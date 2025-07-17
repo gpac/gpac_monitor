@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback , useMemo} from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -10,10 +10,12 @@ import {
   useReactFlow,
   useViewport,
   NodeChange,
-  EdgeChange
+  EdgeChange,
+
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import Legend from '../../../common/Legend';
+
 
 interface GraphFlowProps {
   nodes: Node[];
@@ -38,6 +40,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
 }) => {
   const { setViewport } = useReactFlow();
   const { zoom } = useViewport();
+
 
   const handleMiniMapDrag = useCallback(
     (event: React.DragEvent<SVGSVGElement>) => {

@@ -92,7 +92,7 @@ export class GpacService {
     } catch (error) {
       this.notifyError?.(error as Error);
       this.notifyConnectionStatus?.(false);
-      // Appel de handleDisconnect pour initier la reconnexion
+     
       this.handleDisconnect();
       throw error;
     }
