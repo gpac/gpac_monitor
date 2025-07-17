@@ -12,7 +12,7 @@ export class WebSocketBase {
 
     if (isConnected) {
       toastService.show({
-        title: ' WebSocket connexion',
+        title: 'WebSocket connexion',
         description: 'Connexion established',
         variant: 'default',
       });
@@ -21,95 +21,136 @@ export class WebSocketBase {
     return isConnected;
   }
 
-  public connect(address: string): void {
-    try {
-      console.log(`[WebSocket] Attempting to connect to ${address}`);
+  public connect(address: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        console.log(`[WebSocket] Attempting to connect to ${address}`);
 
-      if (this.socket) {
-        console.log('[WebSocket] Closing existing connection');
-        this.socket.close();
-        this.socket = null;
-      }
+        if (this.socket) {
+          console.log('[WebSocket] Closing existing connection');
+          this.socket.close();
+          this.socket = null;
+        }
 
-      this.socket = new WebSocket(address);
-      this.socket.binaryType = 'arraybuffer';
+        this.socket = new WebSocket(address);
+        this.socket.binaryType = 'arraybuffer';
 
-      this.socket.onopen = () => {
-        toastService.show({
-          title: 'Connexion established',
-          description: `Connected at ${address}`,
-          variant: 'default',
-        });
-        this.callMessageHandlers(
-          '__OnConnect__',
-          new DataView(new ArrayBuffer(0)),
-        );
-      };
+        this.socket.onopen = () => {
+          console.log('[WebSocket] Connection opened successfully');
+          toastService.show({
+            title: 'Connexion established',
+            description: `Connected to ${address}`,
+            variant: 'default',
+          });
+          this.callMessageHandlers(
+            '__OnConnect__',
+            new DataView(new ArrayBuffer(0)),
+          );
+          resolve();
+        };
 
-      this.socket.onmessage = (event: MessageEvent) => {
-        try {
-          const dataView = new DataView(event.data);
+        this.socket.onmessage = (event: MessageEvent) => {
+          try {
+            let data: string;
+            
+            // Handle different message formats
+            if (event.data instanceof ArrayBuffer) {
+              const dataView = new DataView(event.data);
+              data = new TextDecoder().decode(dataView.buffer);
+            } else {
+              data = event.data;
+            }
 
-            // For messages starting with a { character
-          const firstChar = String.fromCharCode(dataView.getInt8(0));
-          if (firstChar === '{') {
-            console.log('[WebSocket] Message received:', firstChar);
-            this.callMessageHandlers('{"me', dataView);
-            return;
-          }
+            console.log('[WebSocket] Raw message received:', data);
 
-          // Pour les messages qui commencent par CONI, LOGM, etc.
-          if (dataView.byteLength >= 4) {
-            const id = String.fromCharCode(
-              dataView.getInt8(0),
-              dataView.getInt8(1),
-              dataView.getInt8(2),
-              dataView.getInt8(3),
-            );
-            console.log('[WebSocket] Message received:', id);
-
-            const handlers = this.messageHandlers[id];
-            if (handlers && handlers.length > 0) {
-              handlers.forEach((handler) => handler(this, dataView));
+            // NEW: Handle messages with "json:" prefix
+            if (data.startsWith('json:')) {
+              console.log('[WebSocket] Processing json: prefixed message');
+              const jsonData = data.substring(5); // Remove "json:" prefix
+              const parsedData = JSON.parse(jsonData);
+              
+              // Convert to DataView for compatibility with existing handlers
+              const textEncoder = new TextEncoder();
+              const encoded = textEncoder.encode(JSON.stringify(parsedData));
+              const dataView = new DataView(encoded.buffer);
+              
+              this.callMessageHandlers('json:', dataView);
               return;
             }
+
+            // Handle direct JSON messages
+            if (data.startsWith('{')) {
+              console.log('[WebSocket] Processing direct JSON message');
+              const parsedData = JSON.parse(data);
+              
+              // Convert to DataView for compatibility
+              const textEncoder = new TextEncoder();
+              const encoded = textEncoder.encode(JSON.stringify(parsedData));
+              const dataView = new DataView(encoded.buffer);
+              
+              this.callMessageHandlers('json', dataView);
+              return;
+            }
+
+            // Legacy format handling for compatibility
+            const dataView = new DataView(event.data instanceof ArrayBuffer ? event.data : new TextEncoder().encode(data).buffer);
+            
+            if (dataView.byteLength >= 4) {
+              const id = String.fromCharCode(
+                dataView.getInt8(0),
+                dataView.getInt8(1),
+                dataView.getInt8(2),
+                dataView.getInt8(3),
+              );
+              console.log('[WebSocket] Legacy message received:', id);
+
+              const handlers = this.messageHandlers[id];
+              if (handlers && handlers.length > 0) {
+                handlers.forEach((handler) => handler(this, dataView));
+                return;
+              }
+            }
+
+            this.callMessageHandlers('__default__', dataView);
+          } catch (error) {
+            console.error('[WebSocket] Error processing message:', error);
+            const errorDataView = event.data instanceof ArrayBuffer 
+              ? new DataView(event.data) 
+              : new DataView(new TextEncoder().encode(event.data).buffer);
+            this.callMessageHandlers('__default__', errorDataView);
           }
+        };
 
-          this.callMessageHandlers('__default__', dataView);
-        } catch (error) {
-          console.error('[WebSocket] Error processing message:', error);
-          this.callMessageHandlers('__default__', new DataView(event.data));
-        }
-      };
+        this.socket.onclose = (event) => {
+          console.log(
+            `[WebSocket] Connection closed: Code=${event.code}, Clean=${event.wasClean}, Reason=${event.reason || 'No reason provided'}`,
+          );
+          toastService.show({
+            title: 'Connexion closed',
+            description: event.reason || 'Connexion closed',
+            variant: event.wasClean ? 'default' : 'destructive',
+          });
+          this.socket = null;
+          this.callMessageHandlers(
+            '__OnDisconnect__',
+            new DataView(new ArrayBuffer(0)),
+          );
+        };
 
-      this.socket.onclose = (event) => {
-        console.log(
-          `[WebSocket] Connection closed: Code=${event.code}, Clean=${event.wasClean}, Reason=${event.reason || 'No reason provided'}`,
-        );
-        toastService.show({
-          title: 'Connexion closed',
-          description: event.reason || 'Connexion closed',
-          variant: event.wasClean ? 'default' : 'destructive',
-        });
-        this.socket = null;
-        this.callMessageHandlers(
-          '__OnDisconnect__',
-          new DataView(new ArrayBuffer(0)),
-        );
-      };
-
-      this.socket.onerror = (error) => {
-        console.error('[WebSocket] Connection error:', error);
-        toastService.show({
-          title: 'WebSocket error',
-          description: 'An error occurred',
-          variant: 'destructive',
-        });
-      };
-    } catch (error) {
-      console.error('[WebSocket] Error creating connection:', error);
-      throw error;
-    }
+        this.socket.onerror = (error) => {
+          console.error('[WebSocket] Connection error:', error);
+          toastService.show({
+            title: 'WebSocket error',
+            description: 'An error occurred',
+            variant: 'destructive',
+          });
+          reject(error);
+        };
+      } catch (error) {
+        console.error('[WebSocket] Error creating connection:', error);
+        reject(error);
+      }
+    });
   }
 
   public disconnect(): void {
@@ -124,14 +165,17 @@ export class WebSocketBase {
     }
   }
 
+  // NEW: Send messages with "json:" prefix for new server
   public send(message: string): void {
     if (!this.isConnected()) {
       throw new Error('Cannot send message: WebSocket is not connected');
     }
 
     try {
-      console.log('[WebSocket] Sending message:', message);
-      this.socket!.send(message);
+      // Add "json:" prefix for new server format
+      const formattedMessage = message.startsWith('json:') ? message : `json:${message}`;
+      console.log('[WebSocket] Sending message:', formattedMessage);
+      this.socket!.send(formattedMessage);
     } catch (error) {
       console.error('[WebSocket] Error sending message:', error);
       throw error;
@@ -154,6 +198,14 @@ export class WebSocketBase {
     handler: (connection: WebSocketBase, dataView: DataView) => void,
   ): void {
     this.addMessageHandler('__default__', handler);
+  }
+
+  // NEW: Add handler for json: prefixed messages
+  public addJsonMessageHandler(
+    handler: (connection: WebSocketBase, dataView: DataView) => void,
+  ): void {
+    this.addMessageHandler('json:', handler);
+    this.addMessageHandler('json', handler); // Also handle direct JSON
   }
 
   public addMessageHandler(

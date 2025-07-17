@@ -112,7 +112,7 @@ export const useGraphConnection = ({
     try {
       communication
         .connect({
-          address: 'ws://127.0.0.1:17815/rmt',
+          address: '"ws://localhost:6363" ',
           maxReconnectAttempts: 5,
           reconnectDelay: 1000,
           maxDelay: 10000,

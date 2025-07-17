@@ -1,4 +1,4 @@
-import { DataViewReader } from '../DataViewReader';
+
 
 export const messageProcessor = {
   processJsonMessage(dataView: DataView, service: any): void {
@@ -12,19 +12,6 @@ export const messageProcessor = {
     }
   },
 
-  processConiMessage(dataView: DataView, service: any): void {
-    try {
-      const reader = new DataViewReader(dataView, 4);
-      const text = reader.getText();
-      if (text.startsWith('json:')) {
-        const jsonText = text.slice(5);
-        const data = JSON.parse(jsonText);
-        this.processGpacMessage(data, service);
-      }
-    } catch (error) {
-      console.error('[MessageProcessor] CONI message parsing error:', error);
-    }
-  },
 
   processDefaultMessage(dataView: DataView, service: any): void {
     try {

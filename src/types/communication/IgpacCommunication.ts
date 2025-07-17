@@ -36,7 +36,13 @@ export type GpacMessageType =
   | 'get_png'
   | 'filters'
   | 'update'
-  | 'details';
+  | 'details'
+  | 'subscribe_filter'
+  | 'unsubscribe_filter'
+  | 'subscribe_session'
+  | 'unsubscribe_session'
+  | 'subscribe_cpu_stats'
+  | 'unsubscribe_cpu_stats'
 
 /**
  * Base message structure for GPAC communication.
