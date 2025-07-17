@@ -88,7 +88,7 @@ export function createOnNodeClick({
   setSelectedFilterDetails,
 }: OnNodeClickParams) {
   return useCallback(
-    (event: React.MouseEvent, node: Node) => {
+    (_event: React.MouseEvent, node: Node) => {
       const nodeId = node.id;
       const nodeData = node.data;
 

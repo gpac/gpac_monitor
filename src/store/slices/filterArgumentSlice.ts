@@ -47,11 +47,6 @@ export const { setArgumentUpdateStatus, clearArgumentUpdate } =
   filterArgumentSlice.actions;
 
 // Thunk
-interface UpdateFilterArgumentParams {
-  filterId: string;
-  name: string;
-  value: any;
-}
 
 export const updateFilterArgument =
   (filterId: string, argName: string, argValue: any): AppThunk =>

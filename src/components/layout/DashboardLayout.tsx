@@ -7,7 +7,6 @@ import {
   Layouts as RGLLayouts,
 } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
-import { useMediaQuery } from 'react-responsive';
 import 'react-resizable/css/styles.css';
 import { updateWidgetPosition } from '../../store/slices/widgetsSlice';
 import Header from './Header';
@@ -37,15 +36,8 @@ const WIDGET_COMPONENTS: Record<
 };
 
 const DashboardLayout: React.FC = () => {
-  const isDesktop = useMediaQuery({ minWidth: 1200 });
-  const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1199 });
-  const isMobile = useMediaQuery({ maxWidth: 767 });
+  
 
-  const getBreakpoint = () => {
-    if (isDesktop) return 'lg';
-    if (isTablet) return 'md';
-    return 'sm';
-  };
 
   const dispatch = useAppDispatch();
   const activeWidgets = useAppSelector(

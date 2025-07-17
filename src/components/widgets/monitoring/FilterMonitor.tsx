@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
-import { RootState } from '../../../store';
+
 import { WidgetProps } from '../../../types/ui/widget';
 import {
   MetricCardProps,
@@ -97,7 +97,7 @@ const ProcessingChart: React.FC<ProcessingChartProps> = ({
               yAxisId="bytes"
               orientation="left"
               stroke="#3b82f6"
-              tickFormatter={(value) => formatBytes(value, 0)}
+              tickFormatter={(value) => formatBytes(value)}
             />
             <YAxis yAxisId="packets" orientation="right" stroke="#10b981" />
             <Tooltip content={<CustomTooltip />} />

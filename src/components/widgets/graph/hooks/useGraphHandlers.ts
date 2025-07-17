@@ -33,11 +33,11 @@ interface UseGraphHandlersProps {
 export const useGraphHandlers = ({
   onNodesChange,
   onEdgesChange,
-  localNodes,
+  
   localEdges,
   nodesRef,
   edgesRef,
-  setLocalNodes,
+ 
   
  
 }: UseGraphHandlersProps) => {
@@ -83,7 +83,7 @@ export const useGraphHandlers = ({
 
   // Handle node click event
   const onNodeClick = useCallback(
-    (event: React.MouseEvent, node: Node) => {
+    (_event: React.MouseEvent, node: Node) => {
       const nodeId = node.id;
       const nodeData = node.data;
 

@@ -104,9 +104,20 @@ export const useVideoMonitor = (options: UseVideoMonitorOptions = {}) => {
   };
 
   const extractTargetFramerate = (node: GpacNodeData): number => {
-    // Extract target framerate from PID properties or node configuration
-    // Default to 0 if not found
-    return node.ipid?.video?.FPS?.val?.n || 0;
+    const fps = node.ipid?.video?.FPS;
+    
+    // If FPS is an object with val.n structure
+    if (fps && typeof fps === 'object' && 'val' in fps) {
+      return (fps as any).val?.n || 0;
+    }
+    
+    // If FPS is a string, try to parse it as a number
+    if (typeof fps === 'string') {
+      const parsed = parseFloat(fps);
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    
+    return 0;
   };
 
   useEffect(() => {

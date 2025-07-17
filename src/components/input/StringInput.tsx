@@ -4,7 +4,7 @@ import { useDebounce, useFirstMountState } from 'react-use';
 import type { FilterArgumentInputProps } from '../../types/domain/gpac/index';
 
 export const StringInput: React.FC<FilterArgumentInputProps<'str'>> = ({
-  argument,
+ 
   value,
   onChange,
   rules,

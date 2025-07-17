@@ -21,7 +21,7 @@ import { throttle } from 'lodash';
 
 
 export const NEW_WS_CONFIG = {
-  address: 'ws://localhost:6363/rmt', // Updated port for new server
+  address: 'ws://localhost:6363', // Updated port for new server
   maxReconnectAttempts: 5,
   reconnectDelay: 1000,
   maxDelay: 10000,

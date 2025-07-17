@@ -4,7 +4,7 @@ import { useDebounce, useFirstMountState } from 'react-use';
 import type { FilterArgumentInputProps } from '../../types/domain/gpac/index';
 
 export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
-  argument,
+
   value,
   onChange,
   rules,

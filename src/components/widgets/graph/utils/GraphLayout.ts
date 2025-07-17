@@ -170,7 +170,7 @@ function applyRadialLayout(nodes: Node[]): Node[] {
 }
 
 // Helper function to detect graph complexity
-export function detectGraphComplexity(nodes: Node[], edges: Edge[]): LayoutType {
+export function detectGraphComplexity(nodes: Node[], _edges: Edge[]): LayoutType {
   // For simple graphs with few nodes, horizontal might be sufficient
   if (nodes.length <= 5) {
     return LayoutType.HORIZONTAL;

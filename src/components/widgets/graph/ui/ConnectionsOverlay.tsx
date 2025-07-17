@@ -22,7 +22,6 @@ interface ConnectionsOverlayProps {
 
 const ConnectionsOverlay: React.FC<ConnectionsOverlayProps> = ({
     selectedNodeId,
-    nodes,
     edges,
     onConnectionHover,
     highlightedEdge,
