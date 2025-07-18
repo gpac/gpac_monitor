@@ -111,11 +111,12 @@ filters.forEach((filter) => {
 
           // Precise mapping of sourceHandle
           const sourceFilter = filters.find(f => f.idx === pid.source_idx);
-          let sourceHandle = pidName; // By default, use the same name
+      
           
           if (sourceFilter?.opid) {
             // Look for the corresponding output PID
-            
+            let sourceHandle: string | undefined;
+            console.log(sourceHandle)
             // If the PID has an explicit source_pid
             if (pid.source_pid) {
               sourceHandle = pid.source_pid;

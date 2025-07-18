@@ -140,11 +140,11 @@ const GraphLayoutControls: React.FC<GraphLayoutControlsProps> = ({
             <input
               type="checkbox"
               className="rounded text-blue-600"
-              checked={currentLayout.groupByFilterType || false}
-              onChange={(e) =>
+              checked={ false}
+              onChange={(_e) =>
                 onLayoutChange({
                   ...currentLayout,
-                  groupByFilterType: e.target.checked,
+               
                 })
               }
             />

@@ -72,7 +72,7 @@ export const CustomNode: React.FC<NodeProps> = ({ data, selected }) => {
         <div style={{ padding: '4px 8px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <div style={{ fontSize: '10px', opacity: 0.8, marginBottom: '2px' }}>INPUTS</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            {inputPids.map((pid, index) => (
+            {inputPids.map((pid, _index) => (
               <div key={pid} style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -107,7 +107,7 @@ export const CustomNode: React.FC<NodeProps> = ({ data, selected }) => {
         <div style={{ padding: '4px 8px' }}>
           <div style={{ fontSize: '10px', opacity: 0.8, marginBottom: '2px' }}>OUTPUTS</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-            {outputPids.map((pid, index) => (
+            {outputPids.map((pid, _index) => (
               <div key={pid} style={{ 
                 display: 'flex', 
                 alignItems: 'center', 
