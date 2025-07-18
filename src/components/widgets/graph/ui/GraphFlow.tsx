@@ -15,6 +15,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import Legend from '../../../common/Legend';
+import { CustomNode } from './customNode';
 
 
 interface GraphFlowProps {
@@ -29,6 +30,11 @@ const flowStyles = {
   background: '#111827',
   width: '100%',
   height: '100%',
+};
+const nodeTypes = {
+  gpacer: CustomNode, // Utilisation du composant personnalisé pour les nœuds
+
+  
 };
 
 const GraphFlow: React.FC<GraphFlowProps> = ({
@@ -66,6 +72,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={onNodeClick}

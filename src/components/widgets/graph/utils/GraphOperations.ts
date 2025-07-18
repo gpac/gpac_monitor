@@ -1,5 +1,5 @@
 import { FilterType, GpacNodeData } from '../../../../types/domain/gpac/index';
-import { Node, Edge, MarkerType, Position } from '@xyflow/react';
+import { Node, Edge, MarkerType  } from '@xyflow/react';
 
 const determineFilterType = (
   filterName: string,
@@ -53,41 +53,29 @@ export function createNodeFromFilter(
     (n) => n.id === filter.idx.toString(),
   );
   const filterType = determineFilterType(filter.name, filter.type);
-  const sourceHandles = filter.opid ? Object.keys(filter.opid).map((pid) => ({
-    id: pid,
-    type: "source" as const,
-    position: Position.Right,
-    x: 0,
-    y: 0,
-  })) : [];
 
-  const targetHandles = filter.ipid ? Object.keys(filter.ipid).map((pid) => ({
-    id: pid, 
-    type: "target" as const,
-    position: Position.Left,
-    x: 0,
-    y: 0,
-  })) : [];
-
+ 
+  
   return {
     id: filter.idx.toString(),
-    type: 'default',
+    type: 'gpacer', 
     data: {
       label: filter.name,
       filterType,
       ...filter,
-         pids: {
+   
+      pids: {
         input: filter.ipid || {},
         output: filter.opid || {}
-      },
+      }
     },
-    sourcePosition: Position.Right,
-    targetPosition: Position.Left,
-    handles: [...sourceHandles, ...targetHandles],
+    
+  
     position: existingNode?.position || {
       x: 150 + index * 300,
       y: 100,
     },
+    
     className: `transition-all duration-200 ${
       existingNode?.selected
         ? 'ring-2 ring-offset-2 ring-blue-500 shadow-lg scale-105'
@@ -95,19 +83,12 @@ export function createNodeFromFilter(
     }`,
 
     selected: existingNode?.selected,
+    
+
     style: {
-      background:
-        filter.nb_ipid === 0
-          ? '#4ade80'
-          : filter.nb_opid === 0
-            ? '#ef4444'
-            : getFilterColor(filterType),
-      color: 'white',
-      padding: '10px',
-      borderRadius: '8px',
-      border: '1px solid #4b5563',
       width: 180,
-      height: 60,
+      height: 'auto', 
+      
     },
   };
 }
@@ -119,16 +100,45 @@ export function createEdgesFromFilters(
 ): Edge[] {
   const newEdges: Edge[] = [];
 
-  filters.forEach((filter) => {
+filters.forEach((filter) => {
     if (filter.ipid) {
       Object.entries(filter.ipid).forEach(([pidName, pid]: [string, any]) => {
         if (pid.source_idx !== undefined) {
           const edgeId = `${pid.source_idx}-${filter.idx}-${pidName}`;
-
           const existingEdge = existingEdges.find((e) => e.id === edgeId);
-
           const filterType = determineFilterType(filter.name, filter.type);
           const filterColor = getFilterColor(filterType);
+
+          // Precise mapping of sourceHandle
+          const sourceFilter = filters.find(f => f.idx === pid.source_idx);
+          let sourceHandle = pidName; // By default, use the same name
+          
+          if (sourceFilter?.opid) {
+            // Look for the corresponding output PID
+            
+            // If the PID has an explicit source_pid
+            if (pid.source_pid) {
+              sourceHandle = pid.source_pid;
+            }
+            // If only one output PID, use it
+            else if (Object.keys(sourceFilter.opid).length === 1) {
+              sourceHandle = Object.keys(sourceFilter.opid)[0];
+            }
+            // Search by similar name
+            else {
+              const matchingOutputPid = Object.keys(sourceFilter.opid).find(opid => 
+                opid === pidName || 
+                opid.includes(pidName) || 
+                pidName.includes(opid)
+              );
+              sourceHandle = matchingOutputPid || Object.keys(sourceFilter.opid)[0];
+            }
+          }
+
+         
+          // (Add this logic if your data has a 'virtual' flag)
+          const isVirtual = pid.virtual || false;
+          if (isVirtual) return
 
           newEdges.push({
             id: edgeId,
