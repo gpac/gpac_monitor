@@ -19,7 +19,7 @@ export interface LayoutOptions {
   nodeFilter?: (node: Node) => boolean; 
   paddingX?: number;
   paddingY?: number;
-  groupByFilterType?: boolean;
+
 }
 
 
@@ -53,7 +53,7 @@ function applyDagreLayout(
 
   // Set graph direction and spacing options
   g.setGraph({
-    rankdir: options.direction || 'LR',
+    rankdir: 'LR',
     nodesep: options.nodeSeparation || 80,
     ranksep: options.rankSeparation || 200,
     marginx: options.paddingX || 20,
@@ -69,12 +69,10 @@ function applyDagreLayout(
     if (options.nodeFilter && !options.nodeFilter(node)) {
       return;
     }
-    
-    g.setNode(node.id, {
-      width: node.style?.width || 180,
-      height: node.style?.height || 60,
-      // Add metadata if grouping by filter type
-      ...(options.groupByFilterType ? { filterType: node.data?.filterType } : {})
+      g.setNode(node.id, {
+     
+      width: node.measured?.width || node.style?.width || 180,
+      height: node.measured?.height || node.style?.height || 60,
     });
   });
 
@@ -82,30 +80,8 @@ function applyDagreLayout(
   edges.forEach((edge) => {
     g.setEdge(edge.source, edge.target);
   });
-
-  // Special handling for grouping by filter type
-  if (options.groupByFilterType) {
-    // Adjust rank for nodes of the same type
-    const nodesByType: Record<string, string[]> = {};
     
-    nodes.forEach((node) => {
-      const filterType = (typeof node.data?.filterType === 'string') ? node.data.filterType : 'other';
-      if (!nodesByType[filterType]) {
-        nodesByType[filterType] = [];
-      }
-      nodesByType[filterType].push(node.id);
-    });
-    
-    // For each type, ensure nodes are in the same rank when possible
-    Object.values(nodesByType).forEach((nodeIds) => {
-      if (nodeIds.length > 1) {
-        for (let i = 1; i < nodeIds.length; i++) {
-          g.setParent(nodeIds[i], nodeIds[0]);
-        }
-      }
-    });
-  }
-
+   
   // Calculate the layout
   dagre.layout(g);
 
@@ -113,15 +89,7 @@ function applyDagreLayout(
   return nodes.map((node) => {
     const nodeWithPosition = { ...node };
 
-    // Respect existing positions if configured and the node already has a position
-    if (
-      options.respectExistingPositions &&
-      node.position &&
-      node.position.x !== 0 &&
-      node.position.y !== 0
-    ) {
-      return nodeWithPosition;
-    }
+
 
     // Skip nodes that don't pass the filter
     if (options.nodeFilter && !options.nodeFilter(node)) {
@@ -134,18 +102,22 @@ function applyDagreLayout(
     if (!dagreNode) {
       return nodeWithPosition;
     }
-    const width = typeof node.style?.width === 'number'
-    ? node.style.width
-    : parseInt(node.style?.width ?? '', 10) || 180;
+   const width = node.measured?.width || 
+      (typeof node.style?.width === 'number' 
+        ? node.style.width 
+        : parseInt(node.style?.width ?? '', 10) || 180);
   
-  const height = typeof node.style?.height === 'number'
-    ? node.style.height
-    : parseInt(node.style?.height ?? '', 10) || 60;
-    // Center the node on the calculated position
+    const height = node.measured?.height ||
+      (typeof node.style?.height === 'number'
+        ? node.style.height
+        : parseInt(node.style?.height ?? '', 10) || 60);
+
+    // ✅ GPACER STANDARD: Centrage avec offset width/height
     nodeWithPosition.position = {
       x: dagreNode.x - width / 2,
       y: dagreNode.y - height / 2,
     };
+    
     return nodeWithPosition;
   });
 }
@@ -205,7 +177,7 @@ export function suggestLayoutOptions(nodes: Node[], edges: Edge[]): LayoutOption
       nodeSeparation: 100,
       rankSeparation: 200,
       respectExistingPositions: false,
-      groupByFilterType: true,
+  
     };
   }
   
