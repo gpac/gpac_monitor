@@ -52,14 +52,15 @@ function applyDagreLayout(
   const g = new dagre.graphlib.Graph();
 
   // Set graph direction and spacing options
-  g.setGraph({
-    rankdir: 'LR',
-    nodesep: options.nodeSeparation || 80,
-    ranksep: options.rankSeparation || 200,
-    marginx: options.paddingX || 20,
-    marginy: options.paddingY || 20,
-    align: options.align,
+ g.setGraph({
+    rankdir: 'LR',     
+    nodesep: 50,       
+    ranksep: 100,     
+    marginx: 20,       
+    marginy: 20       
   });
+
+
 
   g.setDefaultEdgeLabel(() => ({}));
 
@@ -71,8 +72,8 @@ function applyDagreLayout(
     }
       g.setNode(node.id, {
      
-      width: node.measured?.width || node.style?.width || 180,
-      height: node.measured?.height || node.style?.height || 60,
+      width: node.measured?.width || 200,
+      height: node.measured?.height || 100,
     });
   });
 
@@ -102,20 +103,12 @@ function applyDagreLayout(
     if (!dagreNode) {
       return nodeWithPosition;
     }
-   const width = node.measured?.width || 
-      (typeof node.style?.width === 'number' 
-        ? node.style.width 
-        : parseInt(node.style?.width ?? '', 10) || 180);
-  
-    const height = node.measured?.height ||
-      (typeof node.style?.height === 'number'
-        ? node.style.height
-        : parseInt(node.style?.height ?? '', 10) || 60);
+  const { x, y, width, height } = dagreNode;
 
-    // ✅ GPACER STANDARD: Centrage avec offset width/height
+    // Centrage avec offset width/height
     nodeWithPosition.position = {
-      x: dagreNode.x - width / 2,
-      y: dagreNode.y - height / 2,
+     x: x - width / 2,
+      y: y - height / 2,
     };
     
     return nodeWithPosition;
