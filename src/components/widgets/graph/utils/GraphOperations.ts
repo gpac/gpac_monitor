@@ -53,6 +53,21 @@ export function createNodeFromFilter(
     (n) => n.id === filter.idx.toString(),
   );
   const filterType = determineFilterType(filter.name, filter.type);
+  const sourceHandles = filter.opid ? Object.keys(filter.opid).map((pid) => ({
+    id: pid,
+    type: "source" as const,
+    position: Position.Right,
+    x: 0,
+    y: 0,
+  })) : [];
+
+  const targetHandles = filter.ipid ? Object.keys(filter.ipid).map((pid) => ({
+    id: pid, 
+    type: "target" as const,
+    position: Position.Left,
+    x: 0,
+    y: 0,
+  })) : [];
 
   return {
     id: filter.idx.toString(),
@@ -61,9 +76,14 @@ export function createNodeFromFilter(
       label: filter.name,
       filterType,
       ...filter,
+         pids: {
+        input: filter.ipid || {},
+        output: filter.opid || {}
+      },
     },
     sourcePosition: Position.Right,
     targetPosition: Position.Left,
+    handles: [...sourceHandles, ...targetHandles],
     position: existingNode?.position || {
       x: 150 + index * 300,
       y: 100,
@@ -87,6 +107,7 @@ export function createNodeFromFilter(
       borderRadius: '8px',
       border: '1px solid #4b5563',
       width: 180,
+      height: 60,
     },
   };
 }
