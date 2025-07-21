@@ -18,8 +18,12 @@ const GraphLayoutControls: React.FC<GraphLayoutControlsProps> = ({
     onLayoutChange({ ...currentLayout, type });
   };
 
-  const handleDirectionChange = (direction: 'LR' | 'RL' | 'TB' | 'BT') => {
-    onLayoutChange({ ...currentLayout, direction });
+  const handleDagreWithDirection = (direction: 'LR' | 'RL' | 'TB' | 'BT') => {
+    onLayoutChange({ 
+      ...currentLayout, 
+      type: LayoutType.DAGRE,
+      direction 
+    });
   };
 
   return (
@@ -37,58 +41,58 @@ const GraphLayoutControls: React.FC<GraphLayoutControlsProps> = ({
       
       <div className="flex gap-1">
         <button
-          onClick={() => handleTypeChange(LayoutType.HORIZONTAL)}
+          onClick={() => handleDagreWithDirection('LR')}
           className={`p-1.5 rounded-md ${
-            currentLayout.type === LayoutType.HORIZONTAL
+            currentLayout.type === LayoutType.DAGRE && currentLayout.direction === 'LR'
               ? 'bg-blue-600'
               : 'bg-gray-700 hover:bg-gray-600'
           }`}
-          title="Horizontal Layout"
+          title="Horizontal Layout (Left to Right)"
         >
           <ArrowRight className="w-4 h-4" />
         </button>
         
         <button
-          onClick={() => handleTypeChange(LayoutType.VERTICAL)}
+          onClick={() => handleDagreWithDirection('TB')}
           className={`p-1.5 rounded-md ${
-            currentLayout.type === LayoutType.VERTICAL
+            currentLayout.type === LayoutType.DAGRE && currentLayout.direction === 'TB'
               ? 'bg-blue-600'
               : 'bg-gray-700 hover:bg-gray-600'
           }`}
-          title="Vertical Layout"
+          title="Vertical Layout (Top to Bottom)"
         >
           <ArrowDown className="w-4 h-4" />
         </button>
         
         <button
-          onClick={() => handleTypeChange(LayoutType.DAGRE)}
+          onClick={() => handleTypeChange(LayoutType.FORCE)}
           className={`p-1.5 rounded-md ${
-            currentLayout.type === LayoutType.DAGRE
+            currentLayout.type === LayoutType.FORCE
               ? 'bg-blue-600'
               : 'bg-gray-700 hover:bg-gray-600'
           }`}
-          title="Hierarchical Layout"
+          title="Force-directed Layout"
         >
-          <Grid className="w-4 h-4" />
+          <Circle className="w-4 h-4" />
         </button>
         
         <button
-          onClick={() => handleTypeChange(LayoutType.RADIAL)}
+          onClick={() => handleTypeChange(LayoutType.MANUAL)}
           className={`p-1.5 rounded-md ${
-            currentLayout.type === LayoutType.RADIAL
+            currentLayout.type === LayoutType.MANUAL
               ? 'bg-blue-600'
               : 'bg-gray-700 hover:bg-gray-600'
           }`}
-          title="Radial Layout"
+          title="Manual Layout"
         >
-          <Circle className="w-4 h-4" />
+          <Grid className="w-4 h-4" />
         </button>
       </div>
       
       {currentLayout.type === LayoutType.DAGRE && (
         <div className="flex gap-1 mt-1">
           <button
-            onClick={() => handleDirectionChange('LR')}
+            onClick={() => handleDagreWithDirection('LR')}
             className={`text-xs p-1 rounded ${
               currentLayout.direction === 'LR'
                 ? 'bg-blue-600'
@@ -99,7 +103,7 @@ const GraphLayoutControls: React.FC<GraphLayoutControlsProps> = ({
             LR
           </button>
           <button
-            onClick={() => handleDirectionChange('RL')}
+            onClick={() => handleDagreWithDirection('RL')}
             className={`text-xs p-1 rounded ${
               currentLayout.direction === 'RL'
                 ? 'bg-blue-600'
@@ -110,7 +114,7 @@ const GraphLayoutControls: React.FC<GraphLayoutControlsProps> = ({
             RL
           </button>
           <button
-            onClick={() => handleDirectionChange('TB')}
+            onClick={() => handleDagreWithDirection('TB')}
             className={`text-xs p-1 rounded ${
               currentLayout.direction === 'TB'
                 ? 'bg-blue-600'
@@ -121,7 +125,7 @@ const GraphLayoutControls: React.FC<GraphLayoutControlsProps> = ({
             TB
           </button>
           <button
-            onClick={() => handleDirectionChange('BT')}
+            onClick={() => handleDagreWithDirection('BT')}
             className={`text-xs p-1 rounded ${
               currentLayout.direction === 'BT'
                 ? 'bg-blue-600'

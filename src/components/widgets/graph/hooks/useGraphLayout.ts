@@ -38,12 +38,12 @@ export const useGraphLayout = ({
       console.error('Failed to load layout preferences:', e);
     }
     
-    // Default layout options
+    // Default layout options - optimized for nodes with multiple inputs/outputs
     return {
       type: LayoutType.DAGRE,
-      direction: 'LR',
-      nodeSeparation: 80,
-      rankSeparation: 200,
+      direction: 'LR', // Left to Right for better readability
+      nodeSeparation: 100, // Increased spacing between nodes on same rank
+      rankSeparation: 250, // Increased spacing between ranks to prevent overlap
       respectExistingPositions: true,
     };
   });

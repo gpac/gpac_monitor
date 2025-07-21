@@ -3,8 +3,8 @@ import { Node, Edge } from '@xyflow/react';
 import { throttle } from 'lodash';
 import { GpacNodeData } from '../../types/domain/gpac';
 import {
-  createNodeFromFilter,
   createEdgesFromFilters,
+  createNodesFromFilters,
 } from '../../components/widgets/graph/utils/GraphOperations';
 import { RootState } from '../../types/core/store';
 
@@ -52,9 +52,8 @@ const graphSlice = createSlice({
         state.edges = [];
 
         state.filters = action.payload;
-        state.nodes = action.payload.map((f, i) =>
-          createNodeFromFilter(f, i, []),
-        );
+        // Use topological ordering for proper graph layout
+        state.nodes = createNodesFromFilters(action.payload, []);
         state.edges = createEdgesFromFilters(action.payload, []);
         state.lastUpdate = Date.now();
       },
