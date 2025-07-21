@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -16,6 +16,8 @@ import {
 import '@xyflow/react/dist/style.css';
 import Legend from '../../../common/Legend';
 import { CustomNode } from '../../../CustomNode';
+import ConnectionsOverlay from './ConnectionsOverlay';
+import { useAppSelector } from '../../../../hooks/redux';
 
 
 interface GraphFlowProps {
@@ -46,6 +48,12 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
 }) => {
   const { setViewport } = useReactFlow();
   const { zoom } = useViewport();
+  
+  // Get selected node from Redux
+  const selectedNodeId = useAppSelector((state) => state.graph.selectedNodeId);
+  
+  // Local state for edge highlighting
+  const [highlightedEdge, setHighlightedEdge] = useState<string | null>(null);
 
 
   const handleMiniMapDrag = useCallback(
@@ -67,6 +75,11 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
     },
     [setViewport, zoom],
   );
+
+  // Handle connection hover for overlay
+  const handleConnectionHover = useCallback((edgeId: string | null) => {
+    setHighlightedEdge(edgeId);
+  }, []);
   return (
     <div style={flowStyles}>
       <ReactFlow
@@ -112,6 +125,15 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         {/* Légende */}
         <Legend />
       </ReactFlow>
+      
+      {/* Overlay des connexions */}
+      <ConnectionsOverlay
+        selectedNodeId={selectedNodeId}
+        nodes={nodes}
+        edges={edges}
+        onConnectionHover={handleConnectionHover}
+        highlightedEdge={highlightedEdge}
+      />
     </div>
   );
 };

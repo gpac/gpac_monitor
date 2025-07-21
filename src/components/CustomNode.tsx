@@ -20,38 +20,33 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
   const { label, filterType, pids, nb_ipid, nb_opid } = data;
   
 
-  // Couleurs selon le type (style pastel comme dans votre exemple)
+
   const getFilterColor = (type: FilterType): string => {
     const colors = {
-      video: '#60a5fa',    // Bleu pastel
-      audio: '#34d399',    // Vert pastel
-      text: '#fbbf24',     // Jaune pastel
-      image: '#a78bfa',    // Violet pastel
-      other: '#9ca3af',    // Gris pastel
+      video: '#60a5fa',   
+      audio: '#34d399',    
+      text: '#fbbf24',   
+      image: '#a78bfa',   
+      other: '#9ca3af',    
     };
     return colors[type];
   };
 
   // Déterminer le type de node pour la couleur de fond (selon la légende, style pastel)
   const getNodeTypeColor = (): string => {
-    if (nb_ipid === 0) return '#d1fae5'; // Input Filter (source) - vert pastel très clair
-    if (nb_opid === 0) return '#fee2e2'; // Output Filter (sink) - rouge pastel très clair  
-    return '#dbeafe'; // Processing Filter - bleu pastel très clair
+    if (nb_ipid === 0) return '#d1fae5';
+    if (nb_opid === 0) return '#fee2e2';  
+    return '#dbeafe'; 
   };
 
-  // Couleur de bordure selon le type de node (pastel plus saturé)
+ 
   const getNodeBorderColor = (): string => {
-    if (nb_ipid === 0) return '#34d399'; // Input Filter - vert pastel
-    if (nb_opid === 0) return '#f87171'; // Output Filter - rouge pastel
-    return '#60a5fa'; // Processing Filter - bleu pastel
+    if (nb_ipid === 0) return '#34d399'; 
+    if (nb_opid === 0) return '#f87171'; 
+    return '#60a5fa';
   };
 
-  // Déterminer l'icône du type de node
-  const getNodeTypeIcon = (): string => {
-    if (nb_ipid === 0) return '●'; // Input Filter
-    if (nb_opid === 0) return '●'; // Output Filter
-    return '●'; // Processing Filter
-  };
+
   
   // Créer les handles d'entrée seulement si nb_ipid > 0
   const inputHandles = nb_ipid > 0 ? Object.keys(pids.input).map((pidId, index) => ({
@@ -121,7 +116,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
             }}
             title={nb_ipid === 0 ? 'Input Filter' : nb_opid === 0 ? 'Output Filter' : 'Processing Filter'}
           >
-            {getNodeTypeIcon()}
+          
           </div>
         </div>
         
