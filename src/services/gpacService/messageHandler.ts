@@ -135,6 +135,11 @@ export class MessageHandler {
 
   private handleSessionStatsMessage(data: any): void {
     console.log('[MessageHandler] Session stats received:', data.stats);
+    if (data.stats && Array.isArray(data.stats)) {
+      import('../../store').then(({ store }) => {
+        store.dispatch(require('../../store/slices/sessionStatsSlice').updateSessionStats(data.stats));
+      });
+    }
   }
 
   private handleCpuStatsMessage(data: any): void {

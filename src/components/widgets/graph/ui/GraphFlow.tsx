@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback,  } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -17,7 +17,7 @@ import '@xyflow/react/dist/style.css';
 import Legend from '../../../common/Legend';
 import { CustomNode } from '../../../CustomNode';
 
-import { useAppSelector } from '../../../../hooks/redux';
+
 
 
 interface GraphFlowProps {
@@ -49,12 +49,6 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   const { setViewport } = useReactFlow();
   const { zoom } = useViewport();
   
-  // Get selected node from Redux
-  const selectedNodeId = useAppSelector((state) => state.graph.selectedNodeId);
-  
-  // Local state for edge highlighting
-  const [highlightedEdge, setHighlightedEdge] = useState<string | null>(null);
-
 
   const handleMiniMapDrag = useCallback(
     (event: React.DragEvent<SVGSVGElement>) => {
@@ -76,10 +70,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
     [setViewport, zoom],
   );
 
-  // Handle connection hover for overlay
-  const handleConnectionHover = useCallback((edgeId: string | null) => {
-    setHighlightedEdge(edgeId);
-  }, []);
+
   return (
     <div style={flowStyles}>
       <ReactFlow

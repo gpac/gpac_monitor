@@ -6,6 +6,7 @@ import widgetsReducer from './slices/widgetsSlice';
 import filterMonitoringReducer from './slices/filter-monitoringSlice';
 import multiFilterReducer from './slices/multiFilterSlice';
 import filterArgumentReducer from './slices/filterArgumentSlice';
+import sessionStatsReducer from './slices/sessionStatsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     filterMonitoring: filterMonitoringReducer,
     widgets: widgetsReducer,
     multiFilter: multiFilterReducer,
+    sessionStats: sessionStatsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

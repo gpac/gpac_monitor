@@ -6,7 +6,7 @@ import FilterCard from './components/FilterCard';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
-    const { selectedFilters, isLoading, handleCloseMonitor } =
+    const { selectedFilters, isLoading, handleCloseMonitor, sessionStats } =
       useMultiFilterMonitor();
 
     if (isLoading) {
@@ -20,13 +20,47 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     }
 
     if (selectedFilters.length === 0) {
+      // Show session stats when no specific filters are selected
+      const sessionFiltersArray = Object.values(sessionStats);
+      
+      if (sessionFiltersArray.length === 0) {
+        return (
+          <WidgetWrapper id={id} title={title}>
+            <div className="flex flex-col items-center justify-center h-full p-4 text-gray-400">
+              <p>No session data available</p>
+              <p className="text-sm mt-2">
+                Waiting for session statistics...
+              </p>
+            </div>
+          </WidgetWrapper>
+        );
+      }
+
       return (
-        <WidgetWrapper id={id} title={title}>
-          <div className="flex flex-col items-center justify-center h-full p-4 text-gray-400">
-            <p>No filters currently monitored</p>
-            <p className="text-sm mt-2">
-              Click on nodes in the Graph Monitor to start monitoring filters
-            </p>
+        <WidgetWrapper id={id} title="Session Overview">
+          <div className="h-full overflow-auto p-4">
+            <div className="grid gap-4 grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+              {sessionFiltersArray.map((filterStats) => (
+                <div key={filterStats.idx} className="bg-gray-800 rounded-lg p-4 border">
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="font-semibold">Filter {filterStats.idx}</h3>
+                    <span className={`px-2 py-1 rounded text-xs ${
+                      filterStats.status === 'stopped' ? 'bg-red-900 text-red-300' :
+                      filterStats.status === 'running' ? 'bg-green-900 text-green-300' :
+                      'bg-yellow-900 text-yellow-300'
+                    }`}>
+                      {filterStats.status}
+                    </span>
+                  </div>
+                  <div className="space-y-1 text-sm">
+                    <div>Bytes done: {filterStats.bytes_done.toLocaleString()}</div>
+                    <div>Bytes sent: {filterStats.bytes_sent.toLocaleString()}</div>
+                    <div>Packets sent: {filterStats.pck_sent.toLocaleString()}</div>
+                    <div>Packets done: {filterStats.pck_done.toLocaleString()}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </WidgetWrapper>
       );

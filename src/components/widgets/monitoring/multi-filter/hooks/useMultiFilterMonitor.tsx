@@ -11,7 +11,8 @@ export const useMultiFilterMonitor = () => {
   const selectedFilters = useAppSelector(
     (state: RootState) => state.multiFilter.selectedFilters,
   );
-  const isLoading = useAppSelector((state ) => state.graph.isLoading);
+  const isLoading = useAppSelector((state) => state.graph.isLoading);
+  const sessionStats = useAppSelector((state: RootState) => state.sessionStats.sessionStats);
 
   const handleCloseMonitor = useCallback(
     (filterId: string) => {
@@ -30,5 +31,6 @@ export const useMultiFilterMonitor = () => {
     selectedFilters,
     isLoading,
     handleCloseMonitor,
+    sessionStats,
   };
 };
