@@ -1,48 +1,27 @@
 import { WebSocketBase } from '../WebSocketBase';
 import { store } from '../../store';
-import { GpacNodeData } from '../../types/domain/gpac/model';
-import {
-  updateFilterData,
-  setSelectedFilters,
-} from '../../store/slices/multiFilterSlice';
-import { updateRealTimeMetrics } from '../../store/slices/filter-monitoringSlice';
-import {
-  updateGraphData,
-  setLoading,
-  setError,
-  setFilterDetails,
-} from '../../store/slices/graphSlice';
+import { setSelectedFilters } from '../../store/slices/multiFilterSlice';
+import { setFilterDetails } from '../../store/slices/graphSlice';
 import { GpacCommunicationAdapter } from '../communication/adapters/GpacCommunicationAdapter';
-import {
-  IGpacCommunication,
-  GpacMessage,
-} from '../../types/communication/IgpacCommunication';
-import { throttle } from 'lodash';
-
-
-export const NEW_WS_CONFIG = {
-  address: 'ws://localhost:6363', // Updated port for new server
-  maxReconnectAttempts: 5,
-  reconnectDelay: 1000,
-  maxDelay: 10000,
-};
+import { IGpacCommunication, GpacMessage } from '../../types/communication/IgpacCommunication';
+import { NEW_WS_CONFIG } from './config';
+import { GpacNotificationHandlers } from './types';
+import { ConnectionManager } from './connectionManager';
+import { SubscriptionManager } from './subscriptionManager';
+import { MessageHandler } from './messageHandler';
 
 export class GpacService {
   private static instance: GpacService | null = null;
   private ws: WebSocketBase;
-  private reconnectAttempts: number = 0;
-  private readonly MAX_RECONNECT_ATTEMPTS: number = 5;
-  private reconnectTimeout: NodeJS.Timeout | null = null;
-  private isConnecting: boolean = false;
   private currentFilterId: number | null = null;
-  private activeSubscriptions: Set<string> = new Set();
   private communicationAdapter: GpacCommunicationAdapter | null = null;
   
-  // Notification properties
-  private notifyFilterUpdate?: (filter: GpacNodeData) => void;
-  private notifyError?: (error: Error) => void;
-  private notifyConnectionStatus?: (connected: boolean) => void;
-
+  private connectionManager: ConnectionManager;
+  private subscriptionManager: SubscriptionManager;
+  private messageHandler: MessageHandler;
+  
+  private notificationHandlers: GpacNotificationHandlers = {};
+  
   public onMessage?: (message: any) => void;
   public onError?: (error: Error) => void;
   public onDisconnect?: () => void;
@@ -51,6 +30,14 @@ export class GpacService {
     private readonly address: string = NEW_WS_CONFIG.address,
   ) {
     this.ws = new WebSocketBase();
+    this.connectionManager = new ConnectionManager(this.ws, this.address);
+    this.subscriptionManager = new SubscriptionManager(this.sendMessage.bind(this));
+    this.messageHandler = new MessageHandler(
+      () => this.currentFilterId,
+      (idx: string) => this.subscriptionManager.hasSubscription(idx),
+      this.notificationHandlers,
+      (message: any) => this.onMessage?.(message)
+    );
     this.setupWebSocketHandlers();
   }
 
@@ -64,18 +51,9 @@ export class GpacService {
     return GpacService.instance;
   }
 
-  public setNotificationHandlers({
-    onError,
-    onFilterUpdate,
-    onConnectionStatus,
-  }: {
-    onError?: (error: Error) => void;
-    onFilterUpdate?: (filter: GpacNodeData) => void;
-    onConnectionStatus?: (connected: boolean) => void;
-  }) {
-    this.notifyError = onError;
-    this.notifyFilterUpdate = onFilterUpdate;
-    this.notifyConnectionStatus = onConnectionStatus;
+  public setNotificationHandlers(handlers: GpacNotificationHandlers): void {
+    this.notificationHandlers = handlers;
+    this.connectionManager.setNotificationHandlers(handlers);
   }
 
   public getCommunicationAdapter(): IGpacCommunication {
@@ -86,62 +64,33 @@ export class GpacService {
   }
 
   public async connect(): Promise<void> {
-    // Prevent multiple connections
-    if (this.isConnecting) {
-      console.log('[GpacService] Connection already in progress');
-      return;
-    }
-    
-    // Check if already connected
-    if (this.ws.isConnected()) {
-      console.log('[GpacService] Already connected to GPAC server');
-      return;
-    }
-    
-    console.log('[GpacService] Initiating connection to NEW GPAC server');
-    this.isConnecting = true;
-    store.dispatch(setLoading(true));
-    
-    try {
-      await this.ws.connect(this.address);
-      this.notifyConnectionStatus?.(true);
-      console.log('[GpacService] Successfully connected to new GPAC server');
-    } catch (error) {
-      this.isConnecting = false; // Reset flag on error
-      this.notifyError?.(error as Error);
-      this.notifyConnectionStatus?.(false);
-      this.handleDisconnect();
-      throw error;
-    }
+    return this.connectionManager.connect();
   }
 
   public disconnect(): void {
     console.log('[GpacService] Initiating disconnect sequence');
     this.cleanup();
-    this.ws.disconnect();
+    this.connectionManager.disconnect();
     store.dispatch(setSelectedFilters([]));
     store.dispatch(setFilterDetails(null));
   }
 
   public isConnected(): boolean {
-    return this.ws.isConnected();
+    return this.connectionManager.isConnected();
   }
 
-  // NEW: Updated message sending for new server format
   public sendMessage(message: GpacMessage): void {
     if (!this.ws.isConnected()) {
       throw new Error('[GpacService] WebSocket not connected');
     }
     try {
-      // NEW FORMAT: Direct JSON without CONI prefix, just json: prefix
       const formattedMessage = { 
         message: message.type, 
         ...message 
       };
       const jsonString = JSON.stringify(formattedMessage);
-      console.log('[GpacService] Sending message to NEW server:', jsonString);
+      console.log('[GpacService] Sending message:', jsonString);
       
-      // The WebSocketBase will add the "json:" prefix automatically
       this.ws.send(jsonString);
     } catch (error) {
       console.error('[GpacService] Send error:', error);
@@ -166,259 +115,45 @@ export class GpacService {
     return this.currentFilterId;
   }
 
-  // NEW: Subscribe with session subscription support
   public subscribeToFilter(idx: string): void {
-    if (this.activeSubscriptions.has(idx)) return;
-    this.activeSubscriptions.add(idx);
-    
-    // NEW: Use filter subscription for detailed monitoring
-    this.sendMessage({ 
-      type: 'subscribe_filter', 
-      idx: parseInt(idx, 10),
-      interval: 1000 // Update every second
-    });
-    console.log(`[GpacService] Subscribed to filter ${idx} with new API`);
+    this.subscriptionManager.subscribeToFilter(idx);
   }
 
   public unsubscribeFromFilter(idx: string): void {
-    if (!this.activeSubscriptions.has(idx)) return;
-    this.activeSubscriptions.delete(idx);
-    
-    // NEW: Use unsubscribe API
-    this.sendMessage({ 
-      type: 'unsubscribe_filter', 
-      idx: parseInt(idx, 10) 
-    });
-    console.log(`[GpacService] Unsubscribed from filter ${idx}`);
+    this.subscriptionManager.unsubscribeFromFilter(idx);
   }
 
-  // NEW: Subscribe to session statistics
   public subscribeToSessionStats(): void {
-    this.sendMessage({
-      type: 'subscribe_session',
-      interval: 1000,
-      fields: ['status', 'bytes_done', 'pck_sent', 'pck_done', 'time']
-    });
-    console.log('[GpacService] Subscribed to session statistics');
+    this.subscriptionManager.subscribeToSessionStats();
   }
 
-  // NEW: Subscribe to CPU statistics  
   public subscribeToCpuStats(): void {
-    this.sendMessage({
-      type: 'subscribe_cpu_stats',
-      interval: 1000
-    });
-    console.log('[GpacService] Subscribed to CPU statistics');
+    this.subscriptionManager.subscribeToCpuStats();
   }
-
-  private readonly throttledUpdateRealTimeMetrics = throttle(
-    (payload: any) => {
-      if (payload.bytesProcessed > 0) {
-        store.dispatch(updateRealTimeMetrics(payload));
-      }
-    },
-    1000,
-    { leading: true, trailing: true },
-  );
 
   private setupWebSocketHandlers(): void {
     this.ws.addConnectHandler(() => {
-      console.log('[GpacService] Connection established with NEW server');
-      this.isConnecting = false;
-      this.reconnectAttempts = 0;
-      store.dispatch(setError(null));
+      console.log('[GpacService] Connection established');
       
-      // NEW: Request all filters and subscribe to updates
       this.sendMessage({ type: 'get_all_filters' });
-      
-      // NEW: Subscribe to session and CPU stats for enhanced monitoring
-      this.subscribeToSessionStats();
-      this.subscribeToCpuStats();
+      this.subscriptionManager.subscribeToSessionStats();
+      this.subscriptionManager.subscribeToCpuStats();
     });
 
-    // NEW: Handle json: prefixed messages from new server
-    this.ws.addJsonMessageHandler(this.handleJsonMessage.bind(this));
-    
-    // Keep legacy handlers for compatibility
-    this.ws.addMessageHandler('CONI', this.handleConiMessage.bind(this));
-    this.ws.addDefaultMessageHandler(this.handleDefaultMessage.bind(this));
+    this.ws.addJsonMessageHandler(this.messageHandler.handleJsonMessage.bind(this.messageHandler));
+    this.ws.addMessageHandler('CONI', this.messageHandler.handleConiMessage.bind(this.messageHandler));
+    this.ws.addDefaultMessageHandler(this.messageHandler.handleDefaultMessage.bind(this.messageHandler));
 
     this.ws.addDisconnectHandler(() => {
       console.log('[GpacService] Disconnected from server');
-      this.handleDisconnect();
+      this.onDisconnect?.();
+      this.connectionManager.handleDisconnect();
     });
   }
 
-  private handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
-    try {
-      const text = new TextDecoder().decode(dataView.buffer);
-      console.log('[GpacService] Processing JSON message from NEW server:', text);
-      const data = JSON.parse(text);
-      this.processGpacMessage(data);
-    } catch (error) {
-      console.error('[GpacService] JSON message processing error:', error);
-    }
-  }
-
-  private handleConiMessage(_: WebSocketBase, dataView: DataView): void {
-    try {
-      // Legacy handler - kept for compatibility
-      const text = new TextDecoder().decode(dataView.buffer.slice(4));
-      if (text.startsWith('json:')) {
-        const jsonText = text.slice(5);
-        const data = JSON.parse(jsonText);
-        this.processGpacMessage(data);
-      }
-    } catch (error) {
-      console.error('[GpacService] CONI message processing error:', error);
-    }
-  }
-
-  private handleDefaultMessage(_: WebSocketBase, dataView: DataView): void {
-    try {
-      const text = new TextDecoder().decode(dataView.buffer);
-      if (text.startsWith('{')) {
-        const data = JSON.parse(text);
-        this.processGpacMessage(data);
-      }
-    } catch (error) {
-      console.error('[GpacService] Default message processing error:', error);
-    }
-  }
-
-  // NEW: Enhanced message processing for new server types
-  private processGpacMessage(data: any): void {
-    console.log('[GpacService] Processing GPAC message:', data);
-    
-    if (!data.message) {
-      console.warn('[GpacService] Received message without type:', data);
-      return;
-    }
-
-    switch (data.message) {
-      case 'filters':
-        this.handleFiltersMessage(data);
-        break;
-      case 'update':
-        this.handleUpdateMessage(data);
-        break;
-      case 'details':
-        this.handleDetailsMessage(data);
-        break;
-      // NEW: Handle session statistics
-      case 'session_stats':
-        this.handleSessionStatsMessage(data);
-        break;
-      // NEW: Handle CPU statistics
-      case 'cpu_stats':
-        this.handleCpuStatsMessage(data);
-        break;
-      // NEW: Handle filter statistics
-      case 'filter_stats':
-        this.handleFilterStatsMessage(data);
-        break;
-      default:
-        console.log('[GpacService] Unknown message type:', data.message);
-    }
-
-    // Call external message handler if set
-    this.onMessage?.(data);
-  }
-
-  public handleFiltersMessage(data: any): void {
-    console.log('[GpacService] Handling filters message:', data);
-    store.dispatch(setLoading(false));
-    store.dispatch(updateGraphData(data.filters));
-    
-    if (data.filters) {
-      data.filters.forEach((filter: GpacNodeData) => {
-        this.notifyFilterUpdate?.(filter);
-      });
-    }
-  }
-
-  public handleUpdateMessage(data: any): void {
-    if (Array.isArray(data.filters)) {
-      store.dispatch(updateGraphData(data.filters));
-    }
-  }
-
-  public handleDetailsMessage(data: any): void {
-    if (!data.filter) return;
-    const filterId = data.filter.idx.toString();
-    
-    if (data.filter.idx === this.currentFilterId) {
-      store.dispatch(setFilterDetails(data.filter));
-    }
-    
-    if (this.activeSubscriptions.has(filterId)) {
-      store.dispatch(updateFilterData({ id: filterId, data: data.filter }));
-      this.throttledUpdateRealTimeMetrics({
-        filterId,
-        bytes_done: data.filter.bytes_done,
-        buffer: data.filter.buffer,
-        buffer_total: data.filter.buffer_total,
-      });
-    }
-  }
-
-  // NEW: Handle session statistics
-  private handleSessionStatsMessage(data: any): void {
-    console.log('[GpacService] Session stats received:', data.stats);
-    // TODO: Implement session stats handling in Redux store
-  }
-
-  // NEW: Handle CPU statistics
-  private handleCpuStatsMessage(data: any): void {
-    console.log('[GpacService] CPU stats received:', data.stats);
-    // TODO: Implement CPU stats handling in Redux store
-  }
-
-  // NEW: Handle filter-specific statistics
-  private handleFilterStatsMessage(data: any): void {
-    console.log('[GpacService] Filter stats received:', data);
-    // Handle real-time filter updates
-    if (data.idx !== undefined) {
-      const filterId = data.idx.toString();
-      if (this.activeSubscriptions.has(filterId)) {
-        store.dispatch(updateFilterData({ id: filterId, data: data }));
-      }
-    }
-  }
-
   private cleanup(): void {
-    if (this.reconnectTimeout) {
-      clearTimeout(this.reconnectTimeout);
-      this.reconnectTimeout = null;
-    }
-    this.isConnecting = false;
     this.currentFilterId = null;
-    this.reconnectAttempts = 0;
-    this.activeSubscriptions.clear();
-  }
-
-  private handleDisconnect(): void {
-    this.onDisconnect?.();
-    
-    // Only attempt reconnection if not already connected and not intentionally disconnected
-    if (
-      !this.isConnecting &&
-      !this.ws.isConnected() &&
-      this.reconnectAttempts < this.MAX_RECONNECT_ATTEMPTS
-    ) {
-      const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 10000);
-      if (this.reconnectTimeout) {
-        clearTimeout(this.reconnectTimeout);
-      }
-      this.reconnectTimeout = setTimeout(() => {
-        this.reconnectAttempts++;
-        console.log(`[GpacService] Reconnection attempt ${this.reconnectAttempts}`);
-        this.connect().catch(console.error);
-      }, delay);
-    } else if (this.reconnectAttempts >= this.MAX_RECONNECT_ATTEMPTS) {
-      console.log('[GpacService] Max reconnection attempts reached');
-      store.dispatch(setError('Failed to connect to GPAC server'));
-    }
+    this.subscriptionManager.clearSubscriptions();
   }
 }
 

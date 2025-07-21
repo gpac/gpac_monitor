@@ -1,4 +1,4 @@
-import { gpacService } from '@/services/gpacService/gpacService';
+import { gpacService } from '@/services/gpacService';
 
 /**
  * Hook that provides properly typed access to the GpacService instance
