@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDebounce } from 'react-use';
-import { gpacService } from '../../../services/gpacService';
+import { gpacService } from '../../../services/gpacService/gpacService';
 
 export const useFilterArguments = (filterId: string, argumentName: string) => {
   const [localValue, setLocalValue] = useState<

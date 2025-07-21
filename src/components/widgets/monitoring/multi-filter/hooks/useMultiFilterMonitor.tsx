@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { gpacService } from '../../../../../services/gpacService';
+import { gpacService } from '../../../../../services/gpacService/gpacService';
 import { removeSelectedFilter } from '../../../../../store/slices/multiFilterSlice';
 import { setFilterDetails } from '../../../../../store/slices/graphSlice';
 import { RootState } from '../../../../../store';

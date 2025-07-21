@@ -72,24 +72,4 @@ export const isValidFilterData = (
   return data !== null && typeof data === 'object';
 };
 
-export function formatProcessingRate(rateInBytesPerSecond: number): {
-  value: number;
-  unit: string;
-} {
-  if (rateInBytesPerSecond >= 1024 * 1024) {
-    return {
-      value: rateInBytesPerSecond / (1024 * 1024),
-      unit: 'MB/s',
-    };
-  } else if (rateInBytesPerSecond >= 1024) {
-    return {
-      value: rateInBytesPerSecond / 1024,
-      unit: 'KB/s',
-    };
-  } else {
-    return {
-      value: rateInBytesPerSecond,
-      unit: 'bytes/s',
-    };
-  }
-}
+export { formatProcessingRate } from './formatUtils';

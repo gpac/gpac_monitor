@@ -1,4 +1,4 @@
-import { Input } from '../ui/input';
+import { GenericInput } from './GenericInput';
 
 interface NumberInputProps {
   value?: number;
@@ -17,18 +17,11 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   rules,
 }) => {
   return (
-    <Input
+    <GenericInput
       type="number"
-      value={value ?? ''}
-      onChange={(e) => {
-        const val = e.target.value === '' ? null : Number(e.target.value);
-        onChange(val);
-      }}
-      min={rules?.min}
-      max={rules?.max}
-      step={rules?.step}
-      disabled={rules?.disabled}
-      className="bg-gray-700 border-gray-600"
+      value={value}
+      onChange={onChange}
+      rules={rules}
     />
   );
 };

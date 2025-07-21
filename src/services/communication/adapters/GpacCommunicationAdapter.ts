@@ -6,7 +6,7 @@ import {
   GpacCommunicationError,
 } from '../../../types/communication/IgpacCommunication';
 import { IGpacMessageHandler } from '../../../types/communication/IGpacMessageHandler';
-import { gpacService } from '../../gpacService';
+import { gpacService } from '../../gpacService/gpacService';
 import { store } from '../../../store';
 import { setError, setLoading } from '../../../store/slices/graphSlice';
 

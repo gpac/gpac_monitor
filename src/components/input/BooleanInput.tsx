@@ -1,4 +1,4 @@
-import { Switch } from '../ui/switch';
+import { GenericInput } from './GenericInput';
 
 interface BooleanInputProps {
   value?: boolean;
@@ -12,11 +12,11 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
   rules,
 }) => {
   return (
-    <Switch
-      checked={value || false}
-      onCheckedChange={onChange}
-      disabled={rules?.disabled}
-      className="data-[state=checked]:bg-blue-600"
+    <GenericInput
+      type="boolean"
+      value={value}
+      onChange={onChange}
+      rules={rules}
     />
   );
 };

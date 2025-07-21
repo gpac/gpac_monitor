@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { AppThunk } from '../index';
 import { GpacMessage } from '../../types/communication/IgpacCommunication'; // Assurez-vous d'avoir ce type défini
-import { gpacService } from '../../services/gpacService';
+import { gpacService } from '../../services/gpacService/gpacService';
 import { selectFilterNameById } from './graphSlice';
 
 interface ArgumentUpdate {
