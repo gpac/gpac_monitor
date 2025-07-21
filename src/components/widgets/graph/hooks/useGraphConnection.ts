@@ -70,6 +70,18 @@ export const useGraphConnection = ({
     // Try to connect to the service
     const connectToService = async () => {
       try {
+        console.log('[useGraphConnection] Checking existing connection...');
+        
+        // Check if already connected to avoid multiple connections
+        if (service.isConnected()) {
+          console.log('[useGraphConnection] Already connected, skipping connection attempt');
+          if (isMounted) {
+            setConnectionError(null);
+            setIsConnected(true);
+          }
+          return;
+        }
+        
         console.log('[useGraphConnection] Connecting to GPAC...');
         await service.connect();
         

@@ -56,7 +56,10 @@ export class GpacService {
 
   public static getInstance(): GpacService {
     if (!GpacService.instance) {
+      console.log('[GpacService] Creating new singleton instance');
       GpacService.instance = new GpacService();
+    } else {
+      console.log('[GpacService] Returning existing singleton instance');
     }
     return GpacService.instance;
   }
@@ -83,7 +86,18 @@ export class GpacService {
   }
 
   public async connect(): Promise<void> {
-    if (this.isConnecting) return;
+    // Prevent multiple connections
+    if (this.isConnecting) {
+      console.log('[GpacService] Connection already in progress');
+      return;
+    }
+    
+    // Check if already connected
+    if (this.ws.isConnected()) {
+      console.log('[GpacService] Already connected to GPAC server');
+      return;
+    }
+    
     console.log('[GpacService] Initiating connection to NEW GPAC server');
     this.isConnecting = true;
     store.dispatch(setLoading(true));
@@ -93,6 +107,7 @@ export class GpacService {
       this.notifyConnectionStatus?.(true);
       console.log('[GpacService] Successfully connected to new GPAC server');
     } catch (error) {
+      this.isConnecting = false; // Reset flag on error
       this.notifyError?.(error as Error);
       this.notifyConnectionStatus?.(false);
       this.handleDisconnect();
@@ -106,6 +121,10 @@ export class GpacService {
     this.ws.disconnect();
     store.dispatch(setSelectedFilters([]));
     store.dispatch(setFilterDetails(null));
+  }
+
+  public isConnected(): boolean {
+    return this.ws.isConnected();
   }
 
   // NEW: Updated message sending for new server format
@@ -380,8 +399,11 @@ export class GpacService {
 
   private handleDisconnect(): void {
     this.onDisconnect?.();
+    
+    // Only attempt reconnection if not already connected and not intentionally disconnected
     if (
       !this.isConnecting &&
+      !this.ws.isConnected() &&
       this.reconnectAttempts < this.MAX_RECONNECT_ATTEMPTS
     ) {
       const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 10000);
@@ -393,7 +415,8 @@ export class GpacService {
         console.log(`[GpacService] Reconnection attempt ${this.reconnectAttempts}`);
         this.connect().catch(console.error);
       }, delay);
-    } else {
+    } else if (this.reconnectAttempts >= this.MAX_RECONNECT_ATTEMPTS) {
+      console.log('[GpacService] Max reconnection attempts reached');
       store.dispatch(setError('Failed to connect to GPAC server'));
     }
   }

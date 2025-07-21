@@ -26,6 +26,32 @@ export class WebSocketBase {
       try {
         console.log(`[WebSocket] Attempting to connect to ${address}`);
 
+        // Check if already connected to avoid multiple connections
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          console.log('[WebSocket] Already connected, skipping new connection');
+          resolve();
+          return;
+        }
+
+        // Check if connection is in progress
+        if (this.socket && this.socket.readyState === WebSocket.CONNECTING) {
+          console.log('[WebSocket] Connection already in progress, waiting...');
+          // Wait for existing connection to complete
+          const onOpen = () => {
+            this.socket?.removeEventListener('open', onOpen);
+            this.socket?.removeEventListener('error', onError);
+            resolve();
+          };
+          const onError = (error: Event) => {
+            this.socket?.removeEventListener('open', onOpen);
+            this.socket?.removeEventListener('error', onError);
+            reject(error);
+          };
+          this.socket.addEventListener('open', onOpen);
+          this.socket.addEventListener('error', onError);
+          return;
+        }
+
         if (this.socket) {
           console.log('[WebSocket] Closing existing connection');
           this.socket.close();
