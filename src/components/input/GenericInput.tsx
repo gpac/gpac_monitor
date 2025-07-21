@@ -67,7 +67,7 @@ export const GenericInput: React.FC<GenericInputProps> = ({
     return (
       <Input
         type="number"
-        value={debounce ? (localValue ?? '') : (value ?? '')}
+        value={debounce ? String(localValue ?? '') : String(value ?? '')}
         onChange={(e) => {
           const val = e.target.value === '' ? null : Number(e.target.value);
           handleChange(val);
