@@ -33,7 +33,8 @@ export class SubscriptionManager {
     this.sendMessage({
       type: 'subscribe_session',
       interval: GPAC_CONSTANTS.SUBSCRIPTION_INTERVAL,
-      fields: ['status', 'bytes_done', 'pck_sent', 'pck_done', 'time']
+      fields: GPAC_CONSTANTS.SESSION_FIELDS, // Use predefined session fields
+   
     });
     console.log('[SubscriptionManager] Subscribed to session statistics');
   }

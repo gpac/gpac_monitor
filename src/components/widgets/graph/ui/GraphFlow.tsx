@@ -16,7 +16,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import Legend from '../../../common/Legend';
 import { CustomNode } from '../../../CustomNode';
-import ConnectionsOverlay from './ConnectionsOverlay';
+
 import { useAppSelector } from '../../../../hooks/redux';
 
 
@@ -126,14 +126,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         <Legend />
       </ReactFlow>
       
-      {/* Overlay des connexions */}
-      <ConnectionsOverlay
-        selectedNodeId={selectedNodeId}
-        nodes={nodes}
-        edges={edges}
-        onConnectionHover={handleConnectionHover}
-        highlightedEdge={highlightedEdge}
-      />
+ 
     </div>
   );
 };

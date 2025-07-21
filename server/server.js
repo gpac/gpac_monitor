@@ -251,7 +251,9 @@ function JSClient(id, client) {
                     print("Subscribing to session");
                     this.isSessionSubscribed = true;
                     this.sessionInterval = jtext['interval'] || 1000;
-                    this.sessionFields = jtext['fields'] || [ 'status', 'bytes_done', 'pck_sent', 'pck_done', 'time', 'idx' ,'bytes_sent' ];
+                    this.sessionFields = jtext['fields'] || DEFAULT_FILTER_FIELDS;
+
+                 
                     this.send_session_stats();
                 }
                 if ( jtext['message'] == 'unsubscribe_session' ) {
@@ -261,9 +263,9 @@ function JSClient(id, client) {
                 if (jtext.message === 'subscribe_filter') {
                     const idx      = jtext.idx;
                     const interval = jtext.interval || 1000;
-                    const fields   = jtext.fields || DEFAULT_FILTER_FIELDS;
+       
 
-                    this.filterSubscriptions[idx] = { interval, fields };
+                    this.filterSubscriptions[idx] = { interval};
                     this.initializeFilterStatsLoop(idx);
                 }
 
