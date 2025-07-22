@@ -43,22 +43,7 @@ const getFilterColor = (filterType: FilterType): string => {
   return colors[filterType];
 };
 
-// Helper function to determine node type based on inputs/outputs
-const getNodeType = (filter: GpacNodeData): 'source' | 'sink' | 'filter' => {
-  if (filter.nb_ipid === 0) return 'source';
-  if (filter.nb_opid === 0) return 'sink';
-  return 'filter';
-};
 
-// Helper function to calculate topological order
-const getTopologicalOrder = (filter: GpacNodeData): number => {
-  const nodeType = getNodeType(filter);
-  switch (nodeType) {
-    case 'source': return 0;  // Sources en premier (gauche)
-    case 'sink': return 2;    // Sinks en dernier (droite)
-    case 'filter': return 1;  // Filtres au milieu
-  }
-};
 
 // Create a node from a filter object
 export function createNodeFromFilter(
@@ -76,18 +61,38 @@ export function createNodeFromFilter(
   let topologicalX = 150 + index * 300; // Default fallback
   
   if (allFilters) {
-    // Sort filters by topological order
-    const sortedFilters = [...allFilters].sort((a, b) => {
-      const orderA = getTopologicalOrder(a);
-      const orderB = getTopologicalOrder(b);
+    // Calculate dependency depth for proper ordering
+    const calculateDepth = (currentFilter: GpacNodeData, visited = new Set<number>()): number => {
+      if (visited.has(currentFilter.idx)) return 0; // Avoid cycles
+      visited.add(currentFilter.idx);
       
-      // First sort by type (source -> filter -> sink)
-      if (orderA !== orderB) {
-        return orderA - orderB;
+      // Source nodes (no inputs) are at depth 0
+      if (currentFilter.nb_ipid === 0) return 0;
+      
+      // Find maximum depth among all source dependencies
+      let maxDepth = 0;
+      if (currentFilter.ipid) {
+        Object.values(currentFilter.ipid).forEach((pid: any) => {
+          if (pid.source_idx !== undefined && pid.source_idx !== null) {
+            const sourceFilter = allFilters.find(f => f.idx === pid.source_idx);
+            if (sourceFilter && !visited.has(sourceFilter.idx)) {
+              const sourceDepth = calculateDepth(sourceFilter, new Set(visited));
+              maxDepth = Math.max(maxDepth, sourceDepth);
+            }
+          }
+        });
       }
       
-      // Then by idx within the same type
-      return a.idx - b.idx;
+      return maxDepth + 1;
+    };
+    
+    // Sort filters by dependency depth for correct ordering
+    const sortedFilters = [...allFilters].sort((a, b) => {
+      const depthA = calculateDepth(a);
+      const depthB = calculateDepth(b);
+      
+      if (depthA !== depthB) return depthA - depthB;
+      return a.idx - b.idx; // Stable sort by idx
     });
     
     // Find the position of current filter in sorted array
@@ -102,7 +107,7 @@ export function createNodeFromFilter(
       label: filter.name,
       filterType,
       ...filter,
-      // Expose nb_ipid and nb_opid to the CustomNode
+  
       nb_ipid: filter.nb_ipid,
       nb_opid: filter.nb_opid,
       pids: {

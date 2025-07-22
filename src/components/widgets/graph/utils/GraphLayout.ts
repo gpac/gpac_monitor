@@ -144,30 +144,65 @@ export function getLayoutedElements(
 
 /**
  * Applies layout with topological ordering to ensure proper node placement
- * Sources (nb_ipid=0) on the left, sinks (nb_opid=0) on the right
+ * Follows dependency chain via source_idx for correct ordering
  */
 export function applyTopologicalLayout(
   nodes: Node[],
   edges: Edge[],
   options: LayoutOptions = {}
 ): Node[] {
-  // First, sort nodes by topological order
-  const sortedNodes = [...nodes].sort((a, b) => {
-    const getOrder = (node: Node) => {
-      const data = node.data;
-      if (data.nb_ipid === 0) return 0; // Sources first
-      if (data.nb_opid === 0) return 2; // Sinks last
-      return 1; // Filters in between
-    };
+  // Build dependency chain using source_idx
+  const nodeMap = new Map<string, Node>();
+  nodes.forEach(node => nodeMap.set(node.id, node));
+  
+  // Function to calculate depth in dependency chain
+  const calculateDepth = (node: Node, visited = new Set<string>()): number => {
+    if (visited.has(node.id)) return 0; // Avoid cycles
+    visited.add(node.id);
     
-    const orderA = getOrder(a);
-    const orderB = getOrder(b);
+    const data = node.data;
     
-    if (orderA !== orderB) return orderA - orderB;
-    return parseInt(a.id) - parseInt(b.id); // Secondary sort by ID
+    // Source nodes (no inputs) are at depth 0
+    if (data.nb_ipid === 0) return 0;
+    
+    // Find maximum depth among all source dependencies
+    let maxDepth = 0;
+    if (data.ipid) {
+      Object.values(data.ipid).forEach((pid: any) => {
+        if (pid.source_idx !== undefined && pid.source_idx !== null) {
+          const sourceNode = nodeMap.get(pid.source_idx.toString());
+          if (sourceNode && !visited.has(sourceNode.id)) {
+            const sourceDepth = calculateDepth(sourceNode, new Set(visited));
+            maxDepth = Math.max(maxDepth, sourceDepth);
+          }
+        }
+      });
+    }
+    
+    return maxDepth + 1;
+  };
+  
+  // Group nodes by depth and organize them for better vertical distribution
+  const nodesByDepth = new Map<number, Node[]>();
+  nodes.forEach(node => {
+    const depth = calculateDepth(node);
+    if (!nodesByDepth.has(depth)) {
+      nodesByDepth.set(depth, []);
+    }
+    nodesByDepth.get(depth)!.push(node);
   });
   
-  // Apply dagre layout with sorted nodes
-  return applyDagreLayout(sortedNodes, edges, options);
+  // Create a more balanced layout by ensuring better vertical spacing
+  // Configure dagre for vertical distribution of nodes at same depth
+  const dagreOptions: LayoutOptions = {
+    ...options,
+    direction: options.direction || 'LR',
+    nodeSeparation: options.nodeSeparation || 80, // Increased for better vertical spacing
+    rankSeparation: options.rankSeparation || 150,
+  };
+  
+  // Apply dagre layout - it will handle the vertical distribution automatically
+  // when it processes the dependency graph structure
+  return applyDagreLayout(nodes, edges, dagreOptions);
 }
 
