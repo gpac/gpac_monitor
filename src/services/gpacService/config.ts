@@ -1,4 +1,4 @@
-export const NEW_WS_CONFIG = {
+export const WS_CONFIG = {
   address: 'ws://localhost:6363',
   maxReconnectAttempts: 5,
   reconnectDelay: 1000,

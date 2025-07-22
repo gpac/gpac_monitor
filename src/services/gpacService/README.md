@@ -70,7 +70,7 @@ gpacService.unsubscribeFromFilter('123');
 Default configuration in `config.ts`:
 
 ```typescript
-export const NEW_WS_CONFIG = {
+export const WS_CONFIG = {
   address: 'ws://localhost:6363',
   maxReconnectAttempts: 5,
   reconnectDelay: 1000,
@@ -102,7 +102,7 @@ The service integrates with:
 
 - **Redux Store** - Automatic state updates
 - **React Components** - Through hooks like `useGpacService`
-- **Communication Adapters** - For protocol abstraction
+- **IGpacCommunication** - For protocol abstraction
 
 ## Development
 

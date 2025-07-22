@@ -29,9 +29,9 @@ export const useGraphConnection = ({
   // Track connection state internally
   const [isConnected, setIsConnected] = useState(false);
   
-  // Get communication adapter
+  // Use service directly as IGpacCommunication
   const communication = useMemo(() => {
-    return service.getCommunicationAdapter();
+    return service;
   }, [service]);
 
   // Message handler for WebSocket communication
@@ -83,7 +83,7 @@ export const useGraphConnection = ({
         }
         
         console.log('[useGraphConnection] Connecting to GPAC...');
-        await service.connect();
+        await service.connectService();
         
         if (isMounted) {
           console.log('[useGraphConnection] Connected to GPAC');
@@ -122,13 +122,7 @@ export const useGraphConnection = ({
     setConnectionError(null);
     
     try {
-      communication
-        .connect({
-          address: '"ws://localhost:6363" ',
-          maxReconnectAttempts: 5,
-          reconnectDelay: 1000,
-          maxDelay: 10000,
-        })
+      service.connectService()
         .then(() => {
           console.log('[useGraphConnection] Retry connection success');
           setConnectionError(null);

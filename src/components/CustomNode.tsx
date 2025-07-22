@@ -1,6 +1,6 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { FilterType, GpacNodeData } from '../types/domain/gpac/index';
+import { GpacNodeData } from '../types/domain/gpac/index';
 
 
 interface CustomNodeProps extends NodeProps {

@@ -17,7 +17,7 @@ export function useGraphMonitorConnection({
   const service = useGpacService();
   useEffect(() => {
     const cleanup = service
-      .connect()
+      .connectService()
       .then(() => console.log('[useGraphMonitor] Connected to GPAC'))
       .catch((error) => {
         console.error('[useGraphMonitor] Connection error:', error);

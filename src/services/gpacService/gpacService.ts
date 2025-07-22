@@ -2,19 +2,19 @@ import { WebSocketBase } from '../WebSocketBase';
 import { store } from '../../store';
 import { setSelectedFilters } from '../../store/slices/multiFilterSlice';
 import { setFilterDetails } from '../../store/slices/graphSlice';
-import { GpacCommunicationAdapter } from '../communication/adapters/GpacCommunicationAdapter';
-import { IGpacCommunication, GpacMessage } from '../../types/communication/IgpacCommunication';
-import { NEW_WS_CONFIG } from './config';
+import { IGpacCommunication, GpacMessage, IGpacCommunicationConfig, ConnectionStatus } from '../../types/communication/IgpacCommunication';
+import { IGpacMessageHandler } from '../../types/communication/IGpacMessageHandler';
+import { WS_CONFIG } from './config';
 import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './connectionManager';
 import { SubscriptionManager } from './subscriptionManager';
 import { MessageHandler } from './messageHandler';
 
-export class GpacService {
+export class GpacService implements IGpacCommunication {
   private static instance: GpacService | null = null;
   private ws: WebSocketBase;
   private currentFilterId: number | null = null;
-  private communicationAdapter: GpacCommunicationAdapter | null = null;
+  private messageHandlers: Set<IGpacMessageHandler> = new Set();
   
   private connectionManager: ConnectionManager;
   private subscriptionManager: SubscriptionManager;
@@ -27,7 +27,7 @@ export class GpacService {
   public onDisconnect?: () => void;
 
   private constructor(
-    private readonly address: string = NEW_WS_CONFIG.address,
+    private readonly address: string = WS_CONFIG.address,
   ) {
     this.ws = new WebSocketBase();
     this.connectionManager = new ConnectionManager(this.ws, this.address);
@@ -36,7 +36,10 @@ export class GpacService {
       () => this.currentFilterId,
       (idx: string) => this.subscriptionManager.hasSubscription(idx),
       this.notificationHandlers,
-      (message: any) => this.onMessage?.(message)
+      (message: any) => {
+        this.onMessage?.(message);
+        this.notifyHandlers(message);
+      }
     );
     this.setupWebSocketHandlers();
   }
@@ -56,14 +59,29 @@ export class GpacService {
     this.connectionManager.setNotificationHandlers(handlers);
   }
 
-  public getCommunicationAdapter(): IGpacCommunication {
-    if (!this.communicationAdapter) {
-      this.communicationAdapter = new GpacCommunicationAdapter(this);
-    }
-    return this.communicationAdapter;
+  // IGpacCommunication interface implementation
+  public async connect(_config?: IGpacCommunicationConfig): Promise<void> {
+    return this.connectionManager.connect();
   }
 
-  public async connect(): Promise<void> {
+  public send(message: GpacMessage): void {
+    this.sendMessage(message);
+  }
+
+  public registerHandler(handler: IGpacMessageHandler): () => void {
+    this.messageHandlers.add(handler);
+    return () => this.unregisterHandler(handler);
+  }
+
+  public unregisterHandler(handler: IGpacMessageHandler): void {
+    this.messageHandlers.delete(handler);
+  }
+
+  public getStatus(): ConnectionStatus {
+    return this.isConnected() ? ConnectionStatus.CONNECTED : ConnectionStatus.DISCONNECTED;
+  }
+
+  public async connectService(): Promise<void> {
     return this.connectionManager.connect();
   }
 
@@ -154,6 +172,17 @@ export class GpacService {
   private cleanup(): void {
     this.currentFilterId = null;
     this.subscriptionManager.clearSubscriptions();
+  }
+
+  private notifyHandlers(message: any): void {
+    this.messageHandlers.forEach(handler => {
+      try {
+        handler.onMessage?.(message);
+      } catch (error) {
+        console.error('[GpacService] Handler error:', error);
+        handler.onError?.(error instanceof Error ? error : new Error(String(error)));
+      }
+    });
   }
 }
 
