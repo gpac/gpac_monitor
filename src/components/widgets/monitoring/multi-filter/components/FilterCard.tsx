@@ -46,7 +46,7 @@ const FilterCard: React.FC<FilterCardProps> = React.memo(
             <div className="flex items-center gap-4 text-sm text-gray-400">
               <span>{filter.nodeData.type}</span>
               <span className="text-xs px-2 py-0.5 bg-gray-600 rounded-full">
-                ID: {filter.id}
+                IDX: {filter.nodeData.idx}
               </span>
             </div>
           </div>

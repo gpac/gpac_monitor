@@ -5,7 +5,7 @@ import { GPAC_CONSTANTS } from './config';
 import { GpacNotificationHandlers } from './types';
 
 export interface MessageHandlerCallbacks {
-  onUpdateFilterData: (payload: { id: string; data: any }) => void;
+  onUpdateFilterData: (payload: { idx: number; data: any }) => void;
   onUpdateRealTimeMetrics: (payload: any) => void;
   onUpdateGraphData: (data: any) => void;
   onSetLoading: (loading: boolean) => void;
@@ -118,7 +118,7 @@ export class MessageHandler {
     }
     
     if (this.hasSubscription(filterId)) {
-      this.callbacks.onUpdateFilterData({ id: filterId, data: data.filter });
+      this.callbacks.onUpdateFilterData({ idx: data.filter.idx, data: data.filter });
       this.throttledUpdateRealTimeMetrics({
         filterId,
         bytes_done: data.filter.bytes_done,
@@ -144,7 +144,7 @@ export class MessageHandler {
     if (data.idx !== undefined) {
       const filterId = data.idx.toString();
       if (this.hasSubscription(filterId)) {
-        this.callbacks.onUpdateFilterData({ id: filterId, data: data });
+        this.callbacks.onUpdateFilterData({ idx: data.idx, data: data });
       }
     }
   }

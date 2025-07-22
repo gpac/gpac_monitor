@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { GpacNodeData } from '../../types/domain/gpac';
 
 export interface MonitoredFilter {
-  id: string;
+  id: string; // Keep for backward compatibility, but will use nodeData.idx as primary key
   nodeData: GpacNodeData;
 }
 
@@ -23,26 +23,28 @@ const multiFilterSlice = createSlice({
   initialState,
   reducers: {
     addSelectedFilter(state, action: PayloadAction<MonitoredFilter>) {
-      if (state.selectedFilters.length > state.maxMonitors) {
+      if (state.selectedFilters.length >= state.maxMonitors) {
         return;
       }
 
-      const filterId = action.payload.nodeData.idx.toString();
-      if (state.selectedFilters.some((filter) => filter.id === filterId)) {
+      const filterIdx = action.payload.nodeData.idx.toString();
+      // Prevent duplicates by checking idx instead of id
+      if (state.selectedFilters.some((filter) => filter.nodeData.idx.toString() === filterIdx)) {
         return;
       }
       state.selectedFilters.push({
-        id: filterId,
+        id: filterIdx, // Use idx as id for consistency
         nodeData: action.payload.nodeData,
       });
-      state.activeSubscriptions.push(filterId);
+      state.activeSubscriptions.push(filterIdx);
     },
     removeSelectedFilter: (state, action: PayloadAction<string>) => {
+      // Remove by idx for consistency
       state.selectedFilters = state.selectedFilters.filter(
-        (f) => f.id !== action.payload,
+        (f) => f.nodeData.idx.toString() !== action.payload,
       );
       state.activeSubscriptions = state.activeSubscriptions.filter(
-        (id) => id !== action.payload,
+        (idx) => idx !== action.payload,
       );
     },
 
@@ -53,10 +55,11 @@ const multiFilterSlice = createSlice({
 
     updateFilterData: (
       state,
-      action: PayloadAction<{ id: string; data: GpacNodeData }>,
+      action: PayloadAction<{ idx: number; data: GpacNodeData }>,
     ) => {
+      // Find by idx instead of id
       const index = state.selectedFilters.findIndex(
-        (f) => f.id === action.payload.id,
+        (f) => f.nodeData.idx === action.payload.idx,
       );
       if (index !== -1) {
         state.selectedFilters[index].nodeData = action.payload.data;

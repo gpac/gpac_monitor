@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface SessionFilterStats {
-  status: string;
+status :string,
   bytes_done: number;
   pck_sent: number;
   pck_done: number;
@@ -18,6 +18,8 @@ export interface SessionStatsState {
   selectedFilterId: string | null;
   lastUpdate: number | null;
   isLoading: boolean;
+  subscribedComponents: string[];
+  isSubscribed: boolean;
 }
 
 const initialState: SessionStatsState = {
@@ -26,6 +28,8 @@ const initialState: SessionStatsState = {
   selectedFilterId: null,
   lastUpdate: null,
   isLoading: false,
+  subscribedComponents: [],
+  isSubscribed: false,
 };
 
 const sessionStatsSlice = createSlice({
@@ -61,6 +65,32 @@ const sessionStatsSlice = createSlice({
     clearSessionStats: (state) => {
       state.sessionStats = {};
       state.lastUpdate = null;
+    },
+
+    subscribeToSessionStats: (state, action: PayloadAction<string>) => {
+      if (!state.subscribedComponents.includes(action.payload)) {
+        state.subscribedComponents.push(action.payload);
+      }
+      state.isSubscribed = state.subscribedComponents.length > 0;
+    },
+
+    unsubscribeFromSessionStats: (state, action: PayloadAction<string>) => {
+      state.subscribedComponents = state.subscribedComponents.filter(
+        (id) => id !== action.payload
+      );
+      state.isSubscribed = state.subscribedComponents.length > 0;
+      
+      // Clear stats if no components are subscribed
+      if (!state.isSubscribed) {
+        state.sessionStats = {};
+        state.lastUpdate = null;
+      }
+    },
+
+    resetSessionStats: (state) => {
+      state.sessionStats = {};
+      state.lastUpdate = null;
+      state.isLoading = false;
     }
   },
 });
@@ -71,6 +101,9 @@ export const {
   switchToFilterMode,
   setLoading,
   clearSessionStats,
+  subscribeToSessionStats,
+  unsubscribeFromSessionStats,
+  resetSessionStats,
 } = sessionStatsSlice.actions;
 
 export default sessionStatsSlice.reducer;

@@ -188,6 +188,8 @@ return
 }
 }
 
+
+
 function JSClient(id, client) {
     this.id = id;
     this.client = client;
@@ -217,6 +219,7 @@ function JSClient(id, client) {
         }
 
         console.log("on_client_data on client id ", this.id, " len ", msg.length, msg);
+   
         console.log("this has peer:", this.client.peer_address);
 
 
@@ -496,6 +499,8 @@ sys.rmt_on_new_client = function(client) {
 
     let js_client = new JSClient(++cid, client);
     all_clients.push(js_client);
+
+    
 
     console.log("New ws client ", js_client.id, " gpac peer ", js_client.client.peer_address);
 
