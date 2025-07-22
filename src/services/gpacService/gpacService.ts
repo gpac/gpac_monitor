@@ -1,14 +1,16 @@
 import { WebSocketBase } from '../WebSocketBase';
 import { store } from '../../store';
-import { setSelectedFilters } from '../../store/slices/multiFilterSlice';
-import { setFilterDetails } from '../../store/slices/graphSlice';
+import { setSelectedFilters, updateFilterData } from '../../store/slices/multiFilterSlice';
+import { setFilterDetails, updateGraphData, setLoading } from '../../store/slices/graphSlice';
+import { updateRealTimeMetrics } from '../../store/slices/filter-monitoringSlice';
+import { updateSessionStats } from '../../store/slices/sessionStatsSlice';
 import { IGpacCommunication, GpacMessage, IGpacCommunicationConfig, ConnectionStatus } from '../../types/communication/IgpacCommunication';
 import { IGpacMessageHandler } from '../../types/communication/IGpacMessageHandler';
 import { WS_CONFIG } from './config';
 import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './connectionManager';
 import { SubscriptionManager } from './subscriptionManager';
-import { MessageHandler } from './messageHandler';
+import { MessageHandler, MessageHandlerCallbacks } from './messageHandler';
 
 export class GpacService implements IGpacCommunication {
   private static instance: GpacService | null = null;
@@ -32,10 +34,21 @@ export class GpacService implements IGpacCommunication {
     this.ws = new WebSocketBase();
     this.connectionManager = new ConnectionManager(this.ws, this.address);
     this.subscriptionManager = new SubscriptionManager(this.sendMessage.bind(this));
+    
+    const callbacks: MessageHandlerCallbacks = {
+      onUpdateFilterData: (payload) => store.dispatch(updateFilterData(payload)),
+      onUpdateRealTimeMetrics: (payload) => store.dispatch(updateRealTimeMetrics(payload)),
+      onUpdateGraphData: (data) => store.dispatch(updateGraphData(data)),
+      onSetLoading: (loading) => store.dispatch(setLoading(loading)),
+      onSetFilterDetails: (filter) => store.dispatch(setFilterDetails(filter)),
+      onUpdateSessionStats: (stats) => store.dispatch(updateSessionStats(stats))
+    };
+    
     this.messageHandler = new MessageHandler(
       () => this.currentFilterId,
       (idx: string) => this.subscriptionManager.hasSubscription(idx),
       this.notificationHandlers,
+      callbacks,
       (message: any) => {
         this.onMessage?.(message);
         this.notifyHandlers(message);
@@ -159,7 +172,6 @@ export class GpacService implements IGpacCommunication {
     });
 
     this.ws.addJsonMessageHandler(this.messageHandler.handleJsonMessage.bind(this.messageHandler));
-    this.ws.addMessageHandler('CONI', this.messageHandler.handleConiMessage.bind(this.messageHandler));
     this.ws.addDefaultMessageHandler(this.messageHandler.handleDefaultMessage.bind(this.messageHandler));
 
     this.ws.addDisconnectHandler(() => {

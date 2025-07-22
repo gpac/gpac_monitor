@@ -1,18 +1,23 @@
 import { WebSocketBase } from '../WebSocketBase';
-import { store } from '../../store';
 import { GpacNodeData } from '../../types/domain/gpac/model';
-import { updateFilterData } from '../../store/slices/multiFilterSlice';
-import { updateRealTimeMetrics } from '../../store/slices/filter-monitoringSlice';
-import { updateGraphData, setLoading, setFilterDetails } from '../../store/slices/graphSlice';
 import { throttle } from 'lodash';
 import { GPAC_CONSTANTS } from './config';
 import { GpacNotificationHandlers } from './types';
+
+export interface MessageHandlerCallbacks {
+  onUpdateFilterData: (payload: { id: string; data: any }) => void;
+  onUpdateRealTimeMetrics: (payload: any) => void;
+  onUpdateGraphData: (data: any) => void;
+  onSetLoading: (loading: boolean) => void;
+  onSetFilterDetails: (filter: any) => void;
+  onUpdateSessionStats: (stats: any) => void;
+}
 
 export class MessageHandler {
   private readonly throttledUpdateRealTimeMetrics = throttle(
     (payload: any) => {
       if (payload.bytesProcessed > 0) {
-        store.dispatch(updateRealTimeMetrics(payload));
+        this.callbacks.onUpdateRealTimeMetrics(payload);
       }
     },
     GPAC_CONSTANTS.THROTTLE_DELAY,
@@ -23,6 +28,7 @@ export class MessageHandler {
     private currentFilterId: () => number | null,
     private hasSubscription: (idx: string) => boolean,
     private notificationHandlers: GpacNotificationHandlers,
+    private callbacks: MessageHandlerCallbacks,
     private onMessage?: (message: any) => void,
   ) {}
 
@@ -37,18 +43,7 @@ export class MessageHandler {
     }
   }
 
-  public handleConiMessage(_: WebSocketBase, dataView: DataView): void {
-    try {
-      const text = new TextDecoder().decode(dataView.buffer.slice(4));
-      if (text.startsWith('json:')) {
-        const jsonText = text.slice(5);
-        const data = JSON.parse(jsonText);
-        this.processGpacMessage(data);
-      }
-    } catch (error) {
-      console.error('[MessageHandler] CONI message processing error:', error);
-    }
-  }
+
 
   public handleDefaultMessage(_: WebSocketBase, dataView: DataView): void {
     try {
@@ -98,8 +93,8 @@ export class MessageHandler {
 
   private handleFiltersMessage(data: any): void {
     console.log('[MessageHandler] Handling filters message:', data);
-    store.dispatch(setLoading(false));
-    store.dispatch(updateGraphData(data.filters));
+    this.callbacks.onSetLoading(false);
+    this.callbacks.onUpdateGraphData(data.filters);
     
     if (data.filters) {
       data.filters.forEach((filter: GpacNodeData) => {
@@ -110,7 +105,7 @@ export class MessageHandler {
 
   private handleUpdateMessage(data: any): void {
     if (Array.isArray(data.filters)) {
-      store.dispatch(updateGraphData(data.filters));
+      this.callbacks.onUpdateGraphData(data.filters);
     }
   }
 
@@ -119,11 +114,11 @@ export class MessageHandler {
     const filterId = data.filter.idx.toString();
     
     if (data.filter.idx === this.currentFilterId()) {
-      store.dispatch(setFilterDetails(data.filter));
+      this.callbacks.onSetFilterDetails(data.filter);
     }
     
     if (this.hasSubscription(filterId)) {
-      store.dispatch(updateFilterData({ id: filterId, data: data.filter }));
+      this.callbacks.onUpdateFilterData({ id: filterId, data: data.filter });
       this.throttledUpdateRealTimeMetrics({
         filterId,
         bytes_done: data.filter.bytes_done,
@@ -132,15 +127,13 @@ export class MessageHandler {
       });
     }
   }
-
   private handleSessionStatsMessage(data: any): void {
     console.log('[MessageHandler] Session stats received:', data.stats);
     if (data.stats && Array.isArray(data.stats)) {
-      import('../../store').then(({ store }) => {
-        store.dispatch(require('../../store/slices/sessionStatsSlice').updateSessionStats(data.stats));
-      });
+      this.callbacks.onUpdateSessionStats(data.stats);
     }
   }
+  
 
   private handleCpuStatsMessage(data: any): void {
     console.log('[MessageHandler] CPU stats received:', data.stats);
@@ -151,7 +144,7 @@ export class MessageHandler {
     if (data.idx !== undefined) {
       const filterId = data.idx.toString();
       if (this.hasSubscription(filterId)) {
-        store.dispatch(updateFilterData({ id: filterId, data: data }));
+        this.callbacks.onUpdateFilterData({ id: filterId, data: data });
       }
     }
   }
