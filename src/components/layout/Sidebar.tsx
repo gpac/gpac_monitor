@@ -6,7 +6,6 @@ import { WidgetType } from '../../types/ui/widget';
 import {
   Activity,
   Gauge,
-  Video,
   Volume2,
   FileText,
   Share2,
@@ -20,12 +19,7 @@ const availableWidgets = [
     icon: Volume2,
     defaultSize: { w: 4, h: 4 },
   },
-  {
-    type: WidgetType.VIDEO,
-    title: 'Video Monitor',
-    icon: Video,
-    defaultSize: { w: 6, h: 4 },
-  },
+ 
   {
     type: WidgetType.METRICS,
     title: 'System Metrics',

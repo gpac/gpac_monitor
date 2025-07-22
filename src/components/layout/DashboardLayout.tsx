@@ -14,7 +14,6 @@ import Sidebar from './Sidebar';
 import MultiFilterMonitor from '../widgets/monitoring/multi-filter/MultiFilterMonitor';
 import GraphMonitor from '../widgets/graph/GraphMonitor';
 import AudioMonitor from '../widgets/AudioMonitor';
-import VideoMonitor from '../widgets/video/VideoMonitor';
 import LogsMonitor from '../widgets/LogsMonitor';
 import FilterMonitor from '../widgets/monitoring/FilterMonitor';
 import MetricsMonitor from '../widgets/MetricsMonitor';
@@ -28,7 +27,6 @@ const WIDGET_COMPONENTS: Record<
 > = {
   [WidgetType.GRAPH]: GraphMonitor,
   [WidgetType.AUDIO]: AudioMonitor,
-  [WidgetType.VIDEO]: VideoMonitor,
   [WidgetType.LOGS]: LogsMonitor,
   [WidgetType.METRICS]: MetricsMonitor,
   [WidgetType.FILTER]: FilterMonitor,

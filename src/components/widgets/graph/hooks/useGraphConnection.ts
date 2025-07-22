@@ -17,7 +17,7 @@ interface UseGraphConnectionProps {
 }
 
 /**
- * Hook for managing WebSocket connection to GPAC service
+ * Hook for managing  connection to GPAC service
  * Handles connection, reconnection, and message processing
  */
 export const useGraphConnection = ({
@@ -34,7 +34,7 @@ export const useGraphConnection = ({
     return service;
   }, [service]);
 
-  // Message handler for WebSocket communication
+  // Message handler  communication
   const messageHandler = useMemo<IGpacMessageHandler>(
     () => ({
       onMessage(message: GpacMessage) {

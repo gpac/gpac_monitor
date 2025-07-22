@@ -4,7 +4,7 @@ import {
   LayoutType, 
   LayoutOptions, 
   applyGraphLayout, 
-  suggestLayoutOptions 
+
 } from '../utils/GraphLayout';
 
 interface UseGraphLayoutProps {
@@ -81,15 +81,13 @@ export const useGraphLayout = ({
     
     // Set flag to prevent state overrides
     isApplyingLayout.current = true;
-    
-    const suggestedOptions = suggestLayoutOptions(localNodes, localEdges);
-    setLayoutOptions(suggestedOptions);
+
     
     // Apply the suggested layout immediately
     const layoutedNodes = applyGraphLayout(
       localNodes,
       localEdges,
-      suggestedOptions
+    
     );
     
     setLocalNodes(layoutedNodes);

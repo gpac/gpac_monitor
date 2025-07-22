@@ -3,7 +3,6 @@ import { ReactNode } from 'react';
 export enum WidgetType {
   GRAPH = 'graph-monitor',
   AUDIO = 'audio-monitor',
-  VIDEO = 'video-monitor',
   METRICS = 'metrics-monitor',
   LOGS = 'logs-monitor',
   FILTER = 'filter-monitor',

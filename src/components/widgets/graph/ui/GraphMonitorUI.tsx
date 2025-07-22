@@ -4,7 +4,6 @@ import WidgetWrapper from '../../../common/WidgetWrapper';
 import LoadingState from '../../../common/LoadingState';
 import ConnectionErrorState from '../../../common/ConnectionErrorState';
 import GraphFlow from './GraphFlow';
-import GraphLayoutControls from './GraphLayoutControl';
 import { WidgetProps } from '../../../../types/ui/widget';
 import { Node, Edge } from '@xyflow/react';
 import { LayoutOptions } from '../utils/GraphLayout';
@@ -34,9 +33,7 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
   onNodesChange,
   onEdgesChange,
   onNodeClick,
-  layoutOptions,
-  onLayoutChange,
-  onAutoLayout,
+ 
 }) => {
   if (isLoading) {
     return <LoadingState id={id} title={title} message="Connexion à GPAC..." />;
@@ -64,12 +61,7 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
           onNodeClick={onNodeClick}
         />
         
-        {/* Add the layout controls */}
-        <GraphLayoutControls
-          currentLayout={layoutOptions}
-          onLayoutChange={onLayoutChange}
-          onAutoLayout={onAutoLayout}
-        />
+     
       </div>
     </WidgetWrapper>
   );

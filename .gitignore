@@ -15,3 +15,7 @@ pnpm-debug.log*
 # System files
 .DS_Store
 *.tsbuildinfosrc/output.css
+# dans .gitignore
+*.hvc
+*.mp4
+*.mkv
