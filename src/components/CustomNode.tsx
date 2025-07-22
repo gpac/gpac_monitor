@@ -20,7 +20,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
   const { label, filterType, pids, nb_ipid, nb_opid } = data;
   
 
-
+/* 
   const getFilterColor = (type: FilterType): string => {
     const colors = {
       video: '#60a5fa',   
@@ -30,7 +30,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
       other: '#9ca3af',    
     };
     return colors[type];
-  };
+  }; */
 
   // Déterminer le type de node pour la couleur de fond (selon la légende, style pastel)
   const getNodeTypeColor = (): string => {
@@ -64,7 +64,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
     index
   })) : [];
 
-  // Calculer la position Y des handles (comme GPACER)
+
   const getHandleY = (index: number, total: number): string => {
     if (total === 1) return '50%';
     return `${(index / (total - 1)) * 100}%`;
@@ -83,7 +83,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
         borderWidth: '2px'
       }}
     >
-      {/* Handles d'entrée */}
+   
       {inputHandles.map(({ id, type, position, index }) => (
         <Handle
           key={`input-${id}`}
@@ -102,34 +102,25 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
         />
       ))}
 
-      {/* Contenu du nœud */}
-      <div className="node-drag-handle cursor-move">
-        {/* En-tête avec nom et icône de type */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="font-bold text-sm text-gray-800">
+      <div 
+        className="rounded-t-xl -m-4 mb-2 px-4 py-3 shadow-sm bg-gray-800"
+        
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold text-white text-sm drop-shadow-sm">
             {label}
-          </div>
+          </h3>
           <div 
-            className="text-lg font-bold"
-            style={{ 
-              color: nb_ipid === 0 ? '#059669' : nb_opid === 0 ? '#dc2626' : '#2563eb'
-            }}
+            className="text-white text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
             title={nb_ipid === 0 ? 'Input Filter' : nb_opid === 0 ? 'Output Filter' : 'Processing Filter'}
           >
-          
+            {filterType.toUpperCase()}
           </div>
         </div>
-        
-        {/* Type de filtre avec couleur pastel */}
-        <div className="flex items-center mb-2">
-          <div 
-            className="w-3 h-3 rounded-full mr-2 shadow-sm"
-            style={{ backgroundColor: getFilterColor(filterType as FilterType) }}
-          ></div>
-          <div className="text-xs font-medium text-gray-700">
-            Type: {filterType}
-          </div>
-        </div>
+      </div>
+
+      {/* Contenu du nœud */}
+      <div className="node-drag-handle cursor-move">
         
         {/* Informations détaillées sur les inputs/outputs */}
         <div className="space-y-1">
@@ -147,11 +138,11 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
           )}
           
           {nb_opid > 0 && (
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-gray-800">
               <span className="font-medium text-blue-700">OUTPUTS</span>
               <div className="ml-2">
                 {Object.keys(pids.output).map((pidId) => (
-                  <div key={pidId} className="text-xs text-gray-500">
+                  <div key={pidId} className="text-xs text-gray-800">
                     {pidId}
                   </div>
                 ))}
@@ -161,7 +152,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
         </div>
         
         {/* Statistiques */}
-        <div className="text-xs text-gray-400 mt-2 pt-2 border-t border-gray-200">
+        <div className="text-xs text-gray-600 mt-2 pt-2 border-t border-gray-500">
           IPIDs: {nb_ipid} | OPIDs: {nb_opid}
         </div>
       </div>
