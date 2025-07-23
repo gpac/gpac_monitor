@@ -1,4 +1,4 @@
-import { WebSocketBase } from '../WebSocketBase';
+import { WebSocketBase } from '../ws/WebSocketBase';
 import { GpacNodeData } from '../../types/domain/gpac/model';
 import { throttle } from 'lodash';
 import { GPAC_CONSTANTS } from './config';

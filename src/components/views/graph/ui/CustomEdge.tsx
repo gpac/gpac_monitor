@@ -5,7 +5,7 @@ import {
   EdgeLabelRenderer,
   Position,
 } from '@xyflow/react';
-import { EdgeData } from '../types/domain/gpac/index';
+import { EdgeData } from '../../../../types/domain/gpac/model';
 
 interface CustomEdgeProps extends EdgeProps {
   sourceX: number;

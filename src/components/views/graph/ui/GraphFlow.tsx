@@ -15,7 +15,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import Legend from '../../../common/Legend';
-import { CustomNode } from '../../../CustomNode';
+import { CustomNode } from '../../../views/graph/ui/CustomNode';
 
 
 

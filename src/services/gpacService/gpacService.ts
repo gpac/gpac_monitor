@@ -1,4 +1,4 @@
-import { WebSocketBase } from '../WebSocketBase';
+import { WebSocketBase } from '../ws/WebSocketBase';
 import { store } from '../../store';
 import { setSelectedFilters, updateFilterData } from '../../store/slices/multiFilterSlice';
 import { setFilterDetails, updateGraphData, setLoading } from '../../store/slices/graphSlice';
