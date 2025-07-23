@@ -40,5 +40,5 @@ export const useGraphNotifications = ({
     }
   }, [error, toast]);
   
-  return {}; // No return values needed for this hook
+  return {}; 
 };

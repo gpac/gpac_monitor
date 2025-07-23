@@ -1,7 +1,7 @@
 import React from 'react';
-import { GpacNodeData } from '../../../types/domain/gpac/model';
+import { GpacNodeData } from '../../../../../types/domain/gpac/index';
 import { Activity, Cpu, Package } from 'lucide-react';
-import { Accordion, AccordionItem } from '../../ui/accordion';
+import { Accordion, AccordionItem } from '../../../../ui/accordion';
 import FPSMetric from './FPSMetric';
 
 interface AdvancedMetricsProps {

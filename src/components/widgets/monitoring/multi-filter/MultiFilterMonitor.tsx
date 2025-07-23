@@ -2,7 +2,7 @@ import React from 'react';
 import { useMultiFilterMonitor } from './hooks/useMultiFilterMonitor';
 import WidgetWrapper from '../../../common/WidgetWrapper';
 import { WidgetProps } from '../../../../types/ui/widget';
-import FilterCard from './components/FilterCard';
+import FilterCard from './stats/FilterCard';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {

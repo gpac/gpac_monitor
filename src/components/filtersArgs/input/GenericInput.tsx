@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDebounce, useFirstMountState } from 'react-use';
-import { Input } from '../ui/input';
-import { Switch } from '../ui/switch';
+import { Input } from '../../ui/input';
+import { Switch } from '../../ui/switch';
 
 interface GenericInputProps {
   type: 'string' | 'number' | 'boolean';
@@ -68,8 +68,8 @@ export const GenericInput: React.FC<GenericInputProps> = ({
       <Input
         type="number"
         value={debounce ? String(localValue ?? '') : String(value ?? '')}
-        onChange={(e) => {
-          const val = e.target.value === '' ? null : Number(e.target.value);
+        onChange={(_e) => {
+          const val = _e.target.value === '' ? null : Number(_e.target.value);
           handleChange(val);
         }}
         min={rules?.min}

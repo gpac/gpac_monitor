@@ -3,8 +3,7 @@ import { Node, Edge, Position } from '@xyflow/react';
 
 export enum LayoutType {
   DAGRE = 'dagre',
-  FORCE = 'force',
-  MANUAL = 'manual'
+ 
 }
 
 export interface LayoutOptions {

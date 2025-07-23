@@ -8,7 +8,7 @@ import {
   StringInput,
   FractionInput,
   EnumInput,
-} from '../input/index';
+} from '../filtersArgs/input';
 import { GPACArgumentType } from '../../types/domain/gpac/index';
 import { InputValue } from '../../types/domain/gpac/index';
 import { convertArgumentValue } from '../../utils/filtersArguments';

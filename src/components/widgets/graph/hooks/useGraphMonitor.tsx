@@ -76,8 +76,6 @@ const useGraphMonitor = () => {
    
   });
 
-
-  
   // Use notification system
   useGraphNotifications({
     nodes,

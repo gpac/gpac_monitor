@@ -1,7 +1,7 @@
-import { Input } from '../ui/input';
+import { Input } from '../../ui/input';
 import { useState, useEffect } from 'react';
 import { useDebounce, useFirstMountState } from 'react-use';
-import type { FilterArgumentInputProps } from '../../types/domain/gpac/index';
+import type { FilterArgumentInputProps } from '../../../types/domain/gpac/arguments';
 
 export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
 
@@ -65,8 +65,8 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
       <Input
         type="number"
         value={fraction[0]}
-        onChange={(e) => {
-          const newNum = parseInt(e.target.value);
+        onChange={(_e) => {
+          const newNum = parseInt(_e.target.value);
           if (!isNaN(newNum)) {
             setFraction([newNum, fraction[1]]);
           }
@@ -78,8 +78,8 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
       <Input
         type="number"
         value={fraction[1]}
-        onChange={(e) => {
-          const newDen = parseInt(e.target.value);
+        onChange={(_e) => {
+          const newDen = parseInt(_e.target.value);
           if (!isNaN(newDen) && newDen !== 0) {
             setFraction([fraction[0], newDen]);
           }
