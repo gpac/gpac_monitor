@@ -1,12 +1,9 @@
 import { WebSocketBase } from '../ws/WebSocketBase';
 import { GpacNodeData } from '../../types/domain/gpac/model';
-import { throttle } from 'lodash';
-import { GPAC_CONSTANTS } from './config';
 import { GpacNotificationHandlers } from './types';
 
 export interface MessageHandlerCallbacks {
   onUpdateFilterData: (payload: { idx: number; data: any }) => void;
-  onUpdateRealTimeMetrics: (payload: any) => void;
   onUpdateGraphData: (data: any) => void;
   onSetLoading: (loading: boolean) => void;
   onSetFilterDetails: (filter: any) => void;
@@ -14,15 +11,6 @@ export interface MessageHandlerCallbacks {
 }
 
 export class MessageHandler {
-  private readonly throttledUpdateRealTimeMetrics = throttle(
-    (payload: any) => {
-      if (payload.bytesProcessed > 0) {
-        this.callbacks.onUpdateRealTimeMetrics(payload);
-      }
-    },
-    GPAC_CONSTANTS.THROTTLE_DELAY,
-    { leading: true, trailing: true },
-  );
 
   constructor(
     private currentFilterId: () => number | null,
@@ -111,21 +99,13 @@ export class MessageHandler {
 
   private handleDetailsMessage(data: any): void {
     if (!data.filter) return;
-    const filterId = data.filter.idx.toString();
+   
     
     if (data.filter.idx === this.currentFilterId()) {
       this.callbacks.onSetFilterDetails(data.filter);
     }
     
-    if (this.hasSubscription(filterId)) {
-      this.callbacks.onUpdateFilterData({ idx: data.filter.idx, data: data.filter });
-      this.throttledUpdateRealTimeMetrics({
-        filterId,
-        bytes_done: data.filter.bytes_done,
-        buffer: data.filter.buffer,
-        buffer_total: data.filter.buffer_total,
-      });
-    }
+ 
   }
   private handleSessionStatsMessage(data: any): void {
     console.log('[MessageHandler] Session stats received:', data.stats);

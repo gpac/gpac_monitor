@@ -2,7 +2,6 @@ import { WebSocketBase } from '../ws/WebSocketBase';
 import { store } from '@/shared/store';
 import { setSelectedFilters, updateFilterData } from '@/shared/store/slices/multiFilterSlice';
 import { setFilterDetails, updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
-import { updateRealTimeMetrics } from '@/shared/store/slices/filter-monitoringSlice';
 import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
 import { IGpacCommunication, GpacMessage, IGpacCommunicationConfig, ConnectionStatus } from '../../types/communication/IgpacCommunication';
 import { IGpacMessageHandler } from '../../types/communication/IGpacMessageHandler';
@@ -37,7 +36,7 @@ export class GpacService implements IGpacCommunication {
     
     const callbacks: MessageHandlerCallbacks = {
       onUpdateFilterData: (payload) => store.dispatch(updateFilterData(payload)),
-      onUpdateRealTimeMetrics: (payload) => store.dispatch(updateRealTimeMetrics(payload)),
+
       onUpdateGraphData: (data) => store.dispatch(updateGraphData(data)),
       onSetLoading: (loading) => store.dispatch(setLoading(loading)),
       onSetFilterDetails: (filter) => store.dispatch(setFilterDetails(filter)),

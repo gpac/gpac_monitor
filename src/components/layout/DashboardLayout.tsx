@@ -11,11 +11,11 @@ import 'react-resizable/css/styles.css';
 import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import MultiFilterMonitor from '../views/monitoring/multi-filter/MultiFilterMonitor';
+import MultiFilterMonitor from '@/components/views/stats-session/session-overview/entry';
 import GraphMonitor from '../views/graph/GraphMonitor';
 import AudioMonitor from '../views/audio/AudioMonitor';
 import LogsMonitor from '../views/logs/LogsMonitor';
-import FilterMonitor from '../views/monitoring/FilterMonitor';
+import FilterMonitor from '@/components/views/stats-session/FilterMonitor';
 import MetricsMonitor from '../views/cpu/MetricsMonitor';
 import { Widget, WidgetType, WidgetComponent } from '../../types/ui/widget';
 

@@ -62,7 +62,7 @@ const initialState: WidgetsState = {
       x: 0,
       y: 0,
       w: 10,
-      h: 8,
+      h: 6,
     },
   ],
   configs: {

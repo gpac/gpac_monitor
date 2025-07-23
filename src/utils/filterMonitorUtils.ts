@@ -1,5 +1,5 @@
 import { GpacNodeData } from '../types/domain/gpac/model';
-import { TrendDirection } from '../components/views/monitoring/types';
+import { TrendDirection } from '@/components/views/stats-session/types';
 
 // Types
 export type TrendType = 'up' | 'down' | 'stable';
