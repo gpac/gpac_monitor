@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDebounce, useFirstMountState } from 'react-use';
 import { cn } from '../../utils/cn';
-import { GPACTypes } from '../../types/domain/gpac/index';
+import { GPACTypes, GPACArgumentType, InputValue } from './types';
 import {
   BooleanInput,
   NumberInput,
@@ -9,22 +9,11 @@ import {
   FractionInput,
   EnumInput,
 } from '../filtersArgs/input';
-import { GPACArgumentType } from '../../types/domain/gpac/index';
-import { InputValue } from '../../types/domain/gpac/index';
 import { convertArgumentValue } from '../../utils/filtersArguments';
 import { updateFilterArgument } from '../../store/slices/filterArgumentSlice';
 import { useAppDispatch } from '../../hooks/redux';
 import { isEnumArgument } from '../../utils/filtersArguments';
-
-interface FilterArgumentBase {
-  name: string;
-  desc?: string;
-  hint?: string;
-  default?: any;
-  min_max_enum?: string;
-  update?: boolean;
-  update_sync?: boolean;
-}
+import { FilterArgumentBase } from './types';
 
 interface FilterArgumentInputProps<
   T extends keyof GPACTypes = keyof GPACTypes,

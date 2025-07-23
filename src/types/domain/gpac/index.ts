@@ -1,2 +1,2 @@
 export * from './model';
-export * from './arguments';
+// Les types d'arguments ont été déplacés vers src/components/filtersArgs/types.ts

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Info, AlertCircle } from 'lucide-react';
-import WidgetWrapper from '../common/WidgetWrapper';
+import WidgetWrapper from '../../common/WidgetWrapper';
 
 interface LogsMonitorProps {
   id: string;

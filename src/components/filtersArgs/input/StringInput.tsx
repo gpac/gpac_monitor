@@ -1,5 +1,5 @@
 import { GenericInput } from './GenericInput';
-import type { FilterArgumentInputProps } from '../../../types/domain/gpac/arguments';
+import type { FilterArgumentInputProps } from '../types';
 
 export const StringInput: React.FC<FilterArgumentInputProps<'str'>> = ({
   value,

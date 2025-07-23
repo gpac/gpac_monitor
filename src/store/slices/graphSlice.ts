@@ -5,7 +5,7 @@ import { GpacNodeData } from '../../types/domain/gpac';
 import {
   createEdgesFromFilters,
   createNodesFromFilters,
-} from '../../components/widgets/graph/utils/GraphOperations';
+} from '../../components/views/graph/utils/GraphOperations';
 import { RootState } from '../../types/core/store';
 
 export interface GraphState {

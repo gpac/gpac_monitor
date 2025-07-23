@@ -1,4 +1,4 @@
-import { GPACTypes } from '../gpac/index';
+import { GPACTypes, InputValue } from '../../../components/filtersArgs/types';
 
 interface ArgumentRule {
   disabled?: boolean;
@@ -7,18 +7,6 @@ interface ArgumentRule {
   step?: number;
   placeholder?: string;
 }
-
-export type InputValue<T extends keyof GPACTypes> = T extends 'bool'
-  ? boolean
-  : T extends 'uint' | 'sint' | 'luint' | 'lsint' | 'flt' | 'dbl'
-    ? number
-    : T extends 'frac' | 'lfrac'
-      ? string
-      : T extends 'str' | 'cstr' | '4cc'
-        ? string
-        : T extends 'strl' | 'uintl' | 'sintl' | '4ccl'
-          ? string[]
-          : string;
 
 export interface FilterArgumentInputProps<
   T extends keyof GPACTypes = keyof GPACTypes,

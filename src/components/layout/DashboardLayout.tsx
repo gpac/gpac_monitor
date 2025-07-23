@@ -11,12 +11,12 @@ import 'react-resizable/css/styles.css';
 import { updateWidgetPosition } from '../../store/slices/widgetsSlice';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import MultiFilterMonitor from '../widgets/monitoring/multi-filter/MultiFilterMonitor';
-import GraphMonitor from '../widgets/graph/GraphMonitor';
-import AudioMonitor from '../widgets/AudioMonitor';
-import LogsMonitor from '../widgets/LogsMonitor';
-import FilterMonitor from '../widgets/monitoring/FilterMonitor';
-import MetricsMonitor from '../widgets/MetricsMonitor';
+import MultiFilterMonitor from '../views/monitoring/multi-filter/MultiFilterMonitor';
+import GraphMonitor from '../views/graph/GraphMonitor';
+import AudioMonitor from '../views/audio/AudioMonitor';
+import LogsMonitor from '../views/logs/LogsMonitor';
+import FilterMonitor from '../views/monitoring/FilterMonitor';
+import MetricsMonitor from '../views/cpu/MetricsMonitor';
 import { Widget, WidgetType, WidgetComponent } from '../../types/ui/widget';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);

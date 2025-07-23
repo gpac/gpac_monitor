@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import WidgetWrapper from '../common/WidgetWrapper';
+import WidgetWrapper from '../../common/WidgetWrapper';
 
 interface MetricsMonitorProps {
   id: string;

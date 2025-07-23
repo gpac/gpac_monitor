@@ -1,10 +1,9 @@
 import { Input } from '../../ui/input';
 import { useState, useEffect } from 'react';
 import { useDebounce, useFirstMountState } from 'react-use';
-import type { FilterArgumentInputProps } from '../../../types/domain/gpac/arguments';
+import type { FilterArgumentInputProps } from '../types';
 
 export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
-
   value,
   onChange,
   rules,
