@@ -1,9 +1,9 @@
 // Core hook implementation with modular composition
 import {  useEffect, useRef } from 'react';
 import { Node, Edge, useNodesState, useEdgesState } from '@xyflow/react';
-import { useToast } from '@/hooks/useToast';
-import { useGpacService } from '@/hooks/useGpacService';
-import { useAppDispatch } from '@/hooks/redux';
+import { useToast } from '@/shared/hooks/useToast';
+import { useGpacService } from '@/shared/hooks/useGpacService';
+import { useAppDispatch } from '@/shared/hooks/redux';
 
 // Modularized hooks
 import { useGraphLayout } from './useGraphLayout';

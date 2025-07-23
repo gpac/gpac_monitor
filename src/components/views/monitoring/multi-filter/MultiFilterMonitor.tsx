@@ -3,6 +3,7 @@ import { useMultiFilterMonitor } from './hooks/useMultiFilterMonitor';
 import WidgetWrapper from '../../../common/WidgetWrapper';
 import { WidgetProps } from '../../../../types/ui/widget';
 import FilterCard from './stats/FilterCard';
+import { GPACFilterStats } from '../types';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
@@ -21,7 +22,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
     if (selectedFilters.length === 0) {
       // Show session stats when no specific filters are selected
-      const sessionFiltersArray = Object.values(sessionStats);
+      const sessionFiltersArray = Object.values(sessionStats) as GPACFilterStats[];
       
       if (sessionFiltersArray.length === 0) {
         return (
@@ -82,7 +83,10 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
             >
               {selectedFilters.map((filter) => (
                 <div key={`filter-${filter.nodeData.idx}`} className="h-full">
-                  <FilterCard filter={filter} onClose={handleCloseMonitor} />
+                  <FilterCard 
+                    filter={filter} 
+                    onClose={handleCloseMonitor} 
+                  />
                 </div>
               ))}
             </div>

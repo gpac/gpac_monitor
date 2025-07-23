@@ -69,3 +69,16 @@ export interface PIDMetricsCardProps {
   outputCount: number;
   name: string;
 }
+
+export interface GPACFilterStats {
+  idx: number
+  status: string
+  bytes_done: number
+  bytes_sent: number
+  pck_sent: number
+  pck_done: number
+  time: number
+  nb_ipid: number
+  nb_opid: number
+}
+

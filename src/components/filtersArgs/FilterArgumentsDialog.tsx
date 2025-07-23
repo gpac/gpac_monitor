@@ -18,8 +18,8 @@ import { Badge } from '../ui/badge';
 import {
   selectArgumentUpdate,
   updateFilterArgument,
-} from '../../store/slices/filterArgumentSlice';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux';
+} from '@/shared/store/slices/filterArgumentSlice';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 
 interface FilterArgumentsDialogProps {
   filter: GpacNodeData;

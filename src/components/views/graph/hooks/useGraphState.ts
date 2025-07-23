@@ -1,12 +1,12 @@
 import { useState, useRef, useMemo, MutableRefObject } from 'react';
 import { Node, Edge } from '@xyflow/react';
-import { useAppSelector } from '@/hooks/redux';
+import { useAppSelector } from '@/shared/hooks/redux';
 import {
   selectNodesForGraphMonitor,
   selectEdges,
   selectIsLoading,
   selectError,
-} from '../../../../store/selectors/graphSelectors';
+} from '@/shared/store/selectors/graphSelectors';
 import { updateNodesWithPositions, updateEdgesWithState } from './useGraphMonitor.helpers';
 
 /**

@@ -1,7 +1,7 @@
 import React from 'react';
-import { useAppDispatch } from '@/hooks/redux';
-import { addWidget } from '../../store/slices/widgetsSlice';
-import { WidgetType } from '../../types/ui/widget';
+import { useAppDispatch } from '@/shared/hooks/redux';
+import { addWidget } from '@/shared/store/slices/widgetsSlice';
+import { WidgetType } from '@/types/ui/widget';
 
 import {
   Activity,

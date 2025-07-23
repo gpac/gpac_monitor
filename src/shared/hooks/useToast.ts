@@ -1,6 +1,6 @@
 // hooks/useToast.ts
 import * as React from 'react';
-import { ToastProps } from '../components/ui/toast';
+import { ToastProps } from '@/components/ui/toast';
 
 const TOAST_LIMIT = 1;
 const TOAST_REMOVE_DELAY = 5000;

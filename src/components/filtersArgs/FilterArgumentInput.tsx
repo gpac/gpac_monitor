@@ -10,8 +10,8 @@ import {
   EnumInput,
 } from '../filtersArgs/input';
 import { convertArgumentValue } from '../../utils/filtersArguments';
-import { updateFilterArgument } from '../../store/slices/filterArgumentSlice';
-import { useAppDispatch } from '../../hooks/redux';
+import { updateFilterArgument } from '@/shared/store/slices/filterArgumentSlice';
+import { useAppDispatch } from '@/shared/hooks/redux';
 import { isEnumArgument } from '../../utils/filtersArguments';
 import { FilterArgumentBase } from './types';
 

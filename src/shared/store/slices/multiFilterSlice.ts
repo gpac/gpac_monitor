@@ -1,9 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { GpacNodeData } from '../../types/domain/gpac';
+import { GpacNodeData } from '@/types/domain/gpac';
 
 export interface MonitoredFilter {
-  id: string; // Keep for backward compatibility, but will use nodeData.idx as primary key
+
   nodeData: GpacNodeData;
+  id: GpacNodeData["idx"] | string; // Use idx as id for consistency
 }
 
 export interface MultifilterState {
@@ -50,7 +51,7 @@ const multiFilterSlice = createSlice({
 
     setSelectedFilters: (state, action: PayloadAction<MonitoredFilter[]>) => {
       state.selectedFilters = action.payload;
-      state.activeSubscriptions = action.payload.map((f) => f.id);
+      state.activeSubscriptions = action.payload.map((f) => f.id.toString());
     },
 
     updateFilterData: (

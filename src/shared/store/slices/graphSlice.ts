@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Node, Edge } from '@xyflow/react';
 import { throttle } from 'lodash';
-import { GpacNodeData } from '../../types/domain/gpac';
+import { GpacNodeData } from '@/types/domain/gpac';
 import {
   createEdgesFromFilters,
   createNodesFromFilters,
-} from '../../components/views/graph/utils/GraphOperations';
-import { RootState } from '../../types/core/store';
+} from '@/components/views/graph/utils/GraphOperations';
+import { RootState } from '@/shared/store/types';
 
 export interface GraphState {
   filters: GpacNodeData[];

@@ -1,9 +1,9 @@
 import { WebSocketBase } from '../ws/WebSocketBase';
-import { store } from '../../store';
-import { setSelectedFilters, updateFilterData } from '../../store/slices/multiFilterSlice';
-import { setFilterDetails, updateGraphData, setLoading } from '../../store/slices/graphSlice';
-import { updateRealTimeMetrics } from '../../store/slices/filter-monitoringSlice';
-import { updateSessionStats } from '../../store/slices/sessionStatsSlice';
+import { store } from '@/shared/store';
+import { setSelectedFilters, updateFilterData } from '@/shared/store/slices/multiFilterSlice';
+import { setFilterDetails, updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
+import { updateRealTimeMetrics } from '@/shared/store/slices/filter-monitoringSlice';
+import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
 import { IGpacCommunication, GpacMessage, IGpacCommunicationConfig, ConnectionStatus } from '../../types/communication/IgpacCommunication';
 import { IGpacMessageHandler } from '../../types/communication/IGpacMessageHandler';
 import { WS_CONFIG } from './config';

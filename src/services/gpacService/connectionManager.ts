@@ -1,6 +1,6 @@
 import { WebSocketBase } from '../ws/WebSocketBase';
-import { store } from '../../store';
-import { setLoading, setError } from '../../store/slices/graphSlice';
+import { store } from '@/shared/store';
+import { setLoading, setError } from '@/shared/store/slices/graphSlice';
 import { GPAC_CONSTANTS } from './config';
 import { GpacNotificationHandlers } from './types';
 

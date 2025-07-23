@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAppSelector, useAppDispatch } from '@/hooks/redux';
+import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import {
   Responsive,
   WidthProvider,
@@ -8,7 +8,7 @@ import {
 } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-import { updateWidgetPosition } from '../../store/slices/widgetsSlice';
+import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import MultiFilterMonitor from '../views/monitoring/multi-filter/MultiFilterMonitor';

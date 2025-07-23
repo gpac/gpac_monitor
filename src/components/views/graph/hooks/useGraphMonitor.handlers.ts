@@ -2,7 +2,7 @@
 import { useCallback } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { GpacNodeData } from '../../../../types/domain/gpac';
-import { MonitoredFilter } from '../../../../store/slices/multiFilterSlice';
+import { MonitoredFilter } from '@/shared/store/slices/multiFilterSlice';
 
 // =========================
 //       NODES HANDLER

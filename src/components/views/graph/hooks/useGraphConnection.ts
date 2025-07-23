@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAppDispatch } from '@/hooks/redux';
+import { useAppDispatch } from '@/shared/hooks/redux';
 import {
   ConnectionStatus,
   GpacMessage,
   GpacCommunicationError,
 } from '@/types/communication';
 import { IGpacMessageHandler } from '@/types/communication';
-import { setError, setLoading } from '@/store/slices/graphSlice';
-import { useGpacService } from '@/hooks/useGpacService';
+import { setError, setLoading } from '@/shared/store/slices/graphSlice';
+import { useGpacService } from '@/shared/hooks/useGpacService';
 
 
 interface UseGraphConnectionProps {

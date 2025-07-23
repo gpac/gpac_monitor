@@ -1,4 +1,4 @@
-import { toastService } from '../../hooks/useToast';
+import { toastService } from '@/shared/hooks/useToast';
 
 export class WebSocketBase {
   private socket: WebSocket | null = null;

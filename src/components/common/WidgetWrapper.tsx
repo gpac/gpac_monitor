@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 
 import { X, RotateCcw } from 'lucide-react';
 import {
@@ -7,7 +7,7 @@ import {
   minimizeWidget,
   maximizeWidget,
   restoreWidget,
-} from '../../store/slices/widgetsSlice';
+} from '@/shared/store/slices/widgetsSlice';
 
 
 interface WidgetWrapperProps {

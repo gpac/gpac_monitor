@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   LineChart,
   Line,
@@ -18,7 +18,7 @@ import {
   FilterMetric,
 } from './types';
 import WidgetWrapper from '../../common/WidgetWrapper';
-import { addFilterMetric } from '../../../store/slices/filter-monitoringSlice';
+import { addFilterMetric } from '@/shared/store/slices/filter-monitoringSlice';
 import { formatBytes } from '../../../utils/filterMonitorUtils';
 
 const MetricCard: React.FC<MetricCardProps> = ({

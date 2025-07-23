@@ -1,13 +1,13 @@
 import { useCallback, MutableRefObject } from 'react';
 import { Node, Edge } from '@xyflow/react';
-import { useAppSelector, useAppDispatch } from '@/hooks/redux';
+import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { GpacNodeData } from '@/types/domain/gpac';
 import { 
   setSelectedFilterDetails,
   setSelectedNode
-} from '@/store/slices/graphSlice';
-import { addSelectedFilter } from '@/store/slices/multiFilterSlice';
-import { useGpacService } from '@/hooks/useGpacService';
+} from '@/shared/store/slices/graphSlice';
+import { addSelectedFilter } from '@/shared/store/slices/multiFilterSlice';
+import { useGpacService } from '@/shared/hooks/useGpacService';
 import { Dispatch } from '@reduxjs/toolkit';
 
 
@@ -95,7 +95,7 @@ export const useGraphHandlers = ({
       service.getFilterDetails(parseInt(nodeId));
 
       // Add to monitored filters if not already
-      const isAlreadyMonitored = monitoredFilters.some((f) => f.id === nodeId);
+      const isAlreadyMonitored = monitoredFilters.some((f) => f.nodeData.idx.toString() === nodeId);
       if (!isAlreadyMonitored) {
         dispatch(addSelectedFilter({
           id: nodeId,

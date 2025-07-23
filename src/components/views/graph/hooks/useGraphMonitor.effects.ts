@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { IGpacMessageHandler } from '@/types/communication';
-import { useGpacService } from '@/hooks/useGpacService';
+import { useGpacService } from '@/shared/hooks/useGpacService';
 
 
 

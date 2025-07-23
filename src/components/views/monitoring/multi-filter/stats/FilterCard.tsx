@@ -7,7 +7,7 @@ import FilterArgumentsDialog from '../../../../filtersArgs/FilterArgumentsDialog
 
 interface FilterCardProps {
   filter: {
-    id: string;
+    id: string | number;
     nodeData: GpacNodeData;
   };
   onClose: (id: string) => void;
@@ -51,7 +51,7 @@ const FilterCard: React.FC<FilterCardProps> = React.memo(
             </div>
           </div>
           <button
-            onClick={() => onClose(filter.id)}
+            onClick={() => onClose(filter.id.toString())}
             className="p-2 hover:bg-gray-600 rounded-lg text-gray-400 hover:text-white transition-colors"
             title="Stop monitoring this filter"
           >

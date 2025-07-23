@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { gpacService } from '../../../../../services/gpacService/gpacService';
-import { removeSelectedFilter } from '../../../../../store/slices/multiFilterSlice';
-import { setFilterDetails } from '../../../../../store/slices/graphSlice';
-import { subscribeToSessionStats, unsubscribeFromSessionStats, resetSessionStats } from '../../../../../store/slices/sessionStatsSlice';
-import { RootState } from '../../../../../store';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { gpacService } from '@/services/gpacService';
+import { removeSelectedFilter } from '@/shared/store/slices/multiFilterSlice';
+import { setFilterDetails } from '@/shared/store/slices/graphSlice';
+import { subscribeToSessionStats, unsubscribeFromSessionStats, resetSessionStats } from '@/shared/store/slices/sessionStatsSlice';
+import { RootState } from '@/shared/store';
 
 export const useMultiFilterMonitor = (componentId = 'multiFilterMonitor') => {
   const dispatch = useAppDispatch();
