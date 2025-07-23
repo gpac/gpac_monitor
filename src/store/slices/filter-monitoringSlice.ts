@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { FilterMetric, RealTimeMetrics } from '../../types/domain/monitoring';
-import { FilterBufferStats } from '../../types/domain/monitoring';
+import { FilterMetric, RealTimeMetrics } from '../../components/views/monitoring/types';
+import { FilterBufferStats } from '../../components/views/monitoring/types';
 import {
   analyzeBufferMetrics,
   parseFilterStatus,
 } from '../../utils/bufferAnalytics';
 import { RootState } from '../index';
-import { BufferMetrics } from '../../types/domain/monitoring';
+import { BufferMetrics } from '../../components/views/monitoring/types';
 import { GpacNodeData } from '../../types/domain/gpac';
 import { determineTrend } from '../../utils/filterMonitorUtils';
 

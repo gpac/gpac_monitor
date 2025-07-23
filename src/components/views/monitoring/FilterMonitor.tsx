@@ -16,7 +16,7 @@ import {
   MetricCardProps,
   ProcessingChartProps,
   FilterMetric,
-} from '../../../types/domain/monitoring/filterMonitor';
+} from './types';
 import WidgetWrapper from '../../common/WidgetWrapper';
 import { addFilterMetric } from '../../../store/slices/filter-monitoringSlice';
 import { formatBytes } from '../../../utils/filterMonitorUtils';
