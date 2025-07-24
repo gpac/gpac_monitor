@@ -73,7 +73,7 @@ const WidgetWrapper = ({
   //Memoized container classes
   const containerClasses = React.useMemo(() => {
     return [
-      'flex flex-col bg-gray-800 overflow-hidden rounded-lg',
+      'flex flex-col bg-foreground/10 overflow-hidden rounded-lg',
       isMaximized ? 'fixed inset-0 z-50' : '',
       isMinimized ? 'h-12' : 'h-full',
       className,
@@ -86,7 +86,7 @@ const WidgetWrapper = ({
     <div className={containerClasses}>
       <div className={`${headerStyles.base} cursor-move drag-indicator`}>
         <div className={headerStyles.title}>
-          <h3 className="text-sm font-medium">{title}</h3>
+          <h3 className="text-base font-medium">{title}</h3>
         </div>
 
         <div className={`${headerStyles.actions} no-drag`}>
@@ -161,7 +161,7 @@ const WidgetWrapper = ({
       </div>
 
       {!isMinimized && (
-        <div className="flex-1 overflow-auto no-drag">{children}</div>
+        <div className="flex-1 bg-gray-900 overflow-auto no-drag">{children}</div>
       )}
     </div>
   );
