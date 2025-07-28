@@ -36,7 +36,6 @@ export class GpacService implements IGpacCommunication {
     
     const callbacks: MessageHandlerCallbacks = {
       onUpdateFilterData: (payload) => store.dispatch(updateFilterData(payload)),
-
       onUpdateGraphData: (data) => store.dispatch(updateGraphData(data)),
       onSetLoading: (loading) => store.dispatch(setLoading(loading)),
       onSetFilterDetails: (filter) => store.dispatch(setFilterDetails(filter)),
