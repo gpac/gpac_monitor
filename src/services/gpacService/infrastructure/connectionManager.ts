@@ -1,8 +1,8 @@
-import { WebSocketBase } from '../ws/WebSocketBase';
+import { WebSocketBase } from '../../ws/WebSocketBase';
 import { store } from '@/shared/store';
 import { setLoading, setError } from '@/shared/store/slices/graphSlice';
-import { GPAC_CONSTANTS } from './config';
-import { GpacNotificationHandlers } from './types';
+import { GPAC_CONSTANTS } from '../config';
+import { GpacNotificationHandlers } from '../types';
 
 export class ConnectionManager {
   private reconnectAttempts: number = 0;

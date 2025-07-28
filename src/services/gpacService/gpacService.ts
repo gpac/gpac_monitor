@@ -3,11 +3,11 @@ import { IGpacCommunication, GpacMessage, IGpacCommunicationConfig, ConnectionSt
 import { IGpacMessageHandler } from '../../types/communication/IGpacMessageHandler';
 import { WS_CONFIG } from './config';
 import { GpacNotificationHandlers } from './types';
-import { ConnectionManager } from './connectionManager';
-import { SubscriptionManager } from './subscriptionManager';
-import { MessageHandler } from './messageHandler';
-import { GpacCoreService } from './gpacCore';
-import { createStoreCallbacks, clearStoreFilters } from './storeIntegration';
+import { ConnectionManager } from './infrastructure/connectionManager';
+import { SubscriptionManager } from './infrastructure/subscriptionManager';
+import { MessageHandler } from './infrastructure/messageHandler';
+import { GpacCoreService } from './core/gpacCore';
+import { createStoreCallbacks, clearStoreFilters } from './integration/storeIntegration';
 
 export class GpacService implements IGpacCommunication {
   private static instance: GpacService | null = null;

@@ -1,6 +1,6 @@
-import { WebSocketBase } from '../ws/WebSocketBase';
-import { GpacNodeData } from '../../types/domain/gpac/model';
-import { GpacNotificationHandlers } from './types';
+import { WebSocketBase } from '../../ws/WebSocketBase';
+import { GpacNodeData } from '../../../types/domain/gpac/model';
+import { GpacNotificationHandlers } from '../types';
 
 export interface MessageHandlerCallbacks {
   onUpdateFilterData: (payload: { idx: number; data: any }) => void;

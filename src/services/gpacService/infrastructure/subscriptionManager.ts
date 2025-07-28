@@ -1,5 +1,5 @@
-import { GpacMessage } from '../../types/communication/IgpacCommunication';
-import { GPAC_CONSTANTS } from './config';
+import { GpacMessage } from '../../../types/communication/IgpacCommunication';
+import { GPAC_CONSTANTS } from '../config';
 
 export class SubscriptionManager {
   private activeSubscriptions: Set<string> = new Set();

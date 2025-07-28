@@ -2,7 +2,7 @@ import { store } from '@/shared/store';
 import { setSelectedFilters, updateFilterData } from '@/shared/store/slices/multiFilterSlice';
 import { setFilterDetails, updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
 import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
-import { MessageHandlerCallbacks } from './messageHandler';
+import { MessageHandlerCallbacks } from '../infrastructure/messageHandler'
 
 export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateFilterData: (payload) => store.dispatch(updateFilterData(payload)),
