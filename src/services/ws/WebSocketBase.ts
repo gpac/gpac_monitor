@@ -1,4 +1,5 @@
-import { toastService } from '@/shared/hooks/useToast';
+import { MessageFormatter } from './formatters/messageFormatters';
+import { WebSocketNotificationService } from './notificationService';
 
 export class WebSocketBase {
   private socket: WebSocket | null = null;
@@ -11,11 +12,7 @@ export class WebSocketBase {
       this.socket !== null && this.socket.readyState === WebSocket.OPEN;
 
     if (isConnected) {
-      toastService.show({
-        title: 'WebSocket connexion',
-        description: 'Connexion established',
-        variant: 'default',
-      });
+      WebSocketNotificationService.onConnectedStatus();
     }
 
     return isConnected;
@@ -63,11 +60,7 @@ export class WebSocketBase {
 
         this.socket.onopen = () => {
           console.log('[WebSocket] Connection opened successfully');
-          toastService.show({
-            title: 'Connexion established',
-            description: `Connected to ${address}`,
-            variant: 'default',
-          });
+          WebSocketNotificationService.onConnected(address);
           this.callMessageHandlers(
             '__OnConnect__',
             new DataView(new ArrayBuffer(0)),
@@ -82,39 +75,21 @@ export class WebSocketBase {
             // Handle different message formats
             if (event.data instanceof ArrayBuffer) {
               const dataView = new DataView(event.data);
-              data = new TextDecoder().decode(dataView.buffer);
+              data = MessageFormatter.decodeDataView(dataView);
             } else {
               data = event.data;
             }
 
             console.log('[WebSocket] Raw message received:', data);
 
-            // NEW: Handle messages with "json:" prefix
-            if (data.startsWith('json:')) {
-              console.log('[WebSocket] Processing json: prefixed message');
-              const jsonData = data.substring(5); // Remove "json:" prefix
-              const parsedData = JSON.parse(jsonData);
+            // Handle messages with "json:" prefix or direct JSON
+            if (data.startsWith('json:') || data.startsWith('{')) {
+              console.log('[WebSocket] Processing JSON message');
+              const parsedData = MessageFormatter.parseReceived(data);
+              const dataView = MessageFormatter.createDataView(parsedData);
               
-              // Convert to DataView for compatibility with existing handlers
-              const textEncoder = new TextEncoder();
-              const encoded = textEncoder.encode(JSON.stringify(parsedData));
-              const dataView = new DataView(encoded.buffer);
-              
-              this.callMessageHandlers('json:', dataView);
-              return;
-            }
-
-            // Handle direct JSON messages
-            if (data.startsWith('{')) {
-              console.log('[WebSocket] Processing direct JSON message');
-              const parsedData = JSON.parse(data);
-              
-              // Convert to DataView for compatibility
-              const textEncoder = new TextEncoder();
-              const encoded = textEncoder.encode(JSON.stringify(parsedData));
-              const dataView = new DataView(encoded.buffer);
-              
-              this.callMessageHandlers('json', dataView);
+              const handlerKey = data.startsWith('json:') ? 'json:' : 'json';
+              this.callMessageHandlers(handlerKey, dataView);
               return;
             }
 
@@ -151,11 +126,7 @@ export class WebSocketBase {
           console.log(
             `[WebSocket] Connection closed: Code=${event.code}, Clean=${event.wasClean}, Reason=${event.reason || 'No reason provided'}`,
           );
-          toastService.show({
-            title: 'Connexion closed',
-            description: event.reason || 'Connexion closed',
-            variant: event.wasClean ? 'default' : 'destructive',
-          });
+          WebSocketNotificationService.onDisconnected(event.reason, event.wasClean);
           this.socket = null;
           this.callMessageHandlers(
             '__OnDisconnect__',
@@ -165,11 +136,7 @@ export class WebSocketBase {
 
         this.socket.onerror = (error) => {
           console.error('[WebSocket] Connection error:', error);
-          toastService.show({
-            title: 'WebSocket error',
-            description: 'An error occurred',
-            variant: 'destructive',
-          });
+          WebSocketNotificationService.onError();
           reject(error);
         };
       } catch (error) {
@@ -191,15 +158,13 @@ export class WebSocketBase {
     }
   }
 
-  // NEW: Send messages with "json:" prefix for new server
   public send(message: string): void {
     if (!this.isConnected()) {
       throw new Error('Cannot send message: WebSocket is not connected');
     }
 
     try {
-      // Add "json:" prefix for new server format
-      const formattedMessage = message.startsWith('json:') ? message : `json:${message}`;
+      const formattedMessage = MessageFormatter.formatForSend(message);
       console.log('[WebSocket] Sending message:', formattedMessage);
       this.socket!.send(formattedMessage);
     } catch (error) {
@@ -226,12 +191,11 @@ export class WebSocketBase {
     this.addMessageHandler('__default__', handler);
   }
 
-  // NEW: Add handler for json: prefixed messages
   public addJsonMessageHandler(
     handler: (connection: WebSocketBase, dataView: DataView) => void,
   ): void {
     this.addMessageHandler('json:', handler);
-    this.addMessageHandler('json', handler); // Also handle direct JSON
+    this.addMessageHandler('json', handler);
   }
 
   public addMessageHandler(
