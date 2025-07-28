@@ -95,8 +95,8 @@ src/
 │   ├── widgets/            # Reusable monitoring widgets
 │   ├── common/             # Shared UI components
 │   └── layout/             # Application layout
-├── services/
-│   ├── gpacService/        # GPAC integration services
+├── services/               # Communication infrastructure
+│   ├── gpacService/        # GPAC integration services (see [Services Documentation](src/services/README.md))
 │   └── ws/                 # WebSocket communication
 ├── store/
 │   └── slices/             # Redux state management
@@ -193,5 +193,5 @@ The dashboard provides comprehensive monitoring across multiple dimensions:
 
 This monitoring dashboard is designed to provide deep insights into GPAC multimedia processing pipelines, making it easier to optimize performance, debug issues, and understand complex media workflows.
 
-For questions, issues, or contributions, please refer to the project documentation and issue tracker.
+
 
