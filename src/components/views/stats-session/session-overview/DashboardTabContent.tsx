@@ -1,4 +1,4 @@
-import type { GpacNodeData } from "@/types/domain/gpac/model"
+import type { EnrichedFilterOverview } from "@/types/domain/gpac/model"
 
 import React from "react"
 import { FiltersGrid } from "./FiltersGrid"
@@ -12,37 +12,31 @@ interface SystemStats {
 }
 
 interface DashboardTabContentProps {
-
   systemStats: SystemStats
-  filtersWithLiveStats: GpacNodeData[]
-  filtersMatchingCriteria: GpacNodeData[]
-  rawFiltersFromServer: GpacNodeData[]
+  filtersWithLiveStats: EnrichedFilterOverview[]
+  filtersMatchingCriteria: EnrichedFilterOverview[]
   loading: boolean
-  monitoredFilters: Map<number, GpacNodeData>
+  monitoredFilters: Map<number, EnrichedFilterOverview>
   onCardClick: (idx: number) => void
-  onRefreshFilters: () => void
   refreshInterval: string
 }
 
 export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
   filtersWithLiveStats,
   filtersMatchingCriteria,
-  rawFiltersFromServer,
   loading,
   monitoredFilters,
   onCardClick,
-  onRefreshFilters
 }) => {
   return (
     <div className="space-y-4">
       <FiltersGrid
         filtersWithLiveStats={filtersWithLiveStats}
         filtersMatchingCriteria={filtersMatchingCriteria}
-        rawFiltersFromServer={rawFiltersFromServer}
         loading={loading}
         monitoredFilters={monitoredFilters}
         onCardClick={onCardClick}
-        onRefreshFilters={onRefreshFilters}
+
       />
     </div>
   )

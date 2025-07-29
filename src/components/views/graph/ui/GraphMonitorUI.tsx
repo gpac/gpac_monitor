@@ -1,4 +1,3 @@
-// src/components/GraphMonitorUI.tsx
 import React from 'react';
 import WidgetWrapper from '../../../common/WidgetWrapper';
 import LoadingState from '../../../common/LoadingState';

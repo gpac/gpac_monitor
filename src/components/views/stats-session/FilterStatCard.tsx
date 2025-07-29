@@ -128,7 +128,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(({ filter, onClick, i
               {formatTime(filter.time)}
             </Badge>
           )}
-          {filter.errors > 0 && (
+          {filter.errors && filter.errors > 0 && (
             <Badge variant="destructive" className="h-4 px-1.5 py-0 text-xs">
               {filter.errors} err
             </Badge>

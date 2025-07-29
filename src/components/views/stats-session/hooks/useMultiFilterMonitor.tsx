@@ -5,7 +5,7 @@ import { removeSelectedFilter } from '@/shared/store/slices/multiFilterSlice';
 import { setFilterDetails } from '@/shared/store/slices/graphSlice';
 import { subscribeToSessionStats, unsubscribeFromSessionStats } from '@/shared/store/slices/sessionStatsSlice';
 import { RootState } from '@/shared/store';
-import { GpacNodeData } from '@/types/domain/gpac/model';
+import { GraphFilterData } from '@/types/domain/gpac/model';
 import { MonitoredFilter } from '@/shared/store/slices/multiFilterSlice';
 import { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 
@@ -15,7 +15,7 @@ interface MultiFilterMonitorState {
   handleCloseMonitor: (filterIdx: string) => void;
   sessionStats: Record<string, SessionFilterStats>;
   isSessionSubscribed: boolean;
-  staticFilters: GpacNodeData[];
+  staticFilters: GraphFilterData[];
 }
 
 export const useMultiFilterMonitor = (componentId = 'multiFilterMonitor'): MultiFilterMonitorState => {

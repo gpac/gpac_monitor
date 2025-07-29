@@ -86,19 +86,19 @@ const FilterMonitor: React.FC<WidgetProps> = ({ id, title }) => {
         <div className="grid grid-cols-3 gap-4">
           <MetricCard
             title="Data Processed"
-            value={selectedFilter.bytes_done || 0}
+            value={(selectedFilter as any).bytes_done || 0}
             unit="bytes"
             className="bg-blue-900/20"
           />
           <MetricCard
             title="Packets Sent"
-            value={selectedFilter.pck_sent || 0}
+            value={(selectedFilter as any).pck_sent || 0}
             unit="pkts"
             className="bg-green-900/20"
           />
           <MetricCard
             title="Packets Done"
-            value={selectedFilter.pck_done || 0}
+            value={(selectedFilter as any).pck_done || 0}
             unit="pkts"
             className="bg-yellow-900/20"
           />

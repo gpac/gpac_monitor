@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Node, Edge } from '@xyflow/react';
 import { throttle } from 'lodash';
-import { GpacNodeData } from '@/types/domain/gpac';
+import { GraphFilterData } from '@/types/domain/gpac';
 import {
   createEdgesFromFilters,
   createNodesFromFilters,
@@ -9,7 +9,7 @@ import {
 import { RootState } from '@/shared/store/types';
 
 export interface GraphState {
-  filters: GpacNodeData[];
+  filters: GraphFilterData[];
   nodes: Node[];
   edges: Edge[];
   isLoading: boolean;
@@ -17,7 +17,7 @@ export interface GraphState {
   redraw: boolean;
   selectedNodeId: string | null;
   lastUpdate: number;
-  selectedFilterDetails: GpacNodeData | null;
+  selectedFilterDetails: GraphFilterData | null;
 }
 
 const initialState: GraphState = {
@@ -46,7 +46,7 @@ const graphSlice = createSlice({
       state.isLoading = false;
     },
     updateGraphData: {
-      reducer(state, action: PayloadAction<GpacNodeData[]>) {
+      reducer(state, action: PayloadAction<GraphFilterData[]>) {
         state.filters = [];
         state.nodes = [];
         state.edges = [];
@@ -58,7 +58,7 @@ const graphSlice = createSlice({
         state.lastUpdate = Date.now();
       },
       prepare: throttle(
-        (data: GpacNodeData[]) => ({
+        (data: GraphFilterData[]) => ({
           payload: data,
           meta: { throttle: THROTTLE_INTERVAL },
         }),
@@ -82,7 +82,7 @@ const graphSlice = createSlice({
         state.selectedNodeId = action.payload;
       }
     },
-    setFilterDetails: (state, action: PayloadAction<GpacNodeData | null>) => {
+    setFilterDetails: (state, action: PayloadAction<GraphFilterData | null>) => {
       console.log('[GraphSlice] Updating filter details:', action.payload);
       state.selectedFilterDetails = action.payload;
     },
@@ -93,7 +93,7 @@ const graphSlice = createSlice({
     clearFilterDetails: (state) => {
       state.selectedFilterDetails = null;
     },
-    setSelectedFilterDetails: (state, action: PayloadAction<GpacNodeData>) => {
+    setSelectedFilterDetails: (state, action: PayloadAction<GraphFilterData>) => {
       state.selectedFilterDetails = action.payload;
       console.log('DETAILS DU FILTRE SÉLECTIONNÉ :', action.payload);
     },

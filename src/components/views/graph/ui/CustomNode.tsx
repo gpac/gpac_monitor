@@ -1,63 +1,41 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { GpacNodeData } from '../../../../types/domain/gpac/model';
+import { GraphFilterData } from '../../../../types/domain/gpac/model';
 
 
 interface CustomNodeProps extends NodeProps {
-  data: GpacNodeData & {
+  data: GraphFilterData & {
     label: string;
     filterType: string;
-    nb_ipid: number;
-    nb_opid: number;
-    pids: {
-      input: Record<string, any>;
-      output: Record<string, any>;
-    };
-  };
+  } & Record<string, unknown>;
 }
 
 export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
-  const { label, filterType, pids, nb_ipid, nb_opid } = data;
-  
-
-/* 
-  const getFilterColor = (type: FilterType): string => {
-    const colors = {
-      video: '#60a5fa',   
-      audio: '#34d399',    
-      text: '#fbbf24',   
-      image: '#a78bfa',   
-      other: '#9ca3af',    
-    };
-    return colors[type];
-  }; */
-
-  // Déterminer le type de node pour la couleur de fond (selon la légende, style pastel)
+  const { label, filterType, ipid, opid, nb_ipid, nb_opid } = data;
+  // Determine node type for background color (according to legend, pastel style)
   const getNodeTypeColor = (): string => {
     if (nb_ipid === 0) return '#d1fae5';
     if (nb_opid === 0) return '#fee2e2';  
     return '#dbeafe'; 
   };
 
- 
+  // Determine node border color
   const getNodeBorderColor = (): string => {
     if (nb_ipid === 0) return '#34d399'; 
     if (nb_opid === 0) return '#f87171'; 
     return '#60a5fa';
   };
 
-
-  
-  // Créer les handles d'entrée seulement si nb_ipid > 0
-  const inputHandles = nb_ipid > 0 ? Object.keys(pids.input).map((pidId, index) => ({
+  // Create input handles only if nb_ipid > 0
+  const inputHandles = nb_ipid > 0 ? Object.keys(ipid).map((pidId, index) => ({
     id: pidId,
     type: 'target' as const,
     position: Position.Left,
     index
   })) : [];
 
-  // Créer les handles de sortie seulement si nb_opid > 0
-  const outputHandles = nb_opid > 0 ? Object.keys(pids.output).map((pidId, index) => ({
+  // Create output handles only if nb_opid > 0
+  const outputHandles = nb_opid > 0 ? Object.keys(opid).map((pidId, index) => ({
     id: pidId,
     type: 'source' as const,
     position: Position.Right,
@@ -128,7 +106,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
             <div className="text-xs text-gray-600">
               <span className="font-medium text-green-700">INPUTS</span>
               <div className="ml-2">
-                {Object.keys(pids.input).map((pidId) => (
+                {Object.keys(ipid).map((pidId) => (
                   <div key={pidId} className="text-xs text-gray-500">
                     {pidId}
                   </div>
@@ -141,7 +119,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
             <div className="text-xs text-gray-800">
               <span className="font-medium text-blue-700">OUTPUTS</span>
               <div className="ml-2">
-                {Object.keys(pids.output).map((pidId) => (
+                {Object.keys(opid).map((pidId) => (
                   <div key={pidId} className="text-xs text-gray-800">
                     {pidId}
                   </div>

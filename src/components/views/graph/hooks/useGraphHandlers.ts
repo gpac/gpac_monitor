@@ -1,7 +1,7 @@
 import { useCallback, MutableRefObject } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
-import { GpacNodeData } from '@/types/domain/gpac';
+import { GraphFilterData } from '@/types/domain/gpac';
 import { 
   setSelectedFilterDetails,
   setSelectedNode
@@ -88,7 +88,7 @@ export const useGraphHandlers = ({
       const nodeData = node.data;
 
       // Set selected filter in Redux
-      dispatch(setSelectedFilterDetails(nodeData as GpacNodeData));
+      dispatch(setSelectedFilterDetails(nodeData as unknown as GraphFilterData));
       
       // Update service with current filter
       service.setCurrentFilterId(parseInt(nodeId));
@@ -99,7 +99,14 @@ export const useGraphHandlers = ({
       if (!isAlreadyMonitored) {
         dispatch(addSelectedFilter({
           id: nodeId,
-          nodeData: nodeData as GpacNodeData,
+          nodeData: {
+            ...nodeData,
+            bytes_done: 0,
+            bytes_sent: 0,
+            pck_done: 0,
+            pck_sent: 0,
+            time: 0,
+          } as any,
         }));
         service.subscribeToFilter(nodeId);
       }

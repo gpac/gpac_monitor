@@ -1,4 +1,4 @@
-import { FilterType, GpacNodeData } from '../../../../types/domain/gpac/index';
+import { FilterType, GraphFilterData } from '@/types/domain/gpac';
 import { Node, Edge, MarkerType  } from '@xyflow/react';
 
 const determineFilterType = (
@@ -47,10 +47,10 @@ const getFilterColor = (filterType: FilterType): string => {
 
 // Create a node from a filter object
 export function createNodeFromFilter(
-  filter: GpacNodeData,
+  filter: GraphFilterData,
   index: number,
   existingNodes: Node[],
-  allFilters?: GpacNodeData[], // Add this parameter to calculate proper positioning
+  allFilters?: GraphFilterData[], // Add this parameter to calculate proper positioning
 ): Node {
   const existingNode = existingNodes.find(
     (n) => n.id === filter.idx.toString(),
@@ -62,7 +62,7 @@ export function createNodeFromFilter(
   
   if (allFilters) {
     // Calculate dependency depth for proper ordering
-    const calculateDepth = (currentFilter: GpacNodeData, visited = new Set<number>()): number => {
+    const calculateDepth = (currentFilter: GraphFilterData, visited = new Set<number>()): number => {
       if (visited.has(currentFilter.idx)) return 0; // Avoid cycles
       visited.add(currentFilter.idx);
       
@@ -107,13 +107,6 @@ export function createNodeFromFilter(
       label: filter.name,
       filterType,
       ...filter,
-  
-      nb_ipid: filter.nb_ipid,
-      nb_opid: filter.nb_opid,
-      pids: {
-        input: filter.ipid || {},
-        output: filter.opid || {}
-      }
     },
     
     position: existingNode?.position || {
@@ -140,7 +133,7 @@ export function createNodeFromFilter(
 
 // Create edges from a list of filters
 export function createEdgesFromFilters(
-  filters: GpacNodeData[],
+  filters: GraphFilterData[],
   existingEdges: Edge[],
 ): Edge[] {
   const newEdges: Edge[] = [];
@@ -214,7 +207,7 @@ console.log('New edges created:', newEdges);
 
 // Helper function to create nodes with proper topological ordering
 export function createNodesFromFilters(
-  filters: GpacNodeData[],
+  filters: GraphFilterData[],
   existingNodes: Node[] = []
 ): Node[] {
   return filters.map((filter, index) => 

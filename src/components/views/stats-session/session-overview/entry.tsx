@@ -2,12 +2,13 @@ import React, { useMemo, useState, useRef } from 'react';
 import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/useMultiFilterMonitor';
 import WidgetWrapper from '@/components/common/WidgetWrapper';
 import { WidgetProps } from '@/types/ui/widget';
-import { GpacNodeData } from '@/types/domain/gpac/model';
+import { EnrichedFilterOverview, } from '@/types/domain/gpac/model';
 import FilterStatCard from '../FilterStatCard';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { StatsTabs } from './StatsTabs';
 import { DashboardTabContent } from './DashboardTabContent';
 import { FilterTabContent } from './FilterTabContent';
+import { convertGraphFiltersToEnriched } from '@/utils/filterConversion';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
@@ -15,35 +16,8 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       useMultiFilterMonitor(id);
     
 
-    
     const enrichedGraphFilterCollection = useMemo(() => 
-      staticFilters.map(graphFilterDefinition => {
-        // Trouver les statistiques de session correspondantes
-        const matchingDynamicFilterData = Object.values(sessionStats).find(filterStat => filterStat.idx === graphFilterDefinition.idx);
-        
-        return {
-          // Données statiques (base du graphe)
-          name: graphFilterDefinition.name,
-          type: graphFilterDefinition.type,
-          idx: graphFilterDefinition.idx,
-          nb_ipid: graphFilterDefinition.nb_ipid,
-          nb_opid: graphFilterDefinition.nb_opid,
-          ipid: graphFilterDefinition.ipid,
-          opid: graphFilterDefinition.opid,
-          tasks: graphFilterDefinition.tasks,
-          itag: graphFilterDefinition.itag,
-          ID: graphFilterDefinition.ID,
-          errors: graphFilterDefinition.errors,
-          
-          // Données dynamiques (statistiques de session si disponibles)
-          status: matchingDynamicFilterData?.status || graphFilterDefinition.status,
-          bytes_done: matchingDynamicFilterData?.bytes_done || graphFilterDefinition.bytes_done,
-          pck_done: matchingDynamicFilterData?.pck_done || graphFilterDefinition.pck_done,
-          pck_sent: matchingDynamicFilterData?.pck_sent || graphFilterDefinition.pck_sent,
-          time: matchingDynamicFilterData?.time || graphFilterDefinition.time,
-          pck_ifce_sent: matchingDynamicFilterData?.pck_sent || graphFilterDefinition.pck_ifce_sent,
-        } as GpacNodeData;
-      }), 
+      convertGraphFiltersToEnriched(staticFilters, sessionStats), 
       [staticFilters, sessionStats]
     );
     
@@ -53,7 +27,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     );
     
     const [activeTab, setActiveTab] = useState('main');
-    const [monitoredFiltersState, setMonitoredFiltersState] = useState<Map<number, GpacNodeData>>(new Map());
+    const [monitoredFiltersState, setMonitoredFiltersState] = useState<Map<number, EnrichedFilterOverview>>(new Map());
     const tabsRef = useRef<HTMLDivElement>(null);
 
     const handleCardClick = (idx: number) => {
@@ -80,9 +54,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       }
     };
     
-    const handleRefreshFilters = () => {
-      console.log('Refresh filters');
-    };
+
 
     if (isLoading) {
       return (
@@ -130,11 +102,10 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
                   }}
                   filtersWithLiveStats={enrichedGraphFilterCollection}
                   filtersMatchingCriteria={enrichedGraphFilterCollection}
-                  rawFiltersFromServer={enrichedGraphFilterCollection}
+               
                   loading={isLoading}
                   monitoredFilters={monitoredFiltersState}
                   onCardClick={handleCardClick}
-                  onRefreshFilters={handleRefreshFilters}
                   refreshInterval="1000"
                 />
               </TabsContent>
