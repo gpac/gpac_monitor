@@ -1,56 +1,54 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { gpacService } from '@/services/gpacService';
 import { removeSelectedFilter } from '@/shared/store/slices/multiFilterSlice';
 import { setFilterDetails } from '@/shared/store/slices/graphSlice';
-import { subscribeToSessionStats, unsubscribeFromSessionStats, resetSessionStats } from '@/shared/store/slices/sessionStatsSlice';
+import { subscribeToSessionStats, unsubscribeFromSessionStats } from '@/shared/store/slices/sessionStatsSlice';
 import { RootState } from '@/shared/store';
+import { GpacNodeData } from '@/types/domain/gpac/model';
+import { MonitoredFilter } from '@/shared/store/slices/multiFilterSlice';
+import { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 
-export const useMultiFilterMonitor = (componentId = 'multiFilterMonitor') => {
+interface MultiFilterMonitorState {
+  selectedFilters: MonitoredFilter[];
+  isLoading: boolean;
+  handleCloseMonitor: (filterIdx: string) => void;
+  sessionStats: Record<string, SessionFilterStats>;
+  isSessionSubscribed: boolean;
+  staticFilters: GpacNodeData[];
+}
+
+export const useMultiFilterMonitor = (componentId = 'multiFilterMonitor'): MultiFilterMonitorState => {
   const dispatch = useAppDispatch();
   const componentIdRef = useRef(componentId);
+  const [mountCount, setMountCount] = useState(0);
 
   const selectedFilters = useAppSelector(
     (state: RootState) => state.multiFilter.selectedFilters,
   );
   const isLoading = useAppSelector((state) => state.graph.isLoading);
   const sessionStats = useAppSelector((state: RootState) => state.sessionStats.sessionStats);
-  const graphNodes = useAppSelector((state: RootState) => state.graph.nodes);
   const isSessionSubscribed = useAppSelector((state: RootState) => state.sessionStats.isSubscribed);
+  const staticFilters = useAppSelector((state: RootState) => state.graph.filters);
 
   // Subscribe/unsubscribe to session stats based on component lifecycle
   useEffect(() => {
+    setMountCount((prev) => prev + 1);
+    console.log(`[useMultiFilterMonitor] Montage #${mountCount + 1}, isSessionSubscribed:`, isSessionSubscribed);
     const id = componentIdRef.current;
     dispatch(subscribeToSessionStats(id));
+    // Log pour vérifier l'abonnement
+    console.log(`[useMultiFilterMonitor] Tentative d'abonnement pour le composant:`, id);
     
     return () => {
+      console.log(`[useMultiFilterMonitor] Démontage, isSessionSubscribed:`, isSessionSubscribed);
       dispatch(unsubscribeFromSessionStats(id));
     };
   }, [dispatch]);
 
-  // Reset session stats when graph changes (new session detected)
-  useEffect(() => {
-    if (graphNodes.length > 0) {
-      // Check if this is a new session by detecting if current session stats 
-      // have filters that no longer exist in the graph
-      const currentNodeIndices = new Set(graphNodes.map(node => 
-        typeof node.data.idx === 'number' ? node.data.idx.toString() : String(node.data.idx)
-      ));
-      const sessionFilterIndices = new Set(Object.keys(sessionStats));
-      
-      // If there are session stats for filters that don't exist in current graph, reset
-      const hasStaleFilters = [...sessionFilterIndices].some(idx => !currentNodeIndices.has(idx));
-      
-      if (hasStaleFilters && sessionFilterIndices.size > 0) {
-        console.log('Detected new session, resetting session stats');
-        dispatch(resetSessionStats());
-      }
-    }
-  }, [graphNodes, sessionStats, dispatch]);
-
   const handleCloseMonitor = useCallback(
     (filterIdx: string) => {
-      // Use idx instead of generated id for consistency
+
       gpacService.unsubscribeFromFilter(filterIdx);
       dispatch(removeSelectedFilter(filterIdx));
 
@@ -68,5 +66,6 @@ export const useMultiFilterMonitor = (componentId = 'multiFilterMonitor') => {
     handleCloseMonitor,
     sessionStats,
     isSessionSubscribed,
+    staticFilters,
   };
 };
