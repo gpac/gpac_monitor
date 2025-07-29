@@ -13,7 +13,7 @@ import {
   getBufferProgressColor,
   calculateBufferUsage,
   formatNumber
-} from './utils/helper';
+} from '../../../utils/helper';
 
 interface FilterStatCardProps {
   filter: GpacNodeData;
