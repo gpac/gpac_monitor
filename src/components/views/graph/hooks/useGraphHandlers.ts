@@ -6,7 +6,6 @@ import {
   setSelectedFilterDetails,
   setSelectedNode
 } from '@/shared/store/slices/graphSlice';
-import { addSelectedFilter } from '@/shared/store/slices/multiFilterSlice';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { Dispatch } from '@reduxjs/toolkit';
 
@@ -94,22 +93,7 @@ export const useGraphHandlers = ({
       service.setCurrentFilterId(parseInt(nodeId));
       service.getFilterDetails(parseInt(nodeId));
 
-      // Add to monitored filters if not already
-      const isAlreadyMonitored = monitoredFilters.some((f) => f.nodeData.idx.toString() === nodeId);
-      if (!isAlreadyMonitored) {
-        dispatch(addSelectedFilter({
-          id: nodeId,
-          nodeData: {
-            ...nodeData,
-            bytes_done: 0,
-            bytes_sent: 0,
-            pck_done: 0,
-            pck_sent: 0,
-            time: 0,
-          } as any,
-        }));
-        service.subscribeToFilter(nodeId);
-      }
+
 
       // Set selected node in Redux
       dispatch(setSelectedNode(nodeId));

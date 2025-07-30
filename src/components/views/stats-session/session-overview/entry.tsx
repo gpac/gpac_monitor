@@ -13,12 +13,27 @@ import { convertGraphFiltersToEnriched } from '@/utils/filterConversion';
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
     const { selectedFilters, isLoading, sessionStats, staticFilters } =
-      useMultiFilterMonitor(id);
-    
+      useMultiFilterMonitor();
+
+    // Convert SessionFilterStatistics[] to Record<string, SessionFilterStats> for compatibility
+    const sessionStatsRecord = useMemo(() => {
+      if (!sessionStats || !Array.isArray(sessionStats)) {
+        return {};
+      }
+      // Convert array to record using filter index as key
+      const result = sessionStats.reduce((acc, stat, index) => {
+        acc[index.toString()] = {
+          // Map SessionFilterStatistics to SessionFilterStats format
+          ...stat
+        };
+        return acc;
+      }, {} as Record<string, any>);
+      return result;
+    }, [sessionStats]);
 
     const enrichedGraphFilterCollection = useMemo(() => 
-      convertGraphFiltersToEnriched(staticFilters, sessionStats), 
-      [staticFilters, sessionStats]
+      convertGraphFiltersToEnriched(staticFilters, sessionStatsRecord), 
+      [staticFilters, sessionStatsRecord]
     );
     
     const monitoredFilterLookupMap = useMemo(() => 
@@ -53,8 +68,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
         setActiveTab('main');
       }
     };
-    
-
 
     if (isLoading) {
       return (
@@ -94,7 +107,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               
               <TabsContent value="main" className="flex-1 p-4">
                 <DashboardTabContent
-              
                   systemStats={{
                     activeFilters: enrichedGraphFilterCollection.filter(f => f.status === 'active').length,
                     totalBytes: enrichedGraphFilterCollection.reduce((sum, f) => sum + f.bytes_done, 0),
@@ -102,7 +114,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
                   }}
                   filtersWithLiveStats={enrichedGraphFilterCollection}
                   filtersMatchingCriteria={enrichedGraphFilterCollection}
-               
                   loading={isLoading}
                   monitoredFilters={monitoredFiltersState}
                   onCardClick={handleCardClick}

@@ -1,5 +1,5 @@
-import { IGpacCommunication,ConnectionStatus } from '../../../types/communication/IgpacCommunication';
-import { IGpacMessageHandler } from '../../../types/communication/IGpacMessageHandler';
+import { IGpacCommunication ,ConnectionStatus, IGpacMessageHandler } from '@/types';
+
 
 export class GpacCoreService implements IGpacCommunication {
   private currentFilterId: number | null = null;

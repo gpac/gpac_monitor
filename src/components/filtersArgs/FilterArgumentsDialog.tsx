@@ -18,7 +18,7 @@ import { Badge } from '../ui/badge';
 import {
   selectArgumentUpdate,
   updateFilterArgument,
-} from '@/shared/store/slices/filterArgumentSlice';
+} from'@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 
 interface FilterArgumentsDialogProps {
@@ -303,11 +303,11 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
                     });
 
                     dispatch(
-                      updateFilterArgument(
-                        filter.idx.toString(),
+                      updateFilterArgument({
+                        filterId: filter.idx.toString(),
                         argName,
-                        value,
-                      ),
+                        argValue: value,
+                      }),
                     );
                   } else {
                     console.log(

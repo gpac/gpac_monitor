@@ -55,7 +55,7 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
         // If the argument is updatable and we have a filterId, dispatch the update action
         if (argument.update && filterId && !standalone) {
           dispatch(
-            updateFilterArgument(filterId, argument.name, convertedValue),
+            updateFilterArgument({ filterId, argName: argument.name, argValue: convertedValue }),
           );
         }
       } catch (error) {

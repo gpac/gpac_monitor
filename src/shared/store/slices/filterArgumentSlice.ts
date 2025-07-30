@@ -1,8 +1,8 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AppThunk } from '../index';
-import { GpacMessage } from '@/types/communication/IgpacCommunication'; 
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { GpacMessage } from '@/types' 
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
+import { RootState } from '../index';
 
 interface ArgumentUpdate {
   filterId: string;
@@ -48,12 +48,12 @@ export const { setArgumentUpdateStatus, clearArgumentUpdate } =
 
 // Thunk
 
-export const updateFilterArgument =
-  (filterId: string, argName: string, argValue: any): AppThunk =>
-  async (dispatch, getState) => {
+export const updateFilterArgument = createAsyncThunk(
+  'filterArgument/updateFilterArgument',
+  async ({ filterId, argName, argValue }: { filterId: string; argName: string; argValue: any }, { dispatch, getState }) => {
     try {
       // Get filter name from state using the selector
-      const filterName = selectFilterNameById(getState(), filterId);
+      const filterName = selectFilterNameById(getState() as RootState, filterId);
 
       if (!filterName) {
         throw new Error(`Filter with ID ${filterId} not found`);
@@ -76,7 +76,7 @@ export const updateFilterArgument =
         argName: argName,
         newValue: argValue,
       };
-      await gpacService.sendMessage(message);
+      gpacService.sendMessage(message);
 
       // Set success status
       const successUpdate: ArgumentUpdate = {
@@ -99,8 +99,10 @@ export const updateFilterArgument =
           error instanceof Error ? error.message : 'An unknown error occurred',
       };
       dispatch(setArgumentUpdateStatus(errorUpdate));
+      throw error;
     }
-  };
+  }
+);
 
 // Selectors
 export const selectArgumentUpdate = (

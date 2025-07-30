@@ -1,6 +1,8 @@
-import { WebSocketBase } from '../../ws/WebSocketBase';
-import { GpacNodeData } from '../../../types/domain/gpac/model';
-import { GpacNotificationHandlers } from '../types';
+import { WebSocketBase } from '../../../ws/WebSocketBase';
+import { GpacNodeData } from '../../../../types/domain/gpac/model';
+import { GpacNotificationHandlers } from '../../types';
+import { generateID } from '@/utils/id';
+import { SessionStatsHandler } from './sessionStatsHandler';
 
 export interface MessageHandlerCallbacks {
   onUpdateFilterData: (payload: { idx: number; data: any }) => void;
@@ -10,28 +12,41 @@ export interface MessageHandlerCallbacks {
   onUpdateSessionStats: (stats: any) => void;
 }
 
-export class MessageHandler {
+export interface MessageHandlerDependencies {
+  isConnected: () => boolean;
+  send: (message: any) => Promise<void>;
+}
+
+export class BaseMessageHandler {
+  private sessionStatsHandler: SessionStatsHandler;
 
   constructor(
     private currentFilterId: () => number | null,
     private hasSubscription: (idx: string) => boolean,
     private notificationHandlers: GpacNotificationHandlers,
     private callbacks: MessageHandlerCallbacks,
+    private dependencies: MessageHandlerDependencies,
     private onMessage?: (message: any) => void,
-  ) {}
+    private isLoaded?: () => boolean,
+  ) {
+    // Initialize specialized handlers
+    this.sessionStatsHandler = new SessionStatsHandler(dependencies, isLoaded || (() => true));
+  }
+
+  // Expose handler methods
+  public getSessionStatsHandler(): SessionStatsHandler {
+    return this.sessionStatsHandler;
+  }
 
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
     try {
       const text = new TextDecoder().decode(dataView.buffer);
-      console.log('[MessageHandler] Processing JSON message:', text);
       const data = JSON.parse(text);
       this.processGpacMessage(data);
     } catch (error) {
-      console.error('[MessageHandler] JSON message processing error:', error);
+      // Error handling
     }
   }
-
-
 
   public handleDefaultMessage(_: WebSocketBase, dataView: DataView): void {
     try {
@@ -41,15 +56,12 @@ export class MessageHandler {
         this.processGpacMessage(data);
       }
     } catch (error) {
-      console.error('[MessageHandler] Default message processing error:', error);
+      // Error handling
     }
   }
 
   private processGpacMessage(data: any): void {
-    console.log('[MessageHandler] Processing GPAC message:', data);
-    
     if (!data.message) {
-      console.warn('[MessageHandler] Received message without type:', data);
       return;
     }
 
@@ -73,17 +85,16 @@ export class MessageHandler {
         this.handleFilterStatsMessage(data);
         break;
       default:
-        console.log('[MessageHandler] Unknown message type:', data.message);
+        // Unknown message type
     }
 
     this.onMessage?.(data);
   }
 
   private handleFiltersMessage(data: any): void {
-    console.log('[MessageHandler] Handling filters message:', data);
     this.callbacks.onSetLoading(false);
     this.callbacks.onUpdateGraphData(data.filters);
-    
+
     if (data.filters) {
       data.filters.forEach((filter: GpacNodeData) => {
         this.notificationHandlers.onFilterUpdate?.(filter);
@@ -99,33 +110,49 @@ export class MessageHandler {
 
   private handleDetailsMessage(data: any): void {
     if (!data.filter) return;
-   
-    
+
     if (data.filter.idx === this.currentFilterId()) {
       this.callbacks.onSetFilterDetails(data.filter);
     }
-    
- 
   }
+
   private handleSessionStatsMessage(data: any): void {
-    console.log('[MessageHandler] Session stats received:', data.stats);
     if (data.stats && Array.isArray(data.stats)) {
+      this.sessionStatsHandler.handleSessionStats(data.stats);
       this.callbacks.onUpdateSessionStats(data.stats);
     }
   }
-  
 
   private handleCpuStatsMessage(data: any): void {
-    console.log('[MessageHandler] CPU stats received:', data.stats);
+    // CPU stats received
   }
 
   private handleFilterStatsMessage(data: any): void {
-    console.log('[MessageHandler] Filter stats received:', data);
     if (data.idx !== undefined) {
       const filterId = data.idx.toString();
       if (this.hasSubscription(filterId)) {
         this.callbacks.onUpdateFilterData({ idx: data.idx, data: data });
       }
     }
+  }
+
+  /**
+   * Checks if the WebSocket client is connected
+   *
+   * @returns true if connected, throws an error otherwise
+   */
+  protected ensureConnected(): boolean {
+    if (!this.dependencies.isConnected()) {
+      const error = new Error("WebSocket client is not connected")
+      throw error
+    }
+    return true
+  }
+
+  /**
+   * Generate a unique ID for messages
+   */
+  protected static generateMessageId(): string {
+    return generateID()
   }
 }

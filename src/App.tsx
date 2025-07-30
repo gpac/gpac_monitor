@@ -3,6 +3,7 @@ import { Provider } from 'react-redux';
 import { store } from '../src/shared/store';
 import DashboardLayout from './components/layout/DashboardLayout';
 import { Toaster } from './components/ui/toaster';
+
 import './index.css';
 
 const App: React.FC = () => {

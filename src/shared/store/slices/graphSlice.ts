@@ -53,8 +53,12 @@ const graphSlice = createSlice({
 
         state.filters = action.payload;
         // Use topological ordering for proper graph layout
-        state.nodes = createNodesFromFilters(action.payload, []);
-        state.edges = createEdgesFromFilters(action.payload, []);
+        const newNodes = createNodesFromFilters(action.payload, []);
+        const newEdges = createEdgesFromFilters(action.payload, []);
+        state.nodes.length = 0;
+        state.edges.length = 0;
+        newNodes.forEach(node => state.nodes.push(node as any));
+        newEdges.forEach(edge => state.edges.push(edge as any));
         state.lastUpdate = Date.now();
       },
       prepare: throttle(

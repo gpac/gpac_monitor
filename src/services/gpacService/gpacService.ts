@@ -4,10 +4,11 @@ import { IGpacMessageHandler } from '../../types/communication/IGpacMessageHandl
 import { WS_CONFIG } from './config';
 import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './infrastructure/connectionManager';
-import { SubscriptionManager } from './infrastructure/subscriptionManager';
-import { MessageHandler } from './infrastructure/messageHandler';
+import { BaseMessageHandler} from './infrastructure/messageHandler/baseMessageHandler';
 import { GpacCoreService } from './core/gpacCore';
 import { createStoreCallbacks, clearStoreFilters } from './integration/storeIntegration';
+import { generateID } from '@/utils/id';
+import { SubscriptionCallback, SubscriptionConfig, SubscriptionType } from '@/types/communication/subscription';
 
 export class GpacService implements IGpacCommunication {
   private static instance: GpacService | null = null;
@@ -15,10 +16,10 @@ export class GpacService implements IGpacCommunication {
   private coreService: GpacCoreService;
   
   private connectionManager: ConnectionManager;
-  private subscriptionManager: SubscriptionManager;
-  private messageHandler: MessageHandler;
-  
+  private messageHandler: BaseMessageHandler; 
+
   private notificationHandlers: GpacNotificationHandlers = {};
+  private _isLoaded: boolean = false;
   
   public onMessage?: (message: any) => void;
   public onError?: (error: Error) => void;
@@ -30,20 +31,28 @@ export class GpacService implements IGpacCommunication {
     this.ws = new WebSocketBase();
     this.coreService = new GpacCoreService();
     this.connectionManager = new ConnectionManager(this.ws, this.address);
-    this.subscriptionManager = new SubscriptionManager(this.sendMessage.bind(this));
+  
     
     const storeCallbacks = createStoreCallbacks();
-    
-    this.messageHandler = new MessageHandler(
+
+    const dependencies = {
+      isConnected: () => this.isConnected(),
+      send: (message: any) => this.send(message)
+    };
+
+    this.messageHandler = new BaseMessageHandler(
       () => this.coreService.getCurrentFilterId(),
-      (idx: string) => this.subscriptionManager.hasSubscription(idx),
+      () => false,
       this.notificationHandlers,
       storeCallbacks,
+      dependencies,
       (message: any) => {
         this.onMessage?.(message);
         this.coreService.notifyHandlers(message);
-      }
+      },
+      () => this.isLoaded()
     );
+    
     this.setupWebSocketHandlers();
   }
 
@@ -57,6 +66,37 @@ export class GpacService implements IGpacCommunication {
     return GpacService.instance;
   }
 
+  public async load(): Promise<boolean> {
+    console.log('[GpacService] Starting load process');
+    
+    if (this._isLoaded) {
+      console.log('[GpacService] Service already loaded');
+      return true;
+    }
+
+    try {
+      // Wait for connection to be established
+      await this.connectionManager.connect();
+      
+      // Wait a bit for the service to be fully initialized
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (!this.isConnected()) {
+        throw new Error('Failed to establish connection');
+      }
+
+      // Service is now loaded and ready
+      this._isLoaded = true;
+      console.log('[GpacService] Service successfully loaded and ready');
+      
+      return true;
+    } catch (error) {
+      console.error('[GpacService] Failed to load service:', error);
+      this._isLoaded = false;
+      throw error;
+    }
+  }
+
   public setNotificationHandlers(handlers: GpacNotificationHandlers): void {
     this.notificationHandlers = handlers;
     this.connectionManager.setNotificationHandlers(handlers);
@@ -67,8 +107,8 @@ export class GpacService implements IGpacCommunication {
     return this.connectionManager.connect();
   }
 
-  public send(message: GpacMessage): void {
-    this.sendMessage(message);
+  public send(message: GpacMessage): Promise<void> {
+    return Promise.resolve(this.sendMessage(message));
   }
 
   public registerHandler(handler: IGpacMessageHandler): () => void {
@@ -96,6 +136,10 @@ export class GpacService implements IGpacCommunication {
 
   public isConnected(): boolean {
     return this.connectionManager.isConnected();
+  }
+
+  public isLoaded(): boolean {
+    return this._isLoaded && this.isConnected();
   }
 
   public sendMessage(message: GpacMessage): void {
@@ -135,29 +179,19 @@ export class GpacService implements IGpacCommunication {
     return this.coreService.getCurrentFilterId();
   }
 
-  public subscribeToFilter(idx: string): void {
-    this.subscriptionManager.subscribeToFilter(idx);
+  public unsubscribeFromFilter(filterIdx: string): void {
+    const numericIdx = parseInt(filterIdx, 10);
+    if (!isNaN(numericIdx)) {
+      this.sendMessage({ type: 'stop_details', idx: numericIdx });
+    }
   }
 
-  public unsubscribeFromFilter(idx: string): void {
-    this.subscriptionManager.unsubscribeFromFilter(idx);
-  }
-
-  public subscribeToSessionStats(): void {
-    this.subscriptionManager.subscribeToSessionStats();
-  }
-
-  public subscribeToCpuStats(): void {
-    this.subscriptionManager.subscribeToCpuStats();
-  }
 
   private setupWebSocketHandlers(): void {
     this.ws.addConnectHandler(() => {
       console.log('[GpacService] Connection established');
       
       this.sendMessage({ type: 'get_all_filters' });
-      this.subscriptionManager.subscribeToSessionStats();
-      this.subscriptionManager.subscribeToCpuStats();
     });
 
     this.ws.addJsonMessageHandler(this.messageHandler.handleJsonMessage.bind(this.messageHandler));
@@ -165,6 +199,8 @@ export class GpacService implements IGpacCommunication {
 
     this.ws.addDisconnectHandler(() => {
       console.log('[GpacService] Disconnected from server');
+      this._isLoaded = false;
+      console.log('[GpacService] Service marked as not loaded');
       this.onDisconnect?.();
       this.connectionManager.handleDisconnect();
     });
@@ -172,8 +208,41 @@ export class GpacService implements IGpacCommunication {
 
   private cleanup(): void {
     this.coreService.setCurrentFilterId(null);
-    this.subscriptionManager.clearSubscriptions();
   }
+    public async subscribe<T = unknown>(
+    config: SubscriptionConfig,
+    callback: SubscriptionCallback<T>
+  ): Promise<() => void> {
+    console.log('[GpacService] subscribe called with config:', config);
+    console.log('[GpacService] Service status - isLoaded:', this.isLoaded(), 'isConnected:', this.isConnected());
+    
+    if (!this.isLoaded()) {
+      console.error('[GpacService] Cannot subscribe - service not loaded');
+      throw new Error("Service not loaded")
+    }
+    
+    const subscriptionId = generateID()
+    console.log('[GpacService] Generated subscription ID:', subscriptionId);
+    
+    switch (config.type) {
+
+      case SubscriptionType.SESSION_STATS:
+        console.log('[GpacService] Setting up SESSION_STATS subscription with interval:', config.interval || 1000);
+        return this.messageHandler.getSessionStatsHandler().subscribeToSessionStats((data) => {
+          console.log('[GpacService] Received session stats data from handler, forwarding to hook callback:', data);
+          callback({
+            data: data as T,
+            timestamp: Date.now(),
+            subscriptionId
+          })
+        }, config.interval || 1000)
+
+      default:
+        console.error('[GpacService] Unsupported subscription type:', config.type);
+        throw new Error(`Unsupported subscription type: ${config.type}`)
+    }
+  }
+
 }
 
 export const gpacService = GpacService.getInstance();

@@ -2,7 +2,7 @@ import {
   ConnectionStatus,
   GpacMessage,
   GpacCommunicationError,
-} from '../communication/IgpacCommunication';
+} from './shared';
 
 /**
  * Handler interface for GPAC communication events.
