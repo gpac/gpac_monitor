@@ -4,7 +4,7 @@ let all_filters = [];
 let all_connected = false;
 
 const DEFAULT_FILTER_FIELDS = [
-    "status", "bytes_done", "bytes_sent", "pck_sent", "pck_done", "time", "nb_ipid", "nb_opid"
+    "idx", "bytes_done", "bytes_sent", "pck_sent", "pck_done", "time", "nb_ipid", "nb_opid"
   ];
 
 const CPU_STATS_FIELDS = ["total_cpu_usage", "process_cpu_usage",

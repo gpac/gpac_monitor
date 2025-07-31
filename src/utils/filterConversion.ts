@@ -1,4 +1,4 @@
-import { GraphFilterData, EnrichedFilterOverview, PIDData } from '@/types/domain/gpac';
+import { GraphFilterData, EnrichedFilterOverview, PIDData, SessionFilterStatistics } from '@/types/domain/gpac';
 import { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 
 /**
@@ -62,12 +62,22 @@ export function convertGraphFilterToEnriched(
  */
 export function convertGraphFiltersToEnriched(
   graphFilters: GraphFilterData[],
-  sessionStats: Record<string, SessionFilterStats> = {}
+  sessionStats: Record<string, SessionFilterStats> | SessionFilterStatistics[] = {}
 ): EnrichedFilterOverview[] {
   return graphFilters.map(graphFilter => {
-    const matchingSessionStats = Object.values(sessionStats).find(
-      filterStat => filterStat.idx === graphFilter.idx
-    );
+    let matchingSessionStats: SessionFilterStats | undefined;
+    
+    if (Array.isArray(sessionStats)) {
+      // Find matching SessionFilterStatistics by idx
+      matchingSessionStats = sessionStats.find(
+        filterStat => filterStat.idx === graphFilter.idx
+      );
+    } else {
+      // Find matching SessionFilterStats in Record
+      matchingSessionStats = Object.values(sessionStats).find(
+        filterStat => filterStat.idx === graphFilter.idx
+      );
+    }
     
     return convertGraphFilterToEnriched(graphFilter, matchingSessionStats);
   });

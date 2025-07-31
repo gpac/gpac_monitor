@@ -3,43 +3,51 @@ import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/us
 import WidgetWrapper from '@/components/common/WidgetWrapper';
 import { WidgetProps } from '@/types/ui/widget';
 import { EnrichedFilterOverview, } from '@/types/domain/gpac/model';
-import FilterStatCard from '../FilterStatCard';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { StatsTabs } from './StatsTabs';
 import { DashboardTabContent } from './DashboardTabContent';
 import { FilterTabContent } from './FilterTabContent';
-import { convertGraphFiltersToEnriched } from '@/utils/filterConversion';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
-    const { selectedFilters, isLoading, sessionStats, staticFilters } =
+    const {  isLoading, sessionStats, staticFilters } =
       useMultiFilterMonitor();
 
-    // Convert SessionFilterStatistics[] to Record<string, SessionFilterStats> for compatibility
-    const sessionStatsRecord = useMemo(() => {
-      if (!sessionStats || !Array.isArray(sessionStats)) {
-        return {};
-      }
-      // Convert array to record using filter index as key
-      const result = sessionStats.reduce((acc, stat, index) => {
-        acc[index.toString()] = {
-          // Map SessionFilterStatistics to SessionFilterStats format
-          ...stat
+    const enrichedGraphFilterCollection = useMemo(() => {
+      return staticFilters.map(staticFilter => {
+            // Trouver les stats dynamiques correspondantes par idx
+        const dynamicStats = sessionStats.find(stat => stat.idx === staticFilter.idx);
+        if (!dynamicStats) {console.log('[****BUG 0**]No dynamic stats found for filter idx:', staticFilter.idx);}
+        
+        return {
+          // Données statiques du filtre
+          ...staticFilter,
+          ipid: Object.fromEntries(
+            Object.entries(staticFilter.ipid).map(([key, value]) => [
+              key, 
+              { ...value, buffer: 0, buffer_total: 0 }
+            ])
+          ),
+          opid: Object.fromEntries(
+            Object.entries(staticFilter.opid).map(([key, value]) => [
+              key, 
+              { ...value, buffer: 0, buffer_total: 0 }
+            ])
+          ),
+          // Données dynamiques (priorité aux stats dynamiques si disponibles)
+          status: dynamicStats?.status || staticFilter.status,
+          bytes_done: dynamicStats?.bytes_done || 0,
+          bytes_sent: dynamicStats?.bytes_sent || 0,
+          pck_done: dynamicStats?.pck_done || 0,
+          pck_sent: dynamicStats?.pck_sent || 0,
+          time: dynamicStats?.time || 0,
+          tasks: 0,
+          errors: 0,
         };
-        return acc;
-      }, {} as Record<string, any>);
-      return result;
-    }, [sessionStats]);
-
-    const enrichedGraphFilterCollection = useMemo(() => 
-      convertGraphFiltersToEnriched(staticFilters, sessionStatsRecord), 
-      [staticFilters, sessionStatsRecord]
-    );
+      });
+    }, [staticFilters, sessionStats]);
     
-    const monitoredFilterLookupMap = useMemo(() => 
-      new Map(enrichedGraphFilterCollection.map(filterData => [filterData.idx, filterData])), 
-      [enrichedGraphFilterCollection]
-    );
+ 
     
     const [activeTab, setActiveTab] = useState('main');
     const [monitoredFiltersState, setMonitoredFiltersState] = useState<Map<number, EnrichedFilterOverview>>(new Map());
@@ -79,13 +87,13 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       );
     }
 
-    if (selectedFilters.length === 0) {
-      if (staticFilters.length === 0) {
-        return (
-          <WidgetWrapper id={id} title={title}>
-            <div className="flex flex-col items-center justify-center h-full p-4 text-gray-400">
-              <p>No filters available</p>
-              <p className="text-sm mt-2">
+    if (staticFilters.length === 0) {
+      return (
+      <WidgetWrapper id={id} title={title}>
+        <div className="flex flex-col items-center justify-center h-full p-4 text-gray-400">
+        <p>No filters available</p>
+        <p className="text-sm mt-2">
+          Waiting
                 Waiting for graph construction...
               </p>
             </div>
@@ -93,51 +101,8 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
         );
       }
 
-      return (
-        <WidgetWrapper id={id} title="Session-stats Overview">
-          <div className="h-full">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <StatsTabs
-                activeTab={activeTab}
-                onValueChange={setActiveTab}
-                monitoredFilters={monitoredFiltersState}
-                onCloseTab={handleCloseTab}
-                tabsRef={tabsRef}
-              />
-              
-              <TabsContent value="main" className="flex-1 p-4">
-                <DashboardTabContent
-                  systemStats={{
-                    activeFilters: enrichedGraphFilterCollection.filter(f => f.status === 'active').length,
-                    totalBytes: enrichedGraphFilterCollection.reduce((sum, f) => sum + f.bytes_done, 0),
-                    totalPackets: enrichedGraphFilterCollection.reduce((sum, f) => sum + f.pck_done, 0)
-                  }}
-                  filtersWithLiveStats={enrichedGraphFilterCollection}
-                  filtersMatchingCriteria={enrichedGraphFilterCollection}
-                  loading={isLoading}
-                  monitoredFilters={monitoredFiltersState}
-                  onCardClick={handleCardClick}
-                  refreshInterval="1000"
-                />
-              </TabsContent>
-
-              {Array.from(monitoredFiltersState.entries()).map(([idx, filter]) => (
-                <TabsContent key={`filter-${idx}`} value={`filter-${idx}`} className="flex-1">
-                  <FilterTabContent
-                    filter={filter}
-                    onCardClick={handleCardClick}
-                    isMonitored={true}
-                  />
-                </TabsContent>
-              ))}
-            </Tabs>
-          </div>
-        </WidgetWrapper>
-      );
-    }
-
     return (
-      <WidgetWrapper id={id} title={title}>
+      <WidgetWrapper id={id} title="Session-stats Overview">
         <div className="h-full">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
             <StatsTabs
@@ -148,24 +113,20 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               tabsRef={tabsRef}
             />
             
-            <TabsContent value="main" className="flex-1 overflow-auto p-4">
-              <div
-                className="grid gap-6 auto-rows-[600px] grid-cols-1 xl:grid-cols-2 2xl:grid-cols-3"
-                style={{
-                  minHeight: 'min-content',
-                  height: '100%',
+            <TabsContent value="main" className="flex-1 p-4">
+              <DashboardTabContent
+                systemStats={{
+                  activeFilters: enrichedGraphFilterCollection.filter(f => f.status === 'active').length,
+                  totalBytes: enrichedGraphFilterCollection.reduce((sum, f) => sum + f.bytes_done, 0),
+                  totalPackets: enrichedGraphFilterCollection.reduce((sum, f) => sum + f.pck_done, 0)
                 }}
-              >
-                {selectedFilters.map((filter) => (
-                  <div key={`filter-${filter.nodeData.idx}`} className="h-full">
-                    <FilterStatCard
-                      filter={filter.nodeData}
-                      onClick={handleCardClick}
-                      isMonitored={monitoredFilterLookupMap.has(filter.nodeData.idx)}
-                    />
-                  </div>
-                ))}
-              </div>
+                filtersWithLiveStats={enrichedGraphFilterCollection}
+                filtersMatchingCriteria={enrichedGraphFilterCollection}
+                loading={isLoading}
+                monitoredFilters={monitoredFiltersState}
+                onCardClick={handleCardClick}
+                refreshInterval="1000"
+              />
             </TabsContent>
 
             {Array.from(monitoredFiltersState.entries()).map(([idx, filter]) => (

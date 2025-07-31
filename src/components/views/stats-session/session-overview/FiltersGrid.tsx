@@ -22,6 +22,13 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
   onCardClick,
 
 }) => {
+  // DEBUG: Log pour comprendre pourquoi seulement 2 filtres s'affichent
+  console.log('[FiltersGrid] Props:', {
+    filtersWithLiveStatsCount: filtersWithLiveStats?.length || 0,
+    filtersMatchingCriteriaCount: filtersMatchingCriteria?.length || 0,
+    filtersWithLiveStats: filtersWithLiveStats,
+    filtersMatchingCriteria: filtersMatchingCriteria
+  });
   return (
     <div className="flex flex-col h-full">
       <div className="mb-4 flex items-center justify-between">

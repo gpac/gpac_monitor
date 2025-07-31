@@ -5,13 +5,16 @@ import { SessionFilterStatistics } from '@/types/domain/gpac/model';
 
 export function useSessionStats(enabled = true, interval = 1000) {
   const [stats, setStats] = useState<SessionFilterStatistics[]>([]);
+  
   const handleSessionStatsUpdate = useCallback((newStats: SessionFilterStatistics[]) => {
     setStats(newStats);
   }, []);
 
   useEffect(() => {
     if (!enabled) {
-      if (stats.length > 0) setStats([]);
+      if (stats.length > 0) {
+        setStats([]);
+      }
       return;
     }
 
@@ -43,7 +46,9 @@ export function useSessionStats(enabled = true, interval = 1000) {
           unsubscribeFunc();
         }
       } catch (error) {
-        if (isMounted) setStats([]);
+        if (isMounted) {
+          setStats([]);
+        }
       }
     };
 
@@ -60,6 +65,5 @@ export function useSessionStats(enabled = true, interval = 1000) {
   return { 
     stats, 
     isSubscribed: stats.length > 0, 
- 
   };
 }

@@ -28,6 +28,9 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
   monitoredFilters,
   onCardClick,
 }) => {
+  console.log('🔍 [DashboardTabContent] filtersWithLiveStats:', filtersWithLiveStats);
+  console.log('🔍 [DashboardTabContent] filtersMatchingCriteria:', filtersMatchingCriteria);
+  
   return (
     <div className="space-y-4">
       <FiltersGrid
