@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/useMultiFilterMonitor';
+import { useTabManagement } from '@/components/views/stats-session/hooks/useTabManagement';
 import WidgetWrapper from '@/components/common/WidgetWrapper';
 import { WidgetProps } from '@/types/ui/widget';
 import { EnrichedFilterOverview, } from '@/types/domain/gpac/model';
@@ -10,17 +11,18 @@ import { FilterTabContent } from './FilterTabContent';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
+    const [activeTab, setActiveTab] = useState('main');
+    const [monitoredFiltersState, setMonitoredFiltersState] = useState<Map<number, EnrichedFilterOverview>>(new Map());
+    const isDashboardActive = activeTab === "main";
+    const tabsRef = useRef<HTMLDivElement>(null);
+
     const {  isLoading, sessionStats, staticFilters } =
-      useMultiFilterMonitor();
+      useMultiFilterMonitor(isDashboardActive);
 
     const enrichedGraphFilterCollection = useMemo(() => {
       return staticFilters.map(staticFilter => {
-            // Trouver les stats dynamiques correspondantes par idx
         const dynamicStats = sessionStats.find(stat => stat.idx === staticFilter.idx);
-        if (!dynamicStats) {console.log('[****BUG 0**]No dynamic stats found for filter idx:', staticFilter.idx);}
-        
         return {
-          // Données statiques du filtre
           ...staticFilter,
           ipid: Object.fromEntries(
             Object.entries(staticFilter.ipid).map(([key, value]) => [
@@ -34,7 +36,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               { ...value, buffer: 0, buffer_total: 0 }
             ])
           ),
-          // Données dynamiques (priorité aux stats dynamiques si disponibles)
           status: dynamicStats?.status || staticFilter.status,
           bytes_done: dynamicStats?.bytes_done || 0,
           bytes_sent: dynamicStats?.bytes_sent || 0,
@@ -46,36 +47,15 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
         };
       });
     }, [staticFilters, sessionStats]);
-    
- 
-    
-    const [activeTab, setActiveTab] = useState('main');
-    const [monitoredFiltersState, setMonitoredFiltersState] = useState<Map<number, EnrichedFilterOverview>>(new Map());
-    const tabsRef = useRef<HTMLDivElement>(null);
 
-    const handleCardClick = (idx: number) => {
-      const filter = enrichedGraphFilterCollection.find(f => f.idx === idx);
-      if (filter) {
-        setMonitoredFiltersState(prev => {
-          const newMap = new Map(prev);
-          newMap.set(idx, filter);
-          return newMap;
-        });
-        setActiveTab(`filter-${idx}`);
-      }
-    };
-
-    const handleCloseTab = (idx: number, e: React.MouseEvent) => {
-      e.stopPropagation();
-      setMonitoredFiltersState(prev => {
-        const newMap = new Map(prev);
-        newMap.delete(idx);
-        return newMap;
-      });
-      if (activeTab === `filter-${idx}`) {
-        setActiveTab('main');
-      }
-    };
+    const { handleCardClick, handleCloseTab } = useTabManagement({
+      rawFiltersFromServer: enrichedGraphFilterCollection,
+      monitoredFilters: monitoredFiltersState,
+      setMonitoredFilters: setMonitoredFiltersState,
+      activeTab,
+      setActiveTab,
+      tabsRef
+    });
 
     if (isLoading) {
       return (

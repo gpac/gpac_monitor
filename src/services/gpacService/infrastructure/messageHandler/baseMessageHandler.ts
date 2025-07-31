@@ -27,7 +27,8 @@ export class BaseMessageHandler {
     private callbacks: MessageHandlerCallbacks,
     private dependencies: MessageHandlerDependencies,
     private onMessage?: (message: any) => void,
-    private isLoaded?: () => boolean,
+    // @ts-ignore used by sessionStatsHandler
+        private isLoaded?: () => boolean,
   ) {
     // Initialize specialized handlers
     this.sessionStatsHandler = new SessionStatsHandler(dependencies, isLoaded || (() => true));
@@ -123,7 +124,7 @@ export class BaseMessageHandler {
     }
   }
 
-  private handleCpuStatsMessage(data: any): void {
+  private handleCpuStatsMessage(_data: any): void {
     // CPU stats received
   }
 

@@ -17,11 +17,12 @@ interface MultiFilterMonitorState {
   sessionStatsData: SessionFilterStatistics[];
 }
 
-export const useMultiFilterMonitor = (): MultiFilterMonitorState => {
+export const useMultiFilterMonitor = (isDashboardActive: boolean = true): MultiFilterMonitorState => {
   const dispatch = useAppDispatch();
 
-
-  const { stats: sessionStatsData } = useSessionStats(true, 1000);
+  console.log('[useMultiFilterMonitor] isDashboardActive:', isDashboardActive);
+  
+  const { stats: sessionStatsData } = useSessionStats(isDashboardActive, 1000);
 
 
   const isLoading = useAppSelector((state) => state.graph.isLoading);
