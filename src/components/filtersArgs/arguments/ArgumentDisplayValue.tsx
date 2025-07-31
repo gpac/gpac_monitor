@@ -48,5 +48,9 @@ export const ArgumentDisplayValue: React.FC<ArgumentDisplayValueProps> = ({
     return String(val);
   };
 
-  return <span className={isEditable ? 'cursor-pointer' : ''}>{formatValue(value)}</span>;
+  return (
+    <span className={isEditable ? 'cursor-pointer' : ''}>
+      {formatValue(value)}
+    </span>
+  );
 };

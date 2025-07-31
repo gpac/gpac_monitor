@@ -9,7 +9,6 @@ import {
   restoreWidget,
 } from '@/shared/store/slices/widgetsSlice';
 
-
 interface WidgetWrapperProps {
   id: string;
   title: string;
@@ -35,7 +34,7 @@ const WidgetWrapper = ({
   children,
   className = '',
 }: WidgetWrapperProps) => {
-  const dispatch =useAppDispatch();
+  const dispatch = useAppDispatch();
 
   // Memoized widget config
   const config = useAppSelector(
@@ -161,7 +160,9 @@ const WidgetWrapper = ({
       </div>
 
       {!isMinimized && (
-        <div className="flex-1 bg-gray-900 overflow-auto no-drag">{children}</div>
+        <div className="flex-1 bg-gray-900 overflow-auto no-drag">
+          {children}
+        </div>
       )}
     </div>
   );

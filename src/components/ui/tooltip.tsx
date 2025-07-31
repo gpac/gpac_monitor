@@ -32,7 +32,7 @@ interface CustomTooltipProps {
   children: React.ReactNode;
   side?: 'top' | 'right' | 'bottom' | 'left';
   maxWidth?: string;
-  maxHeight?: string; 
+  maxHeight?: string;
 }
 
 export const CustomTooltip: React.FC<CustomTooltipProps> = ({
@@ -47,10 +47,7 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
       <Tooltip>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
         <TooltipContent side={side}>
-          <div
-            className="overflow-y-auto"
-            style={{ maxWidth, maxHeight }}
-          >
+          <div className="overflow-y-auto" style={{ maxWidth, maxHeight }}>
             {content}
           </div>
           <TooltipArrow className="fill-gray-900" />

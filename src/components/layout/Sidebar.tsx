@@ -19,7 +19,7 @@ const availableWidgets = [
     icon: Volume2,
     defaultSize: { w: 4, h: 4 },
   },
- 
+
   {
     type: WidgetType.METRICS,
     title: 'System Metrics',
@@ -75,7 +75,7 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside 
+    <aside
       className="w-64 bg-gray-900 border-r border-gray-800 h-full flex flex-col"
       role="complementary"
       aria-label="Dashboard widgets sidebar"
@@ -84,7 +84,6 @@ const Sidebar: React.FC = () => {
         <h2 className="text-xl font-bold text-white mb-2 tracking-tight">
           Dashboard
         </h2>
-     
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -93,7 +92,7 @@ const Sidebar: React.FC = () => {
             <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
             Available Widgets
           </h3>
-          
+
           <div className="space-y-3">
             {availableWidgets.map((widget) => (
               <button
@@ -114,16 +113,26 @@ const Sidebar: React.FC = () => {
                 <div className="flex-shrink-0 p-1.5 rounded-lg bg-gray-700/50 group-hover:bg-blue-500/20 transition-colors duration-200">
                   <widget.icon className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors duration-200  " />
                 </div>
-                
+
                 <div className="flex-1 text-left">
                   <span className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
                     {widget.title}
                   </span>
                 </div>
-                
+
                 <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  <svg
+                    className="w-4 h-4 text-blue-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                    />
                   </svg>
                 </div>
               </button>
@@ -136,9 +145,9 @@ const Sidebar: React.FC = () => {
             <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
             Layouts
           </h3>
-          
+
           <div className="space-y-3">
-            <button 
+            <button
               className={`
                 w-full p-3 rounded-xl font-medium text-sm
                 bg-gradient-to-r from-blue-600 to-blue-700
@@ -152,15 +161,25 @@ const Sidebar: React.FC = () => {
               aria-label="Save current dashboard layout"
             >
               <span className="flex items-center justify-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"
+                  />
                 </svg>
                 Save Current Layout
               </span>
             </button>
-            
+
             <div className="relative">
-              <select 
+              <select
                 className={`
                   w-full p-3 pr-10 rounded-xl text-sm
                   bg-gray-800 border border-gray-700
@@ -172,14 +191,30 @@ const Sidebar: React.FC = () => {
                 `}
                 aria-label="Load saved dashboard layout"
               >
-                <option value="" className="bg-gray-800">Load Layout...</option>
-                <option value="default" className="bg-gray-800">Default Layout</option>
-                <option value="minimal" className="bg-gray-800">Minimal Layout</option>
+                <option value="" className="bg-gray-800">
+                  Load Layout...
+                </option>
+                <option value="default" className="bg-gray-800">
+                  Default Layout
+                </option>
+                <option value="minimal" className="bg-gray-800">
+                  Minimal Layout
+                </option>
               </select>
-              
+
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
             </div>

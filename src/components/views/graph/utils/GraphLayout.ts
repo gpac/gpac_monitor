@@ -3,7 +3,6 @@ import { Node, Edge, Position } from '@xyflow/react';
 
 export enum LayoutType {
   DAGRE = 'dagre',
- 
 }
 
 export interface LayoutOptions {
@@ -36,7 +35,7 @@ function applyDagreLayout(
     nodesep: options.nodeSeparation || 50,
     ranksep: options.rankSeparation || 100,
     marginx: options.paddingX || 20,
-    marginy: options.paddingY || 20
+    marginy: options.paddingY || 20,
   });
 
   g.setDefaultEdgeLabel(() => ({}));
@@ -118,7 +117,7 @@ export function getLayoutedElements(
   edges: Edge[],
   direction: 'TB' | 'LR' | 'BT' | 'RL' = 'LR',
   nodeWidth: number = 200,
-  nodeHeight: number = 100
+  nodeHeight: number = 100,
 ) {
   const layoutOptions: LayoutOptions = {
     direction,
@@ -127,17 +126,21 @@ export function getLayoutedElements(
   };
 
   // Apply dimensions to nodes if not present
-  const nodesWithDimensions = nodes.map(node => ({
+  const nodesWithDimensions = nodes.map((node) => ({
     ...node,
     style: {
       ...node.style,
       width: node.style?.width || nodeWidth,
       height: node.style?.height || nodeHeight,
-    }
+    },
   }));
 
-  const layoutedNodes = applyDagreLayout(nodesWithDimensions, edges, layoutOptions);
-  
+  const layoutedNodes = applyDagreLayout(
+    nodesWithDimensions,
+    edges,
+    layoutOptions,
+  );
+
   return { nodes: layoutedNodes, edges };
 }
 
@@ -148,22 +151,22 @@ export function getLayoutedElements(
 export function applyTopologicalLayout(
   nodes: Node[],
   edges: Edge[],
-  options: LayoutOptions = {}
+  options: LayoutOptions = {},
 ): Node[] {
   // Build dependency chain using source_idx
   const nodeMap = new Map<string, Node>();
-  nodes.forEach(node => nodeMap.set(node.id, node));
-  
+  nodes.forEach((node) => nodeMap.set(node.id, node));
+
   // Function to calculate depth in dependency chain
   const calculateDepth = (node: Node, visited = new Set<string>()): number => {
     if (visited.has(node.id)) return 0; // Avoid cycles
     visited.add(node.id);
-    
+
     const data = node.data;
-    
+
     // Source nodes (no inputs) are at depth 0
     if (data.nb_ipid === 0) return 0;
-    
+
     // Find maximum depth among all source dependencies
     let maxDepth = 0;
     if (data.ipid) {
@@ -177,20 +180,20 @@ export function applyTopologicalLayout(
         }
       });
     }
-    
+
     return maxDepth + 1;
   };
-  
+
   // Group nodes by depth and organize them for better vertical distribution
   const nodesByDepth = new Map<number, Node[]>();
-  nodes.forEach(node => {
+  nodes.forEach((node) => {
     const depth = calculateDepth(node);
     if (!nodesByDepth.has(depth)) {
       nodesByDepth.set(depth, []);
     }
     nodesByDepth.get(depth)!.push(node);
   });
-  
+
   // Create a more balanced layout by ensuring better vertical spacing
   // Configure dagre for vertical distribution of nodes at same depth
   const dagreOptions: LayoutOptions = {
@@ -199,9 +202,8 @@ export function applyTopologicalLayout(
     nodeSeparation: options.nodeSeparation || 80, // Increased for better vertical spacing
     rankSeparation: options.rankSeparation || 150,
   };
-  
+
   // Apply dagre layout - it will handle the vertical distribution automatically
   // when it processes the dependency graph structure
   return applyDagreLayout(nodes, edges, dagreOptions);
 }
-

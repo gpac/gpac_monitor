@@ -2,9 +2,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { GpacNodeData } from '@/types/domain/gpac';
 
 export interface MonitoredFilter {
-
   nodeData: GpacNodeData;
-  id: GpacNodeData["idx"] | string; // Use idx as id for consistency
+  id: GpacNodeData['idx'] | string; // Use idx as id for consistency
 }
 
 export interface MultifilterState {
@@ -30,7 +29,11 @@ const multiFilterSlice = createSlice({
 
       const filterIdx = action.payload.nodeData.idx.toString();
       // Prevent duplicates by checking idx instead of id
-      if (state.selectedFilters.some((filter) => filter.nodeData.idx.toString() === filterIdx)) {
+      if (
+        state.selectedFilters.some(
+          (filter) => filter.nodeData.idx.toString() === filterIdx,
+        )
+      ) {
         return;
       }
       state.selectedFilters.push({

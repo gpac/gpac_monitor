@@ -1,4 +1,9 @@
-import { GraphFilterData, EnrichedFilterOverview, PIDData, SessionFilterStatistics } from '@/types/domain/gpac';
+import {
+  GraphFilterData,
+  EnrichedFilterOverview,
+  PIDData,
+  SessionFilterStatistics,
+} from '@/types/domain/gpac';
 import { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 
 /**
@@ -7,30 +12,30 @@ import { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
  */
 export function convertGraphFilterToEnriched(
   graphFilter: GraphFilterData,
-  sessionStats?: SessionFilterStats
+  sessionStats?: SessionFilterStats,
 ): EnrichedFilterOverview {
   // Convert ipid from simple structure to PIDData structure
   const enrichedIpid: Record<string, PIDData> = Object.fromEntries(
     Object.entries(graphFilter.ipid).map(([key, value]) => [
-      key, 
-      { 
-        ...value, 
-        buffer: 0, 
-        buffer_total: 0 
-      } as PIDData
-    ])
+      key,
+      {
+        ...value,
+        buffer: 0,
+        buffer_total: 0,
+      } as PIDData,
+    ]),
   );
 
   // Convert opid from simple structure to PIDData structure
   const enrichedOpid: Record<string, PIDData> = Object.fromEntries(
     Object.entries(graphFilter.opid).map(([key, value]) => [
-      key, 
-      { 
-        ...value, 
-        buffer: 0, 
-        buffer_total: 0 
-      } as PIDData
-    ])
+      key,
+      {
+        ...value,
+        buffer: 0,
+        buffer_total: 0,
+      } as PIDData,
+    ]),
   );
 
   return {
@@ -46,11 +51,13 @@ export function convertGraphFilterToEnriched(
     itag: graphFilter.itag,
     ID: graphFilter.ID,
     errors: (graphFilter as any).errors || 0,
-    
+
     // Dynamic data (session statistics if available, otherwise defaults)
     status: sessionStats?.status || graphFilter.status,
-    bytes_done: sessionStats?.bytes_done || (graphFilter as any).bytes_done || 0,
-    bytes_sent: sessionStats?.bytes_sent || (graphFilter as any).bytes_sent || 0,
+    bytes_done:
+      sessionStats?.bytes_done || (graphFilter as any).bytes_done || 0,
+    bytes_sent:
+      sessionStats?.bytes_sent || (graphFilter as any).bytes_sent || 0,
     pck_done: sessionStats?.pck_done || (graphFilter as any).pck_done || 0,
     pck_sent: sessionStats?.pck_sent || (graphFilter as any).pck_sent || 0,
     time: sessionStats?.time || (graphFilter as any).time || 0,
@@ -62,23 +69,25 @@ export function convertGraphFilterToEnriched(
  */
 export function convertGraphFiltersToEnriched(
   graphFilters: GraphFilterData[],
-  sessionStats: Record<string, SessionFilterStats> | SessionFilterStatistics[] = {}
+  sessionStats:
+    | Record<string, SessionFilterStats>
+    | SessionFilterStatistics[] = {},
 ): EnrichedFilterOverview[] {
-  return graphFilters.map(graphFilter => {
+  return graphFilters.map((graphFilter) => {
     let matchingSessionStats: SessionFilterStats | undefined;
-    
+
     if (Array.isArray(sessionStats)) {
       // Find matching SessionFilterStatistics by idx
       matchingSessionStats = sessionStats.find(
-        filterStat => filterStat.idx === graphFilter.idx
+        (filterStat) => filterStat.idx === graphFilter.idx,
       );
     } else {
       // Find matching SessionFilterStats in Record
       matchingSessionStats = Object.values(sessionStats).find(
-        filterStat => filterStat.idx === graphFilter.idx
+        (filterStat) => filterStat.idx === graphFilter.idx,
       );
     }
-    
+
     return convertGraphFilterToEnriched(graphFilter, matchingSessionStats);
   });
 }

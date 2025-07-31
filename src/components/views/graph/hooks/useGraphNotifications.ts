@@ -16,7 +16,7 @@ export const useGraphNotifications = ({
   nodes,
   error,
   isLoading,
-  toast
+  toast,
 }: UseGraphNotificationsProps) => {
   // Notification for successful graph loading
   useEffect(() => {
@@ -39,6 +39,6 @@ export const useGraphNotifications = ({
       });
     }
   }, [error, toast]);
-  
-  return {}; 
+
+  return {};
 };

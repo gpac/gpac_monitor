@@ -17,22 +17,22 @@ export interface FilterMetadata {
   MaxFrameSize?: number;
 }
 
-// PID property 
+// PID property
 export interface PIDPropertyValue {
   type: string;
   val: number | string | TimeFraction;
 }
 
-// Complete PID data 
+// Complete PID data
 export interface PIDData {
   // Direct properties from server
   buffer: number;
   buffer_total: number;
   source_idx?: number;
-  
-  // Properties stored as objects with type/val structure 
+
+  // Properties stored as objects with type/val structure
   [key: string]: PIDPropertyValue | number | string | undefined;
-  
+
   // Common decoded properties for convenience
   codec?: string;
   width?: number;
@@ -47,7 +47,7 @@ export interface TimeFraction {
   d: number;
 }
 
-// Minimal filter data sent on initial connection 
+// Minimal filter data sent on initial connection
 export interface GraphFilterData {
   idx: number;
   name: string;
@@ -87,8 +87,6 @@ export interface CompleteFilterData extends Record<string, unknown> {
   last_ts_sent?: TimeFraction;
 }
 
-
-
 // Dynamic runtime statistics from session monitoring
 
 export interface SessionFilterStatistics extends Record<string, unknown> {
@@ -102,6 +100,18 @@ export interface SessionFilterStatistics extends Record<string, unknown> {
   nb_ipid: number;
   nb_opid: number;
 }
+export interface MonitoredFilterStats {
+  idx: number
+  status: string
+  bytes_done: number
+  bytes_sent: number
+  pck_sent: number
+  pck_done: number
+  time: number
+  nb_ipid: number
+  nb_opid: number
+}
+
 
 // Enriched filter data combining static graph + dynamic session data
 export interface EnrichedFilterOverview extends Record<string, unknown> {
@@ -122,7 +132,7 @@ export interface EnrichedFilterOverview extends Record<string, unknown> {
   codec?: string;
   streamtype?: string;
   last_ts_sent?: TimeFraction;
-  
+
   // Dynamic session data (updated from SessionFilterStatistics)
   status: string;
   bytes_done: number;
@@ -131,7 +141,6 @@ export interface EnrichedFilterOverview extends Record<string, unknown> {
   pck_sent: number;
   time: number;
 }
-
 
 export interface GpacNodeData extends EnrichedFilterOverview {}
 
@@ -153,5 +162,3 @@ export type GpacEdge = Edge<EdgeData>;
 export interface GpacEdgeProps extends EdgeProps<EdgeData> {
   data: EdgeData;
 }
-
-

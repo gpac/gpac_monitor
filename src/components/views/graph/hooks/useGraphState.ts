@@ -7,7 +7,10 @@ import {
   selectIsLoading,
   selectError,
 } from '@/shared/store/selectors/graphSelectors';
-import { updateNodesWithPositions, updateEdgesWithState } from './useGraphMonitor.helpers';
+import {
+  updateNodesWithPositions,
+  updateEdgesWithState,
+} from './useGraphMonitor.helpers';
 
 /**
  * Hook for managing graph state
@@ -15,29 +18,29 @@ import { updateNodesWithPositions, updateEdgesWithState } from './useGraphMonito
  */
 export const useGraphState = (
   nodesRef: MutableRefObject<Node[]>,
-  edgesRef: MutableRefObject<Edge[]>
+  edgesRef: MutableRefObject<Edge[]>,
 ) => {
   // Local connection error state
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  
+
   // Redux selectors
   const reduxNodes = useAppSelector(selectNodesForGraphMonitor);
   const reduxEdges = useAppSelector(selectEdges);
   const isLoading = useAppSelector(selectIsLoading);
   const error = useAppSelector(selectError);
-  
+
   // Performance tracking (debug only)
   const renderCount = useRef(0);
-  
+
   // Transformed nodes and edges with proper positioning and state
   const nodes = useMemo(
     () => updateNodesWithPositions(reduxNodes, nodesRef),
-    [reduxNodes, nodesRef]
+    [reduxNodes, nodesRef],
   );
 
   const edges = useMemo(
     () => updateEdgesWithState(reduxEdges, edgesRef),
-    [reduxEdges, edgesRef]
+    [reduxEdges, edgesRef],
   );
 
   return {
@@ -47,6 +50,6 @@ export const useGraphState = (
     error,
     connectionError,
     setConnectionError,
-    renderCount
+    renderCount,
   };
 };

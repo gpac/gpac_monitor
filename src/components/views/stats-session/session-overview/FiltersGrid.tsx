@@ -11,7 +11,6 @@ interface FiltersGridProps {
   loading: boolean;
   monitoredFilters: Map<number, EnrichedFilterOverview>;
   onCardClick: (filterIndex: number) => void;
-
 }
 
 export const FiltersGrid: React.FC<FiltersGridProps> = ({
@@ -20,14 +19,13 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
   loading,
   monitoredFilters,
   onCardClick,
-
 }) => {
   // DEBUG: Log pour comprendre pourquoi seulement 2 filtres s'affichent
   console.log('[FiltersGrid] Props:', {
     filtersWithLiveStatsCount: filtersWithLiveStats?.length || 0,
     filtersMatchingCriteriaCount: filtersMatchingCriteria?.length || 0,
     filtersWithLiveStats: filtersWithLiveStats,
-    filtersMatchingCriteria: filtersMatchingCriteria
+    filtersMatchingCriteria: filtersMatchingCriteria,
   });
   return (
     <div className="flex flex-col h-full">
@@ -38,11 +36,7 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
             {filtersMatchingCriteria.length}
           </Badge>
         </h2>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          disabled={loading}
-        >
+        <Button variant="outline" size="sm" disabled={loading}>
           {loading ? 'Loading...' : 'Refresh'}
         </Button>
       </div>
@@ -52,10 +46,16 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filtersWithLiveStats.map((enrichedFilterOverview) => (
               <FilterStatCard
-                key={enrichedFilterOverview.idx || enrichedFilterOverview.ID || enrichedFilterOverview.name}
+                key={
+                  enrichedFilterOverview.idx ||
+                  enrichedFilterOverview.ID ||
+                  enrichedFilterOverview.name
+                }
                 filter={enrichedFilterOverview}
                 onClick={onCardClick}
-                isMonitored={monitoredFilters.has(enrichedFilterOverview.idx || -1)}
+                isMonitored={monitoredFilters.has(
+                  enrichedFilterOverview.idx || -1,
+                )}
               />
             ))}
           </div>
@@ -64,7 +64,6 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
             <div className="text-center space-y-4 p-8">
               <div className="rounded-lg border bg-card/50 p-8 shadow-sm">
                 <h3 className="text-lg font-medium mb-2">No filters found</h3>
-               
               </div>
             </div>
           </div>

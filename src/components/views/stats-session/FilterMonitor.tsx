@@ -1,12 +1,8 @@
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 
-
 import { WidgetProps } from '../../../types/ui/widget';
-import {
-  MetricCardProps,
-
-} from './types';
+import { MetricCardProps } from './types';
 import WidgetWrapper from '../../common/WidgetWrapper';
 
 import { formatBytes } from '../../../utils/filterMonitorUtils';
@@ -36,19 +32,14 @@ const MetricCard: React.FC<MetricCardProps> = ({
   </div>
 );
 
-
 const FilterMonitor: React.FC<WidgetProps> = ({ id, title }) => {
   const dispatch = useAppDispatch();
   const selectedFilter = useAppSelector(
-    (state ) => state.graph.selectedFilterDetails,
+    (state) => state.graph.selectedFilterDetails,
   );
-
 
   useEffect(() => {
     if (selectedFilter) {
-
-
-
     }
   }, [selectedFilter, dispatch]);
 
@@ -103,8 +94,6 @@ const FilterMonitor: React.FC<WidgetProps> = ({ id, title }) => {
             className="bg-yellow-900/20"
           />
         </div>
-
-
       </div>
     </WidgetWrapper>
   );

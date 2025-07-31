@@ -16,7 +16,7 @@ export type GpacMessageType =
   | 'subscribe_session'
   | 'unsubscribe_session'
   | 'subscribe_cpu_stats'
-  | 'unsubscribe_cpu_stats'
+  | 'unsubscribe_cpu_stats';
 
 /**
  * Base message structure for GPAC communication.

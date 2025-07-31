@@ -1,13 +1,15 @@
-import type { EnrichedFilterOverview } from "@/types/domain/gpac/model"
-import { useCallback } from "react"
+import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
+import { useCallback } from 'react';
 
 interface UseTabManagementProps {
-  rawFiltersFromServer: EnrichedFilterOverview[]
-  monitoredFilters: Map<number, EnrichedFilterOverview>
-  setMonitoredFilters: React.Dispatch<React.SetStateAction<Map<number, EnrichedFilterOverview>>>
-  activeTab: string
-  setActiveTab: React.Dispatch<React.SetStateAction<string>>
-  tabsRef: React.RefObject<HTMLDivElement>
+  rawFiltersFromServer: EnrichedFilterOverview[];
+  monitoredFilters: Map<number, EnrichedFilterOverview>;
+  setMonitoredFilters: React.Dispatch<
+    React.SetStateAction<Map<number, EnrichedFilterOverview>>
+  >;
+  activeTab: string;
+  setActiveTab: React.Dispatch<React.SetStateAction<string>>;
+  tabsRef: React.RefObject<HTMLDivElement>;
 }
 
 export const useTabManagement = ({
@@ -16,57 +18,68 @@ export const useTabManagement = ({
   setMonitoredFilters,
   activeTab,
   setActiveTab,
-  tabsRef
+  tabsRef,
 }: UseTabManagementProps) => {
   const handleCardClick = useCallback(
     (idx: number) => {
       if (monitoredFilters.has(idx)) {
-        setActiveTab(`filter-${idx}`)
+        setActiveTab(`filter-${idx}`);
         setTimeout(() => {
-          const tabElement = tabsRef.current?.querySelector(`[data-value="filter-${idx}"]`) as HTMLButtonElement
+          const tabElement = tabsRef.current?.querySelector(
+            `[data-value="filter-${idx}"]`,
+          ) as HTMLButtonElement;
           if (tabElement) {
-            tabElement.click()
+            tabElement.click();
           }
-        }, 0)
+        }, 0);
       } else {
-        const filter = rawFiltersFromServer.find((f) => f.idx === idx)
+        const filter = rawFiltersFromServer.find((f) => f.idx === idx);
         if (filter) {
           setMonitoredFilters((prev) => {
-            const newMap = new Map(prev)
-            newMap.set(idx, filter)
-            return newMap
-          })
+            const newMap = new Map(prev);
+            newMap.set(idx, filter);
+            return newMap;
+          });
           setTimeout(() => {
-            setActiveTab(`filter-${idx}`)
-          }, 0)
+            setActiveTab(`filter-${idx}`);
+          }, 0);
         }
       }
     },
-    [monitoredFilters, setActiveTab, setMonitoredFilters, tabsRef, rawFiltersFromServer, activeTab]
-  )
+    [
+      monitoredFilters,
+      setActiveTab,
+      setMonitoredFilters,
+      tabsRef,
+      rawFiltersFromServer,
+      activeTab,
+    ],
+  );
 
   const handleCloseTab = useCallback(
     (idx: number, e: React.MouseEvent) => {
-      e.stopPropagation()
+      e.stopPropagation();
       setMonitoredFilters((prev) => {
-        const newMap = new Map(prev)
-        newMap.delete(idx)
-        return newMap
-      })
+        const newMap = new Map(prev);
+        newMap.delete(idx);
+        return newMap;
+      });
       setTimeout(() => {
         if (activeTab === `filter-${idx}`) {
-          const mainTabElement = tabsRef.current?.querySelector('[data-value="main"]') as HTMLButtonElement
+          const mainTabElement = tabsRef.current?.querySelector(
+            '[data-value="main"]',
+          ) as HTMLButtonElement;
           if (mainTabElement) {
-            mainTabElement.click()
+            mainTabElement.click();
           }
         }
-      }, 0)
+      }, 0);
       if (activeTab === `filter-${idx}`) {
-        setActiveTab("main")
+        setActiveTab('main');
       }
     },
-    [activeTab, setActiveTab, setMonitoredFilters, tabsRef]
-  )
+    [activeTab, setActiveTab, setMonitoredFilters, tabsRef],
+  );
 
-  return { handleCardClick, handleCloseTab }
-}
+  return { handleCardClick, handleCloseTab };
+};

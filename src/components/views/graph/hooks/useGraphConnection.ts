@@ -9,11 +9,8 @@ import { IGpacMessageHandler } from '@/types/communication';
 import { setError, setLoading } from '@/shared/store/slices/graphSlice';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 
-
 interface UseGraphConnectionProps {
-
   setConnectionError: (error: string | null) => void;
-
 }
 
 /**
@@ -23,12 +20,11 @@ interface UseGraphConnectionProps {
 export const useGraphConnection = ({
   setConnectionError,
 }: UseGraphConnectionProps) => {
-
   const dispatch = useAppDispatch();
   const service = useGpacService();
   // Track connection state internally
   const [isConnected, setIsConnected] = useState(false);
-  
+
   // Use service directly as IGpacCommunication
   const communication = useMemo(() => {
     return service;
@@ -50,7 +46,7 @@ export const useGraphConnection = ({
         dispatch(setError(gpacError.message));
       },
     }),
-    [dispatch, setConnectionError]
+    [dispatch, setConnectionError],
   );
 
   // Register message handler - do this outside the connection effect
@@ -66,45 +62,48 @@ export const useGraphConnection = ({
   // Separate effect for establishing connection
   useEffect(() => {
     let isMounted = true;
-    
+
     // Try to connect to the service
     const connectToService = async () => {
       try {
         console.log('[useGraphConnection] Checking existing connection...');
-        
+
         // Check if already connected to avoid multiple connections
         if (service.isConnected()) {
-          console.log('[useGraphConnection] Already connected, skipping connection attempt');
+          console.log(
+            '[useGraphConnection] Already connected, skipping connection attempt',
+          );
           if (isMounted) {
             setConnectionError(null);
             setIsConnected(true);
           }
           return;
         }
-        
+
         console.log('[useGraphConnection] Connecting to GPAC...');
         await service.connectService();
-        
+
         if (isMounted) {
           console.log('[useGraphConnection] Connected to GPAC');
           setConnectionError(null);
         }
       } catch (error) {
         if (isMounted) {
-          const errorMessage = error instanceof Error ? error.message : 'Unknown connection error';
+          const errorMessage =
+            error instanceof Error ? error.message : 'Unknown connection error';
           console.error('[useGraphConnection] Connection error:', errorMessage);
           setConnectionError(errorMessage);
         }
       }
     };
-    
+
     // Start connection
     connectToService();
-    
+
     // Cleanup function
     return () => {
       isMounted = false;
-      
+
       // Only disconnect if we were connected
       if (isConnected) {
         try {
@@ -120,9 +119,10 @@ export const useGraphConnection = ({
   // Function to retry connection
   const retryConnection = useCallback(() => {
     setConnectionError(null);
-    
+
     try {
-      service.connectService()
+      service
+        .connectService()
         .then(() => {
           console.log('[useGraphConnection] Retry connection success');
           setConnectionError(null);
@@ -132,11 +132,15 @@ export const useGraphConnection = ({
           setConnectionError(err.message);
         });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to retry connection';
-      console.error('[useGraphConnection] Error initiating retry:', errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to retry connection';
+      console.error(
+        '[useGraphConnection] Error initiating retry:',
+        errorMessage,
+      );
       setConnectionError(errorMessage);
     }
   }, [communication, setConnectionError]);
-  
+
   return { retryConnection, isConnected };
 };

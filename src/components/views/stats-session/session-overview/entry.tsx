@@ -3,7 +3,7 @@ import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/us
 import { useTabManagement } from '@/components/views/stats-session/hooks/useTabManagement';
 import WidgetWrapper from '@/components/common/WidgetWrapper';
 import { WidgetProps } from '@/types/ui/widget';
-import { EnrichedFilterOverview, } from '@/types/domain/gpac/model';
+import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { StatsTabs } from './StatsTabs';
 import { DashboardTabContent } from './DashboardTabContent';
@@ -12,29 +12,33 @@ import { FilterTabContent } from './FilterTabContent';
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
     const [activeTab, setActiveTab] = useState('main');
-    const [monitoredFiltersState, setMonitoredFiltersState] = useState<Map<number, EnrichedFilterOverview>>(new Map());
-    const isDashboardActive = activeTab === "main";
+    const [monitoredFiltersState, setMonitoredFiltersState] = useState<
+      Map<number, EnrichedFilterOverview>
+    >(new Map());
+    const isDashboardActive = activeTab === 'main';
     const tabsRef = useRef<HTMLDivElement>(null);
 
-    const {  isLoading, sessionStats, staticFilters } =
+    const { isLoading, sessionStats, staticFilters } =
       useMultiFilterMonitor(isDashboardActive);
 
     const enrichedGraphFilterCollection = useMemo(() => {
-      return staticFilters.map(staticFilter => {
-        const dynamicStats = sessionStats.find(stat => stat.idx === staticFilter.idx);
+      return staticFilters.map((staticFilter) => {
+        const dynamicStats = sessionStats.find(
+          (stat) => stat.idx === staticFilter.idx,
+        );
         return {
           ...staticFilter,
           ipid: Object.fromEntries(
             Object.entries(staticFilter.ipid).map(([key, value]) => [
-              key, 
-              { ...value, buffer: 0, buffer_total: 0 }
-            ])
+              key,
+              { ...value, buffer: 0, buffer_total: 0 },
+            ]),
           ),
           opid: Object.fromEntries(
             Object.entries(staticFilter.opid).map(([key, value]) => [
-              key, 
-              { ...value, buffer: 0, buffer_total: 0 }
-            ])
+              key,
+              { ...value, buffer: 0, buffer_total: 0 },
+            ]),
           ),
           status: dynamicStats?.status || staticFilter.status,
           bytes_done: dynamicStats?.bytes_done || 0,
@@ -54,7 +58,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       setMonitoredFilters: setMonitoredFiltersState,
       activeTab,
       setActiveTab,
-      tabsRef
+      tabsRef,
     });
 
     if (isLoading) {
@@ -69,22 +73,25 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
     if (staticFilters.length === 0) {
       return (
-      <WidgetWrapper id={id} title={title}>
-        <div className="flex flex-col items-center justify-center h-full p-4 text-gray-400">
-        <p>No filters available</p>
-        <p className="text-sm mt-2">
-          Waiting
-                Waiting for graph construction...
-              </p>
-            </div>
-          </WidgetWrapper>
-        );
-      }
+        <WidgetWrapper id={id} title={title}>
+          <div className="flex flex-col items-center justify-center h-full p-4 text-gray-400">
+            <p>No filters available</p>
+            <p className="text-sm mt-2">
+              Waiting Waiting for graph construction...
+            </p>
+          </div>
+        </WidgetWrapper>
+      );
+    }
 
     return (
       <WidgetWrapper id={id} title="Session-stats Overview">
         <div className="h-full">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="h-full flex flex-col"
+          >
             <StatsTabs
               activeTab={activeTab}
               onValueChange={setActiveTab}
@@ -92,13 +99,21 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               onCloseTab={handleCloseTab}
               tabsRef={tabsRef}
             />
-            
+
             <TabsContent value="main" className="flex-1 p-4">
               <DashboardTabContent
                 systemStats={{
-                  activeFilters: enrichedGraphFilterCollection.filter(f => f.status === 'active').length,
-                  totalBytes: enrichedGraphFilterCollection.reduce((sum, f) => sum + f.bytes_done, 0),
-                  totalPackets: enrichedGraphFilterCollection.reduce((sum, f) => sum + f.pck_done, 0)
+                  activeFilters: enrichedGraphFilterCollection.filter(
+                    (f) => f.status === 'active',
+                  ).length,
+                  totalBytes: enrichedGraphFilterCollection.reduce(
+                    (sum, f) => sum + f.bytes_done,
+                    0,
+                  ),
+                  totalPackets: enrichedGraphFilterCollection.reduce(
+                    (sum, f) => sum + f.pck_done,
+                    0,
+                  ),
                 }}
                 filtersWithLiveStats={enrichedGraphFilterCollection}
                 filtersMatchingCriteria={enrichedGraphFilterCollection}
@@ -109,15 +124,21 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               />
             </TabsContent>
 
-            {Array.from(monitoredFiltersState.entries()).map(([idx, filter]) => (
-              <TabsContent key={`filter-${idx}`} value={`filter-${idx}`} className="flex-1">
-                <FilterTabContent
-                  filter={filter}
-                  onCardClick={handleCardClick}
-                  isMonitored={true}
-                />
-              </TabsContent>
-            ))}
+            {Array.from(monitoredFiltersState.entries()).map(
+              ([idx, filter]) => (
+                <TabsContent
+                  key={`filter-${idx}`}
+                  value={`filter-${idx}`}
+                  className="flex-1"
+                >
+                  <FilterTabContent
+                    filter={filter}
+                    onCardClick={handleCardClick}
+                    isMonitored={true}
+                  />
+                </TabsContent>
+              ),
+            )}
           </Tabs>
         </div>
       </WidgetWrapper>

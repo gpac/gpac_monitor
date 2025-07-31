@@ -1,5 +1,5 @@
 import { FilterType, GraphFilterData } from '@/types/domain/gpac';
-import { Node, Edge, MarkerType  } from '@xyflow/react';
+import { Node, Edge, MarkerType } from '@xyflow/react';
 
 const determineFilterType = (
   filterName: string,
@@ -43,8 +43,6 @@ const getFilterColor = (filterType: FilterType): string => {
   return colors[filterType];
 };
 
-
-
 // Create a node from a filter object
 export function createNodeFromFilter(
   filter: GraphFilterData,
@@ -59,61 +57,69 @@ export function createNodeFromFilter(
 
   // Calculate topological position if allFilters is provided
   let topologicalX = 150 + index * 300; // Default fallback
-  
+
   if (allFilters) {
     // Calculate dependency depth for proper ordering
-    const calculateDepth = (currentFilter: GraphFilterData, visited = new Set<number>()): number => {
+    const calculateDepth = (
+      currentFilter: GraphFilterData,
+      visited = new Set<number>(),
+    ): number => {
       if (visited.has(currentFilter.idx)) return 0; // Avoid cycles
       visited.add(currentFilter.idx);
-      
+
       // Source nodes (no inputs) are at depth 0
       if (currentFilter.nb_ipid === 0) return 0;
-      
+
       // Find maximum depth among all source dependencies
       let maxDepth = 0;
       if (currentFilter.ipid) {
         Object.values(currentFilter.ipid).forEach((pid: any) => {
           if (pid.source_idx !== undefined && pid.source_idx !== null) {
-            const sourceFilter = allFilters.find(f => f.idx === pid.source_idx);
+            const sourceFilter = allFilters.find(
+              (f) => f.idx === pid.source_idx,
+            );
             if (sourceFilter && !visited.has(sourceFilter.idx)) {
-              const sourceDepth = calculateDepth(sourceFilter, new Set(visited));
+              const sourceDepth = calculateDepth(
+                sourceFilter,
+                new Set(visited),
+              );
               maxDepth = Math.max(maxDepth, sourceDepth);
             }
           }
         });
       }
-      
+
       return maxDepth + 1;
     };
-    
+
     // Sort filters by dependency depth for correct ordering
     const sortedFilters = [...allFilters].sort((a, b) => {
       const depthA = calculateDepth(a);
       const depthB = calculateDepth(b);
-      
+
       if (depthA !== depthB) return depthA - depthB;
       return a.idx - b.idx; // Stable sort by idx
     });
-    
+
     // Find the position of current filter in sorted array
-    const sortedIndex = sortedFilters.findIndex(f => f.idx === filter.idx);
+    const sortedIndex = sortedFilters.findIndex((f) => f.idx === filter.idx);
     topologicalX = 150 + sortedIndex * 300;
   }
-  
+
   return {
     id: filter.idx.toString(),
-    type: 'gpacer', 
+    type: 'gpacer',
     data: {
       label: filter.name,
       filterType,
       ...filter,
     },
-    
+
     position: existingNode?.position || {
       x: topologicalX,
       y: 100,
     },
-    
+
     className: `transition-all duration-200 ${
       existingNode?.selected
         ? 'ring-2 ring-offset-2 ring-blue-500 shadow-lg scale-105'
@@ -121,12 +127,10 @@ export function createNodeFromFilter(
     }`,
 
     selected: existingNode?.selected,
-    
 
     style: {
       width: 220,
-      height: 'auto', 
-      
+      height: 'auto',
     },
   };
 }
@@ -148,9 +152,9 @@ export function createEdgesFromFilters(
           const filterColor = getFilterColor(filterType);
 
           // Precise mapping of sourceHandle
-          const sourceFilter = filters.find(f => f.idx === pid.source_idx);
+          const sourceFilter = filters.find((f) => f.idx === pid.source_idx);
           let sourceHandle: string | undefined;
-          
+
           if (sourceFilter?.opid) {
             // If the PID has an explicit source_pid
             if (pid.source_pid) {
@@ -162,12 +166,14 @@ export function createEdgesFromFilters(
             }
             // Search by similar name
             else {
-              const matchingOutputPid = Object.keys(sourceFilter.opid).find(opid => 
-                opid === pidName || 
-                opid.includes(pidName) || 
-                pidName.includes(opid)
+              const matchingOutputPid = Object.keys(sourceFilter.opid).find(
+                (opid) =>
+                  opid === pidName ||
+                  opid.includes(pidName) ||
+                  pidName.includes(opid),
               );
-              sourceHandle = matchingOutputPid || Object.keys(sourceFilter.opid)[0];
+              sourceHandle =
+                matchingOutputPid || Object.keys(sourceFilter.opid)[0];
             }
           }
 
@@ -201,16 +207,16 @@ export function createEdgesFromFilters(
       });
     }
   });
-console.log('New edges created:', newEdges);
+  console.log('New edges created:', newEdges);
   return newEdges;
 }
 
 // Helper function to create nodes with proper topological ordering
 export function createNodesFromFilters(
   filters: GraphFilterData[],
-  existingNodes: Node[] = []
+  existingNodes: Node[] = [],
 ): Node[] {
-  return filters.map((filter, index) => 
-    createNodeFromFilter(filter, index, existingNodes, filters)
+  return filters.map((filter, index) =>
+    createNodeFromFilter(filter, index, existingNodes, filters),
   );
 }

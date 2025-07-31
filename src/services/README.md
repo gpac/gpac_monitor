@@ -13,21 +13,25 @@ The services are organized into two main modules:
 A complete WebSocket-based service for GPAC media framework communication with modular architecture:
 
 #### Core Structure
+
 - **`gpacService.ts`** - Main singleton service class
 - **`config.ts`** - Configuration constants and WebSocket settings
 - **`types.ts`** - TypeScript interfaces and type definitions
 - **`index.ts`** - Public API exports
 
 #### Infrastructure Layer (`/infrastructure/`)
+
 - **`connectionManager.ts`** - WebSocket connection and reconnection logic with exponential backoff
 - **`messageHandler.ts`** - Incoming message processing and routing to appropriate handlers
 - **`subscriptionManager.ts`** - Filter and statistics subscription management
 
 #### Core Logic (`/core/`)
+
 - **`gpacCore.ts`** - Core GPAC protocol implementation and message handling
 - **`types.ts`** - Core type definitions for GPAC communication
 
 #### Integration Layer (`/integration/`)
+
 - **`storeIntegration.ts`** - Redux store integration for automatic state updates
 
 ### 🔗 WebSocket Services (`/ws/`)
@@ -60,7 +64,7 @@ gpacService.subscribeToSessionStats();
 gpacService.setNotificationHandlers({
   onError: (error) => console.error('GPAC Error:', error),
   onFilterUpdate: (filter) => console.log('Filter updated:', filter),
-  onConnectionStatus: (connected) => console.log('Connected:', connected)
+  onConnectionStatus: (connected) => console.log('Connected:', connected),
 });
 ```
 
@@ -77,6 +81,7 @@ ws.send({ type: 'ping' });
 ## Configuration
 
 ### GPAC Service Configuration
+
 Located in `gpacService/config.ts`:
 
 ```typescript
@@ -93,14 +98,16 @@ export const WS_CONFIG = {
 The services handle these primary message categories:
 
 ### GPAC Protocol Messages
+
 - **`filters`** - Complete filter graph data
-- **`update`** - Filter graph updates  
+- **`update`** - Filter graph updates
 - **`details`** - Detailed filter information
 - **`session_stats`** - Session statistics
 - **`cpu_stats`** - CPU usage statistics
 - **`filter_stats`** - Individual filter metrics
 
 ### WebSocket Control Messages
+
 - Connection status updates
 - Subscription confirmations
 - Error notifications
@@ -117,11 +124,13 @@ The services handle these primary message categories:
 ## Integration Points
 
 ### Redux Store Integration
+
 - Automatic state updates through `storeIntegration.ts`
 - Type-safe action dispatching
 - Centralized state management for UI components
 
 ### React Component Integration
+
 ```typescript
 // Through custom hooks
 const { isConnected, filters } = useGpacService();
@@ -153,19 +162,22 @@ const messageHandler = new MessageHandler(/* dependencies */);
 ### Code Organization
 
 - **Separation of Concerns** - Clear boundaries between infrastructure, core logic, and integration
-- **Dependency Injection** - Testable components with injected dependencies  
+- **Dependency Injection** - Testable components with injected dependencies
 - **Type Safety** - Comprehensive TypeScript coverage
 - **Error Boundaries** - Isolated error handling at each layer
 
 ## Monitoring & Debugging
 
 ### Debug Logging
+
 Enable detailed service logging:
+
 ```javascript
 localStorage.setItem('debug', 'services:*');
 ```
 
 ### Connection Monitoring
+
 - Real-time connection status in Redux store
 - WebSocket state tracking
 - Reconnection attempt logging

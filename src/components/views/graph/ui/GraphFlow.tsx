@@ -1,4 +1,4 @@
-import React, { memo, useCallback,  } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -11,14 +11,10 @@ import {
   useViewport,
   NodeChange,
   EdgeChange,
-
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import Legend from '../../../common/Legend';
 import { CustomNode } from '../../../views/graph/ui/CustomNode';
-
-
-
 
 interface GraphFlowProps {
   nodes: Node[];
@@ -34,9 +30,7 @@ const flowStyles = {
   height: '100%',
 };
 const nodeTypes = {
-  gpacer: CustomNode, 
-
-  
+  gpacer: CustomNode,
 };
 
 const GraphFlow: React.FC<GraphFlowProps> = ({
@@ -48,7 +42,6 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
 }) => {
   const { setViewport } = useReactFlow();
   const { zoom } = useViewport();
-  
 
   const handleMiniMapDrag = useCallback(
     (event: React.DragEvent<SVGSVGElement>) => {
@@ -69,7 +62,6 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
     },
     [setViewport, zoom],
   );
-
 
   return (
     <div style={flowStyles}>
@@ -116,8 +108,6 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         {/* Légende */}
         <Legend />
       </ReactFlow>
-      
- 
     </div>
   );
 };

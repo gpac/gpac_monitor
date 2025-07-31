@@ -57,8 +57,8 @@ const graphSlice = createSlice({
         const newEdges = createEdgesFromFilters(action.payload, []);
         state.nodes.length = 0;
         state.edges.length = 0;
-        newNodes.forEach(node => state.nodes.push(node as any));
-        newEdges.forEach(edge => state.edges.push(edge as any));
+        newNodes.forEach((node) => state.nodes.push(node as any));
+        newEdges.forEach((edge) => state.edges.push(edge as any));
         state.lastUpdate = Date.now();
       },
       prepare: throttle(
@@ -86,7 +86,10 @@ const graphSlice = createSlice({
         state.selectedNodeId = action.payload;
       }
     },
-    setFilterDetails: (state, action: PayloadAction<GraphFilterData | null>) => {
+    setFilterDetails: (
+      state,
+      action: PayloadAction<GraphFilterData | null>,
+    ) => {
       console.log('[GraphSlice] Updating filter details:', action.payload);
       state.selectedFilterDetails = action.payload;
     },
@@ -97,7 +100,10 @@ const graphSlice = createSlice({
     clearFilterDetails: (state) => {
       state.selectedFilterDetails = null;
     },
-    setSelectedFilterDetails: (state, action: PayloadAction<GraphFilterData>) => {
+    setSelectedFilterDetails: (
+      state,
+      action: PayloadAction<GraphFilterData>,
+    ) => {
       state.selectedFilterDetails = action.payload;
       console.log('DETAILS DU FILTRE SÉLECTIONNÉ :', action.payload);
     },

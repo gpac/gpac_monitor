@@ -71,7 +71,7 @@ export class WebSocketBase {
         this.socket.onmessage = (event: MessageEvent) => {
           try {
             let data: string;
-            
+
             // Handle different message formats
             if (event.data instanceof ArrayBuffer) {
               const dataView = new DataView(event.data);
@@ -87,15 +87,19 @@ export class WebSocketBase {
               console.log('[WebSocket] Processing JSON message');
               const parsedData = MessageFormatter.parseReceived(data);
               const dataView = MessageFormatter.createDataView(parsedData);
-              
+
               const handlerKey = data.startsWith('json:') ? 'json:' : 'json';
               this.callMessageHandlers(handlerKey, dataView);
               return;
             }
 
             // Legacy format handling for compatibility
-            const dataView = new DataView(event.data instanceof ArrayBuffer ? event.data : new TextEncoder().encode(data).buffer);
-            
+            const dataView = new DataView(
+              event.data instanceof ArrayBuffer
+                ? event.data
+                : new TextEncoder().encode(data).buffer,
+            );
+
             if (dataView.byteLength >= 4) {
               const id = String.fromCharCode(
                 dataView.getInt8(0),
@@ -115,9 +119,10 @@ export class WebSocketBase {
             this.callMessageHandlers('__default__', dataView);
           } catch (error) {
             console.error('[WebSocket] Error processing message:', error);
-            const errorDataView = event.data instanceof ArrayBuffer 
-              ? new DataView(event.data) 
-              : new DataView(new TextEncoder().encode(event.data).buffer);
+            const errorDataView =
+              event.data instanceof ArrayBuffer
+                ? new DataView(event.data)
+                : new DataView(new TextEncoder().encode(event.data).buffer);
             this.callMessageHandlers('__default__', errorDataView);
           }
         };
@@ -126,7 +131,10 @@ export class WebSocketBase {
           console.log(
             `[WebSocket] Connection closed: Code=${event.code}, Clean=${event.wasClean}, Reason=${event.reason || 'No reason provided'}`,
           );
-          WebSocketNotificationService.onDisconnected(event.reason, event.wasClean);
+          WebSocketNotificationService.onDisconnected(
+            event.reason,
+            event.wasClean,
+          );
           this.socket = null;
           this.callMessageHandlers(
             '__OnDisconnect__',

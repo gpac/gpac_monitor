@@ -34,13 +34,8 @@ const WIDGET_COMPONENTS: Record<
 };
 
 const DashboardLayout: React.FC = () => {
-  
-
-
   const dispatch = useAppDispatch();
-  const activeWidgets = useAppSelector(
-    (state) => state.widgets.activeWidgets,
-  );
+  const activeWidgets = useAppSelector((state) => state.widgets.activeWidgets);
   const configs = useAppSelector((state) => state.widgets.configs);
 
   const layouts: RGLLayouts = {

@@ -7,7 +7,6 @@ import { gpacService } from '@/services/gpacService';
 export const useGpacService = () => {
   // Define the type based on the actual instance
   type GpacService = typeof gpacService;
-  
 
   return gpacService as GpacService;
 };

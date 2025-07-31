@@ -10,7 +10,7 @@ The service is split into specialized modules for better maintainability:
 
 - **`GpacService`** - Main singleton service class
 - **`ConnectionManager`** - WebSocket connection and reconnection logic
-- **`SubscriptionManager`** - Filter and statistics subscription handling  
+- **`SubscriptionManager`** - Filter and statistics subscription handling
 - **`MessageHandler`** - Incoming message processing and routing
 - **`config.ts`** - Configuration constants
 - **`types.ts`** - TypeScript interfaces and types
@@ -36,15 +36,15 @@ gpacService.disconnect();
 
 ```typescript
 // Send messages to GPAC server
-gpacService.sendMessage({ 
-  type: 'get_all_filters' 
+gpacService.sendMessage({
+  type: 'get_all_filters',
 });
 
 // Set up notification handlers
 gpacService.setNotificationHandlers({
   onError: (error) => console.error('GPAC Error:', error),
   onFilterUpdate: (filter) => console.log('Filter updated:', filter),
-  onConnectionStatus: (connected) => console.log('Connected:', connected)
+  onConnectionStatus: (connected) => console.log('Connected:', connected),
 });
 ```
 
@@ -83,7 +83,7 @@ export const WS_CONFIG = {
 The service handles these GPAC message types:
 
 - **`filters`** - Complete filter graph data
-- **`update`** - Filter graph updates  
+- **`update`** - Filter graph updates
 - **`details`** - Detailed filter information
 - **`session_stats`** - Session statistics
 - **`cpu_stats`** - CPU usage statistics
@@ -121,7 +121,7 @@ The modular architecture allows easy unit testing of individual components:
 // Test connection logic
 const connectionManager = new ConnectionManager(mockWs, 'ws://test');
 
-// Test subscription handling  
+// Test subscription handling
 const subscriptionManager = new SubscriptionManager(mockSendMessage);
 
 // Test message processing

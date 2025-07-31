@@ -18,7 +18,7 @@ import { Badge } from '../ui/badge';
 import {
   selectArgumentUpdate,
   updateFilterArgument,
-} from'@/shared/store/slices/filterArgumentSlice';
+} from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 
 interface FilterArgumentsDialogProps {
@@ -34,7 +34,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useAppDispatch();
 
-  const argumentUpdates = useAppSelector((state ) =>
+  const argumentUpdates = useAppSelector((state) =>
     filter.gpac_args?.reduce(
       (acc, arg) => {
         acc[arg.name] = selectArgumentUpdate(

@@ -18,7 +18,8 @@ interface GenericInputProps {
   debounceMs?: number;
 }
 
-const INPUT_STYLES = "bg-gray-700 border-gray-600 hover:bg-gray-600/50 focus:ring-blue-500";
+const INPUT_STYLES =
+  'bg-gray-700 border-gray-600 hover:bg-gray-600/50 focus:ring-blue-500';
 
 export const GenericInput: React.FC<GenericInputProps> = ({
   type,
@@ -28,7 +29,9 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   debounce = false,
   debounceMs = 1000,
 }) => {
-  const [localValue, setLocalValue] = useState(value ?? (type === 'string' ? '' : type === 'number' ? null : false));
+  const [localValue, setLocalValue] = useState(
+    value ?? (type === 'string' ? '' : type === 'number' ? null : false),
+  );
   const firstRender = useFirstMountState();
 
   useDebounce(
@@ -37,12 +40,14 @@ export const GenericInput: React.FC<GenericInputProps> = ({
       onChange(localValue);
     },
     debounceMs,
-    [localValue]
+    [localValue],
   );
 
   useEffect(() => {
     if (!debounce) return;
-    setLocalValue(value ?? (type === 'string' ? '' : type === 'number' ? null : false));
+    setLocalValue(
+      value ?? (type === 'string' ? '' : type === 'number' ? null : false),
+    );
   }, [value, type, debounce]);
 
   const handleChange = (newValue: any) => {
@@ -55,7 +60,9 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   if (type === 'boolean') {
     return (
       <Switch
-        checked={debounce ? (localValue as boolean) : (value as boolean) || false}
+        checked={
+          debounce ? (localValue as boolean) : (value as boolean) || false
+        }
         onCheckedChange={handleChange}
         disabled={rules?.disabled}
         className="data-[state=checked]:bg-blue-600"

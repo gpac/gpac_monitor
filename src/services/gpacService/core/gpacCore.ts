@@ -1,5 +1,8 @@
-import { IGpacCommunication ,ConnectionStatus, IGpacMessageHandler } from '@/types';
-
+import {
+  IGpacCommunication,
+  ConnectionStatus,
+  IGpacMessageHandler,
+} from '@/types';
 
 export class GpacCoreService implements IGpacCommunication {
   private currentFilterId: number | null = null;
@@ -15,7 +18,9 @@ export class GpacCoreService implements IGpacCommunication {
   }
 
   public connect(): Promise<void> {
-    throw new Error('Connect method should be implemented by the orchestrating service');
+    throw new Error(
+      'Connect method should be implemented by the orchestrating service',
+    );
   }
 
   public disconnect(): void {
@@ -24,7 +29,9 @@ export class GpacCoreService implements IGpacCommunication {
   }
 
   public send(): void {
-    throw new Error('Send method should be implemented by the orchestrating service');
+    throw new Error(
+      'Send method should be implemented by the orchestrating service',
+    );
   }
 
   public registerHandler(handler: IGpacMessageHandler): () => void {
@@ -46,18 +53,20 @@ export class GpacCoreService implements IGpacCommunication {
 
   protected setStatus(status: ConnectionStatus): void {
     this.status = status;
-    this.messageHandlers.forEach(handler => {
+    this.messageHandlers.forEach((handler) => {
       handler.onStatusChange?.(status);
     });
   }
 
   public notifyHandlers(message: any): void {
-    this.messageHandlers.forEach(handler => {
+    this.messageHandlers.forEach((handler) => {
       try {
         handler.onMessage?.(message);
       } catch (error) {
         console.error('[GpacCoreService] Handler error:', error);
-        handler.onError?.(error instanceof Error ? error : new Error(String(error)));
+        handler.onError?.(
+          error instanceof Error ? error : new Error(String(error)),
+        );
       }
     });
   }

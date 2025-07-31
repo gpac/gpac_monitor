@@ -1,21 +1,21 @@
-import type { ErrorWithBreadcrumbs } from './subscribable'
-import { Subscribable } from "./subscribable"
+import type { ErrorWithBreadcrumbs } from './subscribable';
+import { Subscribable } from './subscribable';
 
 interface UpdatableExtraData {
-  error: ErrorWithBreadcrumbs
+  error: ErrorWithBreadcrumbs;
 }
 
-export class UpdatableSubscribable<D, N = undefined, E extends object = UpdatableExtraData> extends Subscribable<
+export class UpdatableSubscribable<
   D,
-  N,
-  E
-> {
+  N = undefined,
+  E extends object = UpdatableExtraData,
+> extends Subscribable<D, N, E> {
   /**
    * Updates the internal data of the Subscribable instance.
    * @param newData The new data to store.
    */
   public updateData(newData: D): void {
-    this.data = newData
+    this.data = newData;
   }
 
   /**
@@ -24,8 +24,12 @@ export class UpdatableSubscribable<D, N = undefined, E extends object = Updatabl
    * @param type The type of notification (optional).
    * @param extraData Additional data for the notification (optional).
    */
-  public updateDataAndNotify(newData: D, type?: N, extraData?: Partial<E>): void {
-    this.updateData(newData)
-    this.notify(type, extraData)
+  public updateDataAndNotify(
+    newData: D,
+    type?: N,
+    extraData?: Partial<E>,
+  ): void {
+    this.updateData(newData);
+    this.notify(type, extraData);
   }
 }

@@ -4,11 +4,13 @@ import { gpacService } from '@/services/gpacService';
 import { removeSelectedFilter } from '@/shared/store/slices/multiFilterSlice';
 import { setFilterDetails } from '@/shared/store/slices/graphSlice';
 import { RootState } from '@/shared/store';
-import { GraphFilterData, SessionFilterStatistics } from '@/types/domain/gpac/model';
+import {
+  GraphFilterData,
+  SessionFilterStatistics,
+} from '@/types/domain/gpac/model';
 import { useSessionStats } from './useSessionStats';
 
 interface MultiFilterMonitorState {
-
   isLoading: boolean;
   handleCloseMonitor: (filterIdx: string) => void;
   sessionStats: SessionFilterStatistics[];
@@ -17,24 +19,25 @@ interface MultiFilterMonitorState {
   sessionStatsData: SessionFilterStatistics[];
 }
 
-export const useMultiFilterMonitor = (isDashboardActive: boolean = true): MultiFilterMonitorState => {
+export const useMultiFilterMonitor = (
+  isDashboardActive: boolean = true,
+): MultiFilterMonitorState => {
   const dispatch = useAppDispatch();
 
   console.log('[useMultiFilterMonitor] isDashboardActive:', isDashboardActive);
-  
+
   const { stats: sessionStatsData } = useSessionStats(isDashboardActive, 1000);
 
-
   const isLoading = useAppSelector((state) => state.graph.isLoading);
-  const isSessionSubscribed = useAppSelector((state: RootState) => state.sessionStats.isSubscribed);
-  const staticFilters = useAppSelector((state: RootState) => state.graph.filters);
-  
-
-
+  const isSessionSubscribed = useAppSelector(
+    (state: RootState) => state.sessionStats.isSubscribed,
+  );
+  const staticFilters = useAppSelector(
+    (state: RootState) => state.graph.filters,
+  );
 
   const handleCloseMonitor = useCallback(
     (filterIdx: string) => {
-
       gpacService.unsubscribeFromFilter(filterIdx);
       dispatch(removeSelectedFilter(filterIdx));
 
@@ -47,10 +50,9 @@ export const useMultiFilterMonitor = (isDashboardActive: boolean = true): MultiF
   );
 
   return {
-    
     isLoading,
     handleCloseMonitor,
-    sessionStats: sessionStatsData, 
+    sessionStats: sessionStatsData,
     isSessionSubscribed,
     staticFilters,
     sessionStatsData,

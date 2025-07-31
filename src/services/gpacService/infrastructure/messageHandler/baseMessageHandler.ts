@@ -3,6 +3,7 @@ import { GpacNodeData } from '../../../../types/domain/gpac/model';
 import { GpacNotificationHandlers } from '../../types';
 import { generateID } from '@/utils/id';
 import { SessionStatsHandler } from './sessionStatsHandler';
+import { FilterStatsHandler } from './filterStatsHandlers';
 
 export interface MessageHandlerCallbacks {
   onUpdateFilterData: (payload: { idx: number; data: any }) => void;
@@ -19,6 +20,8 @@ export interface MessageHandlerDependencies {
 
 export class BaseMessageHandler {
   private sessionStatsHandler: SessionStatsHandler;
+  private filterStatsHandler: FilterStatsHandler;
+  
 
   constructor(
     private currentFilterId: () => number | null,
@@ -28,15 +31,26 @@ export class BaseMessageHandler {
     private dependencies: MessageHandlerDependencies,
     private onMessage?: (message: any) => void,
     // @ts-ignore used by sessionStatsHandler
-        private isLoaded?: () => boolean,
+    private isLoaded?: () => boolean,
   ) {
     // Initialize specialized handlers
-    this.sessionStatsHandler = new SessionStatsHandler(dependencies, isLoaded || (() => true));
+    this.sessionStatsHandler = new SessionStatsHandler(
+      dependencies,
+      isLoaded || (() => true),
+    );
+    this.filterStatsHandler = new FilterStatsHandler(
+      dependencies,
+    isLoaded || (() => true),
+    );
+  
   }
 
   // Expose handler methods
   public getSessionStatsHandler(): SessionStatsHandler {
     return this.sessionStatsHandler;
+  }
+  public getFilterStatsHandler(): FilterStatsHandler {
+    return this.filterStatsHandler;
   }
 
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
@@ -86,7 +100,7 @@ export class BaseMessageHandler {
         this.handleFilterStatsMessage(data);
         break;
       default:
-        // Unknown message type
+      // Unknown message type
     }
 
     this.onMessage?.(data);
@@ -144,16 +158,16 @@ export class BaseMessageHandler {
    */
   protected ensureConnected(): boolean {
     if (!this.dependencies.isConnected()) {
-      const error = new Error("WebSocket client is not connected")
-      throw error
+      const error = new Error('WebSocket client is not connected');
+      throw error;
     }
-    return true
+    return true;
   }
 
   /**
    * Generate a unique ID for messages
    */
   protected static generateMessageId(): string {
-    return generateID()
+    return generateID();
   }
 }

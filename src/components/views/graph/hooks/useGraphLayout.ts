@@ -1,10 +1,9 @@
 import { useState, useCallback, useEffect, MutableRefObject } from 'react';
 import { Node, Edge } from '@xyflow/react';
-import { 
-  LayoutType, 
-  LayoutOptions, 
-  applyGraphLayout, 
-
+import {
+  LayoutType,
+  LayoutOptions,
+  applyGraphLayout,
 } from '../utils/GraphLayout';
 
 interface UseGraphLayoutProps {
@@ -24,7 +23,7 @@ export const useGraphLayout = ({
   localEdges,
   setLocalNodes,
   nodesRef,
-  isApplyingLayout
+  isApplyingLayout,
 }: UseGraphLayoutProps) => {
   // Layout state
   const [layoutOptions, setLayoutOptions] = useState<LayoutOptions>(() => {
@@ -37,7 +36,7 @@ export const useGraphLayout = ({
     } catch (e) {
       console.error('Failed to load layout preferences:', e);
     }
-    
+
     // Default layout options - optimized for nodes with multiple inputs/outputs
     return {
       type: LayoutType.DAGRE,
@@ -49,50 +48,55 @@ export const useGraphLayout = ({
   });
 
   // Apply layout with current options
-  const applyLayout = useCallback((respectPositions: boolean = true) => {
-    if (localNodes.length === 0) return;
-    
-    // Set flag to prevent state overrides during layout application
-    isApplyingLayout.current = true;
-    
-    const currentOptions = {
-      ...layoutOptions,
-      respectExistingPositions: respectPositions,
-    };
-    
-    const layoutedNodes = applyGraphLayout(
+  const applyLayout = useCallback(
+    (respectPositions: boolean = true) => {
+      if (localNodes.length === 0) return;
+
+      // Set flag to prevent state overrides during layout application
+      isApplyingLayout.current = true;
+
+      const currentOptions = {
+        ...layoutOptions,
+        respectExistingPositions: respectPositions,
+      };
+
+      const layoutedNodes = applyGraphLayout(
+        localNodes,
+        localEdges,
+        currentOptions,
+      );
+
+      setLocalNodes(layoutedNodes);
+      nodesRef.current = layoutedNodes;
+
+      // Reset flag after React has processed state updates
+      setTimeout(() => {
+        isApplyingLayout.current = false;
+      }, 100);
+    },
+    [
       localNodes,
       localEdges,
-      currentOptions
-    );
-    
-    setLocalNodes(layoutedNodes);
-    nodesRef.current = layoutedNodes;
-    
-    // Reset flag after React has processed state updates
-    setTimeout(() => {
-      isApplyingLayout.current = false;
-    }, 100);
-  }, [localNodes, localEdges, layoutOptions, setLocalNodes, nodesRef, isApplyingLayout]);
+      layoutOptions,
+      setLocalNodes,
+      nodesRef,
+      isApplyingLayout,
+    ],
+  );
 
   // Auto-layout function - tries to determine the best layout
   const autoLayout = useCallback(() => {
     if (localNodes.length === 0) return;
-    
+
     // Set flag to prevent state overrides
     isApplyingLayout.current = true;
 
-    
     // Apply the suggested layout immediately
-    const layoutedNodes = applyGraphLayout(
-      localNodes,
-      localEdges,
-    
-    );
-    
+    const layoutedNodes = applyGraphLayout(localNodes, localEdges);
+
     setLocalNodes(layoutedNodes);
     nodesRef.current = layoutedNodes;
-    
+
     // Reset flag after React has processed state updates
     setTimeout(() => {
       isApplyingLayout.current = false;
@@ -100,33 +104,39 @@ export const useGraphLayout = ({
   }, [localNodes, localEdges, setLocalNodes, nodesRef, isApplyingLayout]);
 
   // Handle layout option changes
-  const handleLayoutChange = useCallback((newOptions: LayoutOptions) => {
-    // Set flag to prevent state overrides
-    isApplyingLayout.current = true;
-    
-    setLayoutOptions(newOptions);
-    
-    // Apply the new layout
-    const layoutedNodes = applyGraphLayout(
-      localNodes,
-      localEdges,
-      newOptions
-    );
-    
-    setLocalNodes(layoutedNodes);
-    nodesRef.current = layoutedNodes;
-    
-    // Reset flag after React has processed state updates
-    setTimeout(() => {
-      isApplyingLayout.current = false;
-    }, 100);
-  }, [localNodes, localEdges, setLocalNodes, nodesRef, isApplyingLayout]);
+  const handleLayoutChange = useCallback(
+    (newOptions: LayoutOptions) => {
+      // Set flag to prevent state overrides
+      isApplyingLayout.current = true;
+
+      setLayoutOptions(newOptions);
+
+      // Apply the new layout
+      const layoutedNodes = applyGraphLayout(
+        localNodes,
+        localEdges,
+        newOptions,
+      );
+
+      setLocalNodes(layoutedNodes);
+      nodesRef.current = layoutedNodes;
+
+      // Reset flag after React has processed state updates
+      setTimeout(() => {
+        isApplyingLayout.current = false;
+      }, 100);
+    },
+    [localNodes, localEdges, setLocalNodes, nodesRef, isApplyingLayout],
+  );
 
   // Save layout preferences
   useEffect(() => {
     try {
       if (layoutOptions.type) {
-        localStorage.setItem('gpacMonitorLayout', JSON.stringify(layoutOptions));
+        localStorage.setItem(
+          'gpacMonitorLayout',
+          JSON.stringify(layoutOptions),
+        );
       }
     } catch (e) {
       console.error('Failed to save layout preferences:', e);
@@ -137,6 +147,6 @@ export const useGraphLayout = ({
     layoutOptions,
     handleLayoutChange,
     autoLayout,
-    applyLayout
+    applyLayout,
   };
 };

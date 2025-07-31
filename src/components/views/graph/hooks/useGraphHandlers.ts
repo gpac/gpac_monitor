@@ -2,14 +2,12 @@ import { useCallback, MutableRefObject } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { GraphFilterData } from '@/types/domain/gpac';
-import { 
+import {
   setSelectedFilterDetails,
-  setSelectedNode
+  setSelectedNode,
 } from '@/shared/store/slices/graphSlice';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { Dispatch } from '@reduxjs/toolkit';
-
-
 
 interface UseGraphHandlersProps {
   onNodesChange: (changes: any[]) => void;
@@ -19,10 +17,8 @@ interface UseGraphHandlersProps {
   nodesRef: MutableRefObject<Node[]>;
   edgesRef: MutableRefObject<Edge[]>;
   setLocalNodes: (nodes: Node[]) => void;
-  service : any,
-  dispatch: Dispatch
-  
-  
+  service: any;
+  dispatch: Dispatch;
 }
 
 /**
@@ -32,20 +28,17 @@ interface UseGraphHandlersProps {
 export const useGraphHandlers = ({
   onNodesChange,
   onEdgesChange,
-  
+
   localEdges,
   nodesRef,
   edgesRef,
- 
-  
- 
 }: UseGraphHandlersProps) => {
   const dispatch = useAppDispatch();
   const service = useGpacService();
 
   // Get monitored filters from Redux
   const monitoredFilters = useAppSelector(
-    (state) => state.multiFilter.selectedFilters
+    (state) => state.multiFilter.selectedFilters,
   );
 
   // Handle node changes (position, selection, etc)
@@ -53,22 +46,24 @@ export const useGraphHandlers = ({
     (changes: any[]) => {
       // Let React Flow handle its internal state updates
       onNodesChange(changes);
-      
+
       // Then separately update our local reference for position changes
-      changes.forEach(change => {
+      changes.forEach((change) => {
         if (change.type === 'position' && change.position) {
           // Update the specific node's position in our ref
-          const nodeIndex = nodesRef.current.findIndex(n => n.id === change.id);
+          const nodeIndex = nodesRef.current.findIndex(
+            (n) => n.id === change.id,
+          );
           if (nodeIndex !== -1) {
             nodesRef.current[nodeIndex] = {
               ...nodesRef.current[nodeIndex],
-              position: change.position
+              position: change.position,
             };
           }
         }
       });
     },
-    [onNodesChange, nodesRef]
+    [onNodesChange, nodesRef],
   );
   // Handle edge changes
   const handleEdgesChange = useCallback(
@@ -77,7 +72,7 @@ export const useGraphHandlers = ({
       // Update edgesRef
       edgesRef.current = localEdges;
     },
-    [onEdgesChange, localEdges, edgesRef]
+    [onEdgesChange, localEdges, edgesRef],
   );
 
   // Handle node click event
@@ -87,23 +82,23 @@ export const useGraphHandlers = ({
       const nodeData = node.data;
 
       // Set selected filter in Redux
-      dispatch(setSelectedFilterDetails(nodeData as unknown as GraphFilterData));
-      
+      dispatch(
+        setSelectedFilterDetails(nodeData as unknown as GraphFilterData),
+      );
+
       // Update service with current filter
       service.setCurrentFilterId(parseInt(nodeId));
       service.getFilterDetails(parseInt(nodeId));
 
-
-
       // Set selected node in Redux
       dispatch(setSelectedNode(nodeId));
     },
-    [dispatch, monitoredFilters, service]
+    [dispatch, monitoredFilters, service],
   );
-  
+
   return {
     handleNodesChange,
     handleEdgesChange,
-    onNodeClick
+    onNodeClick,
   };
 };

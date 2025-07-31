@@ -1,24 +1,22 @@
-import type { EnrichedFilterOverview } from "@/types/domain/gpac/model"
+import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 
-import React from "react"
-import { FiltersGrid } from "./FiltersGrid"
-
-
+import React from 'react';
+import { FiltersGrid } from './FiltersGrid';
 
 interface SystemStats {
-  activeFilters: number
-  totalBytes: number
-  totalPackets: number
+  activeFilters: number;
+  totalBytes: number;
+  totalPackets: number;
 }
 
 interface DashboardTabContentProps {
-  systemStats: SystemStats
-  filtersWithLiveStats: EnrichedFilterOverview[]
-  filtersMatchingCriteria: EnrichedFilterOverview[]
-  loading: boolean
-  monitoredFilters: Map<number, EnrichedFilterOverview>
-  onCardClick: (idx: number) => void
-  refreshInterval: string
+  systemStats: SystemStats;
+  filtersWithLiveStats: EnrichedFilterOverview[];
+  filtersMatchingCriteria: EnrichedFilterOverview[];
+  loading: boolean;
+  monitoredFilters: Map<number, EnrichedFilterOverview>;
+  onCardClick: (idx: number) => void;
+  refreshInterval: string;
 }
 
 export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
@@ -28,9 +26,15 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
   monitoredFilters,
   onCardClick,
 }) => {
-  console.log('🔍 [DashboardTabContent] filtersWithLiveStats:', filtersWithLiveStats);
-  console.log('🔍 [DashboardTabContent] filtersMatchingCriteria:', filtersMatchingCriteria);
-  
+  console.log(
+    '🔍 [DashboardTabContent] filtersWithLiveStats:',
+    filtersWithLiveStats,
+  );
+  console.log(
+    '🔍 [DashboardTabContent] filtersMatchingCriteria:',
+    filtersMatchingCriteria,
+  );
+
   return (
     <div className="space-y-4">
       <FiltersGrid
@@ -39,8 +43,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
         loading={loading}
         monitoredFilters={monitoredFilters}
         onCardClick={onCardClick}
-
       />
     </div>
-  )
-}
+  );
+};

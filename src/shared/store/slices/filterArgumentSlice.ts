@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { GpacMessage } from '@/types' 
+import { GpacMessage } from '@/types';
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
 import { RootState } from '../index';
@@ -50,10 +50,20 @@ export const { setArgumentUpdateStatus, clearArgumentUpdate } =
 
 export const updateFilterArgument = createAsyncThunk(
   'filterArgument/updateFilterArgument',
-  async ({ filterId, argName, argValue }: { filterId: string; argName: string; argValue: any }, { dispatch, getState }) => {
+  async (
+    {
+      filterId,
+      argName,
+      argValue,
+    }: { filterId: string; argName: string; argValue: any },
+    { dispatch, getState },
+  ) => {
     try {
       // Get filter name from state using the selector
-      const filterName = selectFilterNameById(getState() as RootState, filterId);
+      const filterName = selectFilterNameById(
+        getState() as RootState,
+        filterId,
+      );
 
       if (!filterName) {
         throw new Error(`Filter with ID ${filterId} not found`);
@@ -101,7 +111,7 @@ export const updateFilterArgument = createAsyncThunk(
       dispatch(setArgumentUpdateStatus(errorUpdate));
       throw error;
     }
-  }
+  },
 );
 
 // Selectors

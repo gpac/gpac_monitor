@@ -32,7 +32,6 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
   onNodesChange,
   onEdgesChange,
   onNodeClick,
- 
 }) => {
   if (isLoading) {
     return <LoadingState id={id} title={title} message="Connexion à GPAC..." />;
@@ -59,8 +58,6 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
         />
-        
-     
       </div>
     </WidgetWrapper>
   );
