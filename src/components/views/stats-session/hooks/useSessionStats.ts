@@ -8,11 +8,14 @@ export function useSessionStats(enabled = true, interval = 1000) {
 
   const handleSessionStatsUpdate = useCallback(
     (newStats: SessionFilterStatistics[]) => {
-      console.log('[useSessionStats] Received stats update:', newStats.length, 'filters');
-      newStats.forEach(stat => {
-        console.log(`[useSessionStats] Filter ${stat.idx}: status=${stat.status}, bytes=${stat.bytes_done}`);
-      });
-      setStats(newStats);
+      console.log(
+        '[useSessionStats] Received stats update:',
+        newStats.length,
+        'filters',
+      );
+
+      setStats(newStats.map(stat => ({ ...stat })));
+
     },
     [],
   );
@@ -30,7 +33,12 @@ export function useSessionStats(enabled = true, interval = 1000) {
 
     const setupSubscription = async () => {
       try {
-        console.log('[useSessionStats] Setting up subscription, enabled:', enabled, 'interval:', interval);
+        console.log(
+          '[useSessionStats] Setting up subscription, enabled:',
+          enabled,
+          'interval:',
+          interval,
+        );
         await gpacService.load();
 
         if (!isMounted) {
@@ -45,7 +53,10 @@ export function useSessionStats(enabled = true, interval = 1000) {
             interval,
           },
           (result) => {
-            console.log('[useSessionStats] Received subscription callback:', result);
+            console.log(
+              '[useSessionStats] Received subscription callback:',
+              result,
+            );
             if (result.data) {
               handleSessionStatsUpdate(
                 result.data as SessionFilterStatistics[],

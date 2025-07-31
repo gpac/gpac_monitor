@@ -102,7 +102,9 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               disabled={isLoading}
               className="h-8 px-2"
             >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw
+                className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`}
+              />
             </Button>
           </div>
           <Tabs

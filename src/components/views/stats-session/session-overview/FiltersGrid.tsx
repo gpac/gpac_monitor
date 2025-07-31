@@ -17,7 +17,6 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
   filtersMatchingCriteria,
   monitoredFilters,
   onCardClick,
-
 }) => {
   // DEBUG: Log pour comprendre pourquoi seulement 2 filtres s'affichent
   console.log('[FiltersGrid] Props:', {
@@ -35,7 +34,6 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
             {filtersMatchingCriteria.length}
           </Badge>
         </h2>
-    
       </div>
 
       <ScrollArea className="flex-1">

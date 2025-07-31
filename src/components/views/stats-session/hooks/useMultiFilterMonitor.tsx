@@ -10,7 +10,6 @@ import {
 } from '@/types/domain/gpac/model';
 import { useSessionStats } from './useSessionStats';
 
-
 interface MultiFilterMonitorState {
   isLoading: boolean;
   handleCloseMonitor: (filterIdx: string) => void;
@@ -26,7 +25,6 @@ export const useMultiFilterMonitor = (
   const dispatch = useAppDispatch();
 
   const { stats: sessionStatsData } = useSessionStats(isDashboardActive, 1000);
-
 
   const isLoading = useAppSelector((state) => state.graph.isLoading);
   const isSessionSubscribed = useAppSelector(
