@@ -5,9 +5,11 @@ import WidgetWrapper from '@/components/common/WidgetWrapper';
 import { WidgetProps } from '@/types/ui/widget';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import { StatsTabs } from './StatsTabs';
-import { DashboardTabContent } from './DashboardTabContent';
-import { FilterTabContent } from './FilterTabContent';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
+import { StatsTabs } from '../tabs/SessionStatsTabs';
+import { DashboardTabContent } from '../tabs/DashboardTabContent';
+import { FilterTabContent } from '../tabs/FilterTabContent';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
@@ -61,6 +63,10 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       tabsRef,
     });
 
+    const handleRefresh = () => {
+      window.location.reload();
+    };
+
     if (isLoading) {
       return (
         <WidgetWrapper id={id} title={title}>
@@ -87,10 +93,22 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     return (
       <WidgetWrapper id={id} title="Session-stats Overview">
         <div className="h-full">
+          <div className="flex justify-between items-center p-2 border-b">
+            <h3 className="text-sm font-medium">Filters Overview</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              className="h-8 px-2"
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+          </div>
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
-            className="h-full flex flex-col"
+            className="flex-1 flex flex-col"
           >
             <StatsTabs
               activeTab={activeTab}
@@ -135,6 +153,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
                     filter={filter}
                     onCardClick={handleCardClick}
                     isMonitored={true}
+                    isActive={activeTab === `filter-${idx}`}
                   />
                 </TabsContent>
               ),

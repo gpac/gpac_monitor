@@ -1,9 +1,8 @@
 import React from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import FilterStatCard from '../FilterStatCard';
+import FilterStatCard from '../monitored_filters/FilterStatCard';
 
 interface FiltersGridProps {
   filtersWithLiveStats: EnrichedFilterOverview[];
@@ -16,9 +15,9 @@ interface FiltersGridProps {
 export const FiltersGrid: React.FC<FiltersGridProps> = ({
   filtersWithLiveStats,
   filtersMatchingCriteria,
-  loading,
   monitoredFilters,
   onCardClick,
+
 }) => {
   // DEBUG: Log pour comprendre pourquoi seulement 2 filtres s'affichent
   console.log('[FiltersGrid] Props:', {
@@ -36,9 +35,7 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
             {filtersMatchingCriteria.length}
           </Badge>
         </h2>
-        <Button variant="outline" size="sm" disabled={loading}>
-          {loading ? 'Loading...' : 'Refresh'}
-        </Button>
+    
       </div>
 
       <ScrollArea className="flex-1">

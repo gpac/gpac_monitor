@@ -21,18 +21,14 @@ export class WebSocketBase {
   public connect(address: string): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
-        console.log(`[WebSocket] Attempting to connect to ${address}`);
-
         // Check if already connected to avoid multiple connections
         if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-          console.log('[WebSocket] Already connected, skipping new connection');
           resolve();
           return;
         }
 
         // Check if connection is in progress
         if (this.socket && this.socket.readyState === WebSocket.CONNECTING) {
-          console.log('[WebSocket] Connection already in progress, waiting...');
           // Wait for existing connection to complete
           const onOpen = () => {
             this.socket?.removeEventListener('open', onOpen);
@@ -50,7 +46,6 @@ export class WebSocketBase {
         }
 
         if (this.socket) {
-          console.log('[WebSocket] Closing existing connection');
           this.socket.close();
           this.socket = null;
         }
@@ -59,7 +54,6 @@ export class WebSocketBase {
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.onopen = () => {
-          console.log('[WebSocket] Connection opened successfully');
           WebSocketNotificationService.onConnected(address);
           this.callMessageHandlers(
             '__OnConnect__',
@@ -80,11 +74,8 @@ export class WebSocketBase {
               data = event.data;
             }
 
-            console.log('[WebSocket] Raw message received:', data);
-
             // Handle messages with "json:" prefix or direct JSON
             if (data.startsWith('json:') || data.startsWith('{')) {
-              console.log('[WebSocket] Processing JSON message');
               const parsedData = MessageFormatter.parseReceived(data);
               const dataView = MessageFormatter.createDataView(parsedData);
 
@@ -107,7 +98,6 @@ export class WebSocketBase {
                 dataView.getInt8(2),
                 dataView.getInt8(3),
               );
-              console.log('[WebSocket] Legacy message received:', id);
 
               const handlers = this.messageHandlers[id];
               if (handlers && handlers.length > 0) {
@@ -118,7 +108,6 @@ export class WebSocketBase {
 
             this.callMessageHandlers('__default__', dataView);
           } catch (error) {
-            console.error('[WebSocket] Error processing message:', error);
             const errorDataView =
               event.data instanceof ArrayBuffer
                 ? new DataView(event.data)
@@ -128,9 +117,6 @@ export class WebSocketBase {
         };
 
         this.socket.onclose = (event) => {
-          console.log(
-            `[WebSocket] Connection closed: Code=${event.code}, Clean=${event.wasClean}, Reason=${event.reason || 'No reason provided'}`,
-          );
           WebSocketNotificationService.onDisconnected(
             event.reason,
             event.wasClean,
@@ -143,12 +129,10 @@ export class WebSocketBase {
         };
 
         this.socket.onerror = (error) => {
-          console.error('[WebSocket] Connection error:', error);
           WebSocketNotificationService.onError();
           reject(error);
         };
       } catch (error) {
-        console.error('[WebSocket] Error creating connection:', error);
         reject(error);
       }
     });

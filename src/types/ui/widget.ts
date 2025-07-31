@@ -5,7 +5,6 @@ export enum WidgetType {
   AUDIO = 'audio-monitor',
   METRICS = 'metrics-monitor',
   LOGS = 'logs-monitor',
-  FILTER = 'filter-monitor',
   MULTI_FILTER = 'multi-filter-monitor',
 }
 export interface Widget {

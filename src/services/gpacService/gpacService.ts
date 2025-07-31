@@ -64,43 +64,30 @@ export class GpacService implements IGpacCommunication {
 
     this.setupWebSocketHandlers();
   }
-
   public static getInstance(): GpacService {
     if (!GpacService.instance) {
-      console.log('[GpacService] Creating new singleton instance');
       GpacService.instance = new GpacService();
-    } else {
-      console.log('[GpacService] Returning existing singleton instance');
     }
     return GpacService.instance;
   }
 
   public async load(): Promise<boolean> {
-    console.log('[GpacService] Starting load process');
-
     if (this._isLoaded) {
-      console.log('[GpacService] Service already loaded');
       return true;
     }
 
     try {
-      // Wait for connection to be established
       await this.connectionManager.connect();
-
-      // Wait a bit for the service to be fully initialized
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       if (!this.isConnected()) {
         throw new Error('Failed to establish connection');
       }
 
-      // Service is now loaded and ready
       this._isLoaded = true;
-      console.log('[GpacService] Service successfully loaded and ready');
 
       return true;
     } catch (error) {
-      console.error('[GpacService] Failed to load service:', error);
       this._isLoaded = false;
       throw error;
     }
@@ -111,7 +98,6 @@ export class GpacService implements IGpacCommunication {
     this.connectionManager.setNotificationHandlers(handlers);
   }
 
-  // IGpacCommunication interface implementation
   public async connect(_config?: IGpacCommunicationConfig): Promise<void> {
     return this.connectionManager.connect();
   }
@@ -137,7 +123,6 @@ export class GpacService implements IGpacCommunication {
   }
 
   public disconnect(): void {
-    console.log('[GpacService] Initiating disconnect sequence');
     this.cleanup();
     this.connectionManager.disconnect();
     clearStoreFilters();
@@ -161,11 +146,8 @@ export class GpacService implements IGpacCommunication {
         ...message,
       };
       const jsonString = JSON.stringify(formattedMessage);
-      console.log('[GpacService] Sending message:', jsonString);
-
       this.ws.send(jsonString);
     } catch (error) {
-      console.error('[GpacService] Send error:', error);
       throw error;
     }
   }
@@ -180,7 +162,6 @@ export class GpacService implements IGpacCommunication {
   }
 
   public setCurrentFilterId(id: number | null): void {
-    console.log('[GpacService] Setting current filter ID:', id);
     this.coreService.setCurrentFilterId(id);
   }
 
@@ -197,8 +178,6 @@ export class GpacService implements IGpacCommunication {
 
   private setupWebSocketHandlers(): void {
     this.ws.addConnectHandler(() => {
-      console.log('[GpacService] Connection established');
-
       this.sendMessage({ type: 'get_all_filters' });
     });
 
@@ -210,9 +189,7 @@ export class GpacService implements IGpacCommunication {
     );
 
     this.ws.addDisconnectHandler(() => {
-      console.log('[GpacService] Disconnected from server');
       this._isLoaded = false;
-      console.log('[GpacService] Service marked as not loaded');
       this.onDisconnect?.();
       this.connectionManager.handleDisconnect();
     });
@@ -225,35 +202,17 @@ export class GpacService implements IGpacCommunication {
     config: SubscriptionConfig,
     callback: SubscriptionCallback<T>,
   ): Promise<() => void> {
-    console.log('[GpacService] subscribe called with config:', config);
-    console.log(
-      '[GpacService] Service status - isLoaded:',
-      this.isLoaded(),
-      'isConnected:',
-      this.isConnected(),
-    );
-
     if (!this.isLoaded()) {
-      console.error('[GpacService] Cannot subscribe - service not loaded');
       throw new Error('Service not loaded');
     }
 
     const subscriptionId = generateID();
-    console.log('[GpacService] Generated subscription ID:', subscriptionId);
 
     switch (config.type) {
       case SubscriptionType.SESSION_STATS:
-        console.log(
-          '[GpacService] Setting up SESSION_STATS subscription with interval:',
-          config.interval || 1000,
-        );
         return this.messageHandler
           .getSessionStatsHandler()
           .subscribeToSessionStats((data) => {
-            console.log(
-              '[GpacService] Received session stats data from handler, forwarding to hook callback:',
-              data,
-            );
             callback({
               data: data as T,
               timestamp: Date.now(),
@@ -261,11 +220,27 @@ export class GpacService implements IGpacCommunication {
             });
           }, config.interval || 1000);
 
+      case SubscriptionType.FILTER_STATS:
+        if (config.filterIdx === undefined) {
+          throw new Error(
+            'filterIdx is required for FILTER_STATS subscription',
+          );
+        }
+        return this.messageHandler
+          .getFilterStatsHandler()
+          .subscribeToFilterStatsUpdates(
+            config.filterIdx,
+            (data) => {
+              callback({
+                data: data as T,
+                timestamp: Date.now(),
+                subscriptionId,
+              });
+            },
+            config.interval || 1000,
+          );
+
       default:
-        console.error(
-          '[GpacService] Unsupported subscription type:',
-          config.type,
-        );
         throw new Error(`Unsupported subscription type: ${config.type}`);
     }
   }

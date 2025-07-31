@@ -21,23 +21,19 @@ export class ConnectionManager {
 
   public async connect(): Promise<void> {
     if (this.isConnecting) {
-      console.log('[ConnectionManager] Connection already in progress');
       return;
     }
 
     if (this.ws.isConnected()) {
-      console.log('[ConnectionManager] Already connected to GPAC server');
       return;
     }
 
-    console.log('[ConnectionManager] Initiating connection to GPAC server');
     this.isConnecting = true;
     store.dispatch(setLoading(true));
 
     try {
       await this.ws.connect(this.address);
       this.notificationHandlers.onConnectionStatus?.(true);
-      console.log('[ConnectionManager] Successfully connected to GPAC server');
       this.onConnectionSuccess();
     } catch (error) {
       this.isConnecting = false;
@@ -49,7 +45,6 @@ export class ConnectionManager {
   }
 
   public disconnect(): void {
-    console.log('[ConnectionManager] Initiating disconnect sequence');
     this.cleanup();
     this.ws.disconnect();
   }
@@ -70,15 +65,11 @@ export class ConnectionManager {
       }
       this.reconnectTimeout = setTimeout(() => {
         this.reconnectAttempts++;
-        console.log(
-          `[ConnectionManager] Reconnection attempt ${this.reconnectAttempts}`,
-        );
         this.connect().catch(console.error);
       }, delay);
     } else if (
       this.reconnectAttempts >= GPAC_CONSTANTS.MAX_RECONNECT_ATTEMPTS
     ) {
-      console.log('[ConnectionManager] Max reconnection attempts reached');
       store.dispatch(setError('Failed to connect to GPAC server'));
     }
   }

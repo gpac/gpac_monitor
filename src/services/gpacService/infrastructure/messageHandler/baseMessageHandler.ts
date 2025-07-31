@@ -3,7 +3,7 @@ import { GpacNodeData } from '../../../../types/domain/gpac/model';
 import { GpacNotificationHandlers } from '../../types';
 import { generateID } from '@/utils/id';
 import { SessionStatsHandler } from './sessionStatsHandler';
-import { FilterStatsHandler } from './filterStatsHandlers';
+import { FilterStatsHandler } from './filterStatsHandler';
 
 export interface MessageHandlerCallbacks {
   onUpdateFilterData: (payload: { idx: number; data: any }) => void;
@@ -21,11 +21,10 @@ export interface MessageHandlerDependencies {
 export class BaseMessageHandler {
   private sessionStatsHandler: SessionStatsHandler;
   private filterStatsHandler: FilterStatsHandler;
-  
 
   constructor(
     private currentFilterId: () => number | null,
-    private hasSubscription: (idx: string) => boolean,
+    _hasSubscription: (idx: string) => boolean,
     private notificationHandlers: GpacNotificationHandlers,
     private callbacks: MessageHandlerCallbacks,
     private dependencies: MessageHandlerDependencies,
@@ -40,9 +39,8 @@ export class BaseMessageHandler {
     );
     this.filterStatsHandler = new FilterStatsHandler(
       dependencies,
-    isLoaded || (() => true),
+      isLoaded || (() => true),
     );
-  
   }
 
   // Expose handler methods
@@ -134,7 +132,6 @@ export class BaseMessageHandler {
   private handleSessionStatsMessage(data: any): void {
     if (data.stats && Array.isArray(data.stats)) {
       this.sessionStatsHandler.handleSessionStats(data.stats);
-      this.callbacks.onUpdateSessionStats(data.stats);
     }
   }
 
@@ -144,10 +141,12 @@ export class BaseMessageHandler {
 
   private handleFilterStatsMessage(data: any): void {
     if (data.idx !== undefined) {
-      const filterId = data.idx.toString();
-      if (this.hasSubscription(filterId)) {
-        this.callbacks.onUpdateFilterData({ idx: data.idx, data: data });
-      }
+      this.filterStatsHandler.handleFilterStatsUpdate(data);
+    } else {
+      console.warn(
+        '[BaseMessageHandler] filter_stats message missing idx:',
+        data,
+      );
     }
   }
 

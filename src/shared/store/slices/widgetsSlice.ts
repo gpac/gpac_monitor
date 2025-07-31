@@ -150,23 +150,6 @@ const widgetsSlice = createSlice({
       action: PayloadAction<WidgetsState['selectedNode']>,
     ) => {
       state.selectedNode = action.payload;
-
-      if (
-        action.payload &&
-        !state.activeWidgets.some((w) => w.type === WidgetType.FILTER)
-      ) {
-        const pidWidget: Widget = {
-          id: `pid-${Date.now()}`,
-          type: WidgetType.FILTER,
-          title: 'FILTER Monitor',
-          x: 0,
-          y: 8,
-          w: 8,
-          h: 6,
-        };
-        state.activeWidgets.push(pidWidget);
-        state.configs[pidWidget.id] = { ...defaultConfig };
-      }
     },
   },
 });

@@ -3,14 +3,7 @@ import { useAppDispatch } from '@/shared/hooks/redux';
 import { addWidget } from '@/shared/store/slices/widgetsSlice';
 import { WidgetType } from '@/types/ui/widget';
 
-import {
-  Activity,
-  Gauge,
-  Volume2,
-  FileText,
-  Share2,
-  Layout,
-} from 'lucide-react';
+import { Gauge, Volume2, FileText, Share2, Layout } from 'lucide-react';
 
 const availableWidgets = [
   {
@@ -38,12 +31,7 @@ const availableWidgets = [
     icon: Share2,
     defaultSize: { w: 6, h: 8 },
   },
-  {
-    type: WidgetType.FILTER,
-    title: 'Filter Metrics',
-    icon: Activity,
-    defaultSize: { w: 4, h: 4 },
-  },
+
   {
     type: WidgetType.MULTI_FILTER,
     title: 'Multi-Filter Monitor',

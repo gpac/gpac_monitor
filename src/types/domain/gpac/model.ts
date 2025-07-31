@@ -101,17 +101,16 @@ export interface SessionFilterStatistics extends Record<string, unknown> {
   nb_opid: number;
 }
 export interface MonitoredFilterStats {
-  idx: number
-  status: string
-  bytes_done: number
-  bytes_sent: number
-  pck_sent: number
-  pck_done: number
-  time: number
-  nb_ipid: number
-  nb_opid: number
+  idx: number;
+  status: string;
+  bytes_done: number;
+  bytes_sent: number;
+  pck_sent: number;
+  pck_done: number;
+  time: number;
+  nb_ipid: number;
+  nb_opid: number;
 }
-
 
 // Enriched filter data combining static graph + dynamic session data
 export interface EnrichedFilterOverview extends Record<string, unknown> {

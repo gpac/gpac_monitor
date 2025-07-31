@@ -15,7 +15,7 @@ import MultiFilterMonitor from '@/components/views/stats-session/session-overvie
 import GraphMonitor from '../views/graph/GraphMonitor';
 import AudioMonitor from '../views/audio/AudioMonitor';
 import LogsMonitor from '../views/logs/LogsMonitor';
-import FilterMonitor from '@/components/views/stats-session/FilterMonitor';
+
 import MetricsMonitor from '../views/cpu/MetricsMonitor';
 import { Widget, WidgetType, WidgetComponent } from '../../types/ui/widget';
 
@@ -29,7 +29,7 @@ const WIDGET_COMPONENTS: Record<
   [WidgetType.AUDIO]: AudioMonitor,
   [WidgetType.LOGS]: LogsMonitor,
   [WidgetType.METRICS]: MetricsMonitor,
-  [WidgetType.FILTER]: FilterMonitor,
+
   [WidgetType.MULTI_FILTER]: MultiFilterMonitor,
 };
 

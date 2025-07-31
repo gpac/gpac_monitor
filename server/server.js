@@ -268,7 +268,10 @@ function JSClient(id, client) {
                     const interval = jtext.interval || 1000;
        
 
-                    this.filterSubscriptions[idx] = { interval};
+                    this.filterSubscriptions[idx] = { 
+                        interval,
+                        fields: ['status', 'bytes_done', 'bytes_sent', 'pck_done', 'pck_sent', 'time', 'nb_ipid', 'nb_opid']
+                    };
                     this.initializeFilterStatsLoop(idx);
                 }
 
