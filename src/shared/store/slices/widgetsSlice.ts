@@ -46,24 +46,25 @@ const defaultConfig: WidgetConfig = {
 const initialState: WidgetsState = {
   activeWidgets: [
     {
-      id: `pid-${Date.now()}`,
-      type: WidgetType.MULTI_FILTER,
-      title: 'Multi-Filter Monitor',
-      x: 0,
-      y: 8,
-      w: 10,
-      h: 8,
-    },
-
-    {
-      id: 'graph-1',
+      id: `graph-${Date.now()}`,
       type: WidgetType.GRAPH,
       title: 'Pipeline Graph',
       x: 0,
       y: 0,
       w: 10,
-      h: 6,
+      h: 5,
     },
+    {
+      id: `pid-${Date.now()}`,
+      type: WidgetType.MULTI_FILTER,
+      title: 'Session filters overview',
+      x: 0,
+      y: 8,
+      w: 10,
+      h: 7,
+    },
+
+ 
   ],
   configs: {
     'metrics-1': { ...defaultConfig },

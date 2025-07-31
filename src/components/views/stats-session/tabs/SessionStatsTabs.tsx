@@ -21,7 +21,7 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
 }) => {
   return (
     <TabsList
-      className="sticky top-0 z-10 mb-4 justify-start border-b border-border bg-background"
+      className="sticky top-0 z-10 mb-4 justify-start border-b border-border bg-black/30 backdrop-blur-sm"
       ref={tabsRef}
     >
       <TabsTrigger

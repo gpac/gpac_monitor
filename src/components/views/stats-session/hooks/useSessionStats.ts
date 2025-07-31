@@ -14,8 +14,7 @@ export function useSessionStats(enabled = true, interval = 1000) {
         'filters',
       );
 
-      setStats(newStats.map(stat => ({ ...stat })));
-
+      setStats(newStats.map((stat) => ({ ...stat })));
     },
     [],
   );
