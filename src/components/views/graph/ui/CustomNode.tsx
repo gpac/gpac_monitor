@@ -1,9 +1,7 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '../../../../types/domain/gpac/model';
-import { 
-  determineFilterSessionType, 
-} from '../utils/filterType';
+import { determineFilterSessionType } from '../utils/filterType';
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
@@ -13,24 +11,30 @@ interface CustomNodeProps extends NodeProps {
 }
 
 export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
-  const { label,ipid, opid, nb_ipid, nb_opid } = data;
+  const { label, ipid, opid, nb_ipid, nb_opid } = data;
   const sessionType = determineFilterSessionType(data);
-  
+
   // Determine node type for background color (according to legend, pastel style)
   const getNodeTypeColor = (): string => {
     switch (sessionType) {
-      case 'source': return '#d1fae5';
-      case 'sink': return '#fee2e2';
-      case 'filter': return '#dbeafe';
+      case 'source':
+        return '#d1fae5';
+      case 'sink':
+        return '#fee2e2';
+      case 'filter':
+        return '#dbeafe';
     }
   };
 
   // Determine node border color
   const getNodeBorderColor = (): string => {
     switch (sessionType) {
-      case 'source': return '#34d399';
-      case 'sink': return '#f87171';
-      case 'filter': return '#60a5fa';
+      case 'source':
+        return '#34d399';
+      case 'sink':
+        return '#f87171';
+      case 'filter':
+        return '#60a5fa';
     }
   };
 
@@ -114,13 +118,14 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
 
       {/* Node content */}
       <div className="node-drag-handle cursor-move">
-
         <div className="flex justify-between items-start mb-2">
           {/* INPUTS on the left */}
           <div className="flex-1 text-xs text-gray-600 pr-2">
             {nb_ipid > 0 && (
               <>
-                <span className="font-medium text-green-700 block text-left">INPUTS</span>
+                <span className="font-medium text-green-700 block text-left">
+                  INPUTS
+                </span>
                 <div className="mt-1">
                   {Object.keys(ipid).map((pidId) => (
                     <div key={pidId} className="text-xs text-gray-500 truncate">
@@ -136,10 +141,15 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
           <div className="flex-1 text-xs text-gray-800 pl-2">
             {nb_opid > 0 && (
               <>
-                <span className="font-medium text-blue-700 block text-right">OUTPUTS</span>
+                <span className="font-medium text-blue-700 block text-right">
+                  OUTPUTS
+                </span>
                 <div className="mt-1">
                   {Object.keys(opid).map((pidId) => (
-                    <div key={pidId} className="text-xs text-gray-800 text-right truncate">
+                    <div
+                      key={pidId}
+                      className="text-xs text-gray-800 text-right truncate"
+                    >
                       {pidId}
                     </div>
                   ))}

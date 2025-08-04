@@ -16,12 +16,9 @@ export function useCPUStats(enabled = true, interval = 150) {
     });
   });
 
-  const handleStatsUpdate = useCallback(
-    (newStats: CPUStats) => {
-      stableCallback.current(newStats);
-    },
-    [],
-  );
+  const handleStatsUpdate = useCallback((newStats: CPUStats) => {
+    stableCallback.current(newStats);
+  }, []);
 
   useEffect(() => {
     if (!enabled) {

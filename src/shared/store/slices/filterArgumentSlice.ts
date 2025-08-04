@@ -59,10 +59,7 @@ export const updateFilterArgument = createAsyncThunk(
   ) => {
     try {
       // Get filter name from state using the selector
-      const filterName = selectFilterNameById(
-        getState() as any,
-        filterId,
-      );
+      const filterName = selectFilterNameById(getState() as any, filterId);
 
       if (!filterName) {
         throw new Error(`Filter with ID ${filterId} not found`);

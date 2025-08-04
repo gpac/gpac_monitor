@@ -2,9 +2,9 @@ import { useCallback, useMemo, memo } from 'react';
 import { LuActivity, LuCpu, LuDatabase, LuEye } from 'react-icons/lu';
 import { GpacNodeData } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
-import { 
-  determineFilterSessionType, 
-  FilterSessionType 
+import {
+  determineFilterSessionType,
+  FilterSessionType,
 } from '@/components/views/graph/utils/filterType';
 import {
   Card,
@@ -58,7 +58,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
     }, [filter]);
 
     const sessionType = determineFilterSessionType(filter);
-    
+
     const getSessionTypeVariant = (type: FilterSessionType) => {
       switch (type) {
         case 'source':
@@ -112,8 +112,8 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                   <LuEye className="h-3 w-3" />
                 </Badge>
               )}
-              <Badge 
-                variant={getSessionTypeVariant(sessionType)} 
+              <Badge
+                variant={getSessionTypeVariant(sessionType)}
                 className={`h-5 px-1.5 text-xs ${getSessionTypeColor(sessionType)}`}
               >
                 {sessionType.toUpperCase()}

@@ -50,7 +50,6 @@ export class BaseMessageHandler {
   public getCPUStatsHandler(): CPUStatsHandler {
     return this.cpuStatsHandler;
   }
-  
 
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
     try {
@@ -138,7 +137,6 @@ export class BaseMessageHandler {
 
   private handleCpuStatsMessage(data: any): void {
     this.cpuStatsHandler.handleCPUStats(data);
-    
   }
 
   private handleFilterStatsMessage(data: any): void {

@@ -54,6 +54,10 @@ export function parseMetricsFromStatus(status: string): ParsedMetrics {
   return metrics;
 }
 
+export function formatPercent(value: number, decimals: number = 1): string {
+  return `${value.toFixed(decimals)}%`;
+}
+
 export const formatProcessingRate = formatBytes;
 export const formatThroughputRate = formatBytes;
 export const parseFilterStatus = parseMetricsFromStatus;

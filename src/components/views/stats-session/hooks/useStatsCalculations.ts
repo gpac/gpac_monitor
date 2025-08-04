@@ -19,7 +19,7 @@ export interface SystemStats {
 
 export const useStatsCalculations = (
   rawFiltersFromServer: GraphFilterData[],
-  filtersWithLiveStats: SessionFilterStats[]
+  filtersWithLiveStats: SessionFilterStats[],
 ) => {
   const statsCounters = useMemo((): StatsCounters => {
     if (!rawFiltersFromServer.length) {
@@ -28,15 +28,21 @@ export const useStatsCalculations = (
 
     return {
       total: rawFiltersFromServer.length,
-      sources: rawFiltersFromServer.filter((f) => determineFilterSessionType(f) === 'source').length,
-      sinks: rawFiltersFromServer.filter((f) => determineFilterSessionType(f) === 'sink').length,
+      sources: rawFiltersFromServer.filter(
+        (f) => determineFilterSessionType(f) === 'source',
+      ).length,
+      sinks: rawFiltersFromServer.filter(
+        (f) => determineFilterSessionType(f) === 'sink',
+      ).length,
       active: filtersWithLiveStats.filter(
         (f) =>
           (f.bytes_done && f.bytes_done > 0) ||
           (f.pck_done && f.pck_done > 0) ||
-          f.status?.toLowerCase().includes('running')
+          f.status?.toLowerCase().includes('running'),
       ).length,
-      processing: filtersWithLiveStats.filter((f) => f.pck_done && f.pck_done > 0).length,
+      processing: filtersWithLiveStats.filter(
+        (f) => f.pck_done && f.pck_done > 0,
+      ).length,
     };
   }, [rawFiltersFromServer, filtersWithLiveStats]);
 
@@ -46,10 +52,16 @@ export const useStatsCalculations = (
     }
 
     return {
-      totalBytes: filtersWithLiveStats.reduce((sum, filter) => sum + (filter.bytes_done || 0), 0),
-      totalPackets: filtersWithLiveStats.reduce((sum, filter) => sum + (filter.pck_done || 0), 0),
+      totalBytes: filtersWithLiveStats.reduce(
+        (sum, filter) => sum + (filter.bytes_done || 0),
+        0,
+      ),
+      totalPackets: filtersWithLiveStats.reduce(
+        (sum, filter) => sum + (filter.pck_done || 0),
+        0,
+      ),
       activeFilters: filtersWithLiveStats.filter(
-        (f) => (f.bytes_done || 0) > 0 || (f.pck_done || 0) > 0
+        (f) => (f.bytes_done || 0) > 0 || (f.pck_done || 0) > 0,
       ).length,
     };
   }, [filtersWithLiveStats]);

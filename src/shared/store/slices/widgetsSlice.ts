@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Widget, WidgetType, WidgetConfig } from '@/types/ui/widget';
 import { createSelector } from '@reduxjs/toolkit';
+import { generateID } from '@/utils/id';
 
 export interface RootState {
   widgets: WidgetsState;
@@ -45,29 +46,38 @@ const defaultConfig: WidgetConfig = {
 
 const initialState: WidgetsState = {
   activeWidgets: [
-    {
-      id: `graph-${Date.now()}`,
-      type: WidgetType.GRAPH,
-      title: 'Pipeline Graph',
-      x: 0,
-      y: 0,
-      w: 10,
-      h: 5,
-    },
-    {
-      id: `pid-${Date.now()}`,
+      {
+      id: generateID('multi-filter'),
       type: WidgetType.MULTI_FILTER,
       title: 'Session filters overview',
       x: 0,
-      y: 8,
-      w: 10,
+      y: 0,
+      w: 8,
       h: 7,
     },
-
- 
+       {
+      id: generateID('metrics'),
+      type: WidgetType.METRICS,
+      title: 'metrics-monitor',
+      x: 9,
+      y: 0,
+      w: 4,
+      h: 7,
+    },
+    {
+      id: generateID('graph'),
+      type: WidgetType.GRAPH,
+      title: 'Pipeline Graph',
+      x: 0,
+      y: 8,
+      w: 10,
+      h: 6,
+    },
+  
   ],
   configs: {
     'metrics-1': { ...defaultConfig },
+    'multi-filter-1': { ...defaultConfig },
     'graph-1': { ...defaultConfig },
   },
   selectedNode: null,

@@ -18,7 +18,6 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
   monitoredFilters,
   onCardClick,
 }) => {
-
   return (
     <div className="flex flex-col h-full">
       <div className="mb-4 flex items-center justify-between">

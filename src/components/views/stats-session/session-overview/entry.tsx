@@ -55,7 +55,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
     const { statsCounters, systemStats } = useStatsCalculations(
       staticFilters,
-      sessionStats
+      sessionStats,
     );
 
     const { handleCardClick, handleCloseTab } = useTabManagement({
@@ -66,8 +66,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       setActiveTab,
       tabsRef,
     });
-
-
 
     if (isLoading) {
       return (
@@ -95,7 +93,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     return (
       <WidgetWrapper id={id} title="Session filters overview  ">
         <div className="h-full">
-     
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}

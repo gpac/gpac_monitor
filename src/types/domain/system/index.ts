@@ -16,12 +16,12 @@ export interface CPUStats {
 
 export const CPU_STATS_FIELDS = [
   'total_cpu_usage',
-  'process_cpu_usage', 
+  'process_cpu_usage',
   'process_memory',
   'physical_memory',
   'physical_memory_avail',
   'gpac_memory',
-  'thread_count'
+  'thread_count',
 ] as const;
 
-export type CPUStatsField = typeof CPU_STATS_FIELDS[number];
+export type CPUStatsField = (typeof CPU_STATS_FIELDS)[number];
