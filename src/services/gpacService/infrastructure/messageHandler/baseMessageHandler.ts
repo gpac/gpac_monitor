@@ -136,7 +136,14 @@ export class BaseMessageHandler {
   }
 
   private handleCpuStatsMessage(data: any): void {
-    this.cpuStatsHandler.handleCPUStats(data);
+    console.log('[BaseMessageHandler] CPU stats message received:', {
+      message: data.message,
+      hasStats: !!data.stats,
+      statsData: data.stats,
+      timestamp: data.stats?.timestamp,
+      processUsage: data.stats?.process_cpu_usage
+    });
+    this.cpuStatsHandler.handleCPUStats(data.stats);
   }
 
   private handleFilterStatsMessage(data: any): void {

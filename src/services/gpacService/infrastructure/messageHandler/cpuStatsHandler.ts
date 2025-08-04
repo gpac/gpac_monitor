@@ -86,8 +86,21 @@ export class CPUStatsHandler {
     return this.pendingCPUStatsUnsubscribe;
   }
   public handleCPUStats(stats: CPUStats): void {
-    console.log(`handleCPUStats called with timestamp ${stats.timestamp} `);
+    console.log('[CPUStatsHandler] handleCPUStats called with:', {
+      timestamp: stats?.timestamp,
+      processUsage: stats?.process_cpu_usage,
+      processMemory: stats?.process_memory,
+      nbCores: stats?.nb_cores,
+      hasSubscribers: this.cpuStatsSubscribable.hasSubscribers
+    });
+    
+    if (!stats) {
+      console.warn('[CPUStatsHandler] Received null/undefined stats data');
+      return;
+    }
+    
     this.cpuStatsSubscribable.updateDataAndNotify([stats]);
+    console.log('[CPUStatsHandler] Stats updated and subscribers notified');
   }
   public subscribeToCPUStatsUpdates(
     callback: (stats: CPUStats) => void,

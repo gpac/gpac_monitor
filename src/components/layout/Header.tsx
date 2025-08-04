@@ -1,7 +1,6 @@
 import React from 'react';
 import {
-  Play,
-  Pause,
+
   Save,
   Layout,
   Settings,
@@ -15,12 +14,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onSaveLayout, onLoadLayout }) => {
-  const [isMonitoring, setIsMonitoring] = React.useState(false);
 
-  const toggleMonitoring = () => {
-    setIsMonitoring(!isMonitoring);
-    // TODO: Add logic to start or stop monitoring
-  };
+
 
   return (
     <header className="h-16 bg-gray-900 border-b border-gray-700 px-4">
@@ -34,30 +29,7 @@ const Header: React.FC<HeaderProps> = ({ onSaveLayout, onLoadLayout }) => {
 
         {/* Actions principales */}
         <div className="flex items-center space-x-4">
-          {/* Contrôles de monitoring */}
-          <div className="flex items-center bg-gray-700 rounded-lg p-1">
-            <button
-              onClick={toggleMonitoring}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors
-                ${
-                  isMonitoring
-                    ? 'bg-red-600 text-white hover:bg-red-700'
-                    : 'bg-green-600 text-white hover:bg-green-700'
-                }`}
-            >
-              {isMonitoring ? (
-                <>
-                  <Pause className="w-4 h-4" />
-                  Stop Monitoring
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4" />
-                  Start Monitoring
-                </>
-              )}
-            </button>
-          </div>
+        
 
           {/* Séparateur */}
           <div className="h-6 w-px bg-gray-700" />

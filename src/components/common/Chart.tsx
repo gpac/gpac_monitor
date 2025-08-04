@@ -120,9 +120,9 @@ export const Chart = memo(<T extends ChartDataPoint>({
   }), [mergedConfig.tooltip])
 
   return (
-    <Card className="bg-black/80">
+    <Card className="bg-stat">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm">
+        <CardTitle className="flex items-center gap-2 text-sm stat">
           {mergedConfig.icon}
           {mergedConfig.title}
         </CardTitle>

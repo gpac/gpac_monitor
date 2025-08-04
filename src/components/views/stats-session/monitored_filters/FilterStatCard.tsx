@@ -73,11 +73,11 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
     const getSessionTypeColor = (type: FilterSessionType) => {
       switch (type) {
         case 'source':
-          return 'text-green-600 border-green-500';
+          return 'text-green-700 border-green-800';
         case 'sink':
-          return 'text-red-600 border-red-500';
+          return 'text-red-700 border-red-800';
         case 'filter':
-          return 'text-blue-600 border-blue-500';
+          return 'text-yellow-600 border-yellow-700';
       }
     };
 
@@ -95,12 +95,12 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
     return (
       <Card
-        className={`cursor-pointer bg-black/50 overflow-hidden transition-shadow hover:shadow-md ${monitoredClass}`}
+        className={`cursor-pointer bg-stat overflow-hidden transition-shadow hover:shadow-md ${monitoredClass}`}
         onClick={handleClick}
       >
         <CardHeader className="p-3 pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium truncate">
+            <CardTitle className="text-sm font-medium truncate stat">
               {filter.name}
             </CardTitle>
             <div className="flex items-center gap-1 ml-2">
@@ -116,13 +116,13 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                 variant={getSessionTypeVariant(sessionType)}
                 className={`h-5 px-1.5 text-xs ${getSessionTypeColor(sessionType)}`}
               >
-                {sessionType.toUpperCase()}
+                <span className="">{sessionType.toUpperCase()}</span>
               </Badge>
             </div>
           </div>
           <CardDescription className="mt-1 flex items-center gap-1 text-xs">
             <LuActivity className="h-3 w-3" />
-            <span className="truncate text-muted-foreground">
+            <span className="truncate text-muted-foreground stat">
               {filter.status || 'No status'}
             </span>
           </CardDescription>
@@ -133,9 +133,9 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             <div className="flex flex-col">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                 <LuCpu className="h-3 w-3" />
-                <span>I/O PIDs</span>
+                <span className="stat">I/O PIDs</span>
               </div>
-              <p className="text-xs font-medium">
+              <p className="text-xs font-medium stat">
                 {filter.nb_ipid || 0}/{filter.nb_opid || 0}
               </p>
             </div>
@@ -143,9 +143,9 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             <div className="flex flex-col">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                 <LuDatabase className="h-3 w-3" />
-                <span>Data</span>
+                <span className="stat">Data</span>
               </div>
-              <p className="text-xs font-medium">
+              <p className="text-xs font-medium  stat">
                 {formatBytes(filter.bytes_done)}
               </p>
             </div>
@@ -153,13 +153,13 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             <div className="flex flex-col">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                 <LuActivity className="h-3 w-3" />
-                <span>Activity</span>
+                <span className="stat">Activity</span>
               </div>
               <div className="flex items-center gap-1">
                 <div
                   className={`h-2 w-2 rounded-full ${getActivityColorClass(activityLevel)}`}
                 />
-                <span className="text-xs">
+                <span className="text-xs stat">
                   {getActivityLabel(activityLevel)}
                 </span>
               </div>
@@ -169,10 +169,10 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
           {hasBufferInfo && (
             <div>
               <div className="mb-1 flex justify-between text-xs">
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs text-muted-foreground stat">
                   Buffer usage
                 </span>
-                <span className="text-xs">{bufferUsage}%</span>
+                <span className="text-xs stat">{bufferUsage}%</span>
               </div>
               <Progress
                 value={bufferUsage}
@@ -185,17 +185,17 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
           <div className="flex flex-wrap gap-1 text-xs">
             {hasPackets && (
               <Badge variant="outline" className="h-4 px-1.5 py-0 text-xs">
-                {formatNumber(filter.pck_done)} pkt
+                <span className="stat-value">{formatNumber(filter.pck_done)} pkt</span>
               </Badge>
             )}
             {hasTime && (
               <Badge variant="outline" className="h-4 px-1.5 py-0 text-xs">
-                {formatTime(filter.time)}
+                <span className="stat-value">{formatTime(filter.time)}</span>
               </Badge>
             )}
             {filter.errors && filter.errors > 0 && (
               <Badge variant="destructive" className="h-4 px-1.5 py-0 text-xs">
-                {filter.errors} err
+                <span className="stat-value">{filter.errors} err</span>
               </Badge>
             )}
           </div>
