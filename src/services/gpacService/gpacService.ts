@@ -240,6 +240,17 @@ export class GpacService implements IGpacCommunication {
             config.interval || 1000,
           );
 
+      case SubscriptionType.CPU_STATS:
+        return this.messageHandler
+          .getCPUStatsHandler()
+          .subscribeToCPUStatsUpdates((data) => {
+            callback({
+              data: data as T,
+              timestamp: Date.now(),
+              subscriptionId,
+            });
+          }, config.interval || 150);
+
       default:
         throw new Error(`Unsupported subscription type: ${config.type}`);
     }
