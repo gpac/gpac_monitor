@@ -1,5 +1,6 @@
 import dagre from 'dagre';
 import { Node, Edge, Position } from '@xyflow/react';
+import { isSource } from './filterType';
 
 export enum LayoutType {
   DAGRE = 'dagre',
@@ -165,7 +166,9 @@ export function applyTopologicalLayout(
     const data = node.data;
 
     // Source nodes (no inputs) are at depth 0
-    if (data.nb_ipid === 0) return 0;
+    if (typeof data.nb_ipid === 'number' && typeof data.nb_opid === 'number') {
+      if (isSource(data as any)) return 0;
+    }
 
     // Find maximum depth among all source dependencies
     let maxDepth = 0;

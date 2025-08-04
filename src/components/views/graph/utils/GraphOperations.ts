@@ -1,5 +1,6 @@
 import { FilterType, GraphFilterData } from '@/types/domain/gpac';
 import { Node, Edge, MarkerType } from '@xyflow/react';
+import { isSource } from './filterType';
 
 const determineFilterType = (
   filterName: string,
@@ -68,7 +69,7 @@ export function createNodeFromFilter(
       visited.add(currentFilter.idx);
 
       // Source nodes (no inputs) are at depth 0
-      if (currentFilter.nb_ipid === 0) return 0;
+      if (isSource(currentFilter)) return 0;
 
       // Find maximum depth among all source dependencies
       let maxDepth = 0;

@@ -2,6 +2,10 @@ import { useCallback, useMemo, memo } from 'react';
 import { LuActivity, LuCpu, LuDatabase, LuEye } from 'react-icons/lu';
 import { GpacNodeData } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
+import { 
+  determineFilterSessionType, 
+  FilterSessionType 
+} from '@/components/views/graph/utils/filterType';
 import {
   Card,
   CardContent,
@@ -53,15 +57,36 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       return result;
     }, [filter]);
 
+    const sessionType = determineFilterSessionType(filter);
+    
+    const getSessionTypeVariant = (type: FilterSessionType) => {
+      switch (type) {
+        case 'source':
+          return 'outline' as const;
+        case 'sink':
+          return 'outline' as const;
+        case 'filter':
+          return 'secondary' as const;
+      }
+    };
+
+    const getSessionTypeColor = (type: FilterSessionType) => {
+      switch (type) {
+        case 'source':
+          return 'text-green-600 border-green-500';
+        case 'sink':
+          return 'text-red-600 border-red-500';
+        case 'filter':
+          return 'text-blue-600 border-blue-500';
+      }
+    };
+
     const handleClick = useCallback(() => {
       if (onClick && filter.idx !== undefined) {
         onClick(filter.idx);
       }
     }, [filter.idx, onClick]);
 
-    const statusVariant = filter.status?.includes('error')
-      ? 'destructive'
-      : 'secondary';
     const monitoredClass = isMonitored ? 'border border-primary/50' : 'border';
     const hasBufferInfo = filter.ipid && Object.keys(filter.ipid).length > 0;
     const hasPackets = filter.pck_done && filter.pck_done > 0;
@@ -70,7 +95,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
     return (
       <Card
-        className={`cursor-pointer bg-black overflow-hidden transition-shadow hover:shadow-md ${monitoredClass}`}
+        className={`cursor-pointer bg-black/50 overflow-hidden transition-shadow hover:shadow-md ${monitoredClass}`}
         onClick={handleClick}
       >
         <CardHeader className="p-3 pb-2">
@@ -87,8 +112,11 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                   <LuEye className="h-3 w-3" />
                 </Badge>
               )}
-              <Badge variant={statusVariant} className="h-5 px-1.5 text-xs">
-                {filter.type || 'filter'}
+              <Badge 
+                variant={getSessionTypeVariant(sessionType)} 
+                className={`h-5 px-1.5 text-xs ${getSessionTypeColor(sessionType)}`}
+              >
+                {sessionType.toUpperCase()}
               </Badge>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/useMultiFilterMonitor';
 import { useTabManagement } from '@/components/views/stats-session/hooks/useTabManagement';
+import { useStatsCalculations } from '@/components/views/stats-session/hooks/useStatsCalculations';
 import WidgetWrapper from '@/components/common/WidgetWrapper';
 import { WidgetProps } from '@/types/ui/widget';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
@@ -51,6 +52,11 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
         };
       });
     }, [staticFilters, sessionStats]);
+
+    const { statsCounters, systemStats } = useStatsCalculations(
+      staticFilters,
+      sessionStats
+    );
 
     const { handleCardClick, handleCloseTab } = useTabManagement({
       rawFiltersFromServer: enrichedGraphFilterCollection,
@@ -105,25 +111,14 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
             <TabsContent value="main" className="flex-1 p-4">
               <DashboardTabContent
-                systemStats={{
-                  activeFilters: enrichedGraphFilterCollection.filter(
-                    (f) => f.status === 'active',
-                  ).length,
-                  totalBytes: enrichedGraphFilterCollection.reduce(
-                    (sum, f) => sum + f.bytes_done,
-                    0,
-                  ),
-                  totalPackets: enrichedGraphFilterCollection.reduce(
-                    (sum, f) => sum + f.pck_done,
-                    0,
-                  ),
-                }}
+                systemStats={systemStats}
+                statsCounters={statsCounters}
                 filtersWithLiveStats={enrichedGraphFilterCollection}
                 filtersMatchingCriteria={enrichedGraphFilterCollection}
                 loading={isLoading}
                 monitoredFilters={monitoredFiltersState}
                 onCardClick={handleCardClick}
-                refreshInterval="1000"
+                refreshInterval="1s"
               />
             </TabsContent>
 

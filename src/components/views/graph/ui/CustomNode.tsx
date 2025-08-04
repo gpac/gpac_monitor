@@ -1,6 +1,10 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '../../../../types/domain/gpac/model';
+import { 
+  determineFilterSessionType, 
+
+} from '../utils/filterType';
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
@@ -10,19 +14,25 @@ interface CustomNodeProps extends NodeProps {
 }
 
 export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
-  const { label, filterType, ipid, opid, nb_ipid, nb_opid } = data;
+  const { label,ipid, opid, nb_ipid, nb_opid } = data;
+  const sessionType = determineFilterSessionType(data);
+  
   // Determine node type for background color (according to legend, pastel style)
   const getNodeTypeColor = (): string => {
-    if (nb_ipid === 0) return '#d1fae5';
-    if (nb_opid === 0) return '#fee2e2';
-    return '#dbeafe';
+    switch (sessionType) {
+      case 'source': return '#d1fae5';
+      case 'sink': return '#fee2e2';
+      case 'filter': return '#dbeafe';
+    }
   };
 
   // Determine node border color
   const getNodeBorderColor = (): string => {
-    if (nb_ipid === 0) return '#34d399';
-    if (nb_opid === 0) return '#f87171';
-    return '#60a5fa';
+    switch (sessionType) {
+      case 'source': return '#34d399';
+      case 'sink': return '#f87171';
+      case 'filter': return '#60a5fa';
+    }
   };
 
   // Create input handles only if nb_ipid > 0
@@ -91,14 +101,14 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
           <div
             className="text-white text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
             title={
-              nb_ipid === 0
-                ? 'Input Filter'
-                : nb_opid === 0
-                  ? 'Output Filter'
+              sessionType === 'source'
+                ? 'Source Filter'
+                : sessionType === 'sink'
+                  ? 'Sink Filter'
                   : 'Processing Filter'
             }
           >
-            {filterType.toUpperCase()}
+            {sessionType.toUpperCase()}
           </div>
         </div>
       </div>
