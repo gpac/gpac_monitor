@@ -5,18 +5,9 @@ import { generateID } from '@/utils/id';
 import { SessionStatsHandler } from './sessionStatsHandler';
 import { FilterStatsHandler } from './filterStatsHandler';
 
-export interface MessageHandlerCallbacks {
-  onUpdateFilterData: (payload: { idx: number; data: any }) => void;
-  onUpdateGraphData: (data: any) => void;
-  onSetLoading: (loading: boolean) => void;
-  onSetFilterDetails: (filter: any) => void;
-  onUpdateSessionStats: (stats: any) => void;
-}
+import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
 
-export interface MessageHandlerDependencies {
-  isConnected: () => boolean;
-  send: (message: any) => Promise<void>;
-}
+export type { MessageHandlerCallbacks, MessageHandlerDependencies };
 
 export class BaseMessageHandler {
   private sessionStatsHandler: SessionStatsHandler;

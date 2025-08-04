@@ -2,7 +2,6 @@ import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { GpacMessage } from '@/types';
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
-import { RootState } from '../index';
 
 interface ArgumentUpdate {
   filterId: string;
@@ -61,7 +60,7 @@ export const updateFilterArgument = createAsyncThunk(
     try {
       // Get filter name from state using the selector
       const filterName = selectFilterNameById(
-        getState() as RootState,
+        getState() as any,
         filterId,
       );
 

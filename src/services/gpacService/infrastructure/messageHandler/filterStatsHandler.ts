@@ -2,7 +2,7 @@ import type { MonitoredFilterStats } from '@/types/domain/gpac';
 import { WSMessageType } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { generateID } from '@/utils/id';
-import { MessageHandlerDependencies } from './baseMessageHandler';
+import { MessageHandlerDependencies } from './types';
 
 export class FilterStatsHandler {
   constructor(
