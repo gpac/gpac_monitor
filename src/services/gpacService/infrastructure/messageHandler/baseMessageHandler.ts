@@ -6,12 +6,14 @@ import { SessionStatsHandler } from './sessionStatsHandler';
 import { FilterStatsHandler } from './filterStatsHandler';
 
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
+import { CPUStatsHandler } from './cpuStatsHandler';
 
 export type { MessageHandlerCallbacks, MessageHandlerDependencies };
 
 export class BaseMessageHandler {
   private sessionStatsHandler: SessionStatsHandler;
   private filterStatsHandler: FilterStatsHandler;
+  private cpuStatsHandler: CPUStatsHandler;
 
   constructor(
     private currentFilterId: () => number | null,
@@ -32,6 +34,10 @@ export class BaseMessageHandler {
       dependencies,
       isLoaded || (() => true),
     );
+    this.cpuStatsHandler = new CPUStatsHandler(
+      dependencies,
+      isLoaded || (() => true),
+    );
   }
 
   // Expose handler methods
@@ -41,6 +47,10 @@ export class BaseMessageHandler {
   public getFilterStatsHandler(): FilterStatsHandler {
     return this.filterStatsHandler;
   }
+  public getCPUStatsHandler(): CPUStatsHandler {
+    return this.cpuStatsHandler;
+  }
+  
 
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
     try {
@@ -126,8 +136,9 @@ export class BaseMessageHandler {
     }
   }
 
-  private handleCpuStatsMessage(_data: any): void {
-    // CPU stats received
+  private handleCpuStatsMessage(data: any): void {
+    this.cpuStatsHandler.handleCPUStats(data);
+    
   }
 
   private handleFilterStatsMessage(data: any): void {
