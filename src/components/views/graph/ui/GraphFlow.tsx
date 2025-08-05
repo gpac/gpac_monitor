@@ -13,7 +13,6 @@ import {
   EdgeChange,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import Legend from '../../../common/Legend';
 import { CustomNode } from '../../../views/graph/ui/CustomNode';
 
 interface GraphFlowProps {
@@ -105,8 +104,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           onDrag={handleMiniMapDrag}
         />
 
-        {/* Légende */}
-        <Legend />
+    
       </ReactFlow>
     </div>
   );

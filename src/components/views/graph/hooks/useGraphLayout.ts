@@ -35,10 +35,18 @@ const performDagreLayout = (nodes: Node[], edges: Edge[]): Node[] => {
 
   nodes.forEach((node) => {
     const nodeData = node.data;
-    if (nodeData && typeof nodeData.nb_opid === 'number' && nodeData.nb_opid === 0) {
+    if (
+      nodeData &&
+      typeof nodeData.nb_opid === 'number' &&
+      nodeData.nb_opid === 0
+    ) {
       sinkNodes.push(node.id);
     }
-    if (nodeData && typeof nodeData.nb_ipid === 'number' && nodeData.nb_ipid === 0) {
+    if (
+      nodeData &&
+      typeof nodeData.nb_ipid === 'number' &&
+      nodeData.nb_ipid === 0
+    ) {
       sourceNodes.push(node.id);
     }
   });
@@ -86,7 +94,7 @@ export const useGraphLayout = ({
         return JSON.parse(savedLayout) as LayoutOptions;
       }
     } catch (e) {}
-    
+
     return {
       type: LayoutType.DAGRE,
       direction: 'LR',
@@ -96,19 +104,22 @@ export const useGraphLayout = ({
     };
   });
 
-  const applyLayoutWithNodes = useCallback((nodes: Node[]) => {
-    if (nodes.length === 0) return;
-    
-    isApplyingLayout.current = true;
-    const layoutedNodes = performDagreLayout(nodes, localEdges);
-    
-    setLocalNodes(layoutedNodes);
-    nodesRef.current = layoutedNodes;
-    
-    setTimeout(() => {
-      isApplyingLayout.current = false;
-    }, 100);
-  }, [localEdges, setLocalNodes, nodesRef, isApplyingLayout]);
+  const applyLayoutWithNodes = useCallback(
+    (nodes: Node[]) => {
+      if (nodes.length === 0) return;
+
+      isApplyingLayout.current = true;
+      const layoutedNodes = performDagreLayout(nodes, localEdges);
+
+      setLocalNodes(layoutedNodes);
+      nodesRef.current = layoutedNodes;
+
+      setTimeout(() => {
+        isApplyingLayout.current = false;
+      }, 100);
+    },
+    [localEdges, setLocalNodes, nodesRef, isApplyingLayout],
+  );
 
   const applyLayout = useCallback(() => {
     applyLayoutWithNodes(localNodes);
@@ -132,7 +143,10 @@ export const useGraphLayout = ({
   useEffect(() => {
     try {
       if (layoutOptions.type) {
-        localStorage.setItem('gpacMonitorLayout', JSON.stringify(layoutOptions));
+        localStorage.setItem(
+          'gpacMonitorLayout',
+          JSON.stringify(layoutOptions),
+        );
       }
     } catch (e) {}
   }, [layoutOptions]);

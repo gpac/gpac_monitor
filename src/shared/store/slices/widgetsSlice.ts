@@ -52,7 +52,7 @@ const initialState: WidgetsState = {
       title: 'Session filters overview',
       x: 0,
       y: 0,
-      w: 7,
+      w: 10,
       h: 6,
     },
     {
@@ -70,7 +70,7 @@ const initialState: WidgetsState = {
       title: 'Pipeline Graph',
       x: 0,
       y: 8,
-      w: 10,
+      w: 7,
       h: 6,
     },
   ],

@@ -2,6 +2,7 @@ import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '../../../../types/domain/gpac/model';
 import { determineFilterSessionType } from '../utils/filterType';
+import { useGraphColors } from '../hooks/useGraphColors';
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
@@ -10,33 +11,12 @@ interface CustomNodeProps extends NodeProps {
   } & Record<string, unknown>;
 }
 
-export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
+export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected, ...nodeProps }) => {
   const { label, ipid, opid, nb_ipid, nb_opid } = data;
   const sessionType = determineFilterSessionType(data);
-
-  // Determine node type for background color (according to legend, pastel style)
-  const getNodeTypeColor = (): string => {
-    switch (sessionType) {
-      case 'source':
-        return '#d1fae5';
-      case 'sink':
-        return '#fee2e2';
-      case 'filter':
-        return '#dbeafe';
-    }
-  };
-
-  // Determine node border color
-  const getNodeBorderColor = (): string => {
-    switch (sessionType) {
-      case 'source':
-        return '#34d399';
-      case 'sink':
-        return '#f87171';
-      case 'filter':
-        return '#60a5fa';
-    }
-  };
+  
+  const node = { data, position: { x: 0, y: 0 }, ...nodeProps };
+  const [textColor, backgroundColor] = useGraphColors(node);
 
   // Create input handles only if nb_ipid > 0
   const inputHandles =
@@ -73,8 +53,8 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
         transition-all duration-200
       `}
       style={{
-        borderColor: getNodeBorderColor(),
-        backgroundColor: getNodeTypeColor(),
+        borderColor: backgroundColor,
+        backgroundColor: backgroundColor + '40',
         borderWidth: '2px',
       }}
     >
@@ -87,7 +67,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
           style={{
             top: getHandleY(index, inputHandles.length),
             transform: 'translateY(-50%)',
-            background: getNodeBorderColor(),
+            background: backgroundColor,
             width: '10px',
             height: '10px',
             border: '2px solid white',
@@ -96,13 +76,14 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
         />
       ))}
 
-      <div className="rounded-t-xl -m-4 mb-2 px-4 py-3 shadow-sm bg-gray-800">
+      <div className="rounded-t-xl -m-4 mb-2 px-4 py-3 shadow-sm" style={{ backgroundColor }}>
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-white text-sm drop-shadow-sm">
+          <h3 className="font-bold text-sm drop-shadow-sm" style={{ color: textColor }}>
             {label}
           </h3>
           <div
-            className="text-white text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
+            className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
+            style={{ color: textColor }}
             title={
               sessionType === 'source'
                 ? 'Source Filter'
@@ -123,12 +104,12 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
           <div className="flex-1 text-xs text-gray-600 pr-2">
             {nb_ipid > 0 && (
               <>
-                <span className="font-medium text-green-700 block text-left">
+                <span className="font-medium text-gray-300 block text-left">
                   INPUTS
                 </span>
                 <div className="mt-1">
                   {Object.keys(ipid).map((pidId) => (
-                    <div key={pidId} className="text-xs text-gray-500 truncate">
+                    <div key={pidId} className="text-xs text-gray-200 truncate">
                       {pidId}
                     </div>
                   ))}
@@ -141,14 +122,14 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
           <div className="flex-1 text-xs text-gray-800 pl-2">
             {nb_opid > 0 && (
               <>
-                <span className="font-medium text-blue-700 block text-right">
+                <span className="font-medium text-gray-300 block text-right">
                   OUTPUTS
                 </span>
                 <div className="mt-1">
                   {Object.keys(opid).map((pidId) => (
                     <div
                       key={pidId}
-                      className="text-xs text-gray-800 text-right truncate"
+                      className="text-xs text-gray-200 text-right truncate"
                     >
                       {pidId}
                     </div>
@@ -160,7 +141,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
         </div>
 
         {/* Statistics */}
-        <div className="text-xs text-gray-600 pt-2 border-t border-gray-500 text-center">
+        <div className="text-xs text-gray-200 pt-2 border-t border-gray-200 text-center">
           IPIDs: {nb_ipid} | OPIDs: {nb_opid}
         </div>
       </div>
@@ -175,7 +156,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected }) => {
           style={{
             top: getHandleY(index, outputHandles.length),
             transform: 'translateY(-50%)',
-            background: getNodeBorderColor(),
+            background: backgroundColor,
             width: '10px',
             height: '10px',
             border: '2px solid white',
