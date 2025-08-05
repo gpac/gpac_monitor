@@ -59,7 +59,6 @@ export const CPUChart = memo(({ currentCPUPercent, isLive }: CPUChartProps) => {
       currentValue={currentCPUPercent}
       isLive={isLive}
       createDataPoint={createDataPoint}
-      
     />
   );
 });

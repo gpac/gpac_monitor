@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { Node, Edge, useNodesState, useEdgesState, useNodesInitialized } from '@xyflow/react';
+import {
+  Node,
+  Edge,
+  useNodesState,
+  useEdgesState,
+  useNodesInitialized,
+} from '@xyflow/react';
 import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch } from '@/shared/hooks/redux';
@@ -88,14 +94,14 @@ const useGraphMonitor = () => {
   // Boolean guard to prevent infinite loops - like colleague's approach
   const [hasLayoutRun, setHasLayoutRun] = useState(false);
   const nodesInitialized = useNodesInitialized();
-  
+
   // Reset layout flag when nodes change (new graph data)
   useEffect(() => {
     if (nodes.length > 0 && nodes.length !== nodesRef.current.length) {
       setHasLayoutRun(false);
     }
   }, [nodes.length]);
-  
+
   // Auto-layout hook using useNodesInitialized with boolean guard
   useEffect(() => {
     if (hasLayoutRun) {
@@ -110,7 +116,7 @@ const useGraphMonitor = () => {
     if (localNodes.some((node) => !node.measured)) {
       return;
     }
-    if (!localNodes.some(n => n.data && n.data.name)) {
+    if (!localNodes.some((n) => n.data && n.data.name)) {
       return;
     }
 

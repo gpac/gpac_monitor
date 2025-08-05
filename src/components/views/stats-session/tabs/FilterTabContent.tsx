@@ -15,15 +15,12 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   isMonitored,
   isActive = false,
 }) => {
-
-
   // Subscribe to filter stats only when this tab is active
   const { stats: filterStats, isSubscribed } = useFilterStats(
     filter.idx,
     isActive, // Only subscribe when tab is active
     1000,
   );
-
 
   // Merge static filter data with live stats
   const enrichedFilter = filterStats

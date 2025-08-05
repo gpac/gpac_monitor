@@ -17,20 +17,20 @@ export interface LayoutOptions {
   respectExistingPositions?: boolean;
 }
 
-function applyDagreLayout(
-  nodes: Node[],
-  edges: Edge[],
-): Node[] {
+function applyDagreLayout(nodes: Node[], edges: Edge[]): Node[] {
   if (nodes.length === 0) return nodes;
 
   // Create a dagre graph - simple like in the working example
   const g = new dagre.graphlib.Graph();
-  g.setGraph({ rankdir: "LR" }); 
+  g.setGraph({ rankdir: 'LR' });
 
- 
-  nodes.forEach((node) => g.setNode(node.id, { width: node.measured?.width, height: node.measured?.height }))
-  edges.forEach((edge) => g.setEdge(edge.source, edge.target, { points: [] })) // We don't need the points
-
+  nodes.forEach((node) =>
+    g.setNode(node.id, {
+      width: node.measured?.width,
+      height: node.measured?.height,
+    }),
+  );
+  edges.forEach((edge) => g.setEdge(edge.source, edge.target, { points: [] })); // We don't need the points
 
   // Perform the layout
   dagre.layout(g);
@@ -41,22 +41,19 @@ function applyDagreLayout(
     if (!dagreNode) return node;
 
     const { x, y, width, height } = dagreNode;
-    return { 
-      ...node, 
-      position: { 
-        x: x - width / 2, 
-        y: y - height / 2 
+    return {
+      ...node,
+      position: {
+        x: x - width / 2,
+        y: y - height / 2,
       },
       targetPosition: Position.Left,
-      sourcePosition: Position.Right
+      sourcePosition: Position.Right,
     };
   });
 }
 
-export function applyGraphLayout(
-  nodes: Node[],
-  edges: Edge[],
-): Node[] {
+export function applyGraphLayout(nodes: Node[], edges: Edge[]): Node[] {
   // Use simple dagre layout like the working example
   return applyDagreLayout(nodes, edges);
 }
@@ -83,10 +80,7 @@ export function getLayoutedElements(
     },
   }));
 
-  const layoutedNodes = applyDagreLayout(
-    nodesWithDimensions,
-    edges,
-  );
+  const layoutedNodes = applyDagreLayout(nodesWithDimensions, edges);
 
   return { nodes: layoutedNodes, edges };
 }
@@ -95,10 +89,7 @@ export function getLayoutedElements(
  * Applies layout with topological ordering to ensure proper node placement
  * Follows dependency chain via source_idx for correct ordering
  */
-export function applyTopologicalLayout(
-  nodes: Node[],
-  edges: Edge[],
-): Node[] {
+export function applyTopologicalLayout(nodes: Node[], edges: Edge[]): Node[] {
   // Build dependency chain using source_idx
   const nodeMap = new Map<string, Node>();
   nodes.forEach((node) => nodeMap.set(node.id, node));

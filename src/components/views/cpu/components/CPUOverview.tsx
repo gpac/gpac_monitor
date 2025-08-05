@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { bytesToHumanReadable, formatPercent } from '@/utils/formatUtils';
 
-
 interface CPUOverviewProps {
   cpuUsage: number;
   memoryPercent?: number;
@@ -21,7 +20,6 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
       <Card className="bg-stat border-0">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
-         
             CPU Usage
           </CardTitle>
         </CardHeader>
@@ -30,7 +28,6 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
             <span className="text-md font-semibold stat">
               {isLoading ? '...' : formatPercent(cpuUsage)}
             </span>
-      
           </div>
         </CardContent>
       </Card>
@@ -38,18 +35,16 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
       <Card className="bg-stat border-0">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
-        
             Memory
           </CardTitle>
         </CardHeader>
         <CardContent>
-        <div className="flex  items-center ">
+          <div className="flex  items-center ">
             <span className="text-md font-semibold stat">
               {isLoading
                 ? '...'
                 : bytesToHumanReadable(memoryProcess).toString()}
             </span>
-        
           </div>
         </CardContent>
       </Card>
@@ -57,7 +52,6 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
       <Card className="bg-stat border-0">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
-      
             System
           </CardTitle>
         </CardHeader>

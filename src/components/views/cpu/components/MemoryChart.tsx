@@ -34,7 +34,6 @@ export const MemoryChart = memo(
       <Card className="bg-stat border-0">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm stat-label">
-       
             Memory Usage Overview
           </CardTitle>
         </CardHeader>

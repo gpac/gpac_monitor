@@ -41,8 +41,8 @@
   .stat {
     @apply text-gray-300;
   }
-  .stat-label{
-    @apply text-gray-400
+  .stat-label {
+    @apply text-gray-400;
   }
   .stat-value {
     @apply text-gray-200;

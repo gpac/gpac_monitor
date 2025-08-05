@@ -73,8 +73,10 @@ const StatsCard: React.FC<StatsCardProps> = ({
         <CardTitle className="text-xs font-medium text-muted-foreground stat-label">
           {title}
         </CardTitle>
-        <div className="flex items-center gap-1 stat-label
-        ">
+        <div
+          className="flex items-center gap-1 stat-label
+        "
+        >
           {activityLevel && (
             <ActivityIndicator level={activityLevel} size="sm" />
           )}

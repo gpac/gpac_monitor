@@ -87,9 +87,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       }
     }, [filter.idx, onClick]);
 
-    const monitoredClass = isMonitored
-      ? 'border border-red-900'
-      : 'border-0';
+    const monitoredClass = isMonitored ? 'border border-red-900' : 'border-0';
     const hasBufferInfo = filter.ipid && Object.keys(filter.ipid).length > 0;
     const hasPackets = filter.pck_done && filter.pck_done > 0;
     const hasTime = filter.time && filter.time > 0;
@@ -114,13 +112,17 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                   <LuEye className="h-3 w-3" />
                 </Badge>
               )}
-                <Badge
+              <Badge
                 variant={getSessionTypeVariant(sessionType)}
                 className={`h-2 px-0.5 text-[10px] leading-none ${getSessionTypeColor(sessionType)}`}
-                style={{ minHeight: '16px', paddingTop: '0', paddingBottom: '0' }}
-                >
+                style={{
+                  minHeight: '16px',
+                  paddingTop: '0',
+                  paddingBottom: '0',
+                }}
+              >
                 <span className="">{sessionType}</span>
-                </Badge>
+              </Badge>
             </div>
           </div>
           <CardDescription className="mt-1 flex items-center gap-1 text-xs">
@@ -135,7 +137,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
           <div className="grid grid-cols-3 gap-3">
             <div className="flex flex-col">
               <div className="flex items-center gap-1 text-xs  mb-1">
-           
                 <span className="stat stat-label">I/O PIDs</span>
               </div>
               <p className="text-xs font-medium stat">
@@ -145,7 +146,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
             <div className="flex flex-col">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-              
                 <span className="stat stat-label">Data</span>
               </div>
               <p className="text-xs font-medium  stat">
