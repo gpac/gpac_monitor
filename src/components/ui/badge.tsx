@@ -12,11 +12,12 @@ export function Badge({
 }: BadgeProps) {
   // Different style variants for the badge
   const variantStyles = {
-    default: 'bg-primary text-primary-foreground hover:bg-primary/80',
-    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-    destructive:
-      'bg-destructive text-destructive-foreground hover:bg-destructive/80',
-    outline: 'border text-foreground',
+    default: "border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80",
+        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        warning: "border-yellow-600 bg-black text-yellow-600 shadow hover:bg-warning/80",
+        destructive: "border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80",
+        outline: "text-foreground",
+
     success: 'bg-green-600/20 text-green-400 border-green-500/30',
   };
 

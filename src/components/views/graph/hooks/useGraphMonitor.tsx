@@ -1,6 +1,5 @@
-// Core hook implementation with modular composition
-import { useEffect, useRef } from 'react';
-import { Node, Edge, useNodesState, useEdgesState } from '@xyflow/react';
+import { useEffect, useRef, useState } from 'react';
+import { Node, Edge, useNodesState, useEdgesState, useNodesInitialized } from '@xyflow/react';
 import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch } from '@/shared/hooks/redux';
@@ -86,13 +85,45 @@ const useGraphMonitor = () => {
     }
   }, [nodes, edges, setLocalNodes, setLocalEdges]);
 
-  // Apply layout when nodes change significantly
+  // Boolean guard to prevent infinite loops - like colleague's approach
+  const [hasLayoutRun, setHasLayoutRun] = useState(false);
+  const nodesInitialized = useNodesInitialized();
+  
+  // Reset layout flag when nodes change (new graph data)
   useEffect(() => {
     if (nodes.length > 0 && nodes.length !== nodesRef.current.length) {
-      // Only auto-layout for significant changes to prevent layout jumps
-      autoLayout();
+      setHasLayoutRun(false);
     }
-  }, [nodes.length, autoLayout]);
+  }, [nodes.length]);
+  
+  // Auto-layout hook using useNodesInitialized with boolean guard
+  useEffect(() => {
+    if (hasLayoutRun) {
+      return;
+    }
+    if (!nodesInitialized) {
+      return;
+    }
+    if (localNodes.length === 0) {
+      return;
+    }
+    if (localNodes.some((node) => !node.measured)) {
+      return;
+    }
+    if (!localNodes.some(n => n.data && n.data.name)) {
+      return;
+    }
+
+    // Run the layout and set guard flag
+    autoLayout();
+    setHasLayoutRun(true);
+  }, [nodesInitialized, localNodes, hasLayoutRun, autoLayout]); // Include hasLayoutRun
+
+  // Manual layout trigger - like colleague's magic button
+  const triggerLayout = () => {
+    setHasLayoutRun(false); // Reset flag to allow re-layout
+    autoLayout();
+  };
 
   return {
     isLoading,
@@ -107,6 +138,7 @@ const useGraphMonitor = () => {
     handleLayoutChange,
     autoLayout,
     applyLayout,
+    triggerLayout, // Manual trigger like colleague's magic button
   };
 };
 

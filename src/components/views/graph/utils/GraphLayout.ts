@@ -20,93 +20,45 @@ export interface LayoutOptions {
 function applyDagreLayout(
   nodes: Node[],
   edges: Edge[],
-  options: LayoutOptions = {},
 ): Node[] {
-  // Create a new directed graph
+  if (nodes.length === 0) return nodes;
+
+  // Create a dagre graph - simple like in the working example
   const g = new dagre.graphlib.Graph();
+  g.setGraph({ rankdir: "LR" }); 
 
-  // Determine if layout is horizontal
-  const direction = options.direction || 'LR';
-  const isHorizontal = direction === 'LR' || direction === 'RL';
+ 
+  nodes.forEach((node) => g.setNode(node.id, { width: node.measured?.width, height: node.measured?.height }))
+  edges.forEach((edge) => g.setEdge(edge.source, edge.target, { points: [] })) // We don't need the points
 
-  // Set graph direction and spacing options with better alignment
-  g.setGraph({
-    rankdir: direction,
-    align: 'UL', // Upper-left alignment for better node positioning
-    nodesep: options.nodeSeparation || 50,
-    ranksep: options.rankSeparation || 100,
-    marginx: options.paddingX || 20,
-    marginy: options.paddingY || 20,
-  });
 
-  g.setDefaultEdgeLabel(() => ({}));
-
-  // Add nodes to the graph with node dimensions
-  nodes.forEach((node) => {
-    // Only apply layout to nodes that pass the filter (if provided)
-    if (options.nodeFilter && !options.nodeFilter(node)) {
-      return;
-    }
-    g.setNode(node.id, {
-      width: node.measured?.width || 200,
-      height: node.measured?.height || 100,
-    });
-  });
-
-  // Add edges to the graph
-  edges.forEach((edge) => {
-    g.setEdge(edge.source, edge.target);
-  });
-
-  // Calculate the layout
+  // Perform the layout
   dagre.layout(g);
 
-  // Apply the calculated layout to the nodes
+  // Update the node positions - exactly like in the working example
   return nodes.map((node) => {
-    const nodeWithPosition = { ...node };
-
-    // Skip nodes that don't pass the filter
-    if (options.nodeFilter && !options.nodeFilter(node)) {
-      return nodeWithPosition;
-    }
-
     const dagreNode = g.node(node.id);
-
-    // Skip if the node wasn't processed by dagre
-    if (!dagreNode) {
-      return nodeWithPosition;
-    }
+    if (!dagreNode) return node;
 
     const { x, y, width, height } = dagreNode;
-
-    // Set source and target positions based on layout direction
-    if (isHorizontal) {
-      nodeWithPosition.targetPosition = Position.Left;
-      nodeWithPosition.sourcePosition = Position.Right;
-    } else {
-      nodeWithPosition.targetPosition = Position.Top;
-      nodeWithPosition.sourcePosition = Position.Bottom;
-    }
-
-    // Center positioning with width/height offset
-    // We shift the dagre node position (anchor=center center) to the top left
-    // so it matches the React Flow node anchor point (top left).
-    nodeWithPosition.position = {
-      x: x - width / 2,
-      y: y - height / 2,
+    return { 
+      ...node, 
+      position: { 
+        x: x - width / 2, 
+        y: y - height / 2 
+      },
+      targetPosition: Position.Left,
+      sourcePosition: Position.Right
     };
-
-    return nodeWithPosition;
   });
 }
 
 export function applyGraphLayout(
   nodes: Node[],
   edges: Edge[],
-  options: LayoutOptions = {},
 ): Node[] {
-  // Use topological layout by default for better ordering
-  return applyTopologicalLayout(nodes, edges, options);
+  // Use simple dagre layout like the working example
+  return applyDagreLayout(nodes, edges);
 }
 
 /**
@@ -116,15 +68,10 @@ export function applyGraphLayout(
 export function getLayoutedElements(
   nodes: Node[],
   edges: Edge[],
-  direction: 'TB' | 'LR' | 'BT' | 'RL' = 'LR',
   nodeWidth: number = 200,
   nodeHeight: number = 100,
 ) {
-  const layoutOptions: LayoutOptions = {
-    direction,
-    nodeSeparation: 50,
-    rankSeparation: direction === 'LR' || direction === 'RL' ? 150 : 100,
-  };
+  // Layout options no longer needed with simple dagre approach
 
   // Apply dimensions to nodes if not present
   const nodesWithDimensions = nodes.map((node) => ({
@@ -139,7 +86,6 @@ export function getLayoutedElements(
   const layoutedNodes = applyDagreLayout(
     nodesWithDimensions,
     edges,
-    layoutOptions,
   );
 
   return { nodes: layoutedNodes, edges };
@@ -152,7 +98,6 @@ export function getLayoutedElements(
 export function applyTopologicalLayout(
   nodes: Node[],
   edges: Edge[],
-  options: LayoutOptions = {},
 ): Node[] {
   // Build dependency chain using source_idx
   const nodeMap = new Map<string, Node>();
@@ -197,16 +142,9 @@ export function applyTopologicalLayout(
     nodesByDepth.get(depth)!.push(node);
   });
 
-  // Create a more balanced layout by ensuring better vertical spacing
-  // Configure dagre for vertical distribution of nodes at same depth
-  const dagreOptions: LayoutOptions = {
-    ...options,
-    direction: options.direction || 'LR',
-    nodeSeparation: options.nodeSeparation || 80, // Increased for better vertical spacing
-    rankSeparation: options.rankSeparation || 150,
-  };
+  // Use simple dagre approach - no complex options needed
 
   // Apply dagre layout - it will handle the vertical distribution automatically
   // when it processes the dependency graph structure
-  return applyDagreLayout(nodes, edges, dagreOptions);
+  return applyDagreLayout(nodes, edges);
 }

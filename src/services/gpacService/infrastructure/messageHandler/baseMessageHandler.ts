@@ -136,13 +136,6 @@ export class BaseMessageHandler {
   }
 
   private handleCpuStatsMessage(data: any): void {
-    console.log('[BaseMessageHandler] CPU stats message received:', {
-      message: data.message,
-      hasStats: !!data.stats,
-      statsData: data.stats,
-      timestamp: data.stats?.timestamp,
-      processUsage: data.stats?.process_cpu_usage,
-    });
     this.cpuStatsHandler.handleCPUStats(data.stats);
   }
 
@@ -150,10 +143,7 @@ export class BaseMessageHandler {
     if (data.idx !== undefined) {
       this.filterStatsHandler.handleFilterStatsUpdate(data);
     } else {
-      console.warn(
-        '[BaseMessageHandler] filter_stats message missing idx:',
-        data,
-      );
+      // filter_stats message missing idx
     }
   }
 

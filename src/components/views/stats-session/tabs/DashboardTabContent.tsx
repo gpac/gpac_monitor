@@ -70,10 +70,11 @@ const StatsCard: React.FC<StatsCardProps> = ({
       className={`transition-all hover:shadow-md bg-stat border-0 ${className}`}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-2">
-        <CardTitle className="text-xs font-medium text-muted-foreground">
+        <CardTitle className="text-xs font-medium text-muted-foreground stat-label">
           {title}
         </CardTitle>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 stat-label
+        ">
           {activityLevel && (
             <ActivityIndicator level={activityLevel} size="sm" />
           )}
@@ -106,7 +107,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
                   ? 'bg-red-500'
                   : progress > 50
                     ? 'bg-yellow-500'
-                    : 'bg-green-500'
+                    : 'bg-green-00'
               }
             />
             <p className="text-xs text-muted-foreground mt-1">

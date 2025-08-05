@@ -1,5 +1,5 @@
 import { useCallback, useMemo, memo } from 'react';
-import { LuActivity, LuCpu, LuDatabase, LuEye } from 'react-icons/lu';
+import { LuActivity, LuEye } from 'react-icons/lu';
 import { GpacNodeData } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
 import {
