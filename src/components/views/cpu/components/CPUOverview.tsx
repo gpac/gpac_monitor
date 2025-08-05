@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { bytesToHumanReadable, formatPercent } from '@/utils/formatUtils';
-import { LuCpu, LuMemoryStick, LuActivity } from 'react-icons/lu';
+
 
 interface CPUOverviewProps {
   cpuUsage: number;
@@ -18,46 +18,46 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
 }) => {
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-      <Card className="bg-stat">
+      <Card className="bg-stat border-0">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm stat">
-            <LuCpu className="h-4 w-4" />
+          <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
+         
             CPU Usage
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-baseline">
-            <span className="text-2xl font-semibold stat">
+          <div className="flex  items-center gap-2">
+            <span className="text-md font-semibold stat">
               {isLoading ? '...' : formatPercent(cpuUsage)}
             </span>
-            <span className="ml-2 text-xs text-muted-foreground">Process</span>
+      
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-stat">
+      <Card className="bg-stat border-0">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm stat">
-            <LuMemoryStick className="h-4 w-4" />
+          <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
+        
             Memory
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-baseline">
-            <span className="text-2xl font-semibold stat">
+        <div className="flex  items-center ">
+            <span className="text-md font-semibold stat">
               {isLoading
                 ? '...'
                 : bytesToHumanReadable(memoryProcess).toString()}
             </span>
-            <span className="ml-2 text-xs text-muted-foreground">Used</span>
+        
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-stat">
+      <Card className="bg-stat border-0">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm stat">
-            <LuActivity className="h-4 w-4" />
+          <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
+      
             System
           </CardTitle>
         </CardHeader>

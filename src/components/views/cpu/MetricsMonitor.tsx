@@ -28,27 +28,6 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = ({ id, title }) => {
   const totalCores = currentStats?.nb_cores || 0;
   const isLoading = !deferredSubscribed;
 
-  // Debug logging for MetricsMonitor
-  console.log('[MetricsMonitor] Current state:', {
-    statsLength: deferredStats.length,
-    isSubscribed: deferredSubscribed,
-    isLoading,
-    currentStats: currentStats
-      ? {
-          timestamp: currentStats.timestamp,
-          processUsage: currentStats.process_cpu_usage,
-          processMemory: currentStats.process_memory,
-          nbCores: currentStats.nb_cores,
-        }
-      : null,
-    propsToOverview: {
-      cpuUsage: currentCPUPercent,
-      memoryProcess: currentMemoryProcess,
-      totalCores,
-      isLoading,
-    },
-  });
-
   return (
     <WidgetWrapper id={id} title={title}>
       <div className="container mx-auto space-y-4 p-4">

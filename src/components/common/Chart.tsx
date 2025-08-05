@@ -135,9 +135,9 @@ export const Chart = memo(
     );
 
     return (
-      <Card className="bg-stat">
+      <Card className="bg-stat border-0">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm stat">
+          <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
             {mergedConfig.icon}
             {mergedConfig.title}
           </CardTitle>

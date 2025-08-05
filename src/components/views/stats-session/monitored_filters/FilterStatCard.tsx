@@ -87,7 +87,9 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       }
     }, [filter.idx, onClick]);
 
-    const monitoredClass = isMonitored ? 'border border-primary/50' : 'border-0';
+    const monitoredClass = isMonitored
+      ? 'border border-red-900'
+      : 'border-0';
     const hasBufferInfo = filter.ipid && Object.keys(filter.ipid).length > 0;
     const hasPackets = filter.pck_done && filter.pck_done > 0;
     const hasTime = filter.time && filter.time > 0;
@@ -112,12 +114,13 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                   <LuEye className="h-3 w-3" />
                 </Badge>
               )}
-              <Badge
+                <Badge
                 variant={getSessionTypeVariant(sessionType)}
-                className={`h-5 px-1.5 text-xs ${getSessionTypeColor(sessionType)}`}
-              >
-                <span className="">{sessionType.toUpperCase()}</span>
-              </Badge>
+                className={`h-2 px-0.5 text-[10px] leading-none ${getSessionTypeColor(sessionType)}`}
+                style={{ minHeight: '16px', paddingTop: '0', paddingBottom: '0' }}
+                >
+                <span className="">{sessionType}</span>
+                </Badge>
             </div>
           </div>
           <CardDescription className="mt-1 flex items-center gap-1 text-xs">
@@ -131,9 +134,9 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
         <CardContent className="space-y-3 p-3 pt-0">
           <div className="grid grid-cols-3 gap-3">
             <div className="flex flex-col">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                <LuCpu className="h-3 w-3" />
-                <span className="stat">I/O PIDs</span>
+              <div className="flex items-center gap-1 text-xs  mb-1">
+           
+                <span className="stat stat-label">I/O PIDs</span>
               </div>
               <p className="text-xs font-medium stat">
                 {filter.nb_ipid || 0}/{filter.nb_opid || 0}
@@ -142,8 +145,8 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
             <div className="flex flex-col">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
-                <LuDatabase className="h-3 w-3" />
-                <span className="stat">Data</span>
+              
+                <span className="stat stat-label">Data</span>
               </div>
               <p className="text-xs font-medium  stat">
                 {formatBytes(filter.bytes_done)}
@@ -153,7 +156,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             <div className="flex flex-col">
               <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
                 <LuActivity className="h-3 w-3" />
-                <span className="stat">Activity</span>
+                <span className="stat stat-label">Activity</span>
               </div>
               <div className="flex items-center gap-1">
                 <div
@@ -169,7 +172,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
           {hasBufferInfo && (
             <div>
               <div className="mb-1 flex justify-between text-xs">
-                <span className="text-xs text-muted-foreground stat">
+                <span className="text-xs text-muted-foreground stat stat-label">
                   Buffer usage
                 </span>
                 <span className="text-xs stat">{bufferUsage}%</span>

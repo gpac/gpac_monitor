@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { LuCpu } from 'react-icons/lu';
 import { Chart, ChartDataPoint, ChartConfig } from '@/components/common/Chart';
 
 export interface CPUDataPoint extends ChartDataPoint {
@@ -13,8 +12,8 @@ interface CPUChartProps {
 }
 
 const cpuChartConfig: ChartConfig = {
-  title: 'CPU Usage Over Time',
-  icon: <LuCpu className="h-4 w-4" />,
+  title: 'CPU Usage over time',
+  icon: '',
   height: 200,
   maxPoints: 400,
   throttleInterval: 50,
@@ -60,6 +59,7 @@ export const CPUChart = memo(({ currentCPUPercent, isLive }: CPUChartProps) => {
       currentValue={currentCPUPercent}
       isLive={isLive}
       createDataPoint={createDataPoint}
+      
     />
   );
 });

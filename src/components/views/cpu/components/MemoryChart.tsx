@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { bytesToHumanReadable } from '@/utils/formatUtils';
 import { memo, useMemo } from 'react';
-import { LuMemoryStick } from 'react-icons/lu';
+
 import {
   RadialBarChart,
   RadialBar,
@@ -31,10 +31,10 @@ export const MemoryChart = memo(
     );
 
     return (
-      <Card className="bg-black/80">
+      <Card className="bg-stat border-0">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <LuMemoryStick className="h-4 w-4" />
+          <CardTitle className="flex items-center gap-2 text-sm stat-label">
+       
             Memory Usage Overview
           </CardTitle>
         </CardHeader>

@@ -41,12 +41,15 @@
   .stat {
     @apply text-gray-300;
   }
+  .stat-label{
+    @apply text-gray-400
+  }
   .stat-value {
     @apply text-gray-200;
   }
 
   .bg-stat {
-    @apply bg-black/50;
+    @apply bg-black/50 hover:bg-black/60 transition-colors duration-200;
   }
 }
 

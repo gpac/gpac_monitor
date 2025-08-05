@@ -52,7 +52,7 @@ const initialState: WidgetsState = {
       title: 'Session filters overview',
       x: 0,
       y: 0,
-      w: 8,
+      w: 7,
       h: 6,
     },
     {
@@ -61,7 +61,7 @@ const initialState: WidgetsState = {
       title: 'metrics-monitor',
       x: 9,
       y: 0,
-      w: 4,
+      w: 5,
       h: 6,
     },
     {
