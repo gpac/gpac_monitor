@@ -1,20 +1,20 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { formatBytes, formatPercent } from "@/utils/formatUtils"
-import { LuCpu, LuMemoryStick, LuActivity } from "react-icons/lu"
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { bytesToHumanReadable, formatPercent } from '@/utils/formatUtils';
+import { LuCpu, LuMemoryStick, LuActivity } from 'react-icons/lu';
 
 interface CPUOverviewProps {
-  cpuUsage: number
-  memoryPercent?: number
-  totalCores?: number
-  isLoading?: boolean
-  memoryProcess?: number
+  cpuUsage: number;
+  memoryPercent?: number;
+  totalCores?: number;
+  isLoading?: boolean;
+  memoryProcess?: number;
 }
 
 export const CPUOverview: React.FC<CPUOverviewProps> = ({
   cpuUsage = 0,
   memoryProcess = 0,
   totalCores = 0,
-  isLoading = false
+  isLoading = false,
 }) => {
   return (
     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -27,7 +27,9 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex items-baseline">
-            <span className="text-2xl font-semibold stat">{isLoading ? "..." : formatPercent(cpuUsage)}</span>
+            <span className="text-2xl font-semibold stat">
+              {isLoading ? '...' : formatPercent(cpuUsage)}
+            </span>
             <span className="ml-2 text-xs text-muted-foreground">Process</span>
           </div>
         </CardContent>
@@ -42,7 +44,9 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex items-baseline">
-            <span className="text-2xl font-semibold stat">{isLoading ? "..." : formatBytes(memoryProcess).toString()}</span>
+            <span className="text-2xl font-semibold stat">
+              {isLoading ? '...' : bytesToHumanReadable(memoryProcess).toString()}
+            </span>
             <span className="ml-2 text-xs text-muted-foreground">Used</span>
           </div>
         </CardContent>
@@ -57,11 +61,13 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex items-baseline">
-            <span className="text-2xl font-semibold stat">{isLoading ? "..." : totalCores}</span>
+            <span className="text-2xl font-semibold stat">
+              {isLoading ? '...' : totalCores}
+            </span>
             <span className="ml-2 text-xs text-muted-foreground">Cores</span>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
-}
+  );
+};

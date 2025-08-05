@@ -72,4 +72,4 @@ export const isValidFilterData = (
   return data !== null && typeof data === 'object';
 };
 
-export { formatProcessingRate } from './formatUtils';
+

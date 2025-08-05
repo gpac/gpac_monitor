@@ -51,7 +51,9 @@ export const FiltersGrid: React.FC<FiltersGridProps> = ({
           <div className="flex items-center justify-center h-full">
             <div className="text-center space-y-4 p-8">
               <div className="rounded-lg border bg-card/50 p-8 shadow-sm">
-                <h3 className="text-lg font-medium mb-2 stat">No filters found</h3>
+                <h3 className="text-lg font-medium mb-2 stat">
+                  No filters found
+                </h3>
               </div>
             </div>
           </div>

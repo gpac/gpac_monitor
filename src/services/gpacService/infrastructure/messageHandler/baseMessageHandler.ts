@@ -141,7 +141,7 @@ export class BaseMessageHandler {
       hasStats: !!data.stats,
       statsData: data.stats,
       timestamp: data.stats?.timestamp,
-      processUsage: data.stats?.process_cpu_usage
+      processUsage: data.stats?.process_cpu_usage,
     });
     this.cpuStatsHandler.handleCPUStats(data.stats);
   }

@@ -35,9 +35,6 @@ export class CPUStatsHandler {
 
     // Check if there's already a pending subscribe request
     if (this.pendingCPUStatsSubscribe) {
-      console.log(
-        'CPU Stats subscribe request already in progress, reusing existing promise',
-      );
       return this.pendingCPUStatsSubscribe;
     }
 
@@ -49,7 +46,6 @@ export class CPUStatsHandler {
           id: CPUStatsHandler.generateMessageId(),
           interval,
         });
-        console.log('CPU Stats subscribe request completed successfully');
       } finally {
         this.pendingCPUStatsSubscribe = null;
       }
@@ -63,9 +59,6 @@ export class CPUStatsHandler {
 
     // Check if there's already a pending unsubscribe request
     if (this.pendingCPUStatsUnsubscribe) {
-      console.log(
-        'CPU Stats unsubscribe request already in progress, reusing existing promise',
-      );
       return this.pendingCPUStatsUnsubscribe;
     }
 
@@ -76,7 +69,6 @@ export class CPUStatsHandler {
           type: WSMessageType.UNSUBSCRIBE_CPU_STATS,
           id: CPUStatsHandler.generateMessageId(),
         });
-        console.log('CPU Stats unsubscribe request completed successfully');
       } finally {
         // Clear the pending request when done (success or failure)
         this.pendingCPUStatsUnsubscribe = null;
@@ -86,35 +78,20 @@ export class CPUStatsHandler {
     return this.pendingCPUStatsUnsubscribe;
   }
   public handleCPUStats(stats: CPUStats): void {
-    console.log('[CPUStatsHandler] handleCPUStats called with:', {
-      timestamp: stats?.timestamp,
-      processUsage: stats?.process_cpu_usage,
-      processMemory: stats?.process_memory,
-      nbCores: stats?.nb_cores,
-      hasSubscribers: this.cpuStatsSubscribable.hasSubscribers
-    });
-    
     if (!stats) {
-      console.warn('[CPUStatsHandler] Received null/undefined stats data');
       return;
     }
-    
+
     this.cpuStatsSubscribable.updateDataAndNotify([stats]);
-    console.log('[CPUStatsHandler] Stats updated and subscribers notified');
   }
   public subscribeToCPUStatsUpdates(
     callback: (stats: CPUStats) => void,
     interval = 50,
   ): () => void {
-    console.log('New subscription to CPU stats.');
-
     // Cancel any pending auto-unsubscribe since we have a new subscriber
     if (this.cpuAutoUnsubscribeTimeout) {
       clearTimeout(this.cpuAutoUnsubscribeTimeout);
       this.cpuAutoUnsubscribeTimeout = null;
-      console.log(
-        'Cancelled pending CPU auto-unsubscribe due to new subscriber',
-      );
     }
 
     const isFirstSubscriber = !this.cpuStatsSubscribable.hasSubscribers;
@@ -128,27 +105,14 @@ export class CPUStatsHandler {
 
     // If this is the first subscriber, automatically subscribe to server
     if (isFirstSubscriber) {
-      console.log(
-        'First subscriber for cpu stats, starting server subscription',
-      );
-      this.subscribeToCPUStats(interval).catch((error) => {
-        console.log(
-          `Error subscribing to cpu stats on server: ${error}`,
-          'stderr',
-        );
-      });
+      this.subscribeToCPUStats(interval).catch(() => {});
     }
 
     return () => {
-      console.log('Unsubscribing from cpu stats.');
       unsubscribe();
 
       // If no more subscribers, schedule delayed auto-unsubscribe to avoid premature cleanup
       if (!this.cpuStatsSubscribable.hasSubscribers) {
-        console.log(
-          'No more listeners for cpu stats. Scheduling delayed auto-unsubscribe from server.',
-        ); // Log
-
         // Cancel any existing timeout
         if (this.cpuAutoUnsubscribeTimeout) {
           clearTimeout(this.cpuAutoUnsubscribeTimeout);
@@ -160,17 +124,7 @@ export class CPUStatsHandler {
 
           // Double-check there are still no subscribers before unsubscribing
           if (!this.cpuStatsSubscribable.hasSubscribers) {
-            console.log('Executing delayed cpu auto-unsubscribe from server'); // Log
-            this.unsubscribeFromCPUStats().catch((error) => {
-              console.log(
-                `Error unsubscribing from cpu stats on server: ${error}`,
-                'stderr',
-              );
-            });
-          } else {
-            console.log(
-              'Cancelled cpu auto-unsubscribe - new subscribers detected',
-            ); // Log
+            this.unsubscribeFromCPUStats().catch(() => {});
           }
         }, 100); // 100ms delay to handle React re-renders
       }

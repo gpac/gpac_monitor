@@ -13,51 +13,29 @@ export interface ParsedMetrics {
   latency: LatencyMetric | null;
 }
 
-export function formatBytes(bytes: number): MetricWithUnit {
-  if (bytes >= 1024 * 1024) {
-    return {
-      value: bytes / (1024 * 1024),
-      unit: 'MB/s',
-    };
-  } else if (bytes >= 1024) {
-    return {
-      value: bytes / 1024,
-      unit: 'KB/s',
-    };
-  } else {
-    return {
-      value: bytes,
-      unit: 'bytes/s',
-    };
+export const bytesToHumanReadable = (bytes: number): string => {
+  const units = ["B", "KB", "MB", "GB"]
+  let unitIndex = 0
+  let currentSize = bytes
+  while (currentSize >= 1024 && unitIndex < units.length - 1) {
+    currentSize /= 1024
+    unitIndex += 1
   }
+  return `${currentSize.toFixed(2)} ${units[unitIndex]}`
 }
 
-export function parseMetricsFromStatus(status: string): ParsedMetrics {
-  const metrics: ParsedMetrics = {
-    fps: null,
-    latency: null,
-  };
-
-  const fpsMatch = status.match(/(\d+\.?\d*)\s*FPS/);
-  if (fpsMatch) {
-    metrics.fps = parseFloat(fpsMatch[1]);
-  }
-
-  const latencyMatch = status.match(/(\d+\.?\d*)\s*(ms|s)/);
-  if (latencyMatch) {
-    metrics.latency = {
-      value: parseFloat(latencyMatch[1]),
-      unit: latencyMatch[2] as 'ms' | 's',
-    };
-  }
-
-  return metrics;
-}
 
 export function formatPercent(value: number, decimals: number = 1): string {
   return `${value.toFixed(decimals)}%`;
 }
 
-export const formatProcessingRate = formatBytes;
-export const formatThroughputRate = formatBytes;
-export const parseFilterStatus = parseMetricsFromStatus;
+export const getFormattedTime = (date: Date = new Date(), includeHour = true): string => {
+  const options: Intl.DateTimeFormatOptions = {
+    minute: "2-digit",
+    second: "2-digit"
+  }
+  if (includeHour) {
+    options.hour = "2-digit"
+  }
+  return date.toLocaleTimeString([], options)
+}

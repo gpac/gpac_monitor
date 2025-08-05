@@ -22,7 +22,7 @@ export function useCPUStats(enabled = true, interval = 150) {
       processUsage: newStats?.process_cpu_usage,
       processMemory: newStats?.process_memory,
       nbCores: newStats?.nb_cores,
-      currentStatsLength: statsRef.current.length
+      currentStatsLength: statsRef.current.length,
     });
     stableCallback.current(newStats);
   }, []);

@@ -185,7 +185,9 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
           <div className="flex flex-wrap gap-1 text-xs">
             {hasPackets && (
               <Badge variant="outline" className="h-4 px-1.5 py-0 text-xs">
-                <span className="stat-value">{formatNumber(filter.pck_done)} pkt</span>
+                <span className="stat-value">
+                  {formatNumber(filter.pck_done)} pkt
+                </span>
               </Badge>
             )}
             {hasTime && (

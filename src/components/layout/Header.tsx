@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-
-  Save,
-  Layout,
-  Settings,
-  Download,
-  Upload,
-} from 'lucide-react';
+import { Save, Layout, Settings, Download, Upload } from 'lucide-react';
 
 interface HeaderProps {
   onSaveLayout?: () => void;
@@ -14,9 +7,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ onSaveLayout, onLoadLayout }) => {
-
-
-
   return (
     <header className="h-16 bg-gray-900 border-b border-gray-700 px-4">
       <div className="h-full max-w-screen-2xl mx-auto flex items-center justify-between">
@@ -29,8 +19,6 @@ const Header: React.FC<HeaderProps> = ({ onSaveLayout, onLoadLayout }) => {
 
         {/* Actions principales */}
         <div className="flex items-center space-x-4">
-        
-
           {/* Séparateur */}
           <div className="h-6 w-px bg-gray-700" />
 
