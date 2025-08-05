@@ -87,7 +87,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       }
     }, [filter.idx, onClick]);
 
-    const monitoredClass = isMonitored ? 'border border-primary/50' : 'border';
+    const monitoredClass = isMonitored ? 'border border-primary/50' : 'border-0';
     const hasBufferInfo = filter.ipid && Object.keys(filter.ipid).length > 0;
     const hasPackets = filter.pck_done && filter.pck_done > 0;
     const hasTime = filter.time && filter.time > 0;

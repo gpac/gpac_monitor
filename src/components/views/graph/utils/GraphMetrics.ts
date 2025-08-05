@@ -2,7 +2,6 @@ import { Edge } from '@xyflow/react';
 import { GpacNodeData } from '@/types/domain/gpac';
 import { FilterType } from '@/types/domain/gpac';
 
-
 /**
  * Enum representing different levels of data throughput for visualization
  */
@@ -203,7 +202,6 @@ export function enhanceEdgesWithThroughput(
 
     // Format throughput using the existing utility function
 
-
     // Enhance edge with throughput data
     return {
       ...edge,
@@ -211,7 +209,7 @@ export function enhanceEdgesWithThroughput(
       data: {
         ...edge.data,
         throughput: metric.bytesPerSecond / 1024, // Legacy format (KB/s) for backward compatibility
-    // Add the formatted throughput with appropriate units
+        // Add the formatted throughput with appropriate units
         throughputLevel: metric.level,
         bufferPercentage: metric.bufferPercentage,
         filterType: metric.filterType,

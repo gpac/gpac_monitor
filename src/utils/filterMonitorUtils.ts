@@ -71,5 +71,3 @@ export const isValidFilterData = (
 ): data is GpacNodeData => {
   return data !== null && typeof data === 'object';
 };
-
-

@@ -45,7 +45,9 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
         <CardContent>
           <div className="flex items-baseline">
             <span className="text-2xl font-semibold stat">
-              {isLoading ? '...' : bytesToHumanReadable(memoryProcess).toString()}
+              {isLoading
+                ? '...'
+                : bytesToHumanReadable(memoryProcess).toString()}
             </span>
             <span className="ml-2 text-xs text-muted-foreground">Used</span>
           </div>

@@ -67,7 +67,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
 
   return (
     <Card
-      className={`transition-all hover:shadow-md bg-black/50 border-gray-700 ${className}`}
+      className={`transition-all hover:shadow-md bg-stat border-0 ${className}`}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-2">
         <CardTitle className="text-xs font-medium text-muted-foreground">
