@@ -38,7 +38,7 @@ export interface ChartConfig {
   height?: number;
   maxPoints?: number;
   throttleInterval?: number;
-  yAxisDomain?: [number, number];
+  yAxisDomain?: [number | string, number | string];
   yAxisFormatter?: (value: number) => string;
   areas: ChartAreaConfig[];
   tooltip: ChartTooltipConfig;

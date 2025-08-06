@@ -21,7 +21,9 @@ const NetworkTab = memo(({ data, filterName, refreshInterval = 5000 }: NetworkTa
 
   console.log('[NetworkTab] Network stats for filter', filterName, ':', {
     currentStats: data,
-    refreshInterval
+    refreshInterval,
+    bytesSent: data.bytesSent,
+    bytesReceived: data.bytesReceived
   });
 
   useEffect(() => {
@@ -37,7 +39,8 @@ const NetworkTab = memo(({ data, filterName, refreshInterval = 5000 }: NetworkTa
       console.log('[NetworkTab] Stats changed for filter', filterName, ':', {
         previousBytes: lastBytesRef.current,
         newBytes: { sent: newBytesSent, received: newBytesReceived },
-        changes: { sentChanged: hasSentChanged, receivedChanged: hasReceivedChanged }
+        changes: { sentChanged: hasSentChanged, receivedChanged: hasReceivedChanged },
+        currentStats: { bytesSent: currentStats.bytesSent, bytesReceived: currentStats.bytesReceived }
       });
 
       lastBytesRef.current = {
