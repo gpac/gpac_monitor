@@ -8,7 +8,7 @@ export function useSessionStats(enabled = true, interval = 1000) {
 
   const handleSessionStatsUpdate = useCallback(
     (newStats: SessionFilterStatistics[]) => {
-
+      console.log('[stats]', newStats);
       setStats(newStats.map((stat) => ({ ...stat })));
     },
     [],

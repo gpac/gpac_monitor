@@ -46,6 +46,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       }
 
       const bufferUsage = calculateBufferUsage(filter.ipid);
+   
       const activityLevel = getActivityLevel(
         filter.pck_done,
         filter.bytes_done,

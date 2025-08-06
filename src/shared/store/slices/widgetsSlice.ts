@@ -53,7 +53,7 @@ const initialState: WidgetsState = {
       x: 0,
       y: 0,
       w: 10,
-      h: 6,
+      h: 7,
     },
     {
       id: generateID('metrics'),

@@ -22,6 +22,20 @@ export const useTabManagement = ({
 }: UseTabManagementProps) => {
   const handleCardClick = useCallback(
     (idx: number) => {
+      // Handle "Back" button click (idx = -1)
+      if (idx === -1) {
+        setActiveTab('main');
+        setTimeout(() => {
+          const mainTabElement = tabsRef.current?.querySelector(
+            '[data-value="main"]',
+          ) as HTMLButtonElement;
+          if (mainTabElement) {
+            mainTabElement.click();
+          }
+        }, 0);
+        return;
+      }
+
       if (monitoredFilters.has(idx)) {
         setActiveTab(`filter-${idx}`);
         setTimeout(() => {
