@@ -17,13 +17,6 @@ export function useCPUStats(enabled = true, interval = 150) {
   });
 
   const handleStatsUpdate = useCallback((newStats: CPUStats) => {
-    console.log('[useCPUStats] Received stats update:', {
-      timestamp: newStats?.timestamp,
-      processUsage: newStats?.process_cpu_usage,
-      processMemory: newStats?.process_memory,
-      nbCores: newStats?.nb_cores,
-      currentStatsLength: statsRef.current.length,
-    });
     stableCallback.current(newStats);
   }, []);
 
