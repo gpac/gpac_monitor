@@ -1,43 +1,25 @@
-import { useMemo, memo } from 'react';
-import { GpacNodeData } from '@/types/domain/gpac/model';
+import { memo } from 'react';
+import { TabPIDData } from '@/types/domain/gpac/filter-stats';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PIDDetails } from '../cards/DetailedStatsCards';
 
 interface InputsTabProps {
-  filter: GpacNodeData;
+  inputPids: TabPIDData[];
+  filterName: string;
 }
 
-const InputsTab = memo(({ filter }: InputsTabProps) => {
-  const enhancedInputPids = useMemo(() => {
-    if (!filter.ipid) {
-      console.log('[InputsTab] No input PIDs available for filter:', filter.name);
-      return [];
-    }
-
-    const inputPids = Object.entries(filter.ipid).map(([name, data]) => ({
-      name,
-      ...data,
-      parentFilter: {
-        name: filter.name,
-        codec: filter.codec,
-        status: filter.status,
-        pck_done: filter.pck_done,
-        bytes_done: filter.bytes_done,
-        pck_sent: filter.pck_sent,
-        time: filter.time,
-      },
-    }));
-
-
-
-    return inputPids;
-  }, [filter]);
+const InputsTab = memo(({ inputPids, filterName }: InputsTabProps) => {
+  console.log('[InputsTab] Input PIDs stats for filter', filterName, ':', {
+    totalInputPids: inputPids.length,
+    pidNames: inputPids.map(pid => pid.name),
+    pidDetails: inputPids
+  });
 
   return (
     <ScrollArea className="h-[400px]">
-      {enhancedInputPids.length > 0 ? (
+      {inputPids.length > 0 ? (
         <div className="space-y-4">
-          {enhancedInputPids.map((pid) => (
+          {inputPids.map((pid) => (
             <PIDDetails
               key={pid.name}
               {...pid}
@@ -47,7 +29,7 @@ const InputsTab = memo(({ filter }: InputsTabProps) => {
         </div>
       ) : (
         <div className="py-8 text-center text-muted-foreground">
-          No input PIDs available
+          No input PIDs available for {filterName}
         </div>
       )}
     </ScrollArea>

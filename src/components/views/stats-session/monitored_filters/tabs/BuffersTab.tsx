@@ -1,67 +1,29 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { LuHardDrive } from 'react-icons/lu';
-import { GpacNodeData } from '@/types/domain/gpac/model';
+import { BuffersTabData } from '@/types/domain/gpac/filter-stats';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
-import { formatBytes, getBufferProgressColor } from '@/utils/helper';
+import { formatBytes } from '@/utils/helper';
 
 interface BuffersTabProps {
-  filter: GpacNodeData;
+  data: BuffersTabData;
 }
 
-const BuffersTab = memo(({ filter }: BuffersTabProps) => {
-  const bufferInfo = useMemo(() => {
-    if (!filter.ipid || Object.keys(filter.ipid).length === 0) {
-      console.log('[BuffersTab] No buffer data available for filter:', filter.name);
-      return [];
-    }
+const BuffersTab = memo(({ data }: BuffersTabProps) => {
+  const { inputBuffers, totalBufferInfo, name } = data;
+  
+  console.log('[BuffersTab] Buffer stats for filter', name, ':', {
+    totalPids: inputBuffers.length,
+    bufferDetails: inputBuffers,
+    totalBufferInfo
+  });
 
-    const buffers = Object.entries(filter.ipid).map(([pidName, pidData]) => {
-      const bufferUsage =
-        pidData.buffer_total > 0
-          ? (pidData.buffer / pidData.buffer_total) * 100
-          : 0;
-      
-      return {
-        name: pidName,
-        buffer: pidData.buffer,
-        bufferTotal: pidData.buffer_total,
-        usage: bufferUsage,
-        color: getBufferProgressColor(bufferUsage),
-        sourceIdx: pidData.source_idx,
-      };
-    });
-
-
-
-    return buffers;
-  }, [filter.ipid]);
-
-  const totalBufferInfo = useMemo(() => {
-    if (bufferInfo.length === 0) {
-      return { totalBuffer: 0, totalCapacity: 0, averageUsage: 0 };
-    }
-
-    const totalBuffer = bufferInfo.reduce((sum, info) => sum + info.buffer, 0);
-    const totalCapacity = bufferInfo.reduce(
-      (sum, info) => sum + info.bufferTotal,
-      0,
-    );
-    const averageUsage =
-      bufferInfo.reduce((sum, info) => sum + info.usage, 0) / bufferInfo.length;
-
-    const totals = { totalBuffer, totalCapacity, averageUsage };
-
-    
-    return totals;
-  }, [bufferInfo]);
-
-  if (bufferInfo.length === 0) {
+  if (inputBuffers.length === 0) {
     return (
       <ScrollArea className="h-[400px]">
         <div className="py-8 text-center text-muted-foreground">
-          No buffer information available
+          No buffer information available for {name}
         </div>
       </ScrollArea>
     );
@@ -103,7 +65,6 @@ const BuffersTab = memo(({ filter }: BuffersTabProps) => {
               <Progress
                 value={totalBufferInfo.averageUsage}
                 className="h-2"
-                color={getBufferProgressColor(totalBufferInfo.averageUsage)}
               />
             </div>
           </CardContent>
@@ -111,7 +72,7 @@ const BuffersTab = memo(({ filter }: BuffersTabProps) => {
 
         {/* Individual PID buffers */}
         <div className="space-y-3">
-          {bufferInfo.map((info) => (
+          {inputBuffers.map((info) => (
             <Card key={info.name} className="bg-stat">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">

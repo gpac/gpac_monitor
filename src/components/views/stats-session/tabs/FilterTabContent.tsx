@@ -1,18 +1,24 @@
 import React from 'react';
-import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
+import { OverviewTabData, BuffersTabData, TabPIDData, NetworkTabData } from '@/types/domain/gpac/filter-stats';
 import { FilterTabContent as DetailedFilterTabContent } from '../monitored_filters/FilterTabContent';
 
 interface FilterTabContentProps {
-  filter: EnrichedFilterOverview;
+  overviewData: OverviewTabData;
+  networkData: NetworkTabData;
+  buffersData: BuffersTabData;
+  inputPids: TabPIDData[];
+  outputPids: TabPIDData[];
   onCardClick: (idx: number) => void;
   isMonitored: boolean;
-  isActive?: boolean; // To know if this tab is currently active
 }
 
 export const FilterTabContent: React.FC<FilterTabContentProps> = ({
-  filter,
+  overviewData,
+  networkData,
+  buffersData,
+  inputPids,
+  outputPids,
   onCardClick,
-  isActive = false,
 }) => {
   const handleBack = () => {
     // Navigate back to the main dashboard view
@@ -22,8 +28,11 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   return (
     <div className="p-4">
       <DetailedFilterTabContent
-        filter={filter}
-        enabled={isActive}
+        overviewData={overviewData}
+        networkData={networkData}
+        buffersData={buffersData}
+        inputPids={inputPids}
+        outputPids={outputPids}
         onBack={handleBack}
       />
     </div>

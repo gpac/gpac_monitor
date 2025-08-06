@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { LuChevronLeft } from 'react-icons/lu';
-import { GpacNodeData } from '@/types/domain/gpac/model';
+import { OverviewTabData, BuffersTabData, TabPIDData, NetworkTabData } from '@/types/domain/gpac/filter-stats';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,7 +11,11 @@ import InputsTab from './tabs/InputsTab';
 import OutputsTab from './tabs/OutputsTab';
 
 interface DetailedStatsViewProps {
-  filter: GpacNodeData;
+  overviewData: OverviewTabData;
+  networkData: NetworkTabData;
+  buffersData: BuffersTabData;
+  inputPids: TabPIDData[];
+  outputPids: TabPIDData[];
   onBack: () => void;
 }
 
@@ -22,18 +26,18 @@ const MemoizedInputsTab = memo(InputsTab);
 const MemoizedOutputsTab = memo(OutputsTab);
 
 const DetailedStatsView = memo(
-  ({ filter, onBack }: DetailedStatsViewProps) => {
+  ({ overviewData, networkData, buffersData, inputPids, outputPids, onBack }: DetailedStatsViewProps) => {
     const badgeVariant = useMemo(
-      () => (filter.status?.includes('error') ? 'destructive' : 'secondary'),
-      [filter.status],
+      () => (overviewData.status?.includes('error') ? 'destructive' : 'secondary'),
+      [overviewData.status],
     );
 
     const counts = useMemo(
       () => ({
-        inputs: filter.nb_ipid || 0,
-        outputs: filter.nb_opid || 0,
+        inputs: inputPids.length,
+        outputs: outputPids.length,
       }),
-      [filter.nb_ipid, filter.nb_opid],
+      [inputPids.length, outputPids.length],
     );
 
     return (
@@ -48,9 +52,9 @@ const DetailedStatsView = memo(
             <LuChevronLeft className="h-3.5 w-3.5" />
             Back
           </Button>
-          <h2 className="text-lg font-semibold">{filter.name}</h2>
+          <h2 className="text-lg font-semibold">{overviewData.name}</h2>
           <Badge variant={badgeVariant}>
-            {filter.status || 'Unknown status'}
+            {overviewData.status || 'Unknown status'}
           </Badge>
         </div>
 
@@ -89,19 +93,19 @@ const DetailedStatsView = memo(
           </TabsList>
 
           <TabsContent value="overview">
-            <MemoizedOverviewTab filter={filter} />
+            <MemoizedOverviewTab filter={overviewData} />
           </TabsContent>
           <TabsContent value="network">
-            <MemoizedNetworkTab filter={filter} refreshInterval={5000} />
+            <MemoizedNetworkTab data={networkData} filterName={overviewData.name} refreshInterval={5000} />
           </TabsContent>
           <TabsContent value="buffers">
-            <MemoizedBuffersTab filter={filter} />
+            <MemoizedBuffersTab data={buffersData} />
           </TabsContent>
           <TabsContent value="inputs">
-            <MemoizedInputsTab filter={filter} />
+            <MemoizedInputsTab inputPids={inputPids} filterName={overviewData.name} />
           </TabsContent>
           <TabsContent value="outputs">
-            <MemoizedOutputsTab filter={filter} />
+            <MemoizedOutputsTab outputPids={outputPids} filterName={overviewData.name} />
           </TabsContent>
         </Tabs>
       </div>

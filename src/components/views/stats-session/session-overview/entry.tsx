@@ -8,7 +8,7 @@ import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { StatsTabs } from '../tabs/SessionStatsTabs';
 import { DashboardTabContent } from '../tabs/DashboardTabContent';
-import { FilterTabContent } from '../tabs/FilterTabContent';
+import { MonitoredFilterTabs } from '../tabs/MonitoredFilterTabs';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
@@ -119,22 +119,11 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               />
             </TabsContent>
 
-            {Array.from(monitoredFiltersState.entries()).map(
-              ([idx, filter]) => (
-                <TabsContent
-                  key={`filter-${idx}`}
-                  value={`filter-${idx}`}
-                  className="flex-1"
-                >
-                  <FilterTabContent
-                    filter={filter}
-                    onCardClick={handleCardClick}
-                    isMonitored={true}
-                    isActive={activeTab === `filter-${idx}`}
-                  />
-                </TabsContent>
-              ),
-            )}
+            <MonitoredFilterTabs
+              monitoredFilters={monitoredFiltersState}
+              activeTab={activeTab}
+              onCardClick={handleCardClick}
+            />
           </Tabs>
         </div>
       </WidgetWrapper>

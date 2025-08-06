@@ -1,27 +1,32 @@
 import React from 'react';
-import { GpacNodeData } from '@/types/domain/gpac/model';
-import { useFilterStats } from '@/components/views/stats-session/hooks/useFilterStats';
+import { OverviewTabData, BuffersTabData, TabPIDData, NetworkTabData } from '@/types/domain/gpac/filter-stats';
 import DetailedStatsView from './DetailedStatsView';
 
 interface FilterTabContentProps {
-  filter: GpacNodeData;
-  enabled: boolean;
+  overviewData: OverviewTabData;
+  networkData: NetworkTabData;
+  buffersData: BuffersTabData;
+  inputPids: TabPIDData[];
+  outputPids: TabPIDData[];
   onBack: () => void;
 }
 
 export const FilterTabContent: React.FC<FilterTabContentProps> = ({
-  filter,
-  enabled,
+  overviewData,
+  networkData,
+  buffersData,
+  inputPids,
+  outputPids,
   onBack,
 }) => {
-  // subscription live
-  const { stats } = useFilterStats(filter.idx, enabled, 1000);
-
-  // merge static + live
-  const filterWithStats = React.useMemo(
-    () => ({ ...filter, ...stats }),
-    [filter, stats],
+  return (
+    <DetailedStatsView 
+      overviewData={overviewData}
+      networkData={networkData}
+      buffersData={buffersData}
+      inputPids={inputPids}
+      outputPids={outputPids}
+      onBack={onBack} 
+    />
   );
-
-  return <DetailedStatsView filter={filterWithStats} onBack={onBack} />;
 };

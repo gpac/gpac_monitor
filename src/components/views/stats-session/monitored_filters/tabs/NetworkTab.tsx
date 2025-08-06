@@ -1,33 +1,32 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { LuUpload, LuDownload } from 'react-icons/lu';
-import { GpacNodeData } from '@/types/domain/gpac/model';
+import { NetworkTabData } from '@/types/domain/gpac/filter-stats';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { BandwidthChart } from '../charts/BandwidthChart';
 import { formatBytes } from '@/utils/helper';
 
 interface NetworkTabProps {
-  filter: GpacNodeData;
+  data: NetworkTabData;
+  filterName: string;
   refreshInterval?: number;
 }
 
-const NetworkTab = memo(({ filter, refreshInterval = 5000 }: NetworkTabProps) => {
+const NetworkTab = memo(({ data, filterName, refreshInterval = 5000 }: NetworkTabProps) => {
   const lastBytesRef = useRef({
-    sent: filter.bytes_sent || 0,
-    received: filter.bytes_done || 0,
+    sent: data.bytesSent,
+    received: data.bytesReceived,
   });
-  const [currentStats, setCurrentStats] = useState({
-    bytesSent: filter.bytes_sent || 0,
-    bytesReceived: filter.bytes_done || 0,
-    packetsSent: filter.pck_sent || 0,
-    packetsReceived: filter.pck_done || 0,
+  const [currentStats, setCurrentStats] = useState(data);
+
+  console.log('[NetworkTab] Network stats for filter', filterName, ':', {
+    currentStats: data,
+    refreshInterval
   });
-
-
 
   useEffect(() => {
-    const newBytesSent = filter.bytes_sent || 0;
-    const newBytesReceived = filter.bytes_done || 0;
+    const newBytesSent = data.bytesSent;
+    const newBytesReceived = data.bytesReceived;
 
     const hasSentChanged =
       Math.abs(newBytesSent - lastBytesRef.current.sent) > 100;
@@ -35,21 +34,20 @@ const NetworkTab = memo(({ filter, refreshInterval = 5000 }: NetworkTabProps) =>
       Math.abs(newBytesReceived - lastBytesRef.current.received) > 100;
 
     if (hasSentChanged || hasReceivedChanged) {
-  
+      console.log('[NetworkTab] Stats changed for filter', filterName, ':', {
+        previousBytes: lastBytesRef.current,
+        newBytes: { sent: newBytesSent, received: newBytesReceived },
+        changes: { sentChanged: hasSentChanged, receivedChanged: hasReceivedChanged }
+      });
 
       lastBytesRef.current = {
         sent: newBytesSent,
         received: newBytesReceived,
       };
 
-      setCurrentStats({
-        bytesSent: newBytesSent,
-        bytesReceived: newBytesReceived,
-        packetsSent: filter.pck_sent || 0,
-        packetsReceived: filter.pck_done || 0,
-      });
+      setCurrentStats(data);
     }
-  }, [filter.bytes_sent, filter.bytes_done, filter.pck_sent, filter.pck_done]);
+  }, [data, filterName]);
 
   const formattedStats = useMemo(
     () => ({

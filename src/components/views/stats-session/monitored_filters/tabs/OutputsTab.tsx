@@ -1,48 +1,25 @@
-import { useMemo, memo } from 'react';
-import { GpacNodeData } from '@/types/domain/gpac/model';
+import { memo } from 'react';
+import { TabPIDData } from '@/types/domain/gpac/filter-stats';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { PIDDetails } from '../cards/DetailedStatsCards';
 
 interface OutputsTabProps {
-  filter: GpacNodeData;
+  outputPids: TabPIDData[];
+  filterName: string;
 }
 
-const OutputsTab = memo(({ filter }: OutputsTabProps) => {
-  const enhancedOutputPids = useMemo(() => {
-    if (!filter.opid) {
-      console.log('[OutputsTab] No output PIDs available for filter:', filter.name);
-      return [];
-    }
-
-    const outputPids = Object.entries(filter.opid).map(([name, data]) => ({
-      name,
-      ...data,
-      parentFilter: {
-        name: filter.name,
-        codec: filter.codec,
-        status: filter.status,
-        pck_done: filter.pck_done,
-        bytes_done: filter.bytes_done,
-        pck_sent: filter.pck_sent,
-        time: filter.time,
-      },
-    }));
-
-    console.log('[OutputsTab] Output PIDs stats for filter', filter.name, ':', {
-      totalOutputPids: outputPids.length,
-      pidNames: outputPids.map(pid => pid.name),
-      pidDetails: outputPids,
-      rawOpidData: filter.opid
-    });
-
-    return outputPids;
-  }, [filter]);
+const OutputsTab = memo(({ outputPids, filterName }: OutputsTabProps) => {
+  console.log('[OutputsTab] Output PIDs stats for filter', filterName, ':', {
+    totalOutputPids: outputPids.length,
+    pidNames: outputPids.map(pid => pid.name),
+    pidDetails: outputPids
+  });
 
   return (
     <ScrollArea className="h-[400px]">
-      {enhancedOutputPids.length > 0 ? (
+      {outputPids.length > 0 ? (
         <div className="space-y-4">
-          {enhancedOutputPids.map((pid) => (
+          {outputPids.map((pid) => (
             <PIDDetails
               key={pid.name}
               {...pid}
@@ -52,7 +29,7 @@ const OutputsTab = memo(({ filter }: OutputsTabProps) => {
         </div>
       ) : (
         <div className="py-8 text-center text-muted-foreground">
-          No output PIDs available
+          No output PIDs available for {filterName}
         </div>
       )}
     </ScrollArea>
