@@ -4,7 +4,6 @@ import { GpacNodeData } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
 import {
   determineFilterSessionType,
-  FilterSessionType,
 } from '@/components/views/graph/utils/filterType';
 import {
   Card,
@@ -59,27 +58,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
     const sessionType = determineFilterSessionType(filter);
 
-    const getSessionTypeVariant = (type: FilterSessionType) => {
-      switch (type) {
-        case 'source':
-          return 'outline' as const;
-        case 'sink':
-          return 'outline' as const;
-        case 'filter':
-          return 'secondary' as const;
-      }
-    };
-
-    const getSessionTypeColor = (type: FilterSessionType) => {
-      switch (type) {
-        case 'source':
-          return 'text-green-700 border-green-800';
-        case 'sink':
-          return 'text-red-700 border-red-800';
-        case 'filter':
-          return 'text-yellow-600 border-yellow-700';
-      }
-    };
 
     const handleClick = useCallback(() => {
       if (onClick && filter.idx !== undefined) {
@@ -113,8 +91,14 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                 </Badge>
               )}
               <Badge
-                variant={getSessionTypeVariant(sessionType)}
-                className={`h-2 px-0.5 text-[10px] leading-none ${getSessionTypeColor(sessionType)}`}
+                variant={
+                  sessionType === 'source'
+                    ? 'outline'
+                    : sessionType === 'sink'
+                    ? 'outline'
+                    : 'secondary'
+                }
+                className={`h-2 px-2 text-[10px] leading-none `}
                 style={{
                   minHeight: '16px',
                   paddingTop: '0',

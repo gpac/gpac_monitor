@@ -20,7 +20,7 @@ export function Badge({
       'border-yellow-600 bg-black text-yellow-600 shadow hover:bg-warning/80',
     destructive:
       'border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80',
-    outline: 'text-foreground',
+    outline: 'text-foreground bg-primary',
 
     success: 'bg-green-600/20 text-green-400 border-green-500/30',
   };
