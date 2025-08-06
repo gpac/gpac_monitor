@@ -65,7 +65,7 @@ const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = ({
   return (
     <TabsContent
       value={`filter-${idx}`}
-      className="flex-1"
+      className="flex-1 "
     >
       <FilterTabContent
         {...tabsData}

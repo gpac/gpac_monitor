@@ -59,7 +59,7 @@ const DetailedStatsView = memo(
         </div>
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="sticky top-0 z-10 mb-2 h-8 justify-start border-b bg-background">
+          <TabsList className="sticky top-0 z-10 mb-4 h-8 justify-start border-b bg-background">
             <TabsTrigger
               value="overview"
               className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
