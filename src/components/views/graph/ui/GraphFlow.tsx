@@ -77,7 +77,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         defaultEdgeOptions={{
           type: 'smoothstep',
           animated: true,
-          style: { stroke: '#4b5563', strokeWidth: 2 },
+          style: { stroke: '#6b7280', strokeWidth: 3 },
         }}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         proOptions={{ hideAttribution: true }}

@@ -17,7 +17,11 @@ const performDagreLayout = (nodes: Node[], edges: Edge[]): Node[] => {
   }
 
   const g = new dagre.graphlib.Graph();
-  g.setGraph({ rankdir: 'LR' });
+  g.setGraph({ 
+    rankdir: 'LR',
+    nodesep: 100,
+    ranksep: 150
+  });
 
   nodes.forEach((node) => {
     g.setNode(node.id, {
