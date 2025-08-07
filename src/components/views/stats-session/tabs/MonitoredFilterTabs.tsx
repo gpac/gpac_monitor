@@ -1,9 +1,10 @@
 import React, { useMemo } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsContent } from '@/components/ui/tabs';
-import { FilterTabContent } from './FilterTabContent';
-import { transformFilterToTabsData } from '@/utils/filterDataTransforms';
+import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
 import { useFilterStats } from '@/components/views/stats-session/hooks/useFilterStats';
+import { FilterStatsResponse, PIDproperties } from '@/types/domain/gpac/filter-stats';
+
 
 interface MonitoredFilterTabsProps {
   monitoredFilters: Map<number, EnrichedFilterOverview>;
@@ -57,20 +58,52 @@ const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = ({
     [filter, stats],
   );
 
-  const tabsData = useMemo(
-    () => transformFilterToTabsData(filterWithStats),
-    [filterWithStats],
-  );
+  // Extract real data directly from filterWithStats
+  const tabsData = useMemo(() => {
+    return {
+      overviewData: {
+        idx: filterWithStats.idx,
+        name: filterWithStats.name,
+        type: filterWithStats.type,
+        status: filterWithStats.status,
+        time: filterWithStats.time,
+        pck_done: filterWithStats.pck_done,
+        pck_sent: filterWithStats.pck_sent,
+        bytes_done: filterWithStats.bytes_done,
+        bytes_sent: filterWithStats.bytes_sent,
+        nb_ipid: filterWithStats.nb_ipid,
+        nb_opid: filterWithStats.nb_opid
+      },
+      networkData: {
+        bytesSent: filterWithStats.bytes_sent || 0,
+        bytesReceived: filterWithStats.bytes_done || 0,
+        packetsSent: filterWithStats.pck_sent || 0,
+        packetsReceived: filterWithStats.pck_done || 0
+      },
+      buffersData: {
+        name: filterWithStats.name,
+        inputBuffers: [],
+        totalBufferInfo: { totalBuffer: 0, totalCapacity: 0, averageUsage: 0 }
+      },
+      inputPids: (stats as FilterStatsResponse)?.ipids ? Object.values((stats as FilterStatsResponse).ipids as Record<string, PIDproperties>) : [],
+      outputPids: (stats as FilterStatsResponse)?.opids ? Object.values((stats as FilterStatsResponse).opids as Record<string, PIDproperties>) : []
+    };
+  }, [filterWithStats]);
+
+  const handleBack = () => {
+    // Navigate back to the main dashboard view
+    onCardClick(-1); // Special value to indicate going back to dashboard
+  };
 
   return (
     <TabsContent
       value={`filter-${idx}`}
-      className="flex-1 "
+      className="flex-1 p-4"
     >
       <FilterTabContent
         {...tabsData}
-        onCardClick={onCardClick}
-        isMonitored={true}
+        filterData={stats as any} // Convert MonitoredFilterStats to FilterStatsResponse
+        onBack={handleBack}
       />
     </TabsContent>
   );

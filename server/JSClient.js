@@ -172,6 +172,102 @@ function JSClient(id, client, all_clients, draned_once_ref) {
                 for (const field of sub.fields) {
                     payload[field] = fObj[field];
                 }
+    payload.ipids = {};
+    for (let i = 0; i < fObj.nb_ipid; i++) {
+        const pid = {};
+        pid.name = fObj.ipid_props(i, "name"); 
+        pid.buffer = fObj.ipid_props(i, "buffer"); // Buffer level in microseconds
+        pid.nb_pck_queued = fObj.ipid_props(i, "nb_pck_queued"); // Number of packets queued in the buffer, complementary to 'buffer'
+        pid.would_block = fObj.ipid_props(i, "would_block");
+        pid.eos = fObj.ipid_props(i, "eos");
+        pid.playing = fObj.ipid_props(i, "playing"); // Indicates if the PID is considered as playing
+
+        pid.timescale = fObj.ipid_props(i, "Timescale"); 
+        pid.codec = fObj.ipid_props(i, "CodecID");
+        pid.type = fObj.ipid_props(i, "StreamType"); 
+        
+        // For video
+        pid.width = fObj.ipid_props(i, "Width"); // in px
+        pid.height = fObj.ipid_props(i, "Height"); // in px
+        pid.pixelformat = fObj.ipid_props(i, "PixelFormat"); // Pixel format of the video stream
+
+        // For audio
+        pid.samplerate = fObj.ipid_props(i, "SampleRate"); // Audio sample rate
+        pid.channels = fObj.ipid_props(i, "Channels"); // Number of audio channels
+        
+        // Source index for input PIDs
+        const source = fObj.ipid_source(i);
+        if (source) {
+            pid.source_idx = source.idx; 
+        }
+
+        const stats = fObj.ipid_stats(i); 
+        if (stats) {
+            pid.stats = {};
+            pid.stats.disconnected = stats.disconnected; 
+            pid.stats.average_process_rate = stats.average_process_rate; // b/s
+            pid.stats.max_process_rate = stats.max_process_rate; // Maximum processing speed b/s
+            pid.stats.average_bitrate = stats.average_bitrate; // Average bitrate
+            pid.stats.max_bitrate = stats.max_bitrate; // Maximum bitrate
+            pid.stats.nb_processed = stats.nb_processed; // Total number of processed packets
+            pid.stats.max_process_time = stats.max_process_time; // (µs) Maximum time spent processing a packet
+            pid.stats.total_process_time = stats.total_process_time; // (µs)
+       
+        }
+
+        const name = pid.name || `ipid_${i}`;
+        payload.ipids[name] = pid;
+    }
+
+    payload.opids = {};
+
+    for (let i = 0; i < fObj.nb_opid; i++) {
+        const pid = {};
+
+        // Direct stream properties
+        pid.name = fObj.opid_props(i, "name");
+        pid.buffer = fObj.opid_props(i, "buffer");
+         pid.max_buffer = fObj.opid_props(i, "max_buffer"); 
+        pid.nb_pck_queued = fObj.opid_props(i, "nb_pck_queued");
+        pid.would_block = fObj.opid_props(i, "would_block");
+        const statsEos = fObj.opid_stats(i);
+        pid.eos_received = statsEos?.eos_received;
+        pid.playing = fObj.opid_props(i, "playing");
+
+        // Media type specific properties
+        pid.timescale = fObj.opid_props(i, "Timescale");
+        pid.codec = fObj.opid_props(i, "CodecID");
+        pid.type = fObj.opid_props(i, "StreamType");
+        
+        // For video
+        pid.width = fObj.opid_props(i, "Width");
+        pid.height = fObj.opid_props(i, "Height");
+        pid.pixelformat = fObj.opid_props(i, "PixelFormat");
+
+        // For audio
+        pid.samplerate = fObj.opid_props(i, "SampleRate");
+        pid.channels = fObj.opid_props(i, "Channels");
+       
+
+        // Detailed statistics
+        const stats = fObj.opid_stats(i);
+        if (stats) {
+            pid.stats = {};
+            pid.stats.disconnected = stats.disconnected;
+            pid.stats.average_process_rate = stats.average_process_rate;
+            pid.stats.max_process_rate = stats.max_process_rate;
+            pid.stats.average_bitrate = stats.average_bitrate;
+            pid.stats.max_bitrate = stats.max_bitrate;
+            pid.stats.nb_processed = stats.nb_processed;
+            pid.stats.max_process_time = stats.max_process_time;
+            pid.stats.total_process_time = stats.total_process_time;
+    
+        }
+
+        const name = pid.name || `opid_${i}`;
+        payload.opids[name] = pid;
+    }
+
                 this.client.send(JSON.stringify({
                     message: 'filter_stats',
                     ...payload

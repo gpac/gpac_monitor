@@ -2,11 +2,11 @@ import { memo } from 'react';
 import { LuActivity, LuPackage2, LuHardDrive } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { GpacNodeData } from '@/types/domain/gpac/model';
 import { formatBytes, formatTime, formatNumber } from '@/utils/helper';
+import { FilterStatsResponse } from '../../../../../types/domain/gpac/filter-stats';
 
 interface PIDMetricsCardProps {
-  data: GpacNodeData;
+  data: FilterStatsResponse;
 }
 
 export const PIDMetricsCard = memo(({ data }: PIDMetricsCardProps) => (
@@ -17,7 +17,8 @@ export const PIDMetricsCard = memo(({ data }: PIDMetricsCardProps) => (
     <CardContent>
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center">
-          <div className="text-2xl font-bold">{data.nb_ipid || 0}</div>
+          <div className="text-2xl font-bold">{data.nb_ipid || 0}
+          </div>
           <div className="text-xs text-muted-foreground stat-label">Input PIDs</div>
         </div>
         <div className="text-center">

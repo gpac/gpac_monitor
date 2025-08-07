@@ -43,8 +43,8 @@ export interface PIDData {
   format?: string;
 }
 export interface TimeFraction {
-  n: number;
-  d: number;
+  num: number;
+  den: number;
 }
 
 // Minimal filter data sent on initial connection

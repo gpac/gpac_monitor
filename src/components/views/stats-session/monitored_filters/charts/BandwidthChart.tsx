@@ -99,13 +99,6 @@ export const BandwidthChart = memo(({ currentBytes, type, refreshInterval = 5000
 
       const bytesPerSecond = Math.max(0, bytesDelta / elapsedSecs)
 
-      console.log(`[BandwidthChart] ${type} interval calculation:`, { 
-        latestBytes,
-        lastBytes: lastBytesRef.current, 
-        bytesDelta, 
-        elapsedSecs, 
-        bytesPerSecond 
-      });
 
       addSamplePoint(bytesPerSecond, now)
     }, refreshInterval)

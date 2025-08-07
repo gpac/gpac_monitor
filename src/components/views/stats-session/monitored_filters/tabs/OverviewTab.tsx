@@ -43,7 +43,7 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
         {/* PID Metrics */}
         <PIDMetricsCard data={{ nb_ipid: filter.nb_ipid, nb_opid: filter.nb_opid } as any} />
 
-        <div className="grid grid-cols-1 bg-stat border-0 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 bg-stat border-0 gap-4 sm:grid-cols-3 ">
           {/* Processing Card */}
           <ProcessingCard tasks={cardData.tasks} time={cardData.time} />
 

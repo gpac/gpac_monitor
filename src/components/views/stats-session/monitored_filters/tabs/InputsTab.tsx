@@ -1,14 +1,16 @@
 import { memo } from 'react';
-import { TabPIDData } from '@/types/domain/gpac/filter-stats';
+import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { PIDDetails } from '../cards/DetailedStatsCards';
+import { PIDStatsOverview } from '../cards/PIDStatsOverview';
 
 interface InputsTabProps {
-  inputPids: TabPIDData[];
+  filterData: FilterStatsResponse;
   filterName: string;
 }
 
-const InputsTab = memo(({ inputPids, filterName }: InputsTabProps) => {
+const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
+  const inputPids = filterData.ipids ? Object.values(filterData.ipids) : [];
+  
   console.log('[InputsTab] Input PIDs stats for filter', filterName, ':', {
     totalInputPids: inputPids.length,
     pidNames: inputPids.map(pid => pid.name),
@@ -18,13 +20,15 @@ const InputsTab = memo(({ inputPids, filterName }: InputsTabProps) => {
   return (
     <ScrollArea className="h-[400px]">
       {inputPids.length > 0 ? (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {inputPids.map((pid) => (
-            <PIDDetails
-              key={pid.name}
-              {...pid}
-              codec={pid.codec || pid.parentFilter.codec}
-            />
+            <div key={pid.name} className="space-y-4">
+              <PIDStatsOverview
+                pidData={pid}
+                showAdvanced={true}
+              />
+   
+            </div>
           ))}
         </div>
       ) : (

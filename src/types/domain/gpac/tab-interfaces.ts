@@ -1,4 +1,4 @@
-import { FilterTabData, TabPIDData, PIDBufferInfo, NetworkTabData, OverviewTabData } from './filter-stats';
+import { FilterStatsResponse, TabPIDData, PIDBufferInfo, NetworkTabData, OverviewTabData } from './filter-stats';
 
 // =======================================
 // TAB COMPONENT PROP INTERFACES
@@ -8,35 +8,35 @@ import { FilterTabData, TabPIDData, PIDBufferInfo, NetworkTabData, OverviewTabDa
  * Props for Overview Tab Component
  */
 export interface OverviewTabProps {
-  filter: FilterTabData;
+  filter: FilterStatsResponse;
 }
 
 /**
  * Props for Buffers Tab Component
  */
 export interface BuffersTabProps {
-  filter: FilterTabData;
+  filter: FilterStatsResponse;
 }
 
 /**
  * Props for Inputs Tab Component
  */
 export interface InputsTabProps {
-  filter: FilterTabData;
+  filter: FilterStatsResponse;
 }
 
 /**
  * Props for Outputs Tab Component
  */
 export interface OutputsTabProps {
-  filter: FilterTabData;
+  filter: FilterStatsResponse;
 }
 
 /**
  * Props for Network Tab Component
  */
 export interface NetworkTabProps {
-  filter: FilterTabData;
+  filter: FilterStatsResponse;
   refreshInterval?: number;
 }
 
@@ -51,12 +51,12 @@ export interface FilterTabDataTransformer {
   /**
    * Transform filter data for Overview Tab
    */
-  toOverviewData(filter: FilterTabData): OverviewTabData;
+  toOverviewData(filter: FilterStatsResponse): OverviewTabData;
 
   /**
    * Transform filter data for Buffers Tab
    */
-  toBuffersData(filter: FilterTabData): {
+  toBuffersData(filter: FilterStatsResponse): {
     inputBuffers: PIDBufferInfo[];
     totalBufferInfo: {
       totalBuffer: number;
@@ -68,17 +68,17 @@ export interface FilterTabDataTransformer {
   /**
    * Transform filter data for Input PIDs
    */
-  toInputPIDsData(filter: FilterTabData): TabPIDData[];
+  toInputPIDsData(filter: FilterStatsResponse): TabPIDData[];
 
   /**
    * Transform filter data for Output PIDs
    */
-  toOutputPIDsData(filter: FilterTabData): TabPIDData[];
+  toOutputPIDsData(filter: FilterStatsResponse): TabPIDData[];
 
   /**
    * Transform filter data for Network Tab
    */
-  toNetworkData(filter: FilterTabData): NetworkTabData;
+  toNetworkData(filter: FilterStatsResponse): NetworkTabData;
 }
 
 // =======================================

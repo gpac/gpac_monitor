@@ -80,6 +80,29 @@ function gpac_filter_to_minimal_object(f) {
     return minimalFilters;
 }
 
+
+function filter_pid_stats_object(f) {
+    const pidsFilters = {
+        idx: f.idx,
+        name: f.name,
+        ipid: {},
+        opid: {}
+    };
+
+    for (let i = 0; i < f.nb_ipid; i++) {
+        const pidName = f.ipid_props(i, "name");
+        pidsFilters.ipid[pidName] = {
+            source_idx: f.ipid_source(i).idx,
+        };
+    }
+    for (let o = 0; o < f.nb_opid; o++) {
+        const pidName = f.opid_props(o, "name");
+        pidsFilters.opid[pidName] = {};
+    }
+
+    return pidsFilters;
+}
+
 function on_all_connected(cb, draned_once_ref) {
     session.post_task(() => {
         let local_connected = true;
