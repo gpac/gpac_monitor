@@ -8,14 +8,7 @@ export class WebSocketBase {
   } = {};
 
   public isConnected(): boolean {
-    const isConnected =
-      this.socket !== null && this.socket.readyState === WebSocket.OPEN;
-
-    if (isConnected) {
-      WebSocketNotificationService.onConnectedStatus();
-    }
-
-    return isConnected;
+    return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
   }
 
   public connect(address: string): Promise<void> {

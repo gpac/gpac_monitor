@@ -25,11 +25,4 @@ export class WebSocketNotificationService {
     });
   }
 
-  static onConnectedStatus(): void {
-    toastService.show({
-      title: 'WebSocket connexion',
-      description: 'Connexion established',
-      variant: 'default',
-    });
-  }
 }
