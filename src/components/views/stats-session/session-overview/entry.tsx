@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useCallback } from 'react';
 import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/useMultiFilterMonitor';
 import { useTabManagement } from '@/components/views/stats-session/hooks/useTabManagement';
 import { useStatsCalculations } from '@/components/views/stats-session/hooks/useStatsCalculations';
@@ -16,14 +16,21 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     const [monitoredFiltersState, setMonitoredFiltersState] = useState<
       Map<number, EnrichedFilterOverview>
     >(new Map());
-    const isDashboardActive = activeTab === 'main';
+    
+    // Memoize isDashboardActive to prevent unnecessary recalculations
+    const isDashboardActive = useMemo(() => activeTab === 'main', [activeTab]);
     const tabsRef = useRef<HTMLDivElement>(null);
 
     const { isLoading, sessionStats, staticFilters } =
       useMultiFilterMonitor(isDashboardActive);
 
+    // Optimize the enriched filter collection with stable keys and memoization
     const enrichedGraphFilterCollection = useMemo(() => {
-      return staticFilters.map((staticFilter) => {
+      if (staticFilters.length === 0) {
+        return []; // Return empty array if no data to avoid expensive operations
+      }
+      
+      return staticFilters.map((staticFilter): EnrichedFilterOverview => {
         const dynamicStats = sessionStats.find(
           (stat) => stat.idx === staticFilter.idx,
         );
@@ -53,11 +60,13 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       });
     }, [staticFilters, sessionStats]);
 
+    // Use the stats calculations hook directly (it's already optimized internally)
     const { statsCounters, systemStats } = useStatsCalculations(
       staticFilters,
       sessionStats,
     );
 
+    // Use the original inline approach for useTabManagement to avoid type issues
     const { handleCardClick, handleCloseTab } = useTabManagement({
       rawFiltersFromServer: enrichedGraphFilterCollection,
       monitoredFilters: monitoredFiltersState,
@@ -66,6 +75,17 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       setActiveTab,
       tabsRef,
     });
+
+    // Memoize callbacks to prevent child re-renders
+    const memoizedHandleCardClick = useCallback((filterIndex: number) => {
+      handleCardClick(filterIndex);
+    }, [handleCardClick]);
+
+    const memoizedHandleCloseTab = useCallback((filterIndex: number, event?: React.MouseEvent) => {
+      if (event) {
+        handleCloseTab(filterIndex, event);
+      }
+    }, [handleCloseTab]);
 
     if (isLoading) {
       return (
@@ -102,7 +122,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               activeTab={activeTab}
               onValueChange={setActiveTab}
               monitoredFilters={monitoredFiltersState}
-              onCloseTab={handleCloseTab}
+              onCloseTab={memoizedHandleCloseTab}
               tabsRef={tabsRef}
             />
 
@@ -114,7 +134,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
                 filtersMatchingCriteria={enrichedGraphFilterCollection}
                 loading={isLoading}
                 monitoredFilters={monitoredFiltersState}
-                onCardClick={handleCardClick}
+                onCardClick={memoizedHandleCardClick}
                 refreshInterval="1s"
               />
             </TabsContent>
@@ -122,7 +142,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
             <MonitoredFilterTabs
               monitoredFilters={monitoredFiltersState}
               activeTab={activeTab}
-              onCardClick={handleCardClick}
+              onCardClick={memoizedHandleCardClick}
             />
           </Tabs>
         </div>
