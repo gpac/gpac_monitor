@@ -15,7 +15,8 @@ interface MetricsMonitorProps {
 const MetricsMonitor: React.FC<MetricsMonitorProps> = ({ id, title }) => {
   const [isLive, setIsLive] = useState(true);
 
-  const { stats, isSubscribed } = useCPUStats(isLive, 150);
+  // Collecte des données à 150ms, affichage à 500ms
+  const { stats, isSubscribed } = useCPUStats(isLive, 150, 500);
 
   const deferredStats = useDeferredValue(stats);
   const deferredSubscribed = useDeferredValue(isSubscribed);

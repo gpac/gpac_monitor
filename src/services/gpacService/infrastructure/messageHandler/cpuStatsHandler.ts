@@ -30,7 +30,7 @@ export class CPUStatsHandler {
     return generateID();
   }
   // logic for subscribing and unsubscribing to cpu stats
-  public async subscribeToCPUStats(interval = 50): Promise<void> {
+  public async subscribeToCPUStats(interval = 150): Promise<void> { // Changé de 50ms à 150ms
     this.ensureLoaded();
 
     // Check if there's already a pending subscribe request
@@ -86,7 +86,7 @@ export class CPUStatsHandler {
   }
   public subscribeToCPUStatsUpdates(
     callback: (stats: CPUStats) => void,
-    interval = 50,
+    interval = 150, 
   ): () => void {
     // Cancel any pending auto-unsubscribe since we have a new subscriber
     if (this.cpuAutoUnsubscribeTimeout) {
