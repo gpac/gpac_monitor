@@ -32,7 +32,7 @@ const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
           ))}
         </div>
       ) : (
-        <div className="py-8 text-center text-muted-foreground">
+        <div className="py-8 text-center text-muted-foreground stat-label">
           No input PIDs available for {filterName}
         </div>
       )}

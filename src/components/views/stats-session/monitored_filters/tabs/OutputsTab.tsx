@@ -10,11 +10,7 @@ interface OutputsTabProps {
 
 const OutputsTab = memo(({ filterData, filterName }: OutputsTabProps) => {
   const outputPids = filterData.opids ? Object.values(filterData.opids) : [];
-  console.log('[OutputsTab] Output PIDs stats for filter', filterName, ':', {
-    totalOutputPids: outputPids.length,
-    pidNames: outputPids.map(pid => pid.name),
-    pidDetails: outputPids
-  });
+
 
   return (
     <ScrollArea className="h-[400px]">

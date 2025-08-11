@@ -91,3 +91,49 @@ export const formatNumber = (num: number): string => {
   if (num < 1000000000) return (num / 1000000).toFixed(1) + 'M';
   return (num / 1000000000).toFixed(1) + 'G';
 };
+
+export const formatBitrate = (bitrate: number | undefined): string => {
+  if (!bitrate) return '0 b/s';
+  if (bitrate >= 1000000000) return `${(bitrate / 1000000000).toFixed(2)} Gb/s`;
+  if (bitrate >= 1000000) return `${(bitrate / 1000000).toFixed(2)} Mb/s`;
+  if (bitrate >= 1000) return `${(bitrate / 1000).toFixed(2)} Kb/s`;
+  return `${bitrate.toFixed(0)} b/s`;
+};
+
+export const formatPacketRate = (rate: number | undefined): string => {
+  if (!rate) return '0 pck/s';
+  if (rate >= 1000000) return `${(rate / 1000000).toFixed(2)} Mpck/s`;
+  if (rate >= 1000) return `${(rate / 1000).toFixed(2)} Kpck/s`;
+  return `${rate.toFixed(0)} pck/s`;
+};
+
+export const formatBufferTime = (microseconds: number): string => {
+  if (microseconds === 0) return '0 ms';
+  const milliseconds = microseconds / 1000;
+  if (milliseconds >= 1000) return `${(milliseconds / 1000).toFixed(1)} s`;
+  return `${Math.floor(milliseconds)} ms`;
+};
+
+export const getBufferHealthColor = (bufferMs: number): { color: string; status: string; variant: 'default' | 'secondary' | 'destructive' } => {
+  if (bufferMs < 100) return { color: 'text-red-500', status: 'Critical', variant: 'destructive' };
+  if (bufferMs < 500) return { color: 'text-orange-500', status: 'Warning', variant: 'secondary' };
+  return { color: 'text-green-500', status: 'Healthy', variant: 'default' };
+};
+
+export const getHealthStatusFromMetrics = (
+  buffer: number,
+  wouldBlock: boolean,
+  disconnected: boolean,
+  queuedPackets: number
+): { color: string; status: string; variant: 'default' | 'secondary' | 'destructive' } => {
+  if (disconnected || wouldBlock) {
+    return { color: 'text-red-500', status: 'Critical', variant: 'destructive' };
+  }
+  
+  const bufferMs = buffer / 1000;
+  if (bufferMs < 100 || queuedPackets > 100) {
+    return { color: 'text-orange-500', status: 'Warning', variant: 'secondary' };
+  }
+  
+  return { color: 'text-green-500', status: 'Healthy', variant: 'default' };
+};

@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TabPIDData } from '@/types/domain/gpac/filter-stats';
+import { formatBufferTime, getHealthStatusFromMetrics } from '@/utils/helper';
 
 interface CriticalPIDStatsProps {
   pidData: TabPIDData;
@@ -26,28 +27,27 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
   // Calculate buffer usage percentage
   const bufferUsage = pidData.buffer_total && pidData.buffer_total > 0 ? (pidData.buffer / pidData.buffer_total) * 100 : 0;
   
-  // Determine buffer status and color
-  const getBufferStatus = (usage: number) => {
-    if (usage < 20) return { status: 'critical', color: 'red', variant: 'destructive' as const };
-    if (usage > 80) return { status: 'warning', color: 'orange', variant: 'secondary' as const };
-    return { status: 'normal', color: 'green', variant: 'default' as const };
-  };
-
-  const bufferStatus = getBufferStatus(bufferUsage);
+  // Use new health assessment function
+  const overallHealth = getHealthStatusFromMetrics(
+    pidData.buffer,
+    pidData.would_block || false,
+    pidData.stats.disconnected || false,
+    pidData.nb_pck_queued || 0
+  );
 
   // Connection state badge
   const getConnectionBadge = () => {
     if (pidData.stats.disconnected) {
       return (
         <Badge variant="destructive" className="flex items-center gap-1">
-          <LuWifiOff className="h-3 w-3" />
+          <LuWifiOff className="h-3 w-3 stat-label" />
           Disconnected
         </Badge>
       );
     }
     return (
       <Badge variant="default" className="flex items-center gap-1">
-        <LuWifi className="h-3 w-3" />
+        <LuWifi className="h-3 w-3 stat-label" />
         Connected
       </Badge>
     );
@@ -58,7 +58,7 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
     if (pidData.would_block) {
       return (
         <Badge variant="destructive" className="flex items-center gap-1">
-          <LuTriangle className="h-3 w-3" />
+          <LuTriangle className="h-3 w-3 stat-label" />
           Would Block
         </Badge>
       );
@@ -72,7 +72,7 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
     if (queuedPackets > 50) {
       return (
         <Badge variant="secondary" className="flex items-center gap-1">
-          <LuClock className="h-3 w-3" />
+          <LuClock className="h-3 w-3 stat-label" />
           Queue: {queuedPackets}
         </Badge>
       );
@@ -85,7 +85,7 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
     if (pidData.eos) {
       return (
         <Badge variant="outline" className="flex items-center gap-1">
-          <LuPause className="h-3 w-3" />
+          <LuPause className="h-3 w-3 stat-label" />
           End of Stream
         </Badge>
       );
@@ -106,30 +106,25 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
     );
   };
 
-  // Overall health indicator
-  const getOverallHealth = () => {
-    if (pidData.stats.disconnected || pidData.would_block) {
-      return { icon: LuInfo, color: 'text-red-500', status: 'Critical' };
-    }
-    if (bufferStatus.status === 'critical' || (pidData.nb_pck_queued || 0) > 100) {
-      return { icon: LuTriangle, color: 'text-orange-500', status: 'Warning' };
-    }
-    return { icon: LuCheck, color: 'text-green-500', status: 'Healthy' };
+  // Get icon for health status
+  const getHealthIcon = (status: string) => {
+    if (status === 'Critical') return LuInfo;
+    if (status === 'Warning') return LuTriangle;
+    return LuCheck;
   };
 
-  const health = getOverallHealth();
-  const HealthIcon = health.icon;
+  const HealthIcon = getHealthIcon(overallHealth.status);
 
   return (
     <Card className="bg-stat border-transparent">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-sm">
-            <HealthIcon className={`h-4 w-4 ${health.color}`} />
+            <HealthIcon className={`h-4 w-4 ${overallHealth.color}`} />
             Critical States
           </CardTitle>
-          <Badge variant="outline" className={health.color}>
-            {health.status}
+          <Badge variant={overallHealth.variant} className={overallHealth.color}>
+            {overallHealth.status}
           </Badge>
         </div>
       </CardHeader>
@@ -157,26 +152,44 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
         )}
 
         {/* Priority 4: Buffer Status with Progress Bar */}
-        <div className="space-y-1">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground stat-label">Buffer</span>
-            <Badge variant={bufferStatus.variant}>
-              {bufferUsage.toFixed(1)}%
-            </Badge>
+            <span className="text-xs text-muted-foreground stat-label">Buffer Level</span>
+            <div className="text-right">
+              <div className={`text-sm font-bold ${overallHealth.color}`}>
+                {formatBufferTime(pidData.buffer)}
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {bufferUsage.toFixed(1)}%
+              </div>
+            </div>
           </div>
           <Progress 
             value={bufferUsage} 
-            className="h-2"
-            // Custom color based on status
+            className="h-3"
             style={{
-              '--progress-background': bufferStatus.status === 'critical' ? '#ef4444' :
-                                     bufferStatus.status === 'warning' ? '#f59e0b' : '#10b981'
+              '--progress-background': overallHealth.status === 'Critical' ? '#ef4444' :
+                                     overallHealth.status === 'Warning' ? '#f59e0b' : '#10b981'
             } as React.CSSProperties}
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>{pidData.buffer.toLocaleString()} bytes</span>
-            <span>{pidData.buffer_total ? pidData.buffer_total.toLocaleString() : '0'} bytes</span>
+            <span>0 ms</span>
+            <span>{pidData.buffer_total ? formatBufferTime(pidData.buffer_total) : '0 ms'}</span>
           </div>
+          
+          {/* Buffer health indicator */}
+          {overallHealth.status === 'Critical' && (
+            <div className="flex items-center gap-1 text-xs text-red-600 bg-red-50 p-1 rounded">
+              <LuTriangle className="h-3 w-3" />
+              <span>Buffer critically low - risk of underflow</span>
+            </div>
+          )}
+          {overallHealth.status === 'Warning' && (
+            <div className="flex items-center gap-1 text-xs text-orange-600 bg-orange-50 p-1 rounded">
+              <LuInfo className="h-3 w-3" />
+              <span>Buffer level requires monitoring</span>
+            </div>
+          )}
         </div>
 
         {/* Priority 5: Playback State */}
