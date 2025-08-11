@@ -16,7 +16,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = ({ id, title }) => {
   const [isLive, setIsLive] = useState(true);
 
   // Collecte des données à 150ms, affichage à 500ms
-  const { stats, isSubscribed } = useCPUStats(isLive, 150, 500);
+  const { stats, isSubscribed } = useCPUStats(isLive, 150 );
 
   const deferredStats = useDeferredValue(stats);
   const deferredSubscribed = useDeferredValue(isSubscribed);

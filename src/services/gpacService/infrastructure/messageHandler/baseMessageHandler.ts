@@ -4,6 +4,7 @@ import { GpacNotificationHandlers } from '../../types';
 import { generateID } from '@/utils/id';
 import { SessionStatsHandler } from './sessionStatsHandler';
 import { FilterStatsHandler } from './filterStatsHandler';
+import { MessageThrottler } from '../../../utils/MessageThrottler';
 
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
 import { CPUStatsHandler } from './cpuStatsHandler';
@@ -14,6 +15,7 @@ export class BaseMessageHandler {
   private sessionStatsHandler: SessionStatsHandler;
   private filterStatsHandler: FilterStatsHandler;
   private cpuStatsHandler: CPUStatsHandler;
+  private messageThrottler: MessageThrottler;
 
   constructor(
     private currentFilterId: () => number | null,
@@ -25,6 +27,9 @@ export class BaseMessageHandler {
     // @ts-ignore used by sessionStatsHandler
     private isLoaded?: () => boolean,
   ) {
+    // Initialize message throttler for performance
+    this.messageThrottler = new MessageThrottler();
+    
     // Initialize specialized handlers
     this.sessionStatsHandler = new SessionStatsHandler(
       dependencies,
@@ -49,6 +54,13 @@ export class BaseMessageHandler {
   }
   public getCPUStatsHandler(): CPUStatsHandler {
     return this.cpuStatsHandler;
+  }
+
+  /**
+   * Nettoie le throttler (utile lors de la déconnexion)
+   */
+  public cleanup(): void {
+    this.messageThrottler.clear();
   }
 
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
@@ -131,17 +143,34 @@ export class BaseMessageHandler {
 
   private handleSessionStatsMessage(data: any): void {
     if (data.stats && Array.isArray(data.stats)) {
-      this.sessionStatsHandler.handleSessionStats(data.stats);
+      this.messageThrottler.throttle(
+      'session_stats',
+      (stats) => this.sessionStatsHandler.handleSessionStats(stats),
+      1000, 
+      data.stats
+    );
     }
   }
 
   private handleCpuStatsMessage(data: any): void {
-    this.cpuStatsHandler.handleCPUStats(data.stats);
+ 
+    this.messageThrottler.throttle(
+      'cpu_stats',
+      (stats) => this.cpuStatsHandler.handleCPUStats(stats),
+      500, 
+      data.stats
+    );
   }
 
   private handleFilterStatsMessage(data: any): void {
     if (data.idx !== undefined) {
-      this.filterStatsHandler.handleFilterStatsUpdate(data);
+   
+      this.messageThrottler.throttle(
+        `filter_stats_${data.idx}`,
+        (filterData) => this.filterStatsHandler.handleFilterStatsUpdate(filterData),
+        1000, 
+        data
+      );
     } else {
       // filter_stats message missing idx
     }
