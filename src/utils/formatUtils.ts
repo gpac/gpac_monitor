@@ -13,7 +13,10 @@ export interface ParsedMetrics {
   latency: LatencyMetric | null;
 }
 
+// DEPRECATED: Use formatBytes from helper.ts instead
+// This function is kept for backward compatibility but will be removed
 export const bytesToHumanReadable = (bytes: number): string => {
+  console.warn('bytesToHumanReadable is deprecated, use formatBytes from @/utils/helper instead');
   const units = ['B', 'KB', 'MB', 'GB'];
   let unitIndex = 0;
   let currentSize = bytes;

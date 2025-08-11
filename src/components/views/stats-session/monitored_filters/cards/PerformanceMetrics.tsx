@@ -1,9 +1,8 @@
 import { memo } from 'react';
 import { LuActivity } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
 import { TabPIDData } from '@/types/domain/gpac/filter-stats';
-import { formatTime, formatNumber, formatBitrate, formatPacketRate } from '@/utils/helper';
+import { usePerformanceMetrics } from '../../hooks/data/usePerformanceMetrics';
 
 interface PerformanceMetricsProps {
   pidData: TabPIDData;
@@ -14,6 +13,8 @@ interface PerformanceMetricsProps {
  * Shows rates, bitrates, processing stats, and throughput indicators
  */
 export const PerformanceMetrics = memo(({ pidData }: PerformanceMetricsProps) => {
+  const performanceData = usePerformanceMetrics(pidData);
+  
   return (
     <Card className="bg-stat border-transparent">
       <CardHeader className="pb-4">
@@ -39,13 +40,13 @@ export const PerformanceMetrics = memo(({ pidData }: PerformanceMetricsProps) =>
               </div>
               
               <div className="stat text-2xl font-bold leading-none">
-                {formatBitrate(pidData.stats.average_bitrate)}
+                {performanceData.throughput.dataBitrate.average}
               </div>
               
               <div className="flex items-center justify-between pt-1 border-t border-border/30">
                 <span className="text-xs stat-label opacity-60">Peak</span>
                 <span className="text-sm font-semibold stat">
-                  {formatBitrate(pidData.stats.max_bitrate)}
+                  {performanceData.throughput.dataBitrate.max}
                 </span>
               </div>
             </div>
@@ -58,13 +59,13 @@ export const PerformanceMetrics = memo(({ pidData }: PerformanceMetricsProps) =>
               </div>
               
               <div className="stat text-2xl font-bold leading-none">
-                {formatPacketRate(pidData.stats.average_process_rate)}
+                {performanceData.throughput.packetRate.average}
               </div>
               
               <div className="flex items-center justify-between pt-1 border-t border-border/30">
                 <span className="text-xs stat-label opacity-60">Peak</span>
                 <span className="text-sm font-semibold stat">
-                  {formatPacketRate(pidData.stats.max_process_rate)}
+                  {performanceData.throughput.packetRate.max}
                 </span>
               </div>
             </div>
@@ -82,22 +83,22 @@ export const PerformanceMetrics = memo(({ pidData }: PerformanceMetricsProps) =>
               <div className="flex items-center justify-between py-2">
                 <span className="text-sm stat-label">Total Processed</span>
                 <span className="text-lg font-bold stat">
-                  {formatNumber(pidData.stats.nb_processed || 0)}
+                  {performanceData.processing.totalProcessed}
                 </span>
               </div>
               
               <div className="flex items-center justify-between py-2 border-t border-border/20">
                 <span className="text-sm stat-label">Total Processing Time</span>
                 <span className="text-lg font-bold stat">
-                  {formatTime(pidData.stats.total_process_time)}
+                  {performanceData.processing.totalTime}
                 </span>
               </div>
               
-              {pidData.stats.nb_processed && pidData.stats.total_process_time && pidData.stats.nb_processed > 0 && (
+              {performanceData.processing.averagePerItem && (
                 <div className="flex items-center justify-between py-2 border-t border-border/20">
                   <span className="text-sm stat-label">Average per Item</span>
                   <span className="text-lg font-bold stat">
-                    {formatTime(pidData.stats.total_process_time / pidData.stats.nb_processed)}
+                    {performanceData.processing.averagePerItem}
                   </span>
                 </div>
               )}

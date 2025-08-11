@@ -1,11 +1,6 @@
 import { memo } from 'react';
 import { 
   LuTriangle, 
-  LuWifi, 
-  LuWifiOff, 
-  LuClock, 
-  LuPlay, 
-  LuPause,
   LuInfo,
   LuCheck
 } from 'react-icons/lu';
@@ -13,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TabPIDData } from '@/types/domain/gpac/filter-stats';
-import { formatBufferTime, getHealthStatusFromMetrics } from '@/utils/helper';
+import { formatBufferTime } from '@/utils/helper';
+import { useCriticalPIDStats } from '../../hooks/data/useCriticalPIDStats';
 
 interface CriticalPIDStatsProps {
   pidData: TabPIDData;
@@ -24,87 +20,7 @@ interface CriticalPIDStatsProps {
  * Shows the Top 5 critical states: disconnected, would_block, nb_pck_queued, buffer, playing/eos
  */
 export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
-  // Calculate buffer usage percentage
-  const bufferUsage = pidData.buffer_total && pidData.buffer_total > 0 ? (pidData.buffer / pidData.buffer_total) * 100 : 0;
-  
-  // Use new health assessment function
-  const overallHealth = getHealthStatusFromMetrics(
-    pidData.buffer,
-    pidData.would_block || false,
-    pidData.stats.disconnected || false,
-    pidData.nb_pck_queued || 0
-  );
-
-  // Connection state badge
-  const getConnectionBadge = () => {
-    if (pidData.stats.disconnected) {
-      return (
-        <Badge variant="destructive" className="flex items-center gap-1">
-          <LuWifiOff className="h-3 w-3 stat-label" />
-          Disconnected
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="default" className="flex items-center gap-1">
-        <LuWifi className="h-3 w-3 stat-label" />
-        Connected
-      </Badge>
-    );
-  };
-
-  // Would block state badge
-  const getBlockingBadge = () => {
-    if (pidData.would_block) {
-      return (
-        <Badge variant="destructive" className="flex items-center gap-1">
-          <LuTriangle className="h-3 w-3 stat-label" />
-          Would Block
-        </Badge>
-      );
-    }
-    return null;
-  };
-
-  // Queue status badge
-  const getQueueBadge = () => {
-    const queuedPackets = pidData.nb_pck_queued || 0;
-    if (queuedPackets > 50) {
-      return (
-        <Badge variant="secondary" className="flex items-center gap-1">
-          <LuClock className="h-3 w-3 stat-label" />
-          Queue: {queuedPackets}
-        </Badge>
-      );
-    }
-    return null;
-  };
-
-  // Playing/EOS state badge
-  const getPlaybackBadge = () => {
-    if (pidData.eos) {
-      return (
-        <Badge variant="outline" className="flex items-center gap-1">
-          <LuPause className="h-3 w-3 stat-label" />
-          End of Stream
-        </Badge>
-      );
-    }
-    if (pidData.playing) {
-      return (
-        <Badge variant="default" className="flex items-center gap-1 bg-green-600">
-          <LuPlay className="h-3 w-3" />
-          Playing
-        </Badge>
-      );
-    }
-    return (
-      <Badge variant="outline" className="flex items-center gap-1">
-        <LuPause className="h-3 w-3" />
-        Paused
-      </Badge>
-    );
-  };
+  const { bufferUsage, overallHealth, criticalStates } = useCriticalPIDStats(pidData);
 
   // Get icon for health status
   const getHealthIcon = (status: string) => {
@@ -120,36 +36,34 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-sm">
-            <HealthIcon className={`h-4 w-4 ${overallHealth.color}`} />
-            Critical States
+            <HealthIcon className="h-4 w-4 stat-label" />
+            System Health
           </CardTitle>
-          <Badge variant={overallHealth.variant} className={overallHealth.color}>
+          <Badge variant={overallHealth.variant}>
             {overallHealth.status}
           </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {/* Priority 1: Connection State */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground stat-label">Connection</span>
-          {getConnectionBadge()}
+      <CardContent className="space-y-4">
+        {/* Critical States Grid */}
+        <div className="grid grid-cols-1 gap-3">
+          {criticalStates
+            .filter(state => state.show)
+            .sort((a, b) => a.priority - b.priority)
+            .map((state) => (
+              <div key={state.key} className="flex items-center justify-between p-2 rounded-md bg-background/50 border border-border/40">
+                <div className="flex flex-col">
+                  <span className="text-xs font-medium stat-label">{state.label}</span>
+                  <span className="text-sm stat">{state.value}</span>
+                </div>
+                <Badge variant={state.variant} className="shrink-0">
+                  {state.status === 'critical' ? 'Critical' : 
+                   state.status === 'warning' ? 'Warning' : 
+                   state.status === 'info' ? 'Info' : 'OK'}
+                </Badge>
+              </div>
+            ))}
         </div>
-
-        {/* Priority 2: Blocking State */}
-        {pidData.would_block && (
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground stat-label">Blocking</span>
-            {getBlockingBadge()}
-          </div>
-        )}
-
-        {/* Priority 3: Queue Status */}
-        {(pidData.nb_pck_queued || 0) > 0 && (
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground stat-label">Queue</span>
-            {getQueueBadge()}
-          </div>
-        )}
 
         {/* Priority 4: Buffer Status with Progress Bar */}
         <div className="space-y-2">
@@ -192,11 +106,6 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
           )}
         </div>
 
-        {/* Priority 5: Playback State */}
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-muted-foreground stat-label">Playback</span>
-          {getPlaybackBadge()}
-        </div>
       </CardContent>
     </Card>
   );

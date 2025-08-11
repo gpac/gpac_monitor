@@ -1,11 +1,11 @@
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo } from 'react';
 import { LuUpload, LuDownload } from 'react-icons/lu';
 import { NetworkTabData } from '@/types/domain/gpac/filter-stats';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { BandwidthChart } from '../charts/BandwidthChart';
-import { formatBytes, formatBitrate, formatPacketRate } from '@/utils/helper';
+import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 
 interface NetworkTabProps {
   data: NetworkTabData;
@@ -14,72 +14,7 @@ interface NetworkTabProps {
 }
 
 const NetworkTab = memo(({ data, filterName, refreshInterval = 5000 }: NetworkTabProps) => {
-  const lastBytesRef = useRef({
-    sent: data.bytesSent,
-    received: data.bytesReceived,
-    timestamp: Date.now(),
-  });
-  const [currentStats, setCurrentStats] = useState(data);
-  const [instantRates, setInstantRates] = useState({
-    bytesSentRate: 0,
-    bytesReceivedRate: 0,
-    packetsSentRate: 0,
-    packetsReceivedRate: 0,
-  });
-
-  useEffect(() => {
-    const now = Date.now();
-    const timeDiff = (now - lastBytesRef.current.timestamp) / 1000; // en secondes
-    
-    // Calculate instant rates (per second)
-    if (timeDiff > 0) {
-      const bytesSentDelta = data.bytesSent - lastBytesRef.current.sent;
-      const bytesReceivedDelta = data.bytesReceived - lastBytesRef.current.received;
-      const packetsSentDelta = data.packetsSent - (lastBytesRef.current as any).packetsSent || 0;
-      const packetsReceivedDelta = data.packetsReceived - (lastBytesRef.current as any).packetsReceived || 0;
-
-      setInstantRates({
-        bytesSentRate: Math.max(0, bytesSentDelta / timeDiff),
-        bytesReceivedRate: Math.max(0, bytesReceivedDelta / timeDiff),
-        packetsSentRate: Math.max(0, packetsSentDelta / timeDiff),
-        packetsReceivedRate: Math.max(0, packetsReceivedDelta / timeDiff),
-      });
-    }
-
-    lastBytesRef.current = {
-      sent: data.bytesSent,
-      received: data.bytesReceived,
-      timestamp: now,
-      ...(lastBytesRef.current as any),
-      packetsSent: data.packetsSent,
-      packetsReceived: data.packetsReceived,
-    };
-
-    setCurrentStats(data);
-  }, [data, filterName]);
-
-  const formattedStats = useMemo(
-    () => ({
-      bytesSent: formatBytes(currentStats.bytesSent),
-      bytesReceived: formatBytes(currentStats.bytesReceived),
-      packetsSent: currentStats.packetsSent.toLocaleString(),
-      packetsReceived: currentStats.packetsReceived.toLocaleString(),
-      // Instant rates
-      bytesSentRate: formatBitrate(instantRates.bytesSentRate * 8), // Convert to bits
-      bytesReceivedRate: formatBitrate(instantRates.bytesReceivedRate * 8),
-      packetsSentRate: formatPacketRate(instantRates.packetsSentRate),
-      packetsReceivedRate: formatPacketRate(instantRates.packetsReceivedRate),
-    }),
-    [currentStats, instantRates],
-  );
-
-  // Activity level based on current throughput
-  const getActivityLevel = (byteRate: number) => {
-    if (byteRate > 10000000) return { level: 'High', variant: 'default' as const, color: 'text-green-600' };
-    if (byteRate > 1000000) return { level: 'Medium', variant: 'secondary' as const, color: 'text-blue-600' };
-    if (byteRate > 0) return { level: 'Low', variant: 'outline' as const, color: 'text-orange-600' };
-    return { level: 'Idle', variant: 'destructive' as const, color: 'text-gray-500' };
-  };
+  const { currentStats, instantRates, formattedStats, getActivityLevel } = useNetworkMetrics(data, filterName);
 
   return (
     <ScrollArea className="h-[400px]">
