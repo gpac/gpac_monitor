@@ -35,11 +35,11 @@ export const PerformanceMetrics = memo(({ pidData }: PerformanceMetricsProps) =>
             {/* Data Rate Card */}
             <div className="bg-background/20 rounded-lg p-4 space-y-3">
               <div className="flex items-baseline justify-between">
-                <span className="text-xs font-medium stat-label">Data Rate</span>
+                <span className="font-medium  stat-label">Data Rate</span>
                 <span className="text-xs stat-label opacity-75">Average</span>
               </div>
               
-              <div className="stat text-2xl font-bold leading-none">
+              <div className="stat text-xl font-bold leading-none">
                 {performanceData.throughput.dataBitrate.average}
               </div>
               
@@ -54,11 +54,11 @@ export const PerformanceMetrics = memo(({ pidData }: PerformanceMetricsProps) =>
             {/* Packet Rate Card */}
             <div className="bg-background/20 rounded-lg p-4 space-y-3">
               <div className="flex items-baseline justify-between">
-                <span className="text-xs font-medium stat-label">Packet Rate</span>
+                <span className="font-medium stat-label">Packet Rate</span>
                 <span className="text-xs stat-label opacity-75">Average</span>
               </div>
               
-              <div className="stat text-2xl font-bold leading-none">
+              <div className="stat text-xl font-bold leading-none">
                 {performanceData.throughput.packetRate.average}
               </div>
               

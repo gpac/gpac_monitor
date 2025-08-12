@@ -51,7 +51,7 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
             .filter(state => state.show)
             .sort((a, b) => a.priority - b.priority)
             .map((state) => (
-              <div key={state.key} className="flex items-center justify-between p-2 rounded-md bg-background/50 border border-border/40">
+              <div key={state.key} className="flex items-center justify-between p-2 rounded-md bg-background/50">
                 <div className="flex flex-col">
                   <span className="text-xs font-medium stat-label">{state.label}</span>
                   <span className="text-sm stat">{state.value}</span>
