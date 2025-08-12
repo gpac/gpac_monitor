@@ -29,7 +29,7 @@ export interface NetworkMetrics {
 
 export const useNetworkMetrics = (
   data: NetworkTabData,
-  filterName: string
+  filterName: string,
 ): NetworkMetrics => {
   const lastBytesRef = useRef({
     sent: data.bytesSent,
@@ -51,12 +51,15 @@ export const useNetworkMetrics = (
   useEffect(() => {
     const now = Date.now();
     const timeDiff = (now - lastBytesRef.current.timestamp) / 1000;
-    
+
     if (timeDiff > 0) {
       const bytesSentDelta = data.bytesSent - lastBytesRef.current.sent;
-      const bytesReceivedDelta = data.bytesReceived - lastBytesRef.current.received;
-      const packetsSentDelta = data.packetsSent - lastBytesRef.current.packetsSent;
-      const packetsReceivedDelta = data.packetsReceived - lastBytesRef.current.packetsReceived;
+      const bytesReceivedDelta =
+        data.bytesReceived - lastBytesRef.current.received;
+      const packetsSentDelta =
+        data.packetsSent - lastBytesRef.current.packetsSent;
+      const packetsReceivedDelta =
+        data.packetsReceived - lastBytesRef.current.packetsReceived;
 
       setInstantRates({
         bytesSentRate: Math.max(0, bytesSentDelta / timeDiff),
@@ -94,10 +97,29 @@ export const useNetworkMetrics = (
 
   // Activity level logic
   const getActivityLevel = (byteRate: number) => {
-    if (byteRate > 10000000) return { level: 'High' as const, variant: 'default' as const, color: 'text-green-600' };
-    if (byteRate > 1000000) return { level: 'Medium' as const, variant: 'secondary' as const, color: 'text-blue-600' };
-    if (byteRate > 0) return { level: 'Low' as const, variant: 'outline' as const, color: 'text-orange-600' };
-    return { level: 'Idle' as const, variant: 'destructive' as const, color: 'text-gray-500' };
+    if (byteRate > 10000000)
+      return {
+        level: 'High' as const,
+        variant: 'default' as const,
+        color: 'text-green-600',
+      };
+    if (byteRate > 1000000)
+      return {
+        level: 'Medium' as const,
+        variant: 'secondary' as const,
+        color: 'text-blue-600',
+      };
+    if (byteRate > 0)
+      return {
+        level: 'Low' as const,
+        variant: 'outline' as const,
+        color: 'text-orange-600',
+      };
+    return {
+      level: 'Idle' as const,
+      variant: 'destructive' as const,
+      color: 'text-gray-500',
+    };
   };
 
   return {

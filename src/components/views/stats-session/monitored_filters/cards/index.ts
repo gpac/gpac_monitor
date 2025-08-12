@@ -6,10 +6,10 @@ export { PIDStatsOverview } from './PIDStatsOverview';
 export { CompactPIDStats } from './CompactPIDStats';
 
 // Legacy components (for backward compatibility)
-export { 
-  PIDMetricsCard, 
-  ProcessingCard, 
-  PacketsCard, 
-  DataCard, 
-  PIDDetails 
+export {
+  PIDMetricsCard,
+  ProcessingCard,
+  PacketsCard,
+  DataCard,
+  PIDDetails,
 } from './DetailedStatsCards';

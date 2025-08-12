@@ -1,4 +1,10 @@
-import { FilterStatsResponse, TabPIDData, PIDBufferInfo, NetworkTabData, OverviewTabData } from './filter-stats';
+import {
+  FilterStatsResponse,
+  TabPIDData,
+  PIDBufferInfo,
+  NetworkTabData,
+  OverviewTabData,
+} from './filter-stats';
 
 // =======================================
 // TAB COMPONENT PROP INTERFACES
@@ -172,11 +178,11 @@ export type BufferProgressColor = 'green' | 'yellow' | 'red';
 /**
  * Filter processing status
  */
-export type FilterProcessingStatus = 
-  | 'play' 
-  | 'stop' 
-  | 'flush' 
-  | 'error' 
+export type FilterProcessingStatus =
+  | 'play'
+  | 'stop'
+  | 'flush'
+  | 'error'
   | 'init'
   | string; // Allow other custom statuses
 

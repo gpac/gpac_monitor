@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import WidgetWrapper from '../../../common/WidgetWrapper';
+import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import LoadingState from '../../../common/LoadingState';
 import ConnectionErrorState from '../../../common/ConnectionErrorState';
 import GraphFlow from './GraphFlow';
@@ -33,6 +34,16 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
   onEdgesChange,
   onNodeClick,
 }) => {
+  const [isResizing, setIsResizing] = useState(false);
+
+  // Optimize ReactFlow during resize - very important for complex graphs
+  const { ref } = useOptimizedResize({
+    onResizeStart: () => setIsResizing(true),
+    onResizeEnd: () => setIsResizing(false),
+    debounce: 24, // Slightly higher for heavy graph operations
+    throttle: true,
+  }) as { ref: React.RefObject<HTMLElement> };
+  const containerRef = ref as React.RefObject<HTMLDivElement>;
   if (isLoading) {
     return <LoadingState id={id} title={title} message="Connexion à GPAC..." />;
   }
@@ -50,13 +61,17 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
 
   return (
     <WidgetWrapper id={id} title={title}>
-      <div className="relative h-full w-full">
+      <div 
+        ref={containerRef}
+        className={`relative h-full w-full ${isResizing ? 'contain-layout contain-style pointer-events-none' : ''}`}
+      >
         <GraphFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
+          isResizing={isResizing}
         />
       </div>
     </WidgetWrapper>

@@ -82,7 +82,7 @@ export const Chart = memo(
       onResizeStart: () => setIsResizing(true),
       onResizeEnd: () => setIsResizing(false),
       debounce: 32, // Reduce frequency during resize for better performance
-      throttle: true
+      throttle: true,
     }) as { ref: React.RefObject<HTMLElement> };
 
     const chartRef = ref as React.RefObject<HTMLDivElement>;
@@ -155,14 +155,11 @@ export const Chart = memo(
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div 
+          <div
             style={{ width: '100%', height: mergedConfig.height }}
             className={isResizing ? 'contain-layout contain-style' : ''}
           >
-            <ResponsiveContainer 
-              width="100%" 
-              height="100%"
-            >
+            <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={dataPoints}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}

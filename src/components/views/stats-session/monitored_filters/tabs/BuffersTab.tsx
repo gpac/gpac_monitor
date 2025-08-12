@@ -13,13 +13,14 @@ interface BuffersTabProps {
 }
 
 const BuffersTab = memo(({ data }: BuffersTabProps) => {
-  const { processedBuffers, totalBufferInfo, hasBuffers } = useBufferMetrics(data);
+  const { processedBuffers, totalBufferInfo, hasBuffers } =
+    useBufferMetrics(data);
   const { name } = data;
-  
+
   console.log('[BuffersTab] Buffer stats for filter', name, ':', {
     totalPids: processedBuffers.length,
     bufferDetails: processedBuffers,
-    totalBufferInfo
+    totalBufferInfo,
   });
 
   if (!hasBuffers) {
@@ -49,26 +50,29 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
                 <div className="text-xl font-bold">
                   {formatBytes(totalBufferInfo.totalBuffer)}
                 </div>
-                <div className="text-xs text-muted-foreground stat-label">Used</div>
+                <div className="text-xs text-muted-foreground stat-label">
+                  Used
+                </div>
               </div>
               <div>
                 <div className="text-xl font-bold">
                   {formatBytes(totalBufferInfo.totalCapacity)}
                 </div>
-                <div className="text-xs text-muted-foreground stat-label">Total</div>
+                <div className="text-xs text-muted-foreground stat-label">
+                  Total
+                </div>
               </div>
               <div>
                 <div className="text-xl font-bold">
                   {totalBufferInfo.averageUsage.toFixed(1)}%
                 </div>
-                <div className="text-xs text-muted-foreground stat-label">Avg Usage</div>
+                <div className="text-xs text-muted-foreground stat-label">
+                  Avg Usage
+                </div>
               </div>
             </div>
             <div className="mt-3">
-              <Progress
-                value={totalBufferInfo.averageUsage}
-                className="h-2"
-              />
+              <Progress value={totalBufferInfo.averageUsage} className="h-2" />
             </div>
           </CardContent>
         </Card>
@@ -99,7 +103,9 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
                 <div className="space-y-3">
                   {/* Buffer Time Display (Primary metric) */}
                   <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium stat-label">Buffer Level</span>
+                    <span className="text-sm font-medium stat-label">
+                      Buffer Level
+                    </span>
                     <div className="text-right">
                       <div className="text-lg font-bold stat">
                         {buffer.bufferTimeMs}
@@ -116,10 +122,16 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
                       <Progress
                         value={buffer.usage}
                         className="h-3 flex-1 mr-2"
-                        style={{
-                          '--progress-background': buffer.health.status === 'Critical' ? '#ef4444' :
-                                                 buffer.health.status === 'Warning' ? '#f59e0b' : '#10b981'
-                        } as React.CSSProperties}
+                        style={
+                          {
+                            '--progress-background':
+                              buffer.health.status === 'Critical'
+                                ? '#ef4444'
+                                : buffer.health.status === 'Warning'
+                                  ? '#f59e0b'
+                                  : '#10b981',
+                          } as React.CSSProperties
+                        }
                       />
                       <span className="text-sm font-medium w-12 text-right">
                         {buffer.usage.toFixed(1)}%

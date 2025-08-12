@@ -1,6 +1,10 @@
 import { useMemo } from 'react';
 import { BuffersTabData } from '@/types/domain/gpac/filter-stats';
-import { formatBytes, formatBufferTime, getBufferHealthColor } from '@/utils/helper';
+import {
+  formatBytes,
+  formatBufferTime,
+  getBufferHealthColor,
+} from '@/utils/helper';
 
 export interface BufferInfo {
   name: string;
@@ -36,7 +40,7 @@ export const useBufferMetrics = (data: BuffersTabData): BufferMetrics => {
     return inputBuffers.map((info) => {
       const bufferTimeMs = info.buffer / 1000;
       const bufferHealth = getBufferHealthColor(bufferTimeMs);
-      
+
       return {
         name: info.name,
         sourceIdx: info.sourceIdx,

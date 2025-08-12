@@ -114,9 +114,25 @@ export const formatBufferTime = (microseconds: number): string => {
   return `${Math.floor(milliseconds)} ms`;
 };
 
-export const getBufferHealthColor = (bufferMs: number): { color: string; status: string; variant: 'default' | 'secondary' | 'destructive' } => {
-  if (bufferMs < 100) return { color: 'text-red-500', status: 'Critical', variant: 'destructive' };
-  if (bufferMs < 500) return { color: 'text-orange-500', status: 'Warning', variant: 'secondary' };
+export const getBufferHealthColor = (
+  bufferMs: number,
+): {
+  color: string;
+  status: string;
+  variant: 'default' | 'secondary' | 'destructive';
+} => {
+  if (bufferMs < 100)
+    return {
+      color: 'text-red-500',
+      status: 'Critical',
+      variant: 'destructive',
+    };
+  if (bufferMs < 500)
+    return {
+      color: 'text-orange-500',
+      status: 'Warning',
+      variant: 'secondary',
+    };
   return { color: 'text-green-500', status: 'Healthy', variant: 'default' };
 };
 
@@ -124,16 +140,28 @@ export const getHealthStatusFromMetrics = (
   buffer: number,
   wouldBlock: boolean,
   disconnected: boolean,
-  queuedPackets: number
-): { color: string; status: string; variant: 'default' | 'secondary' | 'destructive' } => {
+  queuedPackets: number,
+): {
+  color: string;
+  status: string;
+  variant: 'default' | 'secondary' | 'destructive';
+} => {
   if (disconnected || wouldBlock) {
-    return { color: 'text-red-500', status: 'Critical', variant: 'destructive' };
+    return {
+      color: 'text-red-500',
+      status: 'Critical',
+      variant: 'destructive',
+    };
   }
-  
+
   const bufferMs = buffer / 1000;
   if (bufferMs < 100 || queuedPackets > 100) {
-    return { color: 'text-orange-500', status: 'Warning', variant: 'secondary' };
+    return {
+      color: 'text-orange-500',
+      status: 'Warning',
+      variant: 'secondary',
+    };
   }
-  
+
   return { color: 'text-green-500', status: 'Healthy', variant: 'default' };
 };

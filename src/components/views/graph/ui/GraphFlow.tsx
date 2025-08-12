@@ -21,6 +21,7 @@ interface GraphFlowProps {
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onNodeClick: (event: React.MouseEvent, node: Node) => void;
+  isResizing?: boolean;
 }
 
 const flowStyles = {
@@ -38,6 +39,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   onNodesChange,
   onEdgesChange,
   onNodeClick,
+  isResizing = false,
 }) => {
   const { setViewport } = useReactFlow();
   const { zoom } = useViewport();
@@ -63,20 +65,20 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   );
 
   return (
-    <div style={flowStyles}>
+    <div style={flowStyles} className={isResizing ? 'resize-optimized' : ''}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onNodeClick={onNodeClick}
-        fitView
+        onNodesChange={isResizing ? () => {} : onNodesChange}
+        onEdgesChange={isResizing ? () => {} : onEdgesChange}
+        onNodeClick={isResizing ? () => {} : onNodeClick}
+        fitView={!isResizing}
         minZoom={0.1}
         maxZoom={4}
         defaultEdgeOptions={{
           type: 'smoothstep',
-          animated: true,
+          animated: !isResizing,
           style: { stroke: '#6b7280', strokeWidth: 3 },
         }}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
@@ -86,7 +88,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         <Background color="#4b5563" gap={16} variant={BackgroundVariant.Dots} />
         <Controls
           className="bg-gray-800 border-gray-700 fill-gray-400"
-          showInteractive={true}
+          showInteractive={!isResizing}
         />
         <MiniMap
           nodeColor={(n) => {
@@ -101,10 +103,8 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           }}
           maskColor="rgba(0, 0, 0, 0.3)"
           className="bg-gray-800 border border-gray-700"
-          onDrag={handleMiniMapDrag}
+          onDrag={isResizing ? undefined : handleMiniMapDrag}
         />
-
-    
       </ReactFlow>
     </div>
   );

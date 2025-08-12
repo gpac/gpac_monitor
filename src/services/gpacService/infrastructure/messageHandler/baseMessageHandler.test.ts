@@ -47,7 +47,7 @@ describe('BaseMessageHandler', () => {
       mockCallbacks,
       mockDependencies,
       vi.fn(),
-      mockIsLoaded
+      mockIsLoaded,
     );
   });
 

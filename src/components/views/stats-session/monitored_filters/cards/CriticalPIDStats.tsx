@@ -1,9 +1,5 @@
 import { memo } from 'react';
-import { 
-  LuTriangle, 
-  LuInfo,
-  LuCheck
-} from 'react-icons/lu';
+import { LuTriangle, LuInfo, LuCheck } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -20,7 +16,8 @@ interface CriticalPIDStatsProps {
  * Shows the Top 5 critical states: disconnected, would_block, nb_pck_queued, buffer, playing/eos
  */
 export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
-  const { bufferUsage, overallHealth, criticalStates } = useCriticalPIDStats(pidData);
+  const { bufferUsage, overallHealth, criticalStates } =
+    useCriticalPIDStats(pidData);
 
   // Get icon for health status
   const getHealthIcon = (status: string) => {
@@ -39,27 +36,34 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
             <HealthIcon className="h-4 w-4 stat-label" />
             System Health
           </CardTitle>
-          <Badge variant={overallHealth.variant}>
-            {overallHealth.status}
-          </Badge>
+          <Badge variant={overallHealth.variant}>{overallHealth.status}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Critical States Grid */}
         <div className="grid grid-cols-1 gap-3">
           {criticalStates
-            .filter(state => state.show)
+            .filter((state) => state.show)
             .sort((a, b) => a.priority - b.priority)
             .map((state) => (
-              <div key={state.key} className="flex items-center justify-between p-2 rounded-md bg-background/50">
+              <div
+                key={state.key}
+                className="flex items-center justify-between p-2 rounded-md bg-background/50"
+              >
                 <div className="flex flex-col">
-                  <span className="text-xs font-medium stat-label">{state.label}</span>
+                  <span className="text-xs font-medium stat-label">
+                    {state.label}
+                  </span>
                   <span className="text-sm stat">{state.value}</span>
                 </div>
                 <Badge variant={state.variant} className="shrink-0">
-                  {state.status === 'critical' ? 'Critical' : 
-                   state.status === 'warning' ? 'Warning' : 
-                   state.status === 'info' ? 'Info' : 'OK'}
+                  {state.status === 'critical'
+                    ? 'Critical'
+                    : state.status === 'warning'
+                      ? 'Warning'
+                      : state.status === 'info'
+                        ? 'Info'
+                        : 'OK'}
                 </Badge>
               </div>
             ))}
@@ -68,7 +72,9 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
         {/* Priority 4: Buffer Status with Progress Bar */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground stat-label">Buffer Level</span>
+            <span className="text-xs text-muted-foreground stat-label">
+              Buffer Level
+            </span>
             <div className="text-right">
               <div className={`text-sm font-bold ${overallHealth.color}`}>
                 {formatBufferTime(pidData.buffer)}
@@ -78,19 +84,29 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
               </div>
             </div>
           </div>
-          <Progress 
-            value={bufferUsage} 
+          <Progress
+            value={bufferUsage}
             className="h-3"
-            style={{
-              '--progress-background': overallHealth.status === 'Critical' ? '#ef4444' :
-                                     overallHealth.status === 'Warning' ? '#f59e0b' : '#10b981'
-            } as React.CSSProperties}
+            style={
+              {
+                '--progress-background':
+                  overallHealth.status === 'Critical'
+                    ? '#ef4444'
+                    : overallHealth.status === 'Warning'
+                      ? '#f59e0b'
+                      : '#10b981',
+              } as React.CSSProperties
+            }
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>0 ms</span>
-            <span>{pidData.buffer_total ? formatBufferTime(pidData.buffer_total) : '0 ms'}</span>
+            <span>
+              {pidData.buffer_total
+                ? formatBufferTime(pidData.buffer_total)
+                : '0 ms'}
+            </span>
           </div>
-          
+
           {/* Buffer health indicator */}
           {overallHealth.status === 'Critical' && (
             <div className="flex items-center gap-1 text-xs text-red-600 bg-red-50 p-1 rounded">
@@ -105,7 +121,6 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
             </div>
           )}
         </div>
-
       </CardContent>
     </Card>
   );

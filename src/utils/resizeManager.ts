@@ -6,7 +6,10 @@ interface ResizeData {
   timestamp: number;
 }
 
-export type ResizeNotification = 'resize_start' | 'resize_end' | 'resize_update';
+export type ResizeNotification =
+  | 'resize_start'
+  | 'resize_end'
+  | 'resize_update';
 
 class ResizeManager extends Subscribable<ResizeData, ResizeNotification> {
   private resizeObserver: ResizeObserver | null = null;
@@ -37,7 +40,7 @@ class ResizeManager extends Subscribable<ResizeData, ResizeNotification> {
         this.updateData({
           width,
           height,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
         this.notify('resize_update');
       }
@@ -53,24 +56,24 @@ class ResizeManager extends Subscribable<ResizeData, ResizeNotification> {
 
   public observeElement(element: Element, id?: string): string {
     if (!this.resizeObserver) return '';
-    
+
     const elementId = id || `element_${Date.now()}_${Math.random()}`;
     this.activeElements.set(element, elementId);
     this.resizeObserver.observe(element);
-    
+
     return elementId;
   }
 
   public unobserveElement(element: Element) {
     if (!this.resizeObserver) return;
-    
+
     this.resizeObserver.unobserve(element);
     this.activeElements.delete(element);
   }
 
   public subscribeToResize(
     callback: (data: ResizeData, type?: ResizeNotification[]) => void,
-    debounceTime: number = 16 // ~60fps for smooth updates
+    debounceTime: number = 16, // ~60fps for smooth updates
   ) {
     return this.subscribe(callback, { debounce: debounceTime });
   }
@@ -98,11 +101,13 @@ export const resizeManager = new ResizeManager();
 // Hook for React components
 export const useResizeOptimization = () => {
   return {
-    observeElement: (element: Element, id?: string) => 
+    observeElement: (element: Element, id?: string) =>
       resizeManager.observeElement(element, id),
-    unobserveElement: (element: Element) => 
+    unobserveElement: (element: Element) =>
       resizeManager.unobserveElement(element),
-    subscribe: (callback: (data: ResizeData, type?: ResizeNotification[]) => void, debounce?: number) =>
-      resizeManager.subscribeToResize(callback, debounce)
+    subscribe: (
+      callback: (data: ResizeData, type?: ResizeNotification[]) => void,
+      debounce?: number,
+    ) => resizeManager.subscribeToResize(callback, debounce),
   };
 };

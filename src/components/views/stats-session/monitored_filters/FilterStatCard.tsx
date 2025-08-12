@@ -2,9 +2,7 @@ import { useCallback, useMemo, memo } from 'react';
 import { LuActivity, LuEye } from 'react-icons/lu';
 import { GpacNodeData } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
-import {
-  determineFilterSessionType,
-} from '@/components/views/graph/utils/filterType';
+import { determineFilterSessionType } from '@/components/views/graph/utils/filterType';
 import {
   Card,
   CardContent,
@@ -46,7 +44,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       }
 
       const bufferUsage = calculateBufferUsage(filter.ipid);
-   
+
       const activityLevel = getActivityLevel(
         filter.pck_done,
         filter.bytes_done,
@@ -58,7 +56,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
     }, [filter]);
 
     const sessionType = determineFilterSessionType(filter);
-
 
     const handleClick = useCallback(() => {
       if (onClick && filter.idx !== undefined) {
@@ -96,8 +93,8 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                   sessionType === 'source'
                     ? 'outline'
                     : sessionType === 'sink'
-                    ? 'outline'
-                    : 'secondary'
+                      ? 'outline'
+                      : 'secondary'
                 }
                 className={`h-2 px-2 text-[10px] leading-none `}
                 style={{

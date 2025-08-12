@@ -1,6 +1,11 @@
 import { useMemo } from 'react';
 import { TabPIDData } from '@/types/domain/gpac/filter-stats';
-import { formatBitrate, formatPacketRate, formatTime, formatNumber } from '@/utils/helper';
+import {
+  formatBitrate,
+  formatPacketRate,
+  formatTime,
+  formatNumber,
+} from '@/utils/helper';
 
 export interface PerformanceData {
   throughput: {
@@ -24,8 +29,14 @@ export const usePerformanceMetrics = (pidData: TabPIDData): PerformanceData => {
   const performanceData = useMemo(() => {
     // Calculate average processing time per item
     let averagePerItem: string | undefined;
-    if (pidData.stats.nb_processed && pidData.stats.total_process_time && pidData.stats.nb_processed > 0) {
-      averagePerItem = formatTime(pidData.stats.total_process_time / pidData.stats.nb_processed);
+    if (
+      pidData.stats.nb_processed &&
+      pidData.stats.total_process_time &&
+      pidData.stats.nb_processed > 0
+    ) {
+      averagePerItem = formatTime(
+        pidData.stats.total_process_time / pidData.stats.nb_processed,
+      );
     }
 
     return {

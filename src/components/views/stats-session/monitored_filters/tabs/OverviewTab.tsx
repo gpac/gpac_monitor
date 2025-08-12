@@ -35,13 +35,13 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
     ],
   );
 
-
-
   return (
     <ScrollArea className="h-[400px]">
       <div className="space-y-4">
         {/* PID Metrics */}
-        <PIDMetricsCard data={{ nb_ipid: filter.nb_ipid, nb_opid: filter.nb_opid } as any} />
+        <PIDMetricsCard
+          data={{ nb_ipid: filter.nb_ipid, nb_opid: filter.nb_opid } as any}
+        />
 
         <div className="grid grid-cols-1 bg-stat border-0 gap-4 sm:grid-cols-3 ">
           {/* Processing Card */}

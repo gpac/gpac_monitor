@@ -1,6 +1,12 @@
 import { memo, useMemo } from 'react';
 import { LuChevronLeft } from 'react-icons/lu';
-import { OverviewTabData, BuffersTabData, TabPIDData, NetworkTabData, FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
+import {
+  OverviewTabData,
+  BuffersTabData,
+  TabPIDData,
+  NetworkTabData,
+  FilterStatsResponse,
+} from '@/types/domain/gpac/filter-stats';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,7 +22,7 @@ interface DetailedStatsViewProps {
   buffersData: BuffersTabData;
   inputPids: TabPIDData[];
   outputPids: TabPIDData[];
-  filterData?: FilterStatsResponse; 
+  filterData?: FilterStatsResponse;
   onBack: () => void;
 }
 
@@ -27,11 +33,18 @@ const MemoizedInputsTab = memo(InputsTab);
 const MemoizedOutputsTab = memo(OutputsTab);
 
 const DetailedStatsView = memo(
-  ({ overviewData, networkData, buffersData, inputPids, outputPids, filterData, onBack }: DetailedStatsViewProps) => {
-
-
+  ({
+    overviewData,
+    networkData,
+    buffersData,
+    inputPids,
+    outputPids,
+    filterData,
+    onBack,
+  }: DetailedStatsViewProps) => {
     const badgeVariant = useMemo(
-      () => (overviewData.status?.includes('error') ? 'destructive' : 'secondary'),
+      () =>
+        overviewData.status?.includes('error') ? 'destructive' : 'secondary',
       [overviewData.status],
     );
 
@@ -99,21 +112,51 @@ const DetailedStatsView = memo(
             <MemoizedOverviewTab filter={overviewData} />
           </TabsContent>
           <TabsContent value="network">
-            <MemoizedNetworkTab data={networkData} filterName={overviewData.name} refreshInterval={5000} />
+            <MemoizedNetworkTab
+              data={networkData}
+              filterName={overviewData.name}
+              refreshInterval={5000}
+            />
           </TabsContent>
           <TabsContent value="buffers">
             <MemoizedBuffersTab data={buffersData} />
           </TabsContent>
           <TabsContent value="inputs">
-            <MemoizedInputsTab 
-              filterData={filterData || { idx: 0, status: '', bytes_done: 0, bytes_sent: 0, pck_done: 0, pck_sent: 0, time: 0, nb_ipid: 0, nb_opid: 0, ipids: {} }} 
-              filterName={overviewData.name} 
+            <MemoizedInputsTab
+              filterData={
+                filterData || {
+                  idx: 0,
+                  status: '',
+                  bytes_done: 0,
+                  bytes_sent: 0,
+                  pck_done: 0,
+                  pck_sent: 0,
+                  time: 0,
+                  nb_ipid: 0,
+                  nb_opid: 0,
+                  ipids: {},
+                }
+              }
+              filterName={overviewData.name}
             />
           </TabsContent>
           <TabsContent value="outputs">
-            <MemoizedOutputsTab 
-              filterData={filterData || { idx: 0, status: '', bytes_done: 0, bytes_sent: 0, pck_done: 0, pck_sent: 0, time: 0, nb_ipid: 0, nb_opid: 0, opids: {} }} 
-              filterName={overviewData.name} 
+            <MemoizedOutputsTab
+              filterData={
+                filterData || {
+                  idx: 0,
+                  status: '',
+                  bytes_done: 0,
+                  bytes_sent: 0,
+                  pck_done: 0,
+                  pck_sent: 0,
+                  time: 0,
+                  nb_ipid: 0,
+                  nb_opid: 0,
+                  opids: {},
+                }
+              }
+              filterName={overviewData.name}
             />
           </TabsContent>
         </Tabs>

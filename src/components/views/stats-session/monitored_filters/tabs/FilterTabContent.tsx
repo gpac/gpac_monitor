@@ -1,5 +1,11 @@
 import React from 'react';
-import { OverviewTabData, BuffersTabData, TabPIDData, NetworkTabData, FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
+import {
+  OverviewTabData,
+  BuffersTabData,
+  TabPIDData,
+  NetworkTabData,
+  FilterStatsResponse,
+} from '@/types/domain/gpac/filter-stats';
 import DetailedStatsView from '../DetailedStatsView';
 
 interface FilterTabContentProps {
@@ -22,14 +28,14 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   onBack,
 }) => {
   return (
-    <DetailedStatsView 
+    <DetailedStatsView
       overviewData={overviewData}
       networkData={networkData}
       buffersData={buffersData}
       inputPids={inputPids}
       outputPids={outputPids}
       filterData={filterData}
-      onBack={onBack} 
+      onBack={onBack}
     />
   );
 };

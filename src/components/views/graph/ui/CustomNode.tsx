@@ -11,10 +11,14 @@ interface CustomNodeProps extends NodeProps {
   } & Record<string, unknown>;
 }
 
-export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected, ...nodeProps }) => {
+export const CustomNode: React.FC<CustomNodeProps> = ({
+  data,
+  selected,
+  ...nodeProps
+}) => {
   const { label, ipid, opid, nb_ipid, nb_opid } = data;
   const sessionType = determineFilterSessionType(data);
-  
+
   const node = { data, position: { x: 0, y: 0 }, ...nodeProps };
   const [textColor, backgroundColor] = useGraphColors(node);
 
@@ -76,9 +80,15 @@ export const CustomNode: React.FC<CustomNodeProps> = ({ data, selected, ...nodeP
         />
       ))}
 
-      <div className="rounded-t-xl -m-4 mb-2 px-4 py-3 shadow-sm" style={{ backgroundColor }}>
+      <div
+        className="rounded-t-xl -m-4 mb-2 px-4 py-3 shadow-sm"
+        style={{ backgroundColor }}
+      >
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-sm drop-shadow-sm" style={{ color: textColor }}>
+          <h3
+            className="font-bold text-sm drop-shadow-sm"
+            style={{ color: textColor }}
+          >
             {label}
           </h3>
           <div

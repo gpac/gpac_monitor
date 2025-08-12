@@ -29,7 +29,7 @@ export class BaseMessageHandler {
   ) {
     // Initialize message throttler for performance
     this.messageThrottler = new MessageThrottler();
-    
+
     // Initialize specialized handlers
     this.sessionStatsHandler = new SessionStatsHandler(
       dependencies,
@@ -144,32 +144,31 @@ export class BaseMessageHandler {
   private handleSessionStatsMessage(data: any): void {
     if (data.stats && Array.isArray(data.stats)) {
       this.messageThrottler.throttle(
-      'session_stats',
-      (stats) => this.sessionStatsHandler.handleSessionStats(stats),
-      1000, 
-      data.stats
-    );
+        'session_stats',
+        (stats) => this.sessionStatsHandler.handleSessionStats(stats),
+        1000,
+        data.stats,
+      );
     }
   }
 
   private handleCpuStatsMessage(data: any): void {
- 
     this.messageThrottler.throttle(
       'cpu_stats',
       (stats) => this.cpuStatsHandler.handleCPUStats(stats),
-      500, 
-      data.stats
+      500,
+      data.stats,
     );
   }
 
   private handleFilterStatsMessage(data: any): void {
     if (data.idx !== undefined) {
-   
       this.messageThrottler.throttle(
         `filter_stats_${data.idx}`,
-        (filterData) => this.filterStatsHandler.handleFilterStatsUpdate(filterData),
-        1000, 
-        data
+        (filterData) =>
+          this.filterStatsHandler.handleFilterStatsUpdate(filterData),
+        1000,
+        data,
       );
     } else {
       // filter_stats message missing idx

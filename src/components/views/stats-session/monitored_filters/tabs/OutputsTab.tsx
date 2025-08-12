@@ -11,17 +11,13 @@ interface OutputsTabProps {
 const OutputsTab = memo(({ filterData, filterName }: OutputsTabProps) => {
   const outputPids = filterData.opids ? Object.values(filterData.opids) : [];
 
-
   return (
     <ScrollArea className="h-[400px]">
       {outputPids.length > 0 ? (
         <div className="space-y-6">
           {outputPids.map((pid) => (
             <div key={pid.name} className="space-y-4">
-              <PIDStatsOverview
-                pidData={pid}
-                showAdvanced={true}
-              />
+              <PIDStatsOverview pidData={pid} showAdvanced={true} />
             </div>
           ))}
         </div>

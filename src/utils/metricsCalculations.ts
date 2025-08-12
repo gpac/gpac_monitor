@@ -16,8 +16,18 @@ export interface ActivityLevel {
 
 // Buffer health assessment
 export const getBufferHealthColor = (bufferMs: number): HealthStatus => {
-  if (bufferMs < 100) return { color: 'text-red-500', status: 'Critical', variant: 'destructive' };
-  if (bufferMs < 500) return { color: 'text-orange-500', status: 'Warning', variant: 'secondary' };
+  if (bufferMs < 100)
+    return {
+      color: 'text-red-500',
+      status: 'Critical',
+      variant: 'destructive',
+    };
+  if (bufferMs < 500)
+    return {
+      color: 'text-orange-500',
+      status: 'Warning',
+      variant: 'secondary',
+    };
   return { color: 'text-green-500', status: 'Healthy', variant: 'default' };
 };
 
@@ -26,17 +36,25 @@ export const getHealthStatusFromMetrics = (
   buffer: number,
   wouldBlock: boolean,
   disconnected: boolean,
-  queuedPackets: number
+  queuedPackets: number,
 ): HealthStatus => {
   if (disconnected || wouldBlock) {
-    return { color: 'text-red-500', status: 'Critical', variant: 'destructive' };
+    return {
+      color: 'text-red-500',
+      status: 'Critical',
+      variant: 'destructive',
+    };
   }
-  
+
   const bufferMs = buffer / 1000;
   if (bufferMs < 100 || queuedPackets > 100) {
-    return { color: 'text-orange-500', status: 'Warning', variant: 'secondary' };
+    return {
+      color: 'text-orange-500',
+      status: 'Warning',
+      variant: 'secondary',
+    };
   }
-  
+
   return { color: 'text-green-500', status: 'Healthy', variant: 'default' };
 };
 
@@ -68,9 +86,12 @@ export const getActivityLabel = (level: string): string => {
 
 // Network activity level based on byte rate
 export const getNetworkActivityLevel = (byteRate: number): ActivityLevel => {
-  if (byteRate > 10000000) return { level: 'High', variant: 'default', color: 'text-green-600' };
-  if (byteRate > 1000000) return { level: 'Medium', variant: 'secondary', color: 'text-blue-600' };
-  if (byteRate > 0) return { level: 'Low', variant: 'outline', color: 'text-orange-600' };
+  if (byteRate > 10000000)
+    return { level: 'High', variant: 'default', color: 'text-green-600' };
+  if (byteRate > 1000000)
+    return { level: 'Medium', variant: 'secondary', color: 'text-blue-600' };
+  if (byteRate > 0)
+    return { level: 'Low', variant: 'outline', color: 'text-orange-600' };
   return { level: 'Idle', variant: 'destructive', color: 'text-gray-500' };
 };
 

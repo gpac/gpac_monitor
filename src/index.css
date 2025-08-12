@@ -28,12 +28,12 @@
   .btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white;
   }
-.bg-primary {
-  @apply bg-gray-800
-}
-.bg-secondary {
-  @apply bg-gray-700
-}
+  .bg-primary {
+    @apply bg-gray-800;
+  }
+  .bg-secondary {
+    @apply bg-gray-700;
+  }
   .btn-secondary {
     @apply bg-gray-700 hover:bg-gray-600 text-white;
   }

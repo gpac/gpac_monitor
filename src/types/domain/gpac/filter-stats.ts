@@ -12,7 +12,6 @@ export interface SessionStatsResponse {
   stats: SessionFilterStatistics[];
 }
 
-
 /**
  * Performance stats nested within PID data
  */
@@ -41,7 +40,7 @@ export interface FilterStatsResponse {
   time: number;
   nb_ipid: number;
   nb_opid: number;
-  stats?: PIDStats; 
+  stats?: PIDStats;
   ipids?: Record<string, PIDproperties>;
   opids?: Record<string, PIDproperties>;
 }
@@ -69,7 +68,6 @@ export interface PIDproperties {
   source_idx: number;
   stats: PIDStats;
 }
-
 
 // =======================================
 // TAB-SPECIFIC DATA TYPES
@@ -147,5 +145,3 @@ export interface NetworkTabData {
   uploadThroughput?: number; // bytes/sec
   downloadThroughput?: number; // bytes/sec
 }
-
-

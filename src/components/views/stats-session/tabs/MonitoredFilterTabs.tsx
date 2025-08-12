@@ -3,8 +3,10 @@ import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
 import { useFilterStats } from '@/components/views/stats-session/hooks/useFilterStats';
-import { FilterStatsResponse, PIDproperties } from '@/types/domain/gpac/filter-stats';
-
+import {
+  FilterStatsResponse,
+  PIDproperties,
+} from '@/types/domain/gpac/filter-stats';
 
 interface MonitoredFilterTabsProps {
   monitoredFilters: Map<number, EnrichedFilterOverview>;
@@ -21,7 +23,7 @@ export const MonitoredFilterTabs: React.FC<MonitoredFilterTabsProps> = ({
     <>
       {Array.from(monitoredFilters.entries()).map(([idx, filter]) => {
         const isActive = activeTab === `filter-${idx}`;
-        
+
         return (
           <MonitoredFilterTab
             key={`filter-${idx}`}
@@ -72,21 +74,35 @@ const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = ({
         bytes_done: filterWithStats.bytes_done,
         bytes_sent: filterWithStats.bytes_sent,
         nb_ipid: filterWithStats.nb_ipid,
-        nb_opid: filterWithStats.nb_opid
+        nb_opid: filterWithStats.nb_opid,
       },
       networkData: {
         bytesSent: filterWithStats.bytes_sent || 0,
         bytesReceived: filterWithStats.bytes_done || 0,
         packetsSent: filterWithStats.pck_sent || 0,
-        packetsReceived: filterWithStats.pck_done || 0
+        packetsReceived: filterWithStats.pck_done || 0,
       },
       buffersData: {
         name: filterWithStats.name,
         inputBuffers: [],
-        totalBufferInfo: { totalBuffer: 0, totalCapacity: 0, averageUsage: 0 }
+        totalBufferInfo: { totalBuffer: 0, totalCapacity: 0, averageUsage: 0 },
       },
-      inputPids: (stats as FilterStatsResponse)?.ipids ? Object.values((stats as FilterStatsResponse).ipids as Record<string, PIDproperties>) : [],
-      outputPids: (stats as FilterStatsResponse)?.opids ? Object.values((stats as FilterStatsResponse).opids as Record<string, PIDproperties>) : []
+      inputPids: (stats as FilterStatsResponse)?.ipids
+        ? Object.values(
+            (stats as FilterStatsResponse).ipids as Record<
+              string,
+              PIDproperties
+            >,
+          )
+        : [],
+      outputPids: (stats as FilterStatsResponse)?.opids
+        ? Object.values(
+            (stats as FilterStatsResponse).opids as Record<
+              string,
+              PIDproperties
+            >,
+          )
+        : [],
     };
   }, [filterWithStats]);
 
@@ -96,10 +112,7 @@ const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = ({
   };
 
   return (
-    <TabsContent
-      value={`filter-${idx}`}
-      className="flex-1 p-4"
-    >
+    <TabsContent value={`filter-${idx}`} className="flex-1 p-4">
       <FilterTabContent
         {...tabsData}
         filterData={stats as any} // Convert MonitoredFilterStats to FilterStatsResponse

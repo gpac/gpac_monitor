@@ -10,11 +10,11 @@ interface InputsTabProps {
 
 const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
   const inputPids = filterData.ipids ? Object.values(filterData.ipids) : [];
-  
+
   console.log('[InputsTab] Input PIDs stats for filter', filterName, ':', {
     totalInputPids: inputPids.length,
-    pidNames: inputPids.map(pid => pid.name),
-    pidDetails: inputPids
+    pidNames: inputPids.map((pid) => pid.name),
+    pidDetails: inputPids,
   });
 
   return (
@@ -23,11 +23,7 @@ const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
         <div className="space-y-6">
           {inputPids.map((pid) => (
             <div key={pid.name} className="space-y-4">
-              <PIDStatsOverview
-                pidData={pid}
-                showAdvanced={true}
-              />
-   
+              <PIDStatsOverview pidData={pid} showAdvanced={true} />
             </div>
           ))}
         </div>

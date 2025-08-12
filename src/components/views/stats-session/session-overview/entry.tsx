@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useRef, useCallback } from 'react';
+import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/useMultiFilterMonitor';
 import { useTabManagement } from '@/components/views/stats-session/hooks/useTabManagement';
 import { useStatsCalculations } from '@/components/views/stats-session/hooks/useStatsCalculations';
@@ -13,10 +14,20 @@ import { MonitoredFilterTabs } from '../tabs/MonitoredFilterTabs';
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, title }) => {
     const [activeTab, setActiveTab] = useState('main');
+    const [isResizing, setIsResizing] = useState(false);
     const [monitoredFiltersState, setMonitoredFiltersState] = useState<
       Map<number, EnrichedFilterOverview>
     >(new Map());
-    
+
+    // Optimize complex stats calculations during resize
+    const { ref } = useOptimizedResize({
+      onResizeStart: () => setIsResizing(true),
+      onResizeEnd: () => setIsResizing(false),
+      debounce: 20, // Slightly higher for complex calculations
+      throttle: true,
+    }) as { ref: React.RefObject<HTMLElement> };
+    const containerRef = ref as React.RefObject<HTMLDivElement>;
+
     // Memoize isDashboardActive to prevent unnecessary recalculations
     const isDashboardActive = useMemo(() => activeTab === 'main', [activeTab]);
     const tabsRef = useRef<HTMLDivElement>(null);
@@ -25,11 +36,12 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       useMultiFilterMonitor(isDashboardActive);
 
     // Optimize the enriched filter collection with stable keys and memoization
+    // Skip expensive calculations during resize
     const enrichedGraphFilterCollection = useMemo(() => {
-      if (staticFilters.length === 0) {
-        return []; // Return empty array if no data to avoid expensive operations
+      if (staticFilters.length === 0 || isResizing) {
+        return []; // Return empty array if no data or during resize to avoid expensive operations
       }
-      
+
       return staticFilters.map((staticFilter): EnrichedFilterOverview => {
         const dynamicStats = sessionStats.find(
           (stat) => stat.idx === staticFilter.idx,
@@ -58,7 +70,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
           errors: 0,
         };
       });
-    }, [staticFilters, sessionStats]);
+    }, [staticFilters, sessionStats, isResizing]);
 
     // Use the stats calculations hook directly (it's already optimized internally)
     const { statsCounters, systemStats } = useStatsCalculations(
@@ -77,15 +89,21 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     });
 
     // Memoize callbacks to prevent child re-renders
-    const memoizedHandleCardClick = useCallback((filterIndex: number) => {
-      handleCardClick(filterIndex);
-    }, [handleCardClick]);
+    const memoizedHandleCardClick = useCallback(
+      (filterIndex: number) => {
+        handleCardClick(filterIndex);
+      },
+      [handleCardClick],
+    );
 
-    const memoizedHandleCloseTab = useCallback((filterIndex: number, event?: React.MouseEvent) => {
-      if (event) {
-        handleCloseTab(filterIndex, event);
-      }
-    }, [handleCloseTab]);
+    const memoizedHandleCloseTab = useCallback(
+      (filterIndex: number, event?: React.MouseEvent) => {
+        if (event) {
+          handleCloseTab(filterIndex, event);
+        }
+      },
+      [handleCloseTab],
+    );
 
     if (isLoading) {
       return (
@@ -112,10 +130,13 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
     return (
       <WidgetWrapper id={id} title="Session filters overview  ">
-        <div className="h-full">
+        <div 
+          ref={containerRef}
+          className={`h-full ${isResizing ? 'contain-layout contain-style' : ''}`}
+        >
           <Tabs
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={isResizing ? () => {} : setActiveTab}
             className="flex-1 flex flex-col"
           >
             <StatsTabs
@@ -126,15 +147,18 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               tabsRef={tabsRef}
             />
 
-            <TabsContent value="main" className="flex-1 p-4">
+            <TabsContent 
+              value="main" 
+              className={`flex-1 p-4 ${isResizing ? 'pointer-events-none' : ''}`}
+            >
               <DashboardTabContent
                 systemStats={systemStats}
                 statsCounters={statsCounters}
                 filtersWithLiveStats={enrichedGraphFilterCollection}
                 filtersMatchingCriteria={enrichedGraphFilterCollection}
-                loading={isLoading}
+                loading={isLoading || isResizing}
                 monitoredFilters={monitoredFiltersState}
-                onCardClick={memoizedHandleCardClick}
+                onCardClick={isResizing ? () => {} : memoizedHandleCardClick}
                 refreshInterval="1s"
               />
             </TabsContent>
@@ -142,7 +166,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
             <MonitoredFilterTabs
               monitoredFilters={monitoredFiltersState}
               activeTab={activeTab}
-              onCardClick={memoizedHandleCardClick}
+              onCardClick={isResizing ? () => {} : memoizedHandleCardClick}
             />
           </Tabs>
         </div>

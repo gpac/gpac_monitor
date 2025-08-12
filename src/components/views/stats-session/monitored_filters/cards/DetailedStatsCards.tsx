@@ -17,13 +17,16 @@ export const PIDMetricsCard = memo(({ data }: PIDMetricsCardProps) => (
     <CardContent>
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center">
-          <div className="text-2xl font-bold">{data.nb_ipid || 0}
+          <div className="text-2xl font-bold">{data.nb_ipid || 0}</div>
+          <div className="text-xs text-muted-foreground stat-label">
+            Input PIDs
           </div>
-          <div className="text-xs text-muted-foreground stat-label">Input PIDs</div>
         </div>
         <div className="text-center">
           <div className="text-2xl font-bold">{data.nb_opid || 0}</div>
-          <div className="text-xs text-muted-foreground stat-label">Output PIDs</div>
+          <div className="text-xs text-muted-foreground stat-label">
+            Output PIDs
+          </div>
         </div>
       </div>
     </CardContent>
@@ -86,7 +89,9 @@ export const PacketsCard = memo(
         </div>
         {pck_ifce_sent !== undefined && (
           <div className="flex justify-between">
-            <span className="text-xs text-muted-foreground stat-label">Interface Sent</span>
+            <span className="text-xs text-muted-foreground stat-label">
+              Interface Sent
+            </span>
             <span className="text-sm font-medium">
               {formatNumber(pck_ifce_sent)}
             </span>
@@ -113,11 +118,15 @@ export const DataCard = memo(({ bytes_done, bytes_sent }: DataCardProps) => (
     <CardContent className="space-y-2">
       <div className="flex justify-between">
         <span className="text-xs text-muted-foreground stat-label">Done</span>
-        <span className="text-sm font-medium">{formatBytes(bytes_done || 0)}</span>
+        <span className="text-sm font-medium">
+          {formatBytes(bytes_done || 0)}
+        </span>
       </div>
       <div className="flex justify-between">
         <span className="text-xs text-muted-foreground stat-label">Sent</span>
-        <span className="text-sm font-medium">{formatBytes(bytes_sent || 0)}</span>
+        <span className="text-sm font-medium">
+          {formatBytes(bytes_sent || 0)}
+        </span>
       </div>
     </CardContent>
   </Card>
@@ -147,23 +156,30 @@ export const PIDDetails = memo(
         <CardContent className="space-y-2">
           <div className="grid grid-cols-2 gap-4">
             <div className="flex justify-between">
-              <span className="text-xs text-muted-foreground stat-label">Buffer</span>
+              <span className="text-xs text-muted-foreground stat-label">
+                Buffer
+              </span>
               <span className="text-sm font-medium">
                 {formatBytes(buffer)} / {formatBytes(buffer_total)}
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-xs text-muted-foreground stat-label">Usage</span>
-              <span className="text-sm font-medium">{bufferUsage.toFixed(1)}%</span>
+              <span className="text-xs text-muted-foreground stat-label">
+                Usage
+              </span>
+              <span className="text-sm font-medium">
+                {bufferUsage.toFixed(1)}%
+              </span>
             </div>
           </div>
 
           {Object.entries(pidData)
-            .filter(([key, value]) => 
-              key !== 'parentFilter' && 
-              value !== undefined && 
-              value !== null &&
-              typeof value !== 'object'
+            .filter(
+              ([key, value]) =>
+                key !== 'parentFilter' &&
+                value !== undefined &&
+                value !== null &&
+                typeof value !== 'object',
             )
             .slice(0, 4)
             .map(([key, value]) => (
@@ -172,12 +188,11 @@ export const PIDDetails = memo(
                   {key.replace('_', ' ')}
                 </span>
                 <span className="text-sm font-medium">
-                  {typeof value === 'number' 
-                    ? value > 1000000 
-                      ? formatBytes(value) 
+                  {typeof value === 'number'
+                    ? value > 1000000
+                      ? formatBytes(value)
                       : value.toLocaleString()
-                    : String(value)
-                  }
+                    : String(value)}
                 </span>
               </div>
             ))}

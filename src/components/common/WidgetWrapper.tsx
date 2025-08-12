@@ -43,7 +43,7 @@ const WidgetWrapper = ({
     onResizeStart: () => setIsResizing(true),
     onResizeEnd: () => setIsResizing(false),
     debounce: 16, // ~60fps
-    throttle: true
+    throttle: true,
   });
 
   // Memoized widget config
@@ -93,7 +93,10 @@ const WidgetWrapper = ({
   }, [isMaximized, isMinimized, isResizing, className]);
 
   return (
-    <div ref={resizeRef as React.RefObject<HTMLDivElement>} className={containerClasses}>
+    <div
+      ref={resizeRef as React.RefObject<HTMLDivElement>}
+      className={containerClasses}
+    >
       <div className={`${headerStyles.base} cursor-move drag-indicator`}>
         <div className={headerStyles.title}>
           <h3 className="text-base font-medium">{title}</h3>
@@ -171,7 +174,9 @@ const WidgetWrapper = ({
       </div>
 
       {!isMinimized && (
-        <div className={`flex-1 bg-gray-900 overflow-auto no-drag ${isResizing ? 'contain-layout contain-style' : ''}`}>
+        <div
+          className={`flex-1 bg-gray-900 overflow-auto no-drag ${isResizing ? 'contain-layout contain-style' : ''}`}
+        >
           {children}
         </div>
       )}

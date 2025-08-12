@@ -96,8 +96,11 @@ export class FilterStatsHandler {
    * Handles filter statistics updates from the server
    */
   public handleFilterStatsUpdate(filter: MonitoredFilterStats): void {
-    console.log('Filter stats received from server:', JSON.stringify(filter, null, 2));
-    
+    console.log(
+      'Filter stats received from server:',
+      JSON.stringify(filter, null, 2),
+    );
+
     const idx = filter.idx;
     const subscribable = this.filterStatsSubscribableMap.get(idx);
     if (subscribable) {
