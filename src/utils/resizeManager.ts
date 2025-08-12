@@ -4,6 +4,11 @@ interface ResizeData {
   width: number;
   height: number;
   timestamp: number;
+  transform?: {
+    scale: number;
+    translateX: number;
+    translateY: number;
+  };
 }
 
 export type ResizeNotification =

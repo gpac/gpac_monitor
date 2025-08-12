@@ -77,12 +77,13 @@ export const Chart = memo(
     const lastRecordedValueRef = useRef<number>(0);
     const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Optimize chart during resize
+    // Optimize chart during resize with GPU transforms
     const { ref } = useOptimizedResize({
       onResizeStart: () => setIsResizing(true),
       onResizeEnd: () => setIsResizing(false),
-      debounce: 32, // Reduce frequency during resize for better performance
+      debounce: 32,
       throttle: true,
+      useTransform: true, // GPU transforms pendant resize
     }) as { ref: React.RefObject<HTMLElement> };
 
     const chartRef = ref as React.RefObject<HTMLDivElement>;

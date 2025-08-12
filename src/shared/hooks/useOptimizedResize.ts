@@ -3,6 +3,7 @@ import {
   useResizeOptimization,
   ResizeNotification,
 } from '@/utils/resizeManager';
+import { useTransformResize } from '@/utils/transformResize';
 
 interface UseOptimizedResizeOptions {
   onResize?: (width: number, height: number) => void;
@@ -10,6 +11,7 @@ interface UseOptimizedResizeOptions {
   onResizeEnd?: () => void;
   debounce?: number;
   throttle?: boolean;
+  useTransform?: boolean;
 }
 
 export const useOptimizedResize = (options: UseOptimizedResizeOptions = {}) => {
@@ -19,12 +21,15 @@ export const useOptimizedResize = (options: UseOptimizedResizeOptions = {}) => {
     onResizeEnd,
     debounce = 16,
     throttle = true,
+    useTransform = false,
   } = options;
 
   const elementRef = useRef<HTMLElement>(null);
   const { observeElement, unobserveElement, subscribe } =
     useResizeOptimization();
+  const { startTransform, updateTransform, commitResize } = useTransformResize();
   const isResizingRef = useRef(false);
+  const initialSizeRef = useRef<{ width: number; height: number } | null>(null);
 
   const handleResize = useCallback(
     (
@@ -35,23 +40,37 @@ export const useOptimizedResize = (options: UseOptimizedResizeOptions = {}) => {
 
       if (types.includes('resize_start')) {
         isResizingRef.current = true;
+        if (useTransform && elementRef.current) {
+          initialSizeRef.current = { width: data.width, height: data.height };
+          startTransform(elementRef.current);
+        }
         onResizeStart?.();
       }
 
-      if (types.includes('resize_update') && onResize) {
-        if (throttle && isResizingRef.current) {
-          // Only call onResize during active resizing for better performance
-          onResize(data.width, data.height);
-        } else if (!throttle) {
-          onResize(data.width, data.height);
+      if (types.includes('resize_update')) {
+        if (useTransform && elementRef.current && initialSizeRef.current) {
+          // Use GPU transform instead of DOM resize
+          const scaleX = data.width / initialSizeRef.current.width;
+          const scaleY = data.height / initialSizeRef.current.height;
+          updateTransform(elementRef.current, scaleX, scaleY);
+        } else if (onResize) {
+          if (throttle && isResizingRef.current) {
+            onResize(data.width, data.height);
+          } else if (!throttle) {
+            onResize(data.width, data.height);
+          }
         }
       }
 
       if (types.includes('resize_end')) {
         isResizingRef.current = false;
+        if (useTransform && elementRef.current) {
+          // Commit real dimensions
+          commitResize(elementRef.current, data.width, data.height);
+          initialSizeRef.current = null;
+        }
         onResizeEnd?.();
-        // Final resize call to ensure accuracy
-        if (onResize) {
+        if (onResize && !useTransform) {
           onResize(data.width, data.height);
         }
       }

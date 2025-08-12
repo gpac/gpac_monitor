@@ -61,7 +61,7 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
 
   return (
     <WidgetWrapper id={id} title={title}>
-      <div 
+      <div
         ref={containerRef}
         className={`relative h-full w-full ${isResizing ? 'contain-layout contain-style pointer-events-none' : ''}`}
       >

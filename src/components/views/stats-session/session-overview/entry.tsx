@@ -130,7 +130,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
     return (
       <WidgetWrapper id={id} title="Session filters overview  ">
-        <div 
+        <div
           ref={containerRef}
           className={`h-full ${isResizing ? 'contain-layout contain-style' : ''}`}
         >
@@ -147,8 +147,8 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               tabsRef={tabsRef}
             />
 
-            <TabsContent 
-              value="main" 
+            <TabsContent
+              value="main"
               className={`flex-1 p-4 ${isResizing ? 'pointer-events-none' : ''}`}
             >
               <DashboardTabContent
