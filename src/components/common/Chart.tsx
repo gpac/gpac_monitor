@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import {
   AreaChart,
   Area,
@@ -72,8 +73,19 @@ export const Chart = memo(
     createDataPoint,
   }: ChartProps<T>) => {
     const [dataPoints, setDataPoints] = useState<T[]>([]);
+    const [isResizing, setIsResizing] = useState(false);
     const lastRecordedValueRef = useRef<number>(0);
     const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Optimize chart during resize
+    const { ref } = useOptimizedResize({
+      onResizeStart: () => setIsResizing(true),
+      onResizeEnd: () => setIsResizing(false),
+      debounce: 32, // Reduce frequency during resize for better performance
+      throttle: true
+    }) as { ref: React.RefObject<HTMLElement> };
+
+    const chartRef = ref as React.RefObject<HTMLDivElement>;
 
     const mergedConfig = useMemo(
       () => ({
@@ -135,7 +147,7 @@ export const Chart = memo(
     );
 
     return (
-      <Card className="bg-stat border-transparent">
+      <Card ref={chartRef} className="bg-stat border-transparent">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
             {mergedConfig.icon}
@@ -143,8 +155,14 @@ export const Chart = memo(
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div style={{ width: '100%', height: mergedConfig.height }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div 
+            style={{ width: '100%', height: mergedConfig.height }}
+            className={isResizing ? 'contain-layout contain-style' : ''}
+          >
+            <ResponsiveContainer 
+              width="100%" 
+              height="100%"
+            >
               <AreaChart
                 data={dataPoints}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}

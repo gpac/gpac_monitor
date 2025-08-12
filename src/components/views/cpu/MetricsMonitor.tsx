@@ -1,4 +1,5 @@
 import React, { useState, useDeferredValue, useMemo, useCallback } from 'react';
+import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 
 import { CPUChart } from './components/CPUChart';
 import { CPUOverview } from './components/CPUOverview';
@@ -14,6 +15,16 @@ interface MetricsMonitorProps {
 
 const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id, title }) => {
   const [isLive, setIsLive] = useState(true);
+  const [isResizing, setIsResizing] = useState(false);
+
+  // Optimize resize performance
+  const { ref } = useOptimizedResize({
+    onResizeStart: () => setIsResizing(true),
+    onResizeEnd: () => setIsResizing(false),
+    debounce: 16,
+    throttle: true
+  }) as { ref: React.RefObject<HTMLElement> };
+  const containerRef = ref as React.RefObject<HTMLDivElement>;
 
   // Collecte des données à 150ms (throttlé à 500ms dans le messageHandler)
   const { stats, isSubscribed } = useCPUStats(isLive, 150);
@@ -42,7 +53,10 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id, title })
 
   return (
     <WidgetWrapper id={id} title={title}>
-      <div className="container mx-auto space-y-4 p-4">
+      <div 
+        ref={containerRef}
+        className={`container mx-auto space-y-4 p-4 ${isResizing ? 'contain-layout contain-style' : ''}`}
+      >
         <div className="flex items-center justify-items-start">
           <LiveToggle isLive={isLive} onToggle={handleToggleLive} />
         </div>
@@ -56,12 +70,15 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id, title })
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <CPUChart currentCPUPercent={metricsValues.currentCPUPercent} isLive={isLive} />
+        <div className={`grid grid-cols-1 gap-4 lg:grid-cols-2 ${isResizing ? 'pointer-events-none' : ''}`}>
+          <CPUChart 
+            currentCPUPercent={metricsValues.currentCPUPercent} 
+            isLive={isLive && !isResizing} 
+          />
           <MemoryChart
             currentMemoryPercent={metricsValues.currentMemoryPercent}
             currentMemoryProcess={metricsValues.currentMemoryProcess}
-            isLive={isLive}
+            isLive={isLive && !isResizing}
           />
         </div>
       </div>

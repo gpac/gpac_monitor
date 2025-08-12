@@ -1,5 +1,6 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 
 import { X, RotateCcw } from 'lucide-react';
 import {
@@ -35,6 +36,15 @@ const WidgetWrapper = ({
   className = '',
 }: WidgetWrapperProps) => {
   const dispatch = useAppDispatch();
+  const [isResizing, setIsResizing] = useState(false);
+
+  // Optimized resize hook
+  const { ref: resizeRef } = useOptimizedResize({
+    onResizeStart: () => setIsResizing(true),
+    onResizeEnd: () => setIsResizing(false),
+    debounce: 16, // ~60fps
+    throttle: true
+  });
 
   // Memoized widget config
   const config = useAppSelector(
@@ -69,20 +79,21 @@ const WidgetWrapper = ({
     [dispatch, id],
   );
 
-  //Memoized container classes
+  //Memoized container classes with resize optimization
   const containerClasses = React.useMemo(() => {
     return [
       'flex flex-col bg-foreground/10 overflow-hidden rounded-lg',
       isMaximized ? 'fixed inset-0 z-50' : '',
       isMinimized ? 'h-12' : 'h-full',
+      isResizing ? 'will-change-auto pointer-events-none' : '',
       className,
     ]
       .filter(Boolean)
       .join(' ');
-  }, [isMaximized, isMinimized, className]);
+  }, [isMaximized, isMinimized, isResizing, className]);
 
   return (
-    <div className={containerClasses}>
+    <div ref={resizeRef as React.RefObject<HTMLDivElement>} className={containerClasses}>
       <div className={`${headerStyles.base} cursor-move drag-indicator`}>
         <div className={headerStyles.title}>
           <h3 className="text-base font-medium">{title}</h3>
@@ -160,7 +171,7 @@ const WidgetWrapper = ({
       </div>
 
       {!isMinimized && (
-        <div className="flex-1 bg-gray-900 overflow-auto no-drag">
+        <div className={`flex-1 bg-gray-900 overflow-auto no-drag ${isResizing ? 'contain-layout contain-style' : ''}`}>
           {children}
         </div>
       )}

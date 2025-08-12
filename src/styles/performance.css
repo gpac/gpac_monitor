@@ -1,0 +1,55 @@
+/* CSS Containment for better resize performance */
+.contain-layout {
+  contain: layout;
+}
+
+.contain-style {
+  contain: style;
+}
+
+.contain-layout.contain-style {
+  contain: layout style;
+}
+
+/* Optimize transforms during resize */
+.will-change-auto {
+  will-change: auto;
+}
+
+/* Prevent pointer events during resize to reduce thrashing */
+.pointer-events-none {
+  pointer-events: none;
+}
+
+/* Optimize charts and heavy components during resize */
+.resize-optimized {
+  transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden;
+}
+
+/* Optimize scrollable containers */
+.optimize-scroll {
+  overflow-anchor: none; /* Prevent scroll anchoring during resize */
+  scroll-behavior: auto; /* Disable smooth scroll during resize */
+}
+
+/* Grid optimization during resize */
+.grid-resize-optimized {
+  contain: layout style;
+  will-change: grid-template-columns, grid-template-rows;
+}
+
+.grid-resize-optimized.resizing {
+  will-change: auto;
+  pointer-events: none;
+}
+
+/* Flex optimization */
+.flex-resize-optimized {
+  contain: layout;
+  will-change: flex-basis, flex-grow, flex-shrink;
+}
+
+.flex-resize-optimized.resizing {
+  will-change: auto;
+}
