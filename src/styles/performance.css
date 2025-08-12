@@ -11,6 +11,19 @@
   contain: layout style;
 }
 
+/* Animation optimizations */
+.widget-anim {
+  contain: layout paint;
+  will-change: transform, opacity;
+}
+
+/* Disable animations during interactions */
+.is-interacting,
+.is-interacting * {
+  transition: none !important;
+  animation: none !important;
+}
+
 /* Optimize transforms during resize */
 .will-change-auto {
   will-change: auto;
@@ -33,23 +46,22 @@
   scroll-behavior: auto; /* Disable smooth scroll during resize */
 }
 
+/* GPU-friendly animations */
+.gpu-optimized {
+  transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
 /* Grid optimization during resize */
 .grid-resize-optimized {
   contain: layout style;
-  will-change: grid-template-columns, grid-template-rows;
-}
-
-.grid-resize-optimized.resizing {
-  will-change: auto;
-  pointer-events: none;
+  will-change: transform, opacity; /* Use GPU-friendly props */
 }
 
 /* Flex optimization */
 .flex-resize-optimized {
   contain: layout;
-  will-change: flex-basis, flex-grow, flex-shrink;
+  will-change: transform, opacity; /* Use GPU-friendly props */
 }
 
-.flex-resize-optimized.resizing {
-  will-change: auto;
-}

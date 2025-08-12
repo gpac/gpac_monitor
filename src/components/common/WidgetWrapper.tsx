@@ -82,10 +82,10 @@ const WidgetWrapper = ({
   //Memoized container classes with resize optimization
   const containerClasses = React.useMemo(() => {
     return [
-      'flex flex-col bg-foreground/10 overflow-hidden rounded-lg',
+      'flex flex-col bg-foreground/10 overflow-hidden rounded-lg widget-anim',
       isMaximized ? 'fixed inset-0 z-50' : '',
       isMinimized ? 'h-12' : 'h-full',
-      isResizing ? 'will-change-auto pointer-events-none' : '',
+      isResizing ? 'is-interacting pointer-events-none' : '',
       className,
     ]
       .filter(Boolean)
@@ -175,7 +175,7 @@ const WidgetWrapper = ({
 
       {!isMinimized && (
         <div
-          className={`flex-1 bg-gray-900 overflow-auto no-drag ${isResizing ? 'contain-layout contain-style' : ''}`}
+          className={`flex-1 bg-gray-900 overflow-auto no-drag gpu-optimized ${isResizing ? 'contain-layout contain-style' : ''}`}
         >
           {children}
         </div>

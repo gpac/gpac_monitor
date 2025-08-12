@@ -158,7 +158,7 @@ export const Chart = memo(
         <CardContent>
           <div
             style={{ width: '100%', height: mergedConfig.height }}
-            className={isResizing ? 'contain-layout contain-style' : ''}
+            className={`gpu-optimized ${isResizing ? 'contain-layout contain-style is-interacting' : ''}`}
           >
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
