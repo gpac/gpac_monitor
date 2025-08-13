@@ -25,7 +25,7 @@ const OutputCard = memo(({ outputName, pidsByType }: OutputCardProps) => {
 
   // Render media section for any type
   const renderMediaSection = (pids: TabPIDData[], type: string) => {
-    const mediaInfo = getMediaTypeInfo(type);
+
 
 
     return (

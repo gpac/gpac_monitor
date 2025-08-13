@@ -25,7 +25,7 @@ const InputCard = memo(({ inputName, pidsByType }: InputCardProps) => {
 
   // Render media section for any type
   const renderMediaSection = (pids: TabPIDData[], type: string) => {
-    const mediaInfo = getMediaTypeInfo(type);
+
 
     return (
       <div className="space-y-3">
