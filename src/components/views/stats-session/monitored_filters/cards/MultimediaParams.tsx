@@ -164,7 +164,7 @@ export const MultimediaParams = memo(({ pidData }: MultimediaParamsProps) => {
                       </Badge>
                     )}
                   </div>
-                  {renderParam('Codec', 'codec', videoParams.codec, true)}
+                  {renderParam('Codec', 'codec', videoParams.codec, false)}
                   {renderParam(
                     'Resolution',
                     'resolution',
