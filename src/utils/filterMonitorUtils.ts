@@ -73,18 +73,18 @@ export const isValidFilterData = (
   return data !== null && typeof data === 'object';
 };
 
-   // Get icon and label for media type
-export  const getMediaTypeInfo = (type: string) => {
-    switch (type.toLowerCase()) {
-      case 'visual':
-        return { icon: LuFilm, label: 'Video', color: 'text-blue-500' };
-      case 'audio':
-        return { icon: LuMusic, label: 'Audio', color: 'text-green-500' };
-      case 'text':
-        return { icon: LuFileText, label: 'Text', color: 'text-yellow-500' };
-      case 'file':
-        return { icon: LuFile, label: 'File', color: 'text-purple-500' };
-      default:
-        return { icon: LuFilm, label: type || 'Unknown', color: 'text-gray-500' };
-    }
-  };
+// Get icon and label for media type
+export const getMediaTypeInfo = (type: string) => {
+  switch (type.toLowerCase()) {
+    case 'visual':
+      return { icon: LuFilm, label: 'Video', color: 'text-blue-500' };
+    case 'audio':
+      return { icon: LuMusic, label: 'Audio', color: 'text-green-500' };
+    case 'text':
+      return { icon: LuFileText, label: 'Text', color: 'text-yellow-500' };
+    case 'file':
+      return { icon: LuFile, label: 'File', color: 'text-purple-500' };
+    default:
+      return { icon: LuFilm, label: type || 'Unknown', color: 'text-gray-500' };
+  }
+};

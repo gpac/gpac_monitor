@@ -171,4 +171,3 @@ export const getStatusColor = (status: string | undefined): string => {
 
   return STATUS_COLORS.active;
 };
-

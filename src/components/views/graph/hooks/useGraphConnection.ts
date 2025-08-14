@@ -96,7 +96,9 @@ export const useGraphConnection = ({
       if (isConnected) {
         try {
           service.disconnect();
-        } catch (err) {}
+        } catch (err) {
+          console.error(err);
+        }
       }
     };
   }, [service, setConnectionError, isConnected]);
@@ -119,7 +121,7 @@ export const useGraphConnection = ({
         error instanceof Error ? error.message : 'Failed to retry connection';
       setConnectionError(errorMessage);
     }
-  }, [communication, setConnectionError]);
+  }, [service, setConnectionError]);
 
   return { retryConnection, isConnected };
 };

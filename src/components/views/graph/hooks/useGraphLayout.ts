@@ -97,7 +97,9 @@ export const useGraphLayout = ({
       if (savedLayout) {
         return JSON.parse(savedLayout) as LayoutOptions;
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
 
     return {
       type: LayoutType.DAGRE,
@@ -152,7 +154,9 @@ export const useGraphLayout = ({
           JSON.stringify(layoutOptions),
         );
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
   }, [layoutOptions]);
 
   return {

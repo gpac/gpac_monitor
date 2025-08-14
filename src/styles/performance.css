@@ -64,4 +64,3 @@
   contain: layout;
   will-change: transform, opacity; /* Use GPU-friendly props */
 }
-

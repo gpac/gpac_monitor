@@ -12,7 +12,6 @@ const GraphMonitor: React.FC<WidgetProps> = ({ id, title, config }) => {
     localEdges,
     handleNodesChange,
     handleEdgesChange,
-    onNodeClick,
     layoutOptions,
     handleLayoutChange,
     autoLayout,
@@ -30,7 +29,6 @@ const GraphMonitor: React.FC<WidgetProps> = ({ id, title, config }) => {
       edges={localEdges}
       onNodesChange={handleNodesChange}
       onEdgesChange={handleEdgesChange}
-      onNodeClick={onNodeClick}
       layoutOptions={layoutOptions}
       onLayoutChange={handleLayoutChange}
       onAutoLayout={autoLayout}

@@ -27,7 +27,8 @@ export const useOptimizedResize = (options: UseOptimizedResizeOptions = {}) => {
   const elementRef = useRef<HTMLElement>(null);
   const { observeElement, unobserveElement, subscribe } =
     useResizeOptimization();
-  const { startTransform, updateTransform, commitResize } = useTransformResize();
+  const { startTransform, updateTransform, commitResize } =
+    useTransformResize();
   const isResizingRef = useRef(false);
   const initialSizeRef = useRef<{ width: number; height: number } | null>(null);
 

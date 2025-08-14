@@ -1,12 +1,5 @@
 import { useCallback, MutableRefObject } from 'react';
 import { Node, Edge } from '@xyflow/react';
-import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
-import { GraphFilterData } from '@/types/domain/gpac';
-import {
-  setSelectedFilterDetails,
-  setSelectedNode,
-} from '@/shared/store/slices/graphSlice';
-import { useGpacService } from '@/shared/hooks/useGpacService';
 import { Dispatch } from '@reduxjs/toolkit';
 
 interface UseGraphHandlersProps {
@@ -33,14 +26,6 @@ export const useGraphHandlers = ({
   nodesRef,
   edgesRef,
 }: UseGraphHandlersProps) => {
-  const dispatch = useAppDispatch();
-  const service = useGpacService();
-
-  // Get monitored filters from Redux
-  const monitoredFilters = useAppSelector(
-    (state) => state.multiFilter.selectedFilters,
-  );
-
   // Handle node changes (position, selection, etc)
   const handleNodesChange = useCallback(
     (changes: any[]) => {
@@ -75,30 +60,8 @@ export const useGraphHandlers = ({
     [onEdgesChange, localEdges, edgesRef],
   );
 
-  // Handle node click event
-  const onNodeClick = useCallback(
-    (_event: React.MouseEvent, node: Node) => {
-      const nodeId = node.id;
-      const nodeData = node.data;
-
-      // Set selected filter in Redux
-      dispatch(
-        setSelectedFilterDetails(nodeData as unknown as GraphFilterData),
-      );
-
-      // Update service with current filter
-      service.setCurrentFilterId(parseInt(nodeId));
-      service.getFilterDetails(parseInt(nodeId));
-
-      // Set selected node in Redux
-      dispatch(setSelectedNode(nodeId));
-    },
-    [dispatch, monitoredFilters, service],
-  );
-
   return {
     handleNodesChange,
     handleEdgesChange,
-    onNodeClick,
   };
 };

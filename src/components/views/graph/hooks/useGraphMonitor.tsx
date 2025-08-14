@@ -58,18 +58,17 @@ const useGraphMonitor = () => {
     setConnectionError,
   });
 
-  const { handleNodesChange, handleEdgesChange, onNodeClick } =
-    useGraphHandlers({
-      onNodesChange,
-      onEdgesChange,
-      localNodes,
-      localEdges,
-      nodesRef,
-      edgesRef,
-      setLocalNodes,
-      dispatch,
-      service,
-    });
+  const { handleNodesChange, handleEdgesChange } = useGraphHandlers({
+    onNodesChange,
+    onEdgesChange,
+    localNodes,
+    localEdges,
+    nodesRef,
+    edgesRef,
+    setLocalNodes,
+    dispatch,
+    service,
+  });
 
   // Use notification system
   useGraphNotifications({
@@ -139,7 +138,6 @@ const useGraphMonitor = () => {
     localEdges,
     handleNodesChange,
     handleEdgesChange,
-    onNodeClick,
     layoutOptions,
     handleLayoutChange,
     autoLayout,

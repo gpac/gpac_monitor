@@ -13,7 +13,7 @@ interface NodesHandlerParams {
   nodesRef: React.MutableRefObject<Node[]>;
 }
 
-export function createHandleNodesChange({
+export function useHandleNodesChange({
   onNodesChange,
   localNodes,
   setLocalNodes,
@@ -48,7 +48,7 @@ interface EdgesHandlerParams {
   edgesRef: React.MutableRefObject<Edge[]>;
 }
 
-export function createHandleEdgesChange({
+export function useHandleEdgesChange({
   onEdgesChange,
   localEdges,
   edgesRef,
@@ -78,7 +78,7 @@ interface OnNodeClickParams {
   };
 }
 
-export function createOnNodeClick({
+export function useOnNodeClick({
   dispatch,
   monitoredFilters,
   service,

@@ -140,16 +140,12 @@ export class GpacService implements IGpacCommunication {
     if (!this.ws.isConnected()) {
       throw new Error('[GpacService] WebSocket not connected');
     }
-    try {
-      const formattedMessage = {
-        message: message.type,
-        ...message,
-      };
-      const jsonString = JSON.stringify(formattedMessage);
-      this.ws.send(jsonString);
-    } catch (error) {
-      throw error;
-    }
+    const formattedMessage = {
+      message: message.type,
+      ...message,
+    };
+    const jsonString = JSON.stringify(formattedMessage);
+    this.ws.send(jsonString);
   }
 
   public getFilterDetails(idx: number): void {

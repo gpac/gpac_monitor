@@ -20,7 +20,6 @@ interface GraphFlowProps {
   edges: Edge[];
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
-  onNodeClick: (event: React.MouseEvent, node: Node) => void;
   isResizing?: boolean;
 }
 
@@ -38,7 +37,6 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   edges,
   onNodesChange,
   onEdgesChange,
-  onNodeClick,
   isResizing = false,
 }) => {
   const { setViewport } = useReactFlow();
@@ -72,7 +70,6 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         nodeTypes={nodeTypes}
         onNodesChange={isResizing ? () => {} : onNodesChange}
         onEdgesChange={isResizing ? () => {} : onEdgesChange}
-        onNodeClick={isResizing ? () => {} : onNodeClick}
         fitView={!isResizing}
         minZoom={0.1}
         maxZoom={4}

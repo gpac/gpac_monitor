@@ -1,9 +1,16 @@
 import { memo } from 'react';
-import { FilterStatsResponse, TabPIDData } from '@/types/domain/gpac/filter-stats';
+import {
+  FilterStatsResponse,
+  TabPIDData,
+} from '@/types/domain/gpac/filter-stats';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatBytes } from '@/utils/helper';
-import { getOverallStatus, getPIDStatusBadge, getGlobalStatus } from '@/utils/pidStatus';
+import {
+  getOverallStatus,
+  getPIDStatusBadge,
+  getGlobalStatus,
+} from '@/utils/pidStatus';
 import { getMediaTypeInfo } from '@/utils/filterMonitorUtils';
 
 interface InputsTabProps {
@@ -21,12 +28,8 @@ const InputCard = memo(({ inputName, pidsByType }: InputCardProps) => {
   const overallStatus = getOverallStatus(allPids);
   const StatusIcon = overallStatus.icon;
 
-
-
   // Render media section for any type
   const renderMediaSection = (pids: TabPIDData[], type: string) => {
-
-
     return (
       <div className="space-y-3">
         {pids.map((pid) => {
@@ -67,14 +70,18 @@ const InputCard = memo(({ inputName, pidsByType }: InputCardProps) => {
                 </div>
                 <div>
                   <div className="text-sm font-medium">
-                    {type.toLowerCase() === 'visual' && pid.width && pid.height ? `${pid.width}x${pid.height}` 
-                     : type.toLowerCase() === 'audio' && pid.channels ? `${pid.channels}ch`
-                     : pid.nb_pck_queued || 0}
+                    {type.toLowerCase() === 'visual' && pid.width && pid.height
+                      ? `${pid.width}x${pid.height}`
+                      : type.toLowerCase() === 'audio' && pid.channels
+                        ? `${pid.channels}ch`
+                        : pid.nb_pck_queued || 0}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {type.toLowerCase() === 'visual' && pid.width && pid.height ? 'Resolution'
-                     : type.toLowerCase() === 'audio' && pid.channels ? 'Channels'
-                     : 'Queued'}
+                    {type.toLowerCase() === 'visual' && pid.width && pid.height
+                      ? 'Resolution'
+                      : type.toLowerCase() === 'audio' && pid.channels
+                        ? 'Channels'
+                        : 'Queued'}
                   </div>
                 </div>
               </div>
@@ -102,23 +109,25 @@ const InputCard = memo(({ inputName, pidsByType }: InputCardProps) => {
             <StatusIcon className="h-4 w-4" />
             {inputName}
           </CardTitle>
-          <Badge variant={overallStatus.variant}>
-            {overallStatus.status}
-          </Badge>
+          <Badge variant={overallStatus.variant}>{overallStatus.status}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {Object.entries(pidsByType).length > 0 ? (
-          <div className={`grid gap-4 ${Object.keys(pidsByType).length > 1 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
+          <div
+            className={`grid gap-4 ${Object.keys(pidsByType).length > 1 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}
+          >
             {Object.entries(pidsByType).map(([type, pids]) => {
               const mediaInfo = getMediaTypeInfo(type);
               const MediaIcon = mediaInfo.icon;
-              
+
               return (
                 <div key={type} className="space-y-2">
                   <div className="flex items-center gap-2 pb-2 border-b">
                     <MediaIcon className={`h-4 w-4 ${mediaInfo.color}`} />
-                    <span className="text-sm font-medium">{mediaInfo.label}</span>
+                    <span className="text-sm font-medium">
+                      {mediaInfo.label}
+                    </span>
                     <Badge variant="outline" className="text-xs ml-auto">
                       {pids.length} stream{pids.length > 1 ? 's' : ''}
                     </Badge>
@@ -144,23 +153,26 @@ const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
   const inputPids = filterData.ipids ? Object.values(filterData.ipids) : [];
 
   // Group PIDs by input source and by type
-  const groupedInputs = inputPids.reduce((acc, pid) => {
-    // Extract input name (remove suffix if present)
-    const inputName = pid.name.split('_')[0] || pid.name;
-    
-    if (!acc[inputName]) {
-      acc[inputName] = {};
-    }
+  const groupedInputs = inputPids.reduce(
+    (acc, pid) => {
+      // Extract input name (remove suffix if present)
+      const inputName = pid.name.split('_')[0] || pid.name;
 
-    // Group by actual PID type
-    const pidType = pid.type || 'Unknown';
-    if (!acc[inputName][pidType]) {
-      acc[inputName][pidType] = [];
-    }
-    acc[inputName][pidType].push(pid);
+      if (!acc[inputName]) {
+        acc[inputName] = {};
+      }
 
-    return acc;
-  }, {} as Record<string, Record<string, TabPIDData[]>>);
+      // Group by actual PID type
+      const pidType = pid.type || 'Unknown';
+      if (!acc[inputName][pidType]) {
+        acc[inputName][pidType] = [];
+      }
+      acc[inputName][pidType].push(pid);
+
+      return acc;
+    },
+    {} as Record<string, Record<string, TabPIDData[]>>,
+  );
 
   const inputNames = Object.keys(groupedInputs);
 
@@ -175,20 +187,28 @@ const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">Global Status</span>
               <div className="flex items-center gap-3 text-sm">
-                <span>{globalStatus.totalItems} Input{globalStatus.totalItems > 1 ? 's' : ''}</span>
+                <span>
+                  {globalStatus.totalItems} Input
+                  {globalStatus.totalItems > 1 ? 's' : ''}
+                </span>
                 <span className="text-muted-foreground">•</span>
-                <span>{globalStatus.totalPids} Stream{globalStatus.totalPids > 1 ? 's' : ''}</span>
+                <span>
+                  {globalStatus.totalPids} Stream
+                  {globalStatus.totalPids > 1 ? 's' : ''}
+                </span>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {globalStatus.errors > 0 && (
                 <Badge variant="destructive" className="text-xs">
-                  {globalStatus.errors} Error{globalStatus.errors > 1 ? 's' : ''}
+                  {globalStatus.errors} Error
+                  {globalStatus.errors > 1 ? 's' : ''}
                 </Badge>
               )}
               {globalStatus.warnings > 0 && (
                 <Badge variant="secondary" className="text-xs">
-                  {globalStatus.warnings} Warning{globalStatus.warnings > 1 ? 's' : ''}
+                  {globalStatus.warnings} Warning
+                  {globalStatus.warnings > 1 ? 's' : ''}
                 </Badge>
               )}
               {globalStatus.active > 0 && (

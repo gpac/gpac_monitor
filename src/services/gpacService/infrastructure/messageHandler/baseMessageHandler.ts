@@ -24,7 +24,7 @@ export class BaseMessageHandler {
     private callbacks: MessageHandlerCallbacks,
     private dependencies: MessageHandlerDependencies,
     private onMessage?: (message: any) => void,
-    // @ts-ignore used by sessionStatsHandler
+    // @ts-expect-error used by sessionStatsHandler
     private isLoaded?: () => boolean,
   ) {
     // Initialize message throttler for performance
