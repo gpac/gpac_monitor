@@ -11,9 +11,13 @@
   contain: layout style;
 }
 
-/* Animation optimizations */
+/* Animation optimizations (GPU only during interaction) */
 .widget-anim {
   contain: layout paint;
+  will-change: auto; /* pas de GPU permanent */
+}
+
+.is-interacting .widget-anim {
   will-change: transform, opacity;
 }
 
@@ -36,31 +40,46 @@
 
 /* Optimize charts and heavy components during resize */
 .resize-optimized {
-  transform: translateZ(0); /* Force hardware acceleration */
   backface-visibility: hidden;
+}
+
+.is-interacting .resize-optimized {
+  transform: translateZ(0); /* GPU pendant interaction */
 }
 
 /* Optimize scrollable containers */
 .optimize-scroll {
-  overflow-anchor: none; /* Prevent scroll anchoring during resize */
-  scroll-behavior: auto; /* Disable smooth scroll during resize */
+  overflow-anchor: none;
+  scroll-behavior: auto;
 }
 
 /* GPU-friendly animations */
 .gpu-optimized {
-  transform: translateZ(0); /* Force hardware acceleration */
   backface-visibility: hidden;
+  will-change: auto;
+}
+
+.is-interacting .gpu-optimized {
+  transform: translateZ(0);
   will-change: transform, opacity;
 }
 
 /* Grid optimization during resize */
 .grid-resize-optimized {
   contain: layout style;
-  will-change: transform, opacity; /* Use GPU-friendly props */
+  will-change: auto;
+}
+
+.is-interacting .grid-resize-optimized {
+  will-change: transform, opacity;
 }
 
 /* Flex optimization */
 .flex-resize-optimized {
   contain: layout;
-  will-change: transform, opacity; /* Use GPU-friendly props */
+  will-change: auto;
+}
+
+.is-interacting .flex-resize-optimized {
+  will-change: transform, opacity;
 }
