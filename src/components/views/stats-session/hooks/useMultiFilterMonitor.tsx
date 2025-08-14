@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { gpacService } from '@/services/gpacService';
-import { removeSelectedFilter } from '@/shared/store/slices/multiFilterSlice';
 import { setFilterDetails } from '@/shared/store/slices/graphSlice';
 import { RootState } from '@/shared/store';
 import {
@@ -37,7 +36,7 @@ export const useMultiFilterMonitor = (
   const handleCloseMonitor = useCallback(
     (filterIdx: string) => {
       gpacService.unsubscribeFromFilter(filterIdx);
-      dispatch(removeSelectedFilter(filterIdx));
+   
 
       if (gpacService.getCurrentFilterId()?.toString() === filterIdx) {
         dispatch(setFilterDetails(null));

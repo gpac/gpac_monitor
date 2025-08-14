@@ -1,7 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import graphReducer from './slices/graphSlice';
 import widgetsReducer from './slices/widgetsSlice';
-import multiFilterReducer from './slices/multiFilterSlice';
 import filterArgumentSlice from './slices/filterArgumentSlice';
 import sessionStatsReducer from './slices/sessionStatsSlice';
 
@@ -11,7 +10,6 @@ export const store = configureStore({
     filterArgument: filterArgumentSlice,
 
     widgets: widgetsReducer,
-    multiFilter: multiFilterReducer,
     sessionStats: sessionStatsReducer,
   },
   middleware: (getDefaultMiddleware) =>

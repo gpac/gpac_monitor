@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { GpacNodeData } from '../../../../types/domain/gpac';
-import { MonitoredFilter } from '@/shared/store/slices/multiFilterSlice';
+
 
 // =========================
 //       NODES HANDLER
@@ -68,9 +68,7 @@ export function useHandleEdgesChange({
 // =========================
 interface OnNodeClickParams {
   dispatch: Function;
-  monitoredFilters: MonitoredFilter[];
   service: any;
-  addSelectedFilter: (payload: MonitoredFilter) => void;
   setSelectedNode: (nodeId: string) => { payload: string; type: string };
   setSelectedFilterDetails: (data: GpacNodeData) => {
     payload: GpacNodeData;
@@ -80,9 +78,7 @@ interface OnNodeClickParams {
 
 export function useOnNodeClick({
   dispatch,
-  monitoredFilters,
   service,
-  addSelectedFilter,
   setSelectedNode,
   setSelectedFilterDetails,
 }: OnNodeClickParams) {
@@ -95,24 +91,13 @@ export function useOnNodeClick({
       service.setCurrentFilterId(parseInt(nodeId));
       service.getFilterDetails(parseInt(nodeId));
 
-      const isAlreadyMonitored = monitoredFilters.some((f) => f.id === nodeId);
-      if (!isAlreadyMonitored) {
-        const monitoredFilter: MonitoredFilter = {
-          id: nodeId,
-          nodeData: nodeData as GpacNodeData,
-        };
-
-        dispatch(addSelectedFilter(monitoredFilter));
-        service.subscribeToFilter(nodeId);
-      }
+    
 
       dispatch(setSelectedNode(nodeId));
     },
     [
       dispatch,
-      monitoredFilters,
       service,
-      addSelectedFilter,
       setSelectedFilterDetails,
       setSelectedNode,
     ],

@@ -18,7 +18,7 @@ export class BaseMessageHandler {
   private messageThrottler: MessageThrottler;
 
   constructor(
-    private currentFilterId: () => number | null,
+  /*   private currentFilterId: () => number | null, */
     _hasSubscription: (idx: string) => boolean,
     private notificationHandlers: GpacNotificationHandlers,
     private callbacks: MessageHandlerCallbacks,
@@ -97,9 +97,9 @@ export class BaseMessageHandler {
       case 'update':
         this.handleUpdateMessage(data);
         break;
-      case 'details':
+    /*   case 'details':
         this.handleDetailsMessage(data);
-        break;
+        break; */
       case 'session_stats':
         this.handleSessionStatsMessage(data);
         break;
@@ -133,13 +133,13 @@ export class BaseMessageHandler {
     }
   }
 
-  private handleDetailsMessage(data: any): void {
+ /*  private handleDetailsMessage(data: any): void {
     if (!data.filter) return;
 
     if (data.filter.idx === this.currentFilterId()) {
       this.callbacks.onSetFilterDetails(data.filter);
     }
-  }
+  } */
 
   private handleSessionStatsMessage(data: any): void {
     if (data.stats && Array.isArray(data.stats)) {

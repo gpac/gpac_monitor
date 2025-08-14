@@ -50,7 +50,7 @@ export class GpacService implements IGpacCommunication {
     };
 
     this.messageHandler = new BaseMessageHandler(
-      () => this.coreService.getCurrentFilterId(),
+   /*    () => this.coreService.getCurrentFilterId(), */
       () => false,
       this.notificationHandlers,
       storeCallbacks,
@@ -59,7 +59,6 @@ export class GpacService implements IGpacCommunication {
         this.onMessage?.(message);
         this.coreService.notifyHandlers(message);
       },
-      () => this.isLoaded(),
     );
 
     this.setupWebSocketHandlers();
@@ -140,12 +139,16 @@ export class GpacService implements IGpacCommunication {
     if (!this.ws.isConnected()) {
       throw new Error('[GpacService] WebSocket not connected');
     }
-    const formattedMessage = {
-      message: message.type,
-      ...message,
-    };
-    const jsonString = JSON.stringify(formattedMessage);
-    this.ws.send(jsonString);
+    try {
+      const formattedMessage = {
+        message: message.type,
+        ...message,
+      };
+      const jsonString = JSON.stringify(formattedMessage);
+      this.ws.send(jsonString);
+    } catch (error) {
+      throw error;
+    }
   }
 
   public getFilterDetails(idx: number): void {
