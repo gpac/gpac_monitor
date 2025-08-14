@@ -4,7 +4,7 @@
  */
 export type GpacMessageType =
   | 'get_all_filters'
-  | 'get_details'
+  | 'filter_args_details'
   | 'stop_details'
   | 'update_arg'
   | 'get_png'

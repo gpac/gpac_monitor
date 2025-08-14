@@ -1,4 +1,4 @@
-import { Settings, Check, AlertCircle } from 'lucide-react';
+import { IoSettings, IoCheckmark, IoAlertCircle } from 'react-icons/io5';
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -83,7 +83,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
         )}
         {updateStatus?.status === 'success' && (
           <div className="absolute right-0 top-0 -mt-1 -mr-1">
-            <Check className="h-4 w-4 text-green-500" />
+            <IoCheckmark className="h-4 w-4 text-green-500" />
           </div>
         )}
         {updateStatus?.status === 'error' && (
@@ -91,7 +91,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
             className="absolute right-0 top-0 -mt-1 -mr-1"
             title={updateStatus.error}
           >
-            <AlertCircle className="h-4 w-4 text-red-500" />
+            <IoAlertCircle className="h-4 w-4 text-red-500" />
           </div>
         )}
 
@@ -133,7 +133,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
             'focus-visible:ring-gray-400 disabled:pointer-events-none',
           )}
         >
-          <Settings className="h-6 w-6 text-white" />
+          <IoSettings className="h-6 w-6 text-white" />
           <span className="sr-only">Open filter settings</span>
         </button>
       </DialogTrigger>

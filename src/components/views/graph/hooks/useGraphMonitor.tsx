@@ -16,6 +16,7 @@ import { useGraphState } from './useGraphState';
 import { useGraphConnection } from './useGraphConnection';
 import { useGraphHandlers } from './useGraphHandlers';
 import { useGraphNotifications } from './useGraphNotifications';
+import { useFilterArgs } from './useFilterArgs';
 
 /**
  * Primary hook for GPAC graph monitoring functionality
@@ -58,7 +59,9 @@ const useGraphMonitor = () => {
     setConnectionError,
   });
 
-  const { handleNodesChange, handleEdgesChange } = useGraphHandlers({
+  const { requestFilterArgs, getFilterArgs, hasFilterArgs } = useFilterArgs();
+
+  const { handleNodesChange, handleEdgesChange, handleNodeClick } = useGraphHandlers({
     onNodesChange,
     onEdgesChange,
     localNodes,
@@ -66,8 +69,9 @@ const useGraphMonitor = () => {
     nodesRef,
     edgesRef,
     setLocalNodes,
-    dispatch,
     service,
+    dispatch,
+    onNodeClick: requestFilterArgs,
   });
 
   // Use notification system
@@ -90,7 +94,7 @@ const useGraphMonitor = () => {
     }
   }, [nodes, edges, setLocalNodes, setLocalEdges]);
 
-  // Boolean guard to prevent infinite loops - like colleague's approach
+ 
   const [hasLayoutRun, setHasLayoutRun] = useState(false);
   const nodesInitialized = useNodesInitialized();
 
@@ -122,11 +126,10 @@ const useGraphMonitor = () => {
     // Run the layout and set guard flag
     autoLayout();
     setHasLayoutRun(true);
-  }, [nodesInitialized, localNodes, hasLayoutRun, autoLayout]); // Include hasLayoutRun
+  }, [nodesInitialized, localNodes, hasLayoutRun, autoLayout]);
 
-  // Manual layout trigger - like colleague's magic button
   const triggerLayout = () => {
-    setHasLayoutRun(false); // Reset flag to allow re-layout
+    setHasLayoutRun(false); 
     autoLayout();
   };
 
@@ -138,11 +141,15 @@ const useGraphMonitor = () => {
     localEdges,
     handleNodesChange,
     handleEdgesChange,
+    handleNodeClick,
     layoutOptions,
     handleLayoutChange,
     autoLayout,
     applyLayout,
-    triggerLayout, // Manual trigger like colleague's magic button
+    triggerLayout,
+    // Filter args functions
+    getFilterArgs,
+    hasFilterArgs,
   };
 };
 

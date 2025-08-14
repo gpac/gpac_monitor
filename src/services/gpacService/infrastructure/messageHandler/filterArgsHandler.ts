@@ -1,0 +1,145 @@
+import { WSMessageType } from '@/services/ws/types';
+import { generateID } from '@/utils/id';
+import { MessageHandlerDependencies } from './types';
+import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
+import { FilterArgument } from '@/types';
+
+
+export class FilterArgsHandler {
+  constructor(
+    private dependencies: MessageHandlerDependencies,
+    private isLoaded: () => boolean,
+  ) {}
+  private pendingFilterArgsSubscribeRequests = new Map<number, Promise<void>>();
+  private pendingFilterArgsUnsubscribeRequests = new Map<number, Promise<void>>();
+  
+  private filterArgsSubscribables = new Map<number, UpdatableSubscribable<FilterArgument[]>>();
+
+  private ensureLoaded(): boolean {
+    if (!this.isLoaded()) {
+      const error = new Error('Service not loaded');
+      throw error;
+    }
+    return true;
+  }
+  private static generateMessageId(): string {
+    return generateID();
+  }
+  /**
+   * Subscribes to filter args
+   */
+  public async subscribeToFilterArgs(
+    idx: number,
+  ): Promise<void> {
+    this.ensureLoaded();
+
+    // Check if there's already a pending subscribe request for this filter
+    const existingRequest = this.pendingFilterArgsSubscribeRequests.get(idx);
+    if (existingRequest) {
+      return existingRequest;
+    }
+
+    // Create and store the promise
+    const promise = (async () => {
+      try {
+        await this.dependencies.send({
+          type: WSMessageType.FILTER_ARGS_DETAILS,
+          id: FilterArgsHandler.generateMessageId(),
+          idx,
+        });
+      } finally {
+        // Clear the pending request when done (success or failure)
+        this.pendingFilterArgsSubscribeRequests.delete(idx);
+      }
+    })();
+
+    this.pendingFilterArgsSubscribeRequests.set(idx, promise);
+    return promise;
+  }
+
+  /**
+   * Unsubscribes from filter arguments updates
+   */
+  public async unsubscribeFromFilterArgs(idx: number): Promise<void> {
+    this.ensureLoaded();
+
+    // Check if there's already a pending unsubscribe request for this filter
+    const existingRequest = this.pendingFilterArgsUnsubscribeRequests.get(idx);
+    if (existingRequest) {
+      return existingRequest;
+    }
+
+    // Create and store the promise
+    const promise = (async () => {
+      try {
+        await this.dependencies.send({
+          type: WSMessageType.STOP_FILTER_ARGS,
+          id: FilterArgsHandler.generateMessageId(),
+          idx,
+        });
+      } finally {
+        // Clear the pending request when done (success or failure)
+        this.pendingFilterArgsUnsubscribeRequests.delete(idx);
+      }
+    })();
+
+    this.pendingFilterArgsUnsubscribeRequests.set(idx, promise);
+    return promise;
+  }
+
+  /**
+   * Handles filter args details received from server
+   */
+  public handleFilterArgs(data: any): void {
+    if (!data.filter || data.filter.idx === undefined) {
+      return;
+    }
+
+    console.log('Filter args received:', {
+      idx: data.filter.idx,
+      gpac_args: data.filter.gpac_args,
+      fullData: data.filter
+    });
+
+    const filterIdx = data.filter.idx;
+    const subscribable = this.filterArgsSubscribables.get(filterIdx);
+    
+    if (subscribable && data.filter.gpac_args) {
+      subscribable.updateDataAndNotify(data.filter.gpac_args);
+    }
+  }
+
+  /**
+   * Subscribes to filter args details updates
+   */
+  public subscribeToFilterArgsDetails(
+    filterIdx: number,
+    callback: (args: FilterArgument[]) => void,
+    _interval = 1000, // Pas utilisé car on ne reçoit qu'une fois
+  ): () => void {
+    this.ensureLoaded();
+
+    let subscribable = this.filterArgsSubscribables.get(filterIdx);
+    if (!subscribable) {
+      subscribable = new UpdatableSubscribable<FilterArgument[]>([]);
+      this.filterArgsSubscribables.set(filterIdx, subscribable);
+    }
+
+    const unsubscribe = subscribable.subscribe(callback, { immediate: false });
+
+    return () => {
+      unsubscribe();
+      // Cleanup si plus d'abonnés
+      if (!subscribable!.hasSubscribers) {
+        this.filterArgsSubscribables.delete(filterIdx);
+      }
+    };
+  }
+
+  /**
+   * Cleanup all subscriptions
+   */
+  public cleanup(): void {
+    this.filterArgsSubscribables.clear();
+  }
+}

@@ -11,6 +11,7 @@ import {
   useViewport,
   NodeChange,
   EdgeChange,
+  NodeMouseHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { CustomNode } from '../../../views/graph/ui/CustomNode';
@@ -20,6 +21,7 @@ interface GraphFlowProps {
   edges: Edge[];
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
+  onNodeClick?: NodeMouseHandler;
   isResizing?: boolean;
 }
 
@@ -37,6 +39,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   edges,
   onNodesChange,
   onEdgesChange,
+  onNodeClick,
   isResizing = false,
 }) => {
   const { setViewport } = useReactFlow();
@@ -70,6 +73,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         nodeTypes={nodeTypes}
         onNodesChange={isResizing ? () => {} : onNodesChange}
         onEdgesChange={isResizing ? () => {} : onEdgesChange}
+        onNodeClick={isResizing ? undefined : onNodeClick}
         fitView={!isResizing}
         minZoom={0.1}
         maxZoom={4}

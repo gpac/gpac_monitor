@@ -154,7 +154,7 @@ export class GpacService implements IGpacCommunication {
       this.sendMessage({ type: 'stop_details', idx: currentFilterId });
     }
     this.coreService.setCurrentFilterId(idx);
-    this.sendMessage({ type: 'get_details', idx: idx });
+    this.sendMessage({ type: 'filter_args_details', idx: idx });
   }
 
   public setCurrentFilterId(id: number | null): void {
@@ -171,6 +171,7 @@ export class GpacService implements IGpacCommunication {
       this.sendMessage({ type: 'stop_details', idx: numericIdx });
     }
   }
+
 
   private setupWebSocketHandlers(): void {
     this.ws.addConnectHandler(() => {
@@ -246,6 +247,23 @@ export class GpacService implements IGpacCommunication {
               subscriptionId,
             });
           }, config.interval || 150);
+      case SubscriptionType.FILTER_ARGS_DETAILS:
+        if (typeof config.filterIdx !== "number") {
+          throw new Error("filterIdx is required for FILTER_ARGS_DETAILS subscription");
+        }
+        return this.messageHandler
+          .getFilterArgsHandler()
+          .subscribeToFilterArgsDetails(
+            config.filterIdx,
+            (data) => {
+              callback({
+                data: data as T,
+                timestamp: Date.now(),
+                subscriptionId,
+              });
+            },
+            config.interval || 1000,
+          );
 
       default:
         throw new Error(`Unsupported subscription type: ${config.type}`);

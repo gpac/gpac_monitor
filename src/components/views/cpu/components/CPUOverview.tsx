@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { bytesToHumanReadable, formatPercent } from '@/utils/formatUtils';
+import { formatPercent } from '@/utils/formatUtils'
+import { formatBytes } from '@/utils/helper';
 
 interface CPUOverviewProps {
   cpuUsage: number;
@@ -43,7 +44,7 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
             <span className="text-md font-semibold stat">
               {isLoading
                 ? '...'
-                : bytesToHumanReadable(memoryProcess).toString()}
+                : formatBytes(memoryProcess).toString()}
             </span>
           </div>
         </CardContent>

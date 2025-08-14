@@ -8,6 +8,7 @@ import { MessageThrottler } from '../../../utils/MessageThrottler';
 
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
 import { CPUStatsHandler } from './cpuStatsHandler';
+import { FilterArgsHandler } from './filterArgsHandler';
 
 export type { MessageHandlerCallbacks, MessageHandlerDependencies };
 
@@ -15,6 +16,7 @@ export class BaseMessageHandler {
   private sessionStatsHandler: SessionStatsHandler;
   private filterStatsHandler: FilterStatsHandler;
   private cpuStatsHandler: CPUStatsHandler;
+  private filterArgsHandler: FilterArgsHandler;
   private messageThrottler: MessageThrottler;
 
   constructor(
@@ -43,6 +45,10 @@ export class BaseMessageHandler {
       dependencies,
       isLoaded || (() => true),
     );
+    this.filterArgsHandler = new FilterArgsHandler(
+      dependencies,
+      isLoaded || (() => true),
+    );
   }
 
   // Expose handler methods
@@ -55,13 +61,11 @@ export class BaseMessageHandler {
   public getCPUStatsHandler(): CPUStatsHandler {
     return this.cpuStatsHandler;
   }
-
-  /**
-   * Nettoie le throttler (utile lors de la déconnexion)
-   */
-  public cleanup(): void {
-    this.messageThrottler.clear();
+  public getFilterArgsHandler(): FilterArgsHandler {
+    return this.filterArgsHandler;
   }
+
+
 
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
     try {
@@ -86,6 +90,8 @@ export class BaseMessageHandler {
   }
 
   private processGpacMessage(data: any): void {
+ 
+    
     if (!data.message) {
       return;
     }
@@ -97,9 +103,9 @@ export class BaseMessageHandler {
       case 'update':
         this.handleUpdateMessage(data);
         break;
-      /*   case 'details':
+      case 'details':
         this.handleDetailsMessage(data);
-        break; */
+        break;
       case 'session_stats':
         this.handleSessionStatsMessage(data);
         break;
@@ -133,13 +139,11 @@ export class BaseMessageHandler {
     }
   }
 
-  /*  private handleDetailsMessage(data: any): void {
+  private handleDetailsMessage(data: any): void {
+    console.log('Details message received in baseMessageHandler:', data);
     if (!data.filter) return;
-
-    if (data.filter.idx === this.currentFilterId()) {
-      this.callbacks.onSetFilterDetails(data.filter);
-    }
-  } */
+    this.filterArgsHandler.handleFilterArgs(data);
+  }
 
   private handleSessionStatsMessage(data: any): void {
     if (data.stats && Array.isArray(data.stats)) {

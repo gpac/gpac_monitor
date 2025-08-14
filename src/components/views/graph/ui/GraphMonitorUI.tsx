@@ -5,7 +5,7 @@ import LoadingState from '../../../common/LoadingState';
 import ConnectionErrorState from '../../../common/ConnectionErrorState';
 import GraphFlow from './GraphFlow';
 import { WidgetProps } from '../../../../types/ui/widget';
-import { Node, Edge } from '@xyflow/react';
+import { Node, Edge, NodeMouseHandler } from '@xyflow/react';
 import { LayoutOptions } from '../utils/GraphLayout';
 
 interface GraphMonitorUIProps extends WidgetProps {
@@ -16,6 +16,7 @@ interface GraphMonitorUIProps extends WidgetProps {
   edges: Edge[];
   onNodesChange: (changes: any[]) => void;
   onEdgesChange: (changes: any[]) => void;
+  onNodeClick?: NodeMouseHandler;
   layoutOptions: LayoutOptions;
   onLayoutChange: (options: LayoutOptions) => void;
   onAutoLayout: () => void;
@@ -31,6 +32,7 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
   edges,
   onNodesChange,
   onEdgesChange,
+  onNodeClick,
 }) => {
   const [isResizing, setIsResizing] = useState(false);
 
@@ -68,6 +70,7 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onNodeClick={onNodeClick}
           isResizing={isResizing}
         />
       </div>

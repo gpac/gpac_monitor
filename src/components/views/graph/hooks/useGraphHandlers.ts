@@ -1,6 +1,7 @@
 import { useCallback, MutableRefObject } from 'react';
-import { Node, Edge } from '@xyflow/react';
+import { Node, Edge, NodeMouseHandler } from '@xyflow/react';
 import { Dispatch } from '@reduxjs/toolkit';
+
 
 interface UseGraphHandlersProps {
   onNodesChange: (changes: any[]) => void;
@@ -12,6 +13,7 @@ interface UseGraphHandlersProps {
   setLocalNodes: (nodes: Node[]) => void;
   service: any;
   dispatch: Dispatch;
+  onNodeClick?: (filterIdx: number) => void;
 }
 
 /**
@@ -25,6 +27,7 @@ export const useGraphHandlers = ({
   localEdges,
   nodesRef,
   edgesRef,
+  onNodeClick,
 }: UseGraphHandlersProps) => {
   // Handle node changes (position, selection, etc)
   const handleNodesChange = useCallback(
@@ -60,8 +63,19 @@ export const useGraphHandlers = ({
     [onEdgesChange, localEdges, edgesRef],
   );
 
+  const handleNodeClick: NodeMouseHandler = useCallback(
+    (_event, node) => {
+      const filterIdx = parseInt(node.id);
+      if (!isNaN(filterIdx)) {
+        onNodeClick?.(filterIdx);
+      }
+    },
+    [onNodeClick],
+  );
+
   return {
     handleNodesChange,
     handleEdgesChange,
+    handleNodeClick,
   };
 };
