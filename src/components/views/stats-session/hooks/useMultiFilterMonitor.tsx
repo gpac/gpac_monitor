@@ -36,7 +36,6 @@ export const useMultiFilterMonitor = (
   const handleCloseMonitor = useCallback(
     (filterIdx: string) => {
       gpacService.unsubscribeFromFilter(filterIdx);
-   
 
       if (gpacService.getCurrentFilterId()?.toString() === filterIdx) {
         dispatch(setFilterDetails(null));

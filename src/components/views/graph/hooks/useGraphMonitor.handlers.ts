@@ -2,7 +2,6 @@ import { useCallback } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { GpacNodeData } from '../../../../types/domain/gpac';
 
-
 // =========================
 //       NODES HANDLER
 // =========================
@@ -91,15 +90,8 @@ export function useOnNodeClick({
       service.setCurrentFilterId(parseInt(nodeId));
       service.getFilterDetails(parseInt(nodeId));
 
-    
-
       dispatch(setSelectedNode(nodeId));
     },
-    [
-      dispatch,
-      service,
-      setSelectedFilterDetails,
-      setSelectedNode,
-    ],
+    [dispatch, service, setSelectedFilterDetails, setSelectedNode],
   );
 }
