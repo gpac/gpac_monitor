@@ -18,10 +18,6 @@ import { useGraphHandlers } from './useGraphHandlers';
 import { useGraphNotifications } from './useGraphNotifications';
 import { useFilterArgs } from './useFilterArgs';
 
-/**
- * Primary hook for GPAC graph monitoring functionality
- * Composes specialized sub-hooks for improved maintainability
- */
 const useGraphMonitor = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
@@ -36,7 +32,6 @@ const useGraphMonitor = () => {
   const [localNodes, setLocalNodes, onNodesChange] = useNodesState<Node>([]);
   const [localEdges, setLocalEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
-  // Use specialized hooks for different aspects of functionality
   const {
     nodes,
     edges,
@@ -147,7 +142,6 @@ const useGraphMonitor = () => {
     autoLayout,
     applyLayout,
     triggerLayout,
-    // Filter args functions
     getFilterArgs,
     hasFilterArgs,
   };
