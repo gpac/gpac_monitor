@@ -35,7 +35,6 @@ const cachedUsageCalculations = new WeakMap<
 
 const FilterStatCard: React.FC<FilterStatCardProps> = memo(
   ({ filter, onClick, isMonitored = false }) => {
-
     const { bufferUsage, activityLevel } = useMemo(() => {
       if (cachedUsageCalculations.has(filter)) {
         return cachedUsageCalculations.get(filter) as {
@@ -63,7 +62,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
         onClick(filter.idx);
       }
     }, [filter.idx, onClick]);
-
 
     const monitoredClass = isMonitored ? 'border border-red-900' : 'border-0';
     const hasBufferInfo = filter.ipid && Object.keys(filter.ipid).length > 0;

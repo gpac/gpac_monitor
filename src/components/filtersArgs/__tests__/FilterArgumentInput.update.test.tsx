@@ -7,25 +7,26 @@ import { FilterArgumentInput } from '../FilterArgumentInput';
 import { updateFilterArgument } from '@/shared/store/slices/filterArgumentSlice';
 
 // Mock du store Redux
-const createMockStore = () => configureStore({
-  reducer: {
-    filterArgument: (state = {}, action) => {
-      if (action.type === updateFilterArgument.type) {
-        return {
-          ...state,
-          [action.payload.filterId]: {
-            ...state[action.payload.filterId],
-            [action.payload.argName]: {
-              status: 'pending',
-              value: action.payload.argValue,
+const createMockStore = () =>
+  configureStore({
+    reducer: {
+      filterArgument: (state = {}, action) => {
+        if (action.type === updateFilterArgument.type) {
+          return {
+            ...state,
+            [action.payload.filterId]: {
+              ...state[action.payload.filterId],
+              [action.payload.argName]: {
+                status: 'pending',
+                value: action.payload.argValue,
+              },
             },
-          },
-        };
-      }
-      return state;
+          };
+        }
+        return state;
+      },
     },
-  },
-});
+  });
 
 // Mock des utils
 vi.mock('@/utils/filtersArguments', () => ({
@@ -68,7 +69,7 @@ describe('FilterArgumentInput - Argument Updates', () => {
     return render(
       <Provider store={store}>
         <FilterArgumentInput {...defaultProps} />
-      </Provider>
+      </Provider>,
     );
   };
 
@@ -105,21 +106,27 @@ describe('FilterArgumentInput - Argument Updates', () => {
       });
 
       const switchElement = screen.getByRole('switch');
-      
+
       // Use userEvent for more realistic interaction or trigger the change event
       fireEvent.click(switchElement);
-      
+
       // Wait for state updates
-      await waitFor(() => {
-        expect(mockOnChange).toHaveBeenCalledWith(true);
-      }, { timeout: 200 });
+      await waitFor(
+        () => {
+          expect(mockOnChange).toHaveBeenCalledWith(true);
+        },
+        { timeout: 200 },
+      );
 
       // Should dispatch update action immediately (no debounce)
-      await waitFor(() => {
-        const state = store.getState();
-        expect(state.filterArgument).toHaveProperty('filter123');
-        expect(state.filterArgument.filter123).toHaveProperty('fullscreen');
-      }, { timeout: 200 });
+      await waitFor(
+        () => {
+          const state = store.getState();
+          expect(state.filterArgument).toHaveProperty('filter123');
+          expect(state.filterArgument.filter123).toHaveProperty('fullscreen');
+        },
+        { timeout: 200 },
+      );
     });
 
     it('should not show switch for non-updatable boolean arguments', () => {
@@ -154,9 +161,9 @@ describe('FilterArgumentInput - Argument Updates', () => {
 
       const switchElement = screen.getByRole('switch');
       expect(switchElement).toBeInTheDocument();
-      
+
       fireEvent.click(switchElement);
-      
+
       // Should only call onChange, no store update
       expect(mockOnChange).toHaveBeenCalledWith(true);
     });
@@ -197,9 +204,11 @@ describe('FilterArgumentInput - Argument Updates', () => {
       });
 
       const inputElement = screen.getByRole('textbox');
-      
+
       // Type in the input
-      fireEvent.change(inputElement, { target: { value: '/tmp/new_output.mp4' } });
+      fireEvent.change(inputElement, {
+        target: { value: '/tmp/new_output.mp4' },
+      });
 
       // Should not call onChange immediately
       expect(mockOnChange).not.toHaveBeenCalled();
@@ -235,7 +244,9 @@ describe('FilterArgumentInput - Argument Updates', () => {
 
   describe('Error Handling', () => {
     it('should handle conversion errors gracefully', async () => {
-      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
 
       // Mock convertArgumentValue to throw an error
       const { convertArgumentValue } = await import('@/utils/filtersArguments');
@@ -259,7 +270,10 @@ describe('FilterArgumentInput - Argument Updates', () => {
       fireEvent.click(switchElement);
 
       await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith('Error in immediate update:', expect.any(Error));
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error in immediate update:',
+          expect.any(Error),
+        );
       });
 
       consoleErrorSpy.mockRestore();
@@ -303,7 +317,7 @@ describe('FilterArgumentInput - Argument Updates', () => {
             onChange={mockOnChange}
             filterId={undefined}
           />
-        </Provider>
+        </Provider>,
       );
 
       const inputElement = screen.getByRole('textbox');

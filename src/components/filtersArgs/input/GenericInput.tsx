@@ -61,16 +61,21 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   if (type === 'boolean') {
     // Log only once every 100ms to avoid spam
     const now = Date.now();
-    if (!(window as any).lastBooleanLog || now - (window as any).lastBooleanLog > 100) {
+    if (
+      !(window as any).lastBooleanLog ||
+      now - (window as any).lastBooleanLog > 100
+    ) {
       console.log('🔧 Boolean switch:', {
         value,
         localValue,
         disabled: rules?.disabled,
-        checked: debounce ? (localValue as boolean) : (value as boolean) || false
+        checked: debounce
+          ? (localValue as boolean)
+          : (value as boolean) || false,
       });
       (window as any).lastBooleanLog = now;
     }
-    
+
     return (
       <Switch
         checked={

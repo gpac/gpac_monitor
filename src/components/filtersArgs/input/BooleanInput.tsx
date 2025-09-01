@@ -19,7 +19,7 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
       argName,
       value,
       rules,
-      rulesDisabled: rules?.disabled
+      rulesDisabled: rules?.disabled,
     });
   }
 
