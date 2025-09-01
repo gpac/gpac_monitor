@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '../../../../types/domain/gpac/model';
 import { determineFilterSessionType } from '../utils/filterType';
 import { useGraphColors } from '../hooks/useGraphColors';
+import { useFilterArgs } from '../hooks/useFilterArgs';
+import FilterArgumentsDialog from '../../../filtersArgs/FilterArgumentsDialog';
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
@@ -16,11 +18,29 @@ export const CustomNode: React.FC<CustomNodeProps> = ({
   selected,
   ...nodeProps
 }) => {
-  const { label, ipid, opid, nb_ipid, nb_opid } = data;
+  const { label, ipid, opid, nb_ipid, nb_opid, idx, name } = data;
   const sessionType = determineFilterSessionType(data);
 
   const node = { data, position: { x: 0, y: 0 }, ...nodeProps };
   const [textColor, backgroundColor] = useGraphColors(node);
+
+  // Use filterArgs hook for the dialog
+  const { getFilterArgs, hasFilterArgs, requestFilterArgs } = useFilterArgs();
+  const [isRequesting, setIsRequesting] = useState(false);
+
+  // Récupérer automatiquement les arguments s'ils ne sont pas disponibles
+  const ensureFilterArgs = useCallback(() => {
+    if (!hasFilterArgs(idx) && !isRequesting) {
+      setIsRequesting(true);
+      requestFilterArgs(idx);
+      // Reset isRequesting after a timeout since requestFilterArgs doesn't return a Promise
+      setTimeout(() => {
+        setIsRequesting(false);
+      }, 1000);
+    }
+  }, [idx, hasFilterArgs, requestFilterArgs, isRequesting]);
+
+  const filterArgs = getFilterArgs(idx) || [];
 
   // Create input handles only if nb_ipid > 0
   const inputHandles =
@@ -91,18 +111,34 @@ export const CustomNode: React.FC<CustomNodeProps> = ({
           >
             {label}
           </h3>
-          <div
-            className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
-            style={{ color: textColor }}
-            title={
-              sessionType === 'source'
-                ? 'Source Filter'
-                : sessionType === 'sink'
-                  ? 'Sink Filter'
-                  : 'Processing Filter'
-            }
-          >
-            {sessionType.toUpperCase()}
+          <div className="flex items-center gap-2">
+            <div
+              className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
+              style={{ color: textColor }}
+              title={
+                sessionType === 'source'
+                  ? 'Source Filter'
+                  : sessionType === 'sink'
+                    ? 'Sink Filter'
+                    : 'Processing Filter'
+              }
+            >
+              {sessionType.toUpperCase()}
+            </div>
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                ensureFilterArgs();
+              }}
+            >
+              <FilterArgumentsDialog
+                filter={{
+                  idx,
+                  name,
+                  gpac_args: filterArgs as any[],
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>

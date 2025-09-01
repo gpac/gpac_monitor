@@ -1,5 +1,5 @@
 import { IoSettings, IoCheckmark, IoAlertCircle } from 'react-icons/io5';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,6 @@ import {
   DialogFooter,
 } from '../ui/dialog';
 import { Button } from '../ui/button';
-import { GpacNodeData } from '../../types/domain/gpac/index';
 import { FilterArgumentInput } from './FilterArgumentInput';
 import { ArgumentDisplayValue } from './arguments/ArgumentDisplayValue';
 import { cn } from '../../utils/cn';
@@ -21,11 +20,33 @@ import {
 } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 
-interface FilterArgumentsDialogProps {
-  filter: GpacNodeData;
+// Type temporaire pour la dialog - à terme remplacer par FilterArgument propre
+interface DialogFilterArgument {
+  name: string;
+  type: string;
+  value: any;
+  desc?: string;
+  hint?: string;
+  default?: any;
+  min_max_enum?: string;
+  update?: boolean;
+  update_sync?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
 }
 
-const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
+interface FilterData {
+  idx: number;
+  name: string;
+  gpac_args?: DialogFilterArgument[];
+}
+
+interface FilterArgumentsDialogProps {
+  filter: FilterData;
+}
+
+const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = React.memo(({
   filter,
 }) => {
   // Keep track of pending changes
@@ -35,7 +56,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
   const dispatch = useAppDispatch();
 
   const argumentUpdates = useAppSelector((state) =>
-    filter.gpac_args?.reduce(
+    Array.isArray(filter.gpac_args) ? filter.gpac_args.reduce(
       (acc, arg) => {
         acc[arg.name] = selectArgumentUpdate(
           state,
@@ -45,7 +66,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
         return acc;
       },
       {} as Record<string, any>,
-    ),
+    ) : {},
   );
 
   // useEffect hook
@@ -55,20 +76,21 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
     }
   }, [isOpen]);
 
-  const handleValueChange = (argName: string, newValue: any) => {
+  const handleValueChange = useCallback((argName: string, newValue: any) => {
     setPendingChanges((prev) => ({
       ...prev,
       [argName]: newValue,
     }));
 
-    console.log(`Value changed for ${argName}:`, newValue);
-  };
+  }, []);
 
-  const renderArgumentInput = (arg: any) => {
+  const renderArgumentInput = useCallback((arg: any) => {
     const type = arg.type || typeof arg.value;
     const hasChange = pendingChanges[arg.name] !== undefined;
-    // Get update status from our pre-fetched object instead of calling useSelector here
+    // Get update status from our pre-fetched object instead of calling useSelector here  
     const updateStatus = argumentUpdates?.[arg.name];
+
+
 
     return (
       <div className="relative">
@@ -104,23 +126,33 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
             default: arg.default,
             min_max_enum: arg.min_max_enum,
             update: !!arg.update,
-            update_sync: !!arg.update_sync,
+            update_sync: !!arg.update_sync, 
           }}
           value={hasChange ? pendingChanges[arg.name] : arg.value}
           onChange={(newValue) => {
             handleValueChange(arg.name, newValue);
           }}
-          rules={{
-            disabled: !arg.update,
-            min: arg.min,
-            max: arg.max,
-            step: arg.step,
-          }}
-          // Don't pass filterId here as we'll handle updates with the Apply button
+          rules={(() => {
+            const rules = {
+              disabled: !arg.update,
+              min: arg.min,
+              max: arg.max,
+              step: arg.step,
+            };
+            if (arg.name === 'fullscreen') {
+              console.log('🔧 FilterArgumentsDialog rules for fullscreen:', {
+                argUpdate: arg.update,
+                rulesDisabled: rules.disabled,
+                rules
+              });
+            }
+            return rules;
+          })()}
+          // Don't pass filterId here as we'll handle updates with the Apply button 
         />
       </div>
     );
-  };
+  }, [filter.idx, pendingChanges, handleValueChange]);
 
   return (
     <Dialog onOpenChange={setIsOpen}>
@@ -133,7 +165,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
             'focus-visible:ring-gray-400 disabled:pointer-events-none',
           )}
         >
-          <IoSettings className="h-4 w-4 text-white" />
+          <IoSettings className="h-4 w-4 text-black" />
           <span className="sr-only">Open filter settings</span>
         </button>
       </DialogTrigger>
@@ -165,7 +197,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
               'scrollbar-track-gray-800/50',
             )}
           >
-            {filter.gpac_args?.map((arg, index) => (
+            {Array.isArray(filter.gpac_args) && filter.gpac_args.map((arg, index) => (
               <div
                 key={index}
                 className={cn(
@@ -285,7 +317,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
 
                 // Apply all pending changes
                 Object.entries(pendingChanges).forEach(([argName, value]) => {
-                  const arg = filter.gpac_args?.find((a) => a.name === argName);
+                  const arg = Array.isArray(filter.gpac_args) ? filter.gpac_args.find((a) => a.name === argName) : null;
 
                   // Log detailed information about the argument being updated
                   console.log(`***Updating argument:`, {
@@ -305,7 +337,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
                     dispatch(
                       updateFilterArgument({
                         filterId: filter.idx.toString(),
-                        argName,
+                        argName: argName,
                         argValue: value,
                       }),
                     );
@@ -328,6 +360,6 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
       </DialogContent>
     </Dialog>
   );
-};
+});
 
 export default FilterArgumentsDialog;

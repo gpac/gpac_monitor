@@ -80,10 +80,33 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
     setLocalValue(newValue);
   };
 
+  // Handle immediate updates for boolean arguments when filterId is provided
+  const handleImmediateUpdate = (newValue: any) => {
+    const convertedValue = convertArgumentValue(newValue, argument.type);
+    
+    // Update local value immediately
+    setLocalValue(convertedValue);
+    
+    // Call the parent onChange handler
+    onChange(convertedValue);
+    
+    // If we have filterId and argument is updatable, dispatch immediately
+    if (filterId && argument.update && !standalone) {
+      dispatch(
+        updateFilterArgument({
+          filterId,
+          argName: argument.name,
+          argValue: convertedValue,
+        }),
+      );
+    }
+  };
+
   const renderInput = () => {
+
     const inputProps = {
       value: localValue,
-      onChange: handleLocalChange,
+      onChange: filterId && argument.type === 'bool' ? handleImmediateUpdate : handleLocalChange,
       rules: {
         ...rules,
         disabled: rules?.disabled,
@@ -91,11 +114,23 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
       argument,
     };
 
+    // Debug fullscreen rules flow
+    if (argument.name === 'fullscreen') {
+      console.log('🔧 FilterArgumentInput inputProps for fullscreen:', {
+        originalRules: rules,
+        rulesDisabled: rules?.disabled,
+        finalInputPropsRules: inputProps.rules,
+        finalDisabled: inputProps.rules.disabled
+      });
+    }
+
+
     if (
       argument.min_max_enum &&
       (argument.min_max_enum.includes('|') ||
         argument.min_max_enum.includes('='))
     ) {
+      
       if (isEnumArgument(argument)) {
         return (
           <EnumInput
@@ -115,7 +150,7 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
     switch (argument.type as GPACArgumentType) {
       case 'bool':
         return (
-          <BooleanInput {...(inputProps as FilterArgumentInputProps<'bool'>)} />
+          <BooleanInput {...(inputProps as FilterArgumentInputProps<'bool'>)} argName={argument.name} />
         );
 
       case 'uint':

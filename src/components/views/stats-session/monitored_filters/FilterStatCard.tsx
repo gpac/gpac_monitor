@@ -1,7 +1,5 @@
-import { useCallback, useMemo, memo, useState } from 'react';
+import { useCallback, useMemo, memo } from 'react';
 import { LuActivity, LuEye } from 'react-icons/lu';
-import FilterArgumentsDialog from '../../../filtersArgs/FilterArgumentsDialog';
-import { useFilterArgs } from '../../graph/hooks/useFilterArgs';
 import { GpacNodeData } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
 import { determineFilterSessionType } from '@/components/views/graph/utils/filterType';
@@ -37,8 +35,6 @@ const cachedUsageCalculations = new WeakMap<
 
 const FilterStatCard: React.FC<FilterStatCardProps> = memo(
   ({ filter, onClick, isMonitored = false }) => {
-    const [isRequesting, setIsRequesting] = useState(false);
-    const { getFilterArgs, hasFilterArgs, requestFilterArgs } = useFilterArgs();
 
     const { bufferUsage, activityLevel } = useMemo(() => {
       if (cachedUsageCalculations.has(filter)) {
@@ -68,25 +64,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       }
     }, [filter.idx, onClick]);
 
-    // Récupérer automatiquement les arguments s'ils ne sont pas disponibles
-    const ensureFilterArgs = useCallback(() => {
-      if (!hasFilterArgs(filter.idx) && !filter.gpac_args && !isRequesting) {
-        setIsRequesting(true);
-        requestFilterArgs(filter.idx);
-        // Reset isRequesting after a timeout since requestFilterArgs doesn't return a Promise
-        setTimeout(() => {
-          setIsRequesting(false);
-        }, 1000);
-      }
-    }, [
-      filter.idx,
-      filter.gpac_args,
-      hasFilterArgs,
-      requestFilterArgs,
-      isRequesting,
-    ]);
-
-    const filterArgs = getFilterArgs(filter.idx) || filter.gpac_args;
 
     const monitoredClass = isMonitored ? 'border border-red-900' : 'border-0';
     const hasBufferInfo = filter.ipid && Object.keys(filter.ipid).length > 0;
@@ -210,19 +187,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                 <span className="stat-value">{filter.errors} err</span>
               </Badge>
             )}
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                ensureFilterArgs();
-              }}
-            >
-              <FilterArgumentsDialog
-                filter={{
-                  ...filter,
-                  gpac_args: filterArgs,
-                }}
-              />
-            </div>
           </div>
         </CardContent>
       </Card>
