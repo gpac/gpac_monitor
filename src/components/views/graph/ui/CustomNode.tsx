@@ -5,6 +5,7 @@ import { determineFilterSessionType } from '../utils/filterType';
 import { useGraphColors } from '../hooks/useGraphColors';
 import { useFilterArgs } from '../hooks/useFilterArgs';
 import FilterArgumentsDialog from '../../../filtersArgs/FilterArgumentsDialog';
+import { RenderCount } from './RenderCount';
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
@@ -82,6 +83,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({
         borderWidth: '2px',
       }}
     >
+      <RenderCount componentName="CustomNode" />
       {inputHandles.map(({ id, type, position, index }) => (
         <Handle
           key={`input-${id}`}
