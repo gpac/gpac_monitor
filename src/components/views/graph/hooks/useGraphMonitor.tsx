@@ -56,18 +56,19 @@ const useGraphMonitor = () => {
 
   const { requestFilterArgs, getFilterArgs, hasFilterArgs } = useFilterArgs();
 
-  const { handleNodesChange, handleEdgesChange, handleNodeClick } = useGraphHandlers({
-    onNodesChange,
-    onEdgesChange,
-    localNodes,
-    localEdges,
-    nodesRef,
-    edgesRef,
-    setLocalNodes,
-    service,
-    dispatch,
-    onNodeClick: requestFilterArgs,
-  });
+  const { handleNodesChange, handleEdgesChange, handleNodeClick } =
+    useGraphHandlers({
+      onNodesChange,
+      onEdgesChange,
+      localNodes,
+      localEdges,
+      nodesRef,
+      edgesRef,
+      setLocalNodes,
+      service,
+      dispatch,
+      onNodeClick: requestFilterArgs,
+    });
 
   // Use notification system
   useGraphNotifications({
@@ -89,7 +90,6 @@ const useGraphMonitor = () => {
     }
   }, [nodes, edges, setLocalNodes, setLocalEdges]);
 
- 
   const [hasLayoutRun, setHasLayoutRun] = useState(false);
   const nodesInitialized = useNodesInitialized();
 
@@ -124,7 +124,7 @@ const useGraphMonitor = () => {
   }, [nodesInitialized, localNodes, hasLayoutRun, autoLayout]);
 
   const triggerLayout = () => {
-    setHasLayoutRun(false); 
+    setHasLayoutRun(false);
     autoLayout();
   };
 

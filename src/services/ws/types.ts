@@ -92,6 +92,14 @@ export interface GetPngMessage extends BaseWSMessage {
   name: string;
 }
 
+export interface UpdateArgMessage extends BaseWSMessage {
+  type: WSMessageType.UPDATE_ARG;
+  idx: number;
+  name: string;
+  argName: string;
+  newValue: string | number | boolean;
+}
+
 // Specific response types
 export interface ErrorResponse extends BaseWSResponse {
   type: WSResponseType.ERROR;
@@ -124,6 +132,7 @@ export type WSMessage =
   | GetArgsDetailsMessage
   | StopArgsDetailsMessage
   | GetPngMessage
+  | UpdateArgMessage
   | SubscribeSessionMessage
   | UnsubscribeSessionMessage
   | SubscribeFilterStatsMessage

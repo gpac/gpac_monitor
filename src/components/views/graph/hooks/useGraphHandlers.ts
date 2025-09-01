@@ -2,7 +2,6 @@ import { useCallback, MutableRefObject } from 'react';
 import { Node, Edge, NodeMouseHandler } from '@xyflow/react';
 import { Dispatch } from '@reduxjs/toolkit';
 
-
 interface UseGraphHandlersProps {
   onNodesChange: (changes: any[]) => void;
   onEdgesChange: (changes: any[]) => void;

@@ -12,7 +12,7 @@ const mockService = {};
 const mockDispatch = vi.fn();
 const mockOnNodeClick = vi.fn();
 
-const createMockRef = <T,>(initial: T): MutableRefObject<T> => ({
+const createMockRef = <T>(initial: T): MutableRefObject<T> => ({
   current: initial,
 });
 
@@ -63,7 +63,7 @@ describe('useGraphHandlers', () => {
     ] as Node[];
 
     const nodesRef = createMockRef(initialNodes);
-    
+
     const props = {
       ...defaultProps,
       nodesRef,

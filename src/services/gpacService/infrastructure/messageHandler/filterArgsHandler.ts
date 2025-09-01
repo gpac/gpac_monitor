@@ -4,16 +4,21 @@ import { MessageHandlerDependencies } from './types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { FilterArgument } from '@/types';
 
-
 export class FilterArgsHandler {
   constructor(
     private dependencies: MessageHandlerDependencies,
     private isLoaded: () => boolean,
   ) {}
   private pendingFilterArgsSubscribeRequests = new Map<number, Promise<void>>();
-  private pendingFilterArgsUnsubscribeRequests = new Map<number, Promise<void>>();
-  
-  private filterArgsSubscribables = new Map<number, UpdatableSubscribable<FilterArgument[]>>();
+  private pendingFilterArgsUnsubscribeRequests = new Map<
+    number,
+    Promise<void>
+  >();
+
+  private filterArgsSubscribables = new Map<
+    number,
+    UpdatableSubscribable<FilterArgument[]>
+  >();
 
   private ensureLoaded(): boolean {
     if (!this.isLoaded()) {
@@ -28,9 +33,7 @@ export class FilterArgsHandler {
   /**
    * Subscribes to filter args
    */
-  public async subscribeToFilterArgs(
-    idx: number,
-  ): Promise<void> {
+  public async subscribeToFilterArgs(idx: number): Promise<void> {
     this.ensureLoaded();
 
     // Check if there's already a pending subscribe request for this filter
@@ -95,17 +98,50 @@ export class FilterArgsHandler {
       return;
     }
 
-    console.log('Filter args received:', {
-      idx: data.filter.idx,
-      gpac_args: data.filter.gpac_args,
-      fullData: data.filter
-    });
-
     const filterIdx = data.filter.idx;
     const subscribable = this.filterArgsSubscribables.get(filterIdx);
-    
+
     if (subscribable && data.filter.gpac_args) {
       subscribable.updateDataAndNotify(data.filter.gpac_args);
+    }
+  }
+
+  /**
+   * Update a filter argument
+   */
+  public async updateFilterArg(
+    idx: number,
+    name: string,
+    argName: string,
+    newValue: string | number | boolean,
+  ): Promise<void> {
+    this.ensureLoaded();
+
+    try {
+      this.log(`Updating argument '${argName}' for filter ${name} (idx=${idx}) to value: ${newValue}`);
+
+      await this.dependencies.send({
+        type: WSMessageType.UPDATE_ARG,
+        id: FilterArgsHandler.generateMessageId(),
+        idx,
+        name,
+        argName,
+        newValue,
+      });
+
+      this.log(`Successfully updated argument '${argName}' for filter ${name} (idx=${idx})`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.log(`Error updating filter argument '${argName}' for ${name} (idx=${idx}): ${errorMessage}`, 'stderr');
+      throw error;
+    }
+  }
+
+  private log(message: string, type: 'stdout' | 'stderr' = 'stdout'): void {
+    if (type === 'stderr') {
+      console.error(message);
+    } else {
+      console.log(message);
     }
   }
 

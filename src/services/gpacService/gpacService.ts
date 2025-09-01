@@ -172,6 +172,23 @@ export class GpacService implements IGpacCommunication {
     }
   }
 
+  /**
+   * Update a filter argument
+   */
+  public async updateFilterArg(
+    idx: number,
+    name: string,
+    argName: string,
+    newValue: string | number | boolean,
+  ): Promise<void> {
+    if (!this.isLoaded()) {
+      throw new Error('Service not loaded');
+    }
+
+    return this.messageHandler
+      .getFilterArgsHandler()
+      .updateFilterArg(idx, name, argName, newValue);
+  }
 
   private setupWebSocketHandlers(): void {
     this.ws.addConnectHandler(() => {
@@ -248,8 +265,10 @@ export class GpacService implements IGpacCommunication {
             });
           }, config.interval || 150);
       case SubscriptionType.FILTER_ARGS_DETAILS:
-        if (typeof config.filterIdx !== "number") {
-          throw new Error("filterIdx is required for FILTER_ARGS_DETAILS subscription");
+        if (typeof config.filterIdx !== 'number') {
+          throw new Error(
+            'filterIdx is required for FILTER_ARGS_DETAILS subscription',
+          );
         }
         return this.messageHandler
           .getFilterArgsHandler()
