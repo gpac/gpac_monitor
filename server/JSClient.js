@@ -369,8 +369,10 @@ function JSClient(id, client, all_clients, draned_once_ref) {
             if (this.client) {
                 this.client.send(JSON.stringify({
                     message: 'details',
-                    idx: idx,
-                    gpac_args: Args
+                    filter: {
+                        idx: idx,
+                        gpac_args: Args
+                    }
                 }));
             }
             return false;

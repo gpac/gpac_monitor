@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { bytesToHumanReadable } from '@/utils/formatUtils';
+import { formatBytes } from '@/utils/helper';
 import { memo, useMemo } from 'react';
 
 import {
@@ -68,7 +68,7 @@ export const MemoryChart = memo(
                   {currentMemoryPercent.toFixed(2)}%
                 </span>
                 <span className="text-xs text-gray-300">
-                  {bytesToHumanReadable(currentMemoryProcess)}
+                  {formatBytes(currentMemoryProcess)}
                 </span>
               </div>
             </div>

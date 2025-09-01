@@ -8,22 +8,18 @@ describe('BaseMessageHandler', () => {
   let mockCallbacks: MessageHandlerCallbacks;
   let mockDependencies: MessageHandlerDependencies;
   let mockNotificationHandlers: GpacNotificationHandlers;
-  let mockCurrentFilterId: () => number | null;
   let mockHasSubscription: () => boolean;
   let mockIsLoaded: () => boolean;
 
   beforeEach(() => {
     // Simple mock functions
-    mockCurrentFilterId = vi.fn(() => null);
     mockHasSubscription = vi.fn(() => false);
     mockIsLoaded = vi.fn(() => true);
 
     // Mock callbacks
     mockCallbacks = {
-      onUpdateFilterData: vi.fn(),
       onUpdateGraphData: vi.fn(),
       onSetLoading: vi.fn(),
-      onSetFilterDetails: vi.fn(),
       onUpdateSessionStats: vi.fn(),
     };
 
@@ -41,7 +37,6 @@ describe('BaseMessageHandler', () => {
     };
 
     messageHandler = new BaseMessageHandler(
-      mockCurrentFilterId,
       mockHasSubscription,
       mockNotificationHandlers,
       mockCallbacks,
