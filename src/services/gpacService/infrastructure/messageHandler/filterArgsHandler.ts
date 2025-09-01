@@ -118,9 +118,7 @@ export class FilterArgsHandler {
     this.ensureLoaded();
 
     try {
-      this.log(
-        `Updating argument '${argName}' for filter ${name} (idx=${idx}) to value: ${newValue}`,
-      );
+      this.log(`Updating argument '${argName}' for filter ${name} (idx=${idx}) to value: ${newValue}`);
 
       await this.dependencies.send({
         type: WSMessageType.UPDATE_ARG,
@@ -131,16 +129,10 @@ export class FilterArgsHandler {
         newValue,
       });
 
-      this.log(
-        `Successfully updated argument '${argName}' for filter ${name} (idx=${idx})`,
-      );
+      this.log(`Successfully updated argument '${argName}' for filter ${name} (idx=${idx})`);
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error);
-      this.log(
-        `Error updating filter argument '${argName}' for ${name} (idx=${idx}): ${errorMessage}`,
-        'stderr',
-      );
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.log(`Error updating filter argument '${argName}' for ${name} (idx=${idx}): ${errorMessage}`, 'stderr');
       throw error;
     }
   }
