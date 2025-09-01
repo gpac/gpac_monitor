@@ -133,7 +133,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = ({
             'focus-visible:ring-gray-400 disabled:pointer-events-none',
           )}
         >
-          <IoSettings className="h-6 w-6 text-white" />
+          <IoSettings className="h-4 w-4 text-white" />
           <span className="sr-only">Open filter settings</span>
         </button>
       </DialogTrigger>
