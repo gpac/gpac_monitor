@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatPercent } from '@/utils/formatUtils'
+import { formatPercent } from '@/utils/formatUtils';
 import { formatBytes } from '@/utils/helper';
 
 interface CPUOverviewProps {
@@ -42,9 +42,7 @@ export const CPUOverview: React.FC<CPUOverviewProps> = ({
         <CardContent>
           <div className="flex  items-center ">
             <span className="text-md font-semibold stat">
-              {isLoading
-                ? '...'
-                : formatBytes(memoryProcess).toString()}
+              {isLoading ? '...' : formatBytes(memoryProcess).toString()}
             </span>
           </div>
         </CardContent>

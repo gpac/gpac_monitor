@@ -65,8 +65,6 @@ export class BaseMessageHandler {
     return this.filterArgsHandler;
   }
 
-
-
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
     try {
       const text = new TextDecoder().decode(dataView.buffer);
@@ -90,8 +88,6 @@ export class BaseMessageHandler {
   }
 
   private processGpacMessage(data: any): void {
- 
-    
     if (!data.message) {
       return;
     }

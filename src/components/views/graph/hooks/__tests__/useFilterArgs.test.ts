@@ -29,7 +29,7 @@ describe('useFilterArgs', () => {
 
   it('should request filter args and handle response', () => {
     let subscriptionCallback: ((result: any) => void) | undefined;
-    
+
     mockSubscribe.mockImplementation((config, callback) => {
       subscriptionCallback = callback;
       return vi.fn(); // unsubscribe function
@@ -48,7 +48,7 @@ describe('useFilterArgs', () => {
         type: SubscriptionType.FILTER_ARGS_DETAILS,
         filterIdx: 42,
       },
-      expect.any(Function)
+      expect.any(Function),
     );
 
     // Vérifier que getFilterDetails est appelé
@@ -76,7 +76,7 @@ describe('useFilterArgs', () => {
 
   it('should handle multiple filter args for different indexes', () => {
     let subscriptionCallbacks: Map<number, (result: any) => void> = new Map();
-    
+
     mockSubscribe.mockImplementation((config, callback) => {
       subscriptionCallbacks.set(config.filterIdx, callback);
       return vi.fn();
@@ -89,7 +89,7 @@ describe('useFilterArgs', () => {
       result.current.requestFilterArgs(1);
     });
 
-    // Requête pour le filtre 2  
+    // Requête pour le filtre 2
     act(() => {
       result.current.requestFilterArgs(2);
     });
