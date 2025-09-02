@@ -30,6 +30,10 @@ function JSClient(id, client, all_clients, draned_once_ref) {
     this.cpuStatsInterval = 50;
     this.cpuStatsFields = CPU_STATS_FIELDS;
 
+    // Console/Logging subscriptions - HARDCODED FOR TESTING
+    this.isLogSubscribed = true;
+    this.logFilters = { 'console': 'info', 'core': 'warning', 'demux': 'warning', 'decoder': 'warning' }; // { tool: level } mapping
+
     this.on_client_data = function(msg) {
         console.log("All clients:");
         for (let jc of all_clients) {
@@ -118,6 +122,31 @@ function JSClient(id, client, all_clients, draned_once_ref) {
                     this.isCpuStatsSubscribed = false;
                 }
 
+                if (jtext['message'] == 'subscribe_logs') {
+                    print("Subscribing to logs");
+                    this.isLogSubscribed = true;
+                    this.logFilters = jtext['filters'] || {};
+                    this.configureGPACLogs();
+                    this.send_existing_logs();
+                }
+
+                if (jtext['message'] == 'unsubscribe_logs') {
+                    print("Unsubscribing to logs");
+                    this.isLogSubscribed = false;
+                    this.logFilters = {};
+                }
+
+                if (jtext['message'] == 'set_log_level') {
+                    const { tool, level } = jtext;
+                    this.logFilters[tool] = level;
+                    this.configureGPACLogs();
+                    print(`Log level set: ${tool}@${level}`);
+                }
+
+                if (jtext['message'] == 'get_logs') {
+                    this.send_existing_logs();
+                }
+
             } catch (e) {
                 console.log(e);
             }
@@ -125,6 +154,7 @@ function JSClient(id, client, all_clients, draned_once_ref) {
     };
 
     this.send_session_stats = function() {
+
         session.post_task(() => {
             const stats = [];
 
@@ -267,6 +297,9 @@ function JSClient(id, client, all_clients, draned_once_ref) {
         const name = pid.name || `opid_${i}`;
         payload.opids[name] = pid;
     }
+    
+    
+
 
                 this.client.send(JSON.stringify({
                     message: 'filter_stats',
@@ -394,6 +427,121 @@ function JSClient(id, client, all_clients, draned_once_ref) {
         print("Updating filter " + idx + " (" + filter.name + "), argument '" + argName + "' to '" + newValue + "'");
         filter.update(argName, newValue);
     };
+
+    this.configureGPACLogs = function() {
+        try {
+            // Build log_tools_levels string: "tool1@level1:tool2@level2"
+            const logLevelsArray = [];
+            for (const [tool, level] of Object.entries(this.logFilters)) {
+                logLevelsArray.push(`${tool}@${level}`);
+            }
+            const logLevelsString = logLevelsArray.join(':');
+            
+            console.log(`🔧 Setting GPAC log levels: ${logLevelsString}`);
+            sys.set_opt('core', 'log_tools_levels', logLevelsString);
+            console.log(`✅ GPAC log levels configured successfully`);
+        } catch (e) {
+            console.log(`❌ Error configuring GPAC log levels: ${e.message}`);
+        }
+    };
+
+    this.send_existing_logs = function() {
+        try {
+            const logs = sys.get_logs ? sys.get_logs() : [];
+            if (this.client) {
+                this.client.send(JSON.stringify({
+                    message: 'logs_batch',
+                    logs: logs
+                }));
+            }
+        } catch (e) {
+            print(`Error retrieving existing logs: ${e.message}`);
+        }
+    };
+
+    this.on_log_message = function(logEntry) {
+        console.log("🔍 on_log_message called with:", logEntry);
+        console.log("📊 isLogSubscribed:", this.isLogSubscribed);
+        console.log("🔌 client exists:", !!this.client);
+        
+        if (!this.isLogSubscribed || !this.client) {
+            console.log("❌ Exiting early - not subscribed or no client");
+            return;
+        }
+        
+        const { tool, level, levelNumeric, message, timestamp } = logEntry;
+        console.log(`📝 Processing log: ${tool}@${level} (numeric: ${levelNumeric})`);
+        console.log("🎯 Current filters:", this.logFilters);
+        
+        if (this.logFilters[tool] && this.shouldLogLevel(level, this.logFilters[tool])) {
+            const logMessage = {
+                message: 'log_message',
+                log: {
+                    tool,
+                    level,
+                    levelNumeric: levelNumeric || -1,
+                    message,
+                    timestamp: timestamp || Date.now()
+                }
+            };
+            console.log("✅ SENDING LOG TO CLIENT:", JSON.stringify(logMessage));
+            this.client.send(JSON.stringify(logMessage));
+        } else {
+            console.log(`🚫 Log filtered out: ${tool}@${level} - filter exists: ${!!this.logFilters[tool]}, level check: ${this.logFilters[tool] ? this.shouldLogLevel(level, this.logFilters[tool]) : 'N/A'}`);
+        }
+    };
+
+    this.shouldLogLevel = function(messageLevel, configuredLevel) {
+        const levels = ['quiet', 'error', 'warning', 'info', 'debug'];
+        const msgLevelIndex = levels.indexOf(messageLevel);
+        const configLevelIndex = levels.indexOf(configuredLevel);
+        return msgLevelIndex <= configLevelIndex;
+    };
+
+    // HARDCODED TESTING: Generate test logs using GPAC print() and send them
+    const self = this;
+    
+    // Log GPAC constants for debugging
+    console.log("🎨 GPAC Log Constants:");
+    console.log("GF_LOG_ERROR =", typeof GF_LOG_ERROR !== 'undefined' ? GF_LOG_ERROR : 'undefined');
+    console.log("GF_LOG_WARNING =", typeof GF_LOG_WARNING !== 'undefined' ? GF_LOG_WARNING : 'undefined');
+    console.log("GF_LOG_INFO =", typeof GF_LOG_INFO !== 'undefined' ? GF_LOG_INFO : 'undefined');
+    console.log("GF_LOG_DEBUG =", typeof GF_LOG_DEBUG !== 'undefined' ? GF_LOG_DEBUG : 'undefined');
+    console.log("GF_LOG_QUIET =", typeof GF_LOG_QUIET !== 'undefined' ? GF_LOG_QUIET : 'undefined');
+    
+    // Configure GPAC log levels 
+    this.configureGPACLogs();
+    
+    // Generate some test logs every 5 seconds to verify the transmission works
+    session.post_task(() => {
+        if (self.isLogSubscribed && self.client) {
+            // Simulate various log messages that our system would capture and forward
+            console.log("🧪 Generating test log messages");
+            
+            // Test different log levels with numeric values
+            const testLogs = [
+                { tool: 'console', level: 'info', levelNumeric: GF_LOG_INFO, message: 'Test info message from script' },
+                { tool: 'console', level: 'warning', levelNumeric: GF_LOG_WARNING, message: 'Test warning message from script' },
+                { tool: 'console', level: 'error', levelNumeric: GF_LOG_ERROR, message: 'Test error message from script' }
+            ];
+            
+            testLogs.forEach(log => {
+                self.on_log_message({
+                    tool: log.tool,
+                    level: log.level,
+                    levelNumeric: log.levelNumeric,
+                    message: log.message,
+                    timestamp: Date.now()
+                });
+            });
+            
+            // Also emit using GPAC print() - these logs go to console tool
+            print(GF_LOG_INFO, "GPAC script log: Info level test");
+            print(GF_LOG_WARNING, "GPAC script log: Warning level test");  
+            print(GF_LOG_ERROR, "GPAC script log: Error level test");
+        }
+        return self.isLogSubscribed ? 5000 : false; // repeat every 5 seconds if subscribed
+    });
 }
 
 export { JSClient };
