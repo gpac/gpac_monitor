@@ -1,5 +1,5 @@
 import { LuFile, LuFileText, LuFilm, LuMusic } from 'react-icons/lu';
-import { GpacNodeData } from '../types/domain/gpac/model';
+import {  GraphFilterData } from '../types/domain/gpac/model';
 import { TrendDirection } from '@/components/views/stats-session/types';
 
 // Types
@@ -68,8 +68,8 @@ export function determineTrend(
  * Verify if the data is valid
  */
 export const isValidFilterData = (
-  data: GpacNodeData | null,
-): data is GpacNodeData => {
+  data: GraphFilterData | null,
+): data is GraphFilterData => {
   return data !== null && typeof data === 'object';
 };
 

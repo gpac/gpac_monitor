@@ -6,7 +6,6 @@ import { useGraphColors } from '../hooks/useGraphColors';
 import { useFilterArgs } from '../hooks/useFilterArgs';
 import FilterArgumentsDialog from '../../../filtersArgs/FilterArgumentsDialog';
 
-
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
     label: string;
@@ -21,12 +20,15 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
 }) => {
   const { label, ipid, opid, nb_ipid, nb_opid, idx, name } = data;
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
-  const node = useMemo(() => ({ 
-    data, 
-    position: { x: 0, y: 0 }, 
-    ...nodeProps 
-  }), [data, nodeProps]);
-  
+  const node = useMemo(
+    () => ({
+      data,
+      position: { x: 0, y: 0 },
+      ...nodeProps,
+    }),
+    [data, nodeProps],
+  );
+
   const [textColor, backgroundColor] = useGraphColors(node);
 
   // Use filterArgs hook for the dialog
@@ -44,7 +46,10 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
     }
   }, [idx, hasFilterArgs, requestFilterArgs, isRequesting]);
 
-  const filterArgs = useMemo(() => getFilterArgs(idx) || [], [getFilterArgs, idx]);
+  const filterArgs = useMemo(
+    () => getFilterArgs(idx) || [],
+    [getFilterArgs, idx],
+  );
 
   // Create input handles only if nb_ipid > 0
   const inputHandles =
@@ -73,27 +78,39 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
     return `${(index / (total - 1)) * 100}%`;
   };
   // Memoize style objects
-    const containerStyle = useMemo(() => ({
+  const containerStyle = useMemo(
+    () => ({
       borderColor: backgroundColor,
       backgroundColor: backgroundColor + '40',
       borderWidth: '2px',
-    }), [backgroundColor]);
-  
-    const headerStyle = useMemo(() => ({ 
-      backgroundColor 
-    }), [backgroundColor]);
-  
-    const handleStyle = useMemo(() => ({
+    }),
+    [backgroundColor],
+  );
+
+  const headerStyle = useMemo(
+    () => ({
+      backgroundColor,
+    }),
+    [backgroundColor],
+  );
+
+  const handleStyle = useMemo(
+    () => ({
       background: backgroundColor,
       width: '10px',
       height: '10px',
       border: '2px solid white',
       boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-    }), [backgroundColor]);
-  
-    const textStyle = useMemo(() => ({ 
-      color: textColor 
-    }), [textColor]);
+    }),
+    [backgroundColor],
+  );
+
+  const textStyle = useMemo(
+    () => ({
+      color: textColor,
+    }),
+    [textColor],
+  );
 
   return (
     <div
@@ -104,7 +121,6 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
       `}
       style={containerStyle}
     >
-   
       {inputHandles.map(({ id, type, position, index }) => (
         <Handle
           key={`input-${id}`}
@@ -124,10 +140,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
         style={headerStyle}
       >
         <div className="flex items-center justify-between">
-          <h3
-            className="font-bold text-sm drop-shadow-sm"
-            style={textStyle}
-          >
+          <h3 className="font-bold text-sm drop-shadow-sm" style={textStyle}>
             {label}
           </h3>
           <div className="flex items-center gap-2">
@@ -236,7 +249,8 @@ export const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
     prevProps.data.nb_ipid === nextProps.data.nb_ipid &&
     prevProps.data.nb_opid === nextProps.data.nb_opid &&
     prevProps.selected === nextProps.selected &&
-    JSON.stringify(prevProps.data.ipid) === JSON.stringify(nextProps.data.ipid) &&
+    JSON.stringify(prevProps.data.ipid) ===
+      JSON.stringify(nextProps.data.ipid) &&
     JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)
   );
 });
