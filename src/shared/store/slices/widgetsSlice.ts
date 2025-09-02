@@ -58,7 +58,7 @@ const initialState: WidgetsState = {
     {
       id: generateID('metrics'),
       type: WidgetType.METRICS,
-      title: 'metrics-monitor',
+      title: 'System metrics',
       x: 9,
       y: 0,
       w: 5,

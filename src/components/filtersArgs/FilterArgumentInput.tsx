@@ -116,15 +116,6 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
       argument,
     };
 
-    // Debug fullscreen rules flow
-    if (argument.name === 'fullscreen') {
-      console.log('🔧 FilterArgumentInput inputProps for fullscreen:', {
-        originalRules: rules,
-        rulesDisabled: rules?.disabled,
-        finalInputPropsRules: inputProps.rules,
-        finalDisabled: inputProps.rules.disabled,
-      });
-    }
 
     if (
       argument.min_max_enum &&

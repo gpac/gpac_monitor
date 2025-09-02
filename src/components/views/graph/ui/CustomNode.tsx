@@ -4,7 +4,7 @@ import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../utils/filterType';
 import { useGraphColors } from '../hooks/useGraphColors';
 import { useFilterArgs } from '../hooks/useFilterArgs';
-import FilterArgumentsDialog from '../../../filtersArgs/FilterArgumentsDialog';
+import FilterArgumentsDialog from '@/components/filtersArgs/FilterArgumentsDialog';
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {

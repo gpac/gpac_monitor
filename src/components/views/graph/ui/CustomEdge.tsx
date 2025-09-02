@@ -37,7 +37,16 @@ const CustomEdge = memo(
 
     return (
       <>
-        <BaseEdge path={path} style={style} markerEnd={markerEnd} {...props} />
+        <BaseEdge 
+          path={path} 
+          style={{ 
+            strokeWidth: 4,
+            strokeOpacity: 1,
+            ...style 
+          }} 
+          markerEnd={markerEnd} 
+          {...props} 
+        />
         <EdgeLabelRenderer>
           <div
             style={{

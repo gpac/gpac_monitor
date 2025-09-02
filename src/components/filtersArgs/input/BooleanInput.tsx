@@ -13,15 +13,6 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
   rules,
   argName,
 }) => {
-  // Log only for fullscreen
-  if (argName === 'fullscreen') {
-    console.log('🔧 BooleanInput props for fullscreen:', {
-      argName,
-      value,
-      rules,
-      rulesDisabled: rules?.disabled,
-    });
-  }
 
   return (
     <GenericInput

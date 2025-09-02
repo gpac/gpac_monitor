@@ -29,6 +29,7 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   rules,
   debounce = false,
   debounceMs = 1000,
+  argName,
 }) => {
   const [localValue, setLocalValue] = useState(
     value ?? (type === 'string' ? '' : type === 'number' ? null : false),
@@ -65,16 +66,10 @@ export const GenericInput: React.FC<GenericInputProps> = ({
       !(window as any).lastBooleanLog ||
       now - (window as any).lastBooleanLog > 100
     ) {
-      console.log('🔧 Boolean switch:', {
-        value,
-        localValue,
-        disabled: rules?.disabled,
-        checked: debounce
-          ? (localValue as boolean)
-          : (value as boolean) || false,
-      });
       (window as any).lastBooleanLog = now;
     }
+
+    const switchDisabled = rules?.disabled;
 
     return (
       <Switch
@@ -82,8 +77,8 @@ export const GenericInput: React.FC<GenericInputProps> = ({
           debounce ? (localValue as boolean) : (value as boolean) || false
         }
         onCheckedChange={handleChange}
-        disabled={rules?.disabled}
-        className="data-[state=checked]:bg-blue-600"
+        disabled={switchDisabled}
+        className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-600"
       />
     );
   }

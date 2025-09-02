@@ -67,13 +67,11 @@ export function determineTrend(
 /**
  * Verify if the data is valid GraphFilterData
  */
-export const isValidFilterData = (
-  data: unknown,
-): data is GraphFilterData => {
+export const isValidFilterData = (data: unknown): data is GraphFilterData => {
   if (!data || typeof data !== 'object') return false;
-  
+
   const obj = data as Record<string, unknown>;
-  
+
   return (
     typeof obj.idx === 'number' &&
     typeof obj.name === 'string' &&

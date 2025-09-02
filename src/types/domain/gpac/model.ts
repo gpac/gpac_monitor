@@ -1,10 +1,6 @@
 import { Node, Edge, EdgeProps } from '@xyflow/react';
 import { GpacArgument } from '../../../components/filtersArgs/types';
 
-
-
-
-
 // MONITORING
 
 export interface SessionFilterStatistics extends Record<string, unknown> {
@@ -100,12 +96,10 @@ export interface FilterMetadata {
   MaxFrameSize?: number;
 }
 
-
 export interface PIDPropertyValue {
   type: string;
   val: number | string | TimeFraction;
 }
-
 
 export interface PIDData {
   // Direct properties from server
@@ -129,7 +123,6 @@ export interface TimeFraction {
   num: number;
   den: number;
 }
-
 
 // GRAPH
 

@@ -140,16 +140,6 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = React.memo(
                   max: arg.max,
                   step: arg.step,
                 };
-                if (arg.name === 'fullscreen') {
-                  console.log(
-                    '🔧 FilterArgumentsDialog rules for fullscreen:',
-                    {
-                      argUpdate: arg.update,
-                      rulesDisabled: rules.disabled,
-                      rules,
-                    },
-                  );
-                }
                 return rules;
               })()}
               // Don't pass filterId here as we'll handle updates with the Apply button
@@ -171,7 +161,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = React.memo(
               'focus-visible:ring-gray-400 disabled:pointer-events-none',
             )}
           >
-            <IoSettings className="h-4 w-4 text-black" />
+            <IoSettings className="h-5 w-5 text-black" />
             <span className="sr-only">Open filter settings</span>
           </button>
         </DialogTrigger>
