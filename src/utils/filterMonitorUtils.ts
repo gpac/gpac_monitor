@@ -1,5 +1,5 @@
 import { LuFile, LuFileText, LuFilm, LuMusic } from 'react-icons/lu';
-import {  GraphFilterData } from '../types/domain/gpac/model';
+import { GraphFilterData } from '../types/domain/gpac/model';
 import { TrendDirection } from '@/components/views/stats-session/types';
 
 // Types
@@ -65,12 +65,27 @@ export function determineTrend(
 }
 
 /**
- * Verify if the data is valid
+ * Verify if the data is valid GraphFilterData
  */
 export const isValidFilterData = (
-  data: GraphFilterData | null,
+  data: unknown,
 ): data is GraphFilterData => {
-  return data !== null && typeof data === 'object';
+  if (!data || typeof data !== 'object') return false;
+  
+  const obj = data as Record<string, unknown>;
+  
+  return (
+    typeof obj.idx === 'number' &&
+    typeof obj.name === 'string' &&
+    typeof obj.type === 'string' &&
+    typeof obj.status === 'string' &&
+    typeof obj.nb_ipid === 'number' &&
+    typeof obj.nb_opid === 'number' &&
+    typeof obj.ipid === 'object' &&
+    typeof obj.opid === 'object' &&
+    obj.ipid !== null &&
+    obj.opid !== null
+  );
 };
 
 // Get icon and label for media type

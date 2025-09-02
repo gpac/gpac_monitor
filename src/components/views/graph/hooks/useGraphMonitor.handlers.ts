@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { Node, Edge } from '@xyflow/react';
-import { GpacNodeData } from '../../../../types/domain/gpac';
+import { GraphFilterData } from '../../../../types/domain/gpac';
+import { isValidFilterData } from '../../../../utils/filterMonitorUtils';
 
 // =========================
 //       NODES HANDLER
@@ -69,8 +70,8 @@ interface OnNodeClickParams {
   dispatch: Function;
   service: any;
   setSelectedNode: (nodeId: string) => { payload: string; type: string };
-  setSelectedFilterDetails: (data: GpacNodeData) => {
-    payload: GpacNodeData;
+  setSelectedFilterDetails: (data: GraphFilterData) => {
+    payload: GraphFilterData;
     type: string;
   };
 }
@@ -86,9 +87,14 @@ export function useOnNodeClick({
       const nodeId = node.id;
       const nodeData = node.data;
 
-      dispatch(setSelectedFilterDetails(nodeData as GpacNodeData));
-      service.setCurrentFilterId(parseInt(nodeId));
-      service.getFilterDetails(parseInt(nodeId));
+      // Type guard to ensure nodeData is valid GraphFilterData
+      if (isValidFilterData(nodeData)) {
+        dispatch(setSelectedFilterDetails(nodeData));
+        service.setCurrentFilterId(parseInt(nodeId));
+        service.getFilterDetails(parseInt(nodeId));
+      } else {
+        console.warn('Invalid node data:', nodeData);
+      }
 
       dispatch(setSelectedNode(nodeId));
     },
