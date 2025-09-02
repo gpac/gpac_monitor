@@ -299,7 +299,7 @@ function JSClient(id, client, all_clients, draned_once_ref) {
                     js_filters.push(gpac_filter_to_object(f));
                 }
                 session.lock_filters(false);
-                return 1000;
+                return false;
             });
         }, draned_once_ref);
     };

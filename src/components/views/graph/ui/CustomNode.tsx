@@ -1,11 +1,11 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { GraphFilterData } from '../../../../types/domain/gpac/model';
+import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../utils/filterType';
 import { useGraphColors } from '../hooks/useGraphColors';
 import { useFilterArgs } from '../hooks/useFilterArgs';
 import FilterArgumentsDialog from '../../../filtersArgs/FilterArgumentsDialog';
-import { RenderCount } from './RenderCount';
+
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
@@ -14,22 +14,25 @@ interface CustomNodeProps extends NodeProps {
   } & Record<string, unknown>;
 }
 
-export const CustomNode: React.FC<CustomNodeProps> = ({
+const CustomNodeBase: React.FC<CustomNodeProps> = ({
   data,
   selected,
   ...nodeProps
 }) => {
   const { label, ipid, opid, nb_ipid, nb_opid, idx, name } = data;
-  const sessionType = determineFilterSessionType(data);
-
-  const node = { data, position: { x: 0, y: 0 }, ...nodeProps };
+  const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
+  const node = useMemo(() => ({ 
+    data, 
+    position: { x: 0, y: 0 }, 
+    ...nodeProps 
+  }), [data, nodeProps]);
+  
   const [textColor, backgroundColor] = useGraphColors(node);
 
   // Use filterArgs hook for the dialog
   const { getFilterArgs, hasFilterArgs, requestFilterArgs } = useFilterArgs();
   const [isRequesting, setIsRequesting] = useState(false);
 
-  // Récupérer automatiquement les arguments s'ils ne sont pas disponibles
   const ensureFilterArgs = useCallback(() => {
     if (!hasFilterArgs(idx) && !isRequesting) {
       setIsRequesting(true);
@@ -41,7 +44,7 @@ export const CustomNode: React.FC<CustomNodeProps> = ({
     }
   }, [idx, hasFilterArgs, requestFilterArgs, isRequesting]);
 
-  const filterArgs = getFilterArgs(idx) || [];
+  const filterArgs = useMemo(() => getFilterArgs(idx) || [], [getFilterArgs, idx]);
 
   // Create input handles only if nb_ipid > 0
   const inputHandles =
@@ -69,6 +72,28 @@ export const CustomNode: React.FC<CustomNodeProps> = ({
     if (total === 1) return '50%';
     return `${(index / (total - 1)) * 100}%`;
   };
+  // Memoize style objects
+    const containerStyle = useMemo(() => ({
+      borderColor: backgroundColor,
+      backgroundColor: backgroundColor + '40',
+      borderWidth: '2px',
+    }), [backgroundColor]);
+  
+    const headerStyle = useMemo(() => ({ 
+      backgroundColor 
+    }), [backgroundColor]);
+  
+    const handleStyle = useMemo(() => ({
+      background: backgroundColor,
+      width: '10px',
+      height: '10px',
+      border: '2px solid white',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    }), [backgroundColor]);
+  
+    const textStyle = useMemo(() => ({ 
+      color: textColor 
+    }), [textColor]);
 
   return (
     <div
@@ -77,13 +102,9 @@ export const CustomNode: React.FC<CustomNodeProps> = ({
         ${selected ? 'ring-2 ring-blue-400 shadow-lg' : ''}
         transition-all duration-200
       `}
-      style={{
-        borderColor: backgroundColor,
-        backgroundColor: backgroundColor + '40',
-        borderWidth: '2px',
-      }}
+      style={containerStyle}
     >
-      <RenderCount componentName="CustomNode" />
+   
       {inputHandles.map(({ id, type, position, index }) => (
         <Handle
           key={`input-${id}`}
@@ -91,32 +112,28 @@ export const CustomNode: React.FC<CustomNodeProps> = ({
           type={type}
           position={position}
           style={{
+            ...handleStyle,
             top: getHandleY(index, inputHandles.length),
             transform: 'translateY(-50%)',
-            background: backgroundColor,
-            width: '10px',
-            height: '10px',
-            border: '2px solid white',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           }}
         />
       ))}
 
       <div
         className="rounded-t-xl -m-4 mb-2 px-4 py-3 shadow-sm"
-        style={{ backgroundColor }}
+        style={headerStyle}
       >
         <div className="flex items-center justify-between">
           <h3
             className="font-bold text-sm drop-shadow-sm"
-            style={{ color: textColor }}
+            style={textStyle}
           >
             {label}
           </h3>
           <div className="flex items-center gap-2">
             <div
               className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
-              style={{ color: textColor }}
+              style={textStyle}
               title={
                 sessionType === 'source'
                   ? 'Source Filter'
@@ -202,16 +219,24 @@ export const CustomNode: React.FC<CustomNodeProps> = ({
           type={type}
           position={position}
           style={{
+            ...handleStyle,
             top: getHandleY(index, outputHandles.length),
             transform: 'translateY(-50%)',
-            background: backgroundColor,
-            width: '10px',
-            height: '10px',
-            border: '2px solid white',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           }}
         />
       ))}
     </div>
   );
 };
+export const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
+  // Only re-render if essential props changed
+  return (
+    prevProps.data.idx === nextProps.data.idx &&
+    prevProps.data.name === nextProps.data.name &&
+    prevProps.data.nb_ipid === nextProps.data.nb_ipid &&
+    prevProps.data.nb_opid === nextProps.data.nb_opid &&
+    prevProps.selected === nextProps.selected &&
+    JSON.stringify(prevProps.data.ipid) === JSON.stringify(nextProps.data.ipid) &&
+    JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)
+  );
+});
