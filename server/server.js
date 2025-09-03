@@ -1,5 +1,5 @@
 import { Sys as sys } from 'gpaccore';
-import { JSClient } from './JSClient.js';
+import { JSClient } from './JSClient/index.js';
 
 // =======================================
 // GLOBAL STATE
