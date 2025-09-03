@@ -195,7 +195,7 @@ export function createEdgesFromFilters(
             animated: true,
             style: {
               stroke: filterColor,
-              strokeWidth: 2,
+              strokeWidth: 3,
               opacity: 0.8,
             },
             markerEnd: {
