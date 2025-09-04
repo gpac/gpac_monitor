@@ -1,12 +1,28 @@
-import React from 'react';
-import { Save, Layout, Settings, Download } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import {  Layout, Settings } from 'lucide-react';
+import { LayoutManager } from './LayoutManager';
 
-interface HeaderProps {
-  onSaveLayout?: () => void;
-  onLoadLayout?: () => void;
-}
+interface HeaderProps {}
 
-const Header: React.FC<HeaderProps> = ({ onSaveLayout, onLoadLayout }) => {
+const Header: React.FC<HeaderProps> = () => {
+  const [showLayoutManager, setShowLayoutManager] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowLayoutManager(false);
+      }
+    };
+
+    if (showLayoutManager) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showLayoutManager]);
   return (
     <header className="h-16 bg-gray-900 border-b border-gray-700 px-4">
       <div className="h-full max-w-screen-2xl mx-auto flex items-center justify-between">
@@ -25,18 +41,11 @@ const Header: React.FC<HeaderProps> = ({ onSaveLayout, onLoadLayout }) => {
           {/* Boutons de layout */}
           <div className="flex items-center space-x-2">
             <button
-              onClick={onSaveLayout}
+              onClick={() => setShowLayoutManager(!showLayoutManager)}
               className="flex items-center gap-2 px-3 py-1.5 text-gray-300 hover:text-white text-sm"
             >
-              <Save className="w-4 h-4" />
-              Save Layout
-            </button>
-            <button
-              onClick={onLoadLayout}
-              className="flex items-center gap-2 px-3 py-1.5 text-gray-300 hover:text-white text-sm"
-            >
-              <Download className="w-4 h-4" />
-              Load Layout
+              <Layout className="w-4 h-4" />
+              Layouts
             </button>
           </div>
 
@@ -47,13 +56,6 @@ const Header: React.FC<HeaderProps> = ({ onSaveLayout, onLoadLayout }) => {
           <div className="flex items-center space-x-2">
             <button
               className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700"
-              title="Layout Settings"
-            >
-              <Layout className="w-5 h-5" />
-            </button>
-
-            <button
-              className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700"
               title="Settings"
             >
               <Settings className="w-5 h-5" />
@@ -61,6 +63,16 @@ const Header: React.FC<HeaderProps> = ({ onSaveLayout, onLoadLayout }) => {
           </div>
         </div>
       </div>
+      
+      {/* Layout Manager Dropdown */}
+      {showLayoutManager && (
+        <div 
+          ref={dropdownRef}
+          className="absolute top-16 right-4 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50 min-w-80"
+        >
+          <LayoutManager />
+        </div>
+      )}
     </header>
   );
 };
