@@ -1,8 +1,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { useFilterArgs } from '../useFilterArgs';
-import { SubscriptionType } from '../../../../../types/communication/subscription'
+import { SubscriptionType } from '../../../../../types/communication/subscription';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-
 
 const mockSubscribe = vi.fn();
 const mockGetFilterDetails = vi.fn();

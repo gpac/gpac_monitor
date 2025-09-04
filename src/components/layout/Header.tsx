@@ -1,5 +1,5 @@
 import React from 'react';
-import { Save, Layout, Settings, Download, Upload } from 'lucide-react';
+import { Save, Layout, Settings, Download } from 'lucide-react';
 
 interface HeaderProps {
   onSaveLayout?: () => void;
@@ -51,12 +51,7 @@ const Header: React.FC<HeaderProps> = ({ onSaveLayout, onLoadLayout }) => {
             >
               <Layout className="w-5 h-5" />
             </button>
-            <button
-              className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700"
-              title="Export Data"
-            >
-              <Upload className="w-5 h-5" />
-            </button>
+
             <button
               className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700"
               title="Settings"

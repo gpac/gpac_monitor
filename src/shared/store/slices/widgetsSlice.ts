@@ -7,9 +7,17 @@ export interface RootState {
   widgets: WidgetsState;
 }
 
+export interface LayoutState {
+  name: string;
+  widgets: Widget[];
+  configs: Record<string, WidgetConfig>;
+  createdAt: string;
+}
+
 export interface WidgetsState {
   activeWidgets: Widget[];
   configs: Record<string, WidgetConfig>;
+  savedLayouts: Record<string, LayoutState>;
   selectedNode: {
     name: string;
     type: string;
@@ -29,6 +37,8 @@ export interface WidgetsState {
 export const selectActiveWidgets = (state: RootState) =>
   state.widgets.activeWidgets;
 export const selectWidgetConfigs = (state: RootState) => state.widgets.configs;
+export const selectSavedLayouts = (state: RootState) =>
+  state.widgets.savedLayouts;
 
 export const selectWidgetById = createSelector(
   [
@@ -88,6 +98,7 @@ const initialState: WidgetsState = {
     'multi-filter-1': { ...defaultConfig },
     'graph-1': { ...defaultConfig },
   },
+  savedLayouts: {},
   selectedNode: null,
 };
 
@@ -170,6 +181,27 @@ const widgetsSlice = createSlice({
     ) => {
       state.selectedNode = action.payload;
     },
+    saveLayout: (state, action: PayloadAction<string>) => {
+      const layoutName = action.payload;
+      state.savedLayouts[layoutName] = {
+        name: layoutName,
+        widgets: [...state.activeWidgets],
+        configs: { ...state.configs },
+        createdAt: new Date().toISOString(),
+      };
+    },
+    loadLayout: (state, action: PayloadAction<string>) => {
+      const layoutName = action.payload;
+      const layout = state.savedLayouts[layoutName];
+      if (layout) {
+        state.activeWidgets = [...layout.widgets];
+        state.configs = { ...layout.configs };
+      }
+    },
+    deleteLayout: (state, action: PayloadAction<string>) => {
+      const layoutName = action.payload;
+      delete state.savedLayouts[layoutName];
+    },
   },
 });
 
@@ -181,6 +213,9 @@ export const {
   restoreWidget,
   updateWidgetPosition,
   setSelectedNode,
+  saveLayout,
+  loadLayout,
+  deleteLayout,
 } = widgetsSlice.actions;
 
 export default widgetsSlice.reducer;
