@@ -29,7 +29,6 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   rules,
   debounce = false,
   debounceMs = 1000,
-  
 }) => {
   const [localValue, setLocalValue] = useState(
     value ?? (type === 'string' ? '' : type === 'number' ? null : false),

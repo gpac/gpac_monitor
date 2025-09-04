@@ -116,7 +116,6 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
       argument,
     };
 
-
     if (
       argument.min_max_enum &&
       (argument.min_max_enum.includes('|') ||

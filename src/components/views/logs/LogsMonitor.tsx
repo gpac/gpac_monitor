@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { FaInfoCircle, FaExclamationTriangle, FaTimesCircle, FaChevronDown } from 'react-icons/fa';
+import {
+  FaInfoCircle,
+  FaExclamationTriangle,
+  FaTimesCircle,
+  FaChevronDown,
+} from 'react-icons/fa';
 import WidgetWrapper from '../../common/WidgetWrapper';
 import {
   DropdownMenu,
@@ -48,16 +53,20 @@ const GPAC_TOOLS = [
   'compose',
   'ctime',
   'interact',
-  'rti'
+  'rti',
 ] as const;
 
 const LOG_LEVELS = ['all', 'debug', 'info', 'warning', 'error'] as const;
 
 const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [filter, _setFilter] = useState<'all' | 'info' | 'warning' | 'error' | 'debug'>('all');
-  const [toolFilter, setToolFilter] = useState<typeof GPAC_TOOLS[number]>('all');
-  const [levelFilter, setLevelFilter] = useState<typeof LOG_LEVELS[number]>('all');
+  const [filter, _setFilter] = useState<
+    'all' | 'info' | 'warning' | 'error' | 'debug'
+  >('all');
+  const [toolFilter, setToolFilter] =
+    useState<(typeof GPAC_TOOLS)[number]>('all');
+  const [levelFilter, setLevelFilter] =
+    useState<(typeof LOG_LEVELS)[number]>('all');
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -89,7 +98,8 @@ const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
         'error',
       ];
       const randomLevel = levels[Math.floor(Math.random() * levels.length)];
-      const randomTool = GPAC_TOOLS[Math.floor(Math.random() * (GPAC_TOOLS.length - 1)) + 1];
+      const randomTool =
+        GPAC_TOOLS[Math.floor(Math.random() * (GPAC_TOOLS.length - 1)) + 1];
 
       setLogs((prev) =>
         [
@@ -202,7 +212,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
                     [{log.level.toUpperCase()}]
                   </span>
                 </div>
-                <div className={`mt-1 ${getLevelStyle(log.level)}`}>{log.message}</div>
+                <div className={`mt-1 ${getLevelStyle(log.level)}`}>
+                  {log.message}
+                </div>
               </div>
             </div>
           ))}

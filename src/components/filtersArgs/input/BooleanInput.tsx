@@ -13,7 +13,6 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
   rules,
   argName,
 }) => {
-
   return (
     <GenericInput
       type="boolean"

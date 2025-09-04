@@ -1,9 +1,9 @@
 import { renderHook, act } from '@testing-library/react';
 import { useFilterArgs } from '../useFilterArgs';
-import { SubscriptionType } from '@/types/communication/subscription';
+import { SubscriptionType } from '../../../../../types/communication/subscription'
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock du service GPAC
+
 const mockSubscribe = vi.fn();
 const mockGetFilterDetails = vi.fn();
 
@@ -75,7 +75,7 @@ describe('useFilterArgs', () => {
   });
 
   it('should handle multiple filter args for different indexes', () => {
-    let subscriptionCallbacks: Map<number, (result: any) => void> = new Map();
+    const subscriptionCallbacks: Map<number, (result: any) => void> = new Map();
 
     mockSubscribe.mockImplementation((config, callback) => {
       subscriptionCallbacks.set(config.filterIdx, callback);
