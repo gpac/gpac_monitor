@@ -9,6 +9,8 @@ import { MessageThrottler } from '../../../utils/MessageThrottler';
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
+import { LogHandler } from './logHandler';
+import { LogEntryResponse, LogHistoryResponse, LogStatusResponse, LogConfigChangedResponse } from '@/services/ws/types';
 
 export type { MessageHandlerCallbacks, MessageHandlerDependencies };
 
@@ -17,6 +19,7 @@ export class BaseMessageHandler {
   private filterStatsHandler: FilterStatsHandler;
   private cpuStatsHandler: CPUStatsHandler;
   private filterArgsHandler: FilterArgsHandler;
+  private logHandler: LogHandler;
   private messageThrottler: MessageThrottler;
 
   constructor(
@@ -49,6 +52,10 @@ export class BaseMessageHandler {
       dependencies,
       isLoaded || (() => true),
     );
+    this.logHandler = new LogHandler(
+      dependencies,
+      isLoaded || (() => true),
+    );
   }
 
   // Expose handler methods
@@ -63,6 +70,9 @@ export class BaseMessageHandler {
   }
   public getFilterArgsHandler(): FilterArgsHandler {
     return this.filterArgsHandler;
+  }
+  public getLogHandler(): LogHandler {
+    return this.logHandler;
   }
 
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
@@ -110,6 +120,18 @@ export class BaseMessageHandler {
         break;
       case 'filter_stats':
         this.handleFilterStatsMessage(data);
+        break;
+      case 'log_entry':
+        this.handleLogEntryMessage(data);
+        break;
+      case 'log_history':
+        this.handleLogHistoryMessage(data);
+        break;
+      case 'log_status':
+        this.handleLogStatusMessage(data);
+        break;
+      case 'log_config_changed':
+        this.handleLogConfigChangedMessage(data);
         break;
       default:
       // Unknown message type
@@ -172,6 +194,30 @@ export class BaseMessageHandler {
       );
     } else {
       // filter_stats message missing idx
+    }
+  }
+
+  private handleLogEntryMessage(data: LogEntryResponse): void {
+    if (data.log) {
+      this.logHandler.handleLogEntry(data.log);
+    }
+  }
+
+  private handleLogHistoryMessage(data: LogHistoryResponse): void {
+    if (data.logs && Array.isArray(data.logs)) {
+      this.logHandler.handleLogHistory(data.logs);
+    }
+  }
+
+  private handleLogStatusMessage(data: LogStatusResponse): void {
+    if (data.status) {
+      this.logHandler.handleLogStatus(data.status);
+    }
+  }
+
+  private handleLogConfigChangedMessage(data: LogConfigChangedResponse): void {
+    if (data.logLevel) {
+      this.logHandler.handleLogConfigChanged(data.logLevel);
     }
   }
 
