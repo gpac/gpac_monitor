@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import React, { memo } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -7,14 +7,13 @@ import {
   BackgroundVariant,
   Node,
   Edge,
-  useReactFlow,
-  useViewport,
   NodeChange,
   EdgeChange,
   NodeMouseHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { CustomNode } from '../../../views/graph/ui/CustomNode';
+import { CustomNode } from '../ui/CustomNode';
+import { useMinimapNavigation } from '../hooks/useMinimapNavigation';
 
 interface GraphFlowProps {
   nodes: Node[];
@@ -42,28 +41,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   onNodeClick,
   isResizing = false,
 }) => {
-  const { setViewport } = useReactFlow();
-  const { zoom } = useViewport();
-
-  const handleMiniMapDrag = useCallback(
-    (event: React.DragEvent<SVGSVGElement>) => {
-      const svgElement = event.currentTarget;
-      const svgRect = svgElement.getBoundingClientRect();
-
-      const x = (event.clientX - svgRect.left) / zoom;
-      const y = (event.clientY - svgRect.top) / zoom;
-
-      setViewport(
-        {
-          x: -x,
-          y: -y,
-          zoom,
-        },
-        { duration: 0 },
-      );
-    },
-    [setViewport, zoom],
-  );
+  const { handleMiniMapClick, handleMiniMapDrag } = useMinimapNavigation();
 
   return (
     <div style={flowStyles} className={isResizing ? 'resize-optimized' : ''}>
@@ -102,9 +80,19 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
                 return '#3b82f6';
             }
           }}
-          maskColor="rgba(0, 0, 0, 0.3)"
-          className="bg-gray-800 border border-gray-700"
+          nodeStrokeWidth={1}
+          nodeStrokeColor="#374151"
+          maskColor="rgba(0, 0, 0, 0.4)"
+          className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
+          style={{
+            backgroundColor: '#1f2937',
+            border: '1px solid #374151',
+          }}
+          onClick={isResizing ? undefined : handleMiniMapClick}
           onDrag={isResizing ? undefined : handleMiniMapDrag}
+          pannable={!isResizing}
+          zoomable={!isResizing}
+          ariaLabel="Minimap pour navigation du graphique"
         />
       </ReactFlow>
     </div>
