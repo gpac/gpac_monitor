@@ -71,7 +71,7 @@ session.set_event_fun((evt) => {
 // WEBSOCKET CLIENT HANDLER
 // =======================================
 sys.rmt_on_new_client = function(client) {
-    console.log("rmt on client");
+    console.p("rmt on client");
     print(typeof(client));
 
     let draned_once_ref = { value: draned_once };

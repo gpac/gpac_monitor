@@ -80,6 +80,32 @@ function MessageHandler(client) {
                     'unsubscribe_cpu_stats': () => {
                         print("Unsubscribing to CPU stats");
                         this.client.cpuStatsManager.unsubscribe();
+                    },
+                    
+                    'subscribe_logs': () => {
+                        print("Subscribing to GPAC logs");
+                        const logLevel = jtext['logLevel'] || "all@warning";
+                        this.client.logManager.subscribe(logLevel);
+                    },
+                    
+                    'unsubscribe_logs': () => {
+                        print("Unsubscribing from GPAC logs");
+                        this.client.logManager.unsubscribe();
+                    },
+                    
+                    'update_log_level': () => {
+                        print("Updating log level");
+                        const logLevel = jtext['logLevel'] || "all@warning";
+                        this.client.logManager.updateLogLevel(logLevel);
+                    },
+                    
+                    'get_log_status': () => {
+                        print("Getting log status");
+                        const status = this.client.logManager.getStatus();
+                        this.client.client.send(JSON.stringify({
+                            message: 'log_status',
+                            status: status
+                        }));
                     }
                 };
 

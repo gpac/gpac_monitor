@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {  Layout, Settings } from 'lucide-react';
+import { Layout, Settings } from 'lucide-react';
 import { LayoutManager } from './LayoutManager';
 
 interface HeaderProps {}
@@ -10,7 +10,10 @@ const Header: React.FC<HeaderProps> = () => {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setShowLayoutManager(false);
       }
     };
@@ -63,10 +66,10 @@ const Header: React.FC<HeaderProps> = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Layout Manager Dropdown */}
       {showLayoutManager && (
-        <div 
+        <div
           ref={dropdownRef}
           className="absolute top-16 right-4 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50 min-w-80"
         >

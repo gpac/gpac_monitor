@@ -40,17 +40,29 @@ export const LayoutManager = () => {
         <h3 className="text-sm font-medium">Saved layouts:</h3>
         {getLayoutNames().map((name) => (
           <div key={name} className="flex gap-2 items-center">
-            <span className="flex-1 text-sm text-muted-foreground text-gray-400">{name}</span>
-            <Button size="sm" variant="outline" onClick={() => handleLoad(name)}>
+            <span className="flex-1 text-sm text-muted-foreground text-gray-400">
+              {name}
+            </span>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleLoad(name)}
+            >
               Load
             </Button>
-            <Button size="sm" variant="destructive" onClick={() => handleDelete(name)}>
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => handleDelete(name)}
+            >
               Delete
             </Button>
           </div>
         ))}
         {getLayoutNames().length === 0 && (
-          <p className="text-sm text-muted-foreground text-gray-400">No saved layouts</p>
+          <p className="text-sm text-muted-foreground text-gray-400">
+            No saved layouts
+          </p>
         )}
       </div>
     </div>
