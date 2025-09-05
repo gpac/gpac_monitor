@@ -12,62 +12,28 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../../ui/dropdown-menu';
+import { useLogs } from './hooks/useLogs';
+import { GpacLogConfig, GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
 
 interface LogsMonitorProps {
   id: string;
   title: string;
 }
 
-interface LogEntry {
-  id: string;
-  timestamp: Date;
-  level: 'info' | 'warning' | 'error' | 'debug';
-  message: string;
-  tool?: string;
-}
-
-const GPAC_TOOLS = [
-  'all',
-  'core',
-  'mutex',
-  'mem',
-  'module',
-  'filter',
-  'sched',
-  'codec',
-  'coding',
-  'container',
-  'network',
-  'http',
-  'cache',
-  'rtp',
-  'dash',
-  'route',
-  'media',
-  'parser',
-  'mmio',
-  'audio',
-  'script',
-  'console',
-  'scene',
-  'compose',
-  'ctime',
-  'interact',
-  'rti',
-] as const;
-
-const LOG_LEVELS = ['all', 'debug', 'info', 'warning', 'error'] as const;
+const GPAC_TOOLS = Object.values(GpacLogTool);
+const LOG_LEVELS = Object.values(GpacLogLevel);
 
 const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
-  const [filter, _setFilter] = useState<
-    'all' | 'info' | 'warning' | 'error' | 'debug'
-  >('all');
-  const [toolFilter, setToolFilter] =
-    useState<(typeof GPAC_TOOLS)[number]>('all');
-  const [levelFilter, setLevelFilter] =
-    useState<(typeof LOG_LEVELS)[number]>('all');
+  const [toolFilter, setToolFilter] = useState<GpacLogTool>(GpacLogTool.ALL);
+  const [levelFilter, setLevelFilter] = useState<GpacLogLevel>(GpacLogLevel.WARNING);
   const logsEndRef = useRef<HTMLDivElement>(null);
+
+  // Use real logs from GPAC
+  const logLevel: GpacLogConfig = `${toolFilter}@${levelFilter}`;
+  const { logs, isSubscribed } = useLogs({
+    enabled: true,
+    logLevel,
+  });
 
   const scrollToBottom = () => {
     logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -77,77 +43,51 @@ const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
     scrollToBottom();
   }, [logs]);
 
-  // Simuler l'arrivée de nouveaux logs
-  useEffect(() => {
-    const sampleLogs = [
-      'Filter video_decoder started successfully',
-      'High CPU usage detected on transcoding process',
-      'Failed to connect to remote stream',
-      'Buffer overflow warning in audio stream',
-      'Network latency increased above threshold',
-      'Stream reconnected successfully',
-    ];
+  console.log('[LogsMonitor] Logs received:', logs.length, 'isSubscribed:', isSubscribed);
 
-    const interval = setInterval(() => {
-      const randomLog =
-        sampleLogs[Math.floor(Math.random() * sampleLogs.length)];
-      const levels: Array<'info' | 'warning' | 'error' | 'debug'> = [
-        'debug',
-        'info',
-        'warning',
-        'error',
-      ];
-      const randomLevel = levels[Math.floor(Math.random() * levels.length)];
-      const randomTool =
-        GPAC_TOOLS[Math.floor(Math.random() * (GPAC_TOOLS.length - 1)) + 1];
-
-      setLogs((prev) =>
-        [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            timestamp: new Date(),
-            level: randomLevel,
-            message: randomLog,
-            tool: randomTool,
-          },
-        ].slice(-100),
-      );
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const filteredLogs = logs.filter((log) => {
-    const levelMatch = levelFilter === 'all' ? true : log.level === levelFilter;
-    const toolMatch = toolFilter === 'all' ? true : log.tool === toolFilter;
-    const oldFilterMatch = filter === 'all' ? true : log.level === filter;
-    return levelMatch && toolMatch && oldFilterMatch;
-  });
-
-  const getLevelIcon = (level: 'info' | 'warning' | 'error' | 'debug') => {
+  const getLevelIcon = (level: number) => {
+    // GPAC log levels are numeric
     switch (level) {
-      case 'debug':
-        return <FaInfoCircle className="w-4 h-4 text-blue-500" />;
-      case 'info':
-        return <FaInfoCircle className="w-4 h-4 text-green-600" />;
-      case 'warning':
-        return <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />;
-      case 'error':
+      case 0: // quiet (no logs)
+        return <FaInfoCircle className="w-4 h-4 text-gray-500" />;
+      case 1: // error
         return <FaTimesCircle className="w-4 h-4 text-red-500" />;
+      case 2: // warning
+        return <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />;
+      case 3: // info
+        return <FaInfoCircle className="w-4 h-4 text-green-700" />;
+      case 4: // debug
+        return <FaInfoCircle className="w-4 h-4 text-blue-500" />;
+      default:
+        return <FaInfoCircle className="w-4 h-4 text-gray-500" />;
     }
   };
 
-  const getLevelStyle = (level: 'info' | 'warning' | 'error' | 'debug') => {
+  const getLevelStyle = (level: number) => {
     switch (level) {
-      case 'debug':
-        return 'text-blue-500';
-      case 'info':
-        return 'text-green-600';
-      case 'warning':
-        return 'text-yellow-500';
-      case 'error':
+      case 0: // quiet
+        return 'text-gray-500';
+      case 1: // error
         return 'text-red-500';
+      case 2: // warning
+        return 'text-yellow-500';
+      case 3: // info
+        return 'text-green-600';
+      case 4: // debug
+        return 'text-blue-500';
+      default:
+        return 'text-gray-500';
+    }
+  };
+
+  const getLevelName = (level: number) => {
+    switch (level) {
+      case 0: return 'QUIET';
+      case 1: return 'ERROR';
+      case 2: return 'WARNING';
+      case 3: return 'INFO';
+      case 4: return 'DEBUG';
+      default: return 'UNKNOWN';
     }
   };
 
@@ -197,19 +137,22 @@ const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
 
         {/* Logs */}
         <div className="flex-1 overflow-y-auto rounded p-4 font-mono text-sm bg-stat stat">
-          {filteredLogs.map((log) => (
+          {logs.map((log, index) => (
             <div
-              key={log.id}
+              key={`${log.timestamp}-${index}`}
               className="flex items-start gap-2 mb-2 hover:bg-gray-900 p-1 rounded"
             >
               {getLevelIcon(log.level)}
-              <div className="flex-1  stat">
-                <div className="flex items-center gap-2 ">
+              <div className="flex-1 stat">
+                <div className="flex items-center gap-2">
                   <span className="text-gray-400 text-xs">
-                    {log.timestamp.toLocaleTimeString()}
+                    {new Date(log.timestamp).toLocaleTimeString()}
                   </span>
-                  <span className={getLevelStyle(log.level)}>
-                    [{log.level.toUpperCase()}]
+                  <span className={`text-xs ${getLevelStyle(log.level)}`}>
+                    [{getLevelName(log.level)}]
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    [{log.tool}]
                   </span>
                 </div>
                 <div className={`mt-1 ${getLevelStyle(log.level)}`}>

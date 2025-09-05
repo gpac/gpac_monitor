@@ -10,12 +10,13 @@ function LogManager(client) {
     // Batching configuration
     this.logBuffer = [];
     this.batchInterval = null;
-    this.batchSize = 50;
+    this.batchSize = 150;
     this.batchDelay = 150; 
 
     this.subscribe = function(logLevel) {
         if (this.isSubscribed) {
-            console.log("LogManager: Client already subscribed to logs");
+            console.log("LogManager: Client already subscribed to logs, updating level from", this.logLevel, "to", logLevel);
+            this.updateLogLevel(logLevel);
             return;
         }
 

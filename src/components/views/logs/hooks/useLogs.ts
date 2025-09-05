@@ -17,9 +17,11 @@ export function useLogs(options: UseLogsOptions = {}) {
   } = options;
 
   const [logs, setLogs] = useState<GpacLogEntry[]>([]);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   const handleLogsUpdate = useCallback(
     (newLogs: GpacLogEntry[]) => {
+      console.log('[useLogs] Received logs:', newLogs.length, newLogs);
       setLogs(newLogs.map((log) => ({ ...log })));
     },
     [],
@@ -30,6 +32,7 @@ export function useLogs(options: UseLogsOptions = {}) {
       if (logs.length > 0) {
         setLogs([]);
       }
+      setIsSubscribed(false);
       return;
     }
 
@@ -38,26 +41,39 @@ export function useLogs(options: UseLogsOptions = {}) {
 
     const setupSubscription = async () => {
       try {
+        console.log('[useLogs] Loading service...');
+        await gpacService.load();
+
+        if (!isMounted) {
+          return;
+        }
+
+        console.log('[useLogs] Subscribing to logs with level:', logLevel);
         const unsubscribeFunc = await gpacService.subscribe(
           {
             type: SubscriptionType.LOGS,
             logLevel,
           },
           (result) => {
+            console.log('[useLogs] Received subscription result:', result);
             if (result.data && isMounted) {
               handleLogsUpdate(result.data as GpacLogEntry[]);
             }
           },
         );
+        console.log('[useLogs] Subscription successful');
 
         if (isMounted) {
           unsubscribe = unsubscribeFunc;
+          setIsSubscribed(true);
         } else {
           unsubscribeFunc();
         }
       } catch (error) {
+        console.error('[useLogs] Subscription failed:', error);
         if (isMounted) {
           setLogs([]);
+          setIsSubscribed(false);
         }
       }
     };
@@ -66,6 +82,7 @@ export function useLogs(options: UseLogsOptions = {}) {
 
     return () => {
       isMounted = false;
+      setIsSubscribed(false);
       if (unsubscribe) {
         unsubscribe();
       }
@@ -74,6 +91,6 @@ export function useLogs(options: UseLogsOptions = {}) {
 
   return {
     logs,
-    isSubscribed: logs.length > 0,
+    isSubscribed,
   };
 }
