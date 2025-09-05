@@ -21,7 +21,7 @@ export type GpacMessageType =
   | 'unsubscribe_logs'
   | 'update_log_level'
   | 'get_log_status'
-  | 'log_entry'
+  | 'log_batch'
   | 'log_history'
   | 'log_status'
   | 'log_config_changed';

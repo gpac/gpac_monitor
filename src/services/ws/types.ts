@@ -158,9 +158,9 @@ export interface GetLogStatusMessage extends BaseWSMessage {
   type: WSMessageType.GET_LOG_STATUS;
 }
 
-export interface LogEntryResponse extends BaseWSResponse {
-  message: 'log_entry';
-  log: GpacLogEntry;
+export interface LogBatchResponse extends BaseWSResponse {
+  message: 'log_batch';
+  logs: GpacLogEntry[];
 }
 
 export interface LogHistoryResponse extends BaseWSResponse {

@@ -6,6 +6,12 @@ function LogManager(client) {
     this.logLevel = "all@warning";
     this.logs = [];
     this.originalLogConfig = null;
+    
+    // Batching configuration
+    this.logBuffer = [];
+    this.batchInterval = null;
+    this.batchSize = 50;
+    this.batchDelay = 150; 
 
     this.subscribe = function(logLevel) {
         if (this.isSubscribed) {
@@ -50,6 +56,9 @@ function LogManager(client) {
         }
 
         try {
+            // Flush any pending batch before unsubscribing
+            this.flushBatch();
+            
             // Remove log callback
             sys.on_log = undefined;
             
@@ -81,11 +90,16 @@ function LogManager(client) {
             this.logs.shift();
         }
 
-        // Send log to client
-        this.sendToClient({
-            message: 'log_entry',
-            log: logEntry
-        });
+        // Add to batch buffer
+        this.logBuffer.push(logEntry);
+
+        // Send batch if buffer is full
+        if (this.logBuffer.length >= this.batchSize) {
+            this.flushBatch();
+        } else if (!this.batchInterval) {
+            // Start timer if not already running
+            this.batchInterval = setTimeout(() => this.flushBatch(), this.batchDelay);
+        }
     };
 
     this.updateLogLevel = function(logLevel) {
@@ -135,6 +149,22 @@ function LogManager(client) {
             logCount: this.logs.length,
             currentLogConfig: this.getCurrentLogConfig()
         };
+    };
+
+    this.flushBatch = function() {
+        if (this.logBuffer.length > 0) {
+            this.sendToClient({
+                message: 'log_batch',
+                logs: [...this.logBuffer]
+            });
+            this.logBuffer = [];
+        }
+        
+        // Clear timer reference
+        if (this.batchInterval) {
+            clearTimeout(this.batchInterval);
+            this.batchInterval = null;
+        }
     };
 
     this.sendToClient = function(data) {

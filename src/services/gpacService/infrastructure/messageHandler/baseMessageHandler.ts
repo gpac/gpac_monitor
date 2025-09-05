@@ -10,7 +10,7 @@ import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
-import { LogEntryResponse, LogHistoryResponse, LogStatusResponse, LogConfigChangedResponse } from '@/services/ws/types';
+import { LogBatchResponse, LogHistoryResponse, LogStatusResponse, LogConfigChangedResponse } from '@/services/ws/types';
 
 export type { MessageHandlerCallbacks, MessageHandlerDependencies };
 
@@ -121,8 +121,8 @@ export class BaseMessageHandler {
       case 'filter_stats':
         this.handleFilterStatsMessage(data);
         break;
-      case 'log_entry':
-        this.handleLogEntryMessage(data);
+      case 'log_batch':
+        this.handleLogBatchMessage(data);
         break;
       case 'log_history':
         this.handleLogHistoryMessage(data);
@@ -197,9 +197,9 @@ export class BaseMessageHandler {
     }
   }
 
-  private handleLogEntryMessage(data: LogEntryResponse): void {
-    if (data.log) {
-      this.logHandler.handleLogEntry(data.log);
+  private handleLogBatchMessage(data: LogBatchResponse): void {
+    if (data.logs && Array.isArray(data.logs)) {
+      this.logHandler.handleLogBatch(data.logs);
     }
   }
 

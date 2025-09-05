@@ -2,6 +2,7 @@ export enum SubscriptionType {
   SESSION_STATS = 'session_stats',
   FILTER_STATS = 'filter_stats',
   CPU_STATS = 'cpu_stats',
+  LOGS = 'logs',
   FILTER_ARGS_DETAILS = 'filter_args_details',
   ALL_FILTERS = 'all_filters',
   BUSY_STATE = 'busy_state',
@@ -15,6 +16,7 @@ export interface SubscriptionConfig {
   filterIdx?: number;
   filterName?: string;
   argumentName?: string;
+  logLevel?: string;
 }
 
 export interface SubscriptionResult<T = unknown> {

@@ -21,6 +21,7 @@ import {
   SubscriptionConfig,
   SubscriptionType,
 } from '@/types/communication/subscription';
+import { GpacLogConfig } from '@/types/domain/gpac/log-types';
 
 export class GpacService implements IGpacCommunication {
   private static instance: GpacService | null = null;
@@ -264,6 +265,18 @@ export class GpacService implements IGpacCommunication {
               subscriptionId,
             });
           }, config.interval || 150);
+
+      case SubscriptionType.LOGS:
+        return this.messageHandler
+          .getLogHandler()
+          .subscribeToLogEntries((data) => {
+            callback({
+              data: data as T,
+              timestamp: Date.now(),
+              subscriptionId,
+            });
+          }, (config.logLevel as GpacLogConfig) || 'all@warning');
+
       case SubscriptionType.FILTER_ARGS_DETAILS:
         if (typeof config.filterIdx !== 'number') {
           throw new Error(

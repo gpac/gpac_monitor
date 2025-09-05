@@ -111,13 +111,14 @@ export class LogHandler {
     });
   }
 
-  public handleLogEntry(logEntry: GpacLogEntry): void {
-    // Add new log entry to the existing array
+
+  public handleLogBatch(logs: GpacLogEntry[]): void {
+    // Add batch of log entries to the existing array
     const currentLogs = this.logEntriesSubscribable.getSnapshot();
-    const updatedLogs = [...currentLogs, logEntry];
+    const updatedLogs = [...currentLogs, ...logs];
 
     // Keep only last 1000 entries
-    if (updatedLogs.length > 1000) {
+    while (updatedLogs.length > 1000) {
       updatedLogs.shift();
     }
 
