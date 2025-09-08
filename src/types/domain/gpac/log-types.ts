@@ -21,6 +21,7 @@ export enum GpacLogTool {
   COMPOSE = 'compose',
   CONSOLE = 'console',
   CONTAINER = 'container',
+  RMTWS = 'rmtws',
   CORE = 'core',
   CTIME = 'ctime',
   DASH = 'dash',

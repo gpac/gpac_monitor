@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useDeferredValue } from 'react';
 import { GpacLogEntry, GpacLogConfig } from '@/types/domain/gpac/log-types';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
@@ -21,7 +21,18 @@ export function useLogs(options: UseLogsOptions = {}) {
 
   const handleLogsUpdate = useCallback(
     (newLogs: GpacLogEntry[]) => {
-      setLogs(newLogs.map((log) => ({ ...log })));
+      console.log('[logs] Batch size:', newLogs.length);
+      setLogs(currentLogs => {
+        // Append new logs instead of replacing all
+        const updatedLogs = [...currentLogs, ...newLogs.map((log) => ({ ...log }))];
+        
+        // Keep only last 500 logs for performance
+        if (updatedLogs.length > 500) {
+          return updatedLogs.slice(-500);
+        }
+        
+        return updatedLogs;
+      });
     },
     [],
   );
@@ -85,8 +96,11 @@ export function useLogs(options: UseLogsOptions = {}) {
     };
   }, [enabled, logLevel, handleLogsUpdate]);
 
+  // Use useDeferredValue to smooth out rapid log updates and prevent UI blocking
+  const deferredLogs = useDeferredValue(logs);
+
   return {
-    logs,
+    logs: deferredLogs,
     isSubscribed,
   };
 }

@@ -1,5 +1,4 @@
 import { Sys as sys } from 'gpaccore';
-
 function LogManager(client) {
     this.client = client;
     this.isSubscribed = false;
@@ -7,17 +6,25 @@ function LogManager(client) {
     this.logs = [];
     this.originalLogConfig = null;
     
-    // Batching configuration
-    this.logBuffer = [];
-    this.batchInterval = null;
-    this.batchSize = 150;
-    this.batchDelay = 160;
+    // Simple configuration
+    this.batchSize = 50;
     
-
+    // Circular buffer to avoid costly shift() operations
+    this.bufferSize = 10000;
+    this.logRingBuffer = new Array(this.bufferSize);
+    this.bufferStartIndex = 0;  // Index of the oldest log
+    this.bufferLogCount = 0;    // Number of logs in the buffer
+    
+    // Rate counters to avoid overload
+    this.maxBytesPerSecond = 50 * 1024;  //
+    this.maxMessagesPerSecond = 30;       // Maximum 30 messages per second
+    this.bytesThisSecond = 0;
+    this.messagesThisSecond = 0;
+    this.currentSecond = Math.floor(Date.now() / 1000);
 
     this.subscribe = function(logLevel) {
         if (this.isSubscribed) {
-            console.log("LogManager: Client already subscribed to logs, updating level from", this.logLevel, "to", logLevel);
+            console.log("LogManager:  Updating level from", this.logLevel, "to", logLevel);
             this.updateLogLevel(logLevel);
             return;
         }
@@ -62,9 +69,6 @@ function LogManager(client) {
         }
 
         try {
-            // Stop periodic flush task
-            this.stopPeriodicFlush();
-            
             // Flush any pending batch before unsubscribing
             this.flushBatch();
             
@@ -89,44 +93,71 @@ function LogManager(client) {
     // Periodic flush 
     this.startPeriodicFlush = function() {
 
-            session.post_task((f) => {
+            session.post_task(() => {
                 if (session.last_task || !this.isSubscribed) {
                     return false; // Stop the task
                 }
                 
                 // Flush any pending logs 
-                if (this.logBuffer.length > 0) {
+                if (this.bufferLogCount > 0) {
                     this.flushBatch();
                 }
                 
-                return 1000; 
+                return 500; 
             });
         
     };
 
-    this.stopPeriodicFlush = function() {
-        // The task will stop automatically when session.last_task is true or isSubscribed is false
-    };
 
-    this.handleLog = function(tool, level, message) {
-        const logEntry = {
-            timestamp: Date.now(),
-            tool: tool,
-            level: level,
-            message: message
-        };
-
-        // Store log entry (simplified, no complex protection needed with periodic flush)
-        this.logs.push(logEntry);
-        if (this.logs.length > 500) { // Reduced from 1000 for better memory management
-            this.logs.shift();
-        }
-
-        // Add to batch buffer (periodic task will flush it)
-        this.logBuffer.push(logEntry);
+    // Function to add a log to the circular buffer
+    this.addLogToBuffer = function(timestamp, tool, level, message) {
+        // Calculate the position to insert the new log
+        const insertPosition = (this.bufferStartIndex + this.bufferLogCount) % this.bufferSize;
         
-        // More frequent flushing to prevent large accumulations
-        if (this.logBuffer.length >= 100) {
+        // Store as simple tuple [timestamp, tool, level, message]
+        this.logRingBuffer[insertPosition] = [timestamp, tool, level, message];
+        
+        if (this.bufferLogCount < this.bufferSize) {
+            // Buffer not yet full, just increase the counter
+            this.bufferLogCount++;
+        } else {
+            // Buffer full, overwrite the oldest (advance the start)
+            this.bufferStartIndex = (this.bufferStartIndex + 1) % this.bufferSize;
+        }
+    };
+    
+    // Function to take N logs from the beginning of the buffer
+    this.takeLogsFromBuffer = function(numberOfLogs) {
+        const logsToTake = Math.min(numberOfLogs, this.bufferLogCount);
+        const result = new Array(logsToTake);
+        
+        // Copy logs from the beginning of the buffer
+        for (let i = 0; i < logsToTake; i++) {
+            const position = (this.bufferStartIndex + i) % this.bufferSize;
+            result[i] = this.logRingBuffer[position];
+        }
+        
+        // Advance the start and reduce the counter
+        this.bufferStartIndex = (this.bufferStartIndex + logsToTake) % this.bufferSize;
+        this.bufferLogCount -= logsToTake;
+        
+        return result;
+    };
+    
+    this.handleLog = function(tool, level, message) {
+        const now = Date.now();
+        
+        // Add to circular buffer (no costly shift)
+        this.addLogToBuffer(now, tool, level, message);
+        
+        // Maintain a small history for new clients (avoid shift)
+        if (this.logs.length >= 500) {
+            this.logs.pop(); // Remove the last instead of shifting the first
+        }
+        this.logs.push({ timestamp: now, tool, level, message });
+        
+        // Flush if enough logs accumulated
+        if (this.bufferLogCount >= 50) {
             this.flushBatch();
         }
     };
@@ -140,7 +171,8 @@ function LogManager(client) {
         try {
             // Clear all logs when changing level to prevent massive history dumps
             this.logs = [];
-            this.logBuffer = [];
+            this.bufferStartIndex = 0;
+            this.bufferLogCount = 0;
             console.log("LogManager: Cleared logs for level change");
             
             this.logLevel = logLevel;
@@ -157,16 +189,6 @@ function LogManager(client) {
         }
     };
 
-    this.getRecentLogs = function(limit) {
-        const count = limit || 100;
-        return this.logs.slice(-count);
-    };
-
-    this.clearLogs = function() {
-        this.logs = [];
-        console.log("LogManager: Cleared stored logs");
-    };
-
     this.getCurrentLogConfig = function() {
         try {
             return sys.get_logs();
@@ -181,38 +203,87 @@ function LogManager(client) {
             isSubscribed: this.isSubscribed,
             logLevel: this.logLevel,
             logCount: this.logs.length,
-            emergencyMode: this.emergencyMode,
-            currentLogRate: this.logRateCounter,
-            droppedLogsCount: this.droppedLogsCount,
-            samplingRate: this.samplingRate,
             currentLogConfig: this.getCurrentLogConfig()
         };
     };
 
+    // Function to check and reset the rate counters
+    this.resetCountersIfNewSecond = function() {
+        const newSecond = Math.floor(Date.now() / 1000);
+        if (newSecond !== this.currentSecond) {
+            this.currentSecond = newSecond;
+            this.bytesThisSecond = 0;
+            this.messagesThisSecond = 0;
+        }
+    };
+    
+    // Function to check if we can send more messages
+    this.canSendMoreMessages = function() {
+        return this.messagesThisSecond < this.maxMessagesPerSecond;
+    };
+    
+    
     this.flushBatch = function() {
-        if (this.logBuffer.length > 0) {
-
+        if (this.bufferLogCount === 0) return;
+        
+        // Check rate limits
+        this.resetCountersIfNewSecond();
+        
+        let batchesSent = 0;
+        const maxBatchesPerFlush = 2;
+        
+        // Send multiple small batches if necessary
+        while (this.bufferLogCount > 0 && batchesSent < maxBatchesPerFlush) {
+            const logsInThisBatch = Math.min(this.batchSize, this.bufferLogCount);
             
-            // Split large batches to avoid frontend overload
-            const maxBatchSize = 50; // Max 50 logs per message
-            let batchCount = 0;
+            // Check limits before processing
+            const estimatedSize = 100 + (logsInThisBatch * 150); // Simple estimation
+            if (!this.canSendMoreMessages()) break;
+            if (this.bytesThisSecond + estimatedSize > this.maxBytesPerSecond) break;
             
-            while (this.logBuffer.length > 0) {
-                const batch = this.logBuffer.splice(0, maxBatchSize);
-                batchCount++;
-                
-       
-                
-                this.sendToClient({
-                    message: 'log_batch',
-                    logs: batch
-                });
+            // Take logs from buffer (no costly splice)
+            const rawLogs = this.takeLogsFromBuffer(logsInThisBatch);
+            
+            // Truncate long messages here, not in handleLog
+            for (let i = 0; i < rawLogs.length; i++) {
+                const messageText = rawLogs[i][3];
+                if (messageText && messageText.length > 500) {
+                    rawLogs[i][3] = messageText.substring(0, 500) + '...';
+                }
             }
             
-   
+            // Convert tuples to objects for sending
+            const logObjects = rawLogs.map(function(logTuple) {
+                return {
+                    timestamp: logTuple[0],
+                    tool: logTuple[1],
+                    level: logTuple[2],
+                    message: logTuple[3]
+                };
+            });
+            
+            const messageToSend = {
+                message: 'log_batch',
+                logs: logObjects
+            };
+            
+            // Serialize once
+            const jsonString = JSON.stringify(messageToSend);
+            
+            // Update counters
+            this.bytesThisSecond += jsonString.length;
+            this.messagesThisSecond += 1;
+            
+            // Send
+            if (this.client?.client?.send) {
+                this.client.client.send(jsonString);
+            }
+            
+            batchesSent++;
         }
     };
 
+    
     this.sendToClient = function(data) {
         if (this.client.client && typeof this.client.client.send === 'function') {
             this.client.client.send(JSON.stringify(data));

@@ -25,7 +25,7 @@ const LOG_LEVELS = Object.values(GpacLogLevel);
 
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const [toolFilter, setToolFilter] = useState<GpacLogTool>(GpacLogTool.ALL);
-  const [levelFilter, setLevelFilter] = useState<GpacLogLevel>(GpacLogLevel.INFO)
+  const [levelFilter, setLevelFilter] = useState<GpacLogLevel>(GpacLogLevel.INFO);
   const viewRef = useRef<HTMLDivElement>(null);
 
   // Use real logs from GPAC
@@ -50,7 +50,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     1: <FaTimesCircle className="w-4 h-4 text-red-500" />,
     2: <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />,
     3: <FaInfoCircle className="w-4 h-4 text-green-700" />,
-    4: <FaInfoCircle className="w-4 h-4 text-blue-500" />
+    4: <FaInfoCircle className="w-4 h-4 text-blue-300" />
   }).current;
 
   const getLevelIcon = useCallback((level: number) => {
@@ -62,7 +62,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     1: 'text-red-500', 
     2: 'text-yellow-500',
     3: 'text-green-600',
-    4: 'text-blue-500'
+    4: 'text-blue-300'
   }).current;
 
   const getLevelStyle = useCallback((level: number) => {
