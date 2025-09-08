@@ -11,7 +11,7 @@ function LogManager(client) {
     this.logBuffer = [];
     this.batchInterval = null;
     this.batchSize = 150;
-    this.batchDelay = 150; 
+    this.batchDelay = 160; 
 
     this.subscribe = function(logLevel) {
         if (this.isSubscribed) {

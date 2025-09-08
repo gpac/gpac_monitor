@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   FaInfoCircle,
   FaExclamationTriangle,
@@ -23,73 +23,63 @@ interface LogsMonitorProps {
 const GPAC_TOOLS = Object.values(GpacLogTool);
 const LOG_LEVELS = Object.values(GpacLogLevel);
 
-const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
+const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const [toolFilter, setToolFilter] = useState<GpacLogTool>(GpacLogTool.ALL);
-  const [levelFilter, setLevelFilter] = useState<GpacLogLevel>(GpacLogLevel.WARNING);
-  const logsEndRef = useRef<HTMLDivElement>(null);
+  const [levelFilter, setLevelFilter] = useState<GpacLogLevel>(GpacLogLevel.INFO)
+  const viewRef = useRef<HTMLDivElement>(null);
 
   // Use real logs from GPAC
   const logLevel: GpacLogConfig = `${toolFilter}@${levelFilter}`;
-  const { logs, isSubscribed } = useLogs({
+  const { logs } = useLogs({
     enabled: true,
     logLevel,
   });
 
-  const scrollToBottom = () => {
-    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const scrollToBottom = useCallback(() => {
+    viewRef.current?.scrollTo({ top: viewRef.current.scrollHeight, behavior: 'smooth' });
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
-  }, [logs]);
+  }, [logs, scrollToBottom]);
 
-  console.log('[LogsMonitor] Logs received:', logs.length, 'isSubscribed:', isSubscribed);
 
-  const getLevelIcon = (level: number) => {
-    // GPAC log levels are numeric
-    switch (level) {
-      case 0: // quiet (no logs)
-        return <FaInfoCircle className="w-4 h-4 text-gray-500" />;
-      case 1: // error
-        return <FaTimesCircle className="w-4 h-4 text-red-500" />;
-      case 2: // warning
-        return <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />;
-      case 3: // info
-        return <FaInfoCircle className="w-4 h-4 text-green-700" />;
-      case 4: // debug
-        return <FaInfoCircle className="w-4 h-4 text-blue-500" />;
-      default:
-        return <FaInfoCircle className="w-4 h-4 text-gray-500" />;
-    }
-  };
 
-  const getLevelStyle = (level: number) => {
-    switch (level) {
-      case 0: // quiet
-        return 'text-gray-500';
-      case 1: // error
-        return 'text-red-500';
-      case 2: // warning
-        return 'text-yellow-500';
-      case 3: // info
-        return 'text-green-600';
-      case 4: // debug
-        return 'text-blue-500';
-      default:
-        return 'text-gray-500';
-    }
-  };
+  const levelIcons = useRef({
+    0: <FaInfoCircle className="w-4 h-4 text-gray-500" />,
+    1: <FaTimesCircle className="w-4 h-4 text-red-500" />,
+    2: <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />,
+    3: <FaInfoCircle className="w-4 h-4 text-green-700" />,
+    4: <FaInfoCircle className="w-4 h-4 text-blue-500" />
+  }).current;
 
-  const getLevelName = (level: number) => {
-    switch (level) {
-      case 0: return 'QUIET';
-      case 1: return 'ERROR';
-      case 2: return 'WARNING';
-      case 3: return 'INFO';
-      case 4: return 'DEBUG';
-      default: return 'UNKNOWN';
-    }
-  };
+  const getLevelIcon = useCallback((level: number) => {
+    return levelIcons[level as keyof typeof levelIcons] || levelIcons[0];
+  }, [levelIcons]);
+
+  const levelStyles = useRef({
+    0: 'text-gray-500',
+    1: 'text-red-500', 
+    2: 'text-yellow-500',
+    3: 'text-green-600',
+    4: 'text-blue-500'
+  }).current;
+
+  const getLevelStyle = useCallback((level: number) => {
+    return levelStyles[level as keyof typeof levelStyles] || levelStyles[0];
+  }, [levelStyles]);
+
+  const levelNames = useRef({
+    0: 'QUIET',
+    1: 'ERROR',
+    2: 'WARNING', 
+    3: 'INFO',
+    4: 'DEBUG'
+  }).current;
+
+  const getLevelName = useCallback((level: number) => {
+    return levelNames[level as keyof typeof levelNames] || 'UNKNOWN';
+  }, [levelNames]);
 
   return (
     <WidgetWrapper id={id} title={title}>
@@ -98,7 +88,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
         <div className="flex gap-2 mb-2 flex-wrap">
           {/* Tools Dropdown */}
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-3 py-1 rounded text-sm bg-stat border border-gray-600 flex items-center gap-1 hover:bg-gray-700">
+            <DropdownMenuTrigger className="px-3 py-1  font-bold border rounded text-sm bg-stat border-gray-600 flex items-center gap-1 hover:bg-gray-700">
               TOOLS: {toolFilter.toUpperCase()}
               <FaChevronDown className="w-3 h-3" />
             </DropdownMenuTrigger>
@@ -117,7 +107,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
 
           {/* Levels Dropdown */}
           <DropdownMenu>
-            <DropdownMenuTrigger className="px-3 py-1 rounded text-sm bg-stat border border-gray-600 flex items-center gap-1 hover:bg-gray-700 hover:text-gray-300">
+            <DropdownMenuTrigger className="px-3 py-1  font-bold border rounded text-sm bg-stat border-gray-600 flex items-center gap-1 hover:bg-gray-700">
               LEVELS: {levelFilter.toUpperCase()}
               <FaChevronDown className="w-3 h-3" />
             </DropdownMenuTrigger>
@@ -136,36 +126,42 @@ const LogsMonitor: React.FC<LogsMonitorProps> = ({ id, title }) => {
         </div>
 
         {/* Logs */}
-        <div className="flex-1 overflow-y-auto rounded p-4 font-mono text-sm bg-stat stat">
-          {logs.map((log, index) => (
-            <div
-              key={`${log.timestamp}-${index}`}
-              className="flex items-start gap-2 mb-2 hover:bg-gray-900 p-1 rounded"
-            >
-              {getLevelIcon(log.level)}
-              <div className="flex-1 stat">
-                <div className="flex items-center gap-2">
-                  <span className="text-gray-400 text-xs">
-                    {new Date(log.timestamp).toLocaleTimeString()}
-                  </span>
-                  <span className={`text-xs ${getLevelStyle(log.level)}`}>
-                    [{getLevelName(log.level)}]
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    [{log.tool}]
-                  </span>
-                </div>
-                <div className={`mt-1 ${getLevelStyle(log.level)}`}>
-                  {log.message}
+        <div ref={viewRef} className="flex-1 overflow-y-auto rounded p-4 text-sm bg-stat stat" style={{ fontFamily: "'Roboto Mono', 'Courier New', monospace" }}>
+          {logs.map((log, index) => {
+            const formattedTime = new Date(log.timestamp).toLocaleTimeString();
+            const levelStyle = getLevelStyle(log.level);
+            const levelName = getLevelName(log.level);
+            const levelIcon = getLevelIcon(log.level);
+            
+            return (
+              <div
+                key={`${log.timestamp}-${index}`}
+                className="flex items-start gap-2 mb-2 hover:bg-gray-900 p-1 rounded"
+              >
+                {levelIcon}
+                <div className="flex-1 stat">
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-400 text-xs">
+                      {formattedTime}
+                    </span>
+                    <span className={`text-xs ${levelStyle}`}>
+                      [{levelName}]
+                    </span>
+                    <span className="text-xs text-gray-300">
+                      [{log.tool}]
+                    </span>
+                  </div>
+                  <div className={`mt-1 ${levelStyle}`}>
+                    {log.message}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-          <div ref={logsEndRef} />
+            );
+          })}
         </div>
       </div>
     </WidgetWrapper>
   );
-};
+});
 
 export default LogsMonitor;
