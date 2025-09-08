@@ -11,7 +11,9 @@ function LogManager(client) {
     this.logBuffer = [];
     this.batchInterval = null;
     this.batchSize = 150;
-    this.batchDelay = 160; 
+    this.batchDelay = 160;
+    
+
 
     this.subscribe = function(logLevel) {
         if (this.isSubscribed) {
@@ -27,10 +29,13 @@ function LogManager(client) {
             // Store original log configuration
             this.originalLogConfig = sys.get_logs(true);
             
-            // Set up log interception with bound callback
+            // Set up log interception with bound callback 
             sys.on_log = (tool, level, message) => {
                 this.handleLog(tool, level, message);
             };
+            
+            // Start periodic flush task (inspired by GPAC creator's approach)
+            this.startPeriodicFlush();
             
             // Configure log level
             sys.set_logs(this.logLevel);
@@ -57,6 +62,9 @@ function LogManager(client) {
         }
 
         try {
+            // Stop periodic flush task
+            this.stopPeriodicFlush();
+            
             // Flush any pending batch before unsubscribing
             this.flushBatch();
             
@@ -77,6 +85,29 @@ function LogManager(client) {
         }
     };
 
+
+    // Periodic flush 
+    this.startPeriodicFlush = function() {
+
+            session.post_task((f) => {
+                if (session.last_task || !this.isSubscribed) {
+                    return false; // Stop the task
+                }
+                
+                // Flush any pending logs 
+                if (this.logBuffer.length > 0) {
+                    this.flushBatch();
+                }
+                
+                return 1000; 
+            });
+        
+    };
+
+    this.stopPeriodicFlush = function() {
+        // The task will stop automatically when session.last_task is true or isSubscribed is false
+    };
+
     this.handleLog = function(tool, level, message) {
         const logEntry = {
             timestamp: Date.now(),
@@ -85,21 +116,18 @@ function LogManager(client) {
             message: message
         };
 
-        // Store log entry (keep last 1000 entries)
+        // Store log entry (simplified, no complex protection needed with periodic flush)
         this.logs.push(logEntry);
-        if (this.logs.length > 1000) {
+        if (this.logs.length > 500) { // Reduced from 1000 for better memory management
             this.logs.shift();
         }
 
-        // Add to batch buffer
+        // Add to batch buffer (periodic task will flush it)
         this.logBuffer.push(logEntry);
-
-        // Send batch if buffer is full
-        if (this.logBuffer.length >= this.batchSize) {
+        
+        // More frequent flushing to prevent large accumulations
+        if (this.logBuffer.length >= 100) {
             this.flushBatch();
-        } else if (!this.batchInterval) {
-            // Start timer if not already running
-            this.batchInterval = setTimeout(() => this.flushBatch(), this.batchDelay);
         }
     };
 
@@ -110,6 +138,11 @@ function LogManager(client) {
         }
 
         try {
+            // Clear all logs when changing level to prevent massive history dumps
+            this.logs = [];
+            this.logBuffer = [];
+            console.log("LogManager: Cleared logs for level change");
+            
             this.logLevel = logLevel;
             sys.set_logs(logLevel);
             
@@ -148,23 +181,35 @@ function LogManager(client) {
             isSubscribed: this.isSubscribed,
             logLevel: this.logLevel,
             logCount: this.logs.length,
+            emergencyMode: this.emergencyMode,
+            currentLogRate: this.logRateCounter,
+            droppedLogsCount: this.droppedLogsCount,
+            samplingRate: this.samplingRate,
             currentLogConfig: this.getCurrentLogConfig()
         };
     };
 
     this.flushBatch = function() {
         if (this.logBuffer.length > 0) {
-            this.sendToClient({
-                message: 'log_batch',
-                logs: [...this.logBuffer]
-            });
-            this.logBuffer = [];
-        }
-        
-        // Clear timer reference
-        if (this.batchInterval) {
-            clearTimeout(this.batchInterval);
-            this.batchInterval = null;
+
+            
+            // Split large batches to avoid frontend overload
+            const maxBatchSize = 50; // Max 50 logs per message
+            let batchCount = 0;
+            
+            while (this.logBuffer.length > 0) {
+                const batch = this.logBuffer.splice(0, maxBatchSize);
+                batchCount++;
+                
+       
+                
+                this.sendToClient({
+                    message: 'log_batch',
+                    logs: batch
+                });
+            }
+            
+   
         }
     };
 

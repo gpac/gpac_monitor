@@ -113,16 +113,9 @@ export class LogHandler {
 
 
   public handleLogBatch(logs: GpacLogEntry[]): void {
-    // Add batch of log entries to the existing array
-    const currentLogs = this.logEntriesSubscribable.getSnapshot();
-    const updatedLogs = [...currentLogs, ...logs];
 
-    // Keep only last 1000 entries
-    while (updatedLogs.length > 1000) {
-      updatedLogs.shift();
-    }
-
-    this.logEntriesSubscribable.updateDataAndNotify(updatedLogs);
+  
+    this.logEntriesSubscribable.updateDataAndNotify(logs);
   }
 
   public handleLogHistory(logs: GpacLogEntry[]): void {
