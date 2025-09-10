@@ -19,6 +19,11 @@ function SessionManager(client) {
 
     this.sendStats = function() {
         session.post_task(() => {
+            if (session.last_task) {
+                this.unsubscribe();
+                return false;
+            }
+            
             const stats = [];
 
             session.lock_filters(true);

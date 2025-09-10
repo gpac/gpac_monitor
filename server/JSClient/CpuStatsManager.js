@@ -20,6 +20,10 @@ function CpuStatsManager(client) {
 
     this.sendStats = function() {
         session.post_task(() => {
+            if (session.last_task) {
+                this.unsubscribe();
+                return false;
+            }
             if (!this.isSubscribed) return false;
             
             const now = Date.now();

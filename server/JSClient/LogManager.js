@@ -89,6 +89,10 @@ function LogManager(client) {
             if (!this.batchTimer) {
                 this.batchTimer = true;
                 session.post_task(() => {
+                    if (session.last_task) {
+                        this.unsubscribe();
+                        return false;
+                    }
                     if (!this.isSubscribed) return false;
                     this.flushPendingLogs();
                     return false; 
@@ -108,6 +112,10 @@ function LogManager(client) {
             this.batchTimer = true;
             const delay = (level === 'info') ? 500 : 2000;
             session.post_task(() => {
+                if (session.last_task) {
+                    this.unsubscribe();
+                    return false;
+                }
                 if (!this.isSubscribed) return false;
                 this.flushPendingLogs();
                 return false; 
