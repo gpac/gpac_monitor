@@ -21,6 +21,9 @@ export class LogHandler {
   // Timeouts for delayed auto-unsubscription to avoid premature cleanup during React re-renders
   private logAutoUnsubscribeTimeout: NodeJS.Timeout | null = null;
 
+  // Track if we're currently subscribed
+  private isSubscribed = false;
+
   // Property and methods for log management
   private logEntriesSubscribable = new UpdatableSubscribable<GpacLogEntry[]>(
     [],
@@ -46,6 +49,11 @@ export class LogHandler {
   ): Promise<void> {
     this.ensureLoaded();
 
+    // If already subscribed, update log level instead
+    if (this.isSubscribed) {
+      return this.updateLogLevel(logLevel);
+    }
+
     // Check if there's already a pending subscribe request
     if (this.pendingLogSubscribe) {
       return this.pendingLogSubscribe;
@@ -59,6 +67,7 @@ export class LogHandler {
           id: LogHandler.generateMessageId(),
           logLevel,
         });
+        this.isSubscribed = true;
       } finally {
         // Clear the pending request when done (success or failure)
         this.pendingLogSubscribe = null;
@@ -83,6 +92,7 @@ export class LogHandler {
           type: WSMessageType.UNSUBSCRIBE_LOGS,
           id: LogHandler.generateMessageId(),
         });
+        this.isSubscribed = false;
       } finally {
         // Clear the pending request when done (success or failure)
         this.pendingLogUnsubscribe = null;
