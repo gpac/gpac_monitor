@@ -1,13 +1,22 @@
 import { Sys as sys } from 'gpaccore';
+
+/**
+ * LogManager - Manages log subscription and batching for GPAC system logs
+ * Captures GPAC logs, batches them for performance, and sends to WebSocket client
+ */
 function LogManager(client) {
     this.client = client;
     this.isSubscribed = false;
     this.logLevel = "all@warning";
-    this.logs = [];
-    this.originalLogConfig = null;
-    this.pendingLogs = [];
-    this.batchTimer = null;
+    this.logs = []; // Historical logs storage (max 500)
+    this.originalLogConfig = null; // Backup of original GPAC log config
+    this.pendingLogs = []; // Batch buffer for outgoing logs
+    this.batchTimer = null; // Batching timer state
 
+    /**
+     * Subscribe to GPAC logs at specified level
+     * Sets up log capturing and configures GPAC log level
+     */
     this.subscribe = function(logLevel) {
         if (this.isSubscribed) {
             this.updateLogLevel(logLevel);
@@ -26,12 +35,7 @@ function LogManager(client) {
             
             sys.set_logs(this.logLevel);
             
-            if (this.logs.length > 0) {
-                this.sendToClient({
-                    message: 'log_history',
-                    logs: this.logs.slice(-50)
-                });
-            }
+      
             
             console.log(`LogManager: Client ${this.client.id} subscribed to logs at level: ${this.logLevel}`);
         } catch (error) {
@@ -40,6 +44,10 @@ function LogManager(client) {
         }
     };
 
+    /**
+     * Unsubscribe from GPAC logs
+     * Restores original log config and cleans up resources
+     */
     this.unsubscribe = function() {
         if (!this.isSubscribed) return;
 
@@ -63,6 +71,10 @@ function LogManager(client) {
         }
     };
 
+    /**
+     * Handle incoming GPAC log entry
+     * Stores log, manages history limit, and batches for transmission
+     */
     this.handleLog = function(tool, level, message) {
         const log = { 
             timestamp: Date.now(), 
@@ -80,49 +92,31 @@ function LogManager(client) {
         // Add to pending batch with strict limit to prevent segfault
         this.pendingLogs.push(log);
  
-        if (level === 'debug') {
-            // For debug: only keep 2 logs max, flush every 50ms
-            if (this.pendingLogs.length >= 2) {
-                this.flushPendingLogs();
-                return;
-            }
-            if (!this.batchTimer) {
-                this.batchTimer = true;
-                session.post_task(() => {
-                    if (session.last_task) {
-                        this.unsubscribe();
-                        return false;
-                    }
-                    if (!this.isSubscribed) return false;
-                    this.flushPendingLogs();
-                    return false; 
-                }, 50);
-            }
-            return;
-        }
+        // Aggressive batching for high-volume log levels
+       const isHighVolume = (level === 'debug' || level === 'info');
+       const maxPending = level === 'debug' ? 10 : (level === 'info' ? 30 : 50);
+       const delay      = level === 'debug' ? 100 : (level === 'info' ? 250 : 1000);
         
-        // For info/other levels
-        const maxPending = (level === 'info') ? 10 : 50;
+        // Flush immediately if batch is full
         if (this.pendingLogs.length >= maxPending) {
             this.flushPendingLogs();
             return;
         }
         
-        if (!this.batchTimer) {
-            this.batchTimer = true;
-            const delay = (level === 'info') ? 500 : 2000;
-            session.post_task(() => {
-                if (session.last_task) {
-                    this.unsubscribe();
-                    return false;
-                }
-                if (!this.isSubscribed) return false;
-                this.flushPendingLogs();
-                return false; 
-            }, delay);
-        }
+       if (!this.batchTimer) {
+  this.batchTimer = true;
+  session.post_task(() => {
+    if (!this.isSubscribed) return false;
+    this.flushPendingLogs();
+    return false;
+  }, delay);
+}
     };
 
+    /**
+     * Update log level for existing subscription
+     * Changes GPAC log level and clears current log buffers
+     */
     this.updateLogLevel = function(logLevel) {
         if (!this.isSubscribed) return;
 
@@ -144,6 +138,10 @@ function LogManager(client) {
         }
     };
 
+    /**
+     * Get current LogManager status
+     * Returns subscription state, log level, and count information
+     */
     this.getStatus = function() {
         return {
             isSubscribed: this.isSubscribed,
@@ -153,6 +151,10 @@ function LogManager(client) {
         };
     };
 
+    /**
+     * Flush pending logs to client
+     * Sends batched logs via WebSocket and clears pending buffer
+     */
     this.flushPendingLogs = function() {
         if (this.pendingLogs.length === 0) {
             this.batchTimer = null;
@@ -169,6 +171,10 @@ function LogManager(client) {
     };
 
     
+    /**
+     * Send data to WebSocket client
+     * Handles JSON serialization and WebSocket transmission
+     */
     this.sendToClient = function(data) {
         if (this.client.client && typeof this.client.client.send === 'function') {
             this.client.client.send(JSON.stringify(data));

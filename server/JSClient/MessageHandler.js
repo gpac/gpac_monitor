@@ -74,7 +74,7 @@ function MessageHandler(client) {
                     
                     'subscribe_cpu_stats': () => {
                         print("Subscribing to CPU stats");
-                        const interval = jtext['interval'] || 50;
+                        const interval = jtext['interval'] || 150;
                         const fields = jtext['fields'] || [];
                         this.client.cpuStatsManager.subscribe(interval, fields);
                     },
