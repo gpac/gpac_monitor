@@ -1,3 +1,5 @@
+import { DEFAULT_FILTER_FIELDS } from '../config.js';
+
 function MessageHandler(client) {
     this.client = client;
 
@@ -38,7 +40,7 @@ function MessageHandler(client) {
                     'subscribe_session': () => {
                         print("Subscribing to session");
                         const interval = jtext['interval'] || 1000;
-                        const fields = jtext['fields'] || [];
+                        const fields = jtext['fields'] || DEFAULT_FILTER_FIELDS;
                         this.client.sessionManager.subscribe(interval, fields);
                     },
                     
