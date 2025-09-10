@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useDeferredValue } from 'react';
+import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react';
 import { GpacLogEntry, GpacLogConfig } from '@/types/domain/gpac/log-types';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
@@ -13,7 +13,7 @@ export function useLogs(options: UseLogsOptions = {}) {
   const {
     enabled = true,
     logLevel = 'all@warning',
-   
+    maxEntries = 2000,
   } = options;
 
   const [logs, setLogs] = useState<GpacLogEntry[]>([]);
@@ -21,20 +21,24 @@ export function useLogs(options: UseLogsOptions = {}) {
 
   const handleLogsUpdate = useCallback(
     (newLogs: GpacLogEntry[]) => {
-      console.log('[logs] Batch size:', newLogs.length);
+      if (newLogs.length === 0) return;
+      
       setLogs(currentLogs => {
-        // Append new logs instead of replacing all
-        const updatedLogs = [...currentLogs, ...newLogs.map((log) => ({ ...log }))];
-        
-        // Keep only last 500 logs for performance
-        if (updatedLogs.length > 500) {
-          return updatedLogs.slice(-500);
+        if (currentLogs.length + newLogs.length <= maxEntries) {
+          return currentLogs.concat(newLogs);
         }
         
-        return updatedLogs;
+        const totalLength = currentLogs.length + newLogs.length;
+        const excessCount = totalLength - maxEntries;
+        
+        if (excessCount >= currentLogs.length) {
+          return newLogs.slice(-(maxEntries));
+        }
+        
+        return currentLogs.slice(excessCount).concat(newLogs);
       });
     },
-    [],
+    [maxEntries],
   );
 
   useEffect(() => {
@@ -96,11 +100,11 @@ export function useLogs(options: UseLogsOptions = {}) {
     };
   }, [enabled, logLevel, handleLogsUpdate]);
 
-  // Use useDeferredValue to smooth out rapid log updates and prevent UI blocking
-  const deferredLogs = useDeferredValue(logs);
+  const memoizedLogs = useMemo(() => logs, [logs]);
+  const optimizedLogs = useDeferredValue(memoizedLogs);
 
   return {
-    logs: deferredLogs,
+    logs: optimizedLogs,
     isSubscribed,
   };
 }

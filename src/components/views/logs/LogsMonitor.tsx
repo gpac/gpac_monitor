@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   FaInfoCircle,
   FaExclamationTriangle,
   FaTimesCircle,
   FaChevronDown,
 } from 'react-icons/fa';
+import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import WidgetWrapper from '../../common/WidgetWrapper';
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import {
   GpacLogConfig,
   GpacLogLevel,
   GpacLogTool,
+  GpacLogEntry,
 } from '@/types/domain/gpac/log-types';
 
 interface LogsMonitorProps {
@@ -32,7 +34,8 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const [levelFilter, setLevelFilter] = useState<GpacLogLevel>(
     GpacLogLevel.INFO,
   );
-  const viewRef = useRef<HTMLDivElement>(null);
+  const [autoScroll, setAutoScroll] = useState(true);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   // Use real logs from GPAC
   const logLevel: GpacLogConfig = `${toolFilter}@${levelFilter}`;
@@ -42,60 +45,72 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   });
 
   const scrollToBottom = useCallback(() => {
-    viewRef.current?.scrollTo({
-      top: viewRef.current.scrollHeight,
-      behavior: 'smooth',
-    });
-  }, []);
+    if (autoScroll) {
+      virtuosoRef.current?.scrollToIndex({
+        index: logs.length - 1,
+        behavior: 'smooth',
+      });
+    }
+  }, [autoScroll, logs.length]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [logs, scrollToBottom]);
+    if (logs.length > 0) {
+      scrollToBottom();
+    }
+  }, [logs.length, scrollToBottom]);
 
-  const levelIcons = useRef({
-    0: <FaInfoCircle className="w-4 h-4 text-gray-500" />,
-    1: <FaTimesCircle className="w-4 h-4 text-red-500" />,
-    2: <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />,
-    3: <FaInfoCircle className="w-4 h-4 text-green-700" />,
-    4: <FaInfoCircle className="w-4 h-4 text-blue-300" />,
-  }).current;
-
-  const getLevelIcon = useCallback(
-    (level: number) => {
-      return levelIcons[level as keyof typeof levelIcons] || levelIcons[0];
+  const levelConfig = useMemo(() => ({
+    icons: {
+      0: <FaInfoCircle className="w-4 h-4 text-gray-500" />,
+      1: <FaTimesCircle className="w-4 h-4 text-red-500" />,
+      2: <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />,
+      3: <FaInfoCircle className="w-4 h-4 text-green-700" />,
+      4: <FaInfoCircle className="w-4 h-4 text-blue-300" />,
     },
-    [levelIcons],
-  );
-
-  const levelStyles = useRef({
-    0: 'text-gray-500',
-    1: 'text-red-500',
-    2: 'text-yellow-500',
-    3: 'text-green-600',
-    4: 'text-blue-300',
-  }).current;
-
-  const getLevelStyle = useCallback(
-    (level: number) => {
-      return levelStyles[level as keyof typeof levelStyles] || levelStyles[0];
+    styles: {
+      0: 'text-gray-500',
+      1: 'text-red-500', 
+      2: 'text-yellow-500',
+      3: 'text-green-600',
+      4: 'text-blue-300',
     },
-    [levelStyles],
-  );
+    names: {
+      0: 'QUIET',
+      1: 'ERROR', 
+      2: 'WARNING',
+      3: 'INFO',
+      4: 'DEBUG',
+    }
+  }), []);
 
-  const levelNames = useRef({
-    0: 'QUIET',
-    1: 'ERROR',
-    2: 'WARNING',
-    3: 'INFO',
-    4: 'DEBUG',
-  }).current;
+  const LogEntry = React.memo(({ log }: { log: GpacLogEntry }) => {
+    const logData = useMemo(() => {
+      const level = log.level;
+      return {
+        time: new Date(log.timestamp).toLocaleTimeString(),
+        icon: levelConfig.icons[level as keyof typeof levelConfig.icons] || levelConfig.icons[0],
+        style: levelConfig.styles[level as keyof typeof levelConfig.styles] || levelConfig.styles[0],
+        name: levelConfig.names[level as keyof typeof levelConfig.names] || 'UNKNOWN',
+      };
+    }, [log.timestamp, log.level]);
 
-  const getLevelName = useCallback(
-    (level: number) => {
-      return levelNames[level as keyof typeof levelNames] || 'UNKNOWN';
-    },
-    [levelNames],
-  );
+    return (
+      <div className="flex items-start gap-2 mb-1 p-1" style={{ minHeight: '32px' }}>
+        {logData.icon}
+        <div className="flex-1 stat overflow-hidden">
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-gray-400 shrink-0">{logData.time}</span>
+            <span className={`shrink-0 ${logData.style}`}>[{logData.name}]</span>
+            <span className="text-gray-300 shrink-0">[{log.tool}]</span>
+          </div>
+          <div className={`text-sm ${logData.style} break-words`}>{log.message}</div>
+        </div>
+      </div>
+    );
+  }, (prevProps, nextProps) => {
+    return prevProps.log.timestamp === nextProps.log.timestamp &&
+           prevProps.log.message === nextProps.log.message;
+  });
 
   return (
     <WidgetWrapper id={id} title={title}>
@@ -142,38 +157,45 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
         </div>
 
         {/* Logs */}
-        <div
-          ref={viewRef}
-          className="flex-1 overflow-y-auto rounded p-4 text-sm bg-stat stat"
-          style={{ fontFamily: "'Roboto Mono', 'Courier New', monospace" }}
-        >
-          {logs.map((log, index) => {
-            const formattedTime = new Date(log.timestamp).toLocaleTimeString();
-            const levelStyle = getLevelStyle(log.level);
-            const levelName = getLevelName(log.level);
-            const levelIcon = getLevelIcon(log.level);
-
-            return (
-              <div
-                key={`${log.timestamp}-${index}`}
-                className="flex items-start gap-2 mb-2 hover:bg-gray-900 p-1 rounded"
-              >
-                {levelIcon}
-                <div className="flex-1 stat">
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-400 text-xs">
-                      {formattedTime}
-                    </span>
-                    <span className={`text-xs ${levelStyle}`}>
-                      [{levelName}]
-                    </span>
-                    <span className="text-xs text-gray-300">[{log.tool}]</span>
-                  </div>
-                  <div className={`mt-1 ${levelStyle}`}>{log.message}</div>
+        <div className="flex-1 relative">
+          <div className="absolute top-2 right-2 z-10">
+            <button
+              onClick={() => setAutoScroll(!autoScroll)}
+              className={`px-2 py-1 text-xs rounded border ${
+                autoScroll
+                  ? 'bg-orange-800  border-orange-600 text-white'
+                  : 'bg-gray-700 border-gray-600 text-gray-300'
+              }`}
+            >
+              Auto-scroll: {autoScroll ? 'ON' : 'OFF'}
+            </button>
+          </div>
+          <Virtuoso
+            ref={virtuosoRef}
+            data={logs}
+            style={{
+              height: '100%',
+              fontFamily: "'Roboto Mono', 'Courier New', monospace",
+              willChange: 'transform',
+            }}
+            className="rounded px-2 py-1 text-sm bg-stat stat"
+            itemContent={(_, log) => <LogEntry log={log} />}
+            followOutput={autoScroll ? 'smooth' : false}
+            atBottomStateChange={(atBottom: boolean) => {
+              if (atBottom && !autoScroll) {
+                setAutoScroll(true);
+              }
+            }}
+            overscan={20}
+            increaseViewportBy={200}
+            components={{
+              Footer: logs.length > 100 ? () => (
+                <div className="text-center text-xs text-gray-500 py-1">
+                  {logs.length} logs
                 </div>
-              </div>
-            );
-          })}
+              ) : undefined,
+            }}
+          />
         </div>
       </div>
     </WidgetWrapper>
