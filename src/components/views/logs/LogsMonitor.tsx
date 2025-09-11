@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from 'react';
 import {
   FaInfoCircle,
   FaExclamationTriangle,
@@ -14,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '../../ui/dropdown-menu';
 import { useLogs } from './hooks/useLogs';
+
 import {
   GpacLogConfig,
   GpacLogLevel,
@@ -32,7 +39,7 @@ const LOG_LEVELS = Object.values(GpacLogLevel);
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const [toolFilter, setToolFilter] = useState<GpacLogTool>(GpacLogTool.ALL);
   const [levelFilter, setLevelFilter] = useState<GpacLogLevel>(
-    GpacLogLevel.INFO,
+    GpacLogLevel.DEBUG,
   );
   const [autoScroll, setAutoScroll] = useState(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -59,58 +66,79 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     }
   }, [logs.length, scrollToBottom]);
 
-  const levelConfig = useMemo(() => ({
-    icons: {
-      0: <FaInfoCircle className="w-4 h-4 text-gray-500" />,
-      1: <FaTimesCircle className="w-4 h-4 text-red-500" />,
-      2: <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />,
-      3: <FaInfoCircle className="w-4 h-4 text-green-700" />,
-      4: <FaInfoCircle className="w-4 h-4 text-blue-300" />,
-    },
-    styles: {
-      0: 'text-gray-500',
-      1: 'text-red-500', 
-      2: 'text-yellow-500',
-      3: 'text-green-600',
-      4: 'text-blue-300',
-    },
-    names: {
-      0: 'QUIET',
-      1: 'ERROR', 
-      2: 'WARNING',
-      3: 'INFO',
-      4: 'DEBUG',
-    }
-  }), []);
+  const levelConfig = useMemo(
+    () => ({
+      icons: {
+        0: <FaInfoCircle className="w-4 h-4 text-gray-500" />,
+        1: <FaTimesCircle className="w-4 h-4 text-red-500" />,
+        2: <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />,
+        3: <FaInfoCircle className="w-4 h-4 text-green-700" />,
+        4: <FaInfoCircle className="w-4 h-4 text-blue-300" />,
+      },
+      styles: {
+        0: 'text-gray-500',
+        1: 'text-red-500',
+        2: 'text-yellow-500',
+        3: 'text-green-600',
+        4: 'text-blue-300',
+      },
+      names: {
+        0: 'QUIET',
+        1: 'ERROR',
+        2: 'WARNING',
+        3: 'INFO',
+        4: 'DEBUG',
+      },
+    }),
+    [],
+  );
 
-  const LogEntry = React.memo(({ log }: { log: GpacLogEntry }) => {
-    const logData = useMemo(() => {
-      const level = log.level;
-      return {
-        time: new Date(log.timestamp).toLocaleTimeString(),
-        icon: levelConfig.icons[level as keyof typeof levelConfig.icons] || levelConfig.icons[0],
-        style: levelConfig.styles[level as keyof typeof levelConfig.styles] || levelConfig.styles[0],
-        name: levelConfig.names[level as keyof typeof levelConfig.names] || 'UNKNOWN',
-      };
-    }, [log.timestamp, log.level]);
+  const LogEntry = React.memo(
+    ({ log }: { log: GpacLogEntry }) => {
+      const logData = useMemo(() => {
+        const level = log.level;
+        return {
+          time: new Date(log.timestamp).toLocaleTimeString(),
+          icon:
+            levelConfig.icons[level as keyof typeof levelConfig.icons] ||
+            levelConfig.icons[0],
+          style:
+            levelConfig.styles[level as keyof typeof levelConfig.styles] ||
+            levelConfig.styles[0],
+          name:
+            levelConfig.names[level as keyof typeof levelConfig.names] ||
+            'UNKNOWN',
+        };
+      }, [log.timestamp, log.level]);
 
-    return (
-      <div className="flex items-start gap-2 mb-1 p-1" style={{ minHeight: '32px' }}>
-        {logData.icon}
-        <div className="flex-1 stat overflow-hidden">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-gray-400 shrink-0">{logData.time}</span>
-            <span className={`shrink-0 ${logData.style}`}>[{logData.name}]</span>
-            <span className="text-gray-300 shrink-0">[{log.tool}]</span>
+      return (
+        <div
+          className="flex items-start gap-2 mb-1 p-1"
+          style={{ minHeight: '32px' }}
+        >
+          {logData.icon}
+          <div className="flex-1 stat overflow-hidden">
+            <div className="flex items-center gap-2 text-xs">
+              <span className="text-gray-400 shrink-0">{logData.time}</span>
+              <span className={`shrink-0 ${logData.style}`}>
+                [{logData.name}]
+              </span>
+              <span className="text-gray-300 shrink-0">[{log.tool}]</span>
+            </div>
+            <div className={`text-sm ${logData.style} break-words`}>
+              {log.message}
+            </div>
           </div>
-          <div className={`text-sm ${logData.style} break-words`}>{log.message}</div>
         </div>
-      </div>
-    );
-  }, (prevProps, nextProps) => {
-    return prevProps.log.timestamp === nextProps.log.timestamp &&
-           prevProps.log.message === nextProps.log.message;
-  });
+      );
+    },
+    (prevProps, nextProps) => {
+      return (
+        prevProps.log.timestamp === nextProps.log.timestamp &&
+        prevProps.log.message === nextProps.log.message
+      );
+    },
+  );
 
   return (
     <WidgetWrapper id={id} title={title}>
@@ -189,11 +217,14 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
             overscan={20}
             increaseViewportBy={200}
             components={{
-              Footer: logs.length > 100 ? () => (
-                <div className="text-center text-xs text-gray-500 py-1">
-                  {logs.length} logs
-                </div>
-              ) : undefined,
+              Footer:
+                logs.length > 100
+                  ? () => (
+                      <div className="text-center text-xs text-gray-500 py-1">
+                        {logs.length} logs
+                      </div>
+                    )
+                  : undefined,
             }}
           />
         </div>

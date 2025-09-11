@@ -7,6 +7,7 @@ import {
 } from '@/types/domain/gpac/log-types';
 import { generateID } from '@/utils/id';
 import { MessageHandlerDependencies } from './types';
+import { logWorkerService } from '@/services/workers/logWorkerService';
 
 export class LogHandler {
   constructor(
@@ -30,6 +31,9 @@ export class LogHandler {
   );
   private logStatusSubscribable =
     new UpdatableSubscribable<LogManagerStatus | null>(null);
+
+  // Worker subscription cleanup
+  private workerUnsubscribe: (() => void) | null = null;
 
   // Logic for subscribing and unsubscribing to logs
   private ensureLoaded(): boolean {
@@ -121,11 +125,8 @@ export class LogHandler {
     });
   }
 
-
   public handleLogBatch(logs: GpacLogEntry[]): void {
-
-  
-    this.logEntriesSubscribable.updateDataAndNotify(logs);
+    logWorkerService.processLogs(logs);
   }
 
   public handleLogHistory(logs: GpacLogEntry[]): void {
@@ -160,6 +161,13 @@ export class LogHandler {
 
     const isFirstSubscriber = !this.logEntriesSubscribable.hasSubscribers;
 
+    // Subscribe to logs processed by the Worker
+    if (!this.workerUnsubscribe) {
+      this.workerUnsubscribe = logWorkerService.subscribe((processedLogs) => {
+        this.logEntriesSubscribable.updateDataAndNotify(processedLogs);
+      });
+    }
+
     const unsubscribe = this.logEntriesSubscribable.subscribe(
       (data) => {
         if (data) callback(data);
@@ -180,6 +188,11 @@ export class LogHandler {
         // Cancel any existing timeout
         if (this.logAutoUnsubscribeTimeout) {
           clearTimeout(this.logAutoUnsubscribeTimeout);
+        }
+        // Clean up the Worker subscription
+        if (this.workerUnsubscribe) {
+          this.workerUnsubscribe();
+          this.workerUnsubscribe = null;
         }
 
         // Schedule unsubscribe after a delay to allow for React re-renders

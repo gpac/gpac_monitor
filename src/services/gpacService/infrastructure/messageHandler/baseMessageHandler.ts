@@ -10,7 +10,12 @@ import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
-import { LogBatchResponse, LogHistoryResponse, LogStatusResponse, LogConfigChangedResponse } from '@/services/ws/types';
+import {
+  LogBatchResponse,
+  LogHistoryResponse,
+  LogStatusResponse,
+  LogConfigChangedResponse,
+} from '@/services/ws/types';
 
 export type { MessageHandlerCallbacks, MessageHandlerDependencies };
 
@@ -52,10 +57,7 @@ export class BaseMessageHandler {
       dependencies,
       isLoaded || (() => true),
     );
-    this.logHandler = new LogHandler(
-      dependencies,
-      isLoaded || (() => true),
-    );
+    this.logHandler = new LogHandler(dependencies, isLoaded || (() => true));
   }
 
   // Expose handler methods
