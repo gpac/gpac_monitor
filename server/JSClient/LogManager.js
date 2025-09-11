@@ -11,6 +11,8 @@ function LogManager(client) {
     this.logs = []; // Historical logs storage (max 500)
     this.originalLogConfig = null; // Backup of original GPAC log config
     this.pendingLogs = []; // Batch buffer for outgoing logs
+    this.incomingBuffer = []; // Non-blocking buffer for incoming logs
+    this.processingScheduled = false; // Processing schedule flag
     this.batchTimer = null; // Batching timer state
 
     /**
@@ -72,10 +74,11 @@ function LogManager(client) {
     };
 
     /**
-     * Handle incoming GPAC log entry
-     * Stores log, manages history limit, and batches for transmission
+     * Handle incoming GPAC log entry 
+     * 
      */
     this.handleLog = function(tool, level, message) {
+        // Only create log object - NO OTHER PROCESSING
         const log = { 
             timestamp: Date.now(), 
             tool, 
@@ -83,34 +86,72 @@ function LogManager(client) {
             message: message?.length > 500 ? message.substring(0, 500) + '...' : message
         };
         
-        // Keep history limited
-        if (this.logs.length >= 500) {
-            this.logs.shift();
+        // Just add to buffer - NO WebSocket operations on main thread
+        this.incomingBuffer.push(log);
+        
+        // Schedule processing if not already scheduled
+        if (!this.processingScheduled) {
+            this.scheduleLogProcessing();
         }
-        this.logs.push(log);
+    };
+
+    /**
+     * Schedule log processing on next tick (non-blocking)
+     */
+    this.scheduleLogProcessing = function() {
+        if (this.processingScheduled) return;
         
-        // Add to pending batch with strict limit to prevent segfault
-        this.pendingLogs.push(log);
- 
-        // Aggressive batching for high-volume log levels
-       const isHighVolume = (level === 'debug' || level === 'info');
-       const maxPending = level === 'debug' ? 10 : (level === 'info' ? 30 : 50);
-       const delay      = level === 'debug' ? 100 : (level === 'info' ? 250 : 1000);
+        this.processingScheduled = true;
+        session.post_task(() => {
+            this.processIncomingLogs();
+            this.processingScheduled = false;
+            return false;
+        }, 1); // Process ASAP but off main thread
+    };
+
+    /**
+     * Process logs from buffer (runs in post_task, safe for WebSocket)
+     */
+    this.processIncomingLogs = function() {
+        if (!this.isSubscribed || this.incomingBuffer.length === 0) {
+            return;
+        }
+
+        // Move all logs from incoming buffer
+        const logsToProcess = this.incomingBuffer.splice(0);
         
-        // Flush immediately if batch is full
+        // Process each log
+        for (const log of logsToProcess) {
+            // Keep history limited
+            if (this.logs.length >= 500) {
+                this.logs.shift();
+            }
+            this.logs.push(log);
+            
+            // Add to pending batch
+            this.pendingLogs.push(log);
+        }
+
+        // Determine batching strategy based on processed logs
+        const hasDebugLogs = logsToProcess.some(log => log.level === 'debug' || log.level === 'info');
+        const maxPending = hasDebugLogs ? 20 : 50; // Slightly larger batches
+        const delay = hasDebugLogs ? 100 : 250; // More conservative delays
+        
+        // Flush if batch is full
         if (this.pendingLogs.length >= maxPending) {
             this.flushPendingLogs();
             return;
         }
         
-       if (!this.batchTimer) {
-  this.batchTimer = true;
-  session.post_task(() => {
-    if (!this.isSubscribed) return false;
-    this.flushPendingLogs();
-    return false;
-  }, delay);
-}
+        // Schedule delayed flush
+        if (!this.batchTimer) {
+            this.batchTimer = true;
+            session.post_task(() => {
+                if (!this.isSubscribed) return false;
+                this.flushPendingLogs();
+                return false;
+            }, delay);
+        }
     };
 
     /**
