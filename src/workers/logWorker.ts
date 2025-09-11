@@ -32,7 +32,6 @@ class LogProcessor {
 
     // Circuit breaker - drop logs if buffer is too full (keep for safety)
     if (this.buffer.length > MAX_BUFFER_SIZE) {
-  
       // Keep only the most recent logs
       this.buffer = this.buffer.slice(-MAX_BUFFER_SIZE / 2);
       return;

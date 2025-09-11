@@ -1,5 +1,7 @@
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import { LogWorkerMessage, LogWorkerResponse } from '@/workers/logWorker';
+import LogWorker from '../../workers/logWorker?worker&inline';
+
 
 export class LogWorkerService {
   private worker: Worker | null = null;
@@ -12,11 +14,9 @@ export class LogWorkerService {
   private initWorker() {
     try {
       // Créer le Worker
-      this.worker = new Worker(
-        new URL('@/workers/logWorker.ts', import.meta.url),
-        { type: 'module' },
-      );
+ 
 
+      this.worker = new LogWorker({  name: 'logWorker' });
       // Écouter les messages du Worker
       this.worker.onmessage = (event: MessageEvent<LogWorkerResponse>) => {
         const { type, logs } = event.data;
