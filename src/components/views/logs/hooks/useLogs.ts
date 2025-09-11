@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useDeferredValue, useMemo } from 'react';
+import { useState, useEffect, useCallback, useDeferredValue, useMemo, useTransition, useRef } from 'react';
 import { GpacLogEntry, GpacLogConfig } from '@/types/domain/gpac/log-types';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
@@ -18,33 +18,64 @@ export function useLogs(options: UseLogsOptions = {}) {
 
   const [logs, setLogs] = useState<GpacLogEntry[]>([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isPending, startTransition] = useTransition();
+  
+  // Buffer pour accumuler les logs pendant le throttling
+  const pendingLogsRef = useRef<GpacLogEntry[]>([]);
+  const throttleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Fonction pour appliquer les logs accumulés avec useTransition
+  const flushPendingLogs = useCallback(() => {
+    if (pendingLogsRef.current.length === 0) return;
+    
+    const logsToAdd = [...pendingLogsRef.current];
+    pendingLogsRef.current = [];
+    
+    startTransition(() => {
+      setLogs(currentLogs => {
+        const newLogs = currentLogs.concat(logsToAdd);
+        
+        if (newLogs.length <= maxEntries) {
+          return newLogs;
+        }
+        
+        // Garde seulement les derniers maxEntries
+        return newLogs.slice(-maxEntries);
+      });
+    });
+  }, [maxEntries, startTransition]);
 
   const handleLogsUpdate = useCallback(
     (newLogs: GpacLogEntry[]) => {
       if (newLogs.length === 0) return;
       
-      setLogs(currentLogs => {
-        if (currentLogs.length + newLogs.length <= maxEntries) {
-          return currentLogs.concat(newLogs);
-        }
-        
-        const totalLength = currentLogs.length + newLogs.length;
-        const excessCount = totalLength - maxEntries;
-        
-        if (excessCount >= currentLogs.length) {
-          return newLogs.slice(-(maxEntries));
-        }
-        
-        return currentLogs.slice(excessCount).concat(newLogs);
-      });
+      // Ajouter les nouveaux logs au buffer
+      pendingLogsRef.current.push(...newLogs);
+      
+      // Annuler le timeout précédent s'il existe
+      if (throttleTimeoutRef.current) {
+        clearTimeout(throttleTimeoutRef.current);
+      }
+      
+      // Programmer le flush des logs avec throttling
+      throttleTimeoutRef.current = setTimeout(() => {
+        flushPendingLogs();
+        throttleTimeoutRef.current = null;
+      }, 50); // 50ms de throttling - plus réactif pour debug
     },
-    [maxEntries],
+    [flushPendingLogs],
   );
 
   useEffect(() => {
     if (!enabled) {
       if (logs.length > 0) {
         setLogs([]);
+      }
+      // Nettoyer les buffers et timeouts
+      pendingLogsRef.current = [];
+      if (throttleTimeoutRef.current) {
+        clearTimeout(throttleTimeoutRef.current);
+        throttleTimeoutRef.current = null;
       }
       setIsSubscribed(false);
       return;
@@ -94,6 +125,12 @@ export function useLogs(options: UseLogsOptions = {}) {
     return () => {
       isMounted = false;
       setIsSubscribed(false);
+      // Nettoyer les buffers et timeouts au démontage
+      pendingLogsRef.current = [];
+      if (throttleTimeoutRef.current) {
+        clearTimeout(throttleTimeoutRef.current);
+        throttleTimeoutRef.current = null;
+      }
       if (unsubscribe) {
         unsubscribe();
       }
@@ -106,5 +143,6 @@ export function useLogs(options: UseLogsOptions = {}) {
   return {
     logs: optimizedLogs,
     isSubscribed,
+    isPending, // Indique si une transition est en cours
   };
 }
