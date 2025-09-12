@@ -172,24 +172,25 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Levels Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger className="px-3 py-1  font-bold border rounded text-sm bg-stat border-gray-600 flex items-center gap-1 hover:bg-gray-700">
-              LEVELS: {globalLevel.toUpperCase()}
-              <FaChevronDown className="w-3 h-3" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
+          {/* Levels Radio Buttons */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-gray-300">LEVELS:</span>
+            <div className="flex gap-1">
               {LOG_LEVELS.map((level) => (
-                <DropdownMenuItem
+                <button
                   key={level}
                   onClick={() => setGlobalLevel(level)}
-                  className={globalLevel === level ? '!bg-gray-600' : ''}
+                  className={`px-3 py-1 text-xs font-medium border rounded transition-colors ${
+                    globalLevel === level
+                      ? 'bg-orange-800 border-orange-700 text-white'
+                      : 'bg-stat border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500'
+                  }`}
                 >
-                  {level}
-                </DropdownMenuItem>
+                  {level.toUpperCase()}
+                </button>
               ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </div>
+          </div>
         </div>
 
         {/* Logs */}
