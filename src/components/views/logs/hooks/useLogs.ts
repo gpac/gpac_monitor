@@ -37,14 +37,19 @@ export function useLogs(options: UseLogsOptions = {}) {
           return allLogs;
         }
 
-        return allLogs.slice(-maxEntries);
+        const trimmed = allLogs.slice(-maxEntries);
+        console.log('[useLogs] Trimmed to:', trimmed.length, 'logs');
+        return trimmed;
       });
     },
     [maxEntries],
   );
 
   useEffect(() => {
+  
+    
     if (!enabled) {
+   
       if (logs.length > 0) {
         setLogs([]);
       }
@@ -57,9 +62,11 @@ export function useLogs(options: UseLogsOptions = {}) {
 
     const setupSubscription = async () => {
       try {
+     
         await gpacService.load();
 
         if (!isMounted) {
+     
           return;
         }
 
@@ -69,6 +76,7 @@ export function useLogs(options: UseLogsOptions = {}) {
             logLevel,
           },
           (result) => {
+ 
             if (result.data && isMounted) {
               handleLogsUpdate(result.data as GpacLogEntry[]);
             }
@@ -78,6 +86,7 @@ export function useLogs(options: UseLogsOptions = {}) {
         if (isMounted) {
           unsubscribe = unsubscribeFunc;
           setIsSubscribed(true);
+          console.log('[useLogs] Subscription successful');
         } else {
           unsubscribeFunc();
         }
@@ -93,6 +102,7 @@ export function useLogs(options: UseLogsOptions = {}) {
     setupSubscription();
 
     return () => {
+      console.log('[useLogs] Cleaning up subscription');
       isMounted = false;
       setIsSubscribed(false);
       if (unsubscribe) {

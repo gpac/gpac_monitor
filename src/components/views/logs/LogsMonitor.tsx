@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '../../ui/dropdown-menu';
 import { useLogs } from './hooks/useLogs';
+import { useLogsRedux } from './hooks/useLogsRedux';
 
 import {
   GpacLogConfig,
@@ -37,34 +38,41 @@ const GPAC_TOOLS = Object.values(GpacLogTool);
 const LOG_LEVELS = Object.values(GpacLogLevel);
 
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
-  const [toolFilter, setToolFilter] = useState<GpacLogTool>(GpacLogTool.ALL);
-  const [levelFilter, setLevelFilter] = useState<GpacLogLevel>(
-    GpacLogLevel.DEBUG,
-  );
   const [autoScroll, setAutoScroll] = useState(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
-  // Use real logs from GPAC
-  const logLevel: GpacLogConfig = `${toolFilter}@${levelFilter}`;
-  const { logs } = useLogs({
+ 
+  
+  const { currentTool, globalLevel, visibleLogs, setTool, setGlobalLevel } = useLogsRedux();
+  
+  // Keep subscription active with current global level
+  const globalLogConfig: GpacLogConfig = `all@${globalLevel}`;
+  console.log('[LogsMonitor] Current state:', {
+    currentTool,
+    globalLevel,
+    visibleLogsCount: visibleLogs.length,
+    globalLogConfig
+  });
+  
+  useLogs({
     enabled: true,
-    logLevel,
+    logLevel: globalLogConfig,
   });
 
   const scrollToBottom = useCallback(() => {
     if (autoScroll) {
       virtuosoRef.current?.scrollToIndex({
-        index: logs.length - 1,
+        index: visibleLogs.length - 1,
         behavior: 'smooth',
       });
     }
-  }, [autoScroll, logs.length]);
+  }, [autoScroll, visibleLogs.length]);
 
   useEffect(() => {
-    if (logs.length > 0) {
+    if (visibleLogs.length > 0) {
       scrollToBottom();
     }
-  }, [logs.length, scrollToBottom]);
+  }, [visibleLogs.length, scrollToBottom]);
 
   const levelConfig = useMemo(
     () => ({
@@ -148,15 +156,15 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
           {/* Tools Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger className="px-3 py-1  font-bold border rounded text-sm bg-stat border-gray-600 flex items-center gap-1 hover:bg-gray-700">
-              TOOLS: {toolFilter.toUpperCase()}
+              TOOLS: {currentTool.toUpperCase()}
               <FaChevronDown className="w-3 h-3" />
             </DropdownMenuTrigger>
             <DropdownMenuContent className="max-h-60 overflow-y-auto">
               {GPAC_TOOLS.map((tool) => (
                 <DropdownMenuItem
                   key={tool}
-                  onClick={() => setToolFilter(tool)}
-                  className={toolFilter === tool ? '!bg-gray-600' : ''}
+                  onClick={() => setTool(tool)}
+                  className={currentTool === tool ? '!bg-gray-600' : ''}
                 >
                   {tool}
                 </DropdownMenuItem>
@@ -167,15 +175,15 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
           {/* Levels Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger className="px-3 py-1  font-bold border rounded text-sm bg-stat border-gray-600 flex items-center gap-1 hover:bg-gray-700">
-              LEVELS: {levelFilter.toUpperCase()}
+              LEVELS: {globalLevel.toUpperCase()}
               <FaChevronDown className="w-3 h-3" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               {LOG_LEVELS.map((level) => (
                 <DropdownMenuItem
                   key={level}
-                  onClick={() => setLevelFilter(level)}
-                  className={levelFilter === level ? '!bg-gray-600' : ''}
+                  onClick={() => setGlobalLevel(level)}
+                  className={globalLevel === level ? '!bg-gray-600' : ''}
                 >
                   {level}
                 </DropdownMenuItem>
@@ -200,7 +208,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
           </div>
           <Virtuoso
             ref={virtuosoRef}
-            data={logs}
+            data={visibleLogs}
             style={{
               height: '100%',
               fontFamily: "'Roboto Mono', 'Courier New', monospace",
@@ -218,10 +226,10 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
             increaseViewportBy={200}
             components={{
               Footer:
-                logs.length > 100
+                visibleLogs.length > 100
                   ? () => (
                       <div className="text-center text-xs text-gray-500 py-1">
-                        {logs.length} logs
+                        {visibleLogs.length} logs
                       </div>
                     )
                   : undefined,

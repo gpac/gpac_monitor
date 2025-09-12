@@ -3,12 +3,13 @@ import graphReducer from './slices/graphSlice';
 import widgetsReducer from './slices/widgetsSlice';
 import filterArgumentSlice from './slices/filterArgumentSlice';
 import sessionStatsReducer from './slices/sessionStatsSlice';
+import logsReducer from './slices/logsSlice';
 
 export const store = configureStore({
   reducer: {
     graph: graphReducer,
     filterArgument: filterArgumentSlice,
-
+    logs: logsReducer,
     widgets: widgetsReducer,
     sessionStats: sessionStatsReducer,
   },

@@ -6,13 +6,14 @@ import {
   GpacLogConfig,
 } from '@/types/domain/gpac/log-types';
 import { generateID } from '@/utils/id';
-import { MessageHandlerDependencies } from './types';
+import { MessageHandlerDependencies, MessageHandlerCallbacks } from './types';
 import { logWorkerService } from '@/services/workers/logWorkerService';
 
 export class LogHandler {
   constructor(
     private dependencies: MessageHandlerDependencies,
     private isLoaded: () => boolean,
+    private callbacks?: MessageHandlerCallbacks,
   ) {}
 
   // Maps to track pending subscription/unsubscription requests
@@ -72,6 +73,11 @@ export class LogHandler {
           logLevel,
         });
         this.isSubscribed = true;
+        
+        // Notify Redux of subscription status
+        if (this.callbacks?.onLogSubscriptionChange) {
+          this.callbacks.onLogSubscriptionChange(true);
+        }
       } finally {
         // Clear the pending request when done (success or failure)
         this.pendingLogSubscribe = null;
@@ -97,6 +103,11 @@ export class LogHandler {
           id: LogHandler.generateMessageId(),
         });
         this.isSubscribed = false;
+        
+        // Notify Redux of subscription status
+        if (this.callbacks?.onLogSubscriptionChange) {
+          this.callbacks.onLogSubscriptionChange(false);
+        }
       } finally {
         // Clear the pending request when done (success or failure)
         this.pendingLogUnsubscribe = null;
@@ -126,11 +137,23 @@ export class LogHandler {
   }
 
   public handleLogBatch(logs: GpacLogEntry[]): void {
+    // Send to worker for processing
     logWorkerService.processLogs(logs);
+    
+    // Send directly to Redux for immediate UI update
+    if (this.callbacks?.onLogsUpdate) {
+      this.callbacks.onLogsUpdate(logs);
+    }
   }
 
   public handleLogHistory(logs: GpacLogEntry[]): void {
+    // Keep the existing subscribable for backward compatibility
     this.logEntriesSubscribable.updateDataAndNotify(logs);
+    
+    // Send to Redux for immediate UI update
+    if (this.callbacks?.onLogsUpdate) {
+      this.callbacks.onLogsUpdate(logs);
+    }
   }
 
   public handleLogStatus(status: LogManagerStatus): void {

@@ -57,7 +57,11 @@ export class BaseMessageHandler {
       dependencies,
       isLoaded || (() => true),
     );
-    this.logHandler = new LogHandler(dependencies, isLoaded || (() => true));
+    this.logHandler = new LogHandler(
+      dependencies,
+      isLoaded || (() => true),
+      callbacks,
+    );
   }
 
   // Expose handler methods
