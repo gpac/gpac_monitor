@@ -13,7 +13,7 @@ export enum GpacLogLevel {
  * GPAC log tools/categories based on GPAC documentation
  */
 export enum GpacLogTool {
-  ALL = 'all',
+
   AUDIO = 'audio',
   CACHE = 'cache',
   CODEC = 'codec',
@@ -21,7 +21,6 @@ export enum GpacLogTool {
   COMPOSE = 'compose',
   CONSOLE = 'console',
   CONTAINER = 'container',
-  RMTWS = 'rmtws',
   CORE = 'core',
   CTIME = 'ctime',
   DASH = 'dash',
@@ -35,12 +34,14 @@ export enum GpacLogTool {
   MUTEX = 'mutex',
   NETWORK = 'network',
   PARSER = 'parser',
+  RMTWS = 'rmtws',
   ROUTE = 'route',
   RTI = 'rti',
   RTP = 'rtp',
   SCENE = 'scene',
   SCHED = 'sched',
   SCRIPT = 'script',
+  ALL = 'all',
 }
 
 /**
