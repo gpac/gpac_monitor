@@ -18,7 +18,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "check-circular": "madge --circular --extensions ts,tsx src/",
-    "check-deps": "npm run check-circular && npm run typecheck && npm run lint",
+    "check-deps": "pnpm run check-circular && pnpm run typecheck && pnpm run lint",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "test:ui": "vitest --ui",
