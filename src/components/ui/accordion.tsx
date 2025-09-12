@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { LuChevronDown } from 'react-icons/lu';
 
 interface AccordionContextType {
   expandedItems: Set<string>;
@@ -64,7 +64,7 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
         className="w-full flex items-center justify-between p-4 text-sm font-medium text-gray-200 hover:bg-gray-700/50 transition-colors rounded-lg"
       >
         {title}
-        <ChevronDown
+        <LuChevronDown
           className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-out ${
             isExpanded ? 'transform rotate-180' : ''
           }`}

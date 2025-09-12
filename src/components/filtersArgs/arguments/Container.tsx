@@ -1,6 +1,6 @@
 import { cn } from '../../../utils/cn';
 import { forwardRef } from 'react';
-import { X } from 'lucide-react';
+import { LuX } from 'react-icons/lu';
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   onClear?: (value: null) => void;
@@ -36,7 +36,7 @@ export const Container = forwardRef(
             className="px-2 hover:bg-gray-700"
             aria-label="Clear"
           >
-            <X className="h-4 w-4" />
+            <LuX className="h-4 w-4" />
           </button>
         )}
       </div>

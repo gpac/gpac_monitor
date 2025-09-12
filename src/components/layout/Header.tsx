@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Layout, Settings } from 'lucide-react';
+import {  LuSettings } from 'react-icons/lu';
+import { FiLayout } from "react-icons/fi";
 import { LayoutManager } from './LayoutManager';
 
 interface HeaderProps {}
@@ -47,7 +48,7 @@ const Header: React.FC<HeaderProps> = () => {
               onClick={() => setShowLayoutManager(!showLayoutManager)}
               className="flex items-center gap-2 px-3 py-1.5 text-gray-300 hover:text-white text-sm"
             >
-              <Layout className="w-4 h-4" />
+              <FiLayout className="w-4 h-4" />
               Layouts
             </button>
           </div>
@@ -61,7 +62,7 @@ const Header: React.FC<HeaderProps> = () => {
               className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700"
               title="Settings"
             >
-              <Settings className="w-5 h-5" />
+              <LuSettings className="w-5 h-5" />
             </button>
           </div>
         </div>

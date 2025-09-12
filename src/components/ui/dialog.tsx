@@ -1,6 +1,6 @@
 import { cn } from '../../utils/cn';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { X } from 'lucide-react';
+import { LuX } from 'react-icons/lu';
 import * as React from 'react';
 
 const Dialog = DialogPrimitive.Root;
@@ -52,7 +52,7 @@ const DialogContent = React.forwardRef<
           'disabled:pointer-events-none',
         )}
       >
-        <X className="h-4 w-4" />
+        <LuX className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>

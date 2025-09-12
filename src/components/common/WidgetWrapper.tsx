@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 
-import { X, RotateCcw } from 'lucide-react';
+import { LuX, LuRotateCcw } from 'react-icons/lu';
 import {
   removeWidget,
   minimizeWidget,
@@ -158,7 +158,7 @@ const WidgetWrapper = ({
               title="Restore"
               type="button"
             >
-              <RotateCcw className="w-4 h-4" />
+              <LuRotateCcw className="w-4 h-4" />
             </button>
           )}
 
@@ -168,7 +168,7 @@ const WidgetWrapper = ({
             title="Close widget"
             type="button"
           >
-            <X className="w-4 h-4" />
+            <LuX className="w-4 h-4" />
           </button>
         </div>
       </div>

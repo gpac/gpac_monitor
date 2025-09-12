@@ -3,39 +3,40 @@ import { useAppDispatch } from '@/shared/hooks/redux';
 import { addWidget } from '@/shared/store/slices/widgetsSlice';
 import { WidgetType } from '@/types/ui/widget';
 
-import { Gauge, Volume2, FileText, Share2, Layout } from 'lucide-react';
+import { LuGauge, LuVolume2, LuFileText, LuShare2, } from 'react-icons/lu';
+import { FiLayout } from "react-icons/fi";
 
 const availableWidgets = [
   {
     type: WidgetType.AUDIO,
     title: 'Audio Monitor',
-    icon: Volume2,
+    icon: LuVolume2,
     defaultSize: { w: 4, h: 4 },
   },
 
   {
     type: WidgetType.METRICS,
     title: 'System Metrics',
-    icon: Gauge,
+    icon: LuGauge,
     defaultSize: { w: 6, h: 4 },
   },
   {
     type: WidgetType.LOGS,
     title: 'System Logs',
-    icon: FileText,
+    icon: LuFileText,
     defaultSize: { w: 4, h: 4 },
   },
   {
     type: WidgetType.GRAPH,
     title: 'Pipeline Graph',
-    icon: Share2,
+    icon: LuShare2,
     defaultSize: { w: 6, h: 8 },
   },
 
   {
     type: WidgetType.MULTI_FILTER,
     title: 'Multi-Filter Monitor',
-    icon: Layout,
+    icon: FiLayout,
     defaultSize: { w: 12, h: 4 },
   },
 ];
