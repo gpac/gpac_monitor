@@ -9,23 +9,15 @@ import {
   FaInfoCircle,
   FaExclamationTriangle,
   FaTimesCircle,
-  FaChevronDown,
 } from 'react-icons/fa';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import WidgetWrapper from '../../common/WidgetWrapper';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../../ui/dropdown-menu';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
+import { useLogsService } from './hooks/useLogsService';
+import { ToolSettingsDropdown } from './components/ToolSettingsDropdown';
 
 import {
-  GpacLogConfig,
-  GpacLogLevel,
-  GpacLogTool,
   GpacLogEntry,
 } from '@/types/domain/gpac/log-types';
 
@@ -34,23 +26,30 @@ interface LogsMonitorProps {
   title: string;
 }
 
-const GPAC_TOOLS = Object.values(GpacLogTool);
-const LOG_LEVELS = Object.values(GpacLogLevel);
 
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const [autoScroll, setAutoScroll] = useState(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
-  const { currentTool, globalLevel, visibleLogs, setTool, setGlobalLevel } =
-    useLogsRedux();
+  const {
+    levelsByTool,
+    defaultAllLevel,
+    visibleLogs,
+    setToolLevel,
+    setDefaultAllLevel: setDefaultLevel,
+  } = useLogsRedux();
 
-  // Keep subscription active with current global level
-  const globalLogConfig: GpacLogConfig = `all@${globalLevel}`;
+  console.log('[LogsMonitor] visibleLogs count:', visibleLogs?.length || 0);
 
+
+  // Initialize logs subscription (triggers backend subscription)
   useLogs({
     enabled: true,
-    logLevel: globalLogConfig,
+    logLevel: 'all@warning', // Initial subscription level
   });
+
+  // Auto-sync per-tool configuration with backend
+  useLogsService();
 
   const scrollToBottom = useCallback(() => {
     if (autoScroll) {
@@ -62,7 +61,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   }, [autoScroll, visibleLogs.length]);
 
   useEffect(() => {
+    console.log('[LogsMonitor] visibleLogs effect triggered, length:', visibleLogs.length);
     if (visibleLogs.length > 0) {
+      console.log('[LogsMonitor] Scrolling to bottom for', visibleLogs.length, 'logs');
       scrollToBottom();
     }
   }, [visibleLogs.length, scrollToBottom]);
@@ -142,50 +143,19 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   );
 
   return (
-    <WidgetWrapper id={id} title={title}>
+    <WidgetWrapper
+      id={id}
+      title={title}
+      customActions={
+        <ToolSettingsDropdown
+          levelsByTool={levelsByTool}
+          defaultAllLevel={defaultAllLevel}
+          onToolLevelChange={setToolLevel}
+          onDefaultAllLevelChange={setDefaultLevel}
+        />
+      }
+    >
       <div className="flex flex-col h-full bg-stat stat">
-        {/* Filters */}
-        <div className="flex gap-2 py-4 mb-2 flex-wrap">
-          {/* Tools Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger className="px-3 py-1  font-bold border rounded text-sm bg-stat border-gray-600 flex items-center gap-1 hover:bg-gray-700">
-              TOOLS: {currentTool.toUpperCase()}
-              <FaChevronDown className="w-3 h-3" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="max-h-60 overflow-y-auto">
-              {GPAC_TOOLS.map((tool) => (
-                <DropdownMenuItem
-                  key={tool}
-                  onClick={() => setTool(tool)}
-                  className={currentTool === tool ? '!bg-gray-600' : ''}
-                >
-                  {tool}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Levels Radio Buttons */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-gray-300">LEVELS:</span>
-            <div className="flex gap-1">
-              {LOG_LEVELS.map((level) => (
-                <button
-                  key={level}
-                  onClick={() => setGlobalLevel(level)}
-                  className={`px-3 py-1 text-xs font-medium border rounded transition-colors ${
-                    globalLevel === level
-                      ? 'bg-orange-800 border-orange-700 text-white'
-                      : 'bg-stat border-gray-600 text-gray-300 hover:bg-gray-700 hover:border-gray-500'
-                  }`}
-                >
-                  {level.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {/* Logs */}
         <div className="flex-1 relative">
           <div className="absolute top-2 right-2 z-10">

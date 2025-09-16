@@ -16,8 +16,10 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateGraphData: (data) => store.dispatch(updateGraphData(data)),
   onSetLoading: (loading) => store.dispatch(setLoading(loading)),
   onUpdateSessionStats: (stats) => store.dispatch(updateSessionStats(stats)),
-  onLogsUpdate: (logs: GpacLogEntry[]) =>
-    store.dispatch(appendLogsForAllTools(logs)),
+  onLogsUpdate: (logs: GpacLogEntry[]) => {
+    console.log('[storeIntegration] onLogsUpdate called with', logs?.length || 0, 'logs');
+    store.dispatch(appendLogsForAllTools(logs));
+  },
   onLogSubscriptionChange: (isSubscribed: boolean) =>
     store.dispatch(setSubscriptionStatus(isSubscribed)),
 });

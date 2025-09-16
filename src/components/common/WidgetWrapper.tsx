@@ -14,9 +14,10 @@ import {
 interface WidgetWrapperProps {
   id: string;
   title: string;
-
+  icon?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
+  customActions?: React.ReactNode;
 }
 
 // Memoized styles
@@ -35,6 +36,7 @@ const WidgetWrapper = ({
   title,
   children,
   className = '',
+  customActions,
 }: WidgetWrapperProps) => {
   const dispatch = useAppDispatch();
   const [isResizing, setIsResizing] = useState(false);
@@ -98,6 +100,13 @@ const WidgetWrapper = ({
         </div>
 
         <div className={`${headerStyles.actions} no-drag`}>
+          {/* Custom actions */}
+          {customActions && (
+            <div className="flex items-center gap-2 mr-2 border-r border-gray-600 pr-2">
+              {customActions}
+            </div>
+          )}
+
           {!isMaximized && !isMinimized && (
             <button
               onClick={handleMinimize}

@@ -14,6 +14,7 @@ import {
   restoreConfig,
 } from '@/shared/store/slices/logsSlice';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
+import { toast } from '@/shared/hooks/useToast';
 
 const STORAGE_KEY = 'gpac-logs-config';
 
@@ -48,9 +49,16 @@ export function useLogsRedux() {
 
   const handleSetToolLevel = useCallback(
     (tool: GpacLogTool, level: GpacLogLevel) => {
+      console.log('[useLogsRedux] handleSetToolLevel called:', tool, level);
       dispatch(setToolLevel({ tool, level }));
       // Auto-save after state update
       setTimeout(saveConfig, 0);
+
+      // Show toast notification
+      toast({
+        title: "Log Level Updated",
+        description: `${tool.toUpperCase()} set to ${level.toUpperCase()}`,
+      });
     },
     [dispatch, saveConfig],
   );
@@ -60,17 +68,49 @@ export function useLogsRedux() {
       dispatch(setDefaultAllLevel(level));
       // Auto-save after state update
       setTimeout(saveConfig, 0);
+
+      // Show toast notification
+      toast({
+        title: "Default Level Updated",
+        description: `Default level for all tools set to ${level.toUpperCase()}`,
+      });
     },
     [dispatch, saveConfig],
   );
 
-  // Restore on mount
+  // Restore on mount with migration logic
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const config = JSON.parse(saved);
-        dispatch(restoreConfig(config));
+
+        // Migration: convert old globalLevel format to new per-tool format
+        if (config.globalLevel && !config.levelsByTool) {
+          console.log('[useLogsRedux] Migrating from old globalLevel format');
+
+          const migratedConfig = {
+            currentTool: config.currentTool,
+            // Initialize all tools with WARNING level (responsible default)
+            levelsByTool: Object.values(GpacLogTool).reduce((acc, tool) => {
+              if (tool !== GpacLogTool.ALL) {
+                acc[tool] = GpacLogLevel.WARNING;
+              }
+              return acc;
+            }, {} as Record<GpacLogTool, GpacLogLevel>),
+            // Use old globalLevel as defaultAllLevel, or QUIET as fallback
+            defaultAllLevel: config.globalLevel || GpacLogLevel.QUIET,
+          };
+
+          dispatch(restoreConfig(migratedConfig));
+
+          // Save migrated config immediately
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(migratedConfig));
+          console.log('[useLogsRedux] Migration completed:', migratedConfig);
+        } else {
+          // Normal restoration
+          dispatch(restoreConfig(config));
+        }
       }
     } catch (error) {
       console.warn('[useLogsRedux] Failed to restore config:', error);

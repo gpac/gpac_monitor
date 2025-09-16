@@ -87,6 +87,7 @@ const initialState: WidgetsState = {
       id: generateID('logs'),
       type: WidgetType.LOGS,
       title: 'System Logs',
+    
       x: 9,
       y: 8,
       w: 5,

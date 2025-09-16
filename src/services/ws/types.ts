@@ -3,6 +3,7 @@ import {
   GpacLogEntry,
   LogManagerStatus,
   GpacLogConfig,
+  GpacLogConfigString,
 } from '@/types/domain/gpac/log-types';
 
 // Base interface for all messages
@@ -151,7 +152,7 @@ export interface UnsubscribeLogsMessage extends BaseWSMessage {
 
 export interface UpdateLogLevelMessage extends BaseWSMessage {
   type: WSMessageType.UPDATE_LOG_LEVEL;
-  logLevel: GpacLogConfig;
+  logLevel: GpacLogConfigString;
 }
 
 export interface GetLogStatusMessage extends BaseWSMessage {

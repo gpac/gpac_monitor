@@ -166,6 +166,11 @@ export class GpacService implements IGpacCommunication {
     return this.coreService.getCurrentFilterId();
   }
 
+  // Expose log handler
+  public get logs() {
+    return this.messageHandler.getLogHandler();
+  }
+
   public unsubscribeFromFilter(filterIdx: string): void {
     const numericIdx = parseInt(filterIdx, 10);
     if (!isNaN(numericIdx)) {

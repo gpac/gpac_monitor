@@ -30,7 +30,11 @@ export const selectDefaultAllLevel = createSelector(
 
 /** Get effective level for a specific tool (levelsByTool[tool] ?? defaultAllLevel) */
 export const selectEffectiveLevel = createSelector(
-  [selectLevelsByTool, selectDefaultAllLevel, (_: RootState, tool: GpacLogTool) => tool],
+  [
+    selectLevelsByTool,
+    selectDefaultAllLevel,
+    (_: RootState, tool: GpacLogTool) => tool,
+  ],
   (levelsByTool, defaultAllLevel, tool): GpacLogLevel =>
     levelsByTool[tool as keyof typeof levelsByTool] ?? defaultAllLevel,
 );
@@ -80,7 +84,8 @@ export const selectVisibleLogs = createSelector(
     }
 
     // Get effective level for current tool
-    const effectiveLevel = levelsByTool[logsState.currentTool] ?? defaultAllLevel;
+    const effectiveLevel =
+      levelsByTool[logsState.currentTool] ?? defaultAllLevel;
 
     // Filter by effective level (preserving history in buffers)
     return filterLogsByLevel(rawLogs, effectiveLevel);
@@ -88,6 +93,7 @@ export const selectVisibleLogs = createSelector(
 );
 
 /** Generate GPAC log config string for backend communication (format: "core@info,demux@warning,all@quiet") */
+/** Create logs config string with ALL changed values (for complete backend sync) */
 export const selectLogsConfigString = createSelector(
   [selectLevelsByTool, selectDefaultAllLevel],
   (levelsByTool, defaultAllLevel): string => {
@@ -100,6 +106,37 @@ export const selectLogsConfigString = createSelector(
 
     // Add default level for 'all'
     configs.push(`all@${defaultAllLevel}`);
+
+    return configs.join(',');
+  },
+);
+
+/** Create optimized logs config string with ONLY changes from defaults */
+export const selectLogsConfigChanges = createSelector(
+  [selectLevelsByTool, selectDefaultAllLevel],
+  (levelsByTool, defaultAllLevel): string => {
+    const configs: string[] = [];
+
+    // Default values (from initialState in logsSlice)
+    const DEFAULT_TOOL_LEVEL = GpacLogLevel.WARNING;
+    const DEFAULT_ALL_LEVEL = GpacLogLevel.QUIET;
+
+    // Only add tool-specific levels that differ from WARNING
+    Object.entries(levelsByTool).forEach(([tool, level]) => {
+      if (level !== DEFAULT_TOOL_LEVEL) {
+        configs.push(`${tool}@${level}`);
+      }
+    });
+
+    // Only add 'all' level if it differs from QUIET
+    if (defaultAllLevel !== DEFAULT_ALL_LEVEL) {
+      configs.push(`all@${defaultAllLevel}`);
+    }
+
+    // If no changes, send the current most restrictive level
+    if (configs.length === 0) {
+      configs.push(`all@${defaultAllLevel}`);
+    }
 
     return configs.join(',');
   },

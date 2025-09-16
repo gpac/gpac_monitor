@@ -28,17 +28,19 @@ function LogManager(client) {
         this.logLevel = logLevel || "all@warning";
         this.isSubscribed = true;
 
+        console.log(`[LogManager] subscribe: Starting subscription with level: ${this.logLevel}`);
+
         try {
             this.originalLogConfig = sys.get_logs(true);
-            
+            console.log(`[LogManager] Original GPAC config: ${this.originalLogConfig}`);
+
             sys.on_log = (tool, level, message) => {
                 this.handleLog(tool, level, message);
             };
-            
+
             sys.set_logs(this.logLevel);
-            
-      
-            
+            console.log(`[LogManager] GPAC logs configured to: ${this.logLevel}`);
+
             console.log(`LogManager: Client ${this.client.id} subscribed to logs at level: ${this.logLevel}`);
         } catch (error) {
             console.error("LogManager: Failed to start log capturing:", error);
@@ -79,16 +81,18 @@ function LogManager(client) {
      */
     this.handleLog = function(tool, level, message) {
         // Only create log object - NO OTHER PROCESSING
-        const log = { 
-            timestamp: Date.now(), 
-            tool, 
-            level, 
+        const log = {
+            timestamp: Date.now(),
+            tool,
+            level,
             message: message?.length > 500 ? message.substring(0, 500) + '...' : message
         };
-        
+
+        console.log(`[LogManager] handleLog: ${tool}@${level} - ${message?.substring(0, 100)}`);
+
         // Just add to buffer - NO WebSocket operations on main thread
         this.incomingBuffer.push(log);
-        
+
         // Schedule processing if not already scheduled
         if (!this.processingScheduled) {
             this.scheduleLogProcessing();
@@ -117,9 +121,11 @@ function LogManager(client) {
             return;
         }
 
+        console.log(`[LogManager] processIncomingLogs: Processing ${this.incomingBuffer.length} logs`);
+
         // Move all logs from incoming buffer
         const logsToProcess = this.incomingBuffer.splice(0);
-        
+
         // Process each log
         for (const log of logsToProcess) {
             // Keep history limited
@@ -127,7 +133,7 @@ function LogManager(client) {
                 this.logs.shift();
             }
             this.logs.push(log);
-            
+
             // Add to pending batch
             this.pendingLogs.push(log);
         }
@@ -161,18 +167,22 @@ function LogManager(client) {
     this.updateLogLevel = function(logLevel) {
         if (!this.isSubscribed) return;
 
+        console.log(`[LogManager] updateLogLevel: Changing from ${this.logLevel} to ${logLevel}`);
+
         try {
             this.logs = [];
             this.pendingLogs = [];
-            
+
             this.logLevel = logLevel;
             sys.set_logs(logLevel);
-            
+
+            console.log(`[LogManager] GPAC logs reconfigured to: ${logLevel}`);
+
             this.sendToClient({
                 message: 'log_config_changed',
                 logLevel: logLevel
             });
-            
+
             console.log(`LogManager: Updated log level to: ${logLevel}`);
         } catch (error) {
             console.error("LogManager: Failed to update log level:", error);
@@ -201,12 +211,14 @@ function LogManager(client) {
             this.batchTimer = null;
             return;
         }
-        
+
+        console.log(`[LogManager] flushPendingLogs: Sending ${this.pendingLogs.length} logs to client`);
+
         this.sendToClient({
             message: 'log_batch',
             logs: this.pendingLogs
         });
-        
+
         this.pendingLogs = [];
         this.batchTimer = null;
     };
@@ -218,7 +230,10 @@ function LogManager(client) {
      */
     this.sendToClient = function(data) {
         if (this.client.client && typeof this.client.client.send === 'function') {
+            console.log(`[LogManager] sendToClient: Sending ${data.message} message`);
             this.client.client.send(JSON.stringify(data));
+        } else {
+            console.log(`[LogManager] sendToClient: Client not ready, cannot send ${data.message}`);
         }
     };
 }

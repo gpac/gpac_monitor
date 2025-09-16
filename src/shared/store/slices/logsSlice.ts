@@ -46,7 +46,10 @@ const logsSlice = createSlice({
     },
 
     /** Set level for a specific tool */
-    setToolLevel: (state, action: PayloadAction<{ tool: GpacLogTool; level: GpacLogLevel }>) => {
+    setToolLevel: (
+      state,
+      action: PayloadAction<{ tool: GpacLogTool; level: GpacLogLevel }>,
+    ) => {
       const { tool, level } = action.payload;
       state.levelsByTool[tool] = level;
     },
@@ -78,6 +81,7 @@ const logsSlice = createSlice({
     /** Distribute and append logs to appropriate tool buffers based on log.tool property */
     appendLogsForAllTools: (state, action: PayloadAction<GpacLogEntry[]>) => {
       const logs = action.payload;
+      console.log('[logsSlice] appendLogsForAllTools called with', logs.length, 'logs');
 
       if (logs.length === 0) return;
 
@@ -91,6 +95,8 @@ const logsSlice = createSlice({
         logsByTool[tool].push(log);
       });
 
+      console.log('[logsSlice] Grouped logs by tool:', Object.keys(logsByTool));
+
       // Apply to each tool's buffer
       Object.entries(logsByTool).forEach(([tool, toolLogs]) => {
         const currentBuffer = state.buffers[tool as GpacLogTool] || [];
@@ -103,6 +109,7 @@ const logsSlice = createSlice({
             -state.maxEntriesPerTool,
           );
         }
+        console.log('[logsSlice] Updated buffer for tool', tool, 'new size:', state.buffers[tool as GpacLogTool]?.length);
       });
     },
 

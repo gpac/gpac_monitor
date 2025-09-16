@@ -50,6 +50,12 @@ export enum GpacLogTool {
 export type GpacLogConfig = `${GpacLogTool}@${GpacLogLevel}`;
 
 /**
+ * Multiple log configurations string
+ * Format: "tool1@level1,tool2@level2,..." (e.g., "core@info,demux@warning,all@quiet")
+ */
+export type GpacLogConfigString = string;
+
+/**
  * GPAC log entry structure
  */
 export interface GpacLogEntry {
