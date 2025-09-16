@@ -16,31 +16,40 @@ const STORAGE_KEY = 'gpac-logs-config';
 
 export function useLogsRedux() {
   const dispatch = useAppDispatch();
-  
+
   // Redux selectors
   const currentTool = useAppSelector(selectCurrentTool);
   const globalLevel = useAppSelector(selectGlobalLevel);
   const visibleLogs = useAppSelector(selectVisibleLogs);
 
   // Persistence
-  const saveConfig = useCallback((config: { currentTool: GpacLogTool; globalLevel: GpacLogLevel }) => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-    } catch (error) {
-      console.warn('[useLogsRedux] Failed to save config:', error);
-    }
-  }, []);
+  const saveConfig = useCallback(
+    (config: { currentTool: GpacLogTool; globalLevel: GpacLogLevel }) => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      } catch (error) {
+        console.warn('[useLogsRedux] Failed to save config:', error);
+      }
+    },
+    [],
+  );
 
   // Actions with persistence
-  const handleSetTool = useCallback((tool: GpacLogTool) => {
-    dispatch(setTool(tool));
-    saveConfig({ currentTool: tool, globalLevel });
-  }, [dispatch, globalLevel, saveConfig]);
+  const handleSetTool = useCallback(
+    (tool: GpacLogTool) => {
+      dispatch(setTool(tool));
+      saveConfig({ currentTool: tool, globalLevel });
+    },
+    [dispatch, globalLevel, saveConfig],
+  );
 
-  const handleSetGlobalLevel = useCallback((level: GpacLogLevel) => {
-    dispatch(setGlobalLevel(level));
-    saveConfig({ currentTool, globalLevel: level });
-  }, [dispatch, currentTool, saveConfig]);
+  const handleSetGlobalLevel = useCallback(
+    (level: GpacLogLevel) => {
+      dispatch(setGlobalLevel(level));
+      saveConfig({ currentTool, globalLevel: level });
+    },
+    [dispatch, currentTool, saveConfig],
+  );
 
   // Restore on mount
   useEffect(() => {
@@ -60,7 +69,7 @@ export function useLogsRedux() {
     currentTool,
     globalLevel,
     visibleLogs,
-    
+
     // Actions
     setTool: handleSetTool,
     setGlobalLevel: handleSetGlobalLevel,

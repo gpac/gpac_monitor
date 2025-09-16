@@ -1,5 +1,5 @@
 import { IoSettings, IoCheckmark, IoAlertCircle } from 'react-icons/io5';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -15,8 +15,8 @@ import { ArgumentDisplayValue } from './arguments/ArgumentDisplayValue';
 import { cn } from '../../utils/cn';
 import { Badge } from '../ui/badge';
 import {
-  selectArgumentUpdate,
   updateFilterArgument,
+  makeSelectArgumentUpdatesForFilter,
 } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 
@@ -56,20 +56,10 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = React.memo(
     const [isOpen, setIsOpen] = useState(false);
     const dispatch = useAppDispatch();
 
+    // Memoized selector for argument updates
+    const selectArgumentUpdates = useMemo(() => makeSelectArgumentUpdatesForFilter(), []);
     const argumentUpdates = useAppSelector((state) =>
-      Array.isArray(filter.gpac_args)
-        ? filter.gpac_args.reduce(
-            (acc, arg) => {
-              acc[arg.name] = selectArgumentUpdate(
-                state,
-                filter.idx.toString(),
-                arg.name,
-              );
-              return acc;
-            },
-            {} as Record<string, any>,
-          )
-        : {},
+      selectArgumentUpdates(state, filter.idx.toString(), filter.gpac_args || [])
     );
 
     // useEffect hook

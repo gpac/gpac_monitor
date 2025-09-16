@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 
@@ -8,6 +8,7 @@ import {
   minimizeWidget,
   maximizeWidget,
   restoreWidget,
+  makeSelectWidgetConfig,
 } from '@/shared/store/slices/widgetsSlice';
 
 interface WidgetWrapperProps {
@@ -46,15 +47,9 @@ const WidgetWrapper = ({
     throttle: true,
   });
 
-  // Memoized widget config
-  const config = useAppSelector(
-    (state) =>
-      state.widgets.configs[id] ?? {
-        isMaximized: false,
-        isMinimized: false,
-        settings: {},
-      },
-  );
+  // Memoized widget config selector
+  const selectWidgetConfig = useMemo(() => makeSelectWidgetConfig(), []);
+  const config = useAppSelector((state) => selectWidgetConfig(state, id));
 
   const { isMaximized, isMinimized } = config;
 

@@ -41,20 +41,13 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const [autoScroll, setAutoScroll] = useState(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
- 
-  
-  const { currentTool, globalLevel, visibleLogs, setTool, setGlobalLevel } = useLogsRedux();
-  
+  const { currentTool, globalLevel, visibleLogs, setTool, setGlobalLevel } =
+    useLogsRedux();
+
   // Keep subscription active with current global level
   const globalLogConfig: GpacLogConfig = `all@${globalLevel}`;
-  console.log('[LogsMonitor] Current state:', {
-    currentTool,
-    globalLevel,
-    visibleLogsCount: visibleLogs.length,
-    globalLogConfig
-  });
-  
-  useLogs({
+
+   useLogs({
     enabled: true,
     logLevel: globalLogConfig,
   });

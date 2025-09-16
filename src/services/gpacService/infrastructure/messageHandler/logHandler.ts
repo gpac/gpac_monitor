@@ -73,7 +73,7 @@ export class LogHandler {
           logLevel,
         });
         this.isSubscribed = true;
-        
+
         // Notify Redux of subscription status
         if (this.callbacks?.onLogSubscriptionChange) {
           this.callbacks.onLogSubscriptionChange(true);
@@ -103,7 +103,7 @@ export class LogHandler {
           id: LogHandler.generateMessageId(),
         });
         this.isSubscribed = false;
-        
+
         // Notify Redux of subscription status
         if (this.callbacks?.onLogSubscriptionChange) {
           this.callbacks.onLogSubscriptionChange(false);
@@ -139,7 +139,7 @@ export class LogHandler {
   public handleLogBatch(logs: GpacLogEntry[]): void {
     // Send to worker for processing
     logWorkerService.processLogs(logs);
-    
+
     // Send directly to Redux for immediate UI update
     if (this.callbacks?.onLogsUpdate) {
       this.callbacks.onLogsUpdate(logs);
@@ -149,7 +149,7 @@ export class LogHandler {
   public handleLogHistory(logs: GpacLogEntry[]): void {
     // Keep the existing subscribable for backward compatibility
     this.logEntriesSubscribable.updateDataAndNotify(logs);
-    
+
     // Send to Redux for immediate UI update
     if (this.callbacks?.onLogsUpdate) {
       this.callbacks.onLogsUpdate(logs);

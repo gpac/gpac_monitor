@@ -46,10 +46,7 @@ export function useLogs(options: UseLogsOptions = {}) {
   );
 
   useEffect(() => {
-  
-    
     if (!enabled) {
-   
       if (logs.length > 0) {
         setLogs([]);
       }
@@ -62,11 +59,9 @@ export function useLogs(options: UseLogsOptions = {}) {
 
     const setupSubscription = async () => {
       try {
-     
         await gpacService.load();
 
         if (!isMounted) {
-     
           return;
         }
 
@@ -76,7 +71,6 @@ export function useLogs(options: UseLogsOptions = {}) {
             logLevel,
           },
           (result) => {
- 
             if (result.data && isMounted) {
               handleLogsUpdate(result.data as GpacLogEntry[]);
             }

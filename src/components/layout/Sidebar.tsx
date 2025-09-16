@@ -3,8 +3,8 @@ import { useAppDispatch } from '@/shared/hooks/redux';
 import { addWidget } from '@/shared/store/slices/widgetsSlice';
 import { WidgetType } from '@/types/ui/widget';
 
-import { LuGauge, LuVolume2, LuFileText, LuShare2, } from 'react-icons/lu';
-import { FiLayout } from "react-icons/fi";
+import { LuGauge, LuVolume2, LuFileText, LuShare2 } from 'react-icons/lu';
+import { FiLayout } from 'react-icons/fi';
 
 const availableWidgets = [
   {

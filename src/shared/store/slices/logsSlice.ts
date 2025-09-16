@@ -1,5 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { GpacLogLevel, GpacLogTool, GpacLogEntry } from '@/types/domain/gpac/log-types';
+import {
+  GpacLogLevel,
+  GpacLogTool,
+  GpacLogEntry,
+} from '@/types/domain/gpac/log-types';
 
 /** Redux state for GPAC logs management with tool-specific buffers and filtering */
 interface LogsState {
@@ -19,7 +23,7 @@ const initialState: LogsState = {
 };
 
 /** Initialize empty buffers for all GPAC tools */
-Object.values(GpacLogTool).forEach(tool => {
+Object.values(GpacLogTool).forEach((tool) => {
   initialState.buffers[tool] = [];
 });
 
@@ -31,21 +35,23 @@ const logsSlice = createSlice({
     setTool: (state, action: PayloadAction<GpacLogTool>) => {
       state.currentTool = action.payload;
     },
-    
+
     /** Update the global log level filter */
     setGlobalLevel: (state, action: PayloadAction<GpacLogLevel>) => {
       state.globalLevel = action.payload;
     },
-    
- 
-    appendLogs: (state, action: PayloadAction<{ tool: GpacLogTool; logs: GpacLogEntry[] }>) => {
+
+    appendLogs: (
+      state,
+      action: PayloadAction<{ tool: GpacLogTool; logs: GpacLogEntry[] }>,
+    ) => {
       const { tool, logs } = action.payload;
-      
+
       if (logs.length === 0) return;
-      
+
       const currentBuffer = state.buffers[tool] || [];
       const allLogs = [...currentBuffer, ...logs];
-      
+
       // Apply  ring buffer logic
       if (allLogs.length <= state.maxEntriesPerTool) {
         state.buffers[tool] = allLogs;
@@ -53,68 +59,76 @@ const logsSlice = createSlice({
         state.buffers[tool] = allLogs.slice(-state.maxEntriesPerTool);
       }
     },
-    
+
     /** Distribute and append logs to appropriate tool buffers based on log.tool property */
     appendLogsForAllTools: (state, action: PayloadAction<GpacLogEntry[]>) => {
       const logs = action.payload;
-      
+
       if (logs.length === 0) return;
-      
+
       // Group logs by tool
       const logsByTool: Record<string, GpacLogEntry[]> = {};
-      logs.forEach(log => {
+      logs.forEach((log) => {
         const tool = log.tool as GpacLogTool;
         if (!logsByTool[tool]) {
           logsByTool[tool] = [];
         }
         logsByTool[tool].push(log);
       });
-      
+
       // Apply to each tool's buffer
       Object.entries(logsByTool).forEach(([tool, toolLogs]) => {
         const currentBuffer = state.buffers[tool as GpacLogTool] || [];
         const allLogs = [...currentBuffer, ...toolLogs];
-        
+
         if (allLogs.length <= state.maxEntriesPerTool) {
           state.buffers[tool as GpacLogTool] = allLogs;
         } else {
-          state.buffers[tool as GpacLogTool] = allLogs.slice(-state.maxEntriesPerTool);
+          state.buffers[tool as GpacLogTool] = allLogs.slice(
+            -state.maxEntriesPerTool,
+          );
         }
       });
     },
-    
+
     /** Clear all log buffers for all tools */
     clearAllBuffers: (state) => {
-      Object.values(GpacLogTool).forEach(tool => {
+      Object.values(GpacLogTool).forEach((tool) => {
         state.buffers[tool] = [];
       });
     },
-    
+
     /** Clear log buffer for a specific tool */
     clearBufferForTool: (state, action: PayloadAction<GpacLogTool>) => {
       state.buffers[action.payload] = [];
     },
-    
+
     /** Update buffer size limit and truncate existing buffers if needed */
     setMaxEntriesPerTool: (state, action: PayloadAction<number>) => {
       state.maxEntriesPerTool = action.payload;
-      
+
       // Apply new limit to all existing buffers
-      Object.keys(state.buffers).forEach(tool => {
+      Object.keys(state.buffers).forEach((tool) => {
         const buffer = state.buffers[tool as GpacLogTool];
         if (buffer.length > action.payload) {
           state.buffers[tool as GpacLogTool] = buffer.slice(-action.payload);
         }
       });
     },
-    
+
     /** Track WebSocket logs subscription status */
     setSubscriptionStatus: (state, action: PayloadAction<boolean>) => {
       state.isSubscribed = action.payload;
     },
-    
+
     /** Restore logs configuration from localStorage persistence */
-    restoreConfig: (state, action: PayloadAction<{ currentTool?: GpacLogTool; globalLevel?: GpacLogLevel }>) => {
+    restoreConfig: (
+      state,
+      action: PayloadAction<{
+        currentTool?: GpacLogTool;
+        globalLevel?: GpacLogLevel;
+      }>,
+    ) => {
       const { currentTool, globalLevel } = action.payload;
       if (currentTool) {
         state.currentTool = currentTool;
@@ -122,7 +136,7 @@ const logsSlice = createSlice({
       if (globalLevel) {
         state.globalLevel = globalLevel;
       }
-    }
+    },
   },
 });
 

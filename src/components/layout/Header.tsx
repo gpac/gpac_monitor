@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {  LuSettings } from 'react-icons/lu';
-import { FiLayout } from "react-icons/fi";
+import { LuSettings } from 'react-icons/lu';
+import { FiLayout } from 'react-icons/fi';
 import { LayoutManager } from './LayoutManager';
 
 interface HeaderProps {}

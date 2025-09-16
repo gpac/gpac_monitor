@@ -59,7 +59,9 @@ export class ConnectionManager {
   public handleDisconnect(): void {
     // Don't reconnect if it was a manual disconnect
     if (this.isManualDisconnect) {
-      console.log('[ConnectionManager] Manual disconnect - stopping reconnection attempts');
+      console.log(
+        '[ConnectionManager] Manual disconnect - stopping reconnection attempts',
+      );
       return;
     }
 

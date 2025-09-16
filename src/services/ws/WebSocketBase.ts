@@ -133,7 +133,6 @@ export class WebSocketBase {
 
   public disconnect(): void {
     if (this.socket) {
-      console.log('[WebSocket] Disconnecting...');
       try {
         this.socket.close(1000, 'Client disconnecting');
       } catch (error) {
@@ -150,7 +149,6 @@ export class WebSocketBase {
 
     try {
       const formattedMessage = MessageFormatter.formatForSend(message);
-      console.log('[WebSocket] Sending message:', formattedMessage);
       this.socket!.send(formattedMessage);
     } catch (error) {
       console.error('[WebSocket] Error sending message:', error);

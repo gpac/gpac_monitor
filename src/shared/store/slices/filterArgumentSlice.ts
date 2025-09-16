@@ -1,7 +1,8 @@
-import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
 import { GpacMessage } from '@/types';
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
+import { RootState } from '../index';
 
 interface ArgumentUpdate {
   filterId: string;
@@ -119,5 +120,24 @@ export const selectArgumentUpdate = (
   const key = `${filterId}_${name}`;
   return state.filterArgument.updates[key];
 };
+
+/** Memoized selector for filter argument updates by filter */
+export const makeSelectArgumentUpdatesForFilter = () =>
+  createSelector(
+    [
+      (state: RootState) => state.filterArgument.updates,
+      (_: RootState, filterId: string) => filterId,
+      (_: RootState, __: string, gpacArgs: any[]) => gpacArgs,
+    ],
+    (updates, filterId, gpacArgs) => {
+      if (!Array.isArray(gpacArgs)) return {};
+
+      return gpacArgs.reduce((acc, arg) => {
+        const key = `${filterId}_${arg.name}`;
+        acc[arg.name] = updates[key];
+        return acc;
+      }, {} as Record<string, any>);
+    }
+  );
 
 export default filterArgumentSlice.reducer;

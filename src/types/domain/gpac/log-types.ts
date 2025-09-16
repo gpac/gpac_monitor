@@ -13,7 +13,6 @@ export enum GpacLogLevel {
  * GPAC log tools/categories based on GPAC documentation
  */
 export enum GpacLogTool {
-
   AUDIO = 'audio',
   CACHE = 'cache',
   CODEC = 'codec',

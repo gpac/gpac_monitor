@@ -218,4 +218,19 @@ export const {
   deleteLayout,
 } = widgetsSlice.actions;
 
+// Memoized selectors
+const selectWidgetConfigsInternal = (state: { widgets: WidgetsState }) => state.widgets.configs;
+const defaultWidgetConfig: WidgetConfig = {
+  isMaximized: false,
+  isMinimized: false,
+  settings: {},
+};
+
+/** Memoized selector for widget config by ID */
+export const makeSelectWidgetConfig = () =>
+  createSelector(
+    [selectWidgetConfigsInternal, (_: any, id: string) => id],
+    (configs, id) => configs[id] ?? defaultWidgetConfig
+  );
+
 export default widgetsSlice.reducer;
