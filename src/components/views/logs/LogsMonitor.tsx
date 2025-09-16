@@ -47,7 +47,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   // Keep subscription active with current global level
   const globalLogConfig: GpacLogConfig = `all@${globalLevel}`;
 
-   useLogs({
+  useLogs({
     enabled: true,
     logLevel: globalLogConfig,
   });

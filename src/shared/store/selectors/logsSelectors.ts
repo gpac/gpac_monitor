@@ -1,9 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
 import {
-  GpacLogConfig,
   GpacLogEntry,
   GpacLogLevel,
+  GpacLogTool,
 } from '@/types/domain/gpac/log-types';
 
 // Base selectors
@@ -16,10 +16,23 @@ export const selectCurrentTool = createSelector(
   (logsState) => logsState.currentTool,
 );
 
-/** Get the global log level filter setting */
-export const selectGlobalLevel = createSelector(
+/** Get the levels by tool mapping */
+export const selectLevelsByTool = createSelector(
   [selectLogsState],
-  (logsState) => logsState.globalLevel,
+  (logsState) => logsState.levelsByTool,
+);
+
+/** Get the default level for 'all' tool */
+export const selectDefaultAllLevel = createSelector(
+  [selectLogsState],
+  (logsState) => logsState.defaultAllLevel,
+);
+
+/** Get effective level for a specific tool (levelsByTool[tool] ?? defaultAllLevel) */
+export const selectEffectiveLevel = createSelector(
+  [selectLevelsByTool, selectDefaultAllLevel, (_: RootState, tool: GpacLogTool) => tool],
+  (levelsByTool, defaultAllLevel, tool): GpacLogLevel =>
+    levelsByTool[tool as keyof typeof levelsByTool] ?? defaultAllLevel,
 );
 
 /** Check if the logs WebSocket subscription is active */
@@ -50,10 +63,10 @@ const filterLogsByLevel = (
   return logs.filter((log: GpacLogEntry) => log.level <= maxLevel);
 };
 
-/** Get logs visible in UI, filtered by selected tool and global level */
+/** Get logs visible in UI, filtered by selected tool and its effective level */
 export const selectVisibleLogs = createSelector(
-  [selectLogsState],
-  (logsState) => {
+  [selectLogsState, selectLevelsByTool, selectDefaultAllLevel],
+  (logsState, levelsByTool, defaultAllLevel) => {
     let rawLogs: GpacLogEntry[];
 
     if (logsState.currentTool === 'all') {
@@ -66,22 +79,41 @@ export const selectVisibleLogs = createSelector(
       rawLogs = logsState.buffers[logsState.currentTool] || [];
     }
 
-    // Filter by current global level (preserving history in buffers)
-    return filterLogsByLevel(rawLogs, logsState.globalLevel);
+    // Get effective level for current tool
+    const effectiveLevel = levelsByTool[logsState.currentTool] ?? defaultAllLevel;
+
+    // Filter by effective level (preserving history in buffers)
+    return filterLogsByLevel(rawLogs, effectiveLevel);
   },
 );
 
-/** Generate GPAC log config string for backend communication (format: "all@level") */
-export const selectGlobalLogConfig = createSelector(
-  [selectGlobalLevel],
-  (globalLevel): GpacLogConfig => `all@${globalLevel}`,
+/** Generate GPAC log config string for backend communication (format: "core@info,demux@warning,all@quiet") */
+export const selectLogsConfigString = createSelector(
+  [selectLevelsByTool, selectDefaultAllLevel],
+  (levelsByTool, defaultAllLevel): string => {
+    const configs: string[] = [];
+
+    // Add tool-specific levels
+    Object.entries(levelsByTool).forEach(([tool, level]) => {
+      configs.push(`${tool}@${level}`);
+    });
+
+    // Add default level for 'all'
+    configs.push(`all@${defaultAllLevel}`);
+
+    return configs.join(',');
+  },
 );
+
+/** @deprecated - Legacy selector for backward compatibility */
+export const selectGlobalLogConfig = selectLogsConfigString;
 
 /** Get current logs configuration for localStorage persistence */
 export const selectCurrentConfig = createSelector(
-  [selectCurrentTool, selectGlobalLevel],
-  (currentTool, globalLevel) => ({
+  [selectCurrentTool, selectLevelsByTool, selectDefaultAllLevel],
+  (currentTool, levelsByTool, defaultAllLevel) => ({
     currentTool,
-    globalLevel,
+    levelsByTool,
+    defaultAllLevel,
   }),
 );

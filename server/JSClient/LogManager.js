@@ -123,7 +123,7 @@ function LogManager(client) {
         // Process each log
         for (const log of logsToProcess) {
             // Keep history limited
-            if (this.logs.length >= 500) {
+            if (this.logs.length >= 5000) {
                 this.logs.shift();
             }
             this.logs.push(log);

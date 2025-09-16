@@ -1,4 +1,9 @@
-import { createSlice, PayloadAction, createAsyncThunk, createSelector } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  PayloadAction,
+  createAsyncThunk,
+  createSelector,
+} from '@reduxjs/toolkit';
 import { GpacMessage } from '@/types';
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
@@ -132,12 +137,15 @@ export const makeSelectArgumentUpdatesForFilter = () =>
     (updates, filterId, gpacArgs) => {
       if (!Array.isArray(gpacArgs)) return {};
 
-      return gpacArgs.reduce((acc, arg) => {
-        const key = `${filterId}_${arg.name}`;
-        acc[arg.name] = updates[key];
-        return acc;
-      }, {} as Record<string, any>);
-    }
+      return gpacArgs.reduce(
+        (acc, arg) => {
+          const key = `${filterId}_${arg.name}`;
+          acc[arg.name] = updates[key];
+          return acc;
+        },
+        {} as Record<string, any>,
+      );
+    },
   );
 
 export default filterArgumentSlice.reducer;

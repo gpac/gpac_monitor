@@ -2,12 +2,15 @@ import { useEffect, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   selectCurrentTool,
-  selectGlobalLevel,
+  selectLevelsByTool,
+  selectDefaultAllLevel,
   selectVisibleLogs,
+  selectCurrentConfig,
 } from '@/shared/store/selectors/logsSelectors';
 import {
   setTool,
-  setGlobalLevel,
+  setToolLevel,
+  setDefaultAllLevel,
   restoreConfig,
 } from '@/shared/store/slices/logsSlice';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
@@ -19,36 +22,46 @@ export function useLogsRedux() {
 
   // Redux selectors
   const currentTool = useAppSelector(selectCurrentTool);
-  const globalLevel = useAppSelector(selectGlobalLevel);
+  const levelsByTool = useAppSelector(selectLevelsByTool);
+  const defaultAllLevel = useAppSelector(selectDefaultAllLevel);
   const visibleLogs = useAppSelector(selectVisibleLogs);
+  const currentConfig = useAppSelector(selectCurrentConfig);
 
   // Persistence
-  const saveConfig = useCallback(
-    (config: { currentTool: GpacLogTool; globalLevel: GpacLogLevel }) => {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-      } catch (error) {
-        console.warn('[useLogsRedux] Failed to save config:', error);
-      }
-    },
-    [],
-  );
+  const saveConfig = useCallback(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(currentConfig));
+    } catch (error) {
+      console.warn('[useLogsRedux] Failed to save config:', error);
+    }
+  }, [currentConfig]);
 
   // Actions with persistence
   const handleSetTool = useCallback(
     (tool: GpacLogTool) => {
       dispatch(setTool(tool));
-      saveConfig({ currentTool: tool, globalLevel });
+      // Auto-save after state update
+      setTimeout(saveConfig, 0);
     },
-    [dispatch, globalLevel, saveConfig],
+    [dispatch, saveConfig],
   );
 
-  const handleSetGlobalLevel = useCallback(
-    (level: GpacLogLevel) => {
-      dispatch(setGlobalLevel(level));
-      saveConfig({ currentTool, globalLevel: level });
+  const handleSetToolLevel = useCallback(
+    (tool: GpacLogTool, level: GpacLogLevel) => {
+      dispatch(setToolLevel({ tool, level }));
+      // Auto-save after state update
+      setTimeout(saveConfig, 0);
     },
-    [dispatch, currentTool, saveConfig],
+    [dispatch, saveConfig],
+  );
+
+  const handleSetDefaultAllLevel = useCallback(
+    (level: GpacLogLevel) => {
+      dispatch(setDefaultAllLevel(level));
+      // Auto-save after state update
+      setTimeout(saveConfig, 0);
+    },
+    [dispatch, saveConfig],
   );
 
   // Restore on mount
@@ -67,11 +80,17 @@ export function useLogsRedux() {
   return {
     // State
     currentTool,
-    globalLevel,
+    levelsByTool,
+    defaultAllLevel,
     visibleLogs,
 
     // Actions
     setTool: handleSetTool,
-    setGlobalLevel: handleSetGlobalLevel,
+    setToolLevel: handleSetToolLevel,
+    setDefaultAllLevel: handleSetDefaultAllLevel,
+
+    // @deprecated - For backward compatibility
+    globalLevel: defaultAllLevel,
+    setGlobalLevel: handleSetDefaultAllLevel,
   };
 }

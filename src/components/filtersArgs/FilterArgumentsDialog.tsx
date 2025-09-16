@@ -57,9 +57,16 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = React.memo(
     const dispatch = useAppDispatch();
 
     // Memoized selector for argument updates
-    const selectArgumentUpdates = useMemo(() => makeSelectArgumentUpdatesForFilter(), []);
+    const selectArgumentUpdates = useMemo(
+      () => makeSelectArgumentUpdatesForFilter(),
+      [],
+    );
     const argumentUpdates = useAppSelector((state) =>
-      selectArgumentUpdates(state, filter.idx.toString(), filter.gpac_args || [])
+      selectArgumentUpdates(
+        state,
+        filter.idx.toString(),
+        filter.gpac_args || [],
+      ),
     );
 
     // useEffect hook

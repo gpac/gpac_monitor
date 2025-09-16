@@ -219,7 +219,8 @@ export const {
 } = widgetsSlice.actions;
 
 // Memoized selectors
-const selectWidgetConfigsInternal = (state: { widgets: WidgetsState }) => state.widgets.configs;
+const selectWidgetConfigsInternal = (state: { widgets: WidgetsState }) =>
+  state.widgets.configs;
 const defaultWidgetConfig: WidgetConfig = {
   isMaximized: false,
   isMinimized: false,
@@ -230,7 +231,7 @@ const defaultWidgetConfig: WidgetConfig = {
 export const makeSelectWidgetConfig = () =>
   createSelector(
     [selectWidgetConfigsInternal, (_: any, id: string) => id],
-    (configs, id) => configs[id] ?? defaultWidgetConfig
+    (configs, id) => configs[id] ?? defaultWidgetConfig,
   );
 
 export default widgetsSlice.reducer;

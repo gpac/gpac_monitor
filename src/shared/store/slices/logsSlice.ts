@@ -5,10 +5,11 @@ import {
   GpacLogEntry,
 } from '@/types/domain/gpac/log-types';
 
-/** Redux state for GPAC logs management with tool-specific buffers and filtering */
+/** Redux state for GPAC logs management with per-tool levels and buffers */
 interface LogsState {
   currentTool: GpacLogTool;
-  globalLevel: GpacLogLevel;
+  levelsByTool: Record<GpacLogTool, GpacLogLevel>;
+  defaultAllLevel: GpacLogLevel;
   buffers: Record<GpacLogTool, GpacLogEntry[]>;
   maxEntriesPerTool: number;
   isSubscribed: boolean;
@@ -16,11 +17,19 @@ interface LogsState {
 
 const initialState: LogsState = {
   currentTool: GpacLogTool.ALL,
-  globalLevel: GpacLogLevel.INFO,
+  levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
+  defaultAllLevel: GpacLogLevel.QUIET,
   buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
   maxEntriesPerTool: 5000,
   isSubscribed: false,
 };
+
+// Initialize all tools with WARNING level (except ALL which uses defaultAllLevel)
+Object.values(GpacLogTool).forEach((tool) => {
+  if (tool !== GpacLogTool.ALL) {
+    initialState.levelsByTool[tool] = GpacLogLevel.WARNING;
+  }
+});
 
 /** Initialize empty buffers for all GPAC tools */
 Object.values(GpacLogTool).forEach((tool) => {
@@ -36,9 +45,15 @@ const logsSlice = createSlice({
       state.currentTool = action.payload;
     },
 
-    /** Update the global log level filter */
-    setGlobalLevel: (state, action: PayloadAction<GpacLogLevel>) => {
-      state.globalLevel = action.payload;
+    /** Set level for a specific tool */
+    setToolLevel: (state, action: PayloadAction<{ tool: GpacLogTool; level: GpacLogLevel }>) => {
+      const { tool, level } = action.payload;
+      state.levelsByTool[tool] = level;
+    },
+
+    /** Set the default level for 'all' tool (fallback) */
+    setDefaultAllLevel: (state, action: PayloadAction<GpacLogLevel>) => {
+      state.defaultAllLevel = action.payload;
     },
 
     appendLogs: (
@@ -126,15 +141,19 @@ const logsSlice = createSlice({
       state,
       action: PayloadAction<{
         currentTool?: GpacLogTool;
-        globalLevel?: GpacLogLevel;
+        levelsByTool?: Record<GpacLogTool, GpacLogLevel>;
+        defaultAllLevel?: GpacLogLevel;
       }>,
     ) => {
-      const { currentTool, globalLevel } = action.payload;
+      const { currentTool, levelsByTool, defaultAllLevel } = action.payload;
       if (currentTool) {
         state.currentTool = currentTool;
       }
-      if (globalLevel) {
-        state.globalLevel = globalLevel;
+      if (levelsByTool) {
+        state.levelsByTool = { ...state.levelsByTool, ...levelsByTool };
+      }
+      if (defaultAllLevel) {
+        state.defaultAllLevel = defaultAllLevel;
       }
     },
   },
@@ -142,7 +161,8 @@ const logsSlice = createSlice({
 
 export const {
   setTool,
-  setGlobalLevel,
+  setToolLevel,
+  setDefaultAllLevel,
   appendLogs,
   appendLogsForAllTools,
   clearAllBuffers,
