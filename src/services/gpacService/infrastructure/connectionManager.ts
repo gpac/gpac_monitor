@@ -8,6 +8,7 @@ export class ConnectionManager {
   private reconnectAttempts: number = 0;
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private isConnecting: boolean = false;
+  private isManualDisconnect: boolean = false;
   private notificationHandlers: GpacNotificationHandlers = {};
 
   constructor(
@@ -29,6 +30,7 @@ export class ConnectionManager {
     }
 
     this.isConnecting = true;
+    this.isManualDisconnect = false; // Reset flag when connecting
     store.dispatch(setLoading(true));
 
     try {
@@ -45,6 +47,7 @@ export class ConnectionManager {
   }
 
   public disconnect(): void {
+    this.isManualDisconnect = true; // Mark as manual disconnect
     this.cleanup();
     this.ws.disconnect();
   }
@@ -54,6 +57,12 @@ export class ConnectionManager {
   }
 
   public handleDisconnect(): void {
+    // Don't reconnect if it was a manual disconnect
+    if (this.isManualDisconnect) {
+      console.log('[ConnectionManager] Manual disconnect - stopping reconnection attempts');
+      return;
+    }
+
     if (
       !this.isConnecting &&
       !this.ws.isConnected() &&
@@ -78,6 +87,12 @@ export class ConnectionManager {
     this.isConnecting = false;
     this.reconnectAttempts = 0;
     store.dispatch(setError(null));
+  }
+
+  /** Stop reconnection attempts manually (e.g., when GPAC process is closed) */
+  public stopReconnection(): void {
+    this.isManualDisconnect = true;
+    this.cleanup();
   }
 
   private cleanup(): void {
