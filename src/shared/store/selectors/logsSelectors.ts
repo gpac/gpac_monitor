@@ -3,24 +3,28 @@ import { RootState } from '../index';
 import { GpacLogConfig, GpacLogEntry, GpacLogLevel } from '@/types/domain/gpac/log-types';
 
 // Base selectors
+/** Access the entire logs state */
 const selectLogsState = (state: RootState) => state.logs;
 
+/** Get the currently selected GPAC tool for log filtering */
 export const selectCurrentTool = createSelector(
   [selectLogsState],
   (logsState) => logsState.currentTool
 );
 
+/** Get the global log level filter setting */
 export const selectGlobalLevel = createSelector(
   [selectLogsState],
   (logsState) => logsState.globalLevel
 );
 
+/** Check if the logs WebSocket subscription is active */
 export const selectIsSubscribed = createSelector(
   [selectLogsState],
   (logsState) => logsState.isSubscribed
 );
 
-// Helper function to filter logs by GPAC level
+/** Filter log entries based on GPAC log level hierarchy */
 const filterLogsByLevel = (logs: GpacLogEntry[], globalLevel: GpacLogLevel): GpacLogEntry[] => {
   const levelThresholds: Record<GpacLogLevel, number> = {
     [GpacLogLevel.QUIET]: 0,     
@@ -40,7 +44,7 @@ const filterLogsByLevel = (logs: GpacLogEntry[], globalLevel: GpacLogLevel): Gpa
   return logs.filter((log: GpacLogEntry) => log.level <= maxLevel);
 };
 
-// Main selector: logs visible in the UI (filtered by tool AND level)
+/** Get logs visible in UI, filtered by selected tool and global level */
 export const selectVisibleLogs = createSelector(
   [selectLogsState],
   (logsState) => {
@@ -61,13 +65,13 @@ export const selectVisibleLogs = createSelector(
   }
 );
 
-//  for the backend (always "all@level")
+/** Generate GPAC log config string for backend communication (format: "all@level") */
 export const selectGlobalLogConfig = createSelector(
   [selectGlobalLevel],
   (globalLevel): GpacLogConfig => `all@${globalLevel}`
 );
 
-// Configuration for persistence
+/** Get current logs configuration for localStorage persistence */
 export const selectCurrentConfig = createSelector(
   [selectCurrentTool, selectGlobalLevel],
   (currentTool, globalLevel) => ({

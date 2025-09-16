@@ -33,16 +33,14 @@ export function useLogsRedux() {
 
   // Actions with persistence
   const handleSetTool = useCallback((tool: GpacLogTool) => {
-    console.log('[useLogsRedux] Setting tool from', currentTool, 'to', tool);
     dispatch(setTool(tool));
     saveConfig({ currentTool: tool, globalLevel });
-  }, [dispatch, globalLevel, saveConfig, currentTool]);
+  }, [dispatch, globalLevel, saveConfig]);
 
   const handleSetGlobalLevel = useCallback((level: GpacLogLevel) => {
-    console.log('[useLogsRedux] Setting global level from', globalLevel, 'to', level);
     dispatch(setGlobalLevel(level));
     saveConfig({ currentTool, globalLevel: level });
-  }, [dispatch, currentTool, saveConfig, globalLevel]);
+  }, [dispatch, currentTool, saveConfig]);
 
   // Restore on mount
   useEffect(() => {
