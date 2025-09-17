@@ -32,6 +32,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const {
+    currentTool,
     levelsByTool,
     defaultAllLevel,
     visibleLogs,
@@ -150,6 +151,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
         <ToolSettingsDropdown
           levelsByTool={levelsByTool}
           defaultAllLevel={defaultAllLevel}
+          currentTool={currentTool}
           onToolLevelChange={setToolLevel}
           onDefaultAllLevelChange={setDefaultLevel}
           onToolNavigate={setTool}

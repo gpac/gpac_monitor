@@ -33,25 +33,25 @@ const LOG_LEVELS: Array<{
     level: GpacLogLevel.ERROR,
     label: 'Error',
     description: 'Critical errors only',
-    color: 'bg-red-500',
+    color: 'bg-red-600',
   },
   {
     level: GpacLogLevel.WARNING,
     label: 'Warning',
     description: 'Errors and warnings',
-    color: 'bg-yellow-500',
+    color: 'bg-yellow-700',
   },
   {
     level: GpacLogLevel.INFO,
     label: 'Info',
     description: 'Errors, warnings, and info',
-    color: 'bg-blue-500',
+    color: 'bg-blue-700',
   },
   {
     level: GpacLogLevel.DEBUG,
     label: 'Debug',
     description: 'All messages (most verbose)',
-    color: 'bg-purple-500',
+    color: 'bg-blue-400',
   },
 ];
 
@@ -64,7 +64,7 @@ export function LevelSelectionDialog({
 }: LevelSelectionDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-secondary ">
         <DialogHeader>
           <DialogTitle>Set Log Level</DialogTitle>
           <DialogDescription>
@@ -72,7 +72,7 @@ export function LevelSelectionDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3 py-4">
+        <div className="space-y-3 py-4 ">
           {LOG_LEVELS.map(({ level, label, description, color }) => (
             <Button
               key={level}

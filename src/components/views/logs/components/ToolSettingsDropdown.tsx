@@ -16,6 +16,7 @@ import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
 interface ToolSettingsDropdownProps {
   levelsByTool: Record<GpacLogTool, GpacLogLevel>;
   defaultAllLevel: GpacLogLevel;
+  currentTool: GpacLogTool;
   onToolLevelChange: (tool: GpacLogTool, level: GpacLogLevel) => void;
   onDefaultAllLevelChange: (level: GpacLogLevel) => void;
   onToolNavigate?: (tool: GpacLogTool) => void;
@@ -64,6 +65,7 @@ const LEVEL_COLORS: Record<GpacLogLevel, string> = {
 export function ToolSettingsDropdown({
   levelsByTool,
   defaultAllLevel,
+  currentTool,
   onToolLevelChange,
   onDefaultAllLevelChange,
   onToolNavigate,
@@ -102,41 +104,40 @@ export function ToolSettingsDropdown({
     <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-            <IoSettings className="h-4 w-4" />
+            <IoSettings className="h-5 w-5" />
           </Button>
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-56 max-h-80 overflow-y-auto">
           <div className="px-3 py-2 text-sm font-medium text-muted-foreground">
-            Tool Log Levels
+            Tool Logs Level
           </div>
           <DropdownMenuSeparator />
 
           {sortedTools.map((tool) => {
             const effectiveLevel = getEffectiveLevel(tool);
+            const isCurrentTool = tool === currentTool;
             return (
-              <DropdownMenuSub key={tool}>
-                <DropdownMenuSubTrigger className="flex items-center justify-between py-2">
-                  
-  <span 
-    className="font-medium mr-2 cursor-pointer hover:text-primary" 
-    onClick={(e) => {
-      e.stopPropagation();
-      onToolNavigate?.(tool);
-    }}
-  >
-                    {TOOL_DISPLAY_NAMES[tool]}
-                  </span>
-                  <Badge
-                    variant="secondary"
-                    className={`text-white text-xs   ${LEVEL_COLORS[effectiveLevel]}`}
-                  >
-                    {effectiveLevel}
-                  </Badge>
+              <div key={tool} className="flex items-center justify-between py-2 px-3">
+                <span
+                  className={`font-medium mr-2 cursor-pointer w-1/3 rounded-lg hover:bg-gray-600 hover:text-blue-200 transition-colors duration-200 ${
+                    isCurrentTool ? 'text-black bg-gray-400' : ''
+                  }`}
+                  onClick={() => onToolNavigate?.(tool)}
+                >
+                  {TOOL_DISPLAY_NAMES[tool]}
+                </span>
                 
-                
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="p-0 h-auto">
+                    <Badge
+                      variant="secondary"
+                      className={`text-white text-xs cursor-pointer hover:opacity-80 ${LEVEL_COLORS[effectiveLevel]}`}
+                    >
+                      {effectiveLevel}
+                    </Badge>
+                  </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="bg-secondary">
                   {Object.values(GpacLogLevel).map((level) => (
                     <DropdownMenuItem
                       key={level}
@@ -156,8 +157,9 @@ export function ToolSettingsDropdown({
                       </div>
                     </DropdownMenuItem>
                   ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+              </div>
             );
           })}
         </DropdownMenuContent>
