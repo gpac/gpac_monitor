@@ -41,18 +41,14 @@ export function useLogsRedux() {
   const handleSetTool = useCallback(
     (tool: GpacLogTool) => {
       dispatch(setTool(tool));
-      // Auto-save after state update
-      setTimeout(saveConfig, 0);
     },
-    [dispatch, saveConfig],
+    [dispatch],
   );
 
   const handleSetToolLevel = useCallback(
     (tool: GpacLogTool, level: GpacLogLevel) => {
       console.log('[useLogsRedux] handleSetToolLevel called:', tool, level);
       dispatch(setToolLevel({ tool, level }));
-      // Auto-save after state update
-      setTimeout(saveConfig, 0);
 
       // Show toast notification
       toast({
@@ -60,14 +56,12 @@ export function useLogsRedux() {
         description: `${tool.toUpperCase()} set to ${level.toUpperCase()}`,
       });
     },
-    [dispatch, saveConfig],
+    [dispatch],
   );
 
   const handleSetDefaultAllLevel = useCallback(
     (level: GpacLogLevel) => {
       dispatch(setDefaultAllLevel(level));
-      // Auto-save after state update
-      setTimeout(saveConfig, 0);
 
       // Show toast notification
       toast({
@@ -75,7 +69,7 @@ export function useLogsRedux() {
         description: `Default level for all tools set to ${level.toUpperCase()}`,
       });
     },
-    [dispatch, saveConfig],
+    [dispatch],
   );
 
   // Restore on mount with migration logic
@@ -111,6 +105,11 @@ export function useLogsRedux() {
       console.warn('[useLogsRedux] Failed to restore config:', error);
     }
   }, [dispatch]);
+
+  // Auto-save config when it changes (after Redux state updates)
+  useEffect(() => {
+    saveConfig();
+  }, [saveConfig, currentConfig]);
 
   return {
     // State
