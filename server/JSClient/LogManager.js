@@ -25,7 +25,7 @@ function LogManager(client) {
             return;
         }
 
-        this.logLevel = logLevel || "all@warning";
+        this.logLevel = logLevel 
         this.isSubscribed = true;
 
         console.log(`[LogManager] subscribe: Starting subscription with level: ${this.logLevel}`);
@@ -92,6 +92,7 @@ function LogManager(client) {
 
         // Just add to buffer - NO WebSocket operations on main thread
         this.incomingBuffer.push(log);
+     
 
         // Schedule processing if not already scheduled
         if (!this.processingScheduled) {
@@ -167,7 +168,7 @@ function LogManager(client) {
     this.updateLogLevel = function(logLevel) {
         if (!this.isSubscribed) return;
 
-        console.log(`[LogManager] updateLogLevel: Changing from ${this.logLevel} to ${logLevel}`);
+      
 
         try {
             this.logs = [];
@@ -176,7 +177,7 @@ function LogManager(client) {
             this.logLevel = logLevel;
             sys.set_logs(logLevel);
 
-            console.log(`[LogManager] GPAC logs reconfigured to: ${logLevel}`);
+        
 
             this.sendToClient({
                 message: 'log_config_changed',
@@ -230,7 +231,7 @@ function LogManager(client) {
      */
     this.sendToClient = function(data) {
         if (this.client.client && typeof this.client.client.send === 'function') {
-            console.log(`[LogManager] sendToClient: Sending ${data.message} message`);
+     
             this.client.client.send(JSON.stringify(data));
         } else {
             console.log(`[LogManager] sendToClient: Client not ready, cannot send ${data.message}`);

@@ -117,26 +117,13 @@ export const selectLogsConfigChanges = createSelector(
   (levelsByTool, defaultAllLevel): string => {
     const configs: string[] = [];
 
-    // Default values (from initialState in logsSlice)
-    const DEFAULT_TOOL_LEVEL = GpacLogLevel.WARNING;
-    const DEFAULT_ALL_LEVEL = GpacLogLevel.QUIET;
-
-    // Only add tool-specific levels that differ from WARNING
+    // Only send user-defined tool levels (no defaults needed)
     Object.entries(levelsByTool).forEach(([tool, level]) => {
-      if (level !== DEFAULT_TOOL_LEVEL) {
-        configs.push(`${tool}@${level}`);
-      }
+      configs.push(`${tool}@${level}`);
     });
 
-    // Only add 'all' level if it differs from QUIET
-    if (defaultAllLevel !== DEFAULT_ALL_LEVEL) {
-      configs.push(`all@${defaultAllLevel}`);
-    }
-
-    // If no changes, send the current most restrictive level
-    if (configs.length === 0) {
-      configs.push(`all@${defaultAllLevel}`);
-    }
+    // Always send the base all@ level
+    configs.push(`all@${defaultAllLevel}`);
 
     return configs.join(',');
   },

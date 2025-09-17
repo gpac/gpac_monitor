@@ -42,10 +42,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   console.log('[LogsMonitor] visibleLogs count:', visibleLogs?.length || 0);
 
 
-  // Initialize logs subscription (triggers backend subscription)
+  // Initialize logs subscription (uses config from Redux store via useLogsService)
   useLogs({
     enabled: true,
-    logLevel: 'all@warning', // Initial subscription level
   });
 
   // Auto-sync per-tool configuration with backend

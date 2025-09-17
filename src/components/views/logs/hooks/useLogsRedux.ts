@@ -91,13 +91,8 @@ export function useLogsRedux() {
 
           const migratedConfig = {
             currentTool: config.currentTool,
-            // Initialize all tools with WARNING level (responsible default)
-            levelsByTool: Object.values(GpacLogTool).reduce((acc, tool) => {
-              if (tool !== GpacLogTool.ALL) {
-                acc[tool] = GpacLogLevel.WARNING;
-              }
-              return acc;
-            }, {} as Record<GpacLogTool, GpacLogLevel>),
+            // Keep levelsByTool empty - only store user changes
+            levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
             // Use old globalLevel as defaultAllLevel, or QUIET as fallback
             defaultAllLevel: config.globalLevel || GpacLogLevel.QUIET,
           };

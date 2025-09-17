@@ -24,12 +24,7 @@ const initialState: LogsState = {
   isSubscribed: false,
 };
 
-// Initialize all tools with WARNING level (except ALL which uses defaultAllLevel)
-Object.values(GpacLogTool).forEach((tool) => {
-  if (tool !== GpacLogTool.ALL) {
-    initialState.levelsByTool[tool] = GpacLogLevel.WARNING;
-  }
-});
+
 
 /** Initialize empty buffers for all GPAC tools */
 Object.values(GpacLogTool).forEach((tool) => {
