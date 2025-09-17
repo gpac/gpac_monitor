@@ -26,6 +26,7 @@ function LogManager(client) {
         }
 
         this.logLevel = logLevel 
+        console.log(`[LogManager] subscribe: Requested log level: ${logLevel}`);
         this.isSubscribed = true;
 
         console.log(`[LogManager] subscribe: Starting subscription with level: ${this.logLevel}`);
@@ -88,7 +89,7 @@ function LogManager(client) {
             message: message?.length > 500 ? message.substring(0, 500) + '...' : message
         };
 
-        console.log(`[LogManager] handleLog: ${tool}@${level} - ${message?.substring(0, 100)}`);
+
 
         // Just add to buffer - NO WebSocket operations on main thread
         this.incomingBuffer.push(log);
@@ -122,7 +123,6 @@ function LogManager(client) {
             return;
         }
 
-        console.log(`[LogManager] processIncomingLogs: Processing ${this.incomingBuffer.length} logs`);
 
         // Move all logs from incoming buffer
         const logsToProcess = this.incomingBuffer.splice(0);
@@ -177,6 +177,7 @@ function LogManager(client) {
             this.logLevel = logLevel;
             sys.set_logs(logLevel);
 
+
         
 
             this.sendToClient({
@@ -213,7 +214,7 @@ function LogManager(client) {
             return;
         }
 
-        console.log(`[LogManager] flushPendingLogs: Sending ${this.pendingLogs.length} logs to client`);
+   
 
         this.sendToClient({
             message: 'log_batch',

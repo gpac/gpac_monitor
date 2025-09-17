@@ -5,20 +5,18 @@ import {
   useDeferredValue,
   useMemo,
 } from 'react';
-import { GpacLogEntry, GpacLogConfig } from '@/types/domain/gpac/log-types';
+import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 
 interface UseLogsOptions {
   enabled?: boolean;
-  logLevel?: GpacLogConfig;
   maxEntries?: number;
 }
 
 export function useLogs(options: UseLogsOptions = {}) {
   const {
     enabled = true,
-    logLevel = 'all@warning',
     maxEntries = 2000,
   } = options;
 
@@ -68,7 +66,6 @@ export function useLogs(options: UseLogsOptions = {}) {
         const unsubscribeFunc = await gpacService.subscribe(
           {
             type: SubscriptionType.LOGS,
-            logLevel,
           },
           (result) => {
             if (result.data && isMounted) {
@@ -103,7 +100,7 @@ export function useLogs(options: UseLogsOptions = {}) {
         unsubscribe();
       }
     };
-  }, [enabled, logLevel, handleLogsUpdate]);
+  }, [enabled, handleLogsUpdate]);
 
   const memoizedLogs = useMemo(() => logs, [logs]);
   const optimizedLogs = useDeferredValue(memoizedLogs);

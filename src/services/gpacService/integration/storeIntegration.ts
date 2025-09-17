@@ -18,7 +18,10 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateSessionStats: (stats) => store.dispatch(updateSessionStats(stats)),
   onLogsUpdate: (logs: GpacLogEntry[]) => {
     console.log('[storeIntegration] onLogsUpdate called with', logs?.length || 0, 'logs');
+    console.log('[storeIntegration] logs data:', logs);
+    console.log('[storeIntegration] Dispatching appendLogsForAllTools...');
     store.dispatch(appendLogsForAllTools(logs));
+    console.log('[storeIntegration] appendLogsForAllTools dispatched');
   },
   onLogSubscriptionChange: (isSubscribed: boolean) =>
     store.dispatch(setSubscriptionStatus(isSubscribed)),

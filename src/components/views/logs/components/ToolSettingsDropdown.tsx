@@ -36,7 +36,7 @@ const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
   [GpacLogTool.HTTP]: 'HTTP',
   [GpacLogTool.INTERACT]: 'Interact',
   [GpacLogTool.MEDIA]: 'Media',
-  [GpacLogTool.MEM]: 'Memory',
+  [GpacLogTool.MEM]: 'Mem',
   [GpacLogTool.MMIO]: 'MMIO',
   [GpacLogTool.MODULE]: 'Module',
   [GpacLogTool.MUTEX]: 'Mutex',
@@ -47,17 +47,17 @@ const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
   [GpacLogTool.RTI]: 'RTI',
   [GpacLogTool.RTP]: 'RTP',
   [GpacLogTool.SCENE]: 'Scene',
-  [GpacLogTool.SCHED]: 'Scheduler',
+  [GpacLogTool.SCHED]: 'Sched',
   [GpacLogTool.SCRIPT]: 'Script',
   [GpacLogTool.ALL]: 'All',
 };
 
 const LEVEL_COLORS: Record<GpacLogLevel, string> = {
   [GpacLogLevel.QUIET]: 'bg-gray-500',
-  [GpacLogLevel.ERROR]: 'bg-red-500',
-  [GpacLogLevel.WARNING]: 'bg-yellow-500',
-  [GpacLogLevel.INFO]: 'bg-blue-500',
-  [GpacLogLevel.DEBUG]: 'bg-purple-500',
+  [GpacLogLevel.ERROR]: 'bg-red-600',
+  [GpacLogLevel.WARNING]: 'bg-yellow-600',
+  [GpacLogLevel.INFO]: 'bg-green-700',
+  [GpacLogLevel.DEBUG]: 'bg-blue-600',
 };
 
 export function ToolSettingsDropdown({
@@ -115,15 +115,18 @@ export function ToolSettingsDropdown({
             return (
               <DropdownMenuSub key={tool}>
                 <DropdownMenuSubTrigger className="flex items-center justify-between py-2">
-                  <span className="font-medium">
+                  
+  <span className="font-medium mr-2">
                     {TOOL_DISPLAY_NAMES[tool]}
                   </span>
                   <Badge
                     variant="secondary"
-                    className={`text-white text-xs px-2 mr-2 ${LEVEL_COLORS[effectiveLevel]}`}
+                    className={`text-white text-xs   ${LEVEL_COLORS[effectiveLevel]}`}
                   >
-                    {effectiveLevel.toUpperCase()}
+                    {effectiveLevel}
                   </Badge>
+                
+                
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent>
                   {Object.values(GpacLogLevel).map((level) => (

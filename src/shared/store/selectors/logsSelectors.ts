@@ -71,6 +71,14 @@ const filterLogsByLevel = (
 export const selectVisibleLogs = createSelector(
   [selectLogsState, selectLevelsByTool, selectDefaultAllLevel],
   (logsState, levelsByTool, defaultAllLevel) => {
+    console.log('[selectVisibleLogs] Debug info:', {
+      currentTool: logsState.currentTool,
+      bufferKeys: Object.keys(logsState.buffers),
+      bufferSizes: Object.entries(logsState.buffers).map(([tool, logs]) => [tool, logs?.length || 0]),
+      levelsByTool,
+      defaultAllLevel
+    });
+
     let rawLogs: GpacLogEntry[];
 
     if (logsState.currentTool === 'all') {
@@ -83,12 +91,26 @@ export const selectVisibleLogs = createSelector(
       rawLogs = logsState.buffers[logsState.currentTool] || [];
     }
 
-    // Get effective level for current tool
+    console.log('[selectVisibleLogs] Raw logs count:', rawLogs.length);
+
+    // Special case: when "all" is selected, show all received logs without filtering
+    // because the backend already handles the filtering with the multi-tool config
+    if (logsState.currentTool === 'all') {
+      console.log('[selectVisibleLogs] Showing all logs without filtering (currentTool = all)');
+      return rawLogs;
+    }
+
+    // For specific tools, get effective level and filter
     const effectiveLevel =
       levelsByTool[logsState.currentTool] ?? defaultAllLevel;
 
+    console.log('[selectVisibleLogs] Effective level for', logsState.currentTool, ':', effectiveLevel);
+
     // Filter by effective level (preserving history in buffers)
-    return filterLogsByLevel(rawLogs, effectiveLevel);
+    const filteredLogs = filterLogsByLevel(rawLogs, effectiveLevel);
+    console.log('[selectVisibleLogs] Filtered logs count:', filteredLogs.length);
+
+    return filteredLogs;
   },
 );
 
@@ -99,15 +121,17 @@ export const selectLogsConfigString = createSelector(
   (levelsByTool, defaultAllLevel): string => {
     const configs: string[] = [];
 
-    // Add tool-specific levels
+    // Add default level for 'all' FIRST to set the base
+    configs.push(`all@${defaultAllLevel}`);
+
+    // Then add tool-specific levels (they will override the default)
     Object.entries(levelsByTool).forEach(([tool, level]) => {
       configs.push(`${tool}@${level}`);
     });
 
-    // Add default level for 'all'
-    configs.push(`all@${defaultAllLevel}`);
-
-    return configs.join(',');
+    const result = configs.join(',');
+    console.log('[selectLogsConfigChanges] Generated config:', result);
+    return result;
   },
 );
 
@@ -117,15 +141,15 @@ export const selectLogsConfigChanges = createSelector(
   (levelsByTool, defaultAllLevel): string => {
     const configs: string[] = [];
 
-    // Only send user-defined tool levels (no defaults needed)
+    // Always send the base all@ level FIRST
+    configs.push(`all@${defaultAllLevel}`);
+
+    // Then send user-defined tool levels (they will override the default)
     Object.entries(levelsByTool).forEach(([tool, level]) => {
       configs.push(`${tool}@${level}`);
     });
 
-    // Always send the base all@ level
-    configs.push(`all@${defaultAllLevel}`);
-
-    return configs.join(',');
+    return configs.join(':');
   },
 );
 
