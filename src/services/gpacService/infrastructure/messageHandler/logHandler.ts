@@ -51,7 +51,7 @@ export class LogHandler {
   }
 
   public async subscribeToLogs(
-    logLevel: GpacLogConfig = 'all@warning',
+    logLevel: GpacLogConfig = 'all@quiet',
   ): Promise<void> {
     this.ensureLoaded();
 
@@ -127,7 +127,7 @@ export class LogHandler {
       id: LogHandler.generateMessageId(),
       logLevel,
     });
-    console.log('[LogHandler] updateLogLevel message sent');
+
   }
 
   public async getLogStatus(): Promise<void> {

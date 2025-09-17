@@ -35,6 +35,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     levelsByTool,
     defaultAllLevel,
     visibleLogs,
+    setTool,
     setToolLevel,
     setDefaultAllLevel: setDefaultLevel,
   } = useLogsRedux();
@@ -151,6 +152,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
           defaultAllLevel={defaultAllLevel}
           onToolLevelChange={setToolLevel}
           onDefaultAllLevelChange={setDefaultLevel}
+          onToolNavigate={setTool}
         />
       }
     >

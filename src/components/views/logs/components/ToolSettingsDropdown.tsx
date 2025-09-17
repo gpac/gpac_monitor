@@ -18,6 +18,7 @@ interface ToolSettingsDropdownProps {
   defaultAllLevel: GpacLogLevel;
   onToolLevelChange: (tool: GpacLogTool, level: GpacLogLevel) => void;
   onDefaultAllLevelChange: (level: GpacLogLevel) => void;
+  onToolNavigate?: (tool: GpacLogTool) => void;
 }
 
 const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
@@ -57,7 +58,7 @@ const LEVEL_COLORS: Record<GpacLogLevel, string> = {
   [GpacLogLevel.ERROR]: 'bg-red-600',
   [GpacLogLevel.WARNING]: 'bg-yellow-600',
   [GpacLogLevel.INFO]: 'bg-green-700',
-  [GpacLogLevel.DEBUG]: 'bg-blue-600',
+  [GpacLogLevel.DEBUG]: 'bg-blue-400',
 };
 
 export function ToolSettingsDropdown({
@@ -65,6 +66,7 @@ export function ToolSettingsDropdown({
   defaultAllLevel,
   onToolLevelChange,
   onDefaultAllLevelChange,
+  onToolNavigate,
 }: ToolSettingsDropdownProps) {
   const handleLevelChange = (tool: GpacLogTool, level: GpacLogLevel) => {
     if (tool === GpacLogTool.ALL) {
@@ -116,7 +118,13 @@ export function ToolSettingsDropdown({
               <DropdownMenuSub key={tool}>
                 <DropdownMenuSubTrigger className="flex items-center justify-between py-2">
                   
-  <span className="font-medium mr-2">
+  <span 
+    className="font-medium mr-2 cursor-pointer hover:text-primary" 
+    onClick={(e) => {
+      e.stopPropagation();
+      onToolNavigate?.(tool);
+    }}
+  >
                     {TOOL_DISPLAY_NAMES[tool]}
                   </span>
                   <Badge

@@ -101,8 +101,8 @@ export const selectVisibleLogs = createSelector(
     }
 
     // For specific tools, get effective level and filter
-    const effectiveLevel =
-      levelsByTool[logsState.currentTool] ?? defaultAllLevel;
+    // Use the tool's configured level if it exists, otherwise use the default
+    const effectiveLevel = levelsByTool[logsState.currentTool] ?? defaultAllLevel;
 
     console.log('[selectVisibleLogs] Effective level for', logsState.currentTool, ':', effectiveLevel);
 

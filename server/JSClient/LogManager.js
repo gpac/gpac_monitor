@@ -235,7 +235,7 @@ function LogManager(client) {
      
             this.client.client.send(JSON.stringify(data));
         } else {
-            console.log(`[LogManager] sendToClient: Client not ready, cannot send ${data.message}`);
+           /*  console.log(`[LogManager] sendToClient: Client not ready, cannot send ${data.message}`); */
         }
     };
 }
