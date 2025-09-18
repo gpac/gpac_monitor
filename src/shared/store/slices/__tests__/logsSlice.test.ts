@@ -1,8 +1,8 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { configureStore } from '@reduxjs/toolkit';
 import logsReducer, {
   setTool,
-  setGlobalLevel,
+  setDefaultAllLevel,
   appendLogs,
   setMaxEntriesPerTool,
 } from '../logsSlice';
@@ -16,6 +16,28 @@ import graphReducer from '../graphSlice';
 import widgetsReducer from '../widgetsSlice';
 import filterArgumentReducer from '../filterArgumentSlice';
 import sessionStatsReducer from '../sessionStatsSlice';
+
+// Mock localStorage globally for all tests
+let localStorageMock: { [key: string]: string };
+
+beforeEach(() => {
+  // Mock localStorage before each test
+  localStorageMock = {};
+  global.localStorage = {
+    getItem: vi.fn((key: string) => localStorageMock[key] || null),
+    setItem: vi.fn((key: string, value: string) => {
+      localStorageMock[key] = value;
+    }),
+    removeItem: vi.fn((key: string) => {
+      delete localStorageMock[key];
+    }),
+    clear: vi.fn(() => {
+      localStorageMock = {};
+    }),
+    length: 0,
+    key: vi.fn(),
+  };
+});
 
 /** Create test store with all required reducers */
 const createTestStore = () =>
@@ -45,6 +67,9 @@ const createLogEntry = (
 describe('Logs History Preservation - Real Usage Scenarios', () => {
   it('preserves logs when switching between tools during active monitoring', () => {
     const store = createTestStore();
+
+    // Set level to see all logs
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.DEBUG));
 
     // Simulate heavy mutex activity - 200 logs over time
     const mutexLogs = Array.from({ length: 200 }, (_, i) =>
@@ -140,11 +165,11 @@ describe('Logs History Preservation - Real Usage Scenarios', () => {
     store.dispatch(setTool(GpacLogTool.NETWORK));
 
     // Start with DEBUG level - see everything (1470 logs)
-    store.dispatch(setGlobalLevel(GpacLogLevel.DEBUG));
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.DEBUG));
     expect(selectVisibleLogs(store.getState())).toHaveLength(1470);
 
     // User notices too verbose, switches to INFO - see errors + warnings + info (670 logs)
-    store.dispatch(setGlobalLevel(GpacLogLevel.INFO));
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
     expect(selectVisibleLogs(store.getState())).toHaveLength(670);
 
     // More network activity during monitoring
@@ -174,7 +199,7 @@ describe('Logs History Preservation - Real Usage Scenarios', () => {
     expect(selectVisibleLogs(store.getState())).toHaveLength(690);
 
     // Issue resolved, user increases verbosity to DEBUG again
-    store.dispatch(setGlobalLevel(GpacLogLevel.DEBUG));
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.DEBUG));
     const finalLogs = selectVisibleLogs(store.getState());
 
     // Should see ALL logs including the debug ones that were hidden (1590 total)
@@ -188,7 +213,8 @@ describe('Logs History Preservation - Real Usage Scenarios', () => {
   it('handles realistic FIFO buffer overflow while preserving visible history', () => {
     const store = createTestStore();
 
-    // Set smaller buffer for testing using proper action
+    // Set level to see all logs and smaller buffer for testing
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.DEBUG));
     store.dispatch(setMaxEntriesPerTool(1000));
 
     // Generate 1200 logs for HTTP tool (exceeds buffer)
@@ -251,7 +277,7 @@ describe('Logs History Preservation - Real Usage Scenarios', () => {
     );
 
     // Set level to DEBUG to see all logs including level 4
-    store.dispatch(setGlobalLevel(GpacLogLevel.DEBUG));
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.DEBUG));
 
     // Check each tool independently
     store.dispatch(setTool(GpacLogTool.DASH));
