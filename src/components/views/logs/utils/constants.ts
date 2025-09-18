@@ -1,0 +1,40 @@
+import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
+
+export const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
+  [GpacLogTool.AUDIO]: 'Audio',
+  [GpacLogTool.CACHE]: 'Cache',
+  [GpacLogTool.CODEC]: 'Codec',
+  [GpacLogTool.CODING]: 'Coding',
+  [GpacLogTool.COMPOSE]: 'Compose',
+  [GpacLogTool.CONSOLE]: 'Console',
+  [GpacLogTool.CONTAINER]: 'Container',
+  [GpacLogTool.CORE]: 'Core',
+  [GpacLogTool.CTIME]: 'CTime',
+  [GpacLogTool.DASH]: 'DASH',
+  [GpacLogTool.FILTER]: 'Filter',
+  [GpacLogTool.HTTP]: 'HTTP',
+  [GpacLogTool.INTERACT]: 'Interact',
+  [GpacLogTool.MEDIA]: 'Media',
+  [GpacLogTool.MEM]: 'Mem',
+  [GpacLogTool.MMIO]: 'MMIO',
+  [GpacLogTool.MODULE]: 'Module',
+  [GpacLogTool.MUTEX]: 'Mutex',
+  [GpacLogTool.NETWORK]: 'Network',
+  [GpacLogTool.PARSER]: 'Parser',
+  [GpacLogTool.RMTWS]: 'RMTWS',
+  [GpacLogTool.ROUTE]: 'Route',
+  [GpacLogTool.RTI]: 'RTI',
+  [GpacLogTool.RTP]: 'RTP',
+  [GpacLogTool.SCENE]: 'Scene',
+  [GpacLogTool.SCHED]: 'Sched',
+  [GpacLogTool.SCRIPT]: 'Script',
+  [GpacLogTool.ALL]: 'All',
+};
+
+export const LEVEL_COLORS: Record<GpacLogLevel, string> = {
+  [GpacLogLevel.QUIET]: 'bg-gray-500',
+  [GpacLogLevel.ERROR]: 'bg-red-500',
+  [GpacLogLevel.WARNING]: 'bg-yellow-600',
+  [GpacLogLevel.INFO]: 'bg-green-600',
+  [GpacLogLevel.DEBUG]: 'bg-blue-400',
+};

@@ -18,6 +18,7 @@ interface WidgetWrapperProps {
   children: React.ReactNode;
   className?: string;
   customActions?: React.ReactNode;
+  statusBadge?: React.ReactNode;
 }
 
 // Memoized styles
@@ -37,6 +38,7 @@ const WidgetWrapper = ({
   children,
   className = '',
   customActions,
+  statusBadge,
 }: WidgetWrapperProps) => {
   const dispatch = useAppDispatch();
   const [isResizing, setIsResizing] = useState(false);
@@ -94,9 +96,14 @@ const WidgetWrapper = ({
       ref={resizeRef as React.RefObject<HTMLDivElement>}
       className={containerClasses}
     >
-      <div className={`${headerStyles.base} cursor-move drag-indicator`}>
+      <div className={`${headerStyles.base} cursor-move drag-indicator flex justify-center`}>
         <div className={headerStyles.title}>
           <h3 className="text-base font-medium">{title}</h3>
+          {statusBadge && (
+            <div className="mx-auto">
+              {statusBadge}
+            </div>
+          )}
         </div>
 
         <div className={`${headerStyles.actions} no-drag`}>

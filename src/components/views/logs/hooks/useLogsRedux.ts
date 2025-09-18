@@ -41,6 +41,7 @@ export function useLogsRedux() {
     (tool: GpacLogTool, level: GpacLogLevel) => {
       console.log('[useLogsRedux] handleSetToolLevel called:', tool, level);
       dispatch(setToolLevel({ tool, level }));
+      dispatch(setTool(tool)); // Switch to the tool after changing its level
  
 
       // Show toast notification
