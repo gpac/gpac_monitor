@@ -41,7 +41,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     setDefaultAllLevel: setDefaultLevel,
   } = useLogsRedux();
 
-  console.log('[LogsMonitor] visibleLogs count:', visibleLogs?.length || 0);
+ 
 
 
   // Initialize logs subscription (uses config from Redux store via useLogsService)
@@ -62,9 +62,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   }, [autoScroll, visibleLogs.length]);
 
   useEffect(() => {
-    console.log('[LogsMonitor] visibleLogs effect triggered, length:', visibleLogs.length);
+   
     if (visibleLogs.length > 0) {
-      console.log('[LogsMonitor] Scrolling to bottom for', visibleLogs.length, 'logs');
+   
       scrollToBottom();
     }
   }, [visibleLogs.length, scrollToBottom]);

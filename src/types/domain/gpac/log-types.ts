@@ -10,7 +10,7 @@ export enum GpacLogLevel {
 }
 
 /**
- * GPAC log tools/categories based on GPAC documentation
+ * GPAC log tools/categories
  */
 export enum GpacLogTool {
   AUDIO = 'audio',

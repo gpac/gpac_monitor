@@ -280,7 +280,7 @@ export class GpacService implements IGpacCommunication {
               subscriptionId,
             });
           },
-          (config.logLevel as GpacLogConfig) || 'all@warning',
+          (config.logLevel as GpacLogConfig) ,
         );
 
       case SubscriptionType.FILTER_ARGS_DETAILS:

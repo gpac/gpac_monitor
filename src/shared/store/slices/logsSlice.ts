@@ -15,14 +15,35 @@ interface LogsState {
   isSubscribed: boolean;
 }
 
-const initialState: LogsState = {
-  currentTool: GpacLogTool.ALL,
-  levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
-  defaultAllLevel: GpacLogLevel.QUIET,
-  buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
-  maxEntriesPerTool: 5000,
-  isSubscribed: false,
+// Initialize state from localStorage
+const getInitialState = (): LogsState => {
+  const STORAGE_KEY = 'gpac-logs-config';
+  
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const config = saved ? JSON.parse(saved) : {};
+    
+    return {
+      currentTool: config.currentTool || GpacLogTool.FILTER,
+      levelsByTool: config.levelsByTool || {} as Record<GpacLogTool, GpacLogLevel>,
+      defaultAllLevel: config.defaultAllLevel || GpacLogLevel.QUIET,
+      buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
+      maxEntriesPerTool: 5000,
+      isSubscribed: false,
+    };
+  } catch {
+    return {
+      currentTool: GpacLogTool.FILTER,
+      levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
+      defaultAllLevel: GpacLogLevel.QUIET,
+      buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
+      maxEntriesPerTool: 5000,
+      isSubscribed: false,
+    };
+  }
 };
+
+const initialState: LogsState = getInitialState();
 
 
 

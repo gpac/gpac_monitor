@@ -7,7 +7,7 @@ import { Sys as sys } from 'gpaccore';
 function LogManager(client) {
     this.client = client;
     this.isSubscribed = false;
-    this.logLevel = "all@warning";
+    this.logLevel = "all@quiet";
     this.logs = []; // Historical logs storage (max 500)
     this.originalLogConfig = null; // Backup of original GPAC log config
     this.pendingLogs = []; // Batch buffer for outgoing logs

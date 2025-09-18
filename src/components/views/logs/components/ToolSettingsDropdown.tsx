@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,7 +45,7 @@ const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
   [GpacLogTool.MUTEX]: 'Mutex',
   [GpacLogTool.NETWORK]: 'Network',
   [GpacLogTool.PARSER]: 'Parser',
-  [GpacLogTool.RMTWS]: 'RemoteWS',
+  [GpacLogTool.RMTWS]: 'RMTWS',
   [GpacLogTool.ROUTE]: 'Route',
   [GpacLogTool.RTI]: 'RTI',
   [GpacLogTool.RTP]: 'RTP',
@@ -84,21 +85,28 @@ export function ToolSettingsDropdown({
       : (levelsByTool[tool] ?? defaultAllLevel);
   };
 
-  const sortedTools = Object.values(GpacLogTool).sort((a, b) => {
-    // ALL first, then alphabetical
-    if (a === GpacLogTool.ALL) return -1;
-    if (b === GpacLogTool.ALL) return 1;
+  const sortedTools = useMemo(() => 
+    Object.values(GpacLogTool).sort((a, b) => {
+      // Current tool first
+      if (a === currentTool) return -1;
+      if (b === currentTool) return 1;
+      
+      // ALL last
+      if (a === GpacLogTool.ALL) return 1;
+      if (b === GpacLogTool.ALL) return -1;
 
-    const nameA = TOOL_DISPLAY_NAMES[a];
-    const nameB = TOOL_DISPLAY_NAMES[b];
+      const nameA = TOOL_DISPLAY_NAMES[a];
+      const nameB = TOOL_DISPLAY_NAMES[b];
 
-    // Safety check for undefined values
-    if (!nameA && !nameB) return 0;
-    if (!nameA) return 1;
-    if (!nameB) return -1;
+      // Safety check for undefined values
+      if (!nameA && !nameB) return 0;
+      if (!nameA) return 1;
+      if (!nameB) return -1;
 
-    return nameA.localeCompare(nameB);
-  });
+      return nameA.localeCompare(nameB);
+    }), 
+    [currentTool]
+  );
 
   return (
     <DropdownMenu>
@@ -121,9 +129,12 @@ export function ToolSettingsDropdown({
               <div key={tool} className="flex items-center justify-between py-2 px-3">
                 <span
                   className={`font-medium mr-2 cursor-pointer w-1/3 rounded-lg hover:bg-gray-600 hover:text-blue-200 transition-colors duration-200 ${
-                    isCurrentTool ? 'text-black bg-gray-400' : ''
+                    isCurrentTool ? 'text-black bg-gray-500' : ''
                   }`}
-                  onClick={() => onToolNavigate?.(tool)}
+                  onClick={() => {
+                    console.log('[ToolSettingsDropdown] Tool clicked:', tool);
+                    onToolNavigate?.(tool);
+                  }}
                 >
                   {TOOL_DISPLAY_NAMES[tool]}
                 </span>
