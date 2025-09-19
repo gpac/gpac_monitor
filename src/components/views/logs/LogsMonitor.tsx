@@ -16,6 +16,7 @@ import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
 import { useLogsService } from './hooks/useLogsService';
 import { Badge } from '@/components/ui/badge';
+import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/ToolSettingsDropdown';
 import { LEVEL_COLORS } from './utils/constants';
 import { bgToTextColor, getEffectiveLevel } from './utils/toolUtils';
@@ -159,14 +160,19 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
       title={title}
       statusBadge={statusBadge}
       customActions={
-        <ToolSettingsDropdown
-          levelsByTool={levelsByTool}
-          defaultAllLevel={defaultAllLevel}
-          currentTool={currentTool}
-          onToolLevelChange={setToolLevel}
-          onDefaultAllLevelChange={setDefaultLevel}
-          onToolNavigate={setTool}
-        />
+        <CustomTooltip
+          content="Configure log levels for each tool"
+          side="bottom"
+        >
+          <ToolSettingsDropdown
+            levelsByTool={levelsByTool}
+            defaultAllLevel={defaultAllLevel}
+            currentTool={currentTool}
+            onToolLevelChange={setToolLevel}
+            onDefaultAllLevelChange={setDefaultLevel}
+            onToolNavigate={setTool}
+          />
+        </CustomTooltip>
       }
     >
       <div className="flex flex-col h-full bg-stat stat">

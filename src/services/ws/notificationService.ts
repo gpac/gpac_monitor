@@ -12,7 +12,7 @@ export class WebSocketNotificationService {
   static onDisconnected(reason?: string, wasClean?: boolean): void {
     toastService.show({
       title: 'Connexion closed',
-      description: reason || 'Connexion closed',
+      description: reason || '',
       variant: wasClean ? 'default' : 'destructive',
     });
   }
