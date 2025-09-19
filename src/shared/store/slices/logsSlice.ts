@@ -13,6 +13,10 @@ interface LogsState {
   buffers: Record<GpacLogTool, GpacLogEntry[]>;
   maxEntriesPerTool: number;
   isSubscribed: boolean;
+  lastSentConfig: {
+    levelsByTool: Record<GpacLogTool, GpacLogLevel>;
+    defaultAllLevel: GpacLogLevel;
+  };
 }
 
 // Initialize state from localStorage
@@ -31,6 +35,10 @@ const getInitialState = (): LogsState => {
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
       maxEntriesPerTool: 5000,
       isSubscribed: false,
+      lastSentConfig: {
+        levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
+        defaultAllLevel: GpacLogLevel.QUIET,
+      },
     };
   } catch {
     return {
@@ -40,6 +48,10 @@ const getInitialState = (): LogsState => {
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
       maxEntriesPerTool: 5000,
       isSubscribed: false,
+      lastSentConfig: {
+        levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
+        defaultAllLevel: GpacLogLevel.QUIET,
+      },
     };
   }
 };
@@ -187,6 +199,14 @@ const logsSlice = createSlice({
         state.defaultAllLevel = defaultAllLevel;
       }
     },
+
+    /** Mark current config as sent to backend */
+    markConfigAsSent: (state) => {
+      state.lastSentConfig = {
+        levelsByTool: { ...state.levelsByTool },
+        defaultAllLevel: state.defaultAllLevel,
+      };
+    },
   },
 });
 
@@ -201,6 +221,7 @@ export const {
   setMaxEntriesPerTool,
   setSubscriptionStatus,
   restoreConfig,
+  markConfigAsSent,
 } = logsSlice.actions;
 
 export default logsSlice.reducer;

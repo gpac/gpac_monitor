@@ -149,21 +149,40 @@ export const selectLogsConfigString = createSelector(
   },
 );
 
-/** Create optimized logs config string with ONLY changes from defaults */
+/** Create optimized logs config string with ONLY changes from last sent config */
 export const selectLogsConfigChanges = createSelector(
-  [selectLevelsByTool, selectDefaultAllLevel],
-  (levelsByTool, defaultAllLevel): string => {
+  [selectLogsState],
+  (logsState): string => {
+    const { levelsByTool, defaultAllLevel, lastSentConfig } = logsState;
     const configs: string[] = [];
 
-    // Always send the base all@ level FIRST
-    configs.push(`all@${defaultAllLevel}`);
+    // Check if default level changed
+    if (defaultAllLevel !== lastSentConfig.defaultAllLevel) {
+      configs.push(`all@${defaultAllLevel}`);
+    }
 
-    // Then send user-defined tool levels (they will override the default)
+    // Check for changed tool levels
     Object.entries(levelsByTool).forEach(([tool, level]) => {
-      configs.push(`${tool}@${level}`);
+      const lastSentLevel = lastSentConfig.levelsByTool[tool as keyof typeof lastSentConfig.levelsByTool];
+      if (level !== lastSentLevel) {
+        configs.push(`${tool}@${level}`);
+      }
     });
 
-    return configs.join(':');
+    // Check for removed tool levels (tools that were configured but now removed)
+    Object.entries(lastSentConfig.levelsByTool).forEach(([tool, _]) => {
+      if (!(tool in levelsByTool)) {
+        // Tool was removed, reset it to default by sending all@level
+        configs.push(`${tool}@${defaultAllLevel}`);
+      }
+    });
+
+    const result = configs.join(':');
+    console.log('[selectLogsConfigChanges] Changes only config:', result, {
+      currentConfig: { levelsByTool, defaultAllLevel },
+      lastSentConfig
+    });
+    return result;
   },
 );
 
