@@ -66,14 +66,18 @@ export const ToolSettingsDropdown = memo(function ToolSettingsDropdown({
   // Handle level changes with duplicate prevention
   const handleLevelSelect = useCallback(
     (tool: GpacLogTool, level: GpacLogLevel) => {
-      const currentLevel = getEffectiveLevel(tool, levelsByTool, defaultAllLevel);
+      const currentLevel = getEffectiveLevel(
+        tool,
+        levelsByTool,
+        defaultAllLevel,
+      );
       if (currentLevel !== level) {
         handleLevelChange(tool, level);
       } else {
         setOpenSubMenu(null);
       }
     },
-    [handleLevelChange, levelsByTool, defaultAllLevel]
+    [handleLevelChange, levelsByTool, defaultAllLevel],
   );
 
   return (
@@ -103,7 +107,8 @@ export const ToolSettingsDropdown = memo(function ToolSettingsDropdown({
             <div
               className="flex items-center justify-between text-xs font-medium text-muted-foreground px-8 py-2"
               style={{
-                background: 'linear-gradient(to right, transparent 49%, #4b5563 49%, #4b5563 51%, transparent 51%)'
+                background:
+                  'linear-gradient(to right, transparent 49%, #4b5563 49%, #4b5563 51%, transparent 51%)',
               }}
             >
               <span>Tool</span>
@@ -112,20 +117,22 @@ export const ToolSettingsDropdown = memo(function ToolSettingsDropdown({
           </div>
 
           {/* Tools list */}
-          {toolItems.map(({ tool, effectiveLevel, isCurrentTool, displayName }) => (
-            <ToolRow
-              key={tool}
-              tool={tool}
-              displayName={displayName}
-              effectiveLevel={effectiveLevel}
-              isCurrentTool={isCurrentTool}
-              isSubMenuOpen={openSubMenu === tool}
-              onToolNavigate={() => onToolNavigate?.(tool)}
-              onSubMenuToggle={(open) => setOpenSubMenu(open ? tool : null)}
-              onLevelSelect={(level) => handleLevelSelect(tool, level)}
-              onMouseLeaveSubMenu={() => setOpenSubMenu(null)}
-            />
-          ))}
+          {toolItems.map(
+            ({ tool, effectiveLevel, isCurrentTool, displayName }) => (
+              <ToolRow
+                key={tool}
+                tool={tool}
+                displayName={displayName}
+                effectiveLevel={effectiveLevel}
+                isCurrentTool={isCurrentTool}
+                isSubMenuOpen={openSubMenu === tool}
+                onToolNavigate={() => onToolNavigate?.(tool)}
+                onSubMenuToggle={(open) => setOpenSubMenu(open ? tool : null)}
+                onLevelSelect={(level) => handleLevelSelect(tool, level)}
+                onMouseLeaveSubMenu={() => setOpenSubMenu(null)}
+              />
+            ),
+          )}
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

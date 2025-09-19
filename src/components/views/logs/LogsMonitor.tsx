@@ -147,7 +147,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     const bgColor = LEVEL_COLORS[effectiveLevel];
     const textColor = bgToTextColor(bgColor);
     return (
-      <Badge variant="secondary" className={`text-xs ${textColor}`}>
+      <Badge variant="status" className={`text-xs ${textColor}`}>
         {currentTool.toUpperCase()} : {effectiveLevel.toUpperCase()} (
         {visibleLogs.length})
       </Badge>

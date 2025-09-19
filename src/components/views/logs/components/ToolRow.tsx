@@ -39,7 +39,9 @@ export const ToolRow = memo(function ToolRow({
     >
       <span
         className={`font-light cursor-pointer transition-opacity duration-200 px-1 py-1 w-1/2 ${
-          isCurrentTool ? 'text-gray-100 bg-gray-800 rounded-lg font-medium' : ''
+          isCurrentTool
+            ? 'text-gray-100 bg-gray-800 rounded-lg font-medium'
+            : ''
         }`}
         onClick={() => onToolNavigate(tool)}
       >
@@ -49,11 +51,7 @@ export const ToolRow = memo(function ToolRow({
       </span>
 
       <div className="w-1/2 flex justify-end">
-        <DropdownMenuSub
-          open={isSubMenuOpen}
-          onOpenChange={onSubMenuToggle}
-          modal={false}
-        >
+        <DropdownMenuSub open={isSubMenuOpen} onOpenChange={onSubMenuToggle}>
           <DropdownMenuSubTrigger className="p-0 h-auto">
             <Badge
               variant="logs"

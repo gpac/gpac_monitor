@@ -9,7 +9,8 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
     | 'outline'
     | 'success'
     | 'warning'
-    | 'logs';
+    | 'logs'
+    | 'status';
 }
 
 export function Badge({
@@ -19,6 +20,8 @@ export function Badge({
 }: BadgeProps) {
   // Different style variants for the badge
   const variantStyles = {
+    status:
+      'border-transparent bg-gray-950 text-primary-foreground shadow hover:bg-primary/80',
     default:
       'border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80',
     secondary:
