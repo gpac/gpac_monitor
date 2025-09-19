@@ -1,4 +1,4 @@
-import { useMemo, useCallback, memo } from 'react';
+import { useMemo, useCallback, memo, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +33,8 @@ export const ToolSettingsDropdown = memo(function ToolSettingsDropdown({
   onDefaultAllLevelChange,
   onToolNavigate,
 }: ToolSettingsDropdownProps) {
+  const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
+
   const handleLevelChange = useCallback(
     (tool: GpacLogTool, level: GpacLogLevel) => {
       if (tool === GpacLogTool.ALL) {
@@ -40,6 +42,7 @@ export const ToolSettingsDropdown = memo(function ToolSettingsDropdown({
       } else {
         onToolLevelChange(tool, level);
       }
+      setOpenSubMenu(null);
     },
     [onToolLevelChange, onDefaultAllLevelChange],
   );
@@ -75,7 +78,8 @@ export const ToolSettingsDropdown = memo(function ToolSettingsDropdown({
 
       <DropdownMenuContent
         align="end"
-        className="w-64 max-h-80 overflow-y-auto p-0"
+        className="w-56 h-80 overflow-y-auto p-0"
+        onScroll={() => setOpenSubMenu(null)}
       >
         <div className="relative">
           {/* Sticky Headers */}
@@ -105,30 +109,38 @@ export const ToolSettingsDropdown = memo(function ToolSettingsDropdown({
             }) => (
               <div
                 key={tool}
-                className="flex items-center py-2 px-3 text-gray-200 text-small  bg-gray-900 "
+                className="flex items-center py-2 px-3 text-gray-200 text-xs bg-gray-900 "
               >
                 <span
-                  className={`font-light cursor-pointer rounded-lg  hover:text-blue-200   transition-colors duration-200 px-1 py-1 w-1/2 ${
-                    isCurrentTool ? 'text-black bg-gray-500' : ''
+                  className={`font-light cursor-pointer transition-all duration-200 px-1 py-1 w-1/2 border-transparent"${
+                    isCurrentTool ? 'text-black bg-gray-800 rounded-lg ' : ''
                   }`}
                   onClick={() => {
                     onToolNavigate?.(tool);
                   }}
                 >
-                  {displayName}
+                  <span className="hover:text-blue-200 hover:border-b-2 hover:border-blue-200 border-b-2 border-transparent inline-block transition-all duration-200"  >
+                    {displayName}
+                  </span>
                 </span>
 
                 <div className="w-1/2 flex justify-end">
-                  <DropdownMenuSub>
+                  <DropdownMenuSub
+                    open={openSubMenu === tool}
+                    onOpenChange={(open) => setOpenSubMenu(open ? tool : null)}
+                  >
                     <DropdownMenuSubTrigger className="p-0 h-auto">
                       <Badge
-                        variant="secondary"
-                        className={`text-gray-200 text-xs cursor-pointer hover:opacity-80 ${levelColor}`}
+                        variant="logs"
+                        className={`  cursor-pointer hover:opacity-80 ${levelColor}`}
                       >
                         {effectiveLevel}
                       </Badge>
                     </DropdownMenuSubTrigger>
-                    <DropdownMenuSubContent className="bg-secondary">
+                    <DropdownMenuSubContent
+                      className="bg-gray-900"
+                      onMouseLeave={() => setOpenSubMenu(null)}
+                    >
                       {Object.values(GpacLogLevel).map((level) => (
                         <DropdownMenuItem
                           key={level}

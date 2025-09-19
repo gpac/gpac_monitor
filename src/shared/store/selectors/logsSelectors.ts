@@ -156,8 +156,8 @@ export const selectLogsConfigChanges = createSelector(
     const { levelsByTool, defaultAllLevel, lastSentConfig } = logsState;
     const configs: string[] = [];
 
-    // Check if default level changed
-    if (defaultAllLevel !== lastSentConfig.defaultAllLevel) {
+    // Check if default level changed (null means no config sent yet)
+    if (lastSentConfig.defaultAllLevel === null || defaultAllLevel !== lastSentConfig.defaultAllLevel) {
       configs.push(`all@${defaultAllLevel}`);
     }
 
@@ -188,9 +188,6 @@ export const selectLogsConfigChanges = createSelector(
     return result;
   },
 );
-
-/** @deprecated - Legacy selector for backward compatibility */
-export const selectGlobalLogConfig = selectLogsConfigString;
 
 /** Get current logs configuration for localStorage persistence */
 export const selectCurrentConfig = createSelector(

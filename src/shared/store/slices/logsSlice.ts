@@ -15,7 +15,7 @@ interface LogsState {
   isSubscribed: boolean;
   lastSentConfig: {
     levelsByTool: Record<GpacLogTool, GpacLogLevel>;
-    defaultAllLevel: GpacLogLevel;
+    defaultAllLevel: GpacLogLevel | null; // null means no config sent yet
   };
 }
 
@@ -37,7 +37,7 @@ const getInitialState = (): LogsState => {
       isSubscribed: false,
       lastSentConfig: {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
-        defaultAllLevel: GpacLogLevel.QUIET,
+        defaultAllLevel: null, // Indicates no config has been sent yet
       },
     };
   } catch {
@@ -50,7 +50,7 @@ const getInitialState = (): LogsState => {
       isSubscribed: false,
       lastSentConfig: {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
-        defaultAllLevel: GpacLogLevel.QUIET,
+        defaultAllLevel: null, // Indicates no config has been sent yet
       },
     };
   }

@@ -3,10 +3,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import logsReducer, {
   setTool,
   setDefaultAllLevel,
+  setToolLevel,
   appendLogs,
   setMaxEntriesPerTool,
+  markConfigAsSent,
 } from '../logsSlice';
-import { selectVisibleLogs } from '../../selectors/logsSelectors';
+import { selectVisibleLogs, selectLogsConfigChanges } from '../../selectors/logsSelectors';
 import {
   GpacLogTool,
   GpacLogLevel,
@@ -292,5 +294,118 @@ describe('Logs History Preservation - Real Usage Scenarios', () => {
     // "all" tool should show combined sorted logs
     store.dispatch(setTool(GpacLogTool.ALL));
     expect(selectVisibleLogs(store.getState())).toHaveLength(240);
+  });
+});
+
+describe('Configuration Change Detection - lastSentConfig', () => {
+  it('should detect initial configuration changes from empty state', () => {
+    const store = createTestStore();
+
+    // Initial state - no config sent yet
+    expect(selectLogsConfigChanges(store.getState())).toBe('all@quiet');
+
+    // Change default level
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
+    expect(selectLogsConfigChanges(store.getState())).toBe('all@info');
+
+    // Add tool-specific level
+    store.dispatch(setToolLevel({ tool: GpacLogTool.CORE, level: GpacLogLevel.DEBUG }));
+    expect(selectLogsConfigChanges(store.getState())).toBe('all@info:core@debug');
+  });
+
+  it('should only return changes after markConfigAsSent', () => {
+    const store = createTestStore();
+
+    // Set initial configuration
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.WARNING));
+    store.dispatch(setToolLevel({ tool: GpacLogTool.HTTP, level: GpacLogLevel.INFO }));
+    store.dispatch(setToolLevel({ tool: GpacLogTool.DASH, level: GpacLogLevel.DEBUG }));
+
+    // Initial config changes
+    expect(selectLogsConfigChanges(store.getState())).toBe('all@warning:http@info:dash@debug');
+
+    // Mark as sent
+    store.dispatch(markConfigAsSent());
+
+    // Now should return empty (no changes)
+    expect(selectLogsConfigChanges(store.getState())).toBe('');
+
+    // Make new change
+    store.dispatch(setToolLevel({ tool: GpacLogTool.CODEC, level: GpacLogLevel.ERROR }));
+    expect(selectLogsConfigChanges(store.getState())).toBe('codec@error');
+
+    // Make another change
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
+    expect(selectLogsConfigChanges(store.getState())).toBe('all@info:codec@error');
+  });
+
+  it('should detect tool level modifications after marking as sent', () => {
+    const store = createTestStore();
+
+    // Initial setup
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.WARNING));
+    store.dispatch(setToolLevel({ tool: GpacLogTool.NETWORK, level: GpacLogLevel.INFO }));
+    store.dispatch(markConfigAsSent());
+
+    // Modify existing tool level
+    store.dispatch(setToolLevel({ tool: GpacLogTool.NETWORK, level: GpacLogLevel.DEBUG }));
+    expect(selectLogsConfigChanges(store.getState())).toBe('network@debug');
+
+    // Mark as sent and modify again
+    store.dispatch(markConfigAsSent());
+    store.dispatch(setToolLevel({ tool: GpacLogTool.NETWORK, level: GpacLogLevel.ERROR }));
+    expect(selectLogsConfigChanges(store.getState())).toBe('network@error');
+  });
+
+  it('should handle multiple concurrent changes efficiently', () => {
+    const store = createTestStore();
+
+    // Initial state
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.ERROR));
+    store.dispatch(markConfigAsSent());
+
+    // Batch of changes
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
+    store.dispatch(setToolLevel({ tool: GpacLogTool.FILTER, level: GpacLogLevel.DEBUG }));
+    store.dispatch(setToolLevel({ tool: GpacLogTool.MEM, level: GpacLogLevel.WARNING }));
+    store.dispatch(setToolLevel({ tool: GpacLogTool.RTP, level: GpacLogLevel.ERROR }));
+
+    // Should detect all changes in one go
+    const changes = selectLogsConfigChanges(store.getState());
+    expect(changes).toContain('all@info');
+    expect(changes).toContain('filter@debug');
+    expect(changes).toContain('memory@warning');
+    expect(changes).toContain('rtp@error');
+
+    // Mark as sent and verify reset
+    store.dispatch(markConfigAsSent());
+    expect(selectLogsConfigChanges(store.getState())).toBe('');
+  });
+
+  it('should preserve lastSentConfig state correctly after markConfigAsSent', () => {
+    const store = createTestStore();
+
+    // Set configuration
+    store.dispatch(setDefaultAllLevel(GpacLogLevel.DEBUG));
+    store.dispatch(setToolLevel({ tool: GpacLogTool.SCENE, level: GpacLogLevel.WARNING }));
+
+    // Mark as sent
+    store.dispatch(markConfigAsSent());
+
+    // Verify lastSentConfig matches current config
+    const state = store.getState();
+    expect(state.logs.lastSentConfig.defaultAllLevel).toBe(GpacLogLevel.DEBUG);
+    expect(state.logs.lastSentConfig.levelsByTool[GpacLogTool.SCENE]).toBe(GpacLogLevel.WARNING);
+
+    // Make minimal change
+    store.dispatch(setToolLevel({ tool: GpacLogTool.PARSER, level: GpacLogLevel.INFO }));
+
+    // Should only show the new change
+    expect(selectLogsConfigChanges(store.getState())).toBe('parser@info');
+
+    // The previous config should remain in lastSentConfig
+    const newState = store.getState();
+    expect(newState.logs.lastSentConfig.defaultAllLevel).toBe(GpacLogLevel.DEBUG);
+    expect(newState.logs.lastSentConfig.levelsByTool[GpacLogTool.SCENE]).toBe(GpacLogLevel.WARNING);
   });
 });
