@@ -7,6 +7,7 @@ import {
   selectVisibleLogs,
   selectCurrentConfig,
 } from '@/shared/store/selectors/logsSelectors';
+import { useDisplayQueue } from './useDisplayQueue';
 import {
   setTool,
   setToolLevel,
@@ -24,8 +25,11 @@ export function useLogsRedux() {
   const currentTool = useAppSelector(selectCurrentTool);
   const levelsByTool = useAppSelector(selectLevelsByTool);
   const defaultAllLevel = useAppSelector(selectDefaultAllLevel);
-  const visibleLogs = useAppSelector(selectVisibleLogs);
+  const rawVisibleLogs = useAppSelector(selectVisibleLogs);
   const currentConfig = useAppSelector(selectCurrentConfig);
+
+  // Throttle visible logs updates using requestAnimationFrame for performance
+  const visibleLogs = useDisplayQueue(() => rawVisibleLogs);
 
   // Actions with persistence
   const handleSetTool = useCallback(
