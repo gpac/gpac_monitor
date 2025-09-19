@@ -9,7 +9,7 @@ import { gpacService } from '@/services/gpacService';
 
 /**
  * Hook to sync per-tool log configuration with backend
- * Sends only configuration changes 
+ * Sends only configuration changes
  */
 export function useLogsService() {
   const dispatch = useAppDispatch();
@@ -17,26 +17,32 @@ export function useLogsService() {
   const isSubscribed = useAppSelector(selectIsSubscribed);
   const lastConfigRef = useRef<string>('');
 
-  const updateBackendConfig = useCallback(async (config: string) => {
-    try {
-      console.log('[useLogsService] Updating backend config:', config);
+  const updateBackendConfig = useCallback(
+    async (config: string) => {
+      try {
+        console.log('[useLogsService] Updating backend config:', config);
 
-      // Only send if there are actual changes
-      if (config.trim() === '') {
-        console.log('[useLogsService] No changes to send');
-        return;
+        // Only send if there are actual changes
+        if (config.trim() === '') {
+          console.log('[useLogsService] No changes to send');
+          return;
+        }
+
+        // Use the updateLogLevel method with the new config string
+        await gpacService.logs.updateLogLevel(config);
+
+        // Mark config as sent to track future changes
+        dispatch(markConfigAsSent());
+        lastConfigRef.current = config;
+      } catch (error) {
+        console.error(
+          '[useLogsService] Failed to update backend config:',
+          error,
+        );
       }
-
-      // Use the updateLogLevel method with the new config string
-      await gpacService.logs.updateLogLevel(config);
-
-      // Mark config as sent to track future changes
-      dispatch(markConfigAsSent());
-      lastConfigRef.current = config;
-    } catch (error) {
-      console.error('[useLogsService] Failed to update backend config:', error);
-    }
-  }, [dispatch]);
+    },
+    [dispatch],
+  );
 
   // Update backend when config changes
   useEffect(() => {

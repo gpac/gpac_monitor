@@ -163,7 +163,10 @@ export const selectLogsConfigChanges = createSelector(
 
     // Check for changed tool levels
     Object.entries(levelsByTool).forEach(([tool, level]) => {
-      const lastSentLevel = lastSentConfig.levelsByTool[tool as keyof typeof lastSentConfig.levelsByTool];
+      const lastSentLevel =
+        lastSentConfig.levelsByTool[
+          tool as keyof typeof lastSentConfig.levelsByTool
+        ];
       if (level !== lastSentLevel) {
         configs.push(`${tool}@${level}`);
       }
@@ -180,7 +183,7 @@ export const selectLogsConfigChanges = createSelector(
     const result = configs.join(':');
     console.log('[selectLogsConfigChanges] Changes only config:', result, {
       currentConfig: { levelsByTool, defaultAllLevel },
-      lastSentConfig
+      lastSentConfig,
     });
     return result;
   },
