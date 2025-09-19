@@ -8,7 +8,10 @@ import logsReducer, {
   setMaxEntriesPerTool,
   markConfigAsSent,
 } from '../logsSlice';
-import { selectVisibleLogs, selectLogsConfigChanges } from '../../selectors/logsSelectors';
+import {
+  selectVisibleLogs,
+  selectLogsConfigChanges,
+} from '../../selectors/logsSelectors';
 import {
   GpacLogTool,
   GpacLogLevel,
@@ -309,8 +312,12 @@ describe('Configuration Change Detection - lastSentConfig', () => {
     expect(selectLogsConfigChanges(store.getState())).toBe('all@info');
 
     // Add tool-specific level
-    store.dispatch(setToolLevel({ tool: GpacLogTool.CORE, level: GpacLogLevel.DEBUG }));
-    expect(selectLogsConfigChanges(store.getState())).toBe('all@info:core@debug');
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.CORE, level: GpacLogLevel.DEBUG }),
+    );
+    expect(selectLogsConfigChanges(store.getState())).toBe(
+      'all@info:core@debug',
+    );
   });
 
   it('should only return changes after markConfigAsSent', () => {
@@ -318,11 +325,17 @@ describe('Configuration Change Detection - lastSentConfig', () => {
 
     // Set initial configuration
     store.dispatch(setDefaultAllLevel(GpacLogLevel.WARNING));
-    store.dispatch(setToolLevel({ tool: GpacLogTool.HTTP, level: GpacLogLevel.INFO }));
-    store.dispatch(setToolLevel({ tool: GpacLogTool.DASH, level: GpacLogLevel.DEBUG }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.HTTP, level: GpacLogLevel.INFO }),
+    );
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.DASH, level: GpacLogLevel.DEBUG }),
+    );
 
     // Initial config changes
-    expect(selectLogsConfigChanges(store.getState())).toBe('all@warning:http@info:dash@debug');
+    expect(selectLogsConfigChanges(store.getState())).toBe(
+      'all@warning:http@info:dash@debug',
+    );
 
     // Mark as sent
     store.dispatch(markConfigAsSent());
@@ -331,12 +344,16 @@ describe('Configuration Change Detection - lastSentConfig', () => {
     expect(selectLogsConfigChanges(store.getState())).toBe('');
 
     // Make new change
-    store.dispatch(setToolLevel({ tool: GpacLogTool.CODEC, level: GpacLogLevel.ERROR }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.CODEC, level: GpacLogLevel.ERROR }),
+    );
     expect(selectLogsConfigChanges(store.getState())).toBe('codec@error');
 
     // Make another change
     store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
-    expect(selectLogsConfigChanges(store.getState())).toBe('all@info:codec@error');
+    expect(selectLogsConfigChanges(store.getState())).toBe(
+      'all@info:codec@error',
+    );
   });
 
   it('should detect tool level modifications after marking as sent', () => {
@@ -344,16 +361,22 @@ describe('Configuration Change Detection - lastSentConfig', () => {
 
     // Initial setup
     store.dispatch(setDefaultAllLevel(GpacLogLevel.WARNING));
-    store.dispatch(setToolLevel({ tool: GpacLogTool.NETWORK, level: GpacLogLevel.INFO }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.NETWORK, level: GpacLogLevel.INFO }),
+    );
     store.dispatch(markConfigAsSent());
 
     // Modify existing tool level
-    store.dispatch(setToolLevel({ tool: GpacLogTool.NETWORK, level: GpacLogLevel.DEBUG }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.NETWORK, level: GpacLogLevel.DEBUG }),
+    );
     expect(selectLogsConfigChanges(store.getState())).toBe('network@debug');
 
     // Mark as sent and modify again
     store.dispatch(markConfigAsSent());
-    store.dispatch(setToolLevel({ tool: GpacLogTool.NETWORK, level: GpacLogLevel.ERROR }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.NETWORK, level: GpacLogLevel.ERROR }),
+    );
     expect(selectLogsConfigChanges(store.getState())).toBe('network@error');
   });
 
@@ -366,9 +389,15 @@ describe('Configuration Change Detection - lastSentConfig', () => {
 
     // Batch of changes
     store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
-    store.dispatch(setToolLevel({ tool: GpacLogTool.FILTER, level: GpacLogLevel.DEBUG }));
-    store.dispatch(setToolLevel({ tool: GpacLogTool.MEM, level: GpacLogLevel.WARNING }));
-    store.dispatch(setToolLevel({ tool: GpacLogTool.RTP, level: GpacLogLevel.ERROR }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.FILTER, level: GpacLogLevel.DEBUG }),
+    );
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.MEM, level: GpacLogLevel.WARNING }),
+    );
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.RTP, level: GpacLogLevel.ERROR }),
+    );
 
     // Should detect all changes in one go
     const changes = selectLogsConfigChanges(store.getState());
@@ -387,7 +416,9 @@ describe('Configuration Change Detection - lastSentConfig', () => {
 
     // Set configuration
     store.dispatch(setDefaultAllLevel(GpacLogLevel.DEBUG));
-    store.dispatch(setToolLevel({ tool: GpacLogTool.SCENE, level: GpacLogLevel.WARNING }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.SCENE, level: GpacLogLevel.WARNING }),
+    );
 
     // Mark as sent
     store.dispatch(markConfigAsSent());
@@ -395,17 +426,25 @@ describe('Configuration Change Detection - lastSentConfig', () => {
     // Verify lastSentConfig matches current config
     const state = store.getState();
     expect(state.logs.lastSentConfig.defaultAllLevel).toBe(GpacLogLevel.DEBUG);
-    expect(state.logs.lastSentConfig.levelsByTool[GpacLogTool.SCENE]).toBe(GpacLogLevel.WARNING);
+    expect(state.logs.lastSentConfig.levelsByTool[GpacLogTool.SCENE]).toBe(
+      GpacLogLevel.WARNING,
+    );
 
     // Make minimal change
-    store.dispatch(setToolLevel({ tool: GpacLogTool.PARSER, level: GpacLogLevel.INFO }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.PARSER, level: GpacLogLevel.INFO }),
+    );
 
     // Should only show the new change
     expect(selectLogsConfigChanges(store.getState())).toBe('parser@info');
 
     // The previous config should remain in lastSentConfig
     const newState = store.getState();
-    expect(newState.logs.lastSentConfig.defaultAllLevel).toBe(GpacLogLevel.DEBUG);
-    expect(newState.logs.lastSentConfig.levelsByTool[GpacLogTool.SCENE]).toBe(GpacLogLevel.WARNING);
+    expect(newState.logs.lastSentConfig.defaultAllLevel).toBe(
+      GpacLogLevel.DEBUG,
+    );
+    expect(newState.logs.lastSentConfig.levelsByTool[GpacLogTool.SCENE]).toBe(
+      GpacLogLevel.WARNING,
+    );
   });
 });

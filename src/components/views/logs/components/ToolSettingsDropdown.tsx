@@ -119,7 +119,7 @@ export const ToolSettingsDropdown = memo(function ToolSettingsDropdown({
                     onToolNavigate?.(tool);
                   }}
                 >
-                  <span className="hover:text-blue-200 hover:border-b-2 hover:border-blue-200 border-b-2 border-transparent inline-block transition-all duration-200"  >
+                  <span className="hover:text-blue-200 hover:border-b-2 hover:border-blue-200 border-b-2 border-transparent inline-block transition-all duration-200">
                     {displayName}
                   </span>
                 </span>
@@ -149,7 +149,14 @@ export const ToolSettingsDropdown = memo(function ToolSettingsDropdown({
                               ? 'bg-accent text-accent-foreground'
                               : ''
                           }`}
-                          onClick={() => handleLevelChange(tool, level)}
+                          onSelect={(e) => {
+                            e.preventDefault();
+                            if (effectiveLevel !== level) {
+                              handleLevelChange(tool, level);
+                            } else {
+                              setOpenSubMenu(null);
+                            }
+                          }}
                         >
                           <div className="flex items-center gap-2">
                             <div

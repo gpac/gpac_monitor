@@ -157,7 +157,10 @@ export const selectLogsConfigChanges = createSelector(
     const configs: string[] = [];
 
     // Check if default level changed (null means no config sent yet)
-    if (lastSentConfig.defaultAllLevel === null || defaultAllLevel !== lastSentConfig.defaultAllLevel) {
+    if (
+      lastSentConfig.defaultAllLevel === null ||
+      defaultAllLevel !== lastSentConfig.defaultAllLevel
+    ) {
       configs.push(`all@${defaultAllLevel}`);
     }
 

@@ -2,7 +2,14 @@ import * as React from 'react';
 import { cn } from '../../utils/cn';
 
 export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'logs';
+  variant?:
+    | 'default'
+    | 'secondary'
+    | 'destructive'
+    | 'outline'
+    | 'success'
+    | 'warning'
+    | 'logs';
 }
 
 export function Badge({
@@ -12,7 +19,6 @@ export function Badge({
 }: BadgeProps) {
   // Different style variants for the badge
   const variantStyles = {
-  
     default:
       'border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80',
     secondary:
@@ -22,8 +28,7 @@ export function Badge({
     destructive:
       'border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80',
     outline: 'text-foreground bg-primary',
-    logs:
-    'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 px-1 py-0 text-gray-900 font-normal',
+    logs: 'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 px-1 py-0 text-gray-900 font-normal',
 
     success: 'bg-green-600/20 text-green-400 border-green-500/30',
   };
