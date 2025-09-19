@@ -92,7 +92,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           onDrag={isResizing ? undefined : handleMiniMapDrag}
           pannable={!isResizing}
           zoomable={!isResizing}
-          ariaLabel="Minimap pour navigation du graphique"
+          ariaLabel="Minimap for graph navigation"
         />
       </ReactFlow>
     </div>
