@@ -166,7 +166,6 @@ export class BaseMessageHandler {
   }
 
   private handleDetailsMessage(data: any): void {
-
     if (!data.filter) return;
     this.filterArgsHandler.handleFilterArgs(data);
   }
@@ -206,18 +205,33 @@ export class BaseMessageHandler {
   }
 
   private handleLogBatchMessage(data: LogBatchResponse): void {
-    console.log('[BaseMessageHandler] handleLogBatchMessage received:', data?.logs?.length || 0, 'logs');
+    console.log(
+      '[BaseMessageHandler] handleLogBatchMessage received:',
+      data?.logs?.length || 0,
+      'logs',
+    );
     console.log('[BaseMessageHandler] handleLogBatchMessage data:', data);
     if (data.logs && Array.isArray(data.logs)) {
-      console.log('[BaseMessageHandler] Calling logHandler.handleLogBatch with', data.logs.length, 'logs');
+      console.log(
+        '[BaseMessageHandler] Calling logHandler.handleLogBatch with',
+        data.logs.length,
+        'logs',
+      );
       this.logHandler.handleLogBatch(data.logs);
     } else {
-      console.log('[BaseMessageHandler] No logs in data or data.logs not an array:', data);
+      console.log(
+        '[BaseMessageHandler] No logs in data or data.logs not an array:',
+        data,
+      );
     }
   }
 
   private handleLogHistoryMessage(data: LogHistoryResponse): void {
-    console.log('[BaseMessageHandler] handleLogHistoryMessage received:', data?.logs?.length || 0, 'logs');
+    console.log(
+      '[BaseMessageHandler] handleLogHistoryMessage received:',
+      data?.logs?.length || 0,
+      'logs',
+    );
     if (data.logs && Array.isArray(data.logs)) {
       this.logHandler.handleLogHistory(data.logs);
     }

@@ -15,19 +15,16 @@ import WidgetWrapper from '../../common/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
 import { useLogsService } from './hooks/useLogsService';
-import  { Badge } from '@/components/ui/badge'
+import { Badge } from '@/components/ui/badge';
 import { ToolSettingsDropdown } from './components/ToolSettingsDropdown';
 import { LEVEL_COLORS } from './utils/constants';
 import { bgToTextColor, getEffectiveLevel } from './utils/toolUtils';
-import {
-  GpacLogEntry,
-} from '@/types/domain/gpac/log-types';
+import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 interface LogsMonitorProps {
   id: string;
   title: string;
 }
-
 
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const [autoScroll, setAutoScroll] = useState(true);
@@ -42,9 +39,6 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     setToolLevel,
     setDefaultAllLevel: setDefaultLevel,
   } = useLogsRedux();
-
- 
-
 
   // Initialize logs subscription (uses config from Redux store via useLogsService)
   useLogs({
@@ -64,9 +58,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   }, [autoScroll, visibleLogs.length]);
 
   useEffect(() => {
-   
     if (visibleLogs.length > 0) {
-   
       scrollToBottom();
     }
   }, [visibleLogs.length, scrollToBottom]);
@@ -146,12 +138,17 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   );
 
   const statusBadge = useMemo(() => {
-    const effectiveLevel = getEffectiveLevel(currentTool, levelsByTool, defaultAllLevel);
+    const effectiveLevel = getEffectiveLevel(
+      currentTool,
+      levelsByTool,
+      defaultAllLevel,
+    );
     const bgColor = LEVEL_COLORS[effectiveLevel];
     const textColor = bgToTextColor(bgColor);
     return (
       <Badge variant="secondary" className={`text-xs ${textColor}`}>
-        {currentTool.toUpperCase()} : {effectiveLevel.toUpperCase()} ({visibleLogs.length})
+        {currentTool.toUpperCase()} : {effectiveLevel.toUpperCase()} (
+        {visibleLogs.length})
       </Badge>
     );
   }, [currentTool, levelsByTool, defaultAllLevel, visibleLogs.length]);

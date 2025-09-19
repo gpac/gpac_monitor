@@ -272,16 +272,15 @@ export class GpacService implements IGpacCommunication {
           }, config.interval || 150);
 
       case SubscriptionType.LOGS:
-        return this.messageHandler.getLogHandler().subscribeToLogEntries(
-          (data) => {
+        return this.messageHandler
+          .getLogHandler()
+          .subscribeToLogEntries((data) => {
             callback({
               data: data as T,
               timestamp: Date.now(),
               subscriptionId,
             });
-          },
-          (config.logLevel as GpacLogConfig) ,
-        );
+          }, config.logLevel as GpacLogConfig);
 
       case SubscriptionType.FILTER_ARGS_DETAILS:
         if (typeof config.filterIdx !== 'number') {

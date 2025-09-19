@@ -4,7 +4,7 @@ import { TOOL_DISPLAY_NAMES } from './constants';
 export const getEffectiveLevel = (
   tool: GpacLogTool,
   levelsByTool: Record<GpacLogTool, GpacLogLevel>,
-  defaultAllLevel: GpacLogLevel
+  defaultAllLevel: GpacLogLevel,
 ): GpacLogLevel => {
   return tool === GpacLogTool.ALL
     ? defaultAllLevel
@@ -15,7 +15,7 @@ export const sortTools = (currentTool: GpacLogTool): GpacLogTool[] => {
   return Object.values(GpacLogTool).sort((a, b) => {
     if (a === currentTool) return -1;
     if (b === currentTool) return 1;
-    
+
     if (a === GpacLogTool.ALL) return 1;
     if (b === GpacLogTool.ALL) return -1;
 

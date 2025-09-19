@@ -15,10 +15,7 @@ interface UseLogsOptions {
 }
 
 export function useLogs(options: UseLogsOptions = {}) {
-  const {
-    enabled = true,
-    maxEntries = 2000,
-  } = options;
+  const { enabled = true, maxEntries = 2000 } = options;
 
   const [logs, setLogs] = useState<GpacLogEntry[]>([]);
   const [isSubscribed, setIsSubscribed] = useState(false);

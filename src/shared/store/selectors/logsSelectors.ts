@@ -74,9 +74,12 @@ export const selectVisibleLogs = createSelector(
     console.log('[selectVisibleLogs] Debug info:', {
       currentTool: logsState.currentTool,
       bufferKeys: Object.keys(logsState.buffers),
-      bufferSizes: Object.entries(logsState.buffers).map(([tool, logs]) => [tool, logs?.length || 0]),
+      bufferSizes: Object.entries(logsState.buffers).map(([tool, logs]) => [
+        tool,
+        logs?.length || 0,
+      ]),
       levelsByTool,
-      defaultAllLevel
+      defaultAllLevel,
     });
 
     let rawLogs: GpacLogEntry[];
@@ -96,19 +99,30 @@ export const selectVisibleLogs = createSelector(
     // Special case: when "all" is selected, show all received logs without filtering
     // because the backend already handles the filtering with the multi-tool config
     if (logsState.currentTool === 'all') {
-      console.log('[selectVisibleLogs] Showing all logs without filtering (currentTool = all)');
+      console.log(
+        '[selectVisibleLogs] Showing all logs without filtering (currentTool = all)',
+      );
       return rawLogs;
     }
 
     // For specific tools, get effective level and filter
     // Use the tool's configured level if it exists, otherwise use the default
-    const effectiveLevel = levelsByTool[logsState.currentTool] ?? defaultAllLevel;
+    const effectiveLevel =
+      levelsByTool[logsState.currentTool] ?? defaultAllLevel;
 
-    console.log('[selectVisibleLogs] Effective level for', logsState.currentTool, ':', effectiveLevel);
+    console.log(
+      '[selectVisibleLogs] Effective level for',
+      logsState.currentTool,
+      ':',
+      effectiveLevel,
+    );
 
     // Filter by effective level (preserving history in buffers)
     const filteredLogs = filterLogsByLevel(rawLogs, effectiveLevel);
-    console.log('[selectVisibleLogs] Filtered logs count:', filteredLogs.length);
+    console.log(
+      '[selectVisibleLogs] Filtered logs count:',
+      filteredLogs.length,
+    );
 
     return filteredLogs;
   },

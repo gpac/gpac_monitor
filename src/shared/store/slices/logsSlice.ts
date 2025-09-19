@@ -18,14 +18,15 @@ interface LogsState {
 // Initialize state from localStorage
 const getInitialState = (): LogsState => {
   const STORAGE_KEY = 'gpac-logs-config';
-  
+
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     const config = saved ? JSON.parse(saved) : {};
-    
+
     return {
       currentTool: config.currentTool || GpacLogTool.FILTER,
-      levelsByTool: config.levelsByTool || {} as Record<GpacLogTool, GpacLogLevel>,
+      levelsByTool:
+        config.levelsByTool || ({} as Record<GpacLogTool, GpacLogLevel>),
       defaultAllLevel: config.defaultAllLevel || GpacLogLevel.QUIET,
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
       maxEntriesPerTool: 5000,
@@ -44,8 +45,6 @@ const getInitialState = (): LogsState => {
 };
 
 const initialState: LogsState = getInitialState();
-
-
 
 /** Initialize empty buffers for all GPAC tools */
 Object.values(GpacLogTool).forEach((tool) => {
@@ -97,7 +96,11 @@ const logsSlice = createSlice({
     /** Distribute and append logs to appropriate tool buffers based on log.tool property */
     appendLogsForAllTools: (state, action: PayloadAction<GpacLogEntry[]>) => {
       const logs = action.payload;
-      console.log('[logsSlice] appendLogsForAllTools called with', logs.length, 'logs');
+      console.log(
+        '[logsSlice] appendLogsForAllTools called with',
+        logs.length,
+        'logs',
+      );
 
       if (logs.length === 0) return;
 
@@ -125,7 +128,12 @@ const logsSlice = createSlice({
             -state.maxEntriesPerTool,
           );
         }
-        console.log('[logsSlice] Updated buffer for tool', tool, 'new size:', state.buffers[tool as GpacLogTool]?.length);
+        console.log(
+          '[logsSlice] Updated buffer for tool',
+          tool,
+          'new size:',
+          state.buffers[tool as GpacLogTool]?.length,
+        );
       });
     },
 

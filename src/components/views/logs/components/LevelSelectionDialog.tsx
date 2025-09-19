@@ -76,7 +76,7 @@ export function LevelSelectionDialog({
           {LOG_LEVELS.map(({ level, label, description, color }) => (
             <Button
               key={level}
-              variant={currentLevel === level ? "default" : "outline"}
+              variant={currentLevel === level ? 'default' : 'outline'}
               className="w-full justify-between h-auto p-4"
               onClick={() => onLevelSelect(level)}
             >

@@ -1,6 +1,9 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { selectLogsConfigChanges, selectIsSubscribed } from '@/shared/store/selectors/logsSelectors';
+import {
+  selectLogsConfigChanges,
+  selectIsSubscribed,
+} from '@/shared/store/selectors/logsSelectors';
 import { gpacService } from '@/services/gpacService';
 
 /**
@@ -30,7 +33,7 @@ export function useLogsService() {
     console.log('[useLogsService] Effect triggered:', {
       isSubscribed,
       configString,
-      lastConfig: lastConfigRef.current
+      lastConfig: lastConfigRef.current,
     });
 
     // Only update if we're subscribed and config actually changed
@@ -40,7 +43,7 @@ export function useLogsService() {
     } else {
       console.log('[useLogsService] No update needed:', {
         isSubscribed,
-        configChanged: configString !== lastConfigRef.current
+        configChanged: configString !== lastConfigRef.current,
       });
     }
   }, [configString, isSubscribed, updateBackendConfig]);

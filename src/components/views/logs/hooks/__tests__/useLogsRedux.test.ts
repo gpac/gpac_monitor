@@ -4,7 +4,10 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import React from 'react';
 import { useLogsRedux } from '../useLogsRedux';
-import { GpacLogLevel, GpacLogTool } from '../../../../../types/domain/gpac/log-types';
+import {
+  GpacLogLevel,
+  GpacLogTool,
+} from '../../../../../types/domain/gpac/log-types';
 
 // Import and mock the slice creation instead of importing the pre-created slice
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
@@ -34,14 +37,15 @@ vi.mock('@/shared/hooks/useToast', () => ({
 const createTestLogsReducer = (localStorageMock: { [key: string]: string }) => {
   const getInitialState = (): LogsState => {
     const STORAGE_KEY = 'gpac-logs-config';
-    
+
     try {
       const saved = localStorageMock[STORAGE_KEY];
       const config = saved ? JSON.parse(saved) : {};
-      
+
       return {
         currentTool: config.currentTool || GpacLogTool.FILTER,
-        levelsByTool: config.levelsByTool || {} as Record<GpacLogTool, GpacLogLevel>,
+        levelsByTool:
+          config.levelsByTool || ({} as Record<GpacLogTool, GpacLogLevel>),
         defaultAllLevel: config.defaultAllLevel || GpacLogLevel.QUIET,
         buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
         maxEntriesPerTool: 5000,
@@ -107,15 +111,16 @@ const createTestLogsReducer = (localStorageMock: { [key: string]: string }) => {
 };
 
 // Create test store
-const createTestStore = (localStorageMock: { [key: string]: string }) => configureStore({
-  reducer: {
-    logs: createTestLogsReducer(localStorageMock),
-  },
-});
+const createTestStore = (localStorageMock: { [key: string]: string }) =>
+  configureStore({
+    reducer: {
+      logs: createTestLogsReducer(localStorageMock),
+    },
+  });
 
 // Wrapper component for Redux Provider
 const createWrapper = (store: ReturnType<typeof createTestStore>) => {
-  return ({ children }: { children: React.ReactNode }) => 
+  return ({ children }: { children: React.ReactNode }) =>
     React.createElement(Provider, { store, children });
 };
 
@@ -180,7 +185,7 @@ describe('useLogsRedux', () => {
 
       expect(localStorage.setItem).toHaveBeenCalledWith(
         'gpac-logs-config',
-        expect.stringContaining('"currentTool":"mmio"')
+        expect.stringContaining('"currentTool":"mmio"'),
       );
     });
   });
@@ -196,7 +201,7 @@ describe('useLogsRedux', () => {
 
       // Create new store AFTER setting localStorage to trigger initialization with saved data
       const storeWithData = createTestStore(localStorageMock);
-      
+
       const { result } = renderHook(() => useLogsRedux(), {
         wrapper: createWrapper(storeWithData),
       });
@@ -219,15 +224,15 @@ describe('useLogsRedux', () => {
       // Check that localStorage was called with complete config
       expect(localStorage.setItem).toHaveBeenCalledWith(
         'gpac-logs-config',
-        expect.stringContaining('"currentTool":"http"')
+        expect.stringContaining('"currentTool":"http"'),
       );
       expect(localStorage.setItem).toHaveBeenCalledWith(
         'gpac-logs-config',
-        expect.stringContaining('"http":"debug"')
+        expect.stringContaining('"http":"debug"'),
       );
       expect(localStorage.setItem).toHaveBeenCalledWith(
         'gpac-logs-config',
-        expect.stringContaining('"defaultAllLevel":"warning"')
+        expect.stringContaining('"defaultAllLevel":"warning"'),
       );
     });
   });
@@ -242,7 +247,9 @@ describe('useLogsRedux', () => {
         result.current.setToolLevel(GpacLogTool.NETWORK, GpacLogLevel.ERROR);
       });
 
-      expect(result.current.levelsByTool[GpacLogTool.NETWORK]).toBe(GpacLogLevel.ERROR);
+      expect(result.current.levelsByTool[GpacLogTool.NETWORK]).toBe(
+        GpacLogLevel.ERROR,
+      );
       expect(result.current.currentTool).toBe(GpacLogTool.NETWORK);
     });
 
@@ -257,7 +264,7 @@ describe('useLogsRedux', () => {
 
       expect(localStorage.setItem).toHaveBeenCalledWith(
         'gpac-logs-config',
-        expect.stringContaining('"parser":"info"')
+        expect.stringContaining('"parser":"info"'),
       );
     });
 
@@ -287,7 +294,9 @@ describe('useLogsRedux', () => {
       });
 
       expect(result.current.currentTool).toBe(GpacLogTool.CODEC);
-      expect(result.current.levelsByTool[GpacLogTool.CORE]).toBe(GpacLogLevel.WARNING);
+      expect(result.current.levelsByTool[GpacLogTool.CORE]).toBe(
+        GpacLogLevel.WARNING,
+      );
     });
 
     it('should preserve levelsByTool when changing currentTool', () => {
@@ -302,8 +311,12 @@ describe('useLogsRedux', () => {
       });
 
       expect(result.current.currentTool).toBe(GpacLogTool.FILTER);
-      expect(result.current.levelsByTool[GpacLogTool.CONSOLE]).toBe(GpacLogLevel.ERROR);
-      expect(result.current.levelsByTool[GpacLogTool.MEDIA]).toBe(GpacLogLevel.INFO);
+      expect(result.current.levelsByTool[GpacLogTool.CONSOLE]).toBe(
+        GpacLogLevel.ERROR,
+      );
+      expect(result.current.levelsByTool[GpacLogTool.MEDIA]).toBe(
+        GpacLogLevel.INFO,
+      );
     });
   });
 
@@ -312,7 +325,7 @@ describe('useLogsRedux', () => {
       localStorageMock['gpac-logs-config'] = 'invalid-json';
 
       const storeWithBadData = createTestStore(localStorageMock);
-      
+
       const { result } = renderHook(() => useLogsRedux(), {
         wrapper: createWrapper(storeWithBadData),
       });
@@ -326,7 +339,7 @@ describe('useLogsRedux', () => {
       localStorageMock['gpac-logs-config'] = JSON.stringify({});
 
       const storeWithEmptyData = createTestStore(localStorageMock);
-      
+
       const { result } = renderHook(() => useLogsRedux(), {
         wrapper: createWrapper(storeWithEmptyData),
       });

@@ -127,7 +127,6 @@ export class LogHandler {
       id: LogHandler.generateMessageId(),
       logLevel,
     });
-
   }
 
   public async getLogStatus(): Promise<void> {
@@ -140,14 +139,22 @@ export class LogHandler {
   }
 
   public handleLogBatch(logs: GpacLogEntry[]): void {
-    console.log('[LogHandler] handleLogBatch received:', logs?.length || 0, 'logs');
+    console.log(
+      '[LogHandler] handleLogBatch received:',
+      logs?.length || 0,
+      'logs',
+    );
 
     // Send to worker for processing
     logWorkerService.processLogs(logs);
 
     // Send directly to Redux for immediate UI update
     if (this.callbacks?.onLogsUpdate) {
-      console.log('[LogHandler] Calling onLogsUpdate callback with', logs?.length || 0, 'logs');
+      console.log(
+        '[LogHandler] Calling onLogsUpdate callback with',
+        logs?.length || 0,
+        'logs',
+      );
       this.callbacks.onLogsUpdate(logs);
     } else {
       console.log('[LogHandler] No onLogsUpdate callback available');
@@ -155,17 +162,27 @@ export class LogHandler {
   }
 
   public handleLogHistory(logs: GpacLogEntry[]): void {
-    console.log('[LogHandler] handleLogHistory received:', logs?.length || 0, 'logs');
+    console.log(
+      '[LogHandler] handleLogHistory received:',
+      logs?.length || 0,
+      'logs',
+    );
 
     // Keep the existing subscribable for backward compatibility
     this.logEntriesSubscribable.updateDataAndNotify(logs);
 
     // Send to Redux for immediate UI update
     if (this.callbacks?.onLogsUpdate) {
-      console.log('[LogHandler] Calling onLogsUpdate callback (history) with', logs?.length || 0, 'logs');
+      console.log(
+        '[LogHandler] Calling onLogsUpdate callback (history) with',
+        logs?.length || 0,
+        'logs',
+      );
       this.callbacks.onLogsUpdate(logs);
     } else {
-      console.log('[LogHandler] No onLogsUpdate callback available for history');
+      console.log(
+        '[LogHandler] No onLogsUpdate callback available for history',
+      );
     }
   }
 

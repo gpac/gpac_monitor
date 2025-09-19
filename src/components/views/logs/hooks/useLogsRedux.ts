@@ -27,7 +27,6 @@ export function useLogsRedux() {
   const visibleLogs = useAppSelector(selectVisibleLogs);
   const currentConfig = useAppSelector(selectCurrentConfig);
 
-
   // Actions with persistence
   const handleSetTool = useCallback(
     (tool: GpacLogTool) => {
@@ -42,11 +41,10 @@ export function useLogsRedux() {
       console.log('[useLogsRedux] handleSetToolLevel called:', tool, level);
       dispatch(setToolLevel({ tool, level }));
       dispatch(setTool(tool)); // Switch to the tool after changing its level
- 
 
       // Show toast notification
       toast({
-        title: "Log Level Updated",
+        title: 'Log Level Updated',
         description: `${tool.toUpperCase()} set to ${level.toUpperCase()}`,
       });
     },
@@ -59,13 +57,12 @@ export function useLogsRedux() {
 
       // Show toast notification
       toast({
-        title: "Default Level Updated",
+        title: 'Default Level Updated',
         description: `Default level for all tools set to ${level.toUpperCase()}`,
       });
     },
     [dispatch],
   );
-
 
   // Auto-save config when it changes
   useEffect(() => {
