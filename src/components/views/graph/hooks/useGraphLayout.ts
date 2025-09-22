@@ -19,13 +19,13 @@ const performDagreLayout = (nodes: Node[], edges: Edge[]): Node[] => {
   const g = new dagre.graphlib.Graph();
   g.setGraph({
     rankdir: 'LR',
-    nodesep: 100,
-    ranksep: 150,
+    nodesep: 300, 
+    ranksep: 50,
   });
 
   nodes.forEach((node) => {
     g.setNode(node.id, {
-      width: node.measured?.width || 200,
+      width: node.measured?.width || 100,
       height: node.measured?.height || 100,
     });
   });

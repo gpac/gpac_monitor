@@ -70,8 +70,11 @@ function analyzeConfigChanges(
     console.log('[useLogsService] Analyzing change:', {
       tool,
       requestedLevel: level,
+      requestedLevelValue: LogLevelUtils.getNumericValue(level),
       backendCurrentLevel,
+      backendCurrentLevelValue: LogLevelUtils.getNumericValue(backendCurrentLevel),
       needsBackend: needsBackendForThisChange,
+      lastSentLevelsByTool,
       reason: needsBackendForThisChange ? 
         `${level}(${LogLevelUtils.getNumericValue(level)}) > ${backendCurrentLevel}(${LogLevelUtils.getNumericValue(backendCurrentLevel)})` : 
         'Can use frontend filtering'
