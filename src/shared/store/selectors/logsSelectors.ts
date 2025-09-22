@@ -71,17 +71,6 @@ const filterLogsByLevel = (
 export const selectVisibleLogs = createSelector(
   [selectLogsState, selectLevelsByTool, selectDefaultAllLevel],
   (logsState, levelsByTool, defaultAllLevel) => {
-    console.log('[selectVisibleLogs] Debug info:', {
-      currentTool: logsState.currentTool,
-      bufferKeys: Object.keys(logsState.buffers),
-      bufferSizes: Object.entries(logsState.buffers).map(([tool, logs]) => [
-        tool,
-        logs?.length || 0,
-      ]),
-      levelsByTool,
-      defaultAllLevel,
-    });
-
     let rawLogs: GpacLogEntry[];
 
     if (logsState.currentTool === 'all') {
@@ -94,14 +83,9 @@ export const selectVisibleLogs = createSelector(
       rawLogs = logsState.buffers[logsState.currentTool] || [];
     }
 
-    console.log('[selectVisibleLogs] Raw logs count:', rawLogs.length);
-
     // Special case: when "all" is selected, show all received logs without filtering
     // because the backend already handles the filtering with the multi-tool config
     if (logsState.currentTool === 'all') {
-      console.log(
-        '[selectVisibleLogs] Showing all logs without filtering (currentTool = all)',
-      );
       return rawLogs;
     }
 
@@ -110,19 +94,8 @@ export const selectVisibleLogs = createSelector(
     const effectiveLevel =
       levelsByTool[logsState.currentTool] ?? defaultAllLevel;
 
-    console.log(
-      '[selectVisibleLogs] Effective level for',
-      logsState.currentTool,
-      ':',
-      effectiveLevel,
-    );
-
     // Filter by effective level (preserving history in buffers)
     const filteredLogs = filterLogsByLevel(rawLogs, effectiveLevel);
-    console.log(
-      '[selectVisibleLogs] Filtered logs count:',
-      filteredLogs.length,
-    );
 
     return filteredLogs;
   },
@@ -144,7 +117,6 @@ export const selectLogsConfigString = createSelector(
     });
 
     const result = configs.join(',');
-    console.log('[selectLogsConfigChanges] Generated config:', result);
     return result;
   },
 );
@@ -184,11 +156,22 @@ export const selectLogsConfigChanges = createSelector(
     });
 
     const result = configs.join(':');
-    console.log('[selectLogsConfigChanges] Changes only config:', result, {
-      currentConfig: { levelsByTool, defaultAllLevel },
-      lastSentConfig,
-    });
     return result;
+  },
+);
+
+/** Get log counts by tool for performance monitoring */
+export const selectLogCountsByTool = createSelector(
+  [selectLogsState],
+  (logsState) => {
+    const counts: Record<string, number> = {};
+    
+    // Count logs from all tool buffers
+    Object.entries(logsState.buffers).forEach(([tool, logs]) => {
+      counts[tool] = logs.length;
+    });
+    
+    return counts;
   },
 );
 

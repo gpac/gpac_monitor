@@ -185,7 +185,7 @@ function LogManager(client) {
                 logLevel: logLevel
             });
 
-            console.log(`LogManager: Updated log level to: ${logLevel}`);
+ 
         } catch (error) {
             console.error("LogManager: Failed to update log level:", error);
         }

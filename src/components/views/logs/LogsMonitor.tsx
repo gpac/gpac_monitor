@@ -14,12 +14,12 @@ import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import WidgetWrapper from '../../common/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
+import { useAppSelector } from '@/shared/hooks/redux';
+import { selectLogCountsByTool } from '@/shared/store/selectors/logsSelectors';
 import { useLogsService } from './hooks/useLogsService';
-import { Badge } from '@/components/ui/badge';
 import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/ToolSettingsDropdown';
-import { LEVEL_COLORS } from './utils/constants';
-import { bgToTextColor, getEffectiveLevel } from './utils/toolUtils';
+import { ToolSwitcher } from './components/ToolSwitcher';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 interface LogsMonitorProps {
@@ -40,6 +40,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     setToolLevel,
     setDefaultAllLevel: setDefaultLevel,
   } = useLogsRedux();
+
+  // Get log counts by tool for performance monitoring
+  const logCountsByTool = useAppSelector(selectLogCountsByTool);
 
   // Initialize logs subscription (uses config from Redux store via useLogsService)
   useLogs({
@@ -138,21 +141,16 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     },
   );
 
-  const statusBadge = useMemo(() => {
-    const effectiveLevel = getEffectiveLevel(
-      currentTool,
-      levelsByTool,
-      defaultAllLevel,
-    );
-    const bgColor = LEVEL_COLORS[effectiveLevel];
-    const textColor = bgToTextColor(bgColor);
-    return (
-      <Badge variant="status" className={`text-xs ${textColor}`}>
-        {currentTool.toUpperCase()} : {effectiveLevel.toUpperCase()} (
-        {visibleLogs.length})
-      </Badge>
-    );
-  }, [currentTool, levelsByTool, defaultAllLevel, visibleLogs.length]);
+  const statusBadge = useMemo(() => (
+    <ToolSwitcher
+      currentTool={currentTool}
+      levelsByTool={levelsByTool}
+      defaultAllLevel={defaultAllLevel}
+      visibleLogsCount={visibleLogs.length}
+      logCountsByTool={logCountsByTool}
+      onToolSelect={setTool}
+    />
+  ), [currentTool, levelsByTool, defaultAllLevel, visibleLogs.length, logCountsByTool, setTool]);
 
   return (
     <WidgetWrapper
