@@ -163,3 +163,52 @@ export type GpacLogMessage =
   | LogHistoryMessage
   | LogStatusMessage
   | LogConfigChangedMessage;
+
+/**
+ * Log level numeric mapping for comparison operations
+ */
+export const LOG_LEVEL_VALUES: Record<GpacLogLevel, number> = {
+  [GpacLogLevel.QUIET]: 0,
+  [GpacLogLevel.ERROR]: 1,
+  [GpacLogLevel.WARNING]: 2,
+  [GpacLogLevel.INFO]: 3,
+  [GpacLogLevel.DEBUG]: 4,
+} as const;
+
+/**
+ * Utility functions for log level operations
+ */
+export const LogLevelUtils = {
+  /**
+   * Get numeric value for a log level
+   */
+  getNumericValue: (level: GpacLogLevel): number => LOG_LEVEL_VALUES[level],
+
+  /**
+   * Check if a requested level requires more verbosity than current level
+   * @param currentLevel - Currently configured level
+   * @param requestedLevel - Requested level
+   * @returns true if backend call is needed (requested > current)
+   */
+  needsBackendCall: (currentLevel: GpacLogLevel, requestedLevel: GpacLogLevel): boolean => {
+    return LOG_LEVEL_VALUES[requestedLevel] > LOG_LEVEL_VALUES[currentLevel];
+  },
+
+  /**
+   * Check if a requested level can be satisfied by frontend filtering
+   * @param currentLevel - Currently configured level
+   * @param requestedLevel - Requested level
+   * @returns true if frontend filtering is sufficient (requested <= current)
+   */
+  canUseFrontendFiltering: (currentLevel: GpacLogLevel, requestedLevel: GpacLogLevel): boolean => {
+    return LOG_LEVEL_VALUES[requestedLevel] <= LOG_LEVEL_VALUES[currentLevel];
+  },
+
+  /**
+   * Compare two log levels
+   * @returns negative if level1 < level2, 0 if equal, positive if level1 > level2
+   */
+  compare: (level1: GpacLogLevel, level2: GpacLogLevel): number => {
+    return LOG_LEVEL_VALUES[level1] - LOG_LEVEL_VALUES[level2];
+  },
+} as const;

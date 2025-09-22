@@ -5,7 +5,7 @@ import {
   GpacLogEntry,
 } from '@/types/domain/gpac/log-types';
 
-/** Redux state for GPAC logs management with per-tool levels and buffers */
+/** Redux state for  logs management with per-tool levels and buffers */
 interface LogsState {
   currentTool: GpacLogTool;
   levelsByTool: Record<GpacLogTool, GpacLogLevel>;

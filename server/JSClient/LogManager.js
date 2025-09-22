@@ -112,7 +112,7 @@ function LogManager(client) {
             this.processIncomingLogs();
             this.processingScheduled = false;
             return false;
-        }, 1); // Process ASAP but off main thread
+        }, 1); 
     };
 
     /**
