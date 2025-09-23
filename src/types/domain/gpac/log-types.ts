@@ -190,7 +190,10 @@ export const LogLevelUtils = {
    * @param requestedLevel - Requested level
    * @returns true if backend call is needed (requested > current)
    */
-  needsBackendCall: (currentLevel: GpacLogLevel, requestedLevel: GpacLogLevel): boolean => {
+  needsBackendCall: (
+    currentLevel: GpacLogLevel,
+    requestedLevel: GpacLogLevel,
+  ): boolean => {
     return LOG_LEVEL_VALUES[requestedLevel] > LOG_LEVEL_VALUES[currentLevel];
   },
 
@@ -200,7 +203,10 @@ export const LogLevelUtils = {
    * @param requestedLevel - Requested level
    * @returns true if frontend filtering is sufficient (requested <= current)
    */
-  canUseFrontendFiltering: (currentLevel: GpacLogLevel, requestedLevel: GpacLogLevel): boolean => {
+  canUseFrontendFiltering: (
+    currentLevel: GpacLogLevel,
+    requestedLevel: GpacLogLevel,
+  ): boolean => {
     return LOG_LEVEL_VALUES[requestedLevel] <= LOG_LEVEL_VALUES[currentLevel];
   },
 

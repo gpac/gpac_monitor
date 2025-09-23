@@ -141,16 +141,26 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     },
   );
 
-  const statusBadge = useMemo(() => (
-    <ToolSwitcher
-      currentTool={currentTool}
-      levelsByTool={levelsByTool}
-      defaultAllLevel={defaultAllLevel}
-      visibleLogsCount={visibleLogs.length}
-      logCountsByTool={logCountsByTool}
-      onToolSelect={setTool}
-    />
-  ), [currentTool, levelsByTool, defaultAllLevel, visibleLogs.length, logCountsByTool, setTool]);
+  const statusBadge = useMemo(
+    () => (
+      <ToolSwitcher
+        currentTool={currentTool}
+        levelsByTool={levelsByTool}
+        defaultAllLevel={defaultAllLevel}
+        visibleLogsCount={visibleLogs.length}
+        logCountsByTool={logCountsByTool}
+        onToolSelect={setTool}
+      />
+    ),
+    [
+      currentTool,
+      levelsByTool,
+      defaultAllLevel,
+      visibleLogs.length,
+      logCountsByTool,
+      setTool,
+    ],
+  );
 
   return (
     <WidgetWrapper

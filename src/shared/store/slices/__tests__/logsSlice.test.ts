@@ -455,31 +455,58 @@ describe('Log Persistence During Tool/Level Configuration Changes', () => {
 
     // Initial configuration: filter@info and all@quiet
     store.dispatch(setDefaultAllLevel(GpacLogLevel.QUIET));
-    store.dispatch(setToolLevel({ tool: GpacLogTool.FILTER, level: GpacLogLevel.INFO }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.FILTER, level: GpacLogLevel.INFO }),
+    );
     store.dispatch(setTool(GpacLogTool.FILTER));
 
     // Add 2 error logs on filter (visible with filter@info)
     const filterErrorLogs: GpacLogEntry[] = [
-      createLogEntry(GpacLogTool.FILTER, 1, 'Critical filter error #1', Date.now()),
-      createLogEntry(GpacLogTool.FILTER, 1, 'Critical filter error #2', Date.now() + 100),
+      createLogEntry(
+        GpacLogTool.FILTER,
+        1,
+        'Critical filter error #1',
+        Date.now(),
+      ),
+      createLogEntry(
+        GpacLogTool.FILTER,
+        1,
+        'Critical filter error #2',
+        Date.now() + 100,
+      ),
     ];
-    store.dispatch(appendLogs({ tool: GpacLogTool.FILTER, logs: filterErrorLogs }));
+    store.dispatch(
+      appendLogs({ tool: GpacLogTool.FILTER, logs: filterErrorLogs }),
+    );
 
     // Verify that the 2 errors are visible on filter@info
     expect(selectVisibleLogs(store.getState())).toHaveLength(2);
-    expect(selectVisibleLogs(store.getState())[0].message).toBe('Critical filter error #1');
-    expect(selectVisibleLogs(store.getState())[1].message).toBe('Critical filter error #2');
+    expect(selectVisibleLogs(store.getState())[0].message).toBe(
+      'Critical filter error #1',
+    );
+    expect(selectVisibleLogs(store.getState())[1].message).toBe(
+      'Critical filter error #2',
+    );
 
     // Change configuration to codec@warning and mutex@info
-    store.dispatch(setToolLevel({ tool: GpacLogTool.CODEC, level: GpacLogLevel.WARNING }));
-    store.dispatch(setToolLevel({ tool: GpacLogTool.MUTEX, level: GpacLogLevel.INFO }));
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.CODEC, level: GpacLogLevel.WARNING }),
+    );
+    store.dispatch(
+      setToolLevel({ tool: GpacLogTool.MUTEX, level: GpacLogLevel.INFO }),
+    );
 
     // Switch to codec@warning
     store.dispatch(setTool(GpacLogTool.CODEC));
-    
+
     // Add some logs on codec
     const codecLogs: GpacLogEntry[] = [
-      createLogEntry(GpacLogTool.CODEC, 2, 'Codec warning #1', Date.now() + 200),
+      createLogEntry(
+        GpacLogTool.CODEC,
+        2,
+        'Codec warning #1',
+        Date.now() + 200,
+      ),
       createLogEntry(GpacLogTool.CODEC, 1, 'Codec error #1', Date.now() + 300),
     ];
     store.dispatch(appendLogs({ tool: GpacLogTool.CODEC, logs: codecLogs }));
@@ -487,11 +514,16 @@ describe('Log Persistence During Tool/Level Configuration Changes', () => {
 
     // Switch to mutex@info
     store.dispatch(setTool(GpacLogTool.MUTEX));
-    
+
     // Add some logs on mutex
     const mutexLogs: GpacLogEntry[] = [
       createLogEntry(GpacLogTool.MUTEX, 3, 'Mutex info #1', Date.now() + 400),
-      createLogEntry(GpacLogTool.MUTEX, 2, 'Mutex warning #1', Date.now() + 500),
+      createLogEntry(
+        GpacLogTool.MUTEX,
+        2,
+        'Mutex warning #1',
+        Date.now() + 500,
+      ),
       createLogEntry(GpacLogTool.MUTEX, 1, 'Mutex error #1', Date.now() + 600),
     ];
     store.dispatch(appendLogs({ tool: GpacLogTool.MUTEX, logs: mutexLogs }));
@@ -505,8 +537,10 @@ describe('Log Persistence During Tool/Level Configuration Changes', () => {
     expect(finalFilterLogs).toHaveLength(2);
     expect(finalFilterLogs[0].message).toBe('Critical filter error #1');
     expect(finalFilterLogs[1].message).toBe('Critical filter error #2');
-    expect(finalFilterLogs.every(log => log.tool === GpacLogTool.FILTER)).toBe(true);
-    expect(finalFilterLogs.every(log => log.level === 1)).toBe(true); // errors
+    expect(
+      finalFilterLogs.every((log) => log.tool === GpacLogTool.FILTER),
+    ).toBe(true);
+    expect(finalFilterLogs.every((log) => log.level === 1)).toBe(true); // errors
   });
 
   it('preserves logs when changing currentTool without backend calls', () => {
@@ -516,22 +550,41 @@ describe('Log Persistence During Tool/Level Configuration Changes', () => {
     store.dispatch(setDefaultAllLevel(GpacLogLevel.WARNING));
 
     // Add logs on different tools
-    store.dispatch(appendLogs({
-      tool: GpacLogTool.NETWORK,
-      logs: [
-        createLogEntry(GpacLogTool.NETWORK, 1, 'Network error', Date.now()),
-        createLogEntry(GpacLogTool.NETWORK, 2, 'Network warning', Date.now() + 100),
-        createLogEntry(GpacLogTool.NETWORK, 3, 'Network info (hidden)', Date.now() + 200),
-      ]
-    }));
+    store.dispatch(
+      appendLogs({
+        tool: GpacLogTool.NETWORK,
+        logs: [
+          createLogEntry(GpacLogTool.NETWORK, 1, 'Network error', Date.now()),
+          createLogEntry(
+            GpacLogTool.NETWORK,
+            2,
+            'Network warning',
+            Date.now() + 100,
+          ),
+          createLogEntry(
+            GpacLogTool.NETWORK,
+            3,
+            'Network info (hidden)',
+            Date.now() + 200,
+          ),
+        ],
+      }),
+    );
 
-    store.dispatch(appendLogs({
-      tool: GpacLogTool.AUDIO,
-      logs: [
-        createLogEntry(GpacLogTool.AUDIO, 1, 'Audio error', Date.now() + 300),
-        createLogEntry(GpacLogTool.AUDIO, 2, 'Audio warning', Date.now() + 400),
-      ]
-    }));
+    store.dispatch(
+      appendLogs({
+        tool: GpacLogTool.AUDIO,
+        logs: [
+          createLogEntry(GpacLogTool.AUDIO, 1, 'Audio error', Date.now() + 300),
+          createLogEntry(
+            GpacLogTool.AUDIO,
+            2,
+            'Audio warning',
+            Date.now() + 400,
+          ),
+        ],
+      }),
+    );
 
     // Start on network
     store.dispatch(setTool(GpacLogTool.NETWORK));

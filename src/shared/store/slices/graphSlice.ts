@@ -94,9 +94,6 @@ const graphSlice = createSlice({
       state.selectedFilterDetails = action.payload;
     },
 
-    selectSelectedFilterDetails: (state, action: PayloadAction<any>) => {
-      state.selectedFilterDetails = action.payload;
-    },
     clearFilterDetails: (state) => {
       state.selectedFilterDetails = null;
     },
@@ -118,7 +115,6 @@ export const {
   setFilterDetails,
   clearFilterDetails,
   setSelectedFilterDetails,
-  selectSelectedFilterDetails,
 } = graphSlice.actions;
 
 export const selectFilterNameById = (state: RootState, filterId: string) => {

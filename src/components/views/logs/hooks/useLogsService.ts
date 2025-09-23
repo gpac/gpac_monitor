@@ -11,9 +11,7 @@ import { gpacService } from '@/services/gpacService';
 import { parseConfigChanges } from '../utils/configParser';
 import { analyzeConfigChanges } from '../utils/configAnalyzer';
 
-
 const selectLogsState = (state: any) => state.logs;
-
 
 /**
  * Hook to sync per-tool log configuration with backend
@@ -31,7 +29,11 @@ export function useLogsService() {
   const updateBackendConfig = useCallback(
     async (config: string, reason?: string) => {
       try {
-        console.log('[useLogsService] Updating backend config:', config, reason ? `(${reason})` : '');
+        console.log(
+          '[useLogsService] Updating backend config:',
+          config,
+          reason ? `(${reason})` : '',
+        );
 
         // Only send if there are actual changes
         if (config.trim() === '') {
@@ -45,7 +47,7 @@ export function useLogsService() {
         // Mark config as sent to track future changes
         dispatch(markConfigAsSent());
         lastConfigRef.current = configString;
-        
+
         console.log('[useLogsService] Backend config updated successfully');
       } catch (error) {
         console.error(
@@ -57,7 +59,7 @@ export function useLogsService() {
     [dispatch, configString],
   );
 
-  // Update backend when config changes 
+  // Update backend when config changes
   useEffect(() => {
     console.log('[useLogsService] Effect triggered:', {
       isSubscribed,
@@ -82,21 +84,31 @@ export function useLogsService() {
     }
 
     const analysis = analyzeConfigChanges(
-      changes, 
+      changes,
       defaultAllLevel,
-      logsState.lastSentConfig.levelsByTool
+      logsState.lastSentConfig.levelsByTool,
     );
 
     if (analysis.needsBackend) {
       console.log('[useLogsService] Backend call required:', analysis.reason);
       updateBackendConfig(analysis.backendOnlyChanges, analysis.reason);
     } else {
-      console.log('[useLogsService] All changes can be handled by frontend filtering - no backend call needed');
+      console.log(
+        '[useLogsService] All changes can be handled by frontend filtering - no backend call needed',
+      );
       // Still mark as sent since we don't need to track these frontend-only changes
       dispatch(markConfigAsSent());
       lastConfigRef.current = configString;
     }
-  }, [configString, isSubscribed, currentLevelsByTool, defaultAllLevel, logsState.lastSentConfig.levelsByTool, updateBackendConfig, dispatch]);
+  }, [
+    configString,
+    isSubscribed,
+    currentLevelsByTool,
+    defaultAllLevel,
+    logsState.lastSentConfig.levelsByTool,
+    updateBackendConfig,
+    dispatch,
+  ]);
 
   return {
     currentConfig: configString,

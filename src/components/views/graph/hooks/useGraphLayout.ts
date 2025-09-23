@@ -19,7 +19,7 @@ const performDagreLayout = (nodes: Node[], edges: Edge[]): Node[] => {
   const g = new dagre.graphlib.Graph();
   g.setGraph({
     rankdir: 'LR',
-    nodesep: 350, 
+    nodesep: 350,
     ranksep: 100,
   });
 

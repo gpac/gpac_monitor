@@ -42,24 +42,39 @@ export const LogsToolSwitcher = memo(function LogsToolSwitcher({
         </div>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="center" side="bottom" sideOffset={4} className="w-auto bg-gray-950">
-        <div className="px-3 py-1 text-xs text-muted-foreground">Quick Switch</div>
+      <DropdownMenuContent
+        align="center"
+        side="bottom"
+        sideOffset={4}
+        className="w-auto bg-gray-950"
+      >
+        <div className="px-3 py-1 text-xs text-muted-foreground">
+          Quick Switch
+        </div>
         <DropdownMenuSeparator />
 
-        {toolItems.map(({ tool, displayName, effectiveLevel, isCurrentTool, levelColor }) => (
-          <DropdownMenuItem
-            key={tool}
-            className={`cursor-pointer flex justify-between py-1 ${
-              isCurrentTool ? 'bg-accent' : ''
-            }`}
-            onSelect={() => onToolSelect(tool)}
-          >
-            <span className="text-sm">{displayName}</span>
-            <Badge variant="logs" className={`text-xs ${levelColor}`}>
-              {effectiveLevel}
-            </Badge>
-          </DropdownMenuItem>
-        ))}
+        {toolItems.map(
+          ({
+            tool,
+            displayName,
+            effectiveLevel,
+            isCurrentTool,
+            levelColor,
+          }) => (
+            <DropdownMenuItem
+              key={tool}
+              className={`cursor-pointer flex justify-between py-1 ${
+                isCurrentTool ? 'bg-accent' : ''
+              }`}
+              onSelect={() => onToolSelect(tool)}
+            >
+              <span className="text-sm">{displayName}</span>
+              <Badge variant="logs" className={`text-xs ${levelColor}`}>
+                {effectiveLevel}
+              </Badge>
+            </DropdownMenuItem>
+          ),
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

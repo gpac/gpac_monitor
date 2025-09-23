@@ -3,7 +3,6 @@ import { RootState } from '../index';
 import {
   GpacLogEntry,
   GpacLogLevel,
-  GpacLogTool,
 } from '@/types/domain/gpac/log-types';
 
 // Base selectors
@@ -28,16 +27,6 @@ export const selectDefaultAllLevel = createSelector(
   (logsState) => logsState.defaultAllLevel,
 );
 
-/** Get effective level for a specific tool (levelsByTool[tool] ?? defaultAllLevel) */
-export const selectEffectiveLevel = createSelector(
-  [
-    selectLevelsByTool,
-    selectDefaultAllLevel,
-    (_: RootState, tool: GpacLogTool) => tool,
-  ],
-  (levelsByTool, defaultAllLevel, tool): GpacLogLevel =>
-    levelsByTool[tool as keyof typeof levelsByTool] ?? defaultAllLevel,
-);
 
 /** Check if the logs WebSocket subscription is active */
 export const selectIsSubscribed = createSelector(
@@ -165,12 +154,12 @@ export const selectLogCountsByTool = createSelector(
   [selectLogsState],
   (logsState) => {
     const counts: Record<string, number> = {};
-    
+
     // Count logs from all tool buffers
     Object.entries(logsState.buffers).forEach(([tool, logs]) => {
       counts[tool] = logs.length;
     });
-    
+
     return counts;
   },
 );
