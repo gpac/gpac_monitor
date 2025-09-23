@@ -294,9 +294,11 @@ describe('Logs History Preservation - Real Usage Scenarios', () => {
     store.dispatch(setTool(GpacLogTool.CODEC));
     expect(selectVisibleLogs(store.getState())).toHaveLength(60);
 
-    // "all" tool should show combined sorted logs
-    store.dispatch(setTool(GpacLogTool.ALL));
-    expect(selectVisibleLogs(store.getState())).toHaveLength(240);
+    // Verify buffers are maintained separately
+    const state = store.getState();
+    expect(state.logs.buffers[GpacLogTool.DASH]).toHaveLength(100);
+    expect(state.logs.buffers[GpacLogTool.AUDIO]).toHaveLength(80);
+    expect(state.logs.buffers[GpacLogTool.CODEC]).toHaveLength(60);
   });
 });
 

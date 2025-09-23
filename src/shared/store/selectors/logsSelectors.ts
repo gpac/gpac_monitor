@@ -36,7 +36,7 @@ export const selectIsSubscribed = createSelector(
   (logsState) => logsState.isSubscribed,
 );
 
-/** Filter log entries based on GPAC log level hierarchy */
+/** Filter log entries based  log level hierarchy */
 const filterLogsByLevel = (
   logs: GpacLogEntry[],
   globalLevel: GpacLogLevel,
@@ -70,7 +70,7 @@ export const selectVisibleLogs = createSelector(
     let rawLogs: GpacLogEntry[];
 
     // Check if we're in ALL mode (filters active) or single tool mode (default)
-    const isAllMode = visibleToolsFilter.length > 0;
+    const isAllMode = visibleToolsFilter && visibleToolsFilter.length > 0;
 
     if (isAllMode) {
       // ALL mode: show logs from all tools

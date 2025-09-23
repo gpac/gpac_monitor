@@ -9,13 +9,13 @@ import logsReducer, {
   setToolLevel,
   setSubscriptionStatus,
   markConfigAsSent,
-} from '@/shared/store/slices/logsSlice';
+} from '../../../../../shared/store/slices/logsSlice';
 import {
   GpacLogLevel,
   GpacLogTool,
   LogLevelUtils,
-} from '@/types/domain/gpac/log-types';
-import { gpacService } from '@/services/gpacService';
+} from '../../../../../types';
+import { gpacService } from '../../../../../services/gpacService';
 
 // Mock gpacService
 vi.mock('@/services/gpacService', () => ({
@@ -27,7 +27,7 @@ vi.mock('@/services/gpacService', () => ({
 }));
 
 // Mock other reducers to satisfy store requirements
-const mockReducer = (state = {}, action: any) => state;
+const mockReducer = (state = {}) => state;
 
 const createTestStore = (initialState?: any) =>
   configureStore({
@@ -37,14 +37,14 @@ const createTestStore = (initialState?: any) =>
       filterArgument: mockReducer,
       widgets: mockReducer,
       sessionStats: mockReducer,
-    },
+    } as any,
     preloadedState: initialState,
   });
 
 const renderUseLogsService = (store: ReturnType<typeof createTestStore>) => {
   return renderHook(() => useLogsService(), {
     wrapper: ({ children }: { children?: React.ReactNode }) =>
-      React.createElement(Provider, { store }, children),
+      React.createElement(Provider, { store, children }),
   });
 };
 
@@ -222,13 +222,24 @@ describe('useLogsService - Intelligent Backend Call Optimization', () => {
     it('should call backend for initial configuration setup', async () => {
       const store = createTestStore();
 
-      // Subscribe without any prior configuration
-      store.dispatch(setSubscriptionStatus(true));
-      store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
-
+      // First, render the hook to initialize
       const { result } = renderUseLogsService(store);
 
-      // Now useLogs.ts handles initial config, so useLogsService should call backend for initial setup
+      // Clear any initial calls
+      vi.clearAllMocks();
+
+      // Subscribe and change level - this should trigger backend call
+      await act(async () => {
+        store.dispatch(setSubscriptionStatus(true));
+        store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
+      });
+
+      // Wait for effects to process
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 50));
+      });
+
+      // The hook should detect config changes and call backend
       expect(gpacService.logs.updateLogLevel).toHaveBeenCalledWith('all@info');
     });
 
