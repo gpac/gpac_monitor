@@ -5,6 +5,7 @@ import {
   selectLevelsByTool,
   selectDefaultAllLevel,
   selectVisibleLogs,
+  selectVisibleToolsFilter,
   selectCurrentConfig,
 } from '@/shared/store/selectors/logsSelectors';
 import { useDisplayQueue } from './useDisplayQueue';
@@ -12,6 +13,9 @@ import {
   setTool,
   setToolLevel,
   setDefaultAllLevel,
+  toggleToolInVisibleFilter,
+  clearVisibleToolsFilter,
+  selectAllToolsInFilter,
 } from '@/shared/store/slices/logsSlice';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
 import { toast } from '@/shared/hooks/useToast';
@@ -25,6 +29,7 @@ export function useLogsRedux() {
   const currentTool = useAppSelector(selectCurrentTool);
   const levelsByTool = useAppSelector(selectLevelsByTool);
   const defaultAllLevel = useAppSelector(selectDefaultAllLevel);
+  const visibleToolsFilter = useAppSelector(selectVisibleToolsFilter);
   const rawVisibleLogs = useAppSelector(selectVisibleLogs);
   const currentConfig = useAppSelector(selectCurrentConfig);
 
@@ -68,6 +73,24 @@ export function useLogsRedux() {
     [dispatch],
   );
 
+  const handleToggleToolFilter = useCallback(
+    (tool: GpacLogTool) => {
+      dispatch(toggleToolInVisibleFilter(tool));
+    },
+    [dispatch],
+  );
+
+  const handleClearFilter = useCallback(() => {
+    dispatch(clearVisibleToolsFilter());
+  }, [dispatch]);
+
+  const handleSelectAllTools = useCallback(
+    (tools: GpacLogTool[]) => {
+      dispatch(selectAllToolsInFilter(tools));
+    },
+    [dispatch],
+  );
+
   // Auto-save config when it changes
   useEffect(() => {
     console.log('[useLogsRedux] Saving config to localStorage:', currentConfig);
@@ -79,11 +102,15 @@ export function useLogsRedux() {
     currentTool,
     levelsByTool,
     defaultAllLevel,
+    visibleToolsFilter,
     visibleLogs,
 
     // Actions
     setTool: handleSetTool,
     setToolLevel: handleSetToolLevel,
     setDefaultAllLevel: handleSetDefaultAllLevel,
+    toggleToolFilter: handleToggleToolFilter,
+    clearFilter: handleClearFilter,
+    selectAllTools: handleSelectAllTools,
   };
 }

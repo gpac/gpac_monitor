@@ -97,11 +97,11 @@ const WidgetWrapper = ({
       className={containerClasses}
     >
       <div
-        className={`${headerStyles.base} cursor-move drag-indicator flex justify-center`}
+        className={`${headerStyles.base} cursor-move drag-indicator bg-gray-850 flex justify-center`}
       >
         <div className={headerStyles.title}>
           <h3 className="text-base font-medium">{title}</h3>
-          {statusBadge && <div className="mx-auto">{statusBadge}</div>}
+          {statusBadge && <div className="mx-auto ">{statusBadge}</div>}
         </div>
 
         <div className={`${headerStyles.actions} no-drag`}>
@@ -126,6 +126,7 @@ const WidgetWrapper = ({
                 fill="none"
                 stroke="currentColor"
               >
+                statusBadge
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

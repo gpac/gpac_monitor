@@ -35,10 +35,14 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     currentTool,
     levelsByTool,
     defaultAllLevel,
+    visibleToolsFilter,
     visibleLogs,
     setTool,
     setToolLevel,
     setDefaultAllLevel: setDefaultLevel,
+    toggleToolFilter,
+    clearFilter,
+    selectAllTools,
   } = useLogsRedux();
 
   // Get log counts by tool for performance monitoring
@@ -149,7 +153,11 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
         defaultAllLevel={defaultAllLevel}
         visibleLogsCount={visibleLogs.length}
         logCountsByTool={logCountsByTool}
+        visibleToolsFilter={visibleToolsFilter}
         onToolSelect={setTool}
+        onToggleToolFilter={toggleToolFilter}
+        onClearFilter={clearFilter}
+        onSelectAllTools={selectAllTools}
       />
     ),
     [
@@ -158,7 +166,11 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
       defaultAllLevel,
       visibleLogs.length,
       logCountsByTool,
+      visibleToolsFilter,
       setTool,
+      toggleToolFilter,
+      clearFilter,
+      selectAllTools,
     ],
   );
 

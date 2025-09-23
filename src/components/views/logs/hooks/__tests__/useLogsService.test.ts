@@ -228,7 +228,7 @@ describe('useLogsService - Intelligent Backend Call Optimization', () => {
 
       const { result } = renderUseLogsService(store);
 
-      // Should call backend for initial setup
+      // Now useLogs.ts handles initial config, so useLogsService should call backend for initial setup
       expect(gpacService.logs.updateLogLevel).toHaveBeenCalledWith('all@info');
     });
 
@@ -298,7 +298,7 @@ describe('useLogsService - Intelligent Backend Call Optimization', () => {
 
       expect(gpacService.logs.updateLogLevel).not.toHaveBeenCalled();
 
-      // Then: try to go back to debug (needs backend since last sent was debug)
+      // Then: try to go back to debug (should NOT need backend since debug was already sent)
       // This tests that we track the actual backend state correctly
       await act(async () => {
         store.dispatch(

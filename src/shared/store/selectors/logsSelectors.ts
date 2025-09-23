@@ -1,9 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
-import {
-  GpacLogEntry,
-  GpacLogLevel,
-} from '@/types/domain/gpac/log-types';
+import { GpacLogEntry, GpacLogLevel } from '@/types/domain/gpac/log-types';
 
 // Base selectors
 /** Access the entire logs state */
@@ -27,6 +24,11 @@ export const selectDefaultAllLevel = createSelector(
   (logsState) => logsState.defaultAllLevel,
 );
 
+/** Get the visible tools filter for 'all' mode */
+export const selectVisibleToolsFilter = createSelector(
+  [selectLogsState],
+  (logsState) => logsState.visibleToolsFilter,
+);
 
 /** Check if the logs WebSocket subscription is active */
 export const selectIsSubscribed = createSelector(
@@ -58,25 +60,36 @@ const filterLogsByLevel = (
 
 /** Get logs visible in UI, filtered by selected tool and its effective level */
 export const selectVisibleLogs = createSelector(
-  [selectLogsState, selectLevelsByTool, selectDefaultAllLevel],
-  (logsState, levelsByTool, defaultAllLevel) => {
+  [
+    selectLogsState,
+    selectLevelsByTool,
+    selectDefaultAllLevel,
+    selectVisibleToolsFilter,
+  ],
+  (logsState, levelsByTool, defaultAllLevel, visibleToolsFilter) => {
     let rawLogs: GpacLogEntry[];
 
-    if (logsState.currentTool === 'all') {
-      // If "all" is selected, get all logs from all tools
-      rawLogs = Object.values(logsState.buffers)
+    // Check if we're in ALL mode (filters active) or single tool mode (default)
+    const isAllMode = visibleToolsFilter.length > 0;
+
+    if (isAllMode) {
+      // ALL mode: show logs from all tools
+      const toolsToInclude = Object.keys(logsState.buffers);
+
+      // Get logs from all tools
+      rawLogs = toolsToInclude
+        .map(
+          (tool) =>
+            logsState.buffers[tool as keyof typeof logsState.buffers] || [],
+        )
         .flat()
         .sort((a, b) => a.timestamp - b.timestamp);
-    } else {
-      // Otherwise, get only logs from the selected tool
-      rawLogs = logsState.buffers[logsState.currentTool] || [];
-    }
 
-    // Special case: when "all" is selected, show all received logs without filtering
-    // because the backend already handles the filtering with the multi-tool config
-    if (logsState.currentTool === 'all') {
       return rawLogs;
     }
+
+    // Single tool selected - get only logs from that tool
+    rawLogs = logsState.buffers[logsState.currentTool] || [];
 
     // For specific tools, get effective level and filter
     // Use the tool's configured level if it exists, otherwise use the default
@@ -166,10 +179,16 @@ export const selectLogCountsByTool = createSelector(
 
 /** Get current logs configuration for localStorage persistence */
 export const selectCurrentConfig = createSelector(
-  [selectCurrentTool, selectLevelsByTool, selectDefaultAllLevel],
-  (currentTool, levelsByTool, defaultAllLevel) => ({
+  [
+    selectCurrentTool,
+    selectLevelsByTool,
+    selectDefaultAllLevel,
+    selectVisibleToolsFilter,
+  ],
+  (currentTool, levelsByTool, defaultAllLevel, visibleToolsFilter) => ({
     currentTool,
     levelsByTool,
     defaultAllLevel,
+    visibleToolsFilter,
   }),
 );

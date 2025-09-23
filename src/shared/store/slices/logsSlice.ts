@@ -10,6 +10,7 @@ interface LogsState {
   currentTool: GpacLogTool;
   levelsByTool: Record<GpacLogTool, GpacLogLevel>;
   defaultAllLevel: GpacLogLevel;
+  visibleToolsFilter: GpacLogTool[]; // Tools to display when in "all" mode (empty = show all)
   buffers: Record<GpacLogTool, GpacLogEntry[]>;
   maxEntriesPerTool: number;
   isSubscribed: boolean;
@@ -32,6 +33,7 @@ const getInitialState = (): LogsState => {
       levelsByTool:
         config.levelsByTool || ({} as Record<GpacLogTool, GpacLogLevel>),
       defaultAllLevel: config.defaultAllLevel || GpacLogLevel.QUIET,
+      visibleToolsFilter: config.visibleToolsFilter || [],
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
       maxEntriesPerTool: 5000,
       isSubscribed: false,
@@ -45,6 +47,7 @@ const getInitialState = (): LogsState => {
       currentTool: GpacLogTool.FILTER,
       levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
       defaultAllLevel: GpacLogLevel.QUIET,
+      visibleToolsFilter: [],
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
       maxEntriesPerTool: 5000,
       isSubscribed: false,
@@ -84,6 +87,28 @@ const logsSlice = createSlice({
     /** Set the default level for 'all' tool (fallback) */
     setDefaultAllLevel: (state, action: PayloadAction<GpacLogLevel>) => {
       state.defaultAllLevel = action.payload;
+    },
+
+    /** Toggle tool visibility in "all" mode */
+    toggleToolInVisibleFilter: (state, action: PayloadAction<GpacLogTool>) => {
+      const tool = action.payload;
+      const index = state.visibleToolsFilter.indexOf(tool);
+
+      if (index === -1) {
+        state.visibleToolsFilter.push(tool);
+      } else {
+        state.visibleToolsFilter.splice(index, 1);
+      }
+    },
+
+    /** Clear all tools from visible filter (show all) */
+    clearVisibleToolsFilter: (state) => {
+      state.visibleToolsFilter = [];
+    },
+
+    /** Select all configured tools in visible filter */
+    selectAllToolsInFilter: (state, action: PayloadAction<GpacLogTool[]>) => {
+      state.visibleToolsFilter = [...action.payload];
     },
 
     appendLogs: (
@@ -186,9 +211,11 @@ const logsSlice = createSlice({
         currentTool?: GpacLogTool;
         levelsByTool?: Record<GpacLogTool, GpacLogLevel>;
         defaultAllLevel?: GpacLogLevel;
+        visibleToolsFilter?: GpacLogTool[];
       }>,
     ) => {
-      const { currentTool, levelsByTool, defaultAllLevel } = action.payload;
+      const { currentTool, levelsByTool, defaultAllLevel, visibleToolsFilter } =
+        action.payload;
       if (currentTool) {
         state.currentTool = currentTool;
       }
@@ -197,6 +224,9 @@ const logsSlice = createSlice({
       }
       if (defaultAllLevel) {
         state.defaultAllLevel = defaultAllLevel;
+      }
+      if (visibleToolsFilter) {
+        state.visibleToolsFilter = visibleToolsFilter;
       }
     },
 
@@ -214,6 +244,9 @@ export const {
   setTool,
   setToolLevel,
   setDefaultAllLevel,
+  toggleToolInVisibleFilter,
+  clearVisibleToolsFilter,
+  selectAllToolsInFilter,
   appendLogs,
   appendLogsForAllTools,
   clearAllBuffers,

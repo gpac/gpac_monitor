@@ -96,8 +96,7 @@ export function useLogsService() {
       console.log(
         '[useLogsService] All changes can be handled by frontend filtering - no backend call needed',
       );
-      // Still mark as sent since we don't need to track these frontend-only changes
-      dispatch(markConfigAsSent());
+      // Don't mark as sent for frontend-only changes to preserve backend state tracking
       lastConfigRef.current = configString;
     }
   }, [
