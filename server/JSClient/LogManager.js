@@ -26,23 +26,22 @@ function LogManager(client) {
         }
 
         this.logLevel = logLevel 
-        console.log(`[LogManager] subscribe: Requested log level: ${logLevel}`);
+   
         this.isSubscribed = true;
 
-        console.log(`[LogManager] subscribe: Starting subscription with level: ${this.logLevel}`);
+        
 
         try {
             this.originalLogConfig = sys.get_logs(true);
-            console.log(`[LogManager] Original GPAC config: ${this.originalLogConfig}`);
+         
 
             sys.on_log = (tool, level, message) => {
                 this.handleLog(tool, level, message);
             };
 
             sys.set_logs(this.logLevel);
-            console.log(`[LogManager] GPAC logs configured to: ${this.logLevel}`);
+           
 
-            console.log(`LogManager: Client ${this.client.id} subscribed to logs at level: ${this.logLevel}`);
         } catch (error) {
             console.error("LogManager: Failed to start log capturing:", error);
             this.isSubscribed = false;

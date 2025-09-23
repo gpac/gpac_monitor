@@ -8,6 +8,8 @@ import {
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
+import { useAppSelector } from '@/shared/hooks/redux';
+import { selectLogsConfigString } from '@/shared/store/selectors/logsSelectors';
 
 interface UseLogsOptions {
   enabled?: boolean;
@@ -19,6 +21,9 @@ export function useLogs(options: UseLogsOptions = {}) {
 
   const [logs, setLogs] = useState<GpacLogEntry[]>([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
+
+  // Get initial log configuration from store
+  const initialLogConfig = useAppSelector(selectLogsConfigString);
 
   const handleLogsUpdate = useCallback(
     (newLogs: GpacLogEntry[]) => {
@@ -63,6 +68,7 @@ export function useLogs(options: UseLogsOptions = {}) {
         const unsubscribeFunc = await gpacService.subscribe(
           {
             type: SubscriptionType.LOGS,
+            logLevel: initialLogConfig,
           },
           (result) => {
             if (result.data && isMounted) {
