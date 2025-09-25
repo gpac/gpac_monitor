@@ -1,5 +1,10 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { selectLogsState, selectLevelsByTool, selectDefaultAllLevel } from './logsSelectors';
+import {
+  selectLogsState,
+  selectLevelsByTool,
+  selectDefaultAllLevel,
+} from './logsSelectors';
+import { GpacLogLevel, GpacLogTool, LOG_LEVEL_VALUES } from '@/types/domain/gpac/log-types';
 
 export interface SidebarLogCounts {
   error: number;
@@ -31,9 +36,9 @@ export const selectLogCounts = createSelector(
     const configString = defaultAllLevel ? buildConfigString() : 'all@warning';
 
     // Helper to check if log level should be included
-    const shouldInclude = (logLevel: number, tool: string): boolean => {
+    const shouldInclude = (logLevel: number, tool: GpacLogTool | string): boolean => {
       // Never include debug in sidebar counts
-      if (logLevel === 4) return false;
+      if (logLevel === LOG_LEVEL_VALUES[GpacLogLevel.DEBUG]) return false;
 
       // Parse config parts
       const configParts = configString.split(':');
@@ -42,44 +47,43 @@ export const selectLogCounts = createSelector(
       for (const part of configParts) {
         const [configTool, level] = part.split('@');
         if (configTool === tool) {
-          const levelNum = getLevelNumber(level);
+          const levelNum = getLevelNumber(level as GpacLogLevel);
           return logLevel <= levelNum;
         }
       }
 
       // Fall back to 'all' config
-      const allConfig = configParts.find(part => part.startsWith('all@'));
+      const allConfig = configParts.find((part) => part.startsWith('all@'));
       if (allConfig) {
-        const level = allConfig.split('@')[1];
+        const level = allConfig.split('@')[1] as GpacLogLevel;
         const levelNum = getLevelNumber(level);
         return logLevel <= levelNum;
       }
 
       // Default: warning and above
-      return logLevel <= 2;
+      return logLevel <= LOG_LEVEL_VALUES[GpacLogLevel.WARNING];
     };
 
-    // Helper to convert level string to number
-    const getLevelNumber = (level: string): number => {
-      const levelMap = { 'error': 1, 'warning': 2, 'info': 3, 'debug': 4 };
-      return levelMap[level as keyof typeof levelMap] || 2;
+    // Helper to convert level string to number using typed constants
+    const getLevelNumber = (level: GpacLogLevel): number => {
+      return LOG_LEVEL_VALUES[level] || LOG_LEVEL_VALUES[GpacLogLevel.WARNING];
     };
 
     // Count logs across all tools
     Object.entries(logsState.buffers).forEach(([tool, logs]) => {
-      logs.forEach(log => {
+      logs.forEach((log) => {
         if (!shouldInclude(log.level, tool)) return;
 
-        if (log.level === 1) totalError++;
-        else if (log.level === 2) totalWarning++;
-        else if (log.level === 3) totalInfo++;
+        if (log.level === LOG_LEVEL_VALUES[GpacLogLevel.ERROR]) totalError++;
+        else if (log.level === LOG_LEVEL_VALUES[GpacLogLevel.WARNING]) totalWarning++;
+        else if (log.level === LOG_LEVEL_VALUES[GpacLogLevel.INFO]) totalInfo++;
       });
     });
 
     return {
       error: totalError,
       warning: totalWarning,
-      info: totalInfo
+      info: totalInfo,
     };
-  }
+  },
 );
