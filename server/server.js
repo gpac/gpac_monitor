@@ -56,9 +56,9 @@ session.set_del_filter_fun((f) => {
     if (f.itag == "NODISPLAY")
         return;
 
-    if (draned_once) {
+     if (draned_once) {
         sys.sleep(100);
-    }
+    } 
 });
 
 session.set_event_fun((evt) => {
@@ -91,6 +91,10 @@ sys.rmt_on_new_client = function(client) {
 
     js_client.client.on_close = function() {
         console.log("ON_CLOSE on client ", js_client.id, " ", client.peer_address);
+
+        // CRITICAL: Clean up client resources before removal
+        js_client.cleanup();
+
         remove_client(js_client.id);
         js_client.client = null;
     }

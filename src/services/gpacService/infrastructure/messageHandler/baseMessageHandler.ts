@@ -108,7 +108,7 @@ export class BaseMessageHandler {
       return;
     }
 
-    console.log('[BaseMessageHandler] Processing message type:', data.message);
+ 
 
     switch (data.message) {
       case 'filters':

@@ -231,10 +231,45 @@ function LogManager(client) {
      */
     this.sendToClient = function(data) {
         if (this.client.client && typeof this.client.client.send === 'function') {
-     
+
             this.client.client.send(JSON.stringify(data));
         } else {
            /*  console.log(`[LogManager] sendToClient: Client not ready, cannot send ${data.message}`); */
+        }
+    };
+
+    /**
+     * Force cleanup - called on client disconnect
+     * Ensures sys.on_log is properly cleaned even if subscriptions exist
+     */
+    this.forceUnsubscribe = function() {
+        console.log(`LogManager: Force cleanup for client ${this.client.id}`);
+
+        try {
+            // Flush any pending logs before cleanup
+            this.flushPendingLogs();
+
+            // Force reset of sys.on_log regardless of subscription status
+            sys.on_log = undefined;
+
+            // Restore original GPAC config if we had one
+            if (this.originalLogConfig) {
+                sys.set_logs(this.originalLogConfig);
+            }
+
+            // Reset all internal state
+            this.isSubscribed = false;
+            this.logs = [];
+            this.pendingLogs = [];
+            this.incomingBuffer = [];
+            this.processingScheduled = false;
+
+            // Clear timers
+            this.batchTimer = null;
+
+            console.log(`LogManager: Client ${this.client.id} force cleanup completed`);
+        } catch (error) {
+            console.error("LogManager: Error during force cleanup:", error);
         }
     };
 }
