@@ -4,7 +4,7 @@ import { GpacLogEntry, GpacLogLevel } from '@/types/domain/gpac/log-types';
 
 // Base selectors
 /** Access the entire logs state */
-const selectLogsState = (state: RootState) => state.logs;
+export const selectLogsState = (state: RootState) => state.logs;
 
 /** Get the currently selected GPAC tool for log filtering */
 export const selectCurrentTool = createSelector(

@@ -33,6 +33,7 @@ function LogManager(client) {
 
         try {
             this.originalLogConfig = sys.get_logs(true);
+        
          
 
             sys.on_log = (tool, level, message) => {
@@ -74,10 +75,9 @@ function LogManager(client) {
             console.error("LogManager: Failed to stop log capturing:", error);
         }
     };
-
     /**
-     * Handle incoming GPAC log entry 
-     * 
+     * Handle incoming GPAC log entry
+     *
      */
     this.handleLog = function(tool, level, message) {
         // Only create log object - NO OTHER PROCESSING
@@ -92,7 +92,7 @@ function LogManager(client) {
 
         // Just add to buffer - NO WebSocket operations on main thread
         this.incomingBuffer.push(log);
-     
+
 
         // Schedule processing if not already scheduled
         if (!this.processingScheduled) {

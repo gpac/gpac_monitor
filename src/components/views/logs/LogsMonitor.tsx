@@ -77,14 +77,14 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
         0: <FaInfoCircle className="w-4 h-4 text-gray-500" />,
         1: <FaTimesCircle className="w-4 h-4 text-red-500" />,
         2: <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />,
-        3: <FaInfoCircle className="w-4 h-4 text-green-700" />,
+        3: <FaInfoCircle className="w-4 h-4 text-green-700/60" />,
         4: <FaInfoCircle className="w-4 h-4 text-blue-300" />,
       },
       styles: {
         0: 'text-gray-500',
         1: 'text-red-500',
         2: 'text-yellow-500',
-        3: 'text-green-600',
+        3: 'text-green-500/70',
         4: 'text-blue-300',
       },
       names: {

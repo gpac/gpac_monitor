@@ -34,8 +34,8 @@ export const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
 export const LEVEL_COLORS: Record<GpacLogLevel, string> = {
   [GpacLogLevel.QUIET]: 'bg-gray-500',
   [GpacLogLevel.ERROR]: 'bg-red-500',
-  [GpacLogLevel.WARNING]: 'bg-yellow-600',
-  [GpacLogLevel.INFO]: 'bg-green-600',
+  [GpacLogLevel.WARNING]: 'bg-yellow-500/60',
+  [GpacLogLevel.INFO]: 'bg-green-700/60',
   [GpacLogLevel.DEBUG]: 'bg-blue-400',
 };
 
@@ -43,7 +43,7 @@ export const LEVEL_COLORS: Record<GpacLogLevel, string> = {
 export const LEVEL_BADGE_CLASSES: Record<GpacLogLevel, string> = {
   [GpacLogLevel.QUIET]: 'bg-gray-500 text-gray-100 hover:opacity-80',
   [GpacLogLevel.ERROR]: 'bg-red-500 text-red-100 hover:opacity-80',
-  [GpacLogLevel.WARNING]: 'bg-yellow-600 text-yellow-100 hover:opacity-80',
-  [GpacLogLevel.INFO]: 'bg-green-600 text-green-100 hover:opacity-80',
+  [GpacLogLevel.WARNING]: 'bg-yellow-500/60 text-yellow-100 hover:opacity-80',
+  [GpacLogLevel.INFO]: 'bg-green-700/60 text-green-100 hover:opacity-80',
   [GpacLogLevel.DEBUG]: 'bg-blue-400 text-blue-100 hover:opacity-80',
 };

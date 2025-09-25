@@ -1,10 +1,144 @@
-import React from 'react';
-import { useAppDispatch } from '@/shared/hooks/redux';
+import React, {useCallback } from 'react';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { addWidget } from '@/shared/store/slices/widgetsSlice';
+import { selectLogCounts } from '@/shared/store/selectors/sidebarSelectors';
 import { WidgetType } from '@/types/ui/widget';
 
 import { LuGauge, LuVolume2, LuFileText, LuShare2 } from 'react-icons/lu';
 import { FiLayout } from 'react-icons/fi';
+import { FaInfoCircle, FaExclamationTriangle, FaTimesCircle } from 'react-icons/fa';
+
+// Memoized log level configurations to avoid re-computation
+const LOG_LEVEL_CONFIGS = {
+  error: {
+    icon: FaTimesCircle,
+    label: 'Errors',
+    baseClasses: 'group w-full flex items-center justify-between p-2 rounded-lg transition-opacity duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+    activeClasses: 'bg-red-900/30 border border-red-800/50 hover:bg-red-900/40',
+    inactiveClasses: 'bg-gray-800/50 border border-gray-700/30 hover:bg-gray-800/70',
+    iconActive: 'w-4 h-4 text-red-400',
+    iconInactive: 'w-4 h-4 text-gray-400',
+    textActive: 'text-sm font-medium text-red-200',
+    textInactive: 'text-sm font-medium text-gray-300',
+    badgeActive: 'text-sm font-bold px-2 py-1 rounded-md bg-red-800/50 text-red-200',
+    badgeInactive: 'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
+  },
+  warning: {
+    icon: FaExclamationTriangle,
+    label: 'Warnings',
+    baseClasses: 'group w-full flex items-center justify-between p-2 rounded-lg transition-opacity duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+    activeClasses: 'bg-yellow-900/30 border border-yellow-800/50 hover:bg-yellow-900/40',
+    inactiveClasses: 'bg-gray-800/50 border border-gray-700/30 hover:bg-gray-800/70',
+    iconActive: 'w-4 h-4 text-yellow-400',
+    iconInactive: 'w-4 h-4 text-gray-400',
+    textActive: 'text-sm font-medium text-yellow-200',
+    textInactive: 'text-sm font-medium text-gray-300',
+    badgeActive: 'text-sm font-bold px-2 py-1 rounded-md bg-yellow-800/50 text-yellow-200',
+    badgeInactive: 'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
+  },
+  info: {
+    icon: FaInfoCircle,
+    label: 'Info',
+    baseClasses: 'group w-full flex items-center justify-between p-2 rounded-lg transition-opacity duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+    activeClasses: 'bg-blue-900/30 border border-blue-800/50 hover:bg-blue-900/40',
+    inactiveClasses: 'bg-gray-800/50 border border-gray-700/30 hover:bg-gray-800/70',
+    iconActive: 'w-4 h-4 text-green-700/60',
+    iconInactive: 'w-4 h-4 text-gray-400',
+    textActive: 'text-sm font-medium text-blue-200',
+    textInactive: 'text-sm font-medium text-gray-300',
+    badgeActive: 'text-sm font-bold px-2 py-1 rounded-md bg-blue-800/50 text-blue-200',
+    badgeInactive: 'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
+  },
+} as const;
+
+
+const AvailableWidgetButton = React.memo(function AvailableWidgetButton({
+  widget,
+  onAdd
+}: {
+  widget: typeof availableWidgets[number],
+  onAdd: (type: WidgetType, size: { w: number; h: number }) => void
+}) {
+  const Icon = widget.icon;
+  return (
+    <button
+      onClick={() => onAdd(widget.type, widget.defaultSize)}
+      className="group w-full flex items-center gap-3 p-3 rounded-xl border border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:ring-offset-2 focus:ring-offset-gray-900 transition-opacity duration-150 ease-out active:translate-y-0 active:scale-[0.98]"
+      aria-label={`Add ${widget.title} widget to dashboard`}
+    >
+      <div className="flex-shrink-0 p-1.5 rounded-lg bg-gray-700/50">
+        <Icon className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors duration-200" />
+      </div>
+      <div className="flex-1 text-left">
+        <span className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
+          {widget.title}
+        </span>
+      </div>
+      <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </div>
+    </button>
+  );
+});
+
+// 2) Badge isolé (ne re-rend que quand le nombre bouge)
+const CountBadge = React.memo(function CountBadge({
+  count,
+  active,
+  classes
+}: {
+  count: number;
+  active: boolean;
+  classes: { active: string; inactive: string }
+}) {
+  return (
+    <span className={active ? classes.active : classes.inactive}>
+      {count}
+    </span>
+  );
+});
+
+const LogLevelButton = React.memo(function LogLevelButton({
+  level,
+  count,
+  onOpen
+}: {
+  level: keyof typeof LOG_LEVEL_CONFIGS;
+  count: number;
+  onOpen: () => void
+}) {
+  const config = LOG_LEVEL_CONFIGS[level];
+  const Icon = config.icon;
+  const hasCount = count > 0;
+
+  return (
+    <button
+      onClick={onOpen}
+      disabled={!hasCount}
+      className={`${config.baseClasses} ${hasCount ? config.activeClasses : config.inactiveClasses}`}
+      aria-label={`${count} ${config.label.toLowerCase()} - Click to open logs monitor`}
+    >
+      <div className="flex items-center gap-2">
+        <Icon className={hasCount ? config.iconActive : config.iconInactive} />
+        <span className={hasCount ? config.textActive : config.textInactive}>
+          {config.label}
+        </span>
+      </div>
+      <CountBadge
+        count={count}
+        active={hasCount}
+        classes={{ active: config.badgeActive, inactive: config.badgeInactive }}
+      />
+    </button>
+  );
+}, (prevProps, nextProps) => {
+  // Optimisation : ne re-render que si le count change
+  return prevProps.count === nextProps.count;
+});
+
+
 
 const availableWidgets = [
   {
@@ -43,8 +177,10 @@ const availableWidgets = [
 
 const Sidebar: React.FC = () => {
   const dispatch = useAppDispatch();
+  const logCounts = useAppSelector(selectLogCounts);
 
-  const handleAddWidget = (
+  // Memoize the widget creation callback to avoid re-renders
+  const handleAddWidget = useCallback((
     type: WidgetType,
     defaultSize: { w: number; h: number },
   ) => {
@@ -61,7 +197,10 @@ const Sidebar: React.FC = () => {
         isDraggable: true,
       }),
     );
-  };
+  }, [dispatch]);
+
+
+  
 
   return (
     <aside
@@ -84,129 +223,30 @@ const Sidebar: React.FC = () => {
 
           <div className="space-y-3">
             {availableWidgets.map((widget) => (
-              <button
+              <AvailableWidgetButton
                 key={widget.type}
-                onClick={() => handleAddWidget(widget.type, widget.defaultSize)}
-                className={`
-                  group w-full flex items-center gap-3 p-3 rounded-xl
-                  bg-gradient-to-r from-gray-800/50 to-gray-800/30
-                  border border-gray-700/50
-                  hover:border-blue-500/30 hover:bg-gradient-to-r hover:from-blue-600/10 hover:to-purple-600/10
-                  focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:ring-offset-2 focus:ring-offset-gray-900
-                  transition-all duration-200 ease-out
-                  transform hover:translate-y-[-1px] hover:shadow-lg hover:shadow-blue-500/10
-                  active:translate-y-0 active:scale-[0.98]
-                `}
-                aria-label={`Add ${widget.title} widget to dashboard`}
-              >
-                <div className="flex-shrink-0 p-1.5 rounded-lg bg-gray-700/50 group-hover:bg-blue-500/20 transition-colors duration-200">
-                  <widget.icon className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors duration-200  " />
-                </div>
-
-                <div className="flex-1 text-left">
-                  <span className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
-                    {widget.title}
-                  </span>
-                </div>
-
-                <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <svg
-                    className="w-4 h-4 text-blue-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
-                </div>
-              </button>
+                widget={widget}
+                onAdd={handleAddWidget}
+              />
             ))}
           </div>
         </section>
 
         <section>
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 flex items-center">
-            <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-            Layouts
+            <span className="w-2 h-2 bg-orange-500 rounded-full mr-2"></span>
+            System Logs
           </h3>
 
-          <div className="space-y-3">
-            <button
-              className={`
-                w-full p-3 rounded-xl font-medium text-sm
-                bg-gradient-to-r from-blue-600 to-blue-700
-                hover:from-blue-500 hover:to-blue-600
-                focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-gray-900
-                transition-all duration-200 ease-out
-                transform hover:translate-y-[-1px] hover:shadow-lg hover:shadow-blue-500/25
-                active:translate-y-0 active:scale-[0.98]
-                text-white
-              `}
-              aria-label="Save current dashboard layout"
-            >
-              <span className="flex items-center justify-center gap-2">
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"
-                  />
-                </svg>
-                Save Current Layout
-              </span>
-            </button>
-
-            <div className="relative">
-              <select
-                className={`
-                  w-full p-3 pr-10 rounded-xl text-sm
-                  bg-gray-800 border border-gray-700
-                  hover:border-gray-600 focus:border-blue-500
-                  focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-gray-900
-                  text-gray-200 cursor-pointer
-                  transition-all duration-200
-                  appearance-none
-                `}
-                aria-label="Load saved dashboard layout"
-              >
-                <option value="" className="bg-gray-800">
-                  Load Layout...
-                </option>
-                <option value="default" className="bg-gray-800">
-                  Default Layout
-                </option>
-                <option value="minimal" className="bg-gray-800">
-                  Minimal Layout
-                </option>
-              </select>
-
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </div>
-            </div>
+          <div className="space-y-2">
+            {Object.entries(logCounts).map(([level, count]) => (
+              <LogLevelButton
+                key={level}
+                level={level as keyof typeof LOG_LEVEL_CONFIGS}
+                count={count as number}
+                onOpen={() => handleAddWidget(WidgetType.LOGS, { w: 5, h: 6 })}
+              />
+            ))}
           </div>
         </section>
       </div>

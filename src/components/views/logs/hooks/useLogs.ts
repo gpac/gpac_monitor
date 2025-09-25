@@ -54,7 +54,7 @@ export function useLogs(options: UseLogsOptions = {}) {
       return;
     }
 
-    let unsubscribe: (() => void) | null = null;
+    /*  let unsubscribe: (() => void) | null = null; */
     let isMounted = true;
 
     const setupSubscription = async () => {
@@ -78,7 +78,7 @@ export function useLogs(options: UseLogsOptions = {}) {
         );
 
         if (isMounted) {
-          unsubscribe = unsubscribeFunc;
+        /*   unsubscribe = unsubscribeFunc; */
           setIsSubscribed(true);
           console.log('[useLogs] Subscription successful');
         } else {
@@ -96,12 +96,14 @@ export function useLogs(options: UseLogsOptions = {}) {
     setupSubscription();
 
     return () => {
-      console.log('[useLogs] Cleaning up subscription');
+      console.log(
+        '[useLogs] Component unmounting - keeping logs subscription for sidebar',
+      );
       isMounted = false;
       setIsSubscribed(false);
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      // NOTE: We deliberately do NOT call unsubscribe() here
+      // This keeps the logs flowing to Redux store for sidebar counts
+      // Logs subscription will only be cleaned up on session end or app close
     };
   }, [enabled, handleLogsUpdate]);
 
