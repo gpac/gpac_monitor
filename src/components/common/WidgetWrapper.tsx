@@ -101,11 +101,11 @@ const WidgetWrapper = ({
       >
         <div className={headerStyles.title}>
           <h3 className="text-base font-medium">{title}</h3>
-          {statusBadge && <div className="mx-auto ">{statusBadge}</div>}
+          {statusBadge && <div className="min-w-32 ">{statusBadge}</div>}
         </div>
 
         <div className={`${headerStyles.actions} no-drag`}>
-          {/* Custom actions */}
+       
           {customActions && (
             <div className="flex items-center gap-2 mr-2 border-r border-gray-600 pr-2">
               {customActions}
@@ -119,7 +119,7 @@ const WidgetWrapper = ({
               title="Minimize"
               type="button"
             >
-              {/* Icon minimisé */}
+          
               <svg
                 className="w-4 h-4"
                 viewBox="0 0 24 24"
@@ -144,7 +144,7 @@ const WidgetWrapper = ({
               title="Maximize"
               type="button"
             >
-              {/* Icon maximisé */}
+          
               <svg
                 className="w-4 h-4"
                 viewBox="0 0 24 24"
@@ -194,7 +194,6 @@ const WidgetWrapper = ({
   );
 };
 
-// Ajout du displayName pour faciliter le debugging
 WidgetWrapper.displayName = 'WidgetWrapper';
 
 export default React.memo(WidgetWrapper);
