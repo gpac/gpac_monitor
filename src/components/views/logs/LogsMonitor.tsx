@@ -157,12 +157,11 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
             {/* Scroll to highlighted log button */}
             {highlightedLogId && (
               <button
-               
                 onClick={scrollToHighlightedLog}
                 className="px-2 py-1 text-xs rounded border bg-gray-800 border-yellow-600 text-white hover:opacity-80"
                 title="Scroll to highlighted log"
               >
-                📌 
+                📌
               </button>
             )}
 

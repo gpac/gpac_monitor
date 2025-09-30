@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import { MdPushPin, MdOutlinePushPin } from 'react-icons/md';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import { LogId } from '../utils/logIdentifier';
@@ -32,18 +32,36 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
       };
     }, [log.timestamp, log.level]);
 
-    const [isHovered, setIsHovered] = React.useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+
+    // Memoize hover handlers to prevent re-renders
+    const handleMouseEnter = useCallback(() => setIsHovered(true), []);
+    const handleMouseLeave = useCallback(() => setIsHovered(false), []);
+
+    // Memoize click handler
+    const handleToggle = useCallback(() => {
+      onToggleHighlight(isHighlighted ? null : logId);
+    }, [onToggleHighlight, isHighlighted, logId]);
+
+    // Pre-compute CSS classes to avoid string concatenation on each render
+    const containerClass = useMemo(() => {
+      const baseClasses = 'flex items-start gap-2 mb-1 p-1 rounded hover:bg-gray-800/30 transition-colors';
+      const highlightClasses = isHighlighted ? ' border-l-4 border-yellow-500 bg-yellow-900/20' : '';
+      return baseClasses + highlightClasses;
+    }, [isHighlighted]);
+
+    const buttonClass = useMemo(() => {
+      const baseClasses = 'shrink-0 p-1 rounded transition-colors mt-1';
+      const colorClasses = isHighlighted ? ' text-yellow-500' : ' text-gray-400 hover:text-yellow-500';
+      return baseClasses + colorClasses;
+    }, [isHighlighted]);
 
     return (
       <div
-        className={`
-          flex items-start gap-2 mb-1 p-1 rounded
-          ${isHighlighted ? 'border-l-4 border-yellow-500 bg-yellow-900/40' : ''}
-          hover:bg-gray-800/30 transition-colors
-        `}
+        className={containerClass}
         style={{ minHeight: '32px' }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         {logData.icon}
         <div className="flex-1 stat overflow-hidden">
@@ -62,11 +80,8 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
         {/* Highlight button - visible on hover or when highlighted */}
         {(isHovered || isHighlighted) && (
           <button
-            onClick={() => onToggleHighlight(isHighlighted ? null : logId)}
-            className={`
-              shrink-0 p-1 rounded transition-colors mt-1
-              ${isHighlighted ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}
-            `}
+            onClick={handleToggle}
+            className={buttonClass}
             title={isHighlighted ? 'Remove highlight' : 'Highlight this log'}
           >
             {isHighlighted ? (
@@ -80,10 +95,13 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
     );
   },
   (prevProps, nextProps) => {
+    // Only re-render if these specific props change
     return (
       prevProps.log.timestamp === nextProps.log.timestamp &&
       prevProps.log.message === nextProps.log.message &&
-      prevProps.isHighlighted === nextProps.isHighlighted
+      prevProps.log.level === nextProps.log.level &&
+      prevProps.isHighlighted === nextProps.isHighlighted &&
+      prevProps.logId === nextProps.logId
     );
   },
 );
