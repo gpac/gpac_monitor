@@ -17,7 +17,7 @@ export const LiveToggle: React.FC<LiveToggleProps> = ({
   };
   return (
     <Button
-      variant={isLive ? 'default' : 'outline'}
+      variant={isLive ? 'outline' : 'destructive'}
       size="sm"
       onClick={handleClick}
       disabled={disabled}

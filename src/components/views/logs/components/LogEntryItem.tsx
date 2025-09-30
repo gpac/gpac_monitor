@@ -18,14 +18,17 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
       return {
         time: new Date(log.timestamp).toLocaleTimeString(),
         icon:
-          LOG_ENTRY_CONFIG.icons[level as keyof typeof LOG_ENTRY_CONFIG.icons] ||
-          LOG_ENTRY_CONFIG.icons[0],
+          LOG_ENTRY_CONFIG.icons[
+            level as keyof typeof LOG_ENTRY_CONFIG.icons
+          ] || LOG_ENTRY_CONFIG.icons[0],
         style:
-          LOG_ENTRY_CONFIG.styles[level as keyof typeof LOG_ENTRY_CONFIG.styles] ||
-          LOG_ENTRY_CONFIG.styles[0],
+          LOG_ENTRY_CONFIG.styles[
+            level as keyof typeof LOG_ENTRY_CONFIG.styles
+          ] || LOG_ENTRY_CONFIG.styles[0],
         name:
-          LOG_ENTRY_CONFIG.names[level as keyof typeof LOG_ENTRY_CONFIG.names] ||
-          'UNKNOWN',
+          LOG_ENTRY_CONFIG.names[
+            level as keyof typeof LOG_ENTRY_CONFIG.names
+          ] || 'UNKNOWN',
       };
     }, [log.timestamp, log.level]);
 
@@ -35,7 +38,7 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
       <div
         className={`
           flex items-start gap-2 mb-1 p-1 rounded
-          ${isHighlighted ? 'border-l-4 border-yellow-500 bg-yellow-900/20' : ''}
+          ${isHighlighted ? 'border-l-4 border-yellow-500 bg-yellow-900/40' : ''}
           hover:bg-gray-800/30 transition-colors
         `}
         style={{ minHeight: '32px' }}

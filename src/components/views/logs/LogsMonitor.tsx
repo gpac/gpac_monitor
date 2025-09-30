@@ -6,6 +6,7 @@ import React, {
   useMemo,
 } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import { RiScrollToBottomLine } from 'react-icons/ri';
 import WidgetWrapper from '../../common/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
@@ -18,6 +19,7 @@ import { ToolSwitcher } from './components/Tool/ToolSwitcher';
 import { LogEntryItem } from './components/LogEntryItem';
 import { generateLogId } from './utils/logIdentifier';
 import { setHighlightedLog } from '@/shared/store/slices/logsSlice';
+import { Button } from '@/components/ui/button';
 
 interface LogsMonitorProps {
   id: string;
@@ -44,7 +46,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   } = useLogsRedux();
 
   // Get highlighted log ID from Redux
-  const highlightedLogId = useAppSelector((state) => state.logs.highlightedLogId);
+  const highlightedLogId = useAppSelector(
+    (state) => state.logs.highlightedLogId,
+  );
 
   // Get log counts by tool for performance monitoring
   const logCountsByTool = useAppSelector(selectLogCountsByTool);
@@ -79,6 +83,22 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     },
     [dispatch],
   );
+
+  // Handler to scroll to highlighted log
+  const scrollToHighlightedLog = useCallback(() => {
+    if (highlightedLogId && virtuosoRef.current && visibleLogs.length > 0) {
+      const index = visibleLogs.findIndex(
+        (log) => generateLogId(log) === highlightedLogId,
+      );
+      if (index !== -1) {
+        virtuosoRef.current.scrollToIndex({
+          index,
+          behavior: 'smooth',
+          align: 'center',
+        });
+      }
+    }
+  }, [highlightedLogId, visibleLogs]);
 
   const statusBadge = useMemo(
     () => (
@@ -133,17 +153,31 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
       <div className="flex flex-col h-full bg-stat stat">
         {/* Logs */}
         <div className="flex-1 relative">
-          <div className="absolute top-2 right-2 z-10">
-            <button
+          <div className="absolute top-2 right-1 z-10 flex gap-2">
+            {/* Scroll to highlighted log button */}
+            {highlightedLogId && (
+              <button
+               
+                onClick={scrollToHighlightedLog}
+                className="px-2 py-1 text-xs rounded border bg-gray-800 border-yellow-600 text-white hover:opacity-80"
+                title="Scroll to highlighted log"
+              >
+                📌 
+              </button>
+            )}
+
+            {/* Auto-scroll toggle */}
+            <Button
+              variant="destructive"
               onClick={() => setAutoScroll(!autoScroll)}
-              className={`px-2 py-1 text-xs rounded border ${
+              className={`px-1 py-1 text-xs rounded border ${
                 autoScroll
-                  ? 'bg-orange-800  border-orange-600 text-white'
+                  ? 'bg-red-700/45  border-orange-600 text-white'
                   : 'bg-gray-700 border-gray-600 text-gray-300'
               }`}
             >
-              Auto-scroll: {autoScroll ? 'ON' : 'OFF'}
-            </button>
+              <RiScrollToBottomLine className="w-4 h-4" />
+            </Button>
           </div>
           <Virtuoso
             ref={virtuosoRef}

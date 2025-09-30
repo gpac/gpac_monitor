@@ -25,7 +25,7 @@ interface LogsState {
 // Initialize state from localStorage
 const getInitialState = (): LogsState => {
   const STORAGE_KEY = 'gpac-logs-config';
-
+  
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     const config = saved ? JSON.parse(saved) : {};
