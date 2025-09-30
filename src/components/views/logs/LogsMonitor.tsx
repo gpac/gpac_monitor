@@ -18,8 +18,8 @@ import { useAppSelector } from '@/shared/hooks/redux';
 import { selectLogCountsByTool } from '@/shared/store/selectors/logsSelectors';
 import { useLogsService } from './hooks/useLogsService';
 import { CustomTooltip } from '@/components/ui/tooltip';
-import { ToolSettingsDropdown } from './components/ToolSettingsDropdown';
-import { ToolSwitcher } from './components/ToolSwitcher';
+import { ToolSettingsDropdown } from './components/Tool/ToolSettingsDropdown';
+import { ToolSwitcher } from './components/Tool/ToolSwitcher';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 interface LogsMonitorProps {

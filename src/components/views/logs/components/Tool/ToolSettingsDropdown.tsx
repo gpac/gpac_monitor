@@ -8,8 +8,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { IoSettings } from 'react-icons/io5';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
-import { TOOL_DISPLAY_NAMES } from '../utils/constants';
-import { getEffectiveLevel, sortTools } from '../utils/toolUtils';
+import { TOOL_DISPLAY_NAMES } from '../../utils/constants';
+import { getEffectiveLevel, sortTools } from '../../utils/toolUtils';
 import { ToolRow } from './ToolRow';
 
 interface ToolSettingsDropdownProps {

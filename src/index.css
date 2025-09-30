@@ -69,16 +69,17 @@
     overflow: hidden; /* pour l’overlay */
   }
   .btn::after {
-    content: "";
-    position: absolute; inset: 0;
+    content: '';
+    position: absolute;
+    inset: 0;
     background: rgb(59 130 246 / 0.15); /* bleu transparent */
     opacity: 0;
     transition: opacity 150ms ease-out;
     pointer-events: none;
   }
-  .btn:hover::after { opacity: 1; }
-
-  
+  .btn:hover::after {
+    opacity: 1;
+  }
 
   .input {
     @apply bg-gray-700 border-gray-600 rounded-md px-3 py-2

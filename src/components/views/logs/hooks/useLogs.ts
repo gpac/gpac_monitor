@@ -78,7 +78,7 @@ export function useLogs(options: UseLogsOptions = {}) {
         );
 
         if (isMounted) {
-        /*   unsubscribe = unsubscribeFunc; */
+          /*   unsubscribe = unsubscribeFunc; */
           setIsSubscribed(true);
           console.log('[useLogs] Subscription successful');
         } else {

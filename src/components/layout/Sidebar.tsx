@@ -1,4 +1,4 @@
-import React, {useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { addWidget } from '@/shared/store/slices/widgetsSlice';
 import { selectLogCounts } from '@/shared/store/selectors/sidebarSelectors';
@@ -6,58 +6,75 @@ import { WidgetType } from '@/types/ui/widget';
 
 import { LuGauge, LuVolume2, LuFileText, LuShare2 } from 'react-icons/lu';
 import { FiLayout } from 'react-icons/fi';
-import { FaInfoCircle, FaExclamationTriangle, FaTimesCircle } from 'react-icons/fa';
+import {
+  FaInfoCircle,
+  FaExclamationTriangle,
+  FaTimesCircle,
+} from 'react-icons/fa';
 
 // Memoized log level configurations to avoid re-computation
 const LOG_LEVEL_CONFIGS = {
   error: {
     icon: FaTimesCircle,
     label: 'Errors',
-    baseClasses: 'group w-full flex items-center justify-between p-2 rounded-lg transition-opacity duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+    baseClasses:
+      'group w-full flex items-center justify-between p-2 rounded-lg transition-opacity duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:ring-offset-2 focus:ring-offset-gray-900',
     activeClasses: 'bg-red-900/30 border border-red-800/50 hover:bg-red-900/40',
-    inactiveClasses: 'bg-gray-800/50 border border-gray-700/30 hover:bg-gray-800/70',
+    inactiveClasses:
+      'bg-gray-800/50 border border-gray-700/30 hover:bg-gray-800/70',
     iconActive: 'w-4 h-4 text-red-400',
     iconInactive: 'w-4 h-4 text-gray-400',
     textActive: 'text-sm font-medium text-red-200',
     textInactive: 'text-sm font-medium text-gray-300',
-    badgeActive: 'text-sm font-bold px-2 py-1 rounded-md bg-red-800/50 text-red-200',
-    badgeInactive: 'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
+    badgeActive:
+      'text-sm font-bold px-2 py-1 rounded-md bg-red-800/50 text-red-200',
+    badgeInactive:
+      'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
   },
   warning: {
     icon: FaExclamationTriangle,
     label: 'Warnings',
-    baseClasses: 'group w-full flex items-center justify-between p-2 rounded-lg transition-opacity duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:ring-offset-2 focus:ring-offset-gray-900',
-    activeClasses: 'bg-yellow-900/30 border border-yellow-800/50 hover:bg-yellow-900/40',
-    inactiveClasses: 'bg-gray-800/50 border border-gray-700/30 hover:bg-gray-800/70',
+    baseClasses:
+      'group w-full flex items-center justify-between p-2 rounded-lg transition-opacity duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-yellow-500/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+    activeClasses:
+      'bg-yellow-900/30 border border-yellow-800/50 hover:bg-yellow-900/40',
+    inactiveClasses:
+      'bg-gray-800/50 border border-gray-700/30 hover:bg-gray-800/70',
     iconActive: 'w-4 h-4 text-yellow-400',
     iconInactive: 'w-4 h-4 text-gray-400',
     textActive: 'text-sm font-medium text-yellow-200',
     textInactive: 'text-sm font-medium text-gray-300',
-    badgeActive: 'text-sm font-bold px-2 py-1 rounded-md bg-yellow-800/50 text-yellow-200',
-    badgeInactive: 'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
+    badgeActive:
+      'text-sm font-bold px-2 py-1 rounded-md bg-yellow-800/50 text-yellow-200',
+    badgeInactive:
+      'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
   },
   info: {
     icon: FaInfoCircle,
     label: 'Info',
-    baseClasses: 'group w-full flex items-center justify-between p-2 rounded-lg transition-opacity duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-gray-900',
-    activeClasses: 'bg-blue-900/30 border border-blue-800/50 hover:bg-blue-900/40',
-    inactiveClasses: 'bg-gray-800/50 border border-gray-700/30 hover:bg-gray-800/70',
+    baseClasses:
+      'group w-full flex items-center justify-between p-2 rounded-lg transition-opacity duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-gray-900',
+    activeClasses:
+      'bg-blue-900/30 border border-blue-800/50 hover:bg-blue-900/40',
+    inactiveClasses:
+      'bg-gray-800/50 border border-gray-700/30 hover:bg-gray-800/70',
     iconActive: 'w-4 h-4 text-green-700/60',
     iconInactive: 'w-4 h-4 text-gray-400',
     textActive: 'text-sm font-medium text-blue-200',
     textInactive: 'text-sm font-medium text-gray-300',
-    badgeActive: 'text-sm font-bold px-2 py-1 rounded-md bg-blue-800/50 text-blue-200',
-    badgeInactive: 'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
+    badgeActive:
+      'text-sm font-bold px-2 py-1 rounded-md bg-blue-800/50 text-blue-200',
+    badgeInactive:
+      'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
   },
 } as const;
 
-
 const AvailableWidgetButton = React.memo(function AvailableWidgetButton({
   widget,
-  onAdd
+  onAdd,
 }: {
-  widget: typeof availableWidgets[number],
-  onAdd: (type: WidgetType, size: { w: number; h: number }) => void
+  widget: (typeof availableWidgets)[number];
+  onAdd: (type: WidgetType, size: { w: number; h: number }) => void;
 }) {
   const Icon = widget.icon;
   return (
@@ -75,8 +92,18 @@ const AvailableWidgetButton = React.memo(function AvailableWidgetButton({
         </span>
       </div>
       <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        <svg
+          className="w-4 h-4 text-blue-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+          />
         </svg>
       </div>
     </button>
@@ -87,58 +114,62 @@ const AvailableWidgetButton = React.memo(function AvailableWidgetButton({
 const CountBadge = React.memo(function CountBadge({
   count,
   active,
-  classes
+  classes,
 }: {
   count: number;
   active: boolean;
-  classes: { active: string; inactive: string }
+  classes: { active: string; inactive: string };
 }) {
   return (
-    <span className={active ? classes.active : classes.inactive}>
-      {count}
-    </span>
+    <span className={active ? classes.active : classes.inactive}>{count}</span>
   );
 });
 
-const LogLevelButton = React.memo(function LogLevelButton({
-  level,
-  count,
-  onOpen
-}: {
-  level: keyof typeof LOG_LEVEL_CONFIGS;
-  count: number;
-  onOpen: () => void
-}) {
-  const config = LOG_LEVEL_CONFIGS[level];
-  const Icon = config.icon;
-  const hasCount = count > 0;
+const LogLevelButton = React.memo(
+  function LogLevelButton({
+    level,
+    count,
+    onOpen,
+  }: {
+    level: keyof typeof LOG_LEVEL_CONFIGS;
+    count: number;
+    onOpen: () => void;
+  }) {
+    const config = LOG_LEVEL_CONFIGS[level];
+    const Icon = config.icon;
+    const hasCount = count > 0;
 
-  return (
-    <button
-      onClick={onOpen}
-      disabled={!hasCount}
-      className={`${config.baseClasses} ${hasCount ? config.activeClasses : config.inactiveClasses}`}
-      aria-label={`${count} ${config.label.toLowerCase()} - Click to open logs monitor`}
-    >
-      <div className="flex items-center gap-2">
-        <Icon className={hasCount ? config.iconActive : config.iconInactive} />
-        <span className={hasCount ? config.textActive : config.textInactive}>
-          {config.label}
-        </span>
-      </div>
-      <CountBadge
-        count={count}
-        active={hasCount}
-        classes={{ active: config.badgeActive, inactive: config.badgeInactive }}
-      />
-    </button>
-  );
-}, (prevProps, nextProps) => {
-  // Optimisation : ne re-render que si le count change
-  return prevProps.count === nextProps.count;
-});
-
-
+    return (
+      <button
+        onClick={onOpen}
+        disabled={!hasCount}
+        className={`${config.baseClasses} ${hasCount ? config.activeClasses : config.inactiveClasses}`}
+        aria-label={`${count} ${config.label.toLowerCase()} - Click to open logs monitor`}
+      >
+        <div className="flex items-center gap-2">
+          <Icon
+            className={hasCount ? config.iconActive : config.iconInactive}
+          />
+          <span className={hasCount ? config.textActive : config.textInactive}>
+            {config.label}
+          </span>
+        </div>
+        <CountBadge
+          count={count}
+          active={hasCount}
+          classes={{
+            active: config.badgeActive,
+            inactive: config.badgeInactive,
+          }}
+        />
+      </button>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Optimisation : ne re-render que si le count change
+    return prevProps.count === nextProps.count;
+  },
+);
 
 const availableWidgets = [
   {
@@ -180,27 +211,24 @@ const Sidebar: React.FC = () => {
   const logCounts = useAppSelector(selectLogCounts);
 
   // Memoize the widget creation callback to avoid re-renders
-  const handleAddWidget = useCallback((
-    type: WidgetType,
-    defaultSize: { w: number; h: number },
-  ) => {
-    dispatch(
-      addWidget({
-        id: `${type}-${Date.now()}`,
-        type,
-        title: availableWidgets.find((w) => w.type === type)?.title || '',
-        x: 0,
-        y: 0,
-        w: defaultSize.w,
-        h: defaultSize.h,
-        isResizable: true,
-        isDraggable: true,
-      }),
-    );
-  }, [dispatch]);
-
-
-  
+  const handleAddWidget = useCallback(
+    (type: WidgetType, defaultSize: { w: number; h: number }) => {
+      dispatch(
+        addWidget({
+          id: `${type}-${Date.now()}`,
+          type,
+          title: availableWidgets.find((w) => w.type === type)?.title || '',
+          x: 0,
+          y: 0,
+          w: defaultSize.w,
+          h: defaultSize.h,
+          isResizable: true,
+          isDraggable: true,
+        }),
+      );
+    },
+    [dispatch],
+  );
 
   return (
     <aside

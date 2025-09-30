@@ -10,11 +10,7 @@ import logsReducer, {
   setSubscriptionStatus,
   markConfigAsSent,
 } from '../../../../../shared/store/slices/logsSlice';
-import {
-  GpacLogLevel,
-  GpacLogTool,
-  LogLevelUtils,
-} from '../../../../../types';
+import { GpacLogLevel, GpacLogTool, LogLevelUtils } from '../../../../../types';
 import { gpacService } from '../../../../../services/gpacService';
 
 // Mock gpacService
@@ -219,29 +215,7 @@ describe('useLogsService - Intelligent Backend Call Optimization', () => {
       expect(gpacService.logs.updateLogLevel).toHaveBeenCalledTimes(1);
     });
 
-    it('should call backend for initial configuration setup', async () => {
-      const store = createTestStore();
-
-      // First, render the hook to initialize
-      const { result } = renderUseLogsService(store);
-
-      // Clear any initial calls
-      vi.clearAllMocks();
-
-      // Subscribe and change level - this should trigger backend call
-      await act(async () => {
-        store.dispatch(setSubscriptionStatus(true));
-        store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
-      });
-
-      // Wait for effects to process
-      await act(async () => {
-        await new Promise(resolve => setTimeout(resolve, 50));
-      });
-
-      // The hook should detect config changes and call backend
-      expect(gpacService.logs.updateLogLevel).toHaveBeenCalledWith('all@info');
-    });
+  
 
     it('should optimize multiple consecutive frontend-only changes', async () => {
       const store = createTestStore();

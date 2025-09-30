@@ -4,7 +4,11 @@ import {
   selectLevelsByTool,
   selectDefaultAllLevel,
 } from './logsSelectors';
-import { GpacLogLevel, GpacLogTool, LOG_LEVEL_VALUES } from '@/types/domain/gpac/log-types';
+import {
+  GpacLogLevel,
+  GpacLogTool,
+  LOG_LEVEL_VALUES,
+} from '@/types/domain/gpac/log-types';
 
 export interface SidebarLogCounts {
   error: number;
@@ -36,7 +40,10 @@ export const selectLogCounts = createSelector(
     const configString = defaultAllLevel ? buildConfigString() : 'all@warning';
 
     // Helper to check if log level should be included
-    const shouldInclude = (logLevel: number, tool: GpacLogTool | string): boolean => {
+    const shouldInclude = (
+      logLevel: number,
+      tool: GpacLogTool | string,
+    ): boolean => {
       // Never include debug in sidebar counts
       if (logLevel === LOG_LEVEL_VALUES[GpacLogLevel.DEBUG]) return false;
 
@@ -75,7 +82,8 @@ export const selectLogCounts = createSelector(
         if (!shouldInclude(log.level, tool)) return;
 
         if (log.level === LOG_LEVEL_VALUES[GpacLogLevel.ERROR]) totalError++;
-        else if (log.level === LOG_LEVEL_VALUES[GpacLogLevel.WARNING]) totalWarning++;
+        else if (log.level === LOG_LEVEL_VALUES[GpacLogLevel.WARNING])
+          totalWarning++;
         else if (log.level === LOG_LEVEL_VALUES[GpacLogLevel.INFO]) totalInfo++;
       });
     });

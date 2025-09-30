@@ -79,12 +79,36 @@ describe('sidebarSelectors - selectLogCounts', () => {
       store.dispatch(setDefaultAllLevel(GpacLogLevel.DEBUG));
 
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error 1'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error 2'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning 1'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning 2'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning 3'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Info 1'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error 1',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error 2',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning 1',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning 2',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning 3',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Info 1',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs }));
@@ -102,11 +126,31 @@ describe('sidebarSelectors - selectLogCounts', () => {
       store.dispatch(setDefaultAllLevel(GpacLogLevel.DEBUG));
 
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Info'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.DEBUG], 'Debug 1'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.DEBUG], 'Debug 2'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Info',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.DEBUG],
+          'Debug 1',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.DEBUG],
+          'Debug 2',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs }));
@@ -126,15 +170,39 @@ describe('sidebarSelectors - selectLogCounts', () => {
       store.dispatch(setDefaultAllLevel(GpacLogLevel.WARNING));
 
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Info (hidden)'),
-        createLogEntry(GpacLogTool.NETWORK, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Net Error'),
-        createLogEntry(GpacLogTool.NETWORK, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Net Info (hidden)'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Info (hidden)',
+        ),
+        createLogEntry(
+          GpacLogTool.NETWORK,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Net Error',
+        ),
+        createLogEntry(
+          GpacLogTool.NETWORK,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Net Info (hidden)',
+        ),
       ];
 
-      store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs: logs.slice(0, 3) }));
-      store.dispatch(appendLogs({ tool: GpacLogTool.NETWORK, logs: logs.slice(3) }));
+      store.dispatch(
+        appendLogs({ tool: GpacLogTool.CORE, logs: logs.slice(0, 3) }),
+      );
+      store.dispatch(
+        appendLogs({ tool: GpacLogTool.NETWORK, logs: logs.slice(3) }),
+      );
       const counts = selectLogCounts(store.getState());
 
       expect(counts).toEqual({
@@ -147,18 +215,44 @@ describe('sidebarSelectors - selectLogCounts', () => {
     it('should respect tool-specific configuration', () => {
       const store = createTestStore();
       store.dispatch(setDefaultAllLevel(GpacLogLevel.WARNING));
-      store.dispatch(setToolLevel({ tool: GpacLogTool.CORE, level: GpacLogLevel.INFO }));
+      store.dispatch(
+        setToolLevel({ tool: GpacLogTool.CORE, level: GpacLogLevel.INFO }),
+      );
 
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Core Error'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Core Warning'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Core Info (visible)'),
-        createLogEntry(GpacLogTool.NETWORK, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Net Error'),
-        createLogEntry(GpacLogTool.NETWORK, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Net Info (hidden)'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Core Error',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Core Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Core Info (visible)',
+        ),
+        createLogEntry(
+          GpacLogTool.NETWORK,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Net Error',
+        ),
+        createLogEntry(
+          GpacLogTool.NETWORK,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Net Info (hidden)',
+        ),
       ];
 
-      store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs: logs.slice(0, 3) }));
-      store.dispatch(appendLogs({ tool: GpacLogTool.NETWORK, logs: logs.slice(3) }));
+      store.dispatch(
+        appendLogs({ tool: GpacLogTool.CORE, logs: logs.slice(0, 3) }),
+      );
+      store.dispatch(
+        appendLogs({ tool: GpacLogTool.NETWORK, logs: logs.slice(3) }),
+      );
       const counts = selectLogCounts(store.getState());
 
       expect(counts).toEqual({
@@ -171,26 +265,68 @@ describe('sidebarSelectors - selectLogCounts', () => {
     it('should handle multiple tool-specific configurations', () => {
       const store = createTestStore();
       store.dispatch(setDefaultAllLevel(GpacLogLevel.ERROR));
-      store.dispatch(setToolLevel({ tool: GpacLogTool.HTTP, level: GpacLogLevel.WARNING }));
-      store.dispatch(setToolLevel({ tool: GpacLogTool.AUDIO, level: GpacLogLevel.INFO }));
+      store.dispatch(
+        setToolLevel({ tool: GpacLogTool.HTTP, level: GpacLogLevel.WARNING }),
+      );
+      store.dispatch(
+        setToolLevel({ tool: GpacLogTool.AUDIO, level: GpacLogLevel.INFO }),
+      );
 
       const logs: GpacLogEntry[] = [
         // Core tool (uses all@error)
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Core Error'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Core Warning (hidden)'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Core Error',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Core Warning (hidden)',
+        ),
         // HTTP tool (uses http@warning)
-        createLogEntry(GpacLogTool.HTTP, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'HTTP Error'),
-        createLogEntry(GpacLogTool.HTTP, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'HTTP Warning'),
-        createLogEntry(GpacLogTool.HTTP, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'HTTP Info (hidden)'),
+        createLogEntry(
+          GpacLogTool.HTTP,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'HTTP Error',
+        ),
+        createLogEntry(
+          GpacLogTool.HTTP,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'HTTP Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.HTTP,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'HTTP Info (hidden)',
+        ),
         // Audio tool (uses audio@info)
-        createLogEntry(GpacLogTool.AUDIO, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Audio Error'),
-        createLogEntry(GpacLogTool.AUDIO, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Audio Warning'),
-        createLogEntry(GpacLogTool.AUDIO, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Audio Info'),
+        createLogEntry(
+          GpacLogTool.AUDIO,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Audio Error',
+        ),
+        createLogEntry(
+          GpacLogTool.AUDIO,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Audio Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.AUDIO,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Audio Info',
+        ),
       ];
 
-      store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs: logs.slice(0, 2) }));
-      store.dispatch(appendLogs({ tool: GpacLogTool.HTTP, logs: logs.slice(2, 5) }));
-      store.dispatch(appendLogs({ tool: GpacLogTool.AUDIO, logs: logs.slice(5) }));
+      store.dispatch(
+        appendLogs({ tool: GpacLogTool.CORE, logs: logs.slice(0, 2) }),
+      );
+      store.dispatch(
+        appendLogs({ tool: GpacLogTool.HTTP, logs: logs.slice(2, 5) }),
+      );
+      store.dispatch(
+        appendLogs({ tool: GpacLogTool.AUDIO, logs: logs.slice(5) }),
+      );
       const counts = selectLogCounts(store.getState());
 
       expect(counts).toEqual({
@@ -207,26 +343,68 @@ describe('sidebarSelectors - selectLogCounts', () => {
       store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
 
       const coreLogger: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Core Error 1'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Core Error 2'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Core Warning'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Core Error 1',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Core Error 2',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Core Warning',
+        ),
       ];
 
       const networkLogs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.NETWORK, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Network Error'),
-        createLogEntry(GpacLogTool.NETWORK, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Network Info 1'),
-        createLogEntry(GpacLogTool.NETWORK, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Network Info 2'),
+        createLogEntry(
+          GpacLogTool.NETWORK,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Network Error',
+        ),
+        createLogEntry(
+          GpacLogTool.NETWORK,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Network Info 1',
+        ),
+        createLogEntry(
+          GpacLogTool.NETWORK,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Network Info 2',
+        ),
       ];
 
       const audioLogs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.AUDIO, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Audio Warning 1'),
-        createLogEntry(GpacLogTool.AUDIO, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Audio Warning 2'),
-        createLogEntry(GpacLogTool.AUDIO, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Audio Warning 3'),
-        createLogEntry(GpacLogTool.AUDIO, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Audio Info'),
+        createLogEntry(
+          GpacLogTool.AUDIO,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Audio Warning 1',
+        ),
+        createLogEntry(
+          GpacLogTool.AUDIO,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Audio Warning 2',
+        ),
+        createLogEntry(
+          GpacLogTool.AUDIO,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Audio Warning 3',
+        ),
+        createLogEntry(
+          GpacLogTool.AUDIO,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Audio Info',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs: coreLogger }));
-      store.dispatch(appendLogs({ tool: GpacLogTool.NETWORK, logs: networkLogs }));
+      store.dispatch(
+        appendLogs({ tool: GpacLogTool.NETWORK, logs: networkLogs }),
+      );
       store.dispatch(appendLogs({ tool: GpacLogTool.AUDIO, logs: audioLogs }));
 
       const counts = selectLogCounts(store.getState());
@@ -244,9 +422,21 @@ describe('sidebarSelectors - selectLogCounts', () => {
 
       // Only add logs to one tool
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.HTTP, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'HTTP Error'),
-        createLogEntry(GpacLogTool.HTTP, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'HTTP Warning'),
-        createLogEntry(GpacLogTool.HTTP, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'HTTP Info'),
+        createLogEntry(
+          GpacLogTool.HTTP,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'HTTP Error',
+        ),
+        createLogEntry(
+          GpacLogTool.HTTP,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'HTTP Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.HTTP,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'HTTP Info',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.HTTP, logs }));
@@ -266,9 +456,21 @@ describe('sidebarSelectors - selectLogCounts', () => {
       // Don't set defaultAllLevel - should use fallback
 
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Info (hidden)'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Info (hidden)',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs }));
@@ -287,9 +489,21 @@ describe('sidebarSelectors - selectLogCounts', () => {
       store.dispatch(setDefaultAllLevel(GpacLogLevel.INFO));
 
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Info'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Info',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs }));
@@ -313,13 +527,13 @@ describe('sidebarSelectors - selectLogCounts', () => {
         const levels = [
           LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
           LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
-          LOG_LEVEL_VALUES[GpacLogLevel.INFO]
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
         ];
         return createLogEntry(
           GpacLogTool.CORE,
           levels[i % 3],
           `Log message ${i}`,
-          Date.now() + i
+          Date.now() + i,
         );
       });
 
@@ -338,8 +552,16 @@ describe('sidebarSelectors - selectLogCounts', () => {
       store.dispatch(setDefaultAllLevel(GpacLogLevel.WARNING));
 
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs }));
@@ -364,7 +586,11 @@ describe('sidebarSelectors - selectLogCounts', () => {
         createLogEntry(GpacLogTool.CORE, 1, 'Error level'),
         createLogEntry(GpacLogTool.CORE, 2, 'Warning level'),
         createLogEntry(GpacLogTool.CORE, 3, 'Info level (filtered out)'),
-        createLogEntry(GpacLogTool.CORE, 999, 'Unknown high level (filtered out)'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          999,
+          'Unknown high level (filtered out)',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs }));
@@ -402,9 +628,21 @@ describe('sidebarSelectors - selectLogCounts', () => {
 
       // Add some logs first
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error'),
-        createLogEntry(GpacLogTool.HTTP, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning'),
-        createLogEntry(GpacLogTool.AUDIO, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Info'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error',
+        ),
+        createLogEntry(
+          GpacLogTool.HTTP,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.AUDIO,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Info',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs: [logs[0]] }));
@@ -484,16 +722,32 @@ describe('sidebarSelectors - selectLogCounts', () => {
 
       // Add logs to test against
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Info'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Info',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs }));
 
       // Set complex config
-      store.dispatch(setToolLevel({ tool: GpacLogTool.CORE, level: GpacLogLevel.WARNING }));
-      store.dispatch(setToolLevel({ tool: GpacLogTool.HTTP, level: GpacLogLevel.DEBUG }));
+      store.dispatch(
+        setToolLevel({ tool: GpacLogTool.CORE, level: GpacLogLevel.WARNING }),
+      );
+      store.dispatch(
+        setToolLevel({ tool: GpacLogTool.HTTP, level: GpacLogLevel.DEBUG }),
+      );
 
       const counts = selectLogCounts(store.getState());
 
@@ -510,9 +764,21 @@ describe('sidebarSelectors - selectLogCounts', () => {
       store.dispatch(setDefaultAllLevel(GpacLogLevel.WARNING));
 
       const logs: GpacLogEntry[] = [
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.ERROR], 'Error'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.WARNING], 'Warning'),
-        createLogEntry(GpacLogTool.CORE, LOG_LEVEL_VALUES[GpacLogLevel.INFO], 'Info (hidden)'),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.ERROR],
+          'Error',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          'Warning',
+        ),
+        createLogEntry(
+          GpacLogTool.CORE,
+          LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          'Info (hidden)',
+        ),
       ];
 
       store.dispatch(appendLogs({ tool: GpacLogTool.CORE, logs }));

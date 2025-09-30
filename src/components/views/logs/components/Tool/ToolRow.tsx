@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
-import { LEVEL_BADGE_CLASSES } from '../utils/constants';
+import { LEVEL_BADGE_CLASSES } from '../../utils/constants';
 
 interface ToolRowProps {
   tool: GpacLogTool;

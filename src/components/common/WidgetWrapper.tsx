@@ -105,7 +105,6 @@ const WidgetWrapper = ({
         </div>
 
         <div className={`${headerStyles.actions} no-drag`}>
-       
           {customActions && (
             <div className="flex items-center gap-2 mr-2 border-r border-gray-600 pr-2">
               {customActions}
@@ -119,7 +118,6 @@ const WidgetWrapper = ({
               title="Minimize"
               type="button"
             >
-          
               <svg
                 className="w-4 h-4"
                 viewBox="0 0 24 24"
@@ -144,7 +142,6 @@ const WidgetWrapper = ({
               title="Maximize"
               type="button"
             >
-          
               <svg
                 className="w-4 h-4"
                 viewBox="0 0 24 24"

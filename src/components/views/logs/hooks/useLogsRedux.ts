@@ -39,7 +39,6 @@ export function useLogsRedux() {
   // Actions with persistence
   const handleSetTool = useCallback(
     (tool: GpacLogTool) => {
-  
       dispatch(setTool(tool));
     },
     [dispatch],
@@ -47,7 +46,6 @@ export function useLogsRedux() {
 
   const handleSetToolLevel = useCallback(
     (tool: GpacLogTool, level: GpacLogLevel) => {
- 
       dispatch(setToolLevel({ tool, level }));
       dispatch(setTool(tool)); // Switch to the tool after changing its level
 

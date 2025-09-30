@@ -108,8 +108,6 @@ export class BaseMessageHandler {
       return;
     }
 
- 
-
     switch (data.message) {
       case 'filters':
         this.handleFiltersMessage(data);
