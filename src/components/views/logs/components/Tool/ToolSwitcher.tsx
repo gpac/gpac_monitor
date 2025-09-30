@@ -117,20 +117,9 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                 <Checkbox.Root
                   checked={parentChecked}
                   onCheckedChange={() => {
-                    console.log('[ToolSwitcher] ALL checkbox clicked');
-                    console.log('[ToolSwitcher] ALL - BEFORE isAll:', isAll);
-                    console.log(
-                      '[ToolSwitcher] ALL - BEFORE visibleToolsFilter:',
-                      visibleToolsFilter,
-                    );
                     if (isAll) {
-                      console.log('[ToolSwitcher] ALL - Calling onClearFilter');
                       onClearFilter?.();
                     } else {
-                      console.log(
-                        '[ToolSwitcher] ALL - Calling onSelectAllTools with:',
-                        configuredTools,
-                      );
                       onSelectAllTools?.(configuredTools);
                     }
                   }}
@@ -171,31 +160,11 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                     currentTool={currentTool}
                     isChecked={isChecked}
                     onToggle={() => {
-                      console.log(
-                        '[ToolSwitcher] onToggle clicked for tool:',
-                        tool,
-                      );
-                      console.log(
-                        '[ToolSwitcher] BEFORE - visibleToolsFilter:',
-                        visibleToolsFilter,
-                      );
-                      console.log(
-                        '[ToolSwitcher] BEFORE - currentTool:',
-                        currentTool,
-                      );
-                      console.log(
-                        '[ToolSwitcher] BEFORE - isChecked:',
-                        isChecked,
-                      );
-
                       // If filter is active, clear it first to go to single-tool mode
                       if (visibleToolsFilter.length > 0) {
-                        console.log('[ToolSwitcher] Clearing filter first');
                         onClearFilter?.();
                       }
-
                       onToolSelect(tool);
-                      console.log('[ToolSwitcher] AFTER onToolSelect called');
                     }}
                     onToolSelect={onToolSelect}
                   />

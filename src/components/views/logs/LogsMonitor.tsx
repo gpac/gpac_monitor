@@ -5,22 +5,19 @@ import React, {
   useState,
   useMemo,
 } from 'react';
-import {
-  FaInfoCircle,
-  FaExclamationTriangle,
-  FaTimesCircle,
-} from 'react-icons/fa';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import WidgetWrapper from '../../common/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
-import { useAppSelector } from '@/shared/hooks/redux';
+import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { selectLogCountsByTool } from '@/shared/store/selectors/logsSelectors';
 import { useLogsService } from './hooks/useLogsService';
 import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/Tool/ToolSettingsDropdown';
 import { ToolSwitcher } from './components/Tool/ToolSwitcher';
-import { GpacLogEntry } from '@/types/domain/gpac/log-types';
+import { LogEntryItem } from './components/LogEntryItem';
+import { generateLogId } from './utils/logIdentifier';
+import { setHighlightedLog } from '@/shared/store/slices/logsSlice';
 
 interface LogsMonitorProps {
   id: string;
@@ -30,6 +27,7 @@ interface LogsMonitorProps {
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const [autoScroll, setAutoScroll] = useState(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const dispatch = useAppDispatch();
 
   const {
     currentTool,
@@ -44,6 +42,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     clearFilter,
     selectAllTools,
   } = useLogsRedux();
+
+  // Get highlighted log ID from Redux
+  const highlightedLogId = useAppSelector((state) => state.logs.highlightedLogId);
 
   // Get log counts by tool for performance monitoring
   const logCountsByTool = useAppSelector(selectLogCountsByTool);
@@ -71,78 +72,12 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     }
   }, [visibleLogs.length, scrollToBottom]);
 
-  const levelConfig = useMemo(
-    () => ({
-      icons: {
-        0: <FaInfoCircle className="w-4 h-4 text-gray-500" />,
-        1: <FaTimesCircle className="w-4 h-4 text-red-500" />,
-        2: <FaExclamationTriangle className="w-4 h-4 text-yellow-500" />,
-        3: <FaInfoCircle className="w-4 h-4 text-green-700/60" />,
-        4: <FaInfoCircle className="w-4 h-4 text-blue-300" />,
-      },
-      styles: {
-        0: 'text-gray-500',
-        1: 'text-red-500',
-        2: 'text-yellow-500',
-        3: 'text-green-500/70',
-        4: 'text-blue-300',
-      },
-      names: {
-        0: 'QUIET',
-        1: 'ERROR',
-        2: 'WARNING',
-        3: 'INFO',
-        4: 'DEBUG',
-      },
-    }),
-    [],
-  );
-
-  const LogEntry = React.memo(
-    ({ log }: { log: GpacLogEntry }) => {
-      const logData = useMemo(() => {
-        const level = log.level;
-        return {
-          time: new Date(log.timestamp).toLocaleTimeString(),
-          icon:
-            levelConfig.icons[level as keyof typeof levelConfig.icons] ||
-            levelConfig.icons[0],
-          style:
-            levelConfig.styles[level as keyof typeof levelConfig.styles] ||
-            levelConfig.styles[0],
-          name:
-            levelConfig.names[level as keyof typeof levelConfig.names] ||
-            'UNKNOWN',
-        };
-      }, [log.timestamp, log.level]);
-
-      return (
-        <div
-          className="flex items-start gap-2 mb-1 p-1"
-          style={{ minHeight: '32px' }}
-        >
-          {logData.icon}
-          <div className="flex-1 stat overflow-hidden">
-            <div className="flex items-center gap-2 text-xs">
-              <span className="text-gray-400 shrink-0">{logData.time}</span>
-              <span className={`shrink-0 ${logData.style}`}>
-                [{logData.name}]
-              </span>
-              <span className="text-gray-300 shrink-0">[{log.tool}]</span>
-            </div>
-            <div className={`text-sm ${logData.style} break-words`}>
-              {log.message}
-            </div>
-          </div>
-        </div>
-      );
+  // Handler for toggling highlight on a log
+  const handleToggleHighlight = useCallback(
+    (logId: string | null) => {
+      dispatch(setHighlightedLog(logId));
     },
-    (prevProps, nextProps) => {
-      return (
-        prevProps.log.timestamp === nextProps.log.timestamp &&
-        prevProps.log.message === nextProps.log.message
-      );
-    },
+    [dispatch],
   );
 
   const statusBadge = useMemo(
@@ -219,7 +154,17 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
               willChange: 'transform',
             }}
             className="rounded px-2 py-1 text-sm bg-stat stat"
-            itemContent={(_, log) => <LogEntry log={log} />}
+            itemContent={(_, log) => {
+              const logId = generateLogId(log);
+              return (
+                <LogEntryItem
+                  log={log}
+                  logId={logId}
+                  isHighlighted={logId === highlightedLogId}
+                  onToggleHighlight={handleToggleHighlight}
+                />
+              );
+            }}
             followOutput={autoScroll ? 'smooth' : false}
             atBottomStateChange={(atBottom: boolean) => {
               if (atBottom && !autoScroll) {

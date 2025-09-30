@@ -4,6 +4,7 @@ import {
   GpacLogTool,
   GpacLogEntry,
 } from '@/types/domain/gpac/log-types';
+import { LogId } from '@/components/views/logs/utils/logIdentifier';
 
 /** Redux state for  logs management with per-tool levels and buffers */
 interface LogsState {
@@ -14,6 +15,7 @@ interface LogsState {
   buffers: Record<GpacLogTool, GpacLogEntry[]>;
   maxEntriesPerTool: number;
   isSubscribed: boolean;
+  highlightedLogId: LogId | null; // ID of the currently highlighted log (session only)
   lastSentConfig: {
     levelsByTool: Record<GpacLogTool, GpacLogLevel>;
     defaultAllLevel: GpacLogLevel | null; // null means no config sent yet
@@ -37,6 +39,7 @@ const getInitialState = (): LogsState => {
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
       maxEntriesPerTool: 5000,
       isSubscribed: false,
+      highlightedLogId: null,
       lastSentConfig: {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
         defaultAllLevel: null, // Indicates no config has been sent yet
@@ -51,6 +54,7 @@ const getInitialState = (): LogsState => {
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
       maxEntriesPerTool: 5000,
       isSubscribed: false,
+      highlightedLogId: null,
       lastSentConfig: {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
         defaultAllLevel: null, // Indicates no config has been sent yet
@@ -237,6 +241,11 @@ const logsSlice = createSlice({
         defaultAllLevel: state.defaultAllLevel,
       };
     },
+
+    /** Set the currently highlighted log (for visual tracking across filters) */
+    setHighlightedLog: (state, action: PayloadAction<LogId | null>) => {
+      state.highlightedLogId = action.payload;
+    },
   },
 });
 
@@ -255,6 +264,7 @@ export const {
   setSubscriptionStatus,
   restoreConfig,
   markConfigAsSent,
+  setHighlightedLog,
 } = logsSlice.actions;
 
 export default logsSlice.reducer;

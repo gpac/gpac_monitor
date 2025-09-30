@@ -1,4 +1,9 @@
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
+import {
+  FaInfoCircle,
+  FaExclamationTriangle,
+  FaTimesCircle,
+} from 'react-icons/fa';
 
 export const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
   [GpacLogTool.AUDIO]: 'Audio',
@@ -47,3 +52,31 @@ export const LEVEL_BADGE_CLASSES: Record<GpacLogLevel, string> = {
   [GpacLogLevel.INFO]: 'bg-green-700/60 text-green-100 hover:opacity-80',
   [GpacLogLevel.DEBUG]: 'bg-blue-400 text-blue-100 hover:opacity-80',
 };
+
+/**
+ * Log level visual configuration for log entries
+ * Maps numeric GPAC log levels (0-4) to icons, styles, and names
+ */
+export const LOG_ENTRY_CONFIG = {
+  icons: {
+    0: <FaInfoCircle className="text-gray-500 shrink-0 mt-1" />,
+    1: <FaTimesCircle className="text-red-500 shrink-0 mt-1" />,
+    2: <FaExclamationTriangle className="text-yellow-500 shrink-0 mt-1" />,
+    3: <FaInfoCircle className="text-green-700/60 shrink-0 mt-1" />,
+    4: <FaInfoCircle className="text-blue-300 shrink-0 mt-1" />,
+  },
+  styles: {
+    0: 'text-gray-500',
+    1: 'text-red-500',
+    2: 'text-yellow-500',
+    3: 'text-green-500/70',
+    4: 'text-blue-300',
+  },
+  names: {
+    0: 'QUIET',
+    1: 'ERROR',
+    2: 'WARNING',
+    3: 'INFO',
+    4: 'DEBUG',
+  },
+} as const;

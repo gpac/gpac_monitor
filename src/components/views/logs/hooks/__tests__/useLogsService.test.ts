@@ -215,8 +215,6 @@ describe('useLogsService - Intelligent Backend Call Optimization', () => {
       expect(gpacService.logs.updateLogLevel).toHaveBeenCalledTimes(1);
     });
 
-  
-
     it('should optimize multiple consecutive frontend-only changes', async () => {
       const store = createTestStore();
 
