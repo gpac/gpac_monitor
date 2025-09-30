@@ -13,6 +13,7 @@ import { bgToTextColor, getEffectiveLevel } from '../utils/toolUtils';
 import { Button } from '@/components/ui/button';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { FaCheck } from 'react-icons/fa';
+import { ToolSwitcherItem } from './ToolSwitcherItem';
 
 interface ToolSwitcherProps {
   currentTool: GpacLogTool;
@@ -52,22 +53,24 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
       return Array.from(tools).sort();
     }, [logCountsByTool]);
 
-    // Use configured tools directly, no need for "all" option
-    const dropdownTools = configuredTools;
+
+
+    // Calculate parent checkbox state
+    // ALL is checked only when visibleToolsFilter has multiple tools
+    const isAll = visibleToolsFilter.length > 1;
+    const parentChecked = isAll;
 
     // Memoize current display info
     const currentDisplayInfo = React.useMemo(() => {
       if (visibleToolsFilter.length > 0) {
-        // ALL mode: show all tools
         return {
           label: 'ALL',
           effectiveLevel: '',
-          bgColor: '#6b7280', // gray-500
+          bgColor: '#6b7280',
           textColor: 'text-white',
         };
       }
 
-      // Single tool mode (default)
       const effectiveLevel = getEffectiveLevel(
         currentTool,
         levelsByTool,
@@ -82,6 +85,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
         textColor,
       };
     }, [currentTool, levelsByTool, defaultAllLevel, visibleToolsFilter]);
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -102,7 +106,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
           align="end"
           className="w-48 bg-gray-950 max-h-80 overflow-y-auto border-transparent"
         >
-          {/* ALL control at the top - only show if there are tools with logs */}
+          {/* ALL control at the top */}
           {configuredTools.length > 0 && (
             <>
               <DropdownMenuItem
@@ -112,20 +116,22 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                   e.stopPropagation();
                 }}
               >
-                {/* ALL checkbox */}
                 <Checkbox.Root
-                  checked={visibleToolsFilter.length > 0}
+                  checked={parentChecked}
                   onCheckedChange={() => {
-                    if (visibleToolsFilter.length > 0) {
-                      // ALL is currently checked, uncheck it -> switch to currentTool mode
+                    console.log('[ToolSwitcher] ALL checkbox clicked');
+                    console.log('[ToolSwitcher] ALL - BEFORE isAll:', isAll);
+                    console.log('[ToolSwitcher] ALL - BEFORE visibleToolsFilter:', visibleToolsFilter);
+                    if (isAll) {
+                      console.log('[ToolSwitcher] ALL - Calling onClearFilter');
                       onClearFilter?.();
                     } else {
-                      // ALL is unchecked, check it -> show all
+                      console.log('[ToolSwitcher] ALL - Calling onSelectAllTools with:', configuredTools);
                       onSelectAllTools?.(configuredTools);
                     }
                   }}
                   className={`h-3 w-3 border rounded flex items-center justify-center ${
-                    visibleToolsFilter.length > 0
+                    parentChecked
                       ? 'bg-green-600 border-green-600'
                       : 'bg-gray-700 border-gray-600'
                   }`}
@@ -144,68 +150,41 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
 
           {/* Show tools with logs, or currentTool if no logs exist */}
           {configuredTools.length > 0
-            ? dropdownTools.map((tool) => {
-                const effectiveLevel = getEffectiveLevel(
-                  tool,
-                  levelsByTool,
-                  defaultAllLevel,
-                );
-                const bgColor = LEVEL_COLORS[effectiveLevel];
-                const textColor = bgToTextColor(bgColor);
-                const isActive = tool === currentTool;
-                const logCount = logCountsByTool[tool] || 0;
-                const isCurrentTool = tool === currentTool;
-                const isChecked = visibleToolsFilter.length > 0 || isCurrentTool;
-
+            ? configuredTools.map((tool) => {
+                // If visibleToolsFilter is active, check if tool is in the filter
+                // Otherwise, only currentTool is checked
+                const isChecked = visibleToolsFilter.length > 0
+                  ? visibleToolsFilter.includes(tool)
+                  : tool === currentTool;
                 return (
-                  <DropdownMenuItem
+                  <ToolSwitcherItem
                     key={tool}
-                    className={`flex items-center gap-2 py-1 px-2 ${
-                      isActive ? 'bg-muted' : ''
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  >
-                    {/* Checkbox - shows current tool or ALL state */}
-                    <Checkbox.Root
-                      checked={isChecked}
-                      onCheckedChange={() => {
-                        onToolSelect(tool); // Select this tool as current
-                      }}
-                      className={`h-3 w-3 border rounded flex items-center justify-center ${
-                        isChecked
-                          ? 'bg-blue-600 border-blue-600'
-                          : 'bg-gray-700 border-gray-600'
-                      }`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Checkbox.Indicator>
-                        <FaCheck className="h-2 w-2 text-white" />
-                      </Checkbox.Indicator>
-                    </Checkbox.Root>
+                    tool={tool}
+                    levelsByTool={levelsByTool}
+                    defaultAllLevel={defaultAllLevel}
+                    logCountsByTool={logCountsByTool}
+                    currentTool={currentTool}
+                    isChecked={isChecked}
+                    onToggle={() => {
+                      console.log('[ToolSwitcher] onToggle clicked for tool:', tool);
+                      console.log('[ToolSwitcher] BEFORE - visibleToolsFilter:', visibleToolsFilter);
+                      console.log('[ToolSwitcher] BEFORE - currentTool:', currentTool);
+                      console.log('[ToolSwitcher] BEFORE - isChecked:', isChecked);
 
-                    {/* Tool name - clickable to select tool */}
-                    <div
-                      className="flex items-center justify-between flex-1 min-w-0 cursor-pointer"
-                      onClick={() => onToolSelect(tool)}
-                    >
-                      <span className="font-normal text-xs truncate">
-                        {tool.toUpperCase()}
-                      </span>
-                      <Badge
-                        variant="status"
-                        className={`text-xs ${textColor} ml-1`}
-                        style={{ backgroundColor: bgColor }}
-                      >
-                        {effectiveLevel.toUpperCase()}({logCount})
-                      </Badge>
-                    </div>
-                  </DropdownMenuItem>
+                      // If filter is active, clear it first to go to single-tool mode
+                      if (visibleToolsFilter.length > 0) {
+                        console.log('[ToolSwitcher] Clearing filter first');
+                        onClearFilter?.();
+                      }
+
+                      onToolSelect(tool);
+                      console.log('[ToolSwitcher] AFTER onToolSelect called');
+                    }}
+                    onToolSelect={onToolSelect}
+                  />
                 );
               })
-            : /* If no logs, show only currentTool checkbox */
+            : /* If no logs, show only currentTool */
               (() => {
                 const effectiveLevel = getEffectiveLevel(
                   currentTool,
@@ -225,7 +204,6 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                       e.stopPropagation();
                     }}
                   >
-                    {/* Checkbox - always checked for currentTool */}
                     <Checkbox.Root
                       checked={true}
                       onCheckedChange={() => {}}
@@ -237,7 +215,6 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                       </Checkbox.Indicator>
                     </Checkbox.Root>
 
-                    {/* Tool name */}
                     <div className="flex items-center justify-between flex-1 min-w-0">
                       <span className="font-normal text-xs truncate">
                         {currentTool.toUpperCase()}
@@ -252,8 +229,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                     </div>
                   </DropdownMenuItem>
                 );
-              })()
-          }
+              })()}
         </DropdownMenuContent>
       </DropdownMenu>
     );
