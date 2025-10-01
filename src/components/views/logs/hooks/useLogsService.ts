@@ -1,11 +1,11 @@
 import { useEffect, useCallback, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import {
-  selectLogsConfigChanges,
   selectIsSubscribed,
   selectLevelsByTool,
   selectDefaultAllLevel,
 } from '@/shared/store/selectors/logsSelectors';
+import { selectLogsConfigChanges } from '@/shared/store/selectors/logsConfigSelectors';
 import { markConfigAsSent } from '@/shared/store/slices/logsSlice';
 import { gpacService } from '@/services/gpacService';
 import { parseConfigChanges } from '../utils/configParser';

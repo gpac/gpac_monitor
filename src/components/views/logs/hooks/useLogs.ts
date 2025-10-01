@@ -9,7 +9,7 @@ import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { selectLogsConfigString } from '@/shared/store/selectors/logsSelectors';
+import { selectLogsConfigString } from '@/shared/store/selectors/logsConfigSelectors';
 
 interface UseLogsOptions {
   enabled?: boolean;
