@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import * as Checkbox from '@radix-ui/react-checkbox';
@@ -29,15 +29,18 @@ export const ToolSwitcherItem: React.FC<ToolSwitcherItemProps> = React.memo(
     onToggle,
     onToolSelect,
   }) => {
-    const effectiveLevel = getEffectiveLevel(
-      tool,
-      levelsByTool,
-      defaultAllLevel,
-    );
-    const bgColor = LEVEL_COLORS[effectiveLevel];
-    const textColor = bgToTextColor(bgColor);
-    const isActive = tool === currentTool;
-    const logCount = logCountsByTool[tool] || 0;
+    const { effectiveLevel, bgColor, textColor, isActive, logCount } =
+      useMemo(() => {
+        const level = getEffectiveLevel(tool, levelsByTool, defaultAllLevel);
+        const bg = LEVEL_COLORS[level];
+        return {
+          effectiveLevel: level,
+          bgColor: bg,
+          textColor: bgToTextColor(bg),
+          isActive: tool === currentTool,
+          logCount: logCountsByTool[tool] || 0,
+        };
+      }, [tool, levelsByTool, defaultAllLevel, currentTool, logCountsByTool]);
 
     return (
       <DropdownMenuItem

@@ -15,6 +15,63 @@ import * as Checkbox from '@radix-ui/react-checkbox';
 import { FaCheck } from 'react-icons/fa';
 import { ToolSwitcherItem } from './ToolSwitcherItem';
 
+const EmptyToolFallback = React.memo(
+  ({
+    tool,
+    levelsByTool,
+    defaultAllLevel,
+    logCountsByTool,
+  }: {
+    tool: GpacLogTool;
+    levelsByTool: Record<GpacLogTool, GpacLogLevel>;
+    defaultAllLevel: GpacLogLevel;
+    logCountsByTool: Record<string, number>;
+  }) => {
+    const effectiveLevel = getEffectiveLevel(
+      tool,
+      levelsByTool,
+      defaultAllLevel,
+    );
+    const bgColor = LEVEL_COLORS[effectiveLevel];
+    const textColor = bgToTextColor(bgColor);
+    const logCount = logCountsByTool[tool] || 0;
+
+    return (
+      <DropdownMenuItem
+        className="flex items-center gap-2 py-1 px-2 bg-muted"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        <Checkbox.Root
+          checked={true}
+          onCheckedChange={() => {}}
+          className="h-3 w-3 border rounded flex items-center justify-center bg-blue-600 border-blue-600"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <Checkbox.Indicator>
+            <FaCheck className="h-2 w-2 text-white" />
+          </Checkbox.Indicator>
+        </Checkbox.Root>
+
+        <div className="flex items-center justify-between flex-1 min-w-0">
+          <span className="font-normal text-xs truncate">
+            {tool.toUpperCase()}
+          </span>
+          <Badge
+            variant="status"
+            className={`text-xs ${textColor} ml-1`}
+            style={{ backgroundColor: bgColor }}
+          >
+            {effectiveLevel.toUpperCase()}({logCount})
+          </Badge>
+        </div>
+      </DropdownMenuItem>
+    );
+  },
+);
+
 interface ToolSwitcherProps {
   currentTool: GpacLogTool;
   levelsByTool: Record<GpacLogTool, GpacLogLevel>;
@@ -171,51 +228,13 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                 );
               })
             : /* If no logs, show only currentTool */
-              (() => {
-                const effectiveLevel = getEffectiveLevel(
-                  currentTool,
-                  levelsByTool,
-                  defaultAllLevel,
-                );
-                const bgColor = LEVEL_COLORS[effectiveLevel];
-                const textColor = bgToTextColor(bgColor);
-                const logCount = logCountsByTool[currentTool] || 0;
-
-                return (
-                  <DropdownMenuItem
-                    key={currentTool}
-                    className="flex items-center gap-2 py-1 px-2 bg-muted"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                    }}
-                  >
-                    <Checkbox.Root
-                      checked={true}
-                      onCheckedChange={() => {}}
-                      className="h-3 w-3 border rounded flex items-center justify-center bg-blue-600 border-blue-600"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Checkbox.Indicator>
-                        <FaCheck className="h-2 w-2 text-white" />
-                      </Checkbox.Indicator>
-                    </Checkbox.Root>
-
-                    <div className="flex items-center justify-between flex-1 min-w-0">
-                      <span className="font-normal text-xs truncate">
-                        {currentTool.toUpperCase()}
-                      </span>
-                      <Badge
-                        variant="status"
-                        className={`text-xs ${textColor} ml-1`}
-                        style={{ backgroundColor: bgColor }}
-                      >
-                        {effectiveLevel.toUpperCase()}({logCount})
-                      </Badge>
-                    </div>
-                  </DropdownMenuItem>
-                );
-              })()}
+              <EmptyToolFallback
+                key={currentTool}
+                tool={currentTool}
+                levelsByTool={levelsByTool}
+                defaultAllLevel={defaultAllLevel}
+                logCountsByTool={logCountsByTool}
+              />}
         </DropdownMenuContent>
       </DropdownMenu>
     );

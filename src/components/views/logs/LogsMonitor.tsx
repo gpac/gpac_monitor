@@ -26,6 +26,10 @@ interface LogsMonitorProps {
   title: string;
 }
 
+const LogsFooter = React.memo(({ count }: { count: number }) => (
+  <div className="text-center text-xs text-gray-500 py-1">{count} logs</div>
+));
+
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const [autoScroll, setAutoScroll] = useState(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
@@ -209,11 +213,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
             components={{
               Footer:
                 visibleLogs.length > 100
-                  ? () => (
-                      <div className="text-center text-xs text-gray-500 py-1">
-                        {visibleLogs.length} logs
-                      </div>
-                    )
+                  ? () => <LogsFooter count={visibleLogs.length} />
                   : undefined,
             }}
           />

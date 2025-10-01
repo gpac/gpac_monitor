@@ -55,15 +55,22 @@ export const LEVEL_BADGE_CLASSES: Record<GpacLogLevel, string> = {
 
 /**
  * Log level visual configuration for log entries
- * Maps numeric GPAC log levels (0-4) to icons, styles, and names
+ * Maps numeric GPAC log levels (0-4) to icon components, styles, and names
  */
 export const LOG_ENTRY_CONFIG = {
-  icons: {
-    0: <FaInfoCircle className="text-gray-500 shrink-0 mt-1" />,
-    1: <FaTimesCircle className="text-red-500 shrink-0 mt-1" />,
-    2: <FaExclamationTriangle className="text-yellow-500 shrink-0 mt-1" />,
-    3: <FaInfoCircle className="text-green-700/60 shrink-0 mt-1" />,
-    4: <FaInfoCircle className="text-blue-300 shrink-0 mt-1" />,
+  iconComponents: {
+    0: FaInfoCircle,
+    1: FaTimesCircle,
+    2: FaExclamationTriangle,
+    3: FaInfoCircle,
+    4: FaInfoCircle,
+  },
+  iconClasses: {
+    0: 'text-gray-500 shrink-0 mt-1',
+    1: 'text-red-500 shrink-0 mt-1',
+    2: 'text-yellow-500 shrink-0 mt-1',
+    3: 'text-green-700/60 shrink-0 mt-1',
+    4: 'text-blue-300 shrink-0 mt-1',
   },
   styles: {
     0: 'text-gray-500',

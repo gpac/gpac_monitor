@@ -15,12 +15,19 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
   ({ log, logId, isHighlighted, onToggleHighlight }) => {
     const logData = useMemo(() => {
       const level = log.level;
+      const IconComponent =
+        LOG_ENTRY_CONFIG.iconComponents[
+          level as keyof typeof LOG_ENTRY_CONFIG.iconComponents
+        ] || LOG_ENTRY_CONFIG.iconComponents[0];
+      const iconClass =
+        LOG_ENTRY_CONFIG.iconClasses[
+          level as keyof typeof LOG_ENTRY_CONFIG.iconClasses
+        ] || LOG_ENTRY_CONFIG.iconClasses[0];
+
       return {
         time: new Date(log.timestamp).toLocaleTimeString(),
-        icon:
-          LOG_ENTRY_CONFIG.icons[
-            level as keyof typeof LOG_ENTRY_CONFIG.icons
-          ] || LOG_ENTRY_CONFIG.icons[0],
+        IconComponent,
+        iconClass,
         style:
           LOG_ENTRY_CONFIG.styles[
             level as keyof typeof LOG_ENTRY_CONFIG.styles
@@ -63,7 +70,7 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {logData.icon}
+        <logData.IconComponent className={logData.iconClass} />
         <div className="flex-1 stat overflow-hidden">
           <div className="flex items-center gap-2 text-xs">
             <span className="text-gray-400 shrink-0">{logData.time}</span>
