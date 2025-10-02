@@ -8,6 +8,12 @@ import { MemoryChart } from './components/MemoryChart';
 import { useCPUStats } from './hooks/useCPUStats';
 import WidgetWrapper from '@/components/common/WidgetWrapper';
 
+// Static CSS classes extracted to prevent recreation on every render
+const BASE_CONTAINER_CLASS = 'container mx-auto space-y-4 p-4';
+const RESIZING_CLASS = 'contain-layout contain-style';
+const BASE_GRID_CLASS = 'grid grid-cols-1 gap-4 lg:grid-cols-2';
+const GRID_RESIZING_CLASS = 'pointer-events-none';
+
 interface MetricsMonitorProps {
   id: string;
   title: string;
@@ -57,12 +63,26 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
       setIsLive(newIsLive);
     }, []);
 
+    // Memoize className strings to prevent recreation on every render
+    const containerClassName = useMemo(
+      () => `${BASE_CONTAINER_CLASS}${isResizing ? ` ${RESIZING_CLASS}` : ''}`,
+      [isResizing],
+    );
+
+    const gridClassName = useMemo(
+      () => `${BASE_GRID_CLASS}${isResizing ? ` ${GRID_RESIZING_CLASS}` : ''}`,
+      [isResizing],
+    );
+
+    // Memoize live state for chart components
+    const chartLiveState = useMemo(
+      () => isLive && !isResizing,
+      [isLive, isResizing],
+    );
+
     return (
       <WidgetWrapper id={id} title={title}>
-        <div
-          ref={containerRef}
-          className={`container mx-auto space-y-4 p-4 ${isResizing ? 'contain-layout contain-style' : ''}`}
-        >
+        <div ref={containerRef} className={containerClassName}>
           <div className="flex items-center justify-items-start">
             <LiveToggle isLive={isLive} onToggle={handleToggleLive} />
           </div>
@@ -76,17 +96,15 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
             />
           </div>
 
-          <div
-            className={`grid grid-cols-1 gap-4 lg:grid-cols-2 ${isResizing ? 'pointer-events-none' : ''}`}
-          >
+          <div className={gridClassName}>
             <CPUChart
               currentCPUPercent={metricsValues.currentCPUPercent}
-              isLive={isLive && !isResizing}
+              isLive={chartLiveState}
             />
             <MemoryChart
               currentMemoryPercent={metricsValues.currentMemoryPercent}
               currentMemoryProcess={metricsValues.currentMemoryProcess}
-              isLive={isLive && !isResizing}
+              isLive={chartLiveState}
             />
           </div>
         </div>
