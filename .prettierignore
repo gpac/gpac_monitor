@@ -1,0 +1,23 @@
+# Build outputs
+dist
+build
+coverage
+
+# Dependencies
+node_modules
+
+# Lock files
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Server directory (excluded from formatting rules)
+server
+
+# Minified files
+*.min.js
+*.min.css
+
+# Generated files
+.vite
+.turbo
