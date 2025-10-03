@@ -27,7 +27,7 @@ export enum GpacLogTool {
   HTTP = 'http',
   INTERACT = 'interact',
   MEDIA = 'media',
-  MEM = 'memory',
+  MEM = 'mem',
   MMIO = 'mmio',
   MODULE = 'module',
   MUTEX = 'mutex',

@@ -52,7 +52,7 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
 
     // Pre-compute CSS classes to avoid string concatenation on each render
     const containerClass = useMemo(() => {
-      const baseClasses = 'flex items-start gap-2 mb-1 p-1 rounded hover:bg-gray-800/30 transition-colors';
+      const baseClasses = 'flex items-start gap-2 mb-1 p-1 rounded hover:bg-gray-800/30 transition-colors cursor-pointer';
       const highlightClasses = isHighlighted ? ' border-l-4 border-yellow-500 bg-yellow-900/70' : '';
       return baseClasses + highlightClasses;
     }, [isHighlighted]);
@@ -69,6 +69,7 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
         style={{ minHeight: '32px' }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleToggle}
       >
         <logData.IconComponent className={logData.iconClass} />
         <div className="flex-1 stat overflow-hidden">
@@ -84,19 +85,15 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
           </div>
         </div>
 
-        {/* Highlight button - visible on hover or when highlighted */}
+        {/* Highlight icon - visible on hover or when highlighted */}
         {(isHovered || isHighlighted) && (
-          <button
-            onClick={handleToggle}
-            className={buttonClass}
-            title={isHighlighted ? 'Remove highlight' : 'Highlight this log'}
-          >
+          <div className={buttonClass}>
             {isHighlighted ? (
               <MdPushPin className="w-4 h-4" />
             ) : (
               <MdOutlinePushPin className="w-4 h-4" />
             )}
-          </button>
+          </div>
         )}
       </div>
     );

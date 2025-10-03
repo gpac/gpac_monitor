@@ -403,7 +403,7 @@ describe('Configuration Change Detection - lastSentConfig', () => {
     const changes = selectLogsConfigChanges(store.getState());
     expect(changes).toContain('all@info');
     expect(changes).toContain('filter@debug');
-    expect(changes).toContain('memory@warning');
+    expect(changes).toContain('mem@warning');
     expect(changes).toContain('rtp@error');
 
     // Mark as sent and verify reset
