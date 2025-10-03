@@ -35,6 +35,9 @@ const EmptyToolFallback = React.memo(
     const bgColor = LEVEL_COLORS[effectiveLevel];
     const textColor = bgToTextColor(bgColor);
     const logCount = logCountsByTool[tool] || 0;
+    const isCritical =
+      effectiveLevel === GpacLogLevel.ERROR ||
+      effectiveLevel === GpacLogLevel.WARNING;
 
     return (
       <DropdownMenuItem
@@ -64,7 +67,8 @@ const EmptyToolFallback = React.memo(
             className={`text-xs ${textColor} ml-1`}
             style={{ backgroundColor: bgColor }}
           >
-            {effectiveLevel.toUpperCase()}({logCount})
+            {effectiveLevel.toUpperCase()}
+            {isCritical && `(${logCount})`}
           </Badge>
         </div>
       </DropdownMenuItem>
@@ -123,6 +127,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
           effectiveLevel: '',
           bgColor: '#6b7280',
           textColor: 'text-white',
+          isCritical: false,
         };
       }
 
@@ -133,11 +138,15 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
       );
       const bgColor = LEVEL_COLORS[effectiveLevel];
       const textColor = bgToTextColor(bgColor);
+      const isCritical =
+        effectiveLevel === GpacLogLevel.ERROR ||
+        effectiveLevel === GpacLogLevel.WARNING;
       return {
         label: currentTool.toUpperCase(),
         effectiveLevel,
         bgColor,
         textColor,
+        isCritical,
       };
     }, [currentTool, levelsByTool, defaultAllLevel, visibleToolsFilter]);
 
@@ -152,8 +161,8 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
             >
               {currentDisplayInfo.label}
               {currentDisplayInfo.effectiveLevel &&
-                ` : ${currentDisplayInfo.effectiveLevel.toUpperCase()}`}{' '}
-              ({visibleLogsCount})
+                ` : ${currentDisplayInfo.effectiveLevel.toUpperCase()}`}
+              {currentDisplayInfo.isCritical && ` (${visibleLogsCount})`}
             </Badge>
           </Button>
         </DropdownMenuTrigger>
@@ -199,42 +208,44 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
           )}
 
           {/* Show tools with logs, or currentTool if no logs exist */}
-          {configuredTools.length > 0
-            ? configuredTools.map((tool) => {
-                // If visibleToolsFilter is active, check if tool is in the filter
-                // Otherwise, only currentTool is checked
-                const isChecked =
-                  visibleToolsFilter.length > 0
-                    ? visibleToolsFilter.includes(tool)
-                    : tool === currentTool;
-                return (
-                  <ToolSwitcherItem
-                    key={tool}
-                    tool={tool}
-                    levelsByTool={levelsByTool}
-                    defaultAllLevel={defaultAllLevel}
-                    logCountsByTool={logCountsByTool}
-                    currentTool={currentTool}
-                    isChecked={isChecked}
-                    onToggle={() => {
-                      // If filter is active, clear it first to go to single-tool mode
-                      if (visibleToolsFilter.length > 0) {
-                        onClearFilter?.();
-                      }
-                      onToolSelect(tool);
-                    }}
-                    onToolSelect={onToolSelect}
-                  />
-                );
-              })
-            : /* If no logs, show only currentTool */
-              <EmptyToolFallback
-                key={currentTool}
-                tool={currentTool}
-                levelsByTool={levelsByTool}
-                defaultAllLevel={defaultAllLevel}
-                logCountsByTool={logCountsByTool}
-              />}
+          {configuredTools.length > 0 ? (
+            configuredTools.map((tool) => {
+              // If visibleToolsFilter is active, check if tool is in the filter
+              // Otherwise, only currentTool is checked
+              const isChecked =
+                visibleToolsFilter.length > 0
+                  ? visibleToolsFilter.includes(tool)
+                  : tool === currentTool;
+              return (
+                <ToolSwitcherItem
+                  key={tool}
+                  tool={tool}
+                  levelsByTool={levelsByTool}
+                  defaultAllLevel={defaultAllLevel}
+                  logCountsByTool={logCountsByTool}
+                  currentTool={currentTool}
+                  isChecked={isChecked}
+                  onToggle={() => {
+                    // If filter is active, clear it first to go to single-tool mode
+                    if (visibleToolsFilter.length > 0) {
+                      onClearFilter?.();
+                    }
+                    onToolSelect(tool);
+                  }}
+                  onToolSelect={onToolSelect}
+                />
+              );
+            })
+          ) : (
+            /* If no logs, show only currentTool */
+            <EmptyToolFallback
+              key={currentTool}
+              tool={currentTool}
+              levelsByTool={levelsByTool}
+              defaultAllLevel={defaultAllLevel}
+              logCountsByTool={logCountsByTool}
+            />
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     );

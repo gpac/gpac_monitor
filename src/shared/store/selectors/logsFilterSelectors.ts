@@ -73,3 +73,13 @@ export const selectVisibleLogs = createSelector(
     return filteredLogs;
   },
 );
+
+/** Count only warning and error logs for UX display */
+export const selectCriticalLogsCount = createSelector(
+  [selectVisibleLogs],
+  (visibleLogs) => {
+    // level is numeric: 1=error, 2=warning
+    return visibleLogs.filter((log) => log.level === 1 || log.level === 2)
+      .length;
+  },
+);

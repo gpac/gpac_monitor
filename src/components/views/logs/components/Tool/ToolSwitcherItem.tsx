@@ -29,18 +29,28 @@ export const ToolSwitcherItem: React.FC<ToolSwitcherItemProps> = React.memo(
     onToggle,
     onToolSelect,
   }) => {
-    const { effectiveLevel, bgColor, textColor, isActive, logCount } =
-      useMemo(() => {
-        const level = getEffectiveLevel(tool, levelsByTool, defaultAllLevel);
-        const bg = LEVEL_COLORS[level];
-        return {
-          effectiveLevel: level,
-          bgColor: bg,
-          textColor: bgToTextColor(bg),
-          isActive: tool === currentTool,
-          logCount: logCountsByTool[tool] || 0,
-        };
-      }, [tool, levelsByTool, defaultAllLevel, currentTool, logCountsByTool]);
+    const {
+      effectiveLevel,
+      bgColor,
+      textColor,
+      isActive,
+      logCount,
+      isCritical,
+    } = useMemo(() => {
+      const level = getEffectiveLevel(tool, levelsByTool, defaultAllLevel);
+      const bg = LEVEL_COLORS[level];
+      const critical =
+        level === GpacLogLevel.ERROR || level === GpacLogLevel.WARNING;
+
+      return {
+        effectiveLevel: level,
+        bgColor: bg,
+        textColor: bgToTextColor(bg),
+        isActive: tool === currentTool,
+        logCount: logCountsByTool[tool] || 0,
+        isCritical: critical,
+      };
+    }, [tool, levelsByTool, defaultAllLevel, currentTool, logCountsByTool]);
 
     return (
       <DropdownMenuItem
@@ -77,7 +87,8 @@ export const ToolSwitcherItem: React.FC<ToolSwitcherItemProps> = React.memo(
             className={`text-xs ${textColor} ml-1`}
             style={{ backgroundColor: bgColor }}
           >
-            {effectiveLevel.toUpperCase()}({logCount})
+            {effectiveLevel.toUpperCase()}
+            {isCritical && `(${logCount})`}
           </Badge>
         </div>
       </DropdownMenuItem>

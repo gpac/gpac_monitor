@@ -12,6 +12,7 @@ import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { selectLogCountsByTool } from '@/shared/store/selectors/logsSelectors';
+import { selectCriticalLogsCount } from '@/shared/store/selectors/logsFilterSelectors';
 import { useLogsService } from './hooks/useLogsService';
 import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/Tool/ToolSettingsDropdown';
@@ -56,6 +57,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
 
   // Get log counts by tool for performance monitoring
   const logCountsByTool = useAppSelector(selectLogCountsByTool);
+
+  // Get critical logs count (warnings + errors only)
+  const criticalLogsCount = useAppSelector(selectCriticalLogsCount);
 
   // Initialize logs subscription (uses config from Redux store via useLogsService)
   useLogs({
@@ -110,7 +114,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
         currentTool={currentTool}
         levelsByTool={levelsByTool}
         defaultAllLevel={defaultAllLevel}
-        visibleLogsCount={visibleLogs.length}
+        visibleLogsCount={criticalLogsCount}
         logCountsByTool={logCountsByTool}
         visibleToolsFilter={visibleToolsFilter}
         onToolSelect={setTool}
@@ -123,7 +127,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
       currentTool,
       levelsByTool,
       defaultAllLevel,
-      visibleLogs.length,
+      criticalLogsCount,
       logCountsByTool,
       visibleToolsFilter,
       setTool,
