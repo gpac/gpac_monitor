@@ -1,5 +1,9 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { selectLogsState, selectLevelsByTool, selectDefaultAllLevel } from './logsSelectors';
+import {
+  selectLogsState,
+  selectLevelsByTool,
+  selectDefaultAllLevel,
+} from './logsSelectors';
 
 /** Generate GPAC log config string for backend communication (format: "core@info,demux@warning,all@quiet") */
 /** Create logs config string with ALL changed values (for complete backend sync) */
@@ -27,12 +31,10 @@ export const selectLogsConfigChanges = createSelector(
   (logsState): string => {
     const { levelsByTool, defaultAllLevel, lastSentConfig } = logsState;
     const configs: string[] = [];
+    const isFirstConfig = lastSentConfig.defaultAllLevel === null;
 
     // Check if default level changed (null means no config sent yet)
-    if (
-      lastSentConfig.defaultAllLevel === null ||
-      defaultAllLevel !== lastSentConfig.defaultAllLevel
-    ) {
+    if (isFirstConfig || defaultAllLevel !== lastSentConfig.defaultAllLevel) {
       configs.push(`all@${defaultAllLevel}`);
     }
 
@@ -42,18 +44,30 @@ export const selectLogsConfigChanges = createSelector(
         lastSentConfig.levelsByTool[
           tool as keyof typeof lastSentConfig.levelsByTool
         ];
-      if (level !== lastSentLevel) {
+
+      // First config: send ALL tools
+      if (isFirstConfig) {
+        configs.push(`${tool}@${level}`);
+      }
+      // Subsequent configs: only send changes
+      else if (lastSentLevel !== undefined && level !== lastSentLevel) {
+        configs.push(`${tool}@${level}`);
+      }
+      // New tool added after initial config
+      else if (lastSentLevel === undefined) {
         configs.push(`${tool}@${level}`);
       }
     });
 
     // Check for removed tool levels (tools that were configured but now removed)
-    Object.entries(lastSentConfig.levelsByTool).forEach(([tool, _]) => {
-      if (!(tool in levelsByTool)) {
-        // Tool was removed, reset it to default by sending all@level
-        configs.push(`${tool}@${defaultAllLevel}`);
-      }
-    });
+    if (!isFirstConfig) {
+      Object.entries(lastSentConfig.levelsByTool).forEach(([tool, _]) => {
+        if (!(tool in levelsByTool)) {
+          // Tool was removed, reset it to default by sending all@level
+          configs.push(`${tool}@${defaultAllLevel}`);
+        }
+      });
+    }
 
     const result = configs.join(':');
     return result;
