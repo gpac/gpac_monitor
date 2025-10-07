@@ -34,39 +34,6 @@ const performDagreLayout = (nodes: Node[], edges: Edge[]): Node[] => {
     g.setEdge(edge.source, edge.target, { points: [] });
   });
 
-  const sinkNodes: string[] = [];
-  const sourceNodes: string[] = [];
-
-  nodes.forEach((node) => {
-    const nodeData = node.data;
-    if (
-      nodeData &&
-      typeof nodeData.nb_opid === 'number' &&
-      nodeData.nb_opid === 0
-    ) {
-      sinkNodes.push(node.id);
-    }
-    if (
-      nodeData &&
-      typeof nodeData.nb_ipid === 'number' &&
-      nodeData.nb_ipid === 0
-    ) {
-      sourceNodes.push(node.id);
-    }
-  });
-
-  if (sinkNodes.length > 1) {
-    for (let i = 0; i < sinkNodes.length - 1; i++) {
-      g.setEdge(sinkNodes[i], sinkNodes[i + 1], { minlen: 0, weight: 0 });
-    }
-  }
-
-  if (sourceNodes.length > 1) {
-    for (let i = 0; i < sourceNodes.length - 1; i++) {
-      g.setEdge(sourceNodes[i], sourceNodes[i + 1], { minlen: 0, weight: 0 });
-    }
-  }
-
   dagre.layout(g);
 
   return nodes.map((node) => {
