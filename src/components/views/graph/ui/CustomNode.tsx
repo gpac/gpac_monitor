@@ -2,8 +2,8 @@ import React, { useState, useCallback, useMemo, memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../utils/filterType';
-import { useGraphColors } from '../hooks/useGraphColors';
-import { useFilterArgs } from '../hooks/useFilterArgs';
+import { useGraphColors } from '../hooks/layout/useGraphColors';
+import { useFilterArgs } from '../hooks/interaction/useFilterArgs';
 import FilterArgumentsDialog from '@/components/filtersArgs/FilterArgumentsDialog';
 
 interface CustomNodeProps extends NodeProps {

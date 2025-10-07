@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { useFilterArgs } from '../useFilterArgs';
+import { useFilterArgs } from '../interaction/useFilterArgs';
 import { SubscriptionType } from '../../../../../types/communication/subscription';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 

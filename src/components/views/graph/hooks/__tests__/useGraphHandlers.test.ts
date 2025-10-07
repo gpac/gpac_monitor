@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { useGraphHandlers } from '../useGraphHandlers';
+import { useGraphHandlers } from '../interaction/useGraphHandlers';
 import { MutableRefObject } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';

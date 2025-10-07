@@ -13,7 +13,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { CustomNode } from '../ui/CustomNode';
-import { useMinimapNavigation } from '../hooks/useMinimapNavigation';
+import { useMinimapNavigation } from '../hooks/layout/useMinimapNavigation';
 
 interface GraphFlowProps {
   nodes: Node[];

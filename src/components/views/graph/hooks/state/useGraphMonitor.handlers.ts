@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { Node, Edge } from '@xyflow/react';
-import { GraphFilterData } from '../../../../types/domain/gpac';
-import { isValidFilterData } from '../../../../utils/filterMonitorUtils';
+import { GraphFilterData } from '@/types/index';
+import { isValidFilterData } from '@/utils/filterMonitorUtils';
 
 // =========================
 //       NODES HANDLER

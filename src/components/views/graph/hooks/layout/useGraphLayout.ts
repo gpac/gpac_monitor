@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, MutableRefObject } from 'react';
 import { Node, Edge } from '@xyflow/react';
 import dagre from 'dagre';
-import { LayoutType, LayoutOptions } from '../utils/GraphLayout';
+import { LayoutType, LayoutOptions } from '../../utils/GraphLayout';
 
 interface UseGraphLayoutProps {
   localNodes: Node[];
@@ -19,7 +19,7 @@ const performDagreLayout = (nodes: Node[], edges: Edge[]): Node[] => {
   const g = new dagre.graphlib.Graph();
   g.setGraph({
     rankdir: 'LR',
-    nodesep: 350,
+    nodesep: 250,
     ranksep: 100,
   });
 

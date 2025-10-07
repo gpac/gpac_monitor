@@ -11,12 +11,12 @@ import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch } from '@/shared/hooks/redux';
 
 // Modularized hooks
-import { useGraphLayout } from './useGraphLayout';
+import { useGraphLayout } from '../layout/useGraphLayout';
 import { useGraphState } from './useGraphState';
-import { useGraphConnection } from './useGraphConnection';
-import { useGraphHandlers } from './useGraphHandlers';
-import { useGraphNotifications } from './useGraphNotifications';
-import { useFilterArgs } from './useFilterArgs';
+import { useGraphConnection } from '../connection/useGraphConnection';
+import { useGraphHandlers } from '../interaction/useGraphHandlers';
+import { useGraphNotifications } from '../interaction/useGraphNotifications';
+import { useFilterArgs } from '../interaction/useFilterArgs';
 
 const useGraphMonitor = () => {
   const dispatch = useAppDispatch();
