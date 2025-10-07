@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
+import { LOG_LEVEL_VALUES, GpacLogLevel } from '@/types/domain/gpac/log-types';
 
 // Base selectors - Direct state access
 /** Access the entire logs state */
@@ -36,15 +37,21 @@ export const selectIsSubscribed = createSelector(
 );
 
 // Statistics selectors
-/** Get log counts by tool for performance monitoring */
+/** Get log counts by tool for performance monitoring (only critical: error + warning) */
 export const selectLogCountsByTool = createSelector(
   [selectLogsState],
   (logsState) => {
     const counts: Record<string, number> = {};
 
-    // Count logs from all tool buffers
+    // Count only critical logs (error + warning) from tool buffers
+    const errorLevel = LOG_LEVEL_VALUES[GpacLogLevel.ERROR];
+    const warningLevel = LOG_LEVEL_VALUES[GpacLogLevel.WARNING];
+
     Object.entries(logsState.buffers).forEach(([tool, logs]) => {
-      counts[tool] = logs.length;
+      const criticalCount = logs.filter(
+        (log) => log.level === errorLevel || log.level === warningLevel,
+      ).length;
+      counts[tool] = criticalCount;
     });
 
     return counts;
