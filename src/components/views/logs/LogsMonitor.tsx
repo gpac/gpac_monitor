@@ -11,7 +11,10 @@ import WidgetWrapper from '../../common/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
-import { selectLogCountsByTool } from '@/shared/store/selectors/logsSelectors';
+import {
+  selectAllLogCountsByTool,
+  selectCriticalLogCountsByTool,
+} from '@/shared/store/selectors/logsSelectors';
 import { selectCriticalLogsCount } from '@/shared/store/selectors/logsFilterSelectors';
 import { useLogsService } from './hooks/useLogsService';
 import { CustomTooltip } from '@/components/ui/tooltip';
@@ -55,8 +58,11 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     (state) => state.logs.highlightedLogId,
   );
 
-  // Get log counts by tool for performance monitoring
-  const logCountsByTool = useAppSelector(selectLogCountsByTool);
+  // Get all log counts by tool (to determine which tools have logs)
+  const allLogCountsByTool = useAppSelector(selectAllLogCountsByTool);
+
+  // Get critical log counts by tool (for badge display)
+  const criticalLogCountsByTool = useAppSelector(selectCriticalLogCountsByTool);
 
   // Get critical logs count (warnings + errors only)
   const criticalLogsCount = useAppSelector(selectCriticalLogsCount);
@@ -115,7 +121,8 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
         levelsByTool={levelsByTool}
         defaultAllLevel={defaultAllLevel}
         visibleLogsCount={criticalLogsCount}
-        logCountsByTool={logCountsByTool}
+        allLogCountsByTool={allLogCountsByTool}
+        criticalLogCountsByTool={criticalLogCountsByTool}
         visibleToolsFilter={visibleToolsFilter}
         onToolSelect={setTool}
         onToggleToolFilter={toggleToolFilter}
@@ -128,7 +135,8 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
       levelsByTool,
       defaultAllLevel,
       criticalLogsCount,
-      logCountsByTool,
+      allLogCountsByTool,
+      criticalLogCountsByTool,
       visibleToolsFilter,
       setTool,
       toggleToolFilter,

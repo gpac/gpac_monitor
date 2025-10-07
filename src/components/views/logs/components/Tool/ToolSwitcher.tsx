@@ -81,7 +81,8 @@ interface ToolSwitcherProps {
   levelsByTool: Record<GpacLogTool, GpacLogLevel>;
   defaultAllLevel: GpacLogLevel;
   visibleLogsCount: number;
-  logCountsByTool: Record<string, number>;
+  allLogCountsByTool: Record<string, number>;
+  criticalLogCountsByTool: Record<string, number>;
   visibleToolsFilter: GpacLogTool[];
   onToolSelect: (tool: GpacLogTool) => void;
   onToggleToolFilter?: (tool: GpacLogTool) => void;
@@ -95,7 +96,8 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
     levelsByTool,
     defaultAllLevel,
     visibleLogsCount,
-    logCountsByTool,
+    allLogCountsByTool,
+    criticalLogCountsByTool,
     visibleToolsFilter,
     onToolSelect,
     onClearFilter,
@@ -105,14 +107,14 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
       const tools = new Set<GpacLogTool>();
 
       // Only add tools that have logs in buffers (ignore tools with 0 logs)
-      Object.keys(logCountsByTool).forEach((tool) => {
-        if (logCountsByTool[tool] > 0) {
+      Object.keys(allLogCountsByTool).forEach((tool) => {
+        if (allLogCountsByTool[tool] > 0) {
           tools.add(tool as GpacLogTool);
         }
       });
 
       return Array.from(tools).sort();
-    }, [logCountsByTool]);
+    }, [allLogCountsByTool]);
 
     // Calculate parent checkbox state
     // ALL is checked only when visibleToolsFilter has multiple tools
@@ -222,7 +224,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                   tool={tool}
                   levelsByTool={levelsByTool}
                   defaultAllLevel={defaultAllLevel}
-                  logCountsByTool={logCountsByTool}
+                  logCountsByTool={criticalLogCountsByTool}
                   currentTool={currentTool}
                   isChecked={isChecked}
                   onToggle={() => {
@@ -243,7 +245,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
               tool={currentTool}
               levelsByTool={levelsByTool}
               defaultAllLevel={defaultAllLevel}
-              logCountsByTool={logCountsByTool}
+              logCountsByTool={criticalLogCountsByTool}
             />
           )}
         </DropdownMenuContent>

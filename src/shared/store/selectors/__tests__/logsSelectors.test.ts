@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { selectLogCountsByTool } from '../logsSelectors';
+import {
+  selectAllLogCountsByTool,
+  selectCriticalLogCountsByTool,
+} from '../logsSelectors';
 import {
   GpacLogLevel,
   GpacLogTool,
@@ -8,7 +11,7 @@ import {
 } from '@/types/domain/gpac/log-types';
 
 describe('logsSelectors', () => {
-  describe('selectLogCountsByTool', () => {
+  describe('selectCriticalLogCountsByTool', () => {
     it('should count only critical logs (error + warning)', () => {
       const logs: GpacLogEntry[] = [
         {
@@ -45,7 +48,7 @@ describe('logsSelectors', () => {
         },
       };
 
-      const result = selectLogCountsByTool(state as any);
+      const result = selectCriticalLogCountsByTool(state as any);
       expect(result[GpacLogTool.MMIO]).toBe(2); // Only warning + error
     });
 
@@ -79,7 +82,7 @@ describe('logsSelectors', () => {
         },
       };
 
-      const result = selectLogCountsByTool(state as any);
+      const result = selectCriticalLogCountsByTool(state as any);
       expect(result[GpacLogTool.MMIO]).toBe(0); // No critical logs
     });
 
@@ -113,7 +116,7 @@ describe('logsSelectors', () => {
         },
       };
 
-      const result = selectLogCountsByTool(state as any);
+      const result = selectCriticalLogCountsByTool(state as any);
       expect(result[GpacLogTool.CORE]).toBe(0);
     });
 
@@ -153,7 +156,7 @@ describe('logsSelectors', () => {
         },
       };
 
-      const result = selectLogCountsByTool(state as any);
+      const result = selectCriticalLogCountsByTool(state as any);
       expect(result[GpacLogTool.MMIO]).toBe(1); // 1 warning
       expect(result[GpacLogTool.CORE]).toBe(2); // 2 errors
     });
@@ -167,8 +170,44 @@ describe('logsSelectors', () => {
         },
       };
 
-      const result = selectLogCountsByTool(state as any);
+      const result = selectCriticalLogCountsByTool(state as any);
       expect(result[GpacLogTool.FILTER]).toBe(0);
+    });
+  });
+
+  describe('selectAllLogCountsByTool', () => {
+    it('should count all logs regardless of level', () => {
+      const logs: GpacLogEntry[] = [
+        {
+          timestamp: 1,
+          tool: 'mmio',
+          level: LOG_LEVEL_VALUES[GpacLogLevel.INFO],
+          message: 'info log',
+        },
+        {
+          timestamp: 2,
+          tool: 'mmio',
+          level: LOG_LEVEL_VALUES[GpacLogLevel.DEBUG],
+          message: 'debug log',
+        },
+        {
+          timestamp: 3,
+          tool: 'mmio',
+          level: LOG_LEVEL_VALUES[GpacLogLevel.WARNING],
+          message: 'warning log',
+        },
+      ];
+
+      const state = {
+        logs: {
+          buffers: {
+            [GpacLogTool.MMIO]: logs,
+          },
+        },
+      };
+
+      const result = selectAllLogCountsByTool(state as any);
+      expect(result[GpacLogTool.MMIO]).toBe(3); // All 3 logs
     });
   });
 });

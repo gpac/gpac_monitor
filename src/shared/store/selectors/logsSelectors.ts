@@ -37,8 +37,23 @@ export const selectIsSubscribed = createSelector(
 );
 
 // Statistics selectors
-/** Get log counts by tool for performance monitoring (only critical: error + warning) */
-export const selectLogCountsByTool = createSelector(
+/** Get total log counts by tool (all levels) - used to determine which tools have logs */
+export const selectAllLogCountsByTool = createSelector(
+  [selectLogsState],
+  (logsState) => {
+    const counts: Record<string, number> = {};
+
+    // Count all logs from tool buffers
+    Object.entries(logsState.buffers).forEach(([tool, logs]) => {
+      counts[tool] = logs.length;
+    });
+
+    return counts;
+  },
+);
+
+/** Get critical log counts by tool (error + warning only) - used for badge display */
+export const selectCriticalLogCountsByTool = createSelector(
   [selectLogsState],
   (logsState) => {
     const counts: Record<string, number> = {};
