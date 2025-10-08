@@ -7,6 +7,7 @@ import {
   PacketsCard,
   DataCard,
   FilterHealthCard,
+  RealtimeMetricsCard,
 } from '../cards';
 
 interface OverviewTabProps {
@@ -39,8 +40,11 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
   return (
     <ScrollArea className="h-[400px]">
       <div className="space-y-4">
-        {/* Filter Health - NEW */}
+        {/* Filter Health */}
         <FilterHealthCard filter={filter} />
+
+        {/* Real-time Metrics - NEW */}
+        <RealtimeMetricsCard filter={filter} />
 
         {/* PID Metrics */}
         <PIDMetricsCard

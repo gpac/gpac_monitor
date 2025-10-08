@@ -14,3 +14,4 @@ export {
   PIDDetails,
 } from './DetailedStatsCards';
 export { FilterHealthCard } from './FilterHealthCard';
+export { RealtimeMetricsCard } from './RealtimeMetricsCard';
