@@ -200,7 +200,7 @@ const availableWidgets = [
 
   {
     type: WidgetType.MULTI_FILTER,
-    title: 'Multi-Filter Monitor',
+    title: 'Session Filters',
     icon: FiLayout,
     defaultSize: { w: 12, h: 4 },
   },

@@ -59,7 +59,7 @@ const initialState: WidgetsState = {
     {
       id: generateID('multi-filter'),
       type: WidgetType.MULTI_FILTER,
-      title: 'Session filters overview',
+      title: 'Session filters',
       x: 0,
       y: 0,
       w: 7,
