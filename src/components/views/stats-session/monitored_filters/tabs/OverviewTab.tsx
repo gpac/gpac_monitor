@@ -7,6 +7,7 @@ import {
   PacketsCard,
   DataCard,
 } from '../cards/DetailedStatsCards';
+import { FilterHealthCard } from '../cards/FilterHealthCard';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
@@ -38,6 +39,9 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
   return (
     <ScrollArea className="h-[400px]">
       <div className="space-y-4">
+        {/* Filter Health - NEW */}
+        <FilterHealthCard filter={filter} />
+
         {/* PID Metrics */}
         <PIDMetricsCard
           data={{ nb_ipid: filter.nb_ipid, nb_opid: filter.nb_opid } as any}

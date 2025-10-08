@@ -17,9 +17,11 @@ pnpm-debug.log*
 # System files
 .DS_Store
 *.tsbuildinfosrc/output.css
-# dans .gitignore
+# Ignore video and documentation files
 *.hvc
 *.mp4
 *.mkv
 *.md
 *.avc
+*.txt
+
