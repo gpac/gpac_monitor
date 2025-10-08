@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import WidgetWrapper from '../../../common/WidgetWrapper';
+import WidgetWrapper from '@/components/common/WidgetWrapper';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
-import LoadingState from '../../../common/LoadingState';
-import ConnectionErrorState from '../../../common/ConnectionErrorState';
+import LoadingState from '@/components/common/LoadingState';
+import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import GraphFlow from './GraphFlow';
-import { WidgetProps } from '../../../../types/ui/widget';
+import { WidgetProps } from '@/types/ui/widget';
 import { Node, Edge, NodeMouseHandler } from '@xyflow/react';
-import { LayoutOptions } from '../utils/GraphLayout';
+import { LayoutOptions } from '../../utils/GraphLayout';
 
 interface GraphMonitorUIProps extends WidgetProps {
   isLoading: boolean;

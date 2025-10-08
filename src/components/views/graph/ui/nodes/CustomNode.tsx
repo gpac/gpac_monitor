@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useMemo, memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
-import { determineFilterSessionType } from '../utils/filterType';
-import { useGraphColors } from '../hooks/layout/useGraphColors';
-import { useFilterArgs } from '../hooks/interaction/useFilterArgs';
+import { determineFilterSessionType } from '../../utils/filterType';
+import { useGraphColors } from '../../hooks/layout/useGraphColors';
+import { useFilterArgs } from '../../hooks/interaction/useFilterArgs';
 import FilterArgumentsDialog from '@/components/filtersArgs/FilterArgumentsDialog';
 
 interface CustomNodeProps extends NodeProps {
@@ -241,7 +241,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
     </div>
   );
 };
-export const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
+const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
   // Only re-render if essential props changed
   return (
     prevProps.data.idx === nextProps.data.idx &&
@@ -254,3 +254,5 @@ export const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
     JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)
   );
 });
+
+export default CustomNode;

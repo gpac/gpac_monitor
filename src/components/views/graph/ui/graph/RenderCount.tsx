@@ -4,7 +4,7 @@ interface RenderCountProps {
   componentName: string;
 }
 
-export const RenderCount = ({ componentName }: RenderCountProps) => {
+const RenderCount = ({ componentName }: RenderCountProps) => {
   const renderCount = useRef(0);
   renderCount.current += 1;
 
@@ -12,3 +12,5 @@ export const RenderCount = ({ componentName }: RenderCountProps) => {
 
   return null;
 };
+
+export default RenderCount;

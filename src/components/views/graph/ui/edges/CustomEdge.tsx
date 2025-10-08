@@ -5,7 +5,7 @@ import {
   EdgeLabelRenderer,
   Position,
 } from '@xyflow/react';
-import { EdgeData } from '../../../../types/domain/gpac/model';
+import { EdgeData } from '@/types/domain/gpac/model';
 
 interface CustomEdgeProps extends EdgeProps {
   sourceX: number;
@@ -40,7 +40,7 @@ const CustomEdge = memo(
         <BaseEdge
           path={path}
           style={{
-            strokeWidth: 4,
+            strokeWidth: 5,
             strokeOpacity: 1,
             ...style,
           }}

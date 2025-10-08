@@ -12,8 +12,8 @@ import {
   NodeMouseHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { CustomNode } from '../ui/CustomNode';
-import { useMinimapNavigation } from '../hooks/layout/useMinimapNavigation';
+import CustomNode from '../nodes/CustomNode';
+import { useMinimapNavigation } from '../../hooks/layout/useMinimapNavigation';
 
 interface GraphFlowProps {
   nodes: Node[];
@@ -80,7 +80,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
                 return '#3b82f6';
             }
           }}
-          nodeStrokeWidth={1}
+          nodeStrokeWidth={2}
           nodeStrokeColor="#374151"
           maskColor="rgba(0, 0, 0, 0.4)"
           className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
