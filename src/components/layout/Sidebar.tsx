@@ -1,6 +1,9 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { addWidget } from '@/shared/store/slices/widgetsSlice';
+import {
+  addWidget,
+  selectActiveWidgets,
+} from '@/shared/store/slices/widgetsSlice';
 import { selectLogCounts } from '@/shared/store/selectors/sidebarSelectors';
 import { WidgetType } from '@/types/ui/widget';
 
@@ -72,16 +75,18 @@ const LOG_LEVEL_CONFIGS = {
 const AvailableWidgetButton = React.memo(function AvailableWidgetButton({
   widget,
   onAdd,
+  isActive,
 }: {
   widget: (typeof availableWidgets)[number];
   onAdd: (type: WidgetType, size: { w: number; h: number }) => void;
+  isActive: boolean;
 }) {
   const Icon = widget.icon;
   return (
     <button
       onClick={() => onAdd(widget.type, widget.defaultSize)}
       className="group w-full flex items-center gap-3 p-3 rounded-xl border border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:ring-offset-2 focus:ring-offset-gray-900 transition-opacity duration-150 ease-out active:translate-y-0 active:scale-[0.98]"
-      aria-label={`Add ${widget.title} widget to dashboard`}
+      aria-label={`Add ${widget.title} widget to dashboard${isActive ? ' (currently active)' : ''}`}
     >
       <div className="flex-shrink-0 p-1.5 rounded-lg bg-gray-700/50">
         <Icon className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors duration-200" />
@@ -91,6 +96,13 @@ const AvailableWidgetButton = React.memo(function AvailableWidgetButton({
           {widget.title}
         </span>
       </div>
+      {/* Active indicator - centered vertically, right of title */}
+      <span
+        className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+          isActive ? 'bg-green-500' : 'bg-gray-600'
+        }`}
+        aria-label={isActive ? 'Active' : 'Inactive'}
+      />
       <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
         <svg
           className="w-4 h-4 text-blue-400"
@@ -209,6 +221,13 @@ const availableWidgets = [
 const Sidebar: React.FC = () => {
   const dispatch = useAppDispatch();
   const logCounts = useAppSelector(selectLogCounts);
+  const activeWidgets = useAppSelector(selectActiveWidgets);
+
+  // Create a Set of active widget types for fast lookup
+  const activeWidgetTypes = useMemo(
+    () => new Set(activeWidgets.map((w) => w.type)),
+    [activeWidgets],
+  );
 
   // Memoize the widget creation callback to avoid re-renders
   const handleAddWidget = useCallback(
@@ -255,6 +274,7 @@ const Sidebar: React.FC = () => {
                 key={widget.type}
                 widget={widget}
                 onAdd={handleAddWidget}
+                isActive={activeWidgetTypes.has(widget.type)}
               />
             ))}
           </div>
