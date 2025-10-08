@@ -14,6 +14,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import CustomNode from '../nodes/CustomNode';
 import { useMinimapNavigation } from '../../hooks/layout/useMinimapNavigation';
+import { getImmediateGraphColor } from '../../hooks/layout/useGraphColors';
 
 interface GraphFlowProps {
   nodes: Node[];
@@ -70,16 +71,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           showInteractive={!isResizing}
         />
         <MiniMap
-          nodeColor={(n) => {
-            switch (n.type) {
-              case 'input':
-                return '#4ade80';
-              case 'output':
-                return '#ef4444';
-              default:
-                return '#3b82f6';
-            }
-          }}
+          nodeColor={(node) => getImmediateGraphColor(node)}
           nodeStrokeWidth={2}
           nodeStrokeColor="#374151"
           maskColor="rgba(0, 0, 0, 0.4)"
