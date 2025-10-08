@@ -5,7 +5,7 @@ export { MultimediaParams } from './MultimediaParams';
 export { PIDStatsOverview } from './PIDStatsOverview';
 export { CompactPIDStats } from './CompactPIDStats';
 
-// Legacy components (for backward compatibility)
+// Overview Tab Cards
 export {
   PIDMetricsCard,
   ProcessingCard,
@@ -13,3 +13,4 @@ export {
   DataCard,
   PIDDetails,
 } from './DetailedStatsCards';
+export { FilterHealthCard } from './FilterHealthCard';

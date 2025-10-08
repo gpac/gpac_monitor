@@ -6,8 +6,8 @@ import {
   ProcessingCard,
   PacketsCard,
   DataCard,
-} from '../cards/DetailedStatsCards';
-import { FilterHealthCard } from '../cards/FilterHealthCard';
+  FilterHealthCard,
+} from '../cards';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
