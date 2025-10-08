@@ -91,7 +91,6 @@ export function useLogsRedux() {
 
   // Auto-save config when it changes
   useEffect(() => {
-    console.log('[useLogsRedux] Saving config to localStorage:', currentConfig);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(currentConfig));
   }, [currentConfig]);
 

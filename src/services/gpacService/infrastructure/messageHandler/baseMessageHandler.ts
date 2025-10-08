@@ -203,18 +203,7 @@ export class BaseMessageHandler {
   }
 
   private handleLogBatchMessage(data: LogBatchResponse): void {
-    console.log(
-      '[BaseMessageHandler] handleLogBatchMessage received:',
-      data?.logs?.length || 0,
-      'logs',
-    );
-    console.log('[BaseMessageHandler] handleLogBatchMessage data:', data);
     if (data.logs && Array.isArray(data.logs)) {
-      console.log(
-        '[BaseMessageHandler] Calling logHandler.handleLogBatch with',
-        data.logs.length,
-        'logs',
-      );
       this.logHandler.handleLogBatch(data.logs);
     } else {
       console.log(
@@ -225,11 +214,6 @@ export class BaseMessageHandler {
   }
 
   private handleLogHistoryMessage(data: LogHistoryResponse): void {
-    console.log(
-      '[BaseMessageHandler] handleLogHistoryMessage received:',
-      data?.logs?.length || 0,
-      'logs',
-    );
     if (data.logs && Array.isArray(data.logs)) {
       this.logHandler.handleLogHistory(data.logs);
     }

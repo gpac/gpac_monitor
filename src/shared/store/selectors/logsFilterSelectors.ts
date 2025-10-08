@@ -40,8 +40,9 @@ export const selectVisibleLogs = createSelector(
   (logsState, levelsByTool, defaultAllLevel, visibleToolsFilter) => {
     let rawLogs: GpacLogEntry[];
 
-    // Check if we're in ALL mode (filters active) or single tool mode (default)
-    const isAllMode = visibleToolsFilter && visibleToolsFilter.length > 0;
+    // Check if we're in ALL mode (multiple tools) or single tool mode
+    // ALL mode requires MORE THAN ONE tool selected (align with ToolSwitcher logic)
+    const isAllMode = visibleToolsFilter && visibleToolsFilter.length > 1;
 
     if (isAllMode) {
       // ALL mode: show logs from all tools
@@ -68,9 +69,7 @@ export const selectVisibleLogs = createSelector(
       levelsByTool[logsState.currentTool] ?? defaultAllLevel;
 
     // Filter by effective level (preserving history in buffers)
-    const filteredLogs = filterLogsByLevel(rawLogs, effectiveLevel);
-
-    return filteredLogs;
+    return filterLogsByLevel(rawLogs, effectiveLevel);
   },
 );
 

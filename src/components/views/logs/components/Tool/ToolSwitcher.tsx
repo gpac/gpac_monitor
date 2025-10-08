@@ -123,7 +123,8 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
 
     // Memoize current display info
     const currentDisplayInfo = React.useMemo(() => {
-      if (visibleToolsFilter.length > 0) {
+      // Show "ALL" only when multiple tools are selected (align with isAll logic)
+      if (visibleToolsFilter.length > 1) {
         return {
           label: 'ALL',
           effectiveLevel: '',
