@@ -35,7 +35,7 @@ const LogsFooter = React.memo(({ count }: { count: number }) => (
 ));
 
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
-  const [autoScroll, setAutoScroll] = useState(true);
+  const [autoScroll, _setAutoScroll] = useState(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const dispatch = useAppDispatch();
 
@@ -57,6 +57,8 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   const highlightedLogId = useAppSelector(
     (state) => state.logs.highlightedLogId,
   );
+  const [atBottom, setAtBottom] = useState(true);
+  const [_atTop, setAtTop] = useState(false);
 
   // Get all log counts by tool (to determine which tools have logs)
   const allLogCountsByTool = useAppSelector(selectAllLogCountsByTool);
@@ -169,7 +171,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
       <div className="flex flex-col h-full bg-stat stat">
         {/* Logs */}
         <div className="flex-1 relative">
-          <div className="absolute top-2 right-1 z-10 flex gap-2">
+          <div className="absolute bottom-4 right-4 z-20 flex flex-col items-center gap-3 pointer-events-auto">
             {/* Scroll to highlighted log button */}
             {highlightedLogId && (
               <button
@@ -183,15 +185,28 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
 
             {/* Auto-scroll toggle */}
             <Button
-              variant="destructive"
-              onClick={() => setAutoScroll(!autoScroll)}
-              className={`px-1 py-1 text-xs rounded border ${
-                autoScroll
-                  ? 'bg-red-700/45  border-orange-600 text-white'
-                  : 'bg-gray-700 border-gray-600 text-gray-300'
-              }`}
+              onClick={() => {
+                if (atBottom) {
+                  virtuosoRef.current?.scrollToIndex({
+                    index: 0,
+                    behavior: 'smooth',
+                  });
+                } else {
+                  virtuosoRef.current?.scrollToIndex({
+                    index: visibleLogs.length - 1,
+                    behavior: 'smooth',
+                  });
+                }
+              }}
+              className={`p-2 rounded-sm shadow-md border-2 transition-transform hover:scale-105
+  `}
+              title={atBottom ? 'Scroll to top' : 'Scroll to bottom'}
             >
-              <RiScrollToBottomLine className="w-4 h-4" />
+              <RiScrollToBottomLine
+                className={`w-5 h-5 transform transition-transform duration-200 ${
+                  atBottom ? 'rotate-180' : ''
+                }`}
+              />
             </Button>
           </div>
           <Virtuoso
@@ -214,12 +229,8 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
                 />
               );
             }}
-            followOutput={autoScroll ? 'smooth' : false}
-            atBottomStateChange={(atBottom: boolean) => {
-              if (atBottom && !autoScroll) {
-                setAutoScroll(true);
-              }
-            }}
+            atBottomStateChange={setAtBottom}
+            atTopStateChange={setAtTop}
             overscan={20}
             increaseViewportBy={200}
             components={{
