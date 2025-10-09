@@ -100,10 +100,17 @@ export const formatBitrate = (bitrate: number | undefined): string => {
   return `${bitrate.toFixed(0)} b/s`;
 };
 
-export const formatPacketRate = (rate: number | undefined): string => {
+export const roundNumber = (num: number, decimals: number = 2): number => {
+  return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
+};
+
+export const formatPacketRate = (
+  rate: number | undefined,
+  decimals: number = 2,
+): string => {
   if (!rate) return '0 pck/s';
-  if (rate >= 1000000) return `${(rate / 1000000).toFixed(2)} Mpck/s`;
-  if (rate >= 1000) return `${(rate / 1000).toFixed(2)} Kpck/s`;
+  if (rate >= 1000000) return `${(rate / 1000000).toFixed(decimals)} Mpck/s`;
+  if (rate >= 1000) return `${(rate / 1000).toFixed(decimals)} Kpck/s`;
   return `${rate.toFixed(0)} pck/s`;
 };
 

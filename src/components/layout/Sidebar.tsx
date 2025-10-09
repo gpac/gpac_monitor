@@ -88,11 +88,11 @@ const AvailableWidgetButton = React.memo(function AvailableWidgetButton({
       className="group w-full flex items-center gap-3 p-3 rounded-xl border border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:ring-offset-2 focus:ring-offset-gray-900 transition-opacity duration-150 ease-out active:translate-y-0 active:scale-[0.98]"
       aria-label={`Add ${widget.title} widget to dashboard${isActive ? ' (currently active)' : ''}`}
     >
-      <div className="flex-shrink-0 p-1.5 rounded-lg bg-gray-700/50">
+      <div className="flex-shrink-0  p-1.5 rounded-lg bg-gray-700/50">
         <Icon className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors duration-200" />
       </div>
       <div className="flex-1 text-left">
-        <span className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors duration-200">
+        <span className="text-sm font-medium text-gray-200 group-hover:text-gray-200 transition-colors duration-200">
           {widget.title}
         </span>
       </div>
@@ -122,7 +122,6 @@ const AvailableWidgetButton = React.memo(function AvailableWidgetButton({
   );
 });
 
-// 2) Badge isolé (ne re-rend que quand le nombre bouge)
 const CountBadge = React.memo(function CountBadge({
   count,
   active,

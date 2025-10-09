@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
-import { formatBytes, formatNumber } from '@/utils/helper';
+import { formatBytes, formatPacketRate } from '@/utils/helper';
 
 interface RealtimeMetricsCardProps {
   filter: OverviewTabData;
@@ -25,7 +25,7 @@ const calculateMetrics = (filter: OverviewTabData): CalculatedMetrics => {
 
   return {
     throughput: `${formatBytes(throughput)}/s`,
-    packetRate: `${formatNumber(packetRate)} pck/s`,
+    packetRate: formatPacketRate(packetRate),
     efficiency: `${efficiencyValue.toFixed(1)}%`,
     efficiencyValue,
   };
