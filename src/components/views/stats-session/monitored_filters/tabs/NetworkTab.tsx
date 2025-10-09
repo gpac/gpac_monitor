@@ -54,16 +54,7 @@ const NetworkTab = memo(
                     Data Rate
                   </div>
                 </div>
-
-                <div className="space-y-1">
-                  <div className="text-lg font-semibold stat">
-                    {formattedStats.packetsSentRate}
-                  </div>
-                  <div className="text-xs text-muted-foreground stat-label">
-                    Packet Rate
-                  </div>
-                </div>
-
+                p
                 <div className="pt-2 border-t border-border/50">
                   <div className="grid grid-cols-2 gap-y-1 text-xs">
                     <div className="text-muted-foreground stat-label">

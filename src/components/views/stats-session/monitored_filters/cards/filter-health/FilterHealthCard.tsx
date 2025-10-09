@@ -26,9 +26,7 @@ export const FilterHealthCard = memo(({ filter }: FilterHealthCardProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div
-          className={`rounded-lg p-3 ${healthInfo.bgColor} border border-border/50`}
-        >
+        <div className={`rounded-lg p-3 ${healthInfo.bgColor} `}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">
               Status
