@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TabPIDData } from '@/types/domain/gpac/filter-stats';
 import { formatBufferTime } from '@/utils/helper';
-import { useCriticalPIDStats } from '../../hooks/data/useCriticalPIDStats';
+import { useCriticalPIDStats } from '../../../hooks/data/useCriticalPIDStats';
 
 interface CriticalPIDStatsProps {
   pidData: TabPIDData;

@@ -1,22 +1,34 @@
 import { memo } from 'react';
-import {
-  LuMonitor,
-  LuWifiOff,
-  LuTriangle,
-  LuClock,
-  LuPlay,
-  LuPause,
-} from 'react-icons/lu';
+import { LuMonitor } from 'react-icons/lu';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TabPIDData } from '@/types/domain/gpac/filter-stats';
 import { formatBytes } from '@/utils/helper';
+import { getCriticalAlerts, getPlaybackStatus } from '../shared/statusHelpers';
 
 interface CompactPIDStatsProps {
   pidData: TabPIDData;
   onClick?: () => void;
 }
+
+/**
+ * Get buffer status color based on usage percentage
+ */
+const getBufferColor = (usage: number): string => {
+  if (usage < 20 || usage > 80) return 'text-red-500';
+  if (usage < 40 || usage > 60) return 'text-orange-500';
+  return 'text-green-500';
+};
+
+/**
+ * Get progress bar color based on buffer usage
+ */
+const getProgressColor = (usage: number): string => {
+  if (usage < 20 || usage > 80) return '#ef4444';
+  if (usage < 40 || usage > 60) return '#f59e0b';
+  return '#10b981';
+};
 
 /**
  * Compact PID statistics component for dashboard/summary views
@@ -30,48 +42,8 @@ export const CompactPIDStats = memo(
         ? (pidData.buffer / pidData.max_buffer) * 100
         : 0;
 
-    // Get critical alerts
-    const getCriticalAlerts = () => {
-      const alerts = [];
-      if (pidData.stats.disconnected)
-        alerts.push({
-          icon: LuWifiOff,
-          color: 'text-red-500',
-          label: 'Disconnected',
-        });
-      if (pidData.would_block)
-        alerts.push({
-          icon: LuTriangle,
-          color: 'text-red-500',
-          label: 'Blocked',
-        });
-      if ((pidData.nb_pck_queued || 0) > 50)
-        alerts.push({
-          icon: LuClock,
-          color: 'text-orange-500',
-          label: `Queue: ${pidData.nb_pck_queued}`,
-        });
-      return alerts;
-    };
-
-    // Get buffer status color
-    const getBufferColor = (usage: number) => {
-      if (usage < 20 || usage > 80) return 'text-red-500';
-      if (usage < 40 || usage > 60) return 'text-orange-500';
-      return 'text-green-500';
-    };
-
-    // Get playback status
-    const getPlaybackStatus = () => {
-      if (pidData.eos)
-        return { icon: LuPause, label: 'EOS', variant: 'outline' as const };
-      if (pidData.playing)
-        return { icon: LuPlay, label: 'Playing', variant: 'default' as const };
-      return { icon: LuPause, label: 'Paused', variant: 'outline' as const };
-    };
-
-    const criticalAlerts = getCriticalAlerts();
-    const playbackStatus = getPlaybackStatus();
+    const criticalAlerts = getCriticalAlerts(pidData);
+    const playbackStatus = getPlaybackStatus(pidData);
     const PlayIcon = playbackStatus.icon;
 
     return (
@@ -145,12 +117,7 @@ export const CompactPIDStats = memo(
               className="h-1"
               style={
                 {
-                  '--progress-background':
-                    bufferUsage < 20 || bufferUsage > 80
-                      ? '#ef4444'
-                      : bufferUsage < 40 || bufferUsage > 60
-                        ? '#f59e0b'
-                        : '#10b981',
+                  '--progress-background': getProgressColor(bufferUsage),
                 } as React.CSSProperties
               }
             />

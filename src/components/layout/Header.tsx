@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LuSettings } from 'react-icons/lu';
 import { FiLayout } from 'react-icons/fi';
 import { LayoutManager } from './LayoutManager';
 
@@ -30,19 +29,19 @@ const Header: React.FC<HeaderProps> = () => {
   return (
     <header className="h-16 bg-gray-900 border-b border-gray-700 px-4">
       <div className="h-full max-w-screen-2xl mx-auto flex items-center justify-between">
-        {/* Logo et titre */}
+        {/* Logo and title */}
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-semibold text-white">GPAC Monitor</h1>
           <span className="text-sm text-gray-400"> </span>
-          <div className="h-6 w-px bg-gray-700" /> {/* Séparateur vertical */}
+          <div className="h-6 w-px bg-gray-700" /> {/* Vertical separator */}
         </div>
 
-        {/* Actions principales */}
+        {/* Main actions */}
         <div className="flex items-center space-x-4">
-          {/* Séparateur */}
+          {/* Separator */}
           <div className="h-6 w-px bg-gray-700" />
 
-          {/* Boutons de layout */}
+          {/* Layout buttons */}
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setShowLayoutManager(!showLayoutManager)}
@@ -53,18 +52,8 @@ const Header: React.FC<HeaderProps> = () => {
             </button>
           </div>
 
-          {/* Séparateur */}
+          {/* Separator */}
           <div className="h-6 w-px bg-gray-700" />
-
-          {/* Actions supplémentaires */}
-          <div className="flex items-center space-x-2">
-            <button
-              className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-700"
-              title="Settings"
-            >
-              <LuSettings className="w-5 h-5" />
-            </button>
-          </div>
         </div>
       </div>
 

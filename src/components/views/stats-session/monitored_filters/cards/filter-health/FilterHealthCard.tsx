@@ -3,50 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
 import { formatTime } from '@/utils/helper';
+import { getFilterHealthInfo } from '../shared/statusHelpers';
 
 interface FilterHealthCardProps {
   filter: OverviewTabData;
 }
-
-type HealthVariant = 'default' | 'secondary' | 'destructive';
-
-interface HealthInfo {
-  variant: HealthVariant;
-  color: string;
-  bgColor: string;
-  label: string;
-}
-
-const getFilterHealthInfo = (status: string): HealthInfo => {
-  const statusLower = status?.toLowerCase() || '';
-
-  if (statusLower.includes('error') || statusLower.includes('stop')) {
-    return {
-      variant: 'destructive',
-      color: 'text-red-500',
-      bgColor: 'bg-red-500/10',
-      label: 'Critical',
-    };
-  }
-  if (
-    statusLower.includes('warning') ||
-    statusLower.includes('wait') ||
-    statusLower.includes('block')
-  ) {
-    return {
-      variant: 'secondary',
-      color: 'text-yellow-500',
-      bgColor: 'bg-yellow-500/10',
-      label: 'Warning',
-    };
-  }
-  return {
-    variant: 'default',
-    color: 'text-green-500',
-    bgColor: 'bg-green-500/10',
-    label: 'Healthy',
-  };
-};
 
 export const FilterHealthCard = memo(({ filter }: FilterHealthCardProps) => {
   const { status, type, idx, time } = filter;

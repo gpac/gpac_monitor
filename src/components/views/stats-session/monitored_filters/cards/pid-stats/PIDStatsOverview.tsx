@@ -3,11 +3,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TabPIDData } from '@/types/domain/gpac/filter-stats';
 import { formatBytes } from '@/utils/helper';
+import { getPIDStatusInfo, getPIDType } from '../shared/statusHelpers';
 
 // Import the new specialized components
 import { CriticalPIDStats } from './CriticalPIDStats';
 import { PerformanceMetrics } from './PerformanceMetrics';
-import { MultimediaParams } from './MultimediaParams';
+import { MultimediaParams } from '../media-info';
 
 interface PIDStatsOverviewProps {
   pidData: TabPIDData;
@@ -20,28 +21,8 @@ interface PIDStatsOverviewProps {
  */
 export const PIDStatsOverview = memo(
   ({ pidData, showAdvanced = true }: PIDStatsOverviewProps) => {
-    // Determine status and variant based on real values
-    const getStatusInfo = () => {
-      if (pidData.stats.disconnected)
-        return { status: 'Disconnected', variant: 'destructive' as const };
-      if (pidData.would_block)
-        return { status: 'Blocked', variant: 'destructive' as const };
-      if (pidData.eos)
-        return { status: 'End of Stream', variant: 'secondary' as const };
-      if (pidData.playing)
-        return { status: 'Playing', variant: 'default' as const };
-      return { status: 'Idle', variant: 'outline' as const };
-    };
-
-    const statusInfo = getStatusInfo();
-
-    // Determine PID type for display
-    const getPIDType = () => {
-      if (pidData.width && pidData.height) return 'Video';
-      if (pidData.samplerate || pidData.channels) return 'Audio';
-      if (pidData.codec) return 'Media';
-      return 'Data';
-    };
+    const statusInfo = getPIDStatusInfo(pidData);
+    const pidType = getPIDType(pidData);
 
     return (
       <div className="space-y-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -54,7 +35,7 @@ export const PIDStatsOverview = memo(
                   <CardTitle className="text-sm">{pidData.name}</CardTitle>
                 </div>
                 <Badge variant="outline" className="text-xs">
-                  {getPIDType()}
+                  {pidType}
                 </Badge>
               </div>
               <Badge variant={statusInfo.variant}>{statusInfo.status}</Badge>
