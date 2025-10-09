@@ -13,8 +13,14 @@ interface NetworkTabProps {
   refreshInterval?: number;
 }
 
+const DEFAULT_REFRESH_INTERVAL = 1000; // 1 seconde pour le monitoring temps réel
+
 const NetworkTab = memo(
-  ({ data, filterName, refreshInterval = 5000 }: NetworkTabProps) => {
+  ({
+    data,
+    filterName,
+    refreshInterval = DEFAULT_REFRESH_INTERVAL,
+  }: NetworkTabProps) => {
     const { currentStats, instantRates, formattedStats, getActivityLevel } =
       useNetworkMetrics(data, filterName);
 

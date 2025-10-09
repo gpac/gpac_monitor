@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatBytes } from '@/utils/helper';
+import { formatBytes, formatChartTime } from '@/utils/helper';
 
 interface DataPoint {
   time: string;
@@ -25,48 +25,47 @@ interface BandwidthChartProps {
   refreshInterval?: number;
 }
 
-const MAX_POINTS = 100;
+const MAX_POINTS = 300; // 5 minutes d'historique à 1s/point
+const DEFAULT_REFRESH_INTERVAL = 1000; // 1 seconde
 
 export const BandwidthChart = memo(
-  ({ currentBytes, type, refreshInterval = 5000 }: BandwidthChartProps) => {
+  ({
+    currentBytes,
+    type,
+    refreshInterval = DEFAULT_REFRESH_INTERVAL,
+  }: BandwidthChartProps) => {
     const [dataPoints, setDataPoints] = useState<DataPoint[]>([]);
 
-    const lastBytesRef = useRef<number>(0);
-    const lastTimestampRef = useRef<number>(0);
-
+    const lastBytesRef = useRef<number>(currentBytes);
+    const lastTimestampRef = useRef<number>(Date.now());
     const currentBytesRef = useRef<number>(currentBytes);
+    const isInitializedRef = useRef<boolean>(false);
 
     const chartTitle = useMemo(
       () => (type === 'sent' ? 'Upload Bandwidth' : 'Download Bandwidth'),
       [type],
     );
+
     const lineColor = useMemo(
       () => (type === 'sent' ? '#10b981' : '#3b82f6'),
       [type],
     );
 
-    // Format bandwidth for display (stable)
+    // Format bandwidth for display
     const formatBandwidth = useCallback((value: number): string => {
       return `${formatBytes(value)}/s`;
     }, []);
 
-    const getFormattedTime = useCallback(() => {
-      return new Date().toLocaleTimeString('en-US', {
-        hour12: false,
-        minute: '2-digit',
-        second: '2-digit',
-      });
-    }, []);
-
+    // Update current bytes ref
     useEffect(() => {
       currentBytesRef.current = currentBytes;
     }, [currentBytes]);
 
-    // Stable callback to add a sample point and update refs for the *next* calculation
+    // Add sample point to chart
     const addSamplePoint = useCallback(
       (bytesPerSecond: number, sampleTimestamp: number) => {
         const newPoint: DataPoint = {
-          time: getFormattedTime(),
+          time: formatChartTime(),
           timestamp: sampleTimestamp,
           bytesPerSecond,
         };
@@ -77,53 +76,55 @@ export const BandwidthChart = memo(
             ? newPoints.slice(-MAX_POINTS)
             : newPoints;
         });
+
         lastBytesRef.current = currentBytesRef.current;
         lastTimestampRef.current = sampleTimestamp;
       },
-      [getFormattedTime],
+      [],
     );
 
+    // Initialize chart data ONCE on mount
     useEffect(() => {
+      if (isInitializedRef.current) return;
+
       const now = Date.now();
-
-      lastBytesRef.current = currentBytesRef.current;
+      lastBytesRef.current = currentBytes;
       lastTimestampRef.current = now;
+      isInitializedRef.current = true;
 
+      // Add initial point immediately
       setDataPoints([
         {
-          time: getFormattedTime(),
+          time: formatChartTime(),
           timestamp: now,
           bytesPerSecond: 0,
         },
       ]);
-    }, [getFormattedTime]);
+    }, [currentBytes]);
 
+    // Update bandwidth data at refresh interval
     useEffect(() => {
+      if (!isInitializedRef.current) return;
+
       const intervalId = setInterval(() => {
         const now = Date.now();
         const lastTimestamp = lastTimestampRef.current;
 
-        // Ensure valid timestamp and avoid division by zero or negative time
-        if (now <= lastTimestamp) {
-          return;
-        }
+        if (now <= lastTimestamp) return;
 
         const elapsedSecs = (now - lastTimestamp) / 1000;
-
-        // Calculate bandwidth using the *latest* bytes value from the ref
         const latestBytes = currentBytesRef.current;
         const bytesDelta = latestBytes - lastBytesRef.current;
-
         const bytesPerSecond = Math.max(0, bytesDelta / elapsedSecs);
 
         addSamplePoint(bytesPerSecond, now);
       }, refreshInterval);
 
       return () => clearInterval(intervalId);
-    }, [refreshInterval, addSamplePoint, type]);
+    }, [refreshInterval, addSamplePoint]);
 
-    // --- Chart Rendering ---
-    const chartComponents = useMemo(
+    // Chart configuration (stable reference)
+    const chartConfig = useMemo(
       () => ({
         lineProps: {
           type: 'monotone' as const,
@@ -133,6 +134,7 @@ export const BandwidthChart = memo(
           dot: false,
           activeDot: { r: 6 },
           isAnimationActive: false,
+          strokeWidth: 2,
         },
         yAxisProps: {
           tickFormatter: formatBandwidth,
@@ -140,18 +142,19 @@ export const BandwidthChart = memo(
           domain: ['auto', 'auto'],
           allowDataOverflow: true,
         },
-        tooltipProps: {
-          formatter: (value: number | string | Array<number | string>) => {
-            // Type guard for value
-            if (typeof value === 'number') {
-              return [formatBandwidth(value), 'Bandwidth'];
-            }
-            return [value, 'Bandwidth'];
-          },
-          labelFormatter: (label: string) => `Time: ${label}`,
-        },
       }),
       [lineColor, formatBandwidth],
+    );
+
+    // Tooltip formatter (stable reference)
+    const tooltipFormatter = useCallback(
+      (value: number | string | Array<number | string>) => {
+        if (typeof value === 'number') {
+          return [formatBandwidth(value), 'Bandwidth'];
+        }
+        return [value, 'Bandwidth'];
+      },
+      [formatBandwidth],
     );
 
     return (
@@ -186,11 +189,12 @@ export const BandwidthChart = memo(
                   tickMargin={5}
                 />
                 <YAxis
-                  {...chartComponents.yAxisProps}
+                  {...chartConfig.yAxisProps}
                   tick={{ fontSize: 10, fill: 'hsl(var(--muted-foreground))' }}
                 />
                 <Tooltip
-                  {...chartComponents.tooltipProps}
+                  formatter={tooltipFormatter}
+                  labelFormatter={(label: string) => `Time: ${label}`}
                   contentStyle={{
                     backgroundColor: 'hsl(var(--background))',
                     border: '1px solid hsl(var(--border))',
@@ -198,8 +202,7 @@ export const BandwidthChart = memo(
                     fontSize: '12px',
                   }}
                 />
-
-                <Line {...chartComponents.lineProps} />
+                <Line {...chartConfig.lineProps} />
               </LineChart>
             </ResponsiveContainer>
           </div>

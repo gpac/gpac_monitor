@@ -33,6 +33,17 @@ export const microsecondsToSeconds = (microseconds: number): number => {
   return milliseconds / 1000;
 };
 
+/**
+ * Formats current time as HH:MM:SS for chart display
+ */
+export const formatChartTime = (): string => {
+  return new Date().toLocaleTimeString('en-US', {
+    hour12: false,
+    minute: '2-digit',
+    second: '2-digit',
+  });
+};
+
 export const getActivityLevel = (
   pckDone: number = 0,
   bytesDone: number = 0,
