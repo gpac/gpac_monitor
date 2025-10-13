@@ -1,10 +1,11 @@
 import { FILTER_SUBSCRIPTION_FIELDS } from '../config.js';
-import { 
-    gpac_filter_to_object, 
-    gpac_filter_to_minimal_object, 
-    on_all_connected 
+import {
+    gpac_filter_to_object,
+    gpac_filter_to_minimal_object,
+    on_all_connected
 } from '../filterUtils.js';
 import { PidDataCollector } from './PidDataCollector.js';
+import { ArgumentHandler } from './ArgumentHandler.js';
 
 function FilterManager(client, draned_once_ref) {
     this.client = client;
@@ -12,6 +13,7 @@ function FilterManager(client, draned_once_ref) {
     this.details_needed = {};
     this.filterSubscriptions = {};
     this.pidDataCollector = new PidDataCollector();
+    this.argumentHandler = new ArgumentHandler(client);
 
     this.sendAllFilters = function() {
         on_all_connected((all_js_filters) => {
@@ -45,39 +47,11 @@ function FilterManager(client, draned_once_ref) {
 
     this.requestDetails = function(idx) {
         this.details_needed[idx] = true;
-        this.sendDetails(idx);
+        this.argumentHandler.sendDetails(idx);
     };
 
     this.stopDetails = function(idx) {
         this.details_needed[idx] = false;
-    };
-
-    this.sendDetails = function(idx) {
-        session.post_task(() => {
-            let Args = [];
-
-            session.lock_filters(true);
-            for (let i = 0; i < session.nb_filters; i++) {
-                let f = session.get_filter(i);
-                if (f.idx == idx) {
-                    const fullObj = gpac_filter_to_object(f, true);
-                    Args = fullObj.gpac_args;
-                    break;
-                }
-            }
-            session.lock_filters(false);
-
-            if (this.client.client) {
-                this.client.client.send(JSON.stringify({
-                    message: 'details',
-                    filter: {
-                        idx: idx,
-                        gpac_args: Args
-                    }
-                }));
-            }
-            return false;
-        });
     };
 
     this.subscribeToFilter = function(idx, interval) {
@@ -131,91 +105,7 @@ function FilterManager(client, draned_once_ref) {
     };
 
     this.updateArgument = function(idx, name, argName, newValue) {
-        let filter = session.get_filter('' + idx);
-
-        if (!filter) {
-            const errorMsg = "Filter with idx " + idx + " not found";
-            print("Error: " + errorMsg);
-
-            // Send error response to client
-            if (this.client.client) {
-                this.client.client.send(JSON.stringify({
-                    message: 'update_arg_response',
-                    idx: idx,
-                    argName: argName,
-                    requestedValue: newValue,
-                    actualValue: null,
-                    success: false,
-                    error: errorMsg
-                }));
-            }
-            return;
-        }
-
-        if (filter.name != name) {
-            print("Warning: Discrepancy in filter names for idx " + idx + ". Expected '" + name + "', found '" + filter.name + "'. Proceeding with update.");
-        }
-
-        try {
-            print("Updating filter " + idx + " (" + filter.name + "), argument '" + argName + "' to '" + newValue + "'");
-
-            // Apply the update
-            filter.update(argName, newValue);
-
-            // Read-after-write: verify the value was actually set
-            let actualValue = filter.get_arg(argName);
-
-            // Normalize actualValue for serialization
-            // GPAC returns objects for fractions {n, d}, booleans, etc.
-            let normalizedValue = actualValue;
-            if (actualValue !== null && typeof actualValue === 'object') {
-                // Handle fraction objects - GPAC uses 'n' and 'd' properties
-                if ('n' in actualValue && 'd' in actualValue) {
-                    normalizedValue = actualValue.n + '/' + actualValue.d;
-                } else if ('num' in actualValue && 'den' in actualValue) {
-                    // Fallback for alternate format
-                    normalizedValue = actualValue.num + '/' + actualValue.den;
-                } else {
-                    // For other objects, try to stringify
-                    normalizedValue = JSON.stringify(actualValue);
-                }
-            } else if (typeof actualValue === 'boolean') {
-                normalizedValue = actualValue ? 'true' : 'false';
-            } else {
-                normalizedValue = String(actualValue);
-            }
-
-            print("Read-after-write: argument '" + argName + "' actual value is '" + normalizedValue + "'");
-
-            // Send success response with actual value
-            if (this.client.client) {
-                this.client.client.send(JSON.stringify({
-                    message: 'update_arg_response',
-                    idx: idx,
-                    argName: argName,
-                    requestedValue: newValue,
-                    actualValue: normalizedValue,
-                    success: true,
-                    error: null
-                }));
-            }
-        } catch (e) {
-            const errorMsg = "Failed to update argument: " + e.toString();
-            print("Error: " + errorMsg);
-
-            // Send error response
-            if (this.client.client) {
-                this.client.client.send(JSON.stringify({
-                    message: 'update_arg_response',
-                    idx: idx,
-                    argName: argName,
-                    requestedValue: newValue,
-                    actualValue: null,
-                    success: false,
-                    error: errorMsg
-                }));
-            }
-        }
+        this.argumentHandler.updateArgument(idx, name, argName, newValue);
     };
 
     this.addPngProbe = function(idx, name) {
