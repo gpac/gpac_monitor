@@ -108,6 +108,16 @@ const widgetsSlice = createSlice({
   initialState,
   reducers: {
     addWidget: (state, action: PayloadAction<Widget>) => {
+      // Vérifier si un widget de ce type existe déjà
+      const widgetExists = state.activeWidgets.some(
+        (w) => w.type === action.payload.type,
+      );
+
+      // Si le widget existe déjà, ne rien faire
+      if (widgetExists) {
+        return;
+      }
+
       state.activeWidgets.push(action.payload);
       state.configs[action.payload.id] = { ...defaultConfig };
     },

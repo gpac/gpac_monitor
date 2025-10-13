@@ -85,8 +85,13 @@ const AvailableWidgetButton = React.memo(function AvailableWidgetButton({
   return (
     <button
       onClick={() => onAdd(widget.type, widget.defaultSize)}
-      className="group w-full flex items-center gap-3 p-3 rounded-xl border border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:ring-offset-2 focus:ring-offset-gray-900 transition-opacity duration-150 ease-out active:translate-y-0 active:scale-[0.98]"
-      aria-label={`Add ${widget.title} widget to dashboard${isActive ? ' (currently active)' : ''}`}
+      disabled={isActive}
+      className={`group w-full flex items-center gap-3 p-3 rounded-xl border transition-opacity duration-150 ease-out ${
+        isActive
+          ? 'border-green-700/50 bg-gray-800/30 cursor-not-allowed opacity-60'
+          : 'border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-gray-300/50 focus:ring-offset-2 focus:ring-offset-gray-900 active:translate-y-0 active:scale-[0.98]'
+      }`}
+      aria-label={`${isActive ? 'Widget already active' : `Add ${widget.title} widget to dashboard`}`}
     >
       <div className="flex-shrink-0  p-1.5 rounded-lg bg-gray-700/50">
         <Icon className="w-4 h-4 text-gray-300 group-hover:text-blue-400 transition-colors duration-200" />
