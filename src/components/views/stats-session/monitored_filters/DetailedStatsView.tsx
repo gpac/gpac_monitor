@@ -108,20 +108,36 @@ const DetailedStatsView = memo(
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview">
+          <TabsContent
+            value="overview"
+            forceMount
+            className="data-[state=inactive]:hidden"
+          >
             <MemoizedOverviewTab filter={overviewData} />
           </TabsContent>
-          <TabsContent value="network">
+          <TabsContent
+            value="network"
+            forceMount
+            className="data-[state=inactive]:hidden"
+          >
             <MemoizedNetworkTab
               data={networkData}
               filterName={overviewData.name}
               refreshInterval={5000}
             />
           </TabsContent>
-          <TabsContent value="buffers">
+          <TabsContent
+            value="buffers"
+            forceMount
+            className="data-[state=inactive]:hidden"
+          >
             <MemoizedBuffersTab data={buffersData} />
           </TabsContent>
-          <TabsContent value="inputs">
+          <TabsContent
+            value="inputs"
+            forceMount
+            className="data-[state=inactive]:hidden"
+          >
             <MemoizedInputsTab
               filterData={
                 filterData || {
@@ -140,7 +156,11 @@ const DetailedStatsView = memo(
               filterName={overviewData.name}
             />
           </TabsContent>
-          <TabsContent value="outputs">
+          <TabsContent
+            value="outputs"
+            forceMount
+            className="data-[state=inactive]:hidden"
+          >
             <MemoizedOutputsTab
               filterData={
                 filterData || {
