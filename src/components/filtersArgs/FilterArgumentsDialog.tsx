@@ -316,14 +316,6 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = React.memo(
                       ? filter.gpac_args.find((a) => a.name === argName)
                       : null;
 
-                    // Log detailed information about the argument being updated
-                    console.log(`***Updating argument:`, {
-                      uiArgName: argName,
-                      actualArgName: arg?.name,
-                      argValue: value,
-                      argObject: arg,
-                    });
-
                     if (arg?.update) {
                       console.log(`***Dispatching updateFilterArgument:`, {
                         filterId: filter.idx.toString(),

@@ -7,12 +7,10 @@ import {
   NumberInput,
   StringInput,
   FractionInput,
-  EnumInput,
 } from '../filtersArgs/input';
 import { convertArgumentValue } from '../../utils/filtersArguments';
 import { updateFilterArgument } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch } from '@/shared/hooks/redux';
-import { isEnumArgument } from '../../utils/filtersArguments';
 import { FilterArgumentBase } from './types';
 
 interface FilterArgumentInputProps<
@@ -47,10 +45,23 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
       if (firstRender || localValue === value) return;
 
       try {
-        const convertedValue = convertArgumentValue(localValue, argument.type);
+        // Check if this is an enum argument
+        const isEnum =
+          argument.min_max_enum &&
+          (argument.min_max_enum.includes('|') ||
+            argument.min_max_enum.includes('='));
+
+        let convertedValue;
+        if (isEnum) {
+          // For enums: send text value directly (GPAC expects text values)
+          convertedValue = String(localValue);
+        } else {
+          // For other types: use standard conversion
+          convertedValue = convertArgumentValue(localValue, argument.type);
+        }
 
         // Call the parent onChange handler
-        onChange(convertedValue);
+        onChange(convertedValue as InputValue<T> | null);
 
         // If the argument is updatable and we have a filterId, dispatch the update action
         if (argument.update && filterId && !standalone) {
@@ -69,7 +80,7 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
       }
     },
     1000,
-    [localValue, filterId, argument.update],
+    [localValue, filterId, argument.update, argument.min_max_enum],
   );
 
   useEffect(() => {
@@ -82,13 +93,26 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
 
   // Handle immediate updates for boolean arguments when filterId is provided
   const handleImmediateUpdate = (newValue: any) => {
-    const convertedValue = convertArgumentValue(newValue, argument.type);
+    // Check if this is an enum argument
+    const isEnum =
+      argument.min_max_enum &&
+      (argument.min_max_enum.includes('|') ||
+        argument.min_max_enum.includes('='));
+
+    let convertedValue;
+    if (isEnum) {
+      // For enums: send text value directly (GPAC expects text values)
+      convertedValue = String(newValue);
+    } else {
+      // For other types: use standard conversion
+      convertedValue = convertArgumentValue(newValue, argument.type);
+    }
 
     // Update local value immediately
-    setLocalValue(convertedValue);
+    setLocalValue(convertedValue as InputValue<T>);
 
     // Call the parent onChange handler
-    onChange(convertedValue);
+    onChange(convertedValue as InputValue<T> | null);
 
     // If we have filterId and argument is updatable, dispatch immediately
     if (filterId && argument.update && !standalone) {
@@ -116,28 +140,15 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
       argument,
     };
 
-    if (
+    // If the argument is an enum, treat it as a string (like colleague's code)
+    const adjustedType =
       argument.min_max_enum &&
       (argument.min_max_enum.includes('|') ||
         argument.min_max_enum.includes('='))
-    ) {
-      if (isEnumArgument(argument)) {
-        return (
-          <EnumInput
-            value={localValue as string}
-            onChange={(newValue) => {
-              handleLocalChange(
-                newValue !== null ? newValue : argument.default || '',
-              );
-            }}
-            options={argument.min_max_enum || ''}
-            rules={inputProps.rules}
-          />
-        );
-      }
-    }
+        ? 'str'
+        : (argument.type as GPACArgumentType);
 
-    switch (argument.type as GPACArgumentType) {
+    switch (adjustedType) {
       case 'bool':
         return (
           <BooleanInput
@@ -178,9 +189,14 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
           />
         );
 
+      case 'str':
       default:
+        // For enums, pass min_max_enum as options
         return (
-          <StringInput {...(inputProps as FilterArgumentInputProps<'str'>)} />
+          <StringInput
+            {...(inputProps as FilterArgumentInputProps<'str'>)}
+            enumOptions={argument.min_max_enum}
+          />
         );
     }
   };

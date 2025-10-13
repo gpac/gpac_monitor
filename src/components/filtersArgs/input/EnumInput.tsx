@@ -20,6 +20,17 @@ export const EnumInput: React.FC<EnumInputProps> = ({
     return options.split('|').map((opt) => {
       const trimmedOpt = opt.trim();
 
+      // Handle format "key=value" (e.g., "0=no", "1=v")
+      if (trimmedOpt.includes('=')) {
+        const [key, value] = trimmedOpt.split('=');
+        return {
+          value: value.trim(), // Use the value part (e.g., "no", "v")
+          label: value.trim(),
+          key: key.trim(), // Keep the key for reference
+        };
+      }
+
+      // Simple value without key (e.g., "no", "v")
       return {
         value: trimmedOpt,
         label: trimmedOpt,

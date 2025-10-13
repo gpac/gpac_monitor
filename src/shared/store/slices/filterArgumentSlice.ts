@@ -4,7 +4,6 @@ import {
   createAsyncThunk,
   createSelector,
 } from '@reduxjs/toolkit';
-import { GpacMessage } from '@/types';
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
 import { RootState } from '../index';
@@ -80,24 +79,30 @@ export const updateFilterArgument = createAsyncThunk(
       };
       dispatch(setArgumentUpdateStatus(pendingUpdate));
 
-      // Send WebSocket message with correct filter name
-      const message: GpacMessage = {
-        type: 'update_arg',
-        idx: parseInt(filterId),
-        name: filterName, // Use the retrieved filter name
-        argName: argName,
-        newValue: argValue,
-      };
-      gpacService.sendMessage(message);
+      // Send update and wait for server response
+      const result = await gpacService.updateFilterArg(
+        parseInt(filterId),
+        filterName,
+        argName,
+        argValue,
+      );
 
-      // Set success status
-      const successUpdate: ArgumentUpdate = {
-        filterId,
-        name: argName,
-        value: argValue,
-        status: 'success',
-      };
-      dispatch(setArgumentUpdateStatus(successUpdate));
+      // Check result from server
+      if (result.success) {
+        // Set success status with actual value from server
+        const successUpdate: ArgumentUpdate = {
+          filterId,
+          name: argName,
+          value: result.actualValue,
+          status: 'success',
+        };
+        dispatch(setArgumentUpdateStatus(successUpdate));
+
+        return result;
+      } else {
+        // Server returned failure
+        throw new Error(result.error || 'Update failed on server');
+      }
     } catch (error) {
       console.error('Failed to update filter argument:', error);
 

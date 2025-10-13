@@ -139,6 +139,9 @@ export class BaseMessageHandler {
       case 'log_config_changed':
         this.handleLogConfigChangedMessage(data);
         break;
+      case 'update_arg_response':
+        this.handleUpdateArgResponseMessage(data);
+        break;
       default:
       // Unknown message type
     }
@@ -229,6 +232,10 @@ export class BaseMessageHandler {
     if (data.logLevel) {
       this.logHandler.handleLogConfigChanged(data.logLevel);
     }
+  }
+
+  private handleUpdateArgResponseMessage(data: any): void {
+    this.filterArgsHandler.handleUpdateArgResponse(data);
   }
 
   /**

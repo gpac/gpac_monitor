@@ -179,14 +179,18 @@ export class GpacService implements IGpacCommunication {
   }
 
   /**
-   * Update a filter argument
+   * Update a filter argument and wait for server confirmation
    */
   public async updateFilterArg(
     idx: number,
     name: string,
     argName: string,
     newValue: string | number | boolean,
-  ): Promise<void> {
+  ): Promise<{
+    success: boolean;
+    actualValue: any;
+    error?: string;
+  }> {
     if (!this.isLoaded()) {
       throw new Error('Service not loaded');
     }

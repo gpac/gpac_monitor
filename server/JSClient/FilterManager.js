@@ -134,7 +134,21 @@ function FilterManager(client, draned_once_ref) {
         let filter = session.get_filter('' + idx);
 
         if (!filter) {
-            print("Error: Filter with idx " + idx + " not found for update_arg.");
+            const errorMsg = "Filter with idx " + idx + " not found";
+            print("Error: " + errorMsg);
+
+            // Send error response to client
+            if (this.client.client) {
+                this.client.client.send(JSON.stringify({
+                    message: 'update_arg_response',
+                    idx: idx,
+                    argName: argName,
+                    requestedValue: newValue,
+                    actualValue: null,
+                    success: false,
+                    error: errorMsg
+                }));
+            }
             return;
         }
 
@@ -142,8 +156,66 @@ function FilterManager(client, draned_once_ref) {
             print("Warning: Discrepancy in filter names for idx " + idx + ". Expected '" + name + "', found '" + filter.name + "'. Proceeding with update.");
         }
 
-        print("Updating filter " + idx + " (" + filter.name + "), argument '" + argName + "' to '" + newValue + "'");
-        filter.update(argName, newValue);
+        try {
+            print("Updating filter " + idx + " (" + filter.name + "), argument '" + argName + "' to '" + newValue + "'");
+
+            // Apply the update
+            filter.update(argName, newValue);
+
+            // Read-after-write: verify the value was actually set
+            let actualValue = filter.get_arg(argName);
+
+            // Normalize actualValue for serialization
+            // GPAC returns objects for fractions {n, d}, booleans, etc.
+            let normalizedValue = actualValue;
+            if (actualValue !== null && typeof actualValue === 'object') {
+                // Handle fraction objects - GPAC uses 'n' and 'd' properties
+                if ('n' in actualValue && 'd' in actualValue) {
+                    normalizedValue = actualValue.n + '/' + actualValue.d;
+                } else if ('num' in actualValue && 'den' in actualValue) {
+                    // Fallback for alternate format
+                    normalizedValue = actualValue.num + '/' + actualValue.den;
+                } else {
+                    // For other objects, try to stringify
+                    normalizedValue = JSON.stringify(actualValue);
+                }
+            } else if (typeof actualValue === 'boolean') {
+                normalizedValue = actualValue ? 'true' : 'false';
+            } else {
+                normalizedValue = String(actualValue);
+            }
+
+            print("Read-after-write: argument '" + argName + "' actual value is '" + normalizedValue + "'");
+
+            // Send success response with actual value
+            if (this.client.client) {
+                this.client.client.send(JSON.stringify({
+                    message: 'update_arg_response',
+                    idx: idx,
+                    argName: argName,
+                    requestedValue: newValue,
+                    actualValue: normalizedValue,
+                    success: true,
+                    error: null
+                }));
+            }
+        } catch (e) {
+            const errorMsg = "Failed to update argument: " + e.toString();
+            print("Error: " + errorMsg);
+
+            // Send error response
+            if (this.client.client) {
+                this.client.client.send(JSON.stringify({
+                    message: 'update_arg_response',
+                    idx: idx,
+                    argName: argName,
+                    requestedValue: newValue,
+                    actualValue: null,
+                    success: false,
+                    error: errorMsg
+                }));
+            }
+        }
     };
 
     this.addPngProbe = function(idx, name) {
