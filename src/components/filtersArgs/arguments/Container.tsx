@@ -1,23 +1,18 @@
 import { cn } from '../../../utils/cn';
-import { forwardRef } from 'react';
+import React, { forwardRef } from 'react';
 import { LuX } from 'react-icons/lu';
 
 interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-  onClear?: (value: null) => void;
+  onClear?: () => void; // inutile de passer (value: null)
   disabled?: boolean;
 }
 
-export const Container = forwardRef(
-  (
-    { className, children, onClear, disabled, ...props }: ContainerProps,
-    ref: React.Ref<HTMLDivElement>,
-  ) => {
+export const Container = forwardRef<HTMLDivElement, ContainerProps>(
+  ({ className, children, onClear, disabled, ...props }, ref) => {
     return (
-      <div
-        ref={ref}
-        className="flex w-full overflow-hidden rounded-md border border-gray-700"
-      >
+      <div className="flex w-full overflow-hidden rounded-md border border-gray-700">
         <div
+          ref={ref}
           className={cn(
             'relative flex h-9 grow items-center transition-colors duration-150',
             'focus-within:border-blue-500/50 focus-within:bg-blue-900/10',
@@ -29,10 +24,11 @@ export const Container = forwardRef(
         >
           {children}
         </div>
+
         {onClear && !disabled && (
           <button
             type="button"
-            onClick={() => onClear(null)}
+            onClick={() => onClear()}
             className="px-2 hover:bg-gray-700"
             aria-label="Clear"
           >

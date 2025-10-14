@@ -79,30 +79,33 @@ export const updateFilterArgument = createAsyncThunk(
       };
       dispatch(setArgumentUpdateStatus(pendingUpdate));
 
-      // Send update and wait for server response
-      const result = await gpacService.updateFilterArg(
+      // Send update (fire-and-forget like colleague's code)
+      await gpacService.updateFilterArg(
         parseInt(filterId),
         filterName,
         argName,
         argValue,
       );
 
-      // Check result from server
-      if (result.success) {
-        // Set success status with actual value from server
-        const successUpdate: ArgumentUpdate = {
+      // Mark as success immediately after sending
+      const successUpdate: ArgumentUpdate = {
+        filterId,
+        name: argName,
+        value: argValue,
+        status: 'success',
+      };
+      dispatch(setArgumentUpdateStatus(successUpdate));
+
+      // Clear success status after 2 seconds but keep the value
+      setTimeout(() => {
+        const idleUpdate: ArgumentUpdate = {
           filterId,
           name: argName,
-          value: result.actualValue,
-          status: 'success',
+          value: argValue,
+          status: 'idle',
         };
-        dispatch(setArgumentUpdateStatus(successUpdate));
-
-        return result;
-      } else {
-        // Server returned failure
-        throw new Error(result.error || 'Update failed on server');
-      }
+        dispatch(setArgumentUpdateStatus(idleUpdate));
+      }, 2000);
     } catch (error) {
       console.error('Failed to update filter argument:', error);
 

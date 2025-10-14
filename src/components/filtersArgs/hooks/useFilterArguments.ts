@@ -25,7 +25,7 @@ export const useFilterArguments = (filterId: string, argumentName: string) => {
           await gpacService.sendMessage({
             type: 'update_arg',
             idx: parseInt(filterId),
-            argName: name,
+            argName: argumentName,
             newValue: localValue,
           });
         } catch (error) {

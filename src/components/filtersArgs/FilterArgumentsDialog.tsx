@@ -126,7 +126,11 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = React.memo(
                 update: !!arg.update,
                 update_sync: !!arg.update_sync,
               }}
-              value={hasChange ? pendingChanges[arg.name] : arg.value}
+              value={
+                hasChange
+                  ? pendingChanges[arg.name]
+                  : (updateStatus?.value ?? arg.value)
+              }
               onChange={(newValue) => {
                 handleValueChange(arg.name, newValue);
               }}
@@ -144,7 +148,7 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = React.memo(
           </div>
         );
       },
-      [filter.idx, pendingChanges, handleValueChange],
+      [filter.idx, pendingChanges, handleValueChange, argumentUpdates],
     );
 
     return (
@@ -191,105 +195,108 @@ const FilterArgumentsDialog: React.FC<FilterArgumentsDialogProps> = React.memo(
               )}
             >
               {Array.isArray(filter.gpac_args) &&
-                filter.gpac_args.map((arg, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      'bg-gray-700/30 rounded-lg p-4',
-                      'border border-gray-600/50',
-                      'transition-colors duration-200',
-                      'hover:bg-gray-700/50',
-                      arg.update ? 'border-green-500/20' : '',
-                      pendingChanges[arg.name] !== undefined
-                        ? 'border-blue-500/50 bg-blue-900/10'
-                        : '',
-                    )}
-                  >
-                    <div className="flex flex-col gap-2">
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-1">
-                          <h4 className="font-medium text-gray-100 flex items-center gap-2">
-                            {arg.name}
-                            {arg.update ? (
-                              <Badge variant="success" className="text-xs">
-                                Updatable
-                              </Badge>
-                            ) : (
-                              <Badge
-                                variant="outline"
-                                className="text-xs bg-gray-700/30 text-gray-400 border-gray-600/30"
-                              >
-                                Read-only
-                              </Badge>
+                filter.gpac_args.map((arg, index) => {
+                  const updateStatus = argumentUpdates?.[arg.name];
+                  return (
+                    <div
+                      key={index}
+                      className={cn(
+                        'bg-gray-700/30 rounded-lg p-4',
+                        'border border-gray-600/50',
+                        'transition-colors duration-200',
+                        'hover:bg-gray-700/50',
+                        arg.update ? 'border-green-500/20' : '',
+                        pendingChanges[arg.name] !== undefined
+                          ? 'border-blue-500/50 bg-blue-900/10'
+                          : '',
+                      )}
+                    >
+                      <div className="flex flex-col gap-2">
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-1">
+                            <h4 className="font-medium text-gray-100 flex items-center gap-2">
+                              {arg.name}
+                              {arg.update ? (
+                                <Badge variant="success" className="text-xs">
+                                  Updatable
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-gray-700/30 text-gray-400 border-gray-600/30"
+                                >
+                                  Read-only
+                                </Badge>
+                              )}
+                              {arg.update_sync && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs bg-blue-900/30 text-blue-400 border-blue-500/30"
+                                >
+                                  Sync
+                                </Badge>
+                              )}
+                            </h4>
+
+                            {arg.desc && (
+                              <p className="text-sm text-gray-400 max-w-[300px]">
+                                {arg.desc}
+                              </p>
                             )}
-                            {arg.update_sync && (
-                              <Badge
-                                variant="outline"
-                                className="text-xs bg-blue-900/30 text-blue-400 border-blue-500/30"
-                              >
-                                Sync
-                              </Badge>
+
+                            {arg.hint && (
+                              <p className="text-xs text-gray-500">
+                                Hint:{' '}
+                                <span className="font-mono">{arg.hint}</span>
+                              </p>
                             )}
-                          </h4>
 
-                          {arg.desc && (
-                            <p className="text-sm text-gray-400 max-w-[300px]">
-                              {arg.desc}
-                            </p>
-                          )}
+                            {arg.default !== undefined && (
+                              <p className="text-xs text-gray-500">
+                                Default:{' '}
+                                <span className="font-mono">
+                                  {String(arg.default)}
+                                </span>
+                              </p>
+                            )}
 
-                          {arg.hint && (
-                            <p className="text-xs text-gray-500">
-                              Hint:{' '}
-                              <span className="font-mono">{arg.hint}</span>
-                            </p>
-                          )}
+                            {arg.min_max_enum && (
+                              <p className="text-xs text-gray-500">
+                                Constraints:{' '}
+                                <span
+                                  className="font-mono max-w-[160px] inline-block  text-ellipsis whitespace-nowrap"
+                                  title={arg.min_max_enum}
+                                >
+                                  {arg.min_max_enum}
+                                </span>
+                              </p>
+                            )}
+                          </div>
 
-                          {arg.default !== undefined && (
-                            <p className="text-xs text-gray-500">
-                              Default:{' '}
-                              <span className="font-mono">
-                                {String(arg.default)}
-                              </span>
-                            </p>
-                          )}
-
-                          {arg.min_max_enum && (
-                            <p className="text-xs text-gray-500">
-                              Constraints:{' '}
-                              <span
-                                className="font-mono max-w-[160px] inline-block  text-ellipsis whitespace-nowrap"
-                                title={arg.min_max_enum}
-                              >
-                                {arg.min_max_enum}
-                              </span>
-                            </p>
-                          )}
-                        </div>
-
-                        <div
-                          className={cn(
-                            'text-sm font-mono px-2 py-1 rounded',
-                            pendingChanges[arg.name] !== undefined
-                              ? 'bg-blue-900/30 text-blue-300'
-                              : 'bg-gray-900/50',
-                          )}
-                        >
-                          <ArgumentDisplayValue
-                            value={
+                          <div
+                            className={cn(
+                              'text-sm font-mono px-2 py-1 rounded',
                               pendingChanges[arg.name] !== undefined
-                                ? pendingChanges[arg.name]
-                                : arg.value
-                            }
-                            isEditable={!!arg.update}
-                          />
+                                ? 'bg-blue-900/30 text-blue-300'
+                                : 'bg-gray-900/50',
+                            )}
+                          >
+                            <ArgumentDisplayValue
+                              value={
+                                pendingChanges[arg.name] !== undefined
+                                  ? pendingChanges[arg.name]
+                                  : (updateStatus?.value ?? arg.value)
+                              }
+                              isEditable={!!arg.update}
+                            />
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="mt-2">{renderArgumentInput(arg)}</div>
+                        <div className="mt-2">{renderArgumentInput(arg)}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
             </div>
           </div>
 

@@ -3,19 +3,6 @@ import { generateID } from '@/utils/id';
 import { MessageHandlerDependencies } from './types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { FilterArgument } from '@/types';
-import { convertEnumIndexToValue } from '@/utils/filtersArguments';
-
-interface UpdateArgResult {
-  success: boolean;
-  actualValue: any;
-  error?: string;
-}
-
-interface PendingUpdate {
-  resolve: (value: UpdateArgResult) => void;
-  reject: (error: Error) => void;
-  timeout: NodeJS.Timeout;
-}
 
 export class FilterArgsHandler {
   constructor(
@@ -32,9 +19,6 @@ export class FilterArgsHandler {
     number,
     UpdatableSubscribable<FilterArgument[]>
   >();
-
-  // Store pending update promises
-  private pendingUpdates = new Map<string, PendingUpdate>();
 
   private ensureLoaded(): boolean {
     if (!this.isLoaded()) {
@@ -123,28 +107,15 @@ export class FilterArgsHandler {
   }
 
   /**
-   * Update a filter argument and wait for server confirmation
+   * Update a filter argument (fire-and-forget like colleague's code)
    */
   public async updateFilterArg(
     idx: number,
     name: string,
     argName: string,
     newValue: string | number | boolean,
-  ): Promise<UpdateArgResult> {
+  ): Promise<void> {
     this.ensureLoaded();
-
-    const key = `${idx}_${argName}`;
-
-    // Create a promise that will be resolved when server responds
-    const promise = new Promise<UpdateArgResult>((resolve, reject) => {
-      // Set a timeout of 5 seconds
-      const timeout = setTimeout(() => {
-        this.pendingUpdates.delete(key);
-        reject(new Error('Update request timed out after 5 seconds'));
-      }, 5000);
-
-      this.pendingUpdates.set(key, { resolve, reject, timeout });
-    });
 
     try {
       this.log(
@@ -160,14 +131,9 @@ export class FilterArgsHandler {
         newValue,
       });
 
-      // Wait for server response
-      const result = await promise;
-
       this.log(
-        `Update result for '${argName}': success=${result.success}, actualValue=${result.actualValue}`,
+        `Successfully updated argument '${argName}' for filter ${name} (idx=${idx})`,
       );
-
-      return result;
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : String(error);
@@ -180,68 +146,10 @@ export class FilterArgsHandler {
   }
 
   /**
-   * Handle update_arg_response from server
+   * Handle update_arg_response from server (no longer used with fire-and-forget)
    */
-  public handleUpdateArgResponse(data: any): void {
-    if (!data.idx || !data.argName) {
-      this.log('Invalid update_arg_response: missing idx or argName', 'stderr');
-      return;
-    }
-
-    const key = `${data.idx}_${data.argName}`;
-    const pending = this.pendingUpdates.get(key);
-
-    if (!pending) {
-      this.log(`No pending update found for ${key}`, 'stderr');
-      return;
-    }
-
-    // Clear the timeout
-    clearTimeout(pending.timeout);
-
-    // Remove from pending
-    this.pendingUpdates.delete(key);
-
-    // Convert enum index to value if needed
-    let actualValue = data.actualValue;
-    if (data.success && actualValue !== undefined) {
-      const subscribable = this.filterArgsSubscribables.get(data.idx);
-      if (subscribable) {
-        const currentArgs = subscribable.getSnapshot();
-        const arg = currentArgs.find((a) => a.name === data.argName);
-
-        // If this is an enum argument, convert index to value
-        // Note: min_max_enum is sent from GPAC but not in the FilterArgument type
-        const minMaxEnum = (arg as any)?.min_max_enum;
-        if (minMaxEnum) {
-          actualValue = convertEnumIndexToValue(actualValue, minMaxEnum);
-          this.log(
-            `Converted enum index ${data.actualValue} to value '${actualValue}' for ${data.argName}`,
-          );
-        }
-      }
-    }
-
-    // Resolve the promise with converted value
-    const result: UpdateArgResult = {
-      success: data.success,
-      actualValue: actualValue,
-      error: data.error,
-    };
-
-    pending.resolve(result);
-
-    // If successful, update the local cache with converted value
-    if (data.success && actualValue !== undefined) {
-      const subscribable = this.filterArgsSubscribables.get(data.idx);
-      if (subscribable) {
-        const currentArgs = subscribable.getSnapshot();
-        const updatedArgs = currentArgs.map((arg) =>
-          arg.name === data.argName ? { ...arg, value: actualValue } : arg,
-        );
-        subscribable.updateDataAndNotify(updatedArgs);
-      }
-    }
+  public handleUpdateArgResponse(_data: any): void {
+    // No-op: we use fire-and-forget approach now
   }
 
   private log(message: string, type: 'stdout' | 'stderr' = 'stdout'): void {
