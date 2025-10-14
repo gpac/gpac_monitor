@@ -14,8 +14,11 @@ import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import {
   selectAllLogCountsByTool,
   selectCriticalLogCountsByTool,
+  selectUIFilter,
+  selectViewMode,
 } from '@/shared/store/selectors/logsSelectors';
 import { selectCriticalLogsCount } from '@/shared/store/selectors/logsFilterSelectors';
+import { clearUIFilter } from '@/shared/store/slices/logsSlice';
 import { useLogsService } from './hooks/useLogsService';
 import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/Tool/ToolSettingsDropdown';
@@ -69,6 +72,10 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   // Get critical logs count (warnings + errors only)
   const criticalLogsCount = useAppSelector(selectCriticalLogsCount);
 
+  // Get UI filter (if active)
+  const uiFilter = useAppSelector(selectUIFilter);
+  const viewMode = useAppSelector(selectViewMode);
+
   // Initialize logs subscription (uses config from Redux store via useLogsService)
   useLogs({
     enabled: true,
@@ -116,8 +123,35 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
     }
   }, [highlightedLogId, visibleLogs]);
 
-  const statusBadge = useMemo(
-    () => (
+  const statusBadge = useMemo(() => {
+    // Global Filter mode: show "all@level" badge with distinctive styling
+    if (viewMode === 'globalFilter' && uiFilter && uiFilter.length > 0) {
+      const levelStr = uiFilter[0].toLowerCase();
+      const colorClasses = {
+        error: 'text-danger',
+        warning: 'text-warning',
+        info: 'text-info',
+        debug: 'text-debug',
+        quiet: 'text-muted',
+      };
+
+      return (
+        <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-gray-700 bg-gray-800/80 font-ui">
+          <span className="text-xs">🌐</span>
+          <span
+            className={`text-sm font-medium ${colorClasses[levelStr as keyof typeof colorClasses] || 'text-info'}`}
+          >
+            all@{levelStr}
+          </span>
+          <span className="text-xs tabular-nums text-muted">
+            ({visibleLogs.length})
+          </span>
+        </div>
+      );
+    }
+
+    // Per-tool mode: show normal ToolSwitcher
+    return (
       <ToolSwitcher
         currentTool={currentTool}
         levelsByTool={levelsByTool}
@@ -131,21 +165,23 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
         onClearFilter={clearFilter}
         onSelectAllTools={selectAllTools}
       />
-    ),
-    [
-      currentTool,
-      levelsByTool,
-      defaultAllLevel,
-      criticalLogsCount,
-      allLogCountsByTool,
-      criticalLogCountsByTool,
-      visibleToolsFilter,
-      setTool,
-      toggleToolFilter,
-      clearFilter,
-      selectAllTools,
-    ],
-  );
+    );
+  }, [
+    viewMode,
+    uiFilter,
+    visibleLogs.length,
+    currentTool,
+    levelsByTool,
+    defaultAllLevel,
+    criticalLogsCount,
+    allLogCountsByTool,
+    criticalLogCountsByTool,
+    visibleToolsFilter,
+    setTool,
+    toggleToolFilter,
+    clearFilter,
+    selectAllTools,
+  ]);
 
   return (
     <WidgetWrapper
@@ -153,19 +189,31 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
       title={title}
       statusBadge={statusBadge}
       customActions={
-        <CustomTooltip
-          content="Configure log levels for each tool"
-          side="bottom"
-        >
-          <ToolSettingsDropdown
-            levelsByTool={levelsByTool}
-            defaultAllLevel={defaultAllLevel}
-            currentTool={currentTool}
-            onToolLevelChange={setToolLevel}
-            onDefaultAllLevelChange={setDefaultLevel}
-            onToolNavigate={setTool}
-          />
-        </CustomTooltip>
+        <div className="flex items-center gap-2">
+          {uiFilter && (
+            <CustomTooltip content="Clear UI filter" side="bottom">
+              <button
+                onClick={() => dispatch(clearUIFilter())}
+                className="px-2 py-1 text-xs rounded bg-red-900/30 border border-red-800/50 text-red-200 hover:bg-red-900/50 transition-colors"
+              >
+                Clear Filter
+              </button>
+            </CustomTooltip>
+          )}
+          <CustomTooltip
+            content="Configure log levels for each tool"
+            side="bottom"
+          >
+            <ToolSettingsDropdown
+              levelsByTool={levelsByTool}
+              defaultAllLevel={defaultAllLevel}
+              currentTool={currentTool}
+              onToolLevelChange={setToolLevel}
+              onDefaultAllLevelChange={setDefaultLevel}
+              onToolNavigate={setTool}
+            />
+          </CustomTooltip>
+        </div>
       }
     >
       <div className="flex flex-col h-full bg-stat stat">

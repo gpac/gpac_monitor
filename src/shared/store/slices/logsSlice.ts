@@ -6,6 +6,9 @@ import {
 } from '@/types/domain/gpac/log-types';
 import { LogId } from '@/components/views/logs/utils/logIdentifier';
 
+/** View mode for LogMonitor UI */
+export type LogViewMode = 'perTool' | 'globalFilter';
+
 /** Redux state for  logs management with per-tool levels and buffers */
 interface LogsState {
   currentTool: GpacLogTool;
@@ -16,6 +19,8 @@ interface LogsState {
   maxEntriesPerTool: number;
   isSubscribed: boolean;
   highlightedLogId: LogId | null; // ID of the currently highlighted log (session only)
+  uiFilter: GpacLogLevel[] | null; // UI-only filter (e.g., [ERROR] or [ERROR, WARNING])
+  viewMode: LogViewMode; // Current view mode (perTool or globalFilter)
   lastSentConfig: {
     levelsByTool: Record<GpacLogTool, GpacLogLevel>;
     defaultAllLevel: GpacLogLevel | null; // null means no config sent yet
@@ -40,6 +45,8 @@ const getInitialState = (): LogsState => {
       maxEntriesPerTool: 5000,
       isSubscribed: false,
       highlightedLogId: null,
+      uiFilter: null,
+      viewMode: 'perTool' as LogViewMode,
       lastSentConfig: {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
         defaultAllLevel: null, // Indicates no config has been sent yet
@@ -55,6 +62,8 @@ const getInitialState = (): LogsState => {
       maxEntriesPerTool: 5000,
       isSubscribed: false,
       highlightedLogId: null,
+      uiFilter: null,
+      viewMode: 'perTool' as LogViewMode,
       lastSentConfig: {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
         defaultAllLevel: null, // Indicates no config has been sent yet
@@ -246,6 +255,18 @@ const logsSlice = createSlice({
     setHighlightedLog: (state, action: PayloadAction<LogId | null>) => {
       state.highlightedLogId = action.payload;
     },
+
+    /** Set UI-only filter for log levels (doesn't affect backend config) */
+    setUIFilter: (state, action: PayloadAction<GpacLogLevel[]>) => {
+      state.uiFilter = action.payload;
+      state.viewMode = 'globalFilter'; // Switch to global filter mode
+    },
+
+    /** Clear UI-only filter (show all logs according to config) */
+    clearUIFilter: (state) => {
+      state.uiFilter = null;
+      state.viewMode = 'perTool'; // Return to per-tool mode
+    },
   },
 });
 
@@ -265,6 +286,8 @@ export const {
   restoreConfig,
   markConfigAsSent,
   setHighlightedLog,
+  setUIFilter,
+  clearUIFilter,
 } = logsSlice.actions;
 
 export default logsSlice.reducer;

@@ -37,43 +37,58 @@ export const WidgetButton: React.FC<WidgetButtonProps> = ({
         h: defaultSize.h,
         isResizable: true,
         isDraggable: true,
-      })
+      }),
     );
   };
 
   return (
     <button
       onClick={handleAddWidget}
-      className={`
-        w-full flex items-center justify-between p-3 rounded-lg
-        transition-all duration-200 ease-out
-        focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-gray-900
-        ${
-          isActive
-            ? 'bg-gray-700/30 border border-blue-800/50 hover:bg-blue-900/40'
-            : 'bg-gray-950/50 border border-gray-700/30 hover:bg-gray-800/70 hover:border-gray-600/50'
-        }
-      `}
       aria-label={`Add ${title} widget to dashboard`}
+      className={`
+      group w-full flex items-center justify-between p-3 rounded-lg
+      transition-all duration-150 ease-out
+      focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-2 focus:ring-offset-black
+
+      ${
+        isActive
+          ? 'bg-slate-800. border text-emerald-500 shadow-[inset_0_0_0_1px_rgba(16,185,129,.25)]'
+          : 'bg-slate-950/60 border border-slate-700/40 hover:bg-slate-800/80 hover:border-slate-500/50'
+      }
+    `}
     >
       <div className="flex items-center font-cond gap-3">
-        <Icon className={`w-5 h-5 ${isActive ? 'text-blue-400' : 'text-gray-400'}`} />
-        <span className={`text-sm font-medium ${isActive ? 'text-blue-200' : 'text-gray-300'}`}>
+        <Icon
+          className={`w-5 h-5
+          ${
+            isActive
+              ? 'text-emerald-400' // accent clair = état actif évident
+              : 'text-slate-300 group-hover:text-slate-100' /* meilleur contraste qu’un gray-400 */
+          }`}
+        />
+        <span
+          className={`text-sm font-medium
+          ${
+            isActive
+              ? 'text-slate-100'
+              : 'text-slate-300 group-hover:text-slate-100'
+          }`}
+        >
           {title}
         </span>
       </div>
 
       <div className="flex items-center gap-2">
         {isActive && (
-          <div className="flex items-center gap-1 text-xs text-green-400">
+          <div className="flex items-center gap-1 text-xs text-emerald-400">
             <FiCheck className="w-3 h-3" />
             <span className="hidden font-cond sm:inline">Active</span>
           </div>
         )}
         <FiPlus
-          className={`w-4 h-4 transition-transform group-hover:scale-110 ${
-            isActive ? 'hidden' : 'text-gray-500'
-          }`}
+          className={`w-4 h-4 transition-transform group-hover:scale-110
+          ${isActive ? 'hidden' : 'text-slate-400 group-hover:text-slate-100'}
+        `}
         />
       </div>
     </button>

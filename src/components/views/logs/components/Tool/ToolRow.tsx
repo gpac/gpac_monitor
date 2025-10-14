@@ -34,20 +34,21 @@ export const ToolRow = memo(function ToolRow({
 }: ToolRowProps) {
   return (
     <div
-      className="flex items-center py-2 px-3 text-gray-200 text-xs bg-gray-900"
+      className="flex items-center px-3 py-2 text-xs
+        text-slate-200 bg-slate-900
+        hover:bg-slate-800/60 transition-colors"
       style={{ overflow: 'visible' }}
     >
       <span
-        className={`font-light cursor-pointer transition-opacity duration-200 px-1 py-1 w-1/2 ${
-          isCurrentTool
-            ? 'text-gray-100 bg-gray-800 rounded-lg font-medium'
-            : ''
-        }`}
         onClick={() => onToolNavigate(tool)}
+        className={`w-1/2 px-1 py-1 cursor-pointer transition
+          ${
+            isCurrentTool
+              ? 'text-slate-100 bg-slate-800 rounded-lg font-medium ring-1 ring-emerald-700/40'
+              : 'text-slate-300 hover:text-slate-100'
+          }`}
       >
-        <span className="hover:text-blue-200 hover:opacity-80 inline-block transition-opacity duration-200">
-          {displayName}
-        </span>
+        <span className="inline-block">{displayName}</span>
       </span>
 
       <div className="w-1/2 flex justify-end">
@@ -55,41 +56,48 @@ export const ToolRow = memo(function ToolRow({
           <DropdownMenuSubTrigger className="p-0 h-auto">
             <Badge
               variant="logs"
-              className={`cursor-pointer transition-opacity duration-200 ${LEVEL_BADGE_CLASSES[effectiveLevel]}`}
+              className={`cursor-pointer transition
+                ring-1 ring-slate-700/40
+                ${LEVEL_BADGE_CLASSES[effectiveLevel]}
+                `}
             >
               {effectiveLevel}
             </Badge>
           </DropdownMenuSubTrigger>
+
           <DropdownMenuSubContent
-            className="bg-gray-950"
+            className="bg-slate-950/95 border border-slate-700/50
+              shadow-lg shadow-black/40 rounded-md"
             onMouseLeave={onMouseLeaveSubMenu}
           >
-            {Object.values(GpacLogLevel).map((level) => (
-              <DropdownMenuItem
-                key={level}
-                className={`cursor-pointer transition-opacity duration-200 ${
-                  effectiveLevel === level
-                    ? 'bg-accent text-accent-foreground'
-                    : ''
-                }`}
-                onSelect={(e) => {
-                  e.preventDefault();
-                  onLevelSelect(level);
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`w-3 h-3 rounded-full opacity-80 ${LEVEL_BADGE_CLASSES[level].split(' ')[0]}`}
-                  />
-                  <span className="capitalize">{level}</span>
-                  {effectiveLevel === level && (
-                    <span className="ml-auto text-xs text-muted-foreground">
-                      Current
-                    </span>
-                  )}
-                </div>
-              </DropdownMenuItem>
-            ))}
+            {Object.values(GpacLogLevel).map((level) => {
+              const isSelected = effectiveLevel === level;
+              return (
+                <DropdownMenuItem
+                  key={level}
+                  className={`cursor-pointer text-sm
+                    text-slate-200 hover:bg-slate-800/60
+                    ${isSelected ? 'bg-emerald-500/10 text-emerald-300' : ''}`}
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    onLevelSelect(level);
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-3 h-3 rounded-full
+                        ${isSelected ? 'bg-emerald-400' : LEVEL_BADGE_CLASSES[level].split(' ')[0]}`}
+                    />
+                    <span className="capitalize">{level}</span>
+                    {isSelected && (
+                      <span className="ml-auto text-[11px] text-slate-400">
+                        Current
+                      </span>
+                    )}
+                  </div>
+                </DropdownMenuItem>
+              );
+            })}
           </DropdownMenuSubContent>
         </DropdownMenuSub>
       </div>

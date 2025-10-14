@@ -30,6 +30,18 @@ export const selectVisibleToolsFilter = createSelector(
   (logsState) => logsState.visibleToolsFilter,
 );
 
+/** Get the UI-only filter (view layer) */
+export const selectUIFilter = createSelector(
+  [selectLogsState],
+  (logsState) => logsState.uiFilter,
+);
+
+/** Get the current view mode (perTool or globalFilter) */
+export const selectViewMode = createSelector(
+  [selectLogsState],
+  (logsState) => logsState.viewMode,
+);
+
 /** Check if the logs WebSocket subscription is active */
 export const selectIsSubscribed = createSelector(
   [selectLogsState],

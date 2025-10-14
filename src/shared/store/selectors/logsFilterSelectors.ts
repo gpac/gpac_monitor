@@ -1,10 +1,15 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { GpacLogEntry, GpacLogLevel } from '@/types/domain/gpac/log-types';
+import {
+  GpacLogEntry,
+  GpacLogLevel,
+  LOG_LEVEL_VALUES,
+} from '@/types/domain/gpac/log-types';
 import {
   selectLogsState,
   selectLevelsByTool,
   selectDefaultAllLevel,
   selectVisibleToolsFilter,
+  selectUIFilter,
 } from './logsSelectors';
 
 /** Filter log entries based on log level hierarchy */
@@ -36,13 +41,15 @@ export const selectVisibleLogs = createSelector(
     selectLevelsByTool,
     selectDefaultAllLevel,
     selectVisibleToolsFilter,
+    selectUIFilter,
   ],
-  (logsState, levelsByTool, defaultAllLevel, visibleToolsFilter) => {
+  (logsState, levelsByTool, defaultAllLevel, visibleToolsFilter, uiFilter) => {
     let rawLogs: GpacLogEntry[];
 
-    // Check if we're in ALL mode (multiple tools) or single tool mode
-    // ALL mode requires MORE THAN ONE tool selected (align with ToolSwitcher logic)
-    const isAllMode = visibleToolsFilter && visibleToolsFilter.length > 1;
+    // UI Filter active = force ALL mode (show logs from ALL configured tools)
+    const isUIFilterActive = uiFilter && uiFilter.length > 0;
+    const isAllMode =
+      isUIFilterActive || (visibleToolsFilter && visibleToolsFilter.length > 1);
 
     if (isAllMode) {
       // ALL mode: show logs from all tools
@@ -56,20 +63,26 @@ export const selectVisibleLogs = createSelector(
         )
         .flat()
         .sort((a, b) => a.timestamp - b.timestamp);
+    } else {
+      // Single tool selected - get only logs from that tool
+      rawLogs = logsState.buffers[logsState.currentTool] || [];
 
-      return rawLogs;
+      // For specific tools, get effective level and filter
+      // Use the tool's configured level if it exists, otherwise use the default
+      const effectiveLevel =
+        levelsByTool[logsState.currentTool] ?? defaultAllLevel;
+
+      // Filter by effective level (preserving history in buffers)
+      rawLogs = filterLogsByLevel(rawLogs, effectiveLevel);
     }
 
-    // Single tool selected - get only logs from that tool
-    rawLogs = logsState.buffers[logsState.currentTool] || [];
+    // Apply UI filter (Layer 2: view layer) if present
+    if (isUIFilterActive) {
+      const allowedLevels = uiFilter.map((level) => LOG_LEVEL_VALUES[level]);
+      rawLogs = rawLogs.filter((log) => allowedLevels.includes(log.level));
+    }
 
-    // For specific tools, get effective level and filter
-    // Use the tool's configured level if it exists, otherwise use the default
-    const effectiveLevel =
-      levelsByTool[logsState.currentTool] ?? defaultAllLevel;
-
-    // Filter by effective level (preserving history in buffers)
-    return filterLogsByLevel(rawLogs, effectiveLevel);
+    return rawLogs;
   },
 );
 

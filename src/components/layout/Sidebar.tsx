@@ -1,22 +1,8 @@
-import React, { useCallback, useMemo } from 'react';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import {
-  addWidget,
-  selectActiveWidgets,
-} from '@/shared/store/slices/widgetsSlice';
-import { selectLogCounts } from '@/shared/store/selectors/sidebarSelectors';
-import { WidgetType } from '@/types/ui/widget';
-
-import { LuGauge, LuVolume2, LuFileText, LuShare2 } from 'react-icons/lu';
-import { FiLayout } from 'react-icons/fi';
-import {
-  FaInfoCircle,
-  FaExclamationTriangle,
-  FaTimesCircle,
-} from 'react-icons/fa';
+import React from 'react';
+import LogCounters from './LogCounters';
 
 // Memoized log level configurations to avoid re-computation
-const LOG_LEVEL_CONFIGS = {
+/* const LOG_LEVEL_CONFIGS = {
   error: {
     icon: FaTimesCircle,
     label: 'Errors',
@@ -71,8 +57,8 @@ const LOG_LEVEL_CONFIGS = {
       'text-sm font-bold px-2 py-1 rounded-md bg-gray-700/50 text-gray-400',
   },
 } as const;
-
-
+ */
+/*
 const CountBadge = React.memo(function CountBadge({
   count,
   active,
@@ -85,9 +71,9 @@ const CountBadge = React.memo(function CountBadge({
   return (
     <span className={active ? classes.active : classes.inactive}>{count}</span>
   );
-});
+}); */
 
-const LogLevelButton = React.memo(
+/* const LogLevelButton = React.memo(
   function LogLevelButton({
     level,
     count,
@@ -132,14 +118,10 @@ const LogLevelButton = React.memo(
     return prevProps.count === nextProps.count;
   },
 );
-
+ */
 
 const Sidebar: React.FC = () => {
-
   // Create a Set of active widget types for fast lookup
-
-
-
 
   return (
     <aside
@@ -147,18 +129,11 @@ const Sidebar: React.FC = () => {
       role="complementary"
       aria-label="Dashboard widgets sidebar"
     >
-      <div className="p-6 pb-4 ">
-        <h2 className="text-xl font-bold text-white mb-2 tracking-tight">
-          Dashboard
-        </h2>
-      </div>
-
-
-
-      <div className="p-6 pt-4 border-t border-gray-800">
-        <div className="text-xs text-gray-500 text-center">
-
+      <div className="p-4">
+        <div className="text-xs font-medium text-muted mb-2 uppercase tracking-wider">
+          Logs Monitor
         </div>
+        <LogCounters />
       </div>
     </aside>
   );

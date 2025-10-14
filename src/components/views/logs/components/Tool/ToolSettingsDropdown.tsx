@@ -38,11 +38,8 @@ export const ToolSettingsDropdown = memo(
 
       const handleLevelChange = useCallback(
         (tool: GpacLogTool, level: GpacLogLevel) => {
-          if (tool === GpacLogTool.ALL) {
-            onDefaultAllLevelChange(level);
-          } else {
-            onToolLevelChange(tool, level);
-          }
+          if (tool === GpacLogTool.ALL) onDefaultAllLevelChange(level);
+          else onToolLevelChange(tool, level);
           setOpenSubMenu(null);
         },
         [onToolLevelChange, onDefaultAllLevelChange],
@@ -58,7 +55,6 @@ export const ToolSettingsDropdown = memo(
             defaultAllLevel,
           );
           const isCurrentTool = tool === currentTool;
-
           return {
             tool,
             effectiveLevel,
@@ -68,7 +64,6 @@ export const ToolSettingsDropdown = memo(
         });
       }, [sortedTools, levelsByTool, defaultAllLevel, currentTool]);
 
-      // Handle level changes with duplicate prevention
       const handleLevelSelect = useCallback(
         (tool: GpacLogTool, level: GpacLogLevel) => {
           const currentLevel = getEffectiveLevel(
@@ -76,11 +71,8 @@ export const ToolSettingsDropdown = memo(
             levelsByTool,
             defaultAllLevel,
           );
-          if (currentLevel !== level) {
-            handleLevelChange(tool, level);
-          } else {
-            setOpenSubMenu(null);
-          }
+          if (currentLevel !== level) handleLevelChange(tool, level);
+          else setOpenSubMenu(null);
         },
         [handleLevelChange, levelsByTool, defaultAllLevel],
       );
@@ -88,7 +80,17 @@ export const ToolSettingsDropdown = memo(
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button ref={ref} variant="ghost" size="sm" className="h-7 w-7 p-0">
+            <Button
+              ref={ref}
+              variant="ghost"
+              size="sm"
+              className="h-7 w-7 p-0 rounded-md
+              text-slate-300 hover:text-slate-100
+              hover:bg-slate-800/60
+              focus-visible:ring-2 focus-visible:ring-emerald-500/40
+              focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+              aria-label="Open logs settings"
+            >
               <IoSettings className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
@@ -97,23 +99,28 @@ export const ToolSettingsDropdown = memo(
             align="end"
             side="bottom"
             sideOffset={6}
-            avoidCollisions={true}
-            className="w-56 max-h-80 overflow-y-auto p-0 border-transparent z-50 border border-gray-700"
+            avoidCollisions
             onScroll={() => setOpenSubMenu(null)}
+            className="z-50 w-64 max-h-80 overflow-y-auto p-0
+            rounded-xl border border-slate-700/50
+            bg-slate-950/90 backdrop-blur
+            shadow-xl shadow-black/50"
           >
-            <div className="relative font-cond text-gray-300">
-              {/* Sticky Headers */}
-              <div className="sticky top-0 w-full z-10 border-b border-gray-600 bg-gray-900 flex flex-col">
-                <div className="px-3 py-2 text-sm font-normal text-muted-foreground">
+            <div className="relative font-cond text-slate-200 text-xs">
+              {/* Sticky header */}
+              <div
+                className="sticky top-0 z-10 w-full flex flex-col
+                bg-slate-900/95 border-b border-slate-700/50"
+              >
+                <div className="px-3 py-2 text-sm text-slate-300">
                   Logs Configuration
                 </div>
                 <DropdownMenuSeparator />
-
                 <div
-                  className="flex items-center justify-between text-xs font-medium text-muted-foreground px-8 py-2"
+                  className="flex items-center justify-between px-8 py-2 text-[11px] font-medium text-slate-400"
                   style={{
                     background:
-                      'linear-gradient(to right, transparent 49%, #4b5563 49%, #4b5563 51%, transparent 51%)',
+                      'linear-gradient(to right, transparent 49%, rgba(148,163,184,.6) 49%, rgba(148,163,184,.6) 51%, transparent 51%)',
                   }}
                 >
                   <span>Tool</span>
