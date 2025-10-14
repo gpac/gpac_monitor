@@ -35,20 +35,7 @@ function ArgumentHandler(client) {
         let filter = session.get_filter('' + idx);
 
         if (!filter) {
-            const errorMsg = "Filter with idx " + idx + " not found";
-            print("Error: " + errorMsg);
-
-            if (this.client.client) {
-                this.client.client.send(JSON.stringify({
-                    message: 'update_arg_response',
-                    idx: idx,
-                    argName: argName,
-                    requestedValue: newValue,
-                    actualValue: null,
-                    success: false,
-                    error: errorMsg
-                }));
-            }
+            print("Error: Filter with idx " + idx + " not found");
             return;
         }
 
@@ -64,52 +51,10 @@ function ArgumentHandler(client) {
 
             filter.update(argName, newValue);
 
-            let actualValue = filter.get_arg(argName);
-
-            let normalizedValue = actualValue;
-            if (actualValue !== null && typeof actualValue === 'object') {
-                if ('n' in actualValue && 'd' in actualValue) {
-                    normalizedValue = actualValue.n + '/' + actualValue.d;
-                } else if ('num' in actualValue && 'den' in actualValue) {
-                    normalizedValue = actualValue.num + '/' + actualValue.den;
-                } else {
-                    normalizedValue = JSON.stringify(actualValue);
-                }
-            } else if (typeof actualValue === 'boolean') {
-                normalizedValue = actualValue ? 'true' : 'false';
-            } else {
-                normalizedValue = String(actualValue);
-            }
-
-            print("Read-after-write: argument '" + argName +
-                  "' actual value is '" + normalizedValue + "'");
-
-            if (this.client.client) {
-                this.client.client.send(JSON.stringify({
-                    message: 'update_arg_response',
-                    idx: idx,
-                    argName: argName,
-                    requestedValue: newValue,
-                    actualValue: normalizedValue,
-                    success: true,
-                    error: null
-                }));
-            }
+            print("Successfully updated argument '" + argName +
+                  "' for filter " + filter.name + " (idx=" + idx + ")");
         } catch (e) {
-            const errorMsg = "Failed to update argument: " + e.toString();
-            print("Error: " + errorMsg);
-
-            if (this.client.client) {
-                this.client.client.send(JSON.stringify({
-                    message: 'update_arg_response',
-                    idx: idx,
-                    argName: argName,
-                    requestedValue: newValue,
-                    actualValue: null,
-                    success: false,
-                    error: errorMsg
-                }));
-            }
+            print("Error: Failed to update argument: " + e.toString());
         }
     };
 }

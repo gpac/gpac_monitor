@@ -72,7 +72,7 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
         onClick={handleToggle}
       >
         <logData.IconComponent className={logData.iconClass} />
-        <div className="flex-1 stat overflow-hidden">
+        <div className="flex-1 stat overflow-hidden font-mono">
           <div className="flex items-center gap-2 text-xs">
             <span className="text-gray-400 shrink-0">{logData.time}</span>
             <span className={`shrink-0 ${logData.style}`}>

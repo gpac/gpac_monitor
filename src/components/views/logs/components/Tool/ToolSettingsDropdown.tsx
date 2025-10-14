@@ -98,12 +98,12 @@ export const ToolSettingsDropdown = memo(
             side="bottom"
             sideOffset={6}
             avoidCollisions={true}
-            className="w-56 max-h-80 overflow-y-auto p-0"
+            className="w-56 max-h-80 overflow-y-auto p-0 border-transparent z-50 border border-gray-700"
             onScroll={() => setOpenSubMenu(null)}
           >
-            <div className="relative">
+            <div className="relative font-cond text-gray-300">
               {/* Sticky Headers */}
-              <div className="sticky top-0 w-full z-10 border-b border-gray-600 bg-gray-800 flex flex-col">
+              <div className="sticky top-0 w-full z-10 border-b border-gray-600 bg-gray-900 flex flex-col">
                 <div className="px-3 py-2 text-sm font-normal text-muted-foreground">
                   Logs Configuration
                 </div>

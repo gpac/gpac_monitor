@@ -34,7 +34,7 @@ export const ToolRow = memo(function ToolRow({
 }: ToolRowProps) {
   return (
     <div
-      className="flex items-center py-2 px-3 text-gray-200 text-xs bg-gray-950"
+      className="flex items-center py-2 px-3 text-gray-200 text-xs bg-gray-900"
       style={{ overflow: 'visible' }}
     >
       <span

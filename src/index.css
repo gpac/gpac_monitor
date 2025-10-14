@@ -32,7 +32,30 @@
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --font-ui: "Inter var", Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, "Liberation Mono", Consolas, monospace;
   }
+}
+
+
+
+
+html {
+  font-family: var(--font-ui);
+  font-size: 14px;          /* 13–14px pour dashboards denses */
+  line-height: 1.35;
+  font-optical-sizing: auto; /* active les axes optiques des variables */
+}
+
+.metrics, .table td, .gauge .value {
+  font-variant-numeric: tabular-nums slashed-zero; /* chiffres alignés + zéro barré */
+  letter-spacing: 0.1px;      /* stabilise le scintillement des chiffres */
+}
+
+.code, .logs {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-variant-ligatures: none; /* évite les ligatures en logs si tu ne veux pas de glyphes ↦ */
 }
 
 @layer components {
