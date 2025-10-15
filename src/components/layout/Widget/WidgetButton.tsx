@@ -52,8 +52,8 @@ export const WidgetButton: React.FC<WidgetButtonProps> = ({
 
       ${
         isActive
-          ? 'bg-slate-800. border text-emerald-500 shadow-[inset_0_0_0_1px_rgba(16,185,129,.25)]'
-          : 'bg-slate-950/60 border border-slate-700/40 hover:bg-slate-800/80 hover:border-slate-500/50'
+          ? 'bg-slate-800 border-transparent text-emerald-500 shadow-[inset_0_0_0_1px_rgba(16,185,129,.25)]'
+          : ' bg-slate-950/50border-transparent text-subtle hover:bg-slate-800/80 hover:border-slate-500/50'
       }
     `}
     >
@@ -62,8 +62,8 @@ export const WidgetButton: React.FC<WidgetButtonProps> = ({
           className={`w-5 h-5
           ${
             isActive
-              ? 'text-emerald-400' // accent clair = état actif évident
-              : 'text-slate-300 group-hover:text-slate-100' /* meilleur contraste qu’un gray-400 */
+              ? 'text-emerald-400'
+              : 'text-muted group-hover:text-slate-100'
           }`}
         />
         <span
