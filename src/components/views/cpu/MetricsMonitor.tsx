@@ -1,12 +1,17 @@
-import React, { useState, useDeferredValue, useMemo, useCallback } from 'react';
+import React, { useState, useDeferredValue, useMemo } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 
 import { CPUChart } from './components/CPUChart';
 import { CPUOverview } from './components/CPUOverview';
-import { LiveToggle } from './components/LiveToggle';
+
 import { MemoryChart } from './components/MemoryChart';
 import { useCPUStats } from './hooks/useCPUStats';
 import WidgetWrapper from '@/components/common/WidgetWrapper';
+import {
+  CPUHistoryBadge,
+  useHistoryDuration,
+  getMaxPointsFromDuration,
+} from './components/CPUHistoryBadge';
 
 // Static CSS classes extracted to prevent recreation on every render
 const BASE_CONTAINER_CLASS = 'container mx-auto space-y-4 p-4';
@@ -21,8 +26,12 @@ interface MetricsMonitorProps {
 
 const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
   ({ id, title }) => {
-    const [isLive, setIsLive] = useState(true);
+    const [isLive, _setIsLive] = useState(true);
     const [isResizing, setIsResizing] = useState(false);
+    const [historyDuration, setHistoryDuration] = useHistoryDuration(
+      'cpu-history-duration',
+      '1min',
+    );
 
     // Optimize resize performance
     const { ref } = useOptimizedResize({
@@ -35,6 +44,11 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
 
     // Collecte des données à 150ms (throttlé à 500ms dans le messageHandler)
     const { stats, isSubscribed } = useCPUStats(isLive, 150);
+
+    const maxPoints = useMemo(
+      () => getMaxPointsFromDuration(historyDuration, 150),
+      [historyDuration],
+    );
 
     const deferredStats = useDeferredValue(stats);
     const deferredSubscribed = useDeferredValue(isSubscribed);
@@ -58,11 +72,6 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
       [currentStats, deferredSubscribed],
     );
 
-    // Memoize the toggle callback to prevent child re-renders
-    const handleToggleLive = useCallback((newIsLive: boolean) => {
-      setIsLive(newIsLive);
-    }, []);
-
     // Memoize className strings to prevent recreation on every render
     const containerClassName = useMemo(
       () => `${BASE_CONTAINER_CLASS}${isResizing ? ` ${RESIZING_CLASS}` : ''}`,
@@ -80,13 +89,19 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
       [isLive, isResizing],
     );
 
-    return (
-      <WidgetWrapper id={id} title={title}>
-        <div ref={containerRef} className={containerClassName}>
-          <div className="flex items-center justify-items-start">
-            <LiveToggle isLive={isLive} onToggle={handleToggleLive} />
-          </div>
+    const statusBadge = useMemo(
+      () => (
+        <CPUHistoryBadge
+          value={historyDuration}
+          onChange={setHistoryDuration}
+        />
+      ),
+      [historyDuration, setHistoryDuration],
+    );
 
+    return (
+      <WidgetWrapper id={id} title={title} statusBadge={statusBadge}>
+        <div ref={containerRef} className={containerClassName}>
           <div className="w-full">
             <CPUOverview
               cpuUsage={metricsValues.currentCPUPercent}
@@ -100,11 +115,13 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
             <CPUChart
               currentCPUPercent={metricsValues.currentCPUPercent}
               isLive={chartLiveState}
+              maxPoints={maxPoints}
             />
             <MemoryChart
               currentMemoryPercent={metricsValues.currentMemoryPercent}
               currentMemoryProcess={metricsValues.currentMemoryProcess}
               isLive={chartLiveState}
+              /*  maxPoints={maxPoints} */
             />
           </div>
         </div>

@@ -57,8 +57,8 @@ const defaultConfig: WidgetConfig = {
 const initialState: WidgetsState = {
   activeWidgets: [
     {
-      id: generateID('multi-filter'),
-      type: WidgetType.MULTI_FILTER,
+      id: generateID('filter-session'),
+      type: WidgetType.FILTERSESSION,
       title: 'Session filters',
       x: 0,
       y: 0,

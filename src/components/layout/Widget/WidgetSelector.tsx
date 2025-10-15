@@ -43,7 +43,7 @@ const availableWidgets = [
   },
 
   {
-    type: WidgetType.MULTI_FILTER,
+    type: WidgetType.FILTERSESSION,
     title: 'Session Filters',
     icon: FiLayout,
     defaultSize: { w: 12, h: 4 },

@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { FaCheck } from 'react-icons/fa';
 import { ToolSwitcherItem } from './ToolSwitcherItem';
+import { WidgetStatusBadge } from '@/components/common/WidgetStatusBadge';
 
 const EmptyToolFallback = React.memo(
   ({
@@ -157,16 +158,14 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="px-0 py-0">
-            <Badge
-              variant="status"
-              className={`text-xs cursor-pointer hover:opacity-80 transition-opacity active:border active:border-gray-500 `}
-              title="Click to switch between configured tools"
-            >
-              {currentDisplayInfo.label}
-              {currentDisplayInfo.effectiveLevel &&
-                ` : ${currentDisplayInfo.effectiveLevel.toUpperCase()}`}
-              {currentDisplayInfo.isCritical && ` (${visibleLogsCount})`}
-            </Badge>
+            <WidgetStatusBadge className="cursor-pointer hover:opacity-80 transition-opacity">
+              <span className="text-sm font-medium text-info">
+                {currentDisplayInfo.label}
+                {currentDisplayInfo.effectiveLevel &&
+                  ` : ${currentDisplayInfo.effectiveLevel.toUpperCase()}`}
+                {currentDisplayInfo.isCritical && ` (${visibleLogsCount})`}
+              </span>
+            </WidgetStatusBadge>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent

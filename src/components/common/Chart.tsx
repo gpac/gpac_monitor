@@ -119,6 +119,10 @@ export const Chart = memo(
     }, [currentValue, isLive, createDataPoint, mergedConfig.maxPoints]);
 
     useEffect(() => {
+      setDataPoints([]);
+    }, [mergedConfig.maxPoints]);
+
+    useEffect(() => {
       if (throttleTimerRef.current) {
         clearTimeout(throttleTimerRef.current);
       }
@@ -165,6 +169,7 @@ export const Chart = memo(
           >
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
+                key={mergedConfig.maxPoints}
                 data={dataPoints}
                 margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
               >

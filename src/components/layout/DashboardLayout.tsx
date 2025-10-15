@@ -30,7 +30,7 @@ const WIDGET_COMPONENTS: Record<
   [WidgetType.LOGS]: LogsMonitor,
   [WidgetType.METRICS]: MetricsMonitor,
 
-  [WidgetType.MULTI_FILTER]: MultiFilterMonitor,
+  [WidgetType.FILTERSESSION]: MultiFilterMonitor,
 };
 
 const DashboardLayout: React.FC = () => {
