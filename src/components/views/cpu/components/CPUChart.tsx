@@ -18,6 +18,7 @@ const cpuChartConfig: ChartConfig = {
   maxPoints: 400,
   throttleInterval: 50,
   yAxisDomain: [0, 100],
+  yAxisTicks: [0, 50, 100],
   yAxisFormatter: (value: number) => `${value}%`,
   areas: [
     {
@@ -29,7 +30,7 @@ const cpuChartConfig: ChartConfig = {
     },
   ],
   tooltip: {
-    formatter: (value: number) => [`${value.toFixed(2)}%`, 'CPU Usage'],
+    formatter: (value: number) => [`${value.toFixed(2)}%`, 'CPU'],
     labelFormatter: (label: string) => `Time: ${label}`,
   },
   gradients: [

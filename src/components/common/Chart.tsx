@@ -40,6 +40,7 @@ export interface ChartConfig {
   maxPoints?: number;
   throttleInterval?: number;
   yAxisDomain?: [number | string, number | string];
+  yAxisTicks?: number[];
   yAxisFormatter?: (value: number) => string;
   areas: ChartAreaConfig[];
   tooltip: ChartTooltipConfig;
@@ -139,9 +140,11 @@ export const Chart = memo(
         formatter: mergedConfig.tooltip.formatter,
         labelFormatter: mergedConfig.tooltip.labelFormatter,
         contentStyle: mergedConfig.tooltip.contentStyle || {
-          backgroundColor: 'hsl(var(--background))',
+          backgroundColor: 'rgb(2 6 23 )',
+          color: 'rgb(226 232 240)',
           border: '1px solid hsl(var(--border))',
           borderRadius: '6px',
+          fontVariantNumeric: 'tabular-nums',
         },
       }),
       [mergedConfig.tooltip],
@@ -196,15 +199,16 @@ export const Chart = memo(
                 />
                 <XAxis
                   dataKey="time"
-                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fontSize: 11, fill: '#6ee7b7' }}
                   tickLine={{ stroke: 'hsl(var(--border))' }}
                   axisLine={{ stroke: 'hsl(var(--border))' }}
                   minTickGap={40}
                 />
                 <YAxis
                   domain={mergedConfig.yAxisDomain}
+                  ticks={mergedConfig.yAxisTicks}
                   tickFormatter={mergedConfig.yAxisFormatter}
-                  tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                  tick={{ fontSize: 11, fill: '#6ee7b7' }}
                   tickLine={{ stroke: 'hsl(var(--border))' }}
                   axisLine={{ stroke: 'hsl(var(--border))' }}
                   width={45}

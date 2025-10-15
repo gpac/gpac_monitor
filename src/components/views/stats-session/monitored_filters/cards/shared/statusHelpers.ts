@@ -31,7 +31,7 @@ export const getPIDStatusInfo = (pidData: TabPIDData): StatusInfo => {
       status: 'Disconnected',
       variant: 'destructive',
       icon: LuWifiOff,
-      color: 'text-red-500',
+      color: 'text-danger',
     };
   }
 
@@ -40,7 +40,7 @@ export const getPIDStatusInfo = (pidData: TabPIDData): StatusInfo => {
       status: 'Blocked',
       variant: 'destructive',
       icon: LuTriangle,
-      color: 'text-red-500',
+      color: 'text-danger',
     };
   }
 
@@ -57,7 +57,7 @@ export const getPIDStatusInfo = (pidData: TabPIDData): StatusInfo => {
       status: 'Playing',
       variant: 'default',
       icon: LuPlay,
-      color: 'text-green-500',
+      color: 'text-info',
     };
   }
 
@@ -105,7 +105,7 @@ export const getFilterHealthInfo = (status: string): HealthInfo => {
   ) {
     return {
       variant: 'secondary',
-      color: 'text-yellow-500',
+      color: 'text-warning',
       bgColor: 'bg-yellow-500/10',
       label: 'Warning',
     };
@@ -113,7 +113,7 @@ export const getFilterHealthInfo = (status: string): HealthInfo => {
 
   return {
     variant: 'default',
-    color: 'text-green-500',
+    color: 'text-info',
     bgColor: 'bg-green-500/10',
     label: 'Healthy',
   };
@@ -128,7 +128,7 @@ export const getCriticalAlerts = (pidData: TabPIDData) => {
   if (pidData.stats.disconnected) {
     alerts.push({
       icon: LuWifiOff,
-      color: 'text-red-500',
+      color: 'text-danger',
       label: 'Disconnected',
     });
   }
@@ -136,7 +136,7 @@ export const getCriticalAlerts = (pidData: TabPIDData) => {
   if (pidData.would_block) {
     alerts.push({
       icon: LuTriangle,
-      color: 'text-red-500',
+      color: 'text-danger',
       label: 'Blocked',
     });
   }
@@ -144,7 +144,7 @@ export const getCriticalAlerts = (pidData: TabPIDData) => {
   if ((pidData.nb_pck_queued || 0) > 50) {
     alerts.push({
       icon: LuClock,
-      color: 'text-orange-500',
+      color: 'text-warning',
       label: `Queue: ${pidData.nb_pck_queued}`,
     });
   }
