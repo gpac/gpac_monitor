@@ -6,7 +6,7 @@ import React, {
   useMemo,
 } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { RiScrollToBottomLine } from 'react-icons/ri';
+import { RiGlobalFill, RiScrollToBottomLine } from 'react-icons/ri';
 import WidgetWrapper from '../../common/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
@@ -137,7 +137,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
 
       return (
         <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-gray-700 bg-gray-800/80 font-ui">
-          <span className="text-xs">🌐</span>
+          <span className="text-xs">
+            <RiGlobalFill className="w-4 h-4" />
+          </span>
           <span
             className={`text-sm font-medium ${colorClasses[levelStr as keyof typeof colorClasses] || 'text-info'}`}
           >

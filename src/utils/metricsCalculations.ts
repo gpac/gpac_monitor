@@ -18,17 +18,17 @@ export interface ActivityLevel {
 export const getBufferHealthColor = (bufferMs: number): HealthStatus => {
   if (bufferMs < 100)
     return {
-      color: 'text-red-500',
+      color: 'text-danger',
       status: 'Critical',
       variant: 'destructive',
     };
   if (bufferMs < 500)
     return {
-      color: 'text-orange-500',
+      color: 'text-warning',
       status: 'Warning',
       variant: 'secondary',
     };
-  return { color: 'text-green-500', status: 'Healthy', variant: 'default' };
+  return { color: 'text-info', status: 'Healthy', variant: 'default' };
 };
 
 // Comprehensive health status from multiple metrics
@@ -40,7 +40,7 @@ export const getHealthStatusFromMetrics = (
 ): HealthStatus => {
   if (disconnected || wouldBlock) {
     return {
-      color: 'text-red-500',
+      color: 'text-danger',
       status: 'Critical',
       variant: 'destructive',
     };
@@ -49,13 +49,13 @@ export const getHealthStatusFromMetrics = (
   const bufferMs = buffer / 1000;
   if (bufferMs < 100 || queuedPackets > 100) {
     return {
-      color: 'text-orange-500',
+      color: 'text-warning',
       status: 'Warning',
       variant: 'secondary',
     };
   }
 
-  return { color: 'text-green-500', status: 'Healthy', variant: 'default' };
+  return { color: 'text-info', status: 'Healthy', variant: 'default' };
 };
 
 // Activity level calculations
@@ -87,11 +87,11 @@ export const getActivityLabel = (level: string): string => {
 // Network activity level based on byte rate
 export const getNetworkActivityLevel = (byteRate: number): ActivityLevel => {
   if (byteRate > 10000000)
-    return { level: 'High', variant: 'default', color: 'text-green-600' };
+    return { level: 'High', variant: 'default', color: 'text-info' };
   if (byteRate > 1000000)
     return { level: 'Medium', variant: 'secondary', color: 'text-blue-600' };
   if (byteRate > 0)
-    return { level: 'Low', variant: 'outline', color: 'text-orange-600' };
+    return { level: 'Low', variant: 'outline', color: 'text-warning' };
   return { level: 'Idle', variant: 'destructive', color: 'text-gray-500' };
 };
 
@@ -113,7 +113,7 @@ export const calculateBufferUsage = (
 };
 
 export const getBufferProgressColor = (usage: number): string => {
-  if (usage < 50) return 'bg-green-500';
+  if (usage < 50) return 'bg-info';
   if (usage < 80) return 'bg-yellow-500';
   return 'bg-red-500';
 };
@@ -152,9 +152,9 @@ export function determineTrend(
 
 // Status color mapping
 const STATUS_COLORS = {
-  active: 'bg-green-500',
-  warning: 'bg-yellow-500',
-  error: 'bg-red-500',
+  active: 'bg-info',
+  warning: 'bg-warning',
+  error: 'bg-danger',
   default: 'bg-gray-500',
 } as const;
 
