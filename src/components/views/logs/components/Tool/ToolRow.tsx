@@ -34,7 +34,7 @@ export const ToolRow = memo(function ToolRow({
 }: ToolRowProps) {
   return (
     <div
-      className="flex items-center px-3 py-2 text-xs
+      className="flex items-center z-10 px-3 py-2 text-xs
         text-slate-200 bg-slate-900
         hover:bg-slate-800/60 transition-colors"
       style={{ overflow: 'visible' }}
@@ -66,7 +66,7 @@ export const ToolRow = memo(function ToolRow({
           </DropdownMenuSubTrigger>
 
           <DropdownMenuSubContent
-            className="bg-slate-950/95 border border-slate-700/50
+            className="z-50 bg-slate-950/95 border border-slate-700/50
               shadow-lg shadow-black/40 rounded-md"
             onMouseLeave={onMouseLeaveSubMenu}
           >
@@ -88,7 +88,7 @@ export const ToolRow = memo(function ToolRow({
                       className={`w-3 h-3 rounded-full
                         ${isSelected ? 'bg-emerald-400' : LEVEL_BADGE_CLASSES[level].split(' ')[0]}`}
                     />
-                    <span className="capitalize">{level}</span>
+                    <span className="capitalize font-cond">{level}</span>
                     {isSelected && (
                       <span className="ml-auto text-[11px] text-slate-400">
                         Current

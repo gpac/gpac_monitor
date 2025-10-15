@@ -51,15 +51,15 @@ html {
 .metrics,
 .table td,
 .gauge .value {
-  font-variant-numeric: tabular-nums slashed-zero; /* chiffres alignés + zéro barré */
-  letter-spacing: 0.1px; /* stabilise le scintillement des chiffres */
+  font-variant-numeric: tabular-nums slashed-zero;
+  letter-spacing: 0.1px;
 }
 
 .code,
 .logs {
   font-family: var(--font-mono);
   font-size: 12.5px;
-  font-variant-ligatures: none; /* évite les ligatures en logs si tu ne veux pas de glyphes ↦ */
+  font-variant-ligatures: none;
 }
 
 @layer components {

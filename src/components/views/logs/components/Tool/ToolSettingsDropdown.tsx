@@ -101,7 +101,7 @@ export const ToolSettingsDropdown = memo(
             sideOffset={6}
             avoidCollisions
             onScroll={() => setOpenSubMenu(null)}
-            className="z-50 w-64 max-h-80 overflow-y-auto p-0
+            className=" z-20 w-64 max-h-80 overflow-y-auto p-0
             rounded-xl border border-slate-700/50
             bg-slate-950/90 backdrop-blur
             shadow-xl shadow-black/50"
