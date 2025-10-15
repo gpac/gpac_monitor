@@ -13,10 +13,15 @@ interface MemoryChartProps {
   currentMemoryPercent: number;
   currentMemoryProcess?: number;
   isLive: boolean;
+  isLoading?: boolean;
 }
 
 export const MemoryChart = memo(
-  ({ currentMemoryProcess = 0, currentMemoryPercent }: MemoryChartProps) => {
+  ({
+    currentMemoryProcess = 0,
+    currentMemoryPercent,
+    isLoading,
+  }: MemoryChartProps) => {
     // Determine gauge color based on percent thresholds
     const fillColor = useMemo(() => {
       if (currentMemoryPercent < 50) return '#34d399'; // green
@@ -38,12 +43,11 @@ export const MemoryChart = memo(
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-6">
-            {/* Gauge */}
-            <div className="relative h-28 w-28">
+          <div className="flex items-center justify-center py-4">
+            <div className="relative h-40 w-40">
               <ResponsiveContainer width="100%" height="100%">
                 <RadialBarChart
-                  innerRadius="75%"
+                  innerRadius="70%"
                   outerRadius="100%"
                   data={gaugeData}
                   startAngle={180}
@@ -63,12 +67,12 @@ export const MemoryChart = memo(
                   />
                 </RadialBarChart>
               </ResponsiveContainer>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-lg font-bold">
-                  {currentMemoryPercent.toFixed(2)}%
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
+                <span className="text-2xl font-bold text-info tabular-nums">
+                  {isLoading ? '...' : `${currentMemoryPercent.toFixed(1)}%`}
                 </span>
-                <span className="text-xs text-gray-300">
-                  {formatBytes(currentMemoryProcess)}
+                <span className="text-sm font-medium text-info tabular-nums">
+                  {isLoading ? '...' : formatBytes(currentMemoryProcess)}
                 </span>
               </div>
             </div>
