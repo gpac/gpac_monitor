@@ -175,10 +175,41 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
           />
         );
 
+      case 'v2di':
+      case 'v2d':
+      case 'v3di':
+      case 'v4di':
+        // Format vecteurs comme le collègue: -1x-1, 1x2x3, etc.
+        return (
+          <StringInput
+            {...(inputProps as FilterArgumentInputProps<'str'>)}
+            value={
+              typeof localValue === 'object' && localValue !== null
+                ? Object.values(localValue).join('x')
+                : String(localValue || '')
+            }
+            onChange={(val: string | undefined) => {
+              if (!val) {
+                handleLocalChange(null);
+                return;
+              }
+              // Parse "1x2" → {x:1, y:2} ou "1x2x3" → {x:1, y:2, z:3}
+              const parts = val.split('x').map((v) => parseFloat(v) || 0);
+              const keys = ['x', 'y', 'z', 'w'];
+              const vector = parts.reduce(
+                (acc, val, i) => ({ ...acc, [keys[i]]: val }),
+                {},
+              );
+              handleLocalChange(vector);
+            }}
+          />
+        );
+
       case 'strl':
       case 'uintl':
       case 'sintl':
       case '4ccl':
+      case 'v2il':
         return (
           <StringInput
             {...(inputProps as FilterArgumentInputProps<'str'>)}
@@ -220,13 +251,13 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
             maxWidth="10rem"
             maxHeight="auto"
           >
-            <Info className="w-4 h-4 text-gray-400 cursor-help 
+            <Info className="w-4 h-4 text-gray-400 cursor-help
                            hover:text-gray-300 transition-colors" />
           </CustomTooltip>
         )}
       </div> */}
 
-      <div className="flex-1">{renderInput()}</div>
+      <div className="flex-1 font-cond">{renderInput()}</div>
     </div>
   );
 };

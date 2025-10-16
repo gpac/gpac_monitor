@@ -1,5 +1,6 @@
 import React from 'react';
 import LogCounters from './LogCounters';
+import PropertiesPanel from './PropertiesPanel';
 
 // Memoized log level configurations to avoid re-computation
 /* const LOG_LEVEL_CONFIGS = {
@@ -134,6 +135,13 @@ const Sidebar: React.FC = () => {
           Logs Monitor
         </div>
         <LogCounters />
+      </div>
+
+      {/* Separator */}
+      <div className="w-full h-px bg-gray-700 my-2" />
+
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
+        <PropertiesPanel />
       </div>
     </aside>
   );

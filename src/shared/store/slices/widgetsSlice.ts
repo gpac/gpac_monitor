@@ -19,18 +19,9 @@ export interface WidgetsState {
   configs: Record<string, WidgetConfig>;
   savedLayouts: Record<string, LayoutState>;
   selectedNode: {
-    name: string;
-    type: string;
-    itag: string | null;
-    ID: string | null;
-    nb_ipid: number;
-    nb_opid: number;
-    status: string;
-    bytes_done: number;
     idx: number;
-    gpac_args: string[];
-    ipid: Record<string, any>;
-    opid: Record<string, any>;
+    name: string;
+    gpac_args: any[];
   } | null;
 }
 

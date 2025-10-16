@@ -1,10 +1,11 @@
-import React, { useState, useCallback, useMemo, memo } from 'react';
+import React, { useState, useMemo, memo, useEffect } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
 import { useFilterArgs } from '../../hooks/interaction/useFilterArgs';
-import FilterArgumentsDialog from '@/components/filtersArgs/FilterArgumentsDialog';
+import { useAppDispatch } from '@/shared/hooks/redux';
+import { setSelectedNode } from '@/shared/store/slices/widgetsSlice';
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
@@ -19,6 +20,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   ...nodeProps
 }) => {
   const { label, ipid, opid, nb_ipid, nb_opid, idx, name } = data;
+  const dispatch = useAppDispatch();
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -31,25 +33,37 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
 
   const [textColor, backgroundColor] = useGraphColors(node);
 
-  // Use filterArgs hook for the dialog
+  // Use filterArgs hook for the panel
   const { getFilterArgs, hasFilterArgs, requestFilterArgs } = useFilterArgs();
   const [isRequesting, setIsRequesting] = useState(false);
-
-  const ensureFilterArgs = useCallback(() => {
-    if (!hasFilterArgs(idx) && !isRequesting) {
-      setIsRequesting(true);
-      requestFilterArgs(idx);
-      // Reset isRequesting after a timeout since requestFilterArgs doesn't return a Promise
-      setTimeout(() => {
-        setIsRequesting(false);
-      }, 1000);
-    }
-  }, [idx, hasFilterArgs, requestFilterArgs, isRequesting]);
 
   const filterArgs = useMemo(
     () => getFilterArgs(idx) || [],
     [getFilterArgs, idx],
   );
+
+  // Open PropertiesPanel when node is selected
+  useEffect(() => {
+    if (selected) {
+      // Ensure filter args are available
+      if (!hasFilterArgs(idx) && !isRequesting) {
+        setIsRequesting(true);
+        requestFilterArgs(idx);
+        setTimeout(() => setIsRequesting(false), 1000);
+      }
+
+      // Update selected node (will update when filterArgs change)
+      dispatch(
+        setSelectedNode({
+          idx,
+          name,
+          gpac_args: filterArgs as any[],
+        }),
+      );
+    }
+    // Only depend on selected, idx and filterArgs to avoid infinite loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, idx, filterArgs]);
 
   // Create input handles only if nb_ipid > 0
   const inputHandles =
@@ -143,34 +157,18 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
           <h3 className="font-bold text-sm drop-shadow-sm" style={textStyle}>
             {label}
           </h3>
-          <div className="flex items-center gap-2">
-            <div
-              className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
-              style={textStyle}
-              title={
-                sessionType === 'source'
-                  ? 'Source Filter'
-                  : sessionType === 'sink'
-                    ? 'Sink Filter'
-                    : 'Processing Filter'
-              }
-            >
-              {sessionType.toUpperCase()}
-            </div>
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                ensureFilterArgs();
-              }}
-            >
-              <FilterArgumentsDialog
-                filter={{
-                  idx,
-                  name,
-                  gpac_args: filterArgs as any[],
-                }}
-              />
-            </div>
+          <div
+            className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
+            style={textStyle}
+            title={
+              sessionType === 'source'
+                ? 'Source Filter'
+                : sessionType === 'sink'
+                  ? 'Sink Filter'
+                  : 'Processing Filter'
+            }
+          >
+            {sessionType.toUpperCase()}
           </div>
         </div>
       </div>

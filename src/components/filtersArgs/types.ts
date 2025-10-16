@@ -17,6 +17,7 @@ export interface GPACTypes {
   '4cc': string;
   //Vectors
   v2di: [number, number];
+  v2d: [number, number];
   v3di: [number, number, number];
   v4di: [number, number, number, number];
   //binaries types
@@ -28,6 +29,7 @@ export interface GPACTypes {
   uintl: number[];
   sintl: number[];
   '4ccl': string[];
+  v2il: Array<[number, number]>;
   // Media format types
   pfmt: string;
   afmt: string;
@@ -126,6 +128,11 @@ export type GPACArgumentType =
   | 'sintl'
   | '4ccl'
   | '4cc'
+  | 'v2di'
+  | 'v2d'
+  | 'v3di'
+  | 'v4di'
+  | 'v2il'
   | 'pfmt'
   | 'afmt'
   | 'cprm'

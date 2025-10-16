@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FiLayout } from 'react-icons/fi';
 import { LayoutManager } from './LayoutManager';
-import WidgetSelector from './Widget/WidgetSelector';
+import WidgetSelector from '../Widget/WidgetSelector';
 
 interface HeaderProps {}
 
@@ -34,7 +34,9 @@ const Header: React.FC<HeaderProps> = () => {
       <div className="h-full flex items-center justify-between">
         {/* Left: Logo + Widget Selector */}
         <div className="flex items-center gap-6">
-          <h1 className="text-xl font-semibold text-gray-200 font-ui">GPAC Monitor</h1>
+          <h1 className="text-xl font-semibold text-gray-200 font-ui">
+            GPAC Monitor
+          </h1>
           <div className="h-6 w-px bg-gray-700" />
           <WidgetSelector
             isOpen={showWidgetSelector}

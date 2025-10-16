@@ -49,7 +49,13 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
   useDebounce(
     () => {
       if (firstRender || `${fraction[0]}/${fraction[1]}` === value) return;
-      onChange(`${fraction[0]}/${fraction[1]}`);
+
+      // Si dénominateur est 0, retourner "0" (comme le collègue)
+      if (fraction[1] === 0) {
+        onChange('0');
+      } else {
+        onChange(`${fraction[0]}/${fraction[1]}`);
+      }
     },
     1000,
     [fraction],
@@ -79,13 +85,13 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
         value={fraction[1]}
         onChange={(_e) => {
           const newDen = parseInt(_e.target.value);
-          if (!isNaN(newDen) && newDen !== 0) {
+          // Autoriser 0 (sera converti en "0" au debounce)
+          if (!isNaN(newDen)) {
             setFraction([fraction[0], newDen]);
           }
         }}
         disabled={rules?.disabled}
         className="w-20 bg-gray-700 border-gray-600"
-        min="1"
       />
     </div>
   );
