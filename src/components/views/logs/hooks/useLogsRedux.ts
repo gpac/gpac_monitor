@@ -34,7 +34,7 @@ export function useLogsRedux() {
   const currentConfig = useAppSelector(selectCurrentConfig);
 
   // Throttle visible logs updates using requestAnimationFrame for performance
-  const visibleLogs = useDisplayQueue(() => rawVisibleLogs);
+  const visibleLogs = useDisplayQueue(rawVisibleLogs);
 
   // Actions with persistence
   const handleSetTool = useCallback(

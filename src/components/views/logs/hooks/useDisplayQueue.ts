@@ -1,38 +1,33 @@
 import { useState, useEffect, useRef } from 'react';
 
-/**
- * Hook to throttle UI updates using requestAnimationFrame for optimal performance.
- * Decouples data reception from display updates to prevent main thread blocking
- * during high-frequency log streams.
- *
- * @param getValue - Function that returns the current value
- * @returns Throttled display data synced with browser refresh rate
- */
-export function useDisplayQueue<T>(getValue: () => T): T {
-  const [displayData, setDisplayData] = useState<T>(getValue);
-  const lastValueRef = useRef<T>(getValue());
-  const rafIdRef = useRef<number>();
+export function useDisplayQueue<T>(value: T): T {
+  const [display, setDisplay] = useState(value);
+  const latest = useRef(value);
+  const pending = useRef(false);
+  const raf = useRef<number>();
 
-  // Update reference on every getValue change
+  // Receive the new value
   useEffect(() => {
-    lastValueRef.current = getValue();
-  });
+    latest.current = value;
+    pending.current = true; // mark “something has changed”
+  }, [value]);
 
+  // Copy to UI state at rAF cadence, BUT only if different
   useEffect(() => {
-    const updateDisplay = () => {
-      setDisplayData(lastValueRef.current);
-      rafIdRef.current = requestAnimationFrame(updateDisplay);
+    const tick = () => {
+      if (pending.current && display !== latest.current) {
+        pending.current = false;
+        setDisplay(latest.current); // a single setState for a batch of updates
+      }
+      raf.current = requestAnimationFrame(tick);
     };
-
-    // Start the animation loop
-    rafIdRef.current = requestAnimationFrame(updateDisplay);
-
+    raf.current = requestAnimationFrame(tick);
     return () => {
-      if (rafIdRef.current) {
-        cancelAnimationFrame(rafIdRef.current);
+      if (raf.current !== undefined) {
+        cancelAnimationFrame(raf.current);
       }
     };
-  }, []);
+  }, [display]);
 
-  return displayData;
+  return display;
 }
