@@ -20,7 +20,7 @@ export interface LayoutOptions {
 function applyDagreLayout(nodes: Node[], edges: Edge[]): Node[] {
   if (nodes.length === 0) return nodes;
 
-  // Create a dagre graph - simple like in the working example
+  // Create a dagre graph
   const g = new dagre.graphlib.Graph();
   g.setGraph({ rankdir: 'LR' });
 
@@ -30,12 +30,12 @@ function applyDagreLayout(nodes: Node[], edges: Edge[]): Node[] {
       height: node.measured?.height,
     }),
   );
-  edges.forEach((edge) => g.setEdge(edge.source, edge.target, { points: [] })); // We don't need the points
+  edges.forEach((edge) => g.setEdge(edge.source, edge.target, { points: [] }));
 
   // Perform the layout
   dagre.layout(g);
 
-  // Update the node positions - exactly like in the working example
+  // Update the node positions
   return nodes.map((node) => {
     const dagreNode = g.node(node.id);
     if (!dagreNode) return node;

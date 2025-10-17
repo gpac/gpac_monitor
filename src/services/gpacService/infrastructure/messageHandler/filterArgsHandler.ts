@@ -107,7 +107,7 @@ export class FilterArgsHandler {
   }
 
   /**
-   * Update a filter argument (fire-and-forget like colleague's code)
+   * Update a filter argument
    */
   public async updateFilterArg(
     idx: number,

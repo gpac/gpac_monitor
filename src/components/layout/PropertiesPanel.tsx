@@ -33,12 +33,12 @@ const PropertiesPanel: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col border-t border-transparent mt-4 flex-1 overflow-hidden">
-      {/* Header */}
-      <div className="shrink-0">
+    <div className="flex flex-col border-t border-transparent mt-4 flex-1 bg-slate-950 overflow-hidden">
+      {/* Header - sticky */}
+      <div className="shrink-0 px-3 pt-3 pb-2 bg-slate-950 border-b border-gray-700/50">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-gray-100 truncate">
+            <h3 className="text-sm font-semibold text-ui text-gray-100 truncate">
               {selectedNode.name}
             </h3>
             <p className="text-xs text-gray-400">Properties</p>
@@ -54,7 +54,7 @@ const PropertiesPanel: React.FC = () => {
       </div>
 
       {/* Content - scrollable */}
-      <div className="flex-1 p-3 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto">
         {Array.isArray(selectedNode.gpac_args) &&
         selectedNode.gpac_args.length > 0 ? (
           <FilterArgumentsContent

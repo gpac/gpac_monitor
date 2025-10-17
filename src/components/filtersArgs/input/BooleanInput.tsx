@@ -5,6 +5,7 @@ interface BooleanInputProps {
   onChange: (value: boolean | null) => void;
   rules?: { disabled?: boolean };
   argName?: string;
+  isPending?: boolean;
 }
 
 export const BooleanInput: React.FC<BooleanInputProps> = ({
@@ -12,6 +13,7 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
   onChange,
   rules,
   argName,
+  isPending = false,
 }) => {
   return (
     <GenericInput
@@ -20,6 +22,7 @@ export const BooleanInput: React.FC<BooleanInputProps> = ({
       onChange={onChange}
       rules={rules}
       argName={argName}
+      isPending={isPending}
     />
   );
 };

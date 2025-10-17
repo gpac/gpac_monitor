@@ -1,9 +1,16 @@
 import React, { useMemo } from 'react';
 import { FilterArgumentInput } from './FilterArgumentInput';
-import { ArgumentDisplayValue } from './arguments/ArgumentDisplayValue';
 import { cn } from '../../utils/cn';
 import { Badge } from '../ui/badge';
 import { Spinner } from '../ui/spinner';
+import { FaCircleInfo } from 'react-icons/fa6';
+import {
+  Tooltip,
+  TooltipArrow,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip';
 import {
   updateFilterArgument,
   makeSelectArgumentUpdatesForFilter,
@@ -16,7 +23,7 @@ interface FilterArgumentsContentProps {
 }
 
 /**
- * Simple component for filter arguments editing.
+ *
  * Updates immediately on change, shows loader during update.
  */
 const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
@@ -74,55 +81,82 @@ const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
           max: arg.max,
           step: arg.step,
         }}
+        isPending={isPending}
       />
     );
   };
 
   return (
-    <div className="space-y-3 overflow-y-auto pr-1">
+    <div className="divide-y divide-gray-500/50 overflow-y-auto ">
       {filterArgs.map((arg, index) => {
         const updateStatus = argumentUpdates?.[arg.name];
         const isPending = updateStatus?.status === 'pending';
+        const isUpdatable = !!arg.update;
 
         return (
           <div
             key={index}
             className={cn(
-              'bg-gray-700/30 rounded p-2',
-              'border border-gray-600/50',
-              'transition-colors duration-200',
-              'hover:bg-gray-700/50',
-              arg.update ? 'border-green-500/20' : '',
-              isPending ? 'opacity-60' : '',
+              'py-2 px-3 transition-colors duration-150',
+              'hover:bg-gray-800/30',
+              isPending && 'opacity-60',
             )}
           >
-            <div className="flex flex-col gap-2">
-              {/* Name + badges + loader */}
-              <div className="flex items-start justify-between gap-1">
-                <h4 className="text-xs font-medium text-slate-100 truncate flex-1">
-                  {arg.name}
-                </h4>
-                <div className="flex gap-1 shrink-0 items-center">
-                  {isPending && <Spinner size="sm" className="text-debug" />}
-                  {arg.update && !isPending && (
-                    <Badge variant="success" className="text-[8px] px-1 py-0">
-                      ✓
-                    </Badge>
-                  )}
-                </div>
-              </div>
+            {/* Header: Name + Info + Status */}
+            <div className="flex items-center gap-2 mb-2">
+              <h4
+                className={cn(
+                  'text-xs font-medium truncate flex-1',
+                  isUpdatable ? 'text-info' : 'text-slate-300',
+                )}
+              >
+                {arg.name}
+              </h4>
 
-              {/* Value display */}
-              <div className="text-xs font-mono px-2 py-1 rounded bg-gray-900/50 text-slate-300">
-                <ArgumentDisplayValue
-                  value={updateStatus?.value ?? arg.value}
-                  isEditable={!!arg.update}
-                />
-              </div>
+              {/* Info icon with tooltip */}
+              {arg.desc && (
+                <TooltipProvider delayDuration={150}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <FaCircleInfo
+                          className={cn(
+                            'w-3 h-3 cursor-pointer transition-colors',
+                            isUpdatable
+                              ? 'text-slate-300 hover:text-slate-200'
+                              : 'text-gray-500 hover:text-gray-400',
+                          )}
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="left"
+                      sideOffset={8}
+                      className="max-w-xs z-[100] rounded bg-gray-900 px-2 py-1 text-[10px] text-gray-200 border border-gray-700"
+                    >
+                      <p>{arg.desc}</p>
+                      <TooltipArrow className="fill-gray-900" />
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
 
-              {/* Input */}
-              <div>{renderArgumentInput(arg)}</div>
+              {/* Status indicators */}
+              <div className="flex gap-1 shrink-0 items-center">
+                {isPending && <Spinner size="sm" className="text-blue-400" />}
+                {isUpdatable && !isPending && (
+                  <Badge
+                    variant="success"
+                    className="text-[8px] px-1.5 py-0 h-4"
+                  >
+                    ✓
+                  </Badge>
+                )}
+              </div>
             </div>
+
+            {/* Input only - no duplicate value display */}
+            <div className="text-xs">{renderArgumentInput(arg)}</div>
           </div>
         );
       })}

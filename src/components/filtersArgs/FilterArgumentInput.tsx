@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useDebounce, useFirstMountState } from 'react-use';
-import { cn } from '../../utils/cn';
 import { GPACTypes, GPACArgumentType, InputValue } from './types';
 import {
   BooleanInput,
@@ -24,6 +23,7 @@ interface FilterArgumentInputProps<
   rules?: Record<string, any>;
   standalone?: boolean;
   filterId?: string;
+  isPending?: boolean;
 }
 
 export const FilterArgumentInput = <T extends keyof GPACTypes>({
@@ -33,6 +33,7 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
   rules,
   standalone = false,
   filterId,
+  isPending = false,
 }: FilterArgumentInputProps<T>) => {
   const [localValue, setLocalValue] = useState<InputValue<T> | undefined>(
     value,
@@ -138,9 +139,10 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
         disabled: rules?.disabled,
       },
       argument,
+      isPending,
     };
 
-    // If the argument is an enum, treat it as a string (like colleague's code)
+    // If the argument is an enum, treat it as a string
     const adjustedType =
       argument.min_max_enum &&
       (argument.min_max_enum.includes('|') ||
@@ -234,30 +236,5 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
 
   if (standalone) return renderInput();
 
-  return (
-    <div
-      className={cn(
-        'flex items-center p-4 gap-4',
-        'transition-all duration-200',
-      )}
-    >
-      {/* Section titre et description */}
-      {/*      <div className="flex-1 flex items-center gap-2">
-        <span className="font-medium text-sm">{argument.name}</span>
-        {argument.desc && (
-          <CustomTooltip
-            content={argument.desc}
-            side="top"
-            maxWidth="10rem"
-            maxHeight="auto"
-          >
-            <Info className="w-4 h-4 text-gray-400 cursor-help
-                           hover:text-gray-300 transition-colors" />
-          </CustomTooltip>
-        )}
-      </div> */}
-
-      <div className="flex-1 font-cond">{renderInput()}</div>
-    </div>
-  );
+  return <div className="w-full">{renderInput()}</div>;
 };

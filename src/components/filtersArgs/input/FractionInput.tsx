@@ -66,7 +66,7 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
   }, [value]);
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1.5">
       <Input
         type="number"
         value={fraction[0]}
@@ -77,9 +77,9 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
           }
         }}
         disabled={rules?.disabled}
-        className="w-20 bg-gray-700 border-gray-600"
+        className="h-7 w-16 text-xs bg-gray-800/60 border-gray-600/50 hover:bg-gray-700/50 focus:ring-1 focus:ring-blue-500/50 transition-colors"
       />
-      <span className="text-gray-400">/</span>
+      <span className="text-gray-500 text-xs">/</span>
       <Input
         type="number"
         value={fraction[1]}
@@ -91,7 +91,7 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
           }
         }}
         disabled={rules?.disabled}
-        className="w-20 bg-gray-700 border-gray-600"
+        className="h-7 w-16 text-xs bg-gray-800/60 border-gray-600/50 hover:bg-gray-700/50 focus:ring-1 focus:ring-blue-500/50 transition-colors"
       />
     </div>
   );

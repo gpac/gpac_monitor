@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDebounce, useFirstMountState } from 'react-use';
 import { Input } from '../../ui/input';
 import { Switch } from '../../ui/switch';
+import { Spinner } from '../../ui/spinner';
 
 interface GenericInputProps {
   type: 'string' | 'number' | 'boolean';
@@ -17,10 +18,11 @@ interface GenericInputProps {
   debounce?: boolean;
   debounceMs?: number;
   argName?: string;
+  isPending?: boolean;
 }
 
 const INPUT_STYLES =
-  'bg-gray-700 border-gray-600 hover:bg-gray-600/50 focus:ring-blue-500';
+  'h-7 text-xs bg-gray-800/60 border-gray-600/50 hover:bg-gray-700/50 focus:ring-1 focus:ring-blue-500/50 transition-colors';
 
 export const GenericInput: React.FC<GenericInputProps> = ({
   type,
@@ -29,6 +31,7 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   rules,
   debounce = false,
   debounceMs = 1000,
+  isPending = false,
 }) => {
   const [localValue, setLocalValue] = useState(
     value ?? (type === 'string' ? '' : type === 'number' ? null : false),
@@ -59,26 +62,20 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   };
 
   if (type === 'boolean') {
-    // Log only once every 100ms to avoid spam
-    const now = Date.now();
-    if (
-      !(window as any).lastBooleanLog ||
-      now - (window as any).lastBooleanLog > 100
-    ) {
-      (window as any).lastBooleanLog = now;
-    }
-
-    const switchDisabled = rules?.disabled;
+    const switchDisabled = rules?.disabled || isPending;
+    const isChecked = debounce
+      ? (localValue as boolean)
+      : (value as boolean) || false;
 
     return (
-      <Switch
-        checked={
-          debounce ? (localValue as boolean) : (value as boolean) || false
-        }
-        onCheckedChange={handleChange}
-        disabled={switchDisabled}
-        className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-600"
-      />
+      <div className="flex items-center gap-2">
+        <Switch
+          checked={isChecked}
+          onCheckedChange={handleChange}
+          disabled={switchDisabled}
+        />
+        {isPending && <Spinner size="sm" className="text-info" />}
+      </div>
     );
   }
 
