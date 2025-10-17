@@ -19,7 +19,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   selected,
   ...nodeProps
 }) => {
-  const { label, ipid, opid, nb_ipid, nb_opid, idx, name } = data;
+  const { label, ipid = {}, opid = {}, nb_ipid, nb_opid, idx, name } = data;
   const dispatch = useAppDispatch();
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(

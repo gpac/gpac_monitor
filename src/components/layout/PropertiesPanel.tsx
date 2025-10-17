@@ -33,9 +33,9 @@ const PropertiesPanel: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col border-t border-gray-800 mt-4 flex-1 overflow-hidden">
+    <div className="flex flex-col border-t border-transparent mt-4 flex-1 overflow-hidden">
       {/* Header */}
-      <div className="border-b border-gray-700 p-3 shrink-0">
+      <div className="shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex-1 min-w-0">
             <h3 className="text-sm font-semibold text-gray-100 truncate">
