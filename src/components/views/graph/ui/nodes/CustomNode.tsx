@@ -1,4 +1,4 @@
-import React, { useState, useMemo, memo, useEffect } from 'react';
+import React, { useMemo, memo, useEffect, useRef } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
@@ -19,8 +19,8 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   selected,
   ...nodeProps
 }) => {
-  const { label, ipid = {}, opid = {}, nb_ipid, nb_opid, idx, name } = data;
   const dispatch = useAppDispatch();
+  const { label, ipid, opid, nb_ipid, nb_opid, idx, name } = data;
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -32,39 +32,39 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   );
 
   const [textColor, backgroundColor] = useGraphColors(node);
-
-  // Use filterArgs hook for the panel
   const { getFilterArgs, hasFilterArgs, requestFilterArgs } = useFilterArgs();
-  const [isRequesting, setIsRequesting] = useState(false);
+  const requestedRef = useRef(false);
 
-  const filterArgs = useMemo(
-    () => getFilterArgs(idx) || [],
-    [getFilterArgs, idx],
-  );
-
-  // Open PropertiesPanel when node is selected
+  // Sync with Redux when selected
   useEffect(() => {
-    if (selected) {
-      // Ensure filter args are available
-      if (!hasFilterArgs(idx) && !isRequesting) {
-        setIsRequesting(true);
-        requestFilterArgs(idx);
-        setTimeout(() => setIsRequesting(false), 1000);
-      }
-
-      // Update selected node (will update when filterArgs change)
-      dispatch(
-        setSelectedNode({
-          idx,
-          name,
-          gpac_args: filterArgs as any[],
-        }),
-      );
+    if (!selected) {
+      requestedRef.current = false;
+      return;
     }
-    // Only depend on selected, idx and filterArgs to avoid infinite loops
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected, idx, filterArgs]);
 
+    if (!hasFilterArgs(idx) && !requestedRef.current) {
+      requestedRef.current = true;
+      requestFilterArgs(idx);
+    }
+
+    const interval = setInterval(() => {
+      const args = getFilterArgs(idx);
+      if (args && args.length > 0) {
+        dispatch(setSelectedNode({ idx, name, gpac_args: args }));
+        clearInterval(interval);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [
+    selected,
+    idx,
+    name,
+    hasFilterArgs,
+    requestFilterArgs,
+    getFilterArgs,
+    dispatch,
+  ]);
   // Create input handles only if nb_ipid > 0
   const inputHandles =
     nb_ipid > 0

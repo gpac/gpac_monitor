@@ -24,7 +24,7 @@ export const useFilterArgs = () => {
       },
     );
 
-    service.getFilterDetails(filterIdx);
+    service.subscribeToFilterArgs(filterIdx);
   };
 
   const getFilterArgs = (filterIdx: number): FilterArgument[] | undefined => {

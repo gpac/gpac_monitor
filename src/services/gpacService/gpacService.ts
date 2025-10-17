@@ -155,7 +155,11 @@ export class GpacService implements IGpacCommunication {
       this.sendMessage({ type: 'stop_details', idx: currentFilterId });
     }
     this.coreService.setCurrentFilterId(idx);
-    this.sendMessage({ type: 'filter_args_details', idx: idx });
+    this.sendMessage({
+      type: 'filter_args_details',
+      id: generateID(),
+      idx: idx,
+    });
   }
 
   public setCurrentFilterId(id: number | null): void {
@@ -164,6 +168,12 @@ export class GpacService implements IGpacCommunication {
 
   public getCurrentFilterId(): number | null {
     return this.coreService.getCurrentFilterId();
+  }
+
+  public async subscribeToFilterArgs(idx: number): Promise<void> {
+    return this.messageHandler
+      .getFilterArgsHandler()
+      .subscribeToFilterArgs(idx);
   }
 
   // Expose log handler
