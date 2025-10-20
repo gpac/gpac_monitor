@@ -30,7 +30,7 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   onChange,
   rules,
   debounce = false,
-  debounceMs = 1000,
+  debounceMs = 100,
   isPending = false,
 }) => {
   const [localValue, setLocalValue] = useState(
@@ -63,9 +63,14 @@ export const GenericInput: React.FC<GenericInputProps> = ({
 
   if (type === 'boolean') {
     const switchDisabled = rules?.disabled || isPending;
-    const isChecked = debounce
-      ? (localValue as boolean)
-      : (value as boolean) || false;
+
+    // Convert value to boolean (handles string "true"/"false" from server)
+    const boolValue =
+      typeof value === 'string'
+        ? value === 'true' || value === '1'
+        : Boolean(value);
+
+    const isChecked = debounce ? Boolean(localValue) : boolValue;
 
     return (
       <div className="flex items-center gap-2">
