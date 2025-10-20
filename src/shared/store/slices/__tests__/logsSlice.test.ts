@@ -8,8 +8,8 @@ import logsReducer, {
   setMaxEntriesPerTool,
   markConfigAsSent,
 } from '../logsSlice';
-import { selectVisibleLogs } from '../../selectors/logsFilterSelectors';
-import { selectLogsConfigChanges } from '../../selectors/logsConfigSelectors';
+import { selectVisibleLogs } from '../../selectors/logs/logsFilterSelectors';
+import { selectLogsConfigChanges } from '../../selectors/logs/logsConfigSelectors';
 import {
   GpacLogTool,
   GpacLogLevel,

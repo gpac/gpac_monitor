@@ -3,7 +3,7 @@ import {
   selectLogsState,
   selectLevelsByTool,
   selectDefaultAllLevel,
-} from './logsSelectors';
+} from './logs/logsSelectors';
 import {
   GpacLogLevel,
   GpacLogTool,

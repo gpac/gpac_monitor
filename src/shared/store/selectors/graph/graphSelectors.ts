@@ -1,6 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { isEqual } from 'lodash';
-import type { RootState } from '../index';
+import type { RootState } from '../../index';
 
 const selectGraphState = (state: RootState) => state.graph;
 

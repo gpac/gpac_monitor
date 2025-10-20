@@ -16,8 +16,8 @@ import {
   selectCriticalLogCountsByTool,
   selectUIFilter,
   selectViewMode,
-} from '@/shared/store/selectors/logsSelectors';
-import { selectCriticalLogsCount } from '@/shared/store/selectors/logsFilterSelectors';
+} from '@/shared/store/selectors/logs/logsSelectors';
+import { selectCriticalLogsCount } from '@/shared/store/selectors/logs/logsFilterSelectors';
 import { clearUIFilter } from '@/shared/store/slices/logsSlice';
 import { useLogsService } from './hooks/useLogsService';
 import { CustomTooltip } from '@/components/ui/tooltip';

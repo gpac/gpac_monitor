@@ -6,7 +6,7 @@ import {
   selectEdges,
   selectIsLoading,
   selectError,
-} from '@/shared/store/selectors/graphSelectors';
+} from '@/shared/store/selectors/graph/graphSelectors';
 import {
   updateNodesWithPositions,
   updateEdgesWithState,

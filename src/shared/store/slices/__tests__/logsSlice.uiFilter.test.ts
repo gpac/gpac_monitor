@@ -5,8 +5,8 @@ import logsReducer, {
   clearUIFilter,
   appendLogs,
 } from '../logsSlice';
-import { selectVisibleLogs } from '../../selectors/logsFilterSelectors';
-import { selectViewMode } from '../../selectors/logsSelectors';
+import { selectVisibleLogs } from '../../selectors/logs/logsFilterSelectors';
+import { selectViewMode } from '../../selectors/logs/logsSelectors';
 import {
   GpacLogTool,
   GpacLogLevel,

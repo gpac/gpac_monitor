@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { selectLogsConfigChanges } from '../logsConfigSelectors';
+import { selectLogsConfigChanges } from '../logs/logsConfigSelectors';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
 
 describe('logsConfigSelectors', () => {

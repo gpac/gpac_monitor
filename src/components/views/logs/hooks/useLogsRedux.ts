@@ -5,9 +5,9 @@ import {
   selectLevelsByTool,
   selectDefaultAllLevel,
   selectVisibleToolsFilter,
-} from '@/shared/store/selectors/logsSelectors';
-import { selectVisibleLogs } from '@/shared/store/selectors/logsFilterSelectors';
-import { selectCurrentConfig } from '@/shared/store/selectors/logsPersistenceSelectors';
+} from '@/shared/store/selectors/logs/logsSelectors';
+import { selectVisibleLogs } from '@/shared/store/selectors/logs/logsFilterSelectors';
+import { selectCurrentConfig } from '@/shared/store/selectors/logs/logsPersistenceSelectors';
 import { useDisplayQueue } from './useDisplayQueue';
 import {
   setTool,

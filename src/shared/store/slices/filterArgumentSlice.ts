@@ -1,14 +1,8 @@
-import {
-  createSlice,
-  PayloadAction,
-  createAsyncThunk,
-  createSelector,
-} from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
-import { RootState } from '../index';
 
-interface ArgumentUpdate {
+export interface ArgumentUpdate {
   filterId: string;
   name: string;
   value: any;
@@ -16,7 +10,7 @@ interface ArgumentUpdate {
   error?: string;
 }
 
-interface FilterArgumentState {
+export interface FilterArgumentState {
   updates: Record<string, ArgumentUpdate>;
 }
 
@@ -44,6 +38,18 @@ export const filterArgumentSlice = createSlice({
       delete state.updates[key];
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(updateFilterArgument.pending, (state, action) => {
+      const { filterId, argName, argValue } = action.meta.arg;
+      const key = `${filterId}_${argName}`;
+      state.updates[key] = {
+        filterId,
+        name: argName,
+        value: argValue,
+        status: 'pending',
+      };
+    });
+  },
 });
 
 // Actions
@@ -62,98 +68,48 @@ export const updateFilterArgument = createAsyncThunk(
     }: { filterId: string; argName: string; argValue: any },
     { dispatch, getState },
   ) => {
-    try {
-      // Get filter name from state using the selector
-      const filterName = selectFilterNameById(getState() as any, filterId);
+    const filterName = selectFilterNameById(getState() as any, filterId);
 
-      if (!filterName) {
-        throw new Error(`Filter with ID ${filterId} not found`);
-      }
+    if (!filterName) {
+      throw new Error(`Filter with ID ${filterId} not found`);
+    }
 
-      // Set pending status
-      const pendingUpdate: ArgumentUpdate = {
-        filterId,
-        name: argName,
-        value: argValue,
-        status: 'pending',
-      };
-      dispatch(setArgumentUpdateStatus(pendingUpdate));
+    // Send update to GPAC
+    await gpacService.updateFilterArg(
+      parseInt(filterId),
+      filterName,
+      argName,
+      argValue,
+    );
 
-      // Send update (fire-and-forget like colleague's code)
-      await gpacService.updateFilterArg(
-        parseInt(filterId),
-        filterName,
-        argName,
-        argValue,
-      );
-
-      // Mark as success immediately after sending
-      const successUpdate: ArgumentUpdate = {
+    // Mark as success immediately after sending
+    dispatch(
+      setArgumentUpdateStatus({
         filterId,
         name: argName,
         value: argValue,
         status: 'success',
-      };
-      dispatch(setArgumentUpdateStatus(successUpdate));
+      }),
+    );
 
-      // Clear success status after 2 seconds but keep the value
-      setTimeout(() => {
-        const idleUpdate: ArgumentUpdate = {
+    // Clear success status after 2 seconds but keep the value
+    setTimeout(() => {
+      dispatch(
+        setArgumentUpdateStatus({
           filterId,
           name: argName,
           value: argValue,
           status: 'idle',
-        };
-        dispatch(setArgumentUpdateStatus(idleUpdate));
-      }, 2000);
-    } catch (error) {
-      console.error('Failed to update filter argument:', error);
-
-      // Set error status
-      const errorUpdate: ArgumentUpdate = {
-        filterId,
-        name: argName,
-        value: argValue,
-        status: 'error',
-        error:
-          error instanceof Error ? error.message : 'An unknown error occurred',
-      };
-      dispatch(setArgumentUpdateStatus(errorUpdate));
-      throw error;
-    }
+        }),
+      );
+    }, 2000);
   },
 );
 
-// Selectors
-export const selectArgumentUpdate = (
-  state: { filterArgument: FilterArgumentState },
-  filterId: string,
-  name: string,
-) => {
-  const key = `${filterId}_${name}`;
-  return state.filterArgument.updates[key];
-};
-
-/** Memoized selector for filter argument updates by filter */
-export const makeSelectArgumentUpdatesForFilter = () =>
-  createSelector(
-    [
-      (state: RootState) => state.filterArgument.updates,
-      (_: RootState, filterId: string) => filterId,
-      (_: RootState, __: string, gpacArgs: any[]) => gpacArgs,
-    ],
-    (updates, filterId, gpacArgs) => {
-      if (!Array.isArray(gpacArgs)) return {};
-
-      return gpacArgs.reduce(
-        (acc, arg) => {
-          const key = `${filterId}_${arg.name}`;
-          acc[arg.name] = updates[key];
-          return acc;
-        },
-        {} as Record<string, any>,
-      );
-    },
-  );
+// Selectors are exported from selectors/gpacArgs/filterArgumentSelectors.ts
+export {
+  selectArgumentUpdate,
+  makeSelectArgumentUpdatesForFilter,
+} from '@/shared/store/selectors/gpacArgs/filterArgumentSelectors';
 
 export default filterArgumentSlice.reducer;

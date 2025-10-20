@@ -4,8 +4,8 @@ import {
   selectIsSubscribed,
   selectLevelsByTool,
   selectDefaultAllLevel,
-} from '@/shared/store/selectors/logsSelectors';
-import { selectLogsConfigChanges } from '@/shared/store/selectors/logsConfigSelectors';
+} from '@/shared/store/selectors/logs/logsSelectors';
+import { selectLogsConfigChanges } from '@/shared/store/selectors/logs/logsConfigSelectors';
 import { markConfigAsSent } from '@/shared/store/slices/logsSlice';
 import { gpacService } from '@/services/gpacService';
 import { parseConfigChanges } from '../utils/configParser';

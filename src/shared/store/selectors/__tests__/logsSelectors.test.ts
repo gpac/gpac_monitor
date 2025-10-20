@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   selectAllLogCountsByTool,
   selectCriticalLogCountsByTool,
-} from '../logsSelectors';
+} from '../logs/logsSelectors';
 import {
   GpacLogLevel,
   GpacLogTool,

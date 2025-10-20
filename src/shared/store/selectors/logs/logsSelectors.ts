@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { RootState } from '../index';
+import { RootState } from '../../index';
 import { LOG_LEVEL_VALUES, GpacLogLevel } from '@/types/domain/gpac/log-types';
 
 // Base selectors - Direct state access
