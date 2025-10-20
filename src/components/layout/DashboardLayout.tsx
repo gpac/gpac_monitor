@@ -11,27 +11,10 @@ import 'react-resizable/css/styles.css';
 import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import MultiFilterMonitor from '@/components/views/stats-session/session-overview/entry';
-import GraphMonitor from '../views/graph/GraphMonitor';
-import AudioMonitor from '../views/audio/AudioMonitor';
-import LogsMonitor from '../views/logs/LogsMonitor';
-
-import MetricsMonitor from '../views/cpu/MetricsMonitor';
-import { Widget, WidgetType, WidgetComponent } from '../../types/ui/widget';
+import { Widget } from '../../types/ui/widget';
+import { getWidgetDefinition } from '../Widget/registry';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
-
-const WIDGET_COMPONENTS: Record<
-  WidgetType,
-  React.ComponentType<WidgetComponent>
-> = {
-  [WidgetType.GRAPH]: GraphMonitor,
-  [WidgetType.AUDIO]: AudioMonitor,
-  [WidgetType.LOGS]: LogsMonitor,
-  [WidgetType.METRICS]: MetricsMonitor,
-
-  [WidgetType.FILTERSESSION]: MultiFilterMonitor,
-};
 
 const DashboardLayout: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -51,12 +34,14 @@ const DashboardLayout: React.FC = () => {
   };
 
   const renderWidget = (widget: Widget) => {
-    const Component = WIDGET_COMPONENTS[widget.type];
+    const definition = getWidgetDefinition(widget.type);
 
-    if (!Component) {
-      console.warn(`No component found for widget type: ${widget.type}`);
+    if (!definition) {
+      console.warn(`No definition found for widget type: ${widget.type}`);
       return null;
     }
+
+    const Component = definition.component;
 
     return (
       <div key={widget.id}>

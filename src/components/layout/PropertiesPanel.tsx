@@ -20,7 +20,7 @@ const PropertiesPanel: React.FC = () => {
   // Empty state
   if (!selectedNode) {
     return (
-      <div className="flex flex-col items-center justify-center p-4 text-center border-t border-gray-800 mt-4">
+      <div className="flex flex-col items-center justify-center p-4 text-center border-t border-transparent mt-4">
         <FiSettings className="w-12 h-12 text-gray-600 mb-3" />
         <h3 className="text-sm font-medium text-gray-400 mb-1">
           No nodes selected

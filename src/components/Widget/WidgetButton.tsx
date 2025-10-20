@@ -17,7 +17,6 @@ export const WidgetButton: React.FC<WidgetButtonProps> = ({
   type,
   title,
   icon: Icon,
-  defaultSize,
 }) => {
   const dispatch = useAppDispatch();
   const activeWidgets = useAppSelector(selectActiveWidgets);
@@ -26,19 +25,7 @@ export const WidgetButton: React.FC<WidgetButtonProps> = ({
   const isActive = activeWidgets.some((widget) => widget.type === type);
 
   const handleAddWidget = () => {
-    dispatch(
-      addWidget({
-        id: `${type}-${Date.now()}`,
-        type,
-        title,
-        x: 0,
-        y: 0,
-        w: defaultSize.w,
-        h: defaultSize.h,
-        isResizable: true,
-        isDraggable: true,
-      }),
-    );
+    dispatch(addWidget(type));
   };
 
   return (
@@ -53,7 +40,7 @@ export const WidgetButton: React.FC<WidgetButtonProps> = ({
       ${
         isActive
           ? 'bg-slate-800 border-transparent text-emerald-500 shadow-[inset_0_0_0_1px_rgba(16,185,129,.25)]'
-          : ' bg-slate-950/50border-transparent text-subtle hover:bg-slate-800/80 hover:border-slate-500/50'
+          : 'bg-slate-950/50 border-transparent text-subtle hover:bg-slate-800/80 hover:border-slate-500/50'
       }
     `}
     >

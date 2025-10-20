@@ -13,6 +13,7 @@ import {
   FaExclamationTriangle,
   FaInfoCircle,
 } from 'react-icons/fa';
+import { getWidgetDefinition } from '../Widget/registry';
 
 interface LogCounterItemProps {
   icon: React.ComponentType<{ className?: string }>;
@@ -77,19 +78,10 @@ const LogCounters: React.FC = () => {
 
     // If widget doesn't exist, open it
     if (!logWidgetExists) {
-      dispatch(
-        addWidget({
-          id: `${WidgetType.LOGS}-${Date.now()}`,
-          type: WidgetType.LOGS,
-          title: 'System Logs',
-          x: 0,
-          y: 0,
-          w: 4,
-          h: 4,
-          isResizable: true,
-          isDraggable: true,
-        }),
-      );
+      const definition = getWidgetDefinition(WidgetType.LOGS);
+      if (definition) {
+        dispatch(addWidget(WidgetType.LOGS));
+      }
     }
     // If widget already exists, Redux state change will trigger re-render
   };

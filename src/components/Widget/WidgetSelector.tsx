@@ -5,50 +5,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@radix-ui/react-popover';
-import { WidgetType } from '@/types';
-import { LuFileText, LuGauge, LuShare2, LuVolume2 } from 'react-icons/lu';
 import { WidgetButton } from './WidgetButton';
+import { getAllWidgets } from './registry';
 
 interface WidgetSelectorProps {
   isOpen: boolean;
   onToggle: () => void;
   onClose: () => void;
 }
-
-const availableWidgets = [
-  {
-    type: WidgetType.AUDIO,
-    title: 'Audio Monitor',
-    icon: LuVolume2,
-    defaultSize: { w: 4, h: 4 },
-  },
-
-  {
-    type: WidgetType.METRICS,
-    title: 'System Metrics',
-    icon: LuGauge,
-    defaultSize: { w: 6, h: 4 },
-  },
-  {
-    type: WidgetType.LOGS,
-    title: 'System Logs',
-    icon: LuFileText,
-    defaultSize: { w: 4, h: 4 },
-  },
-  {
-    type: WidgetType.GRAPH,
-    title: 'Pipeline Graph',
-    icon: LuShare2,
-    defaultSize: { w: 6, h: 8 },
-  },
-
-  {
-    type: WidgetType.FILTERSESSION,
-    title: 'Session Filters',
-    icon: FiLayout,
-    defaultSize: { w: 12, h: 4 },
-  },
-];
 
 const WidgetSelector: React.FC<WidgetSelectorProps> = ({
   isOpen,
@@ -93,8 +57,14 @@ const WidgetSelector: React.FC<WidgetSelectorProps> = ({
         sideOffset={5}
       >
         <div className="space-y-2">
-          {availableWidgets.map((widget) => (
-            <WidgetButton key={widget.type} {...widget} />
+          {getAllWidgets().map((widget) => (
+            <WidgetButton
+              key={widget.type}
+              type={widget.type}
+              title={widget.title}
+              icon={widget.icon}
+              defaultSize={widget.defaultSize}
+            />
           ))}
         </div>
       </PopoverContent>

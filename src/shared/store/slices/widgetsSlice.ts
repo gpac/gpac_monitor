@@ -1,7 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Widget, WidgetType, WidgetConfig } from '@/types/ui/widget';
 import { createSelector } from '@reduxjs/toolkit';
-import { generateID } from '@/utils/id';
+import {
+  createWidgetInstance,
+  widgetRegistry,
+} from '@/components/Widget/registry';
 
 export interface RootState {
   widgets: WidgetsState;
@@ -44,52 +47,19 @@ const defaultConfig: WidgetConfig = {
   isMinimized: false,
   settings: {},
 };
+const activeWidgets = Object.values(widgetRegistry)
+  .filter((def) => def.enabled)
+  .map((def) => createWidgetInstance(def.type))
+  .filter(Boolean) as Widget[];
+
+const configs = Object.fromEntries(
+  activeWidgets.map((w) => [w.id, { ...defaultConfig }]),
+);
 
 const initialState: WidgetsState = {
-  activeWidgets: [
-    {
-      id: generateID('filter-session'),
-      type: WidgetType.FILTERSESSION,
-      title: 'Session filters',
-      x: 0,
-      y: 0,
-      w: 7,
-      h: 7,
-    },
-    {
-      id: generateID('metrics'),
-      type: WidgetType.METRICS,
-      title: 'System metrics',
-      x: 9,
-      y: 8,
-      w: 5,
-      h: 7,
-    },
-    {
-      id: generateID('graph'),
-      type: WidgetType.GRAPH,
-      title: 'Pipeline Graph',
-      x: 0,
-      y: 8,
-      w: 7,
-      h: 6,
-    },
-    {
-      id: generateID('logs'),
-      type: WidgetType.LOGS,
-      title: 'System Logs',
+  activeWidgets: activeWidgets,
 
-      x: 9,
-      y: 8,
-      w: 5,
-      h: 6,
-    },
-  ],
-  configs: {
-    'metrics-1': { ...defaultConfig },
-    'multi-filter-1': { ...defaultConfig },
-    'graph-1': { ...defaultConfig },
-  },
+  configs,
   savedLayouts: {},
   selectedNode: null,
 };
@@ -98,20 +68,14 @@ const widgetsSlice = createSlice({
   name: 'widgets',
   initialState,
   reducers: {
-    addWidget: (state, action: PayloadAction<Widget>) => {
-      // Vérifier si un widget de ce type existe déjà
-      const widgetExists = state.activeWidgets.some(
-        (w) => w.type === action.payload.type,
-      );
-
-      // Si le widget existe déjà, ne rien faire
-      if (widgetExists) {
-        return;
-      }
-
-      state.activeWidgets.push(action.payload);
-      state.configs[action.payload.id] = { ...defaultConfig };
+    addWidget: (state, action: PayloadAction<WidgetType>) => {
+      const instance = createWidgetInstance(action.payload);
+      if (!instance) return;
+      const exists = state.activeWidgets.some((w) => w.type === instance.type);
+      if (exists) return;
+      state.activeWidgets.push(instance);
     },
+
     removeWidget: (state, action: PayloadAction<string>) => {
       console.log('removeWidget action triggered with id:', action.payload);
       const widgetId = action.payload;
