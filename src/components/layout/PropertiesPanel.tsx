@@ -1,9 +1,9 @@
-import React, { useCallback } from 'react';
-import { IoClose } from 'react-icons/io5';
+import React, { useCallback, useState } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { setSelectedNode } from '@/shared/store/slices/widgetsSlice';
 import FilterArgumentsContent from '../filtersArgs/FilterArgumentsContent';
+import PropertiesHeader from './PropertiesHeader';
 
 /**
  * Properties panel - Pure container (style only).
@@ -12,6 +12,8 @@ import FilterArgumentsContent from '../filtersArgs/FilterArgumentsContent';
 const PropertiesPanel: React.FC = () => {
   const dispatch = useAppDispatch();
   const selectedNode = useAppSelector((state) => state.widgets.selectedNode);
+  const [showExpert, setShowExpert] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const handleClose = useCallback(() => {
     dispatch(setSelectedNode(null));
@@ -33,24 +35,17 @@ const PropertiesPanel: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col border-t border-transparent mt-4 flex-1 bg-slate-950 overflow-hidden">
+    <div className="flex flex-col border-t border-transparent mt-4 flex-1 bg-slate-950 ">
       {/* Header - sticky */}
-      <div className="shrink-0 px-3 pt-3 pb-2 bg-slate-950 border-b border-gray-700/50">
-        <div className="flex items-center justify-between">
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-semibold text-ui text-gray-100 truncate">
-              {selectedNode.name}
-            </h3>
-            <p className="text-xs text-gray-400">Properties</p>
-          </div>
-          <button
-            onClick={handleClose}
-            className="p-1 hover:bg-gray-800 rounded transition-colors shrink-0"
-            aria-label="Close panel"
-          >
-            <IoClose className="w-4 h-4 text-gray-400" />
-          </button>
-        </div>
+      <div className="sticky top-0 z-20 bg-slate-950 border-b border-gray-700/50">
+        <PropertiesHeader
+          filterName={selectedNode.name}
+          showExpert={showExpert}
+          showAdvanced={showAdvanced}
+          onToggleExpert={setShowExpert}
+          onToggleAdvanced={setShowAdvanced}
+          onClose={handleClose}
+        />
       </div>
 
       {/* Content - scrollable */}
@@ -60,6 +55,8 @@ const PropertiesPanel: React.FC = () => {
           <FilterArgumentsContent
             filterId={selectedNode.idx}
             filterArgs={selectedNode.gpac_args}
+            showExpert={showExpert}
+            showAdvanced={showAdvanced}
           />
         ) : (
           <div className="text-center text-gray-500 py-6 text-xs">

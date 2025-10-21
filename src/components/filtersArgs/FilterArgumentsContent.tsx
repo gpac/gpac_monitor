@@ -16,10 +16,13 @@ import {
   makeSelectArgumentUpdatesForFilter,
 } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { getBorderStyle } from './utils/argumentStyles';
 
 interface FilterArgumentsContentProps {
   filterId: number;
   filterArgs: any[];
+  showExpert?: boolean;
+  showAdvanced?: boolean;
 }
 
 /**
@@ -29,6 +32,8 @@ interface FilterArgumentsContentProps {
 const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
   filterId,
   filterArgs,
+  showExpert = false,
+  showAdvanced = false,
 }) => {
   const dispatch = useAppDispatch();
 
@@ -53,6 +58,14 @@ const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
       );
     }
   };
+
+  // Filter arguments based on hint level
+  const visibleArgs = filterArgs.filter((arg) => {
+    const hint = arg.hint?.toLowerCase();
+    if (hint === 'expert' && !showExpert) return false;
+    if (hint === 'advanced' && !showAdvanced) return false;
+    return true;
+  });
 
   const renderArgumentInput = (arg: any) => {
     const type = arg.type || typeof arg.value;
@@ -88,7 +101,7 @@ const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
 
   return (
     <div className="divide-y divide-gray-500/50 overflow-y-auto ">
-      {filterArgs.map((arg, index) => {
+      {visibleArgs.map((arg, index) => {
         const updateStatus = argumentUpdates?.[arg.name];
         const isPending = updateStatus?.status === 'pending';
         const isUpdatable = !!arg.update;
@@ -99,6 +112,7 @@ const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
             className={cn(
               'py-2 px-3 transition-colors duration-150',
               'hover:bg-gray-800/30',
+              getBorderStyle(arg.hint),
               isPending && 'opacity-60',
             )}
           >
