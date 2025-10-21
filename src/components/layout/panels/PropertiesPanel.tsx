@@ -22,12 +22,12 @@ const PropertiesPanel: React.FC = () => {
   // Empty state
   if (!selectedNode) {
     return (
-      <div className="flex flex-col items-center justify-center p-4 text-center border-t border-transparent mt-4">
-        <FiSettings className="w-12 h-12 text-gray-600 mb-3" />
-        <h3 className="text-sm font-medium text-gray-400 mb-1">
+      <div className="flex flex-col bg-monitor-panel items-center justify-center p-4 text-center ring-1 ring-monitor-line rounded-xl mt-4">
+        + <FiSettings className="w-12 h-12 text-monitor-text-muted mb-3" />+{' '}
+        <h3 className="text-sm font-medium text-monitor-text-secondary mb-1">
           No nodes selected
         </h3>
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-monitor-text-muted">
           Click on a node to see its properties
         </p>
       </div>
@@ -35,9 +35,9 @@ const PropertiesPanel: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col border-t border-transparent mt-4 flex-1 bg-slate-950 ">
+    <div className="flex flex-col mt-4 flex-1 bg-monitor-surface border border-monitor-line">
       {/* Header - sticky */}
-      <div className="sticky top-0 z-20 bg-slate-950 border-b border-gray-700/50">
+      <div className="sticky top-0 z-20 bg-monitor-surface border-b border-monitor-line">
         <PropertiesHeader
           filterName={selectedNode.name}
           showExpert={showExpert}
@@ -58,7 +58,7 @@ const PropertiesPanel: React.FC = () => {
             showAdvanced={showAdvanced}
           />
         ) : (
-          <div className="text-center text-gray-500 py-6 text-xs">
+          <div className="text-center text-monitor-text-muted py-6 text-xs">
             No arguments available
           </div>
         )}

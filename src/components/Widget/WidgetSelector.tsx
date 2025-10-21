@@ -33,8 +33,8 @@ const WidgetSelector: React.FC<WidgetSelectorProps> = ({
             focus:outline-none focus:ring-2 focus:ring-red-600/50 focus:ring-offset-2 focus:ring-offset-gray-900
             ${
               isOpen
-                ? 'bg-gray-800 text-white ring-2 ring-red-600/50'
-                : 'bg-gray-800/50 text-gray-300 hover:bg-gray-800 hover:text-white'
+                ? 'bg-monitor-surface text-white ring-2 ring-red-600/50'
+                : ' text-gray-300 hover:bg-monitor-surface/70 hover:text-white'
             }
           `}
           aria-label="Toggle widgets menu"

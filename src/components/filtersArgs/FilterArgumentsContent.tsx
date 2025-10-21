@@ -62,7 +62,7 @@ const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
   }, [filterArgs, showExpert, showAdvanced]);
 
   return (
-    <div className="divide-y divide-gray-500/50 overflow-y-auto">
+    <div className="divide-y divide-monitor-divider bg-monitor-paneloverflow-y-auto">
       {visibleArgs.map((arg) => (
         <ArgumentItem
           key={arg.name}

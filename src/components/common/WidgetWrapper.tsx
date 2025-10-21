@@ -23,7 +23,7 @@ interface WidgetWrapperProps {
 
 // Memoized styles
 const headerStyles = {
-  base: 'flex items-center justify-between px-4 py-2 bg-gray-800 border-b border-gray-600 transition-colors hover:bg-gray-650',
+  base: 'flex items-center justify-between px-4 py-2 bg-monitor-app border-b border-gray-600 transition-colors hover:bg-gray-650',
   title: 'flex items-center gap-2',
   actions: 'flex items-center gap-2',
 };
@@ -182,7 +182,7 @@ const WidgetWrapper = ({
 
       {!isMinimized && (
         <div
-          className={`flex-1 bg-gray-900 overflow-auto no-drag gpu-optimized ${isResizing ? 'contain-layout contain-style' : ''}`}
+          className={`flex-1 bg-monitor-surface overflow-auto no-drag gpu-optimized ${isResizing ? 'contain-layout contain-style' : ''}`}
         >
           {children}
         </div>

@@ -24,6 +24,25 @@ export default {
           coralD: "#E64545",
           wine: "#8E1E2D",
         },
+        monitor: {
+          /** Fond d'app global (header/sidebar)**/
+          app: "#0c1117",
+
+          surface: "#101722",
+
+          panel: "#0f141b",
+
+          line: "#ffffff1a",
+
+          divider: "#ffffff1a",
+
+          /** Texte */
+          text: {
+            primary: "#f2f2f2", // ~white/95
+            secondary: "#c7c7c7", // ~white/78
+            muted: "#9aa3ae", // ~slate-400ish
+          },
+        },
       },
       spacing: {
         "widget-sm": "300px",

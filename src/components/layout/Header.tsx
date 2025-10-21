@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = () => {
   }, [showLayoutManager]);
 
   return (
-    <header className="h-14 bg-gray-900 border-b border-gray-700 px-4">
+    <header className="h-14 bg-monitor-app border-b border-white/10 px-4 text-white/80">
       <div className="h-full flex items-center justify-between">
         {/* Left: Logo + Widget Selector */}
         <div className="flex items-center gap-6">
@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = () => {
       {showLayoutManager && (
         <div
           ref={dropdownRef}
-          className="absolute top-14 right-4 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50 min-w-80"
+          className="absolute top-14 right-4  border border-gray-700 rounded-lg shadow-lg z-50 min-w-80"
         >
           <LayoutManager />
         </div>

@@ -5,7 +5,7 @@ import PropertiesPanel from './panels/PropertiesPanel';
 const Sidebar: React.FC = () => {
   return (
     <aside
-      className="w-64 bg-gray-900 border-r border-gray-800 h-full flex flex-col"
+      className="w-64 bg-monitor-app border-gray-800 h-full flex flex-col"
       role="complementary"
       aria-label="Dashboard widgets sidebar"
     >
