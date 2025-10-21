@@ -47,7 +47,7 @@ const PropertiesPanel: React.FC = () => {
           onClose={handleClose}
         />
       </div>
-      m{/* Content - scrollable */}
+      {/* Content - scrollable */}
       <div className="flex-1 overflow-y-auto">
         {Array.isArray(selectedNode.gpac_args) &&
         selectedNode.gpac_args.length > 0 ? (
