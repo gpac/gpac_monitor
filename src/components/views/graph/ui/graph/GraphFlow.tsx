@@ -57,7 +57,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         minZoom={0.1}
         maxZoom={4}
         defaultEdgeOptions={{
-          type: 'smoothstep',
+          type: 'bezier',
           animated: !isResizing,
           style: { stroke: '#6b7280', strokeWidth: 3 },
         }}

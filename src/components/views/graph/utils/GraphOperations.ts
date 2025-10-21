@@ -188,15 +188,15 @@ export function createEdgesFromFilters(
             target: filter.idx.toString(),
             sourceHandle: sourceHandle,
             targetHandle: pidName,
-            type: 'simplebezier',
+            type: 'bezier',
             data: {
               filterType,
             },
             animated: true,
             style: {
               stroke: filterColor,
-              strokeWidth: 3,
-              opacity: 0.8,
+              strokeWidth: 2,
+              opacity: 0.9,
             },
             markerEnd: {
               type: MarkerType.ArrowClosed,

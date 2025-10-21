@@ -44,7 +44,10 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
         <div className="mb-4 flex items-center justify-between">
           <h2 className="flex items-center gap-2 text-lg font-semibold">
             Filters
-            <Badge variant="secondary" className="ml-1 h-6 text-sm">
+            <Badge
+              variant="secondary"
+              className="ml-1 h-6 text-sm text-info tabular-nums"
+            >
               {filtersCount}
             </Badge>
           </h2>
