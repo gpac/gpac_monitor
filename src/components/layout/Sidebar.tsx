@@ -1,6 +1,6 @@
 import React from 'react';
 import LogCounters from './LogCounters';
-import PropertiesPanel from './PropertiesPanel';
+import PropertiesPanel from './panels/PropertiesPanel';
 
 const Sidebar: React.FC = () => {
   return (

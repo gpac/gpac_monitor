@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { setSelectedNode } from '@/shared/store/slices/widgetsSlice';
-import FilterArgumentsContent from '../filtersArgs/FilterArgumentsContent';
+import FilterArgumentsContent from '../../filtersArgs/FilterArgumentsContent';
 import PropertiesHeader from './PropertiesHeader';
 
 /**
@@ -47,8 +47,7 @@ const PropertiesPanel: React.FC = () => {
           onClose={handleClose}
         />
       </div>
-
-      {/* Content - scrollable */}
+      m{/* Content - scrollable */}
       <div className="flex-1 overflow-y-auto">
         {Array.isArray(selectedNode.gpac_args) &&
         selectedNode.gpac_args.length > 0 ? (
