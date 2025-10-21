@@ -30,7 +30,7 @@ export const PIDDetails = memo(
               <span className="text-xs text-muted-foreground stat-label">
                 Buffer
               </span>
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium text-info tabular-nums">
                 {formatBytes(buffer)} / {formatBytes(buffer_total)}
               </span>
             </div>
@@ -38,7 +38,7 @@ export const PIDDetails = memo(
               <span className="text-xs text-muted-foreground stat-label">
                 Usage
               </span>
-              <span className="text-sm font-medium">
+              <span className="text-sm font-medium text-info tabular-nums">
                 {bufferUsage.toFixed(1)}%
               </span>
             </div>
@@ -58,7 +58,7 @@ export const PIDDetails = memo(
                 <span className="text-xs text-muted-foreground capitalize">
                   {key.replace('_', ' ')}
                 </span>
-                <span className="text-sm font-medium">
+                <span className="text-sm font-medium text-info tabular-nums">
                   {typeof value === 'number'
                     ? value > 1000000
                       ? formatBytes(value)

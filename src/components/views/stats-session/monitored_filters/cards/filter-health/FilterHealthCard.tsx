@@ -46,13 +46,15 @@ export const FilterHealthCard = memo(({ filter }: FilterHealthCardProps) => {
             <div className="text-xs text-muted-foreground stat-label">
               Index
             </div>
-            <div className="font-medium">#{idx}</div>
+            <div className="font-medium text-info tabular-nums">#{idx}</div>
           </div>
           <div className="space-y-1">
             <div className="text-xs text-muted-foreground stat-label">
               Uptime
             </div>
-            <div className="font-medium">{formattedUptime}</div>
+            <div className="font-medium text-info tabular-nums">
+              {formattedUptime}
+            </div>
           </div>
         </div>
       </CardContent>

@@ -104,9 +104,11 @@ export const CompactPIDStats = memo(
                 Buffer
               </span>
               <div className="flex items-center gap-2">
-                <span className="text-xs">{formatBytes(pidData.buffer)}</span>
+                <span className="text-xs text-info tabular-nums">
+                  {formatBytes(pidData.buffer)}
+                </span>
                 <span
-                  className={`text-xs font-medium ${getBufferColor(bufferUsage)}`}
+                  className={`text-xs font-medium tabular-nums ${getBufferColor(bufferUsage)}`}
                 >
                   {bufferUsage.toFixed(0)}%
                 </span>
@@ -126,7 +128,7 @@ export const CompactPIDStats = memo(
           {/* Quick Stats Row */}
           <div className="grid grid-cols-2 gap-4 mt-3 text-center">
             <div>
-              <div className="text-xs font-medium">
+              <div className="text-xs font-medium text-info tabular-nums">
                 {pidData.nb_pck_queued || 0}
               </div>
               <div className="text-xs text-muted-foreground stat-label">

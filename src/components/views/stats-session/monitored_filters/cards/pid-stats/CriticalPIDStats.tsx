@@ -54,7 +54,9 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
                   <span className="text-xs font-medium stat-label">
                     {state.label}
                   </span>
-                  <span className="text-sm stat">{state.value}</span>
+                  <span className="text-sm stat text-info tabular-nums">
+                    {state.value}
+                  </span>
                 </div>
                 <Badge variant={state.variant} className="shrink-0">
                   {state.status === 'critical'
@@ -76,10 +78,12 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
               Buffer Level
             </span>
             <div className="text-right">
-              <div className={`text-sm font-bold ${overallHealth.color}`}>
+              <div
+                className={`text-sm font-bold text-info tabular-nums ${overallHealth.color}`}
+              >
                 {formatBufferTime(pidData.buffer)}
               </div>
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground text-info tabular-nums">
                 {bufferUsage.toFixed(1)}%
               </div>
             </div>
@@ -98,7 +102,7 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
               } as React.CSSProperties
             }
           />
-          <div className="flex justify-between text-xs text-muted-foreground">
+          <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
             <span>0 ms</span>
             <span>
               {pidData.buffer_total

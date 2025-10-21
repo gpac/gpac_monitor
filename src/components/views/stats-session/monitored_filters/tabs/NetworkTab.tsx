@@ -47,26 +47,26 @@ const NetworkTab = memo(
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold stat">
+                  <div className="text-2xl font-bold stat text-info tabular-nums">
                     {formattedStats.bytesSentRate}
                   </div>
                   <div className="text-xs text-muted-foreground  stat-label">
                     Data Rate
                   </div>
                 </div>
-                p
+
                 <div className="pt-2 border-t border-border/50">
                   <div className="grid grid-cols-2 gap-y-1 text-xs">
                     <div className="text-muted-foreground stat-label">
                       Total
                     </div>
-                    <div className="font-medium stat">
+                    <div className="font-medium stat text-info tabular-nums">
                       {formattedStats.bytesSent}
                     </div>
                     <div className="text-muted-foreground stat-label">
                       Packets
                     </div>
-                    <div className="font-medium stat">
+                    <div className="font-medium stat text-info tabular-nums">
                       {formattedStats.packetsSent}
                     </div>
                   </div>
@@ -92,7 +92,7 @@ const NetworkTab = memo(
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="space-y-1">
-                  <div className="text-2xl font-bold stat">
+                  <div className="text-2xl font-bold stat text-info tabular-nums">
                     {formattedStats.bytesReceivedRate}
                   </div>
                   <div className="text-xs text-muted-foreground stat-label">
@@ -101,7 +101,7 @@ const NetworkTab = memo(
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-lg font-semibold stat">
+                  <div className="text-lg font-semibold stat text-info tabular-nums">
                     {formattedStats.packetsReceivedRate}
                   </div>
                   <div className="text-xs text-muted-foreground stat-label">
@@ -114,13 +114,13 @@ const NetworkTab = memo(
                     <div className="text-muted-foreground stat-label">
                       Total
                     </div>
-                    <div className="font-medium stat">
+                    <div className="font-medium stat text-info tabular-nums">
                       {formattedStats.bytesReceived}
                     </div>
                     <div className="text-muted-foreground stat-label">
                       Packets
                     </div>
-                    <div className="font-medium stat">
+                    <div className="font-medium stat text-info tabular-nums">
                       {formattedStats.packetsReceived}
                     </div>
                   </div>

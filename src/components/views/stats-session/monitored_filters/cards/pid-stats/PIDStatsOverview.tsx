@@ -45,7 +45,7 @@ export const PIDStatsOverview = memo(
             {/* Quick Stats Row */}
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-sm font-medium">
+                <div className="text-sm font-medium text-info tabular-nums">
                   {formatBytes(pidData.buffer)}
                 </div>
                 <div className="text-xs text-muted-foreground stat-label">
@@ -53,7 +53,7 @@ export const PIDStatsOverview = memo(
                 </div>
               </div>
               <div>
-                <div className="text-sm font-medium">
+                <div className="text-sm font-medium text-info tabular-nums">
                   {pidData.buffer_total && pidData.buffer_total > 0
                     ? `${((pidData.buffer / pidData.buffer_total) * 100).toFixed(1)}%`
                     : '0%'}
@@ -63,7 +63,7 @@ export const PIDStatsOverview = memo(
                 </div>
               </div>
               <div>
-                <div className="text-sm font-medium">
+                <div className="text-sm font-medium text-info tabular-nums">
                   {pidData.nb_pck_queued || 0}
                 </div>
                 <div className="text-xs text-muted-foreground stat-label">

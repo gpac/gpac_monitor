@@ -19,11 +19,15 @@ export const ProcessingCard = memo(({ tasks, time }: ProcessingCardProps) => (
     <CardContent className="space-y-2">
       <div className="flex justify-between">
         <span className="text-xs text-muted-foreground stat-label">Tasks</span>
-        <span className="text-sm font-medium">{tasks || 0}</span>
+        <span className="text-sm font-medium text-info tabular-nums">
+          {tasks || 0}
+        </span>
       </div>
       <div className="flex justify-between">
         <span className="text-xs text-muted-foreground stat-label">Time</span>
-        <span className="text-sm font-medium">{formatTime(time)}</span>
+        <span className="text-sm font-medium text-info tabular-nums">
+          {formatTime(time)}
+        </span>
       </div>
     </CardContent>
   </Card>

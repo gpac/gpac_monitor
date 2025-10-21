@@ -21,13 +21,13 @@ export const PacketsCard = memo(
       <CardContent className="space-y-2">
         <div className="flex justify-between">
           <span className="text-xs text-muted-foreground stat-label">Done</span>
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium text-info tabular-nums">
             {formatNumber(pck_done || 0)}
           </span>
         </div>
         <div className="flex justify-between">
           <span className="text-xs text-muted-foreground stat-label">Sent</span>
-          <span className="text-sm font-medium">
+          <span className="text-sm font-medium text-info tabular-nums">
             {formatNumber(pck_sent || 0)}
           </span>
         </div>
@@ -36,7 +36,7 @@ export const PacketsCard = memo(
             <span className="text-xs text-muted-foreground stat-label">
               Interface Sent
             </span>
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium text-info tabular-nums">
               {formatNumber(pck_ifce_sent)}
             </span>
           </div>

@@ -50,7 +50,7 @@ export const RealtimeMetricsCard = memo(
               <div className="text-xs text-muted-foreground stat-label">
                 Throughput
               </div>
-              <div className="text-lg font-semibold stat">
+              <div className="text-lg font-semibold stat text-info tabular-nums">
                 {metrics.throughput}
               </div>
             </div>
@@ -59,7 +59,7 @@ export const RealtimeMetricsCard = memo(
               <div className="text-xs text-muted-foreground stat-label">
                 Packet Rate
               </div>
-              <div className="text-lg font-semibold stat">
+              <div className="text-lg font-semibold stat text-info tabular-nums">
                 {metrics.packetRate}
               </div>
             </div>

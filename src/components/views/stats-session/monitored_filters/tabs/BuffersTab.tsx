@@ -26,7 +26,7 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
   if (!hasBuffers) {
     return (
       <ScrollArea className="h-[400px]">
-        <div className="py-8 text-center text-muted-foreground">
+        <div className="py-8 text-center text-muted-foreground stat-label">
           No buffer information available for {name}
         </div>
       </ScrollArea>
@@ -47,7 +47,7 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
           <CardContent>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-xl font-bold">
+                <div className="text-xl font-bold text-info tabular-nums">
                   {formatBytes(totalBufferInfo.totalBuffer)}
                 </div>
                 <div className="text-xs text-muted-foreground stat-label">
@@ -55,7 +55,7 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
                 </div>
               </div>
               <div>
-                <div className="text-xl font-bold">
+                <div className="text-xl font-bold text-info tabular-nums">
                   {formatBytes(totalBufferInfo.totalCapacity)}
                 </div>
                 <div className="text-xs text-muted-foreground stat-label">
@@ -63,7 +63,7 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
                 </div>
               </div>
               <div>
-                <div className="text-xl font-bold">
+                <div className="text-xl font-bold text-info tabular-nums">
                   {totalBufferInfo.averageUsage.toFixed(1)}%
                 </div>
                 <div className="text-xs text-muted-foreground stat-label">
@@ -93,7 +93,7 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
                     <Badge variant={buffer.health.variant} className="text-xs">
                       {buffer.health.status}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground tabular-nums">
                       Source: {buffer.sourceIdx || 'N/A'}
                     </span>
                   </div>
@@ -107,10 +107,10 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
                       Buffer Level
                     </span>
                     <div className="text-right">
-                      <div className="text-lg font-bold stat">
+                      <div className="text-lg font-bold stat text-info tabular-nums">
                         {buffer.bufferTimeMs}
                       </div>
-                      <div className="text-xs text-muted-foreground">
+                      <div className="text-xs text-muted-foreground text-info tabular-nums">
                         {buffer.formattedBuffer}
                       </div>
                     </div>
@@ -133,11 +133,11 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
                           } as React.CSSProperties
                         }
                       />
-                      <span className="text-sm font-medium w-12 text-right">
+                      <span className="text-sm font-medium w-12 text-right text-info tabular-nums">
                         {buffer.usage.toFixed(1)}%
                       </span>
                     </div>
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="flex justify-between text-xs text-muted-foreground tabular-nums">
                       <span>0</span>
                       <span>{buffer.formattedBufferTotal}</span>
                     </div>

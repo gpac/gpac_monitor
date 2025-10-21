@@ -19,13 +19,13 @@ export const DataCard = memo(({ bytes_done, bytes_sent }: DataCardProps) => (
     <CardContent className="space-y-2">
       <div className="flex justify-between">
         <span className="text-xs text-muted-foreground stat-label">Done</span>
-        <span className="text-sm font-medium">
+        <span className="text-sm font-medium text-info tabular-nums">
           {formatBytes(bytes_done || 0)}
         </span>
       </div>
       <div className="flex justify-between">
         <span className="text-xs text-muted-foreground stat-label">Sent</span>
-        <span className="text-sm font-medium">
+        <span className="text-sm font-medium text-info tabular-nums">
           {formatBytes(bytes_sent || 0)}
         </span>
       </div>

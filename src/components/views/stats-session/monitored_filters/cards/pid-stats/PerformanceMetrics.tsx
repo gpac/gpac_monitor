@@ -40,13 +40,13 @@ export const PerformanceMetrics = memo(
                   <span className="text-xs stat-label opacity-75">Average</span>
                 </div>
 
-                <div className="stat text-xl font-bold leading-none">
+                <div className="stat text-xl font-bold leading-none text-info tabular-nums">
                   {performanceData.throughput.dataBitrate.average}
                 </div>
 
                 <div className="flex items-center justify-between pt-1 border-t border-border/30">
                   <span className="text-xs stat-label opacity-60">Peak</span>
-                  <span className="text-sm font-semibold stat">
+                  <span className="text-sm font-semibold stat text-info tabular-nums">
                     {performanceData.throughput.dataBitrate.max}
                   </span>
                 </div>
@@ -59,13 +59,13 @@ export const PerformanceMetrics = memo(
                   <span className="text-xs stat-label opacity-75">Average</span>
                 </div>
 
-                <div className="stat text-xl font-bold leading-none">
+                <div className="stat text-xl font-bold leading-none text-info tabular-nums">
                   {performanceData.throughput.packetRate.average}
                 </div>
 
                 <div className="flex items-center justify-between pt-1 border-t border-border/30">
                   <span className="text-xs stat-label opacity-60">Peak</span>
-                  <span className="text-sm font-semibold stat">
+                  <span className="text-sm font-semibold stat text-info tabular-nums">
                     {performanceData.throughput.packetRate.max}
                   </span>
                 </div>
@@ -83,7 +83,7 @@ export const PerformanceMetrics = memo(
               <div className="space-y-3">
                 <div className="flex items-center justify-between py-2">
                   <span className="text-sm stat-label">Total Processed</span>
-                  <span className="text-lg font-bold stat">
+                  <span className="text-lg font-bold stat text-info tabular-nums">
                     {performanceData.processing.totalProcessed}
                   </span>
                 </div>
@@ -92,7 +92,7 @@ export const PerformanceMetrics = memo(
                   <span className="text-sm stat-label">
                     Total Processing Time
                   </span>
-                  <span className="text-lg font-bold stat">
+                  <span className="text-lg font-bold stat text-info tabular-nums">
                     {performanceData.processing.totalTime}
                   </span>
                 </div>
@@ -100,7 +100,7 @@ export const PerformanceMetrics = memo(
                 {performanceData.processing.averagePerItem && (
                   <div className="flex items-center justify-between py-2 border-t border-border/20">
                     <span className="text-sm stat-label">Average per Item</span>
-                    <span className="text-lg font-bold stat">
+                    <span className="text-lg font-bold stat text-info tabular-nums">
                       {performanceData.processing.averagePerItem}
                     </span>
                   </div>

@@ -55,13 +55,13 @@ const OutputCard = memo(({ outputName, pidsByType }: OutputCardProps) => {
               {/* Key Metrics */}
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <div className="text-sm font-medium">
+                  <div className="text-sm font-medium text-info tabular-nums">
                     {formatBytes(pid.buffer)}
                   </div>
                   <div className="text-xs text-muted-foreground">Buffer</div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium">
+                  <div className="text-sm font-medium text-info tabular-nums">
                     {pid.buffer_total && pid.buffer_total > 0
                       ? `${((pid.buffer / pid.buffer_total) * 100).toFixed(1)}%`
                       : '0%'}
@@ -69,7 +69,7 @@ const OutputCard = memo(({ outputName, pidsByType }: OutputCardProps) => {
                   <div className="text-xs text-muted-foreground">Usage</div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium">
+                  <div className="text-sm font-medium text-info tabular-nums">
                     {type.toLowerCase() === 'visual' && pid.width && pid.height
                       ? `${pid.width}x${pid.height}`
                       : type.toLowerCase() === 'audio' && pid.channels
@@ -89,7 +89,7 @@ const OutputCard = memo(({ outputName, pidsByType }: OutputCardProps) => {
               {/* Additional info for specific media types */}
               {type.toLowerCase() === 'audio' && pid.samplerate && (
                 <div className="mt-2 text-center">
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground tabular-nums">
                     Sample Rate: {(pid.samplerate / 1000).toFixed(1)} kHz
                   </span>
                 </div>
@@ -128,7 +128,10 @@ const OutputCard = memo(({ outputName, pidsByType }: OutputCardProps) => {
                     <span className="text-sm font-medium">
                       {mediaInfo.label}
                     </span>
-                    <Badge variant="outline" className="text-xs ml-auto">
+                    <Badge
+                      variant="outline"
+                      className="text-xs ml-auto text-info tabular-nums"
+                    >
                       {pids.length} stream{pids.length > 1 ? 's' : ''}
                     </Badge>
                   </div>
@@ -187,12 +190,12 @@ const OutputsTab = memo(({ filterData, filterName }: OutputsTabProps) => {
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">Global Status</span>
               <div className="flex items-center gap-3 text-sm">
-                <span>
+                <span className="text-info tabular-nums">
                   {globalStatus.totalItems} Output
                   {globalStatus.totalItems > 1 ? 's' : ''}
                 </span>
                 <span className="text-muted-foreground">•</span>
-                <span>
+                <span className="text-info tabular-nums">
                   {globalStatus.totalPids} Stream
                   {globalStatus.totalPids > 1 ? 's' : ''}
                 </span>
@@ -200,19 +203,19 @@ const OutputsTab = memo(({ filterData, filterName }: OutputsTabProps) => {
             </div>
             <div className="flex items-center gap-2">
               {globalStatus.errors > 0 && (
-                <Badge variant="destructive" className="text-xs">
+                <Badge variant="destructive" className="text-xs tabular-nums">
                   {globalStatus.errors} Error
                   {globalStatus.errors > 1 ? 's' : ''}
                 </Badge>
               )}
               {globalStatus.warnings > 0 && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-xs tabular-nums">
                   {globalStatus.warnings} Warning
                   {globalStatus.warnings > 1 ? 's' : ''}
                 </Badge>
               )}
               {globalStatus.active > 0 && (
-                <Badge variant="default" className="text-xs">
+                <Badge variant="default" className="text-xs tabular-nums">
                   {globalStatus.active} Active
                 </Badge>
               )}
@@ -233,7 +236,7 @@ const OutputsTab = memo(({ filterData, filterName }: OutputsTabProps) => {
           ))}
         </div>
       ) : (
-        <div className="py-8 text-center text-muted-foreground">
+        <div className="py-8 text-center text-muted-foreground stat-label">
           <div className="flex flex-col items-center gap-2">
             <span>No output PIDs available for {filterName}</span>
           </div>
