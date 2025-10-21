@@ -38,6 +38,7 @@ export interface ChartConfig {
   icon: React.ReactNode;
   height?: number;
   maxPoints?: number;
+  windowDuration?: number; // Time window in milliseconds (e.g., 20000 for 20s)
   throttleInterval?: number;
   yAxisDomain?: [number | string, number | string];
   yAxisTicks?: number[];
@@ -101,26 +102,77 @@ export const Chart = memo(
       if (!isLive || currentValue === lastRecordedValueRef.current) return;
       lastRecordedValueRef.current = currentValue;
       const now = Date.now();
-      const time = new Date(now).toLocaleTimeString('en-US', {
-        hour12: false,
-        minute: '2-digit',
-        second: '2-digit',
-      });
-
-      const newPoint = createDataPoint(now, time, currentValue);
 
       setDataPoints((prevPoints) => {
-        const newPoints = [...prevPoints, newPoint];
-        if (newPoints.length > mergedConfig.maxPoints) {
-          return newPoints.slice(newPoints.length - mergedConfig.maxPoints);
+        // Filter by time window if specified, otherwise use maxPoints
+        let filteredPoints = prevPoints;
+
+        if (
+          mergedConfig.windowDuration &&
+          mergedConfig.windowDuration !== Infinity
+        ) {
+          const cutoff = now - mergedConfig.windowDuration;
+          filteredPoints = prevPoints.filter((p) => p.timestamp >= cutoff);
+        } else if (prevPoints.length >= mergedConfig.maxPoints) {
+          // Fallback to maxPoints if no windowDuration
+          filteredPoints = prevPoints.slice(
+            prevPoints.length - mergedConfig.maxPoints + 1,
+          );
         }
-        return newPoints;
+
+        // Calculate relative time from oldest point
+        const oldestTimestamp =
+          filteredPoints.length > 0 ? filteredPoints[0].timestamp : now;
+        const relativeSeconds = ((now - oldestTimestamp) / 1000).toFixed(1);
+        const time = `${relativeSeconds}s`;
+
+        const newPoint = createDataPoint(now, time, currentValue);
+        const newPoints = [...filteredPoints, newPoint];
+
+        // Recalculate all relative times for consistency
+        const oldest = newPoints[0].timestamp;
+        return newPoints.map((point) => ({
+          ...point,
+          time: `${((point.timestamp - oldest) / 1000).toFixed(1)}s`,
+        }));
       });
-    }, [currentValue, isLive, createDataPoint, mergedConfig.maxPoints]);
+    }, [
+      currentValue,
+      isLive,
+      createDataPoint,
+      mergedConfig.maxPoints,
+      mergedConfig.windowDuration,
+    ]);
 
     useEffect(() => {
-      setDataPoints([]);
-    }, [mergedConfig.maxPoints]);
+      setDataPoints((prev) => {
+        if (prev.length === 0) return prev;
+
+        const now = Date.now();
+        let filtered = prev;
+
+        // Filter by windowDuration if specified
+        if (
+          mergedConfig.windowDuration &&
+          mergedConfig.windowDuration !== Infinity
+        ) {
+          const cutoff = now - mergedConfig.windowDuration;
+          filtered = prev.filter((p) => p.timestamp >= cutoff);
+        } else if (prev.length > mergedConfig.maxPoints) {
+          // Fallback to maxPoints
+          filtered = prev.slice(prev.length - mergedConfig.maxPoints);
+        }
+
+        if (filtered.length === 0) return prev;
+
+        // Recalculate relative times
+        const oldest = filtered[0].timestamp;
+        return filtered.map((point) => ({
+          ...point,
+          time: `${((point.timestamp - oldest) / 1000).toFixed(1)}s`,
+        }));
+      });
+    }, [mergedConfig.maxPoints, mergedConfig.windowDuration]);
 
     useEffect(() => {
       if (throttleTimerRef.current) {

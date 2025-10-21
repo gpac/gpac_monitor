@@ -10,17 +10,24 @@ interface CPUChartProps {
   currentCPUPercent: number;
   isLive: boolean;
   maxPoints?: number;
+  windowDuration?: number;
 }
 
 export const CPUChart = memo(
-  ({ currentCPUPercent, isLive, maxPoints = 400 }: CPUChartProps) => {
+  ({
+    currentCPUPercent,
+    isLive,
+    maxPoints = 400,
+    windowDuration,
+  }: CPUChartProps) => {
     const cpuChartConfig: ChartConfig = useMemo(
       () => ({
         title: 'CPU Usage over time',
         icon: '',
         height: 200,
         maxPoints,
-        throttleInterval: 50,
+        windowDuration,
+        throttleInterval: 150,
         yAxisDomain: [0, 100],
         yAxisTicks: [0, 50, 100],
         yAxisFormatter: (value: number) => `${value}%`,
@@ -45,7 +52,7 @@ export const CPUChart = memo(
           },
         ],
       }),
-      [maxPoints],
+      [maxPoints, windowDuration],
     );
 
     const createDataPoint = (

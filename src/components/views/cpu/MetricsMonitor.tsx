@@ -7,11 +7,13 @@ import { CPUOverview } from './components/CPUOverview';
 import { MemoryChart } from './components/MemoryChart';
 import { useCPUStats } from './hooks/useCPUStats';
 import WidgetWrapper from '@/components/common/WidgetWrapper';
+import { CPUHistoryBadge } from './components/CPUHistoryBadge';
+import { useChartDuration } from './hooks/useChartDuration';
 import {
-  CPUHistoryBadge,
-  useHistoryDuration,
-  getMaxPointsFromDuration,
-} from './components/CPUHistoryBadge';
+  CHART_CPU_UPDATE_INTERVAL,
+  DEFAULT_CPU_HISTORY,
+  CPU_HISTORY_STORAGE_KEY,
+} from './constants';
 
 // Static CSS classes extracted to prevent recreation on every render
 const BASE_CONTAINER_CLASS = 'container mx-auto space-y-4 p-4';
@@ -28,10 +30,14 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
   ({ id, title }) => {
     const [isLive, _setIsLive] = useState(true);
     const [isResizing, setIsResizing] = useState(false);
-    const [historyDuration, setHistoryDuration] = useHistoryDuration(
-      'cpu-history-duration',
-      '1min',
-    );
+
+    // Chart duration management (encapsulated logic)
+    const { duration, setDuration, windowDuration, maxPoints } =
+      useChartDuration(
+        CPU_HISTORY_STORAGE_KEY,
+        DEFAULT_CPU_HISTORY,
+        CHART_CPU_UPDATE_INTERVAL,
+      );
 
     // Optimize resize performance
     const { ref } = useOptimizedResize({
@@ -42,25 +48,22 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
     }) as { ref: React.RefObject<HTMLElement> };
     const containerRef = ref as React.RefObject<HTMLDivElement>;
 
-    // Collecte des données à 150ms (throttlé à 500ms dans le messageHandler)
-    const { stats, isSubscribed } = useCPUStats(isLive, 150);
-
-    const maxPoints = useMemo(
-      () => getMaxPointsFromDuration(historyDuration, 150),
-      [historyDuration],
+    const { stats, isSubscribed } = useCPUStats(
+      isLive,
+      CHART_CPU_UPDATE_INTERVAL,
     );
 
     const deferredStats = useDeferredValue(stats);
     const deferredSubscribed = useDeferredValue(isSubscribed);
 
-    // Memoize current stats calculation to avoid recalculating on every render
+    // Memoize current stats calculation
     const currentStats = useMemo(() => {
       return deferredStats.length > 0
         ? deferredStats[deferredStats.length - 1]
         : null;
     }, [deferredStats]);
 
-    // Memoize derived values to avoid recalculation
+    // Memoize derived values
     const metricsValues = useMemo(
       () => ({
         currentCPUPercent: currentStats?.process_cpu_usage || 0,
@@ -72,7 +75,6 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
       [currentStats, deferredSubscribed],
     );
 
-    // Memoize className strings to prevent recreation on every render
     const containerClassName = useMemo(
       () => `${BASE_CONTAINER_CLASS}${isResizing ? ` ${RESIZING_CLASS}` : ''}`,
       [isResizing],
@@ -83,20 +85,14 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
       [isResizing],
     );
 
-    // Memoize live state for chart components
     const chartLiveState = useMemo(
       () => isLive && !isResizing,
       [isLive, isResizing],
     );
 
     const statusBadge = useMemo(
-      () => (
-        <CPUHistoryBadge
-          value={historyDuration}
-          onChange={setHistoryDuration}
-        />
-      ),
-      [historyDuration, setHistoryDuration],
+      () => <CPUHistoryBadge value={duration} onChange={setDuration} />,
+      [duration, setDuration],
     );
 
     return (
@@ -116,6 +112,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
               currentCPUPercent={metricsValues.currentCPUPercent}
               isLive={chartLiveState}
               maxPoints={maxPoints}
+              windowDuration={windowDuration}
             />
             <MemoryChart
               currentMemoryPercent={metricsValues.currentMemoryPercent}
