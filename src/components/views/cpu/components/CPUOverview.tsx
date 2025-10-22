@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatPercent } from '@/utils/formatUtils';
+import { formatPercent } from '@/utils/formatting';
 import { memo } from 'react';
 
 interface CPUOverviewProps {

@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TabPIDData } from '@/types/domain/gpac/filter-stats';
-import { formatBytes } from '@/utils/helper';
+import { formatBytes } from '@/utils/formatting';
 import { getCriticalAlerts, getPlaybackStatus } from '../shared/statusHelpers';
 
 interface CompactPIDStatsProps {

@@ -1,4 +1,4 @@
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/core';
 import * as CheckboxPrimitives from '@radix-ui/react-checkbox';
 import * as React from 'react';
 import { FiCheck } from 'react-icons/fi';

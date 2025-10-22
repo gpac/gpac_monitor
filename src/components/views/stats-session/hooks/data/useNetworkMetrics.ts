@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { NetworkTabData } from '@/types/domain/gpac/filter-stats';
-import { formatBytes, formatBitrate, formatPacketRate } from '@/utils/helper';
+import {
+  formatBytes,
+  formatBitrate,
+  formatPacketRate,
+} from '@/utils/formatting';
 
 export interface NetworkMetrics {
   currentStats: NetworkTabData;

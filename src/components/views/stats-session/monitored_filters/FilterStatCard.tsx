@@ -11,16 +11,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { formatBytes, formatTime, formatNumber } from '@/utils/formatting';
 import {
-  formatBytes,
-  formatTime,
   getActivityLevel,
   getActivityLabel,
   getActivityColorClass,
   getBufferProgressColor,
   calculateBufferUsage,
-  formatNumber,
-} from '@/utils/helper';
+} from '@/utils/metrics';
 
 interface FilterStatCardProps {
   filter: GpacNodeData;

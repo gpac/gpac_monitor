@@ -1,6 +1,6 @@
 import React, { memo, useCallback } from 'react';
 import { FilterArgumentInput } from '../FilterArgumentInput';
-import { cn } from '../../../utils/cn';
+import { cn } from '@/utils/core';
 import { Badge } from '../../ui/badge';
 import { Spinner } from '../../ui/spinner';
 import { FaCircleInfo } from 'react-icons/fa6';

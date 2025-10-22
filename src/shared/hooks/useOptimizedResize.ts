@@ -1,9 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react';
-import {
-  useResizeOptimization,
-  ResizeNotification,
-} from '@/utils/resizeManager';
-import { useTransformResize } from '@/utils/transformResize';
+import { useResizeOptimization, ResizeNotification } from '@/utils/performance';
+import { useTransformResize } from '@/utils/performance';
 
 interface UseOptimizedResizeOptions {
   onResize?: (width: number, height: number) => void;

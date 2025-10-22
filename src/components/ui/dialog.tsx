@@ -1,4 +1,4 @@
-import { cn } from '../../utils/cn';
+import { cn } from '@/utils/core';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { LuX } from 'react-icons/lu';
 import * as React from 'react';

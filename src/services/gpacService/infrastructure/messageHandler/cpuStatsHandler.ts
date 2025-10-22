@@ -4,7 +4,7 @@ import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { WSMessageType } from '@/services/ws/types';
 import { MessageHandlerDependencies } from './types';
 
-import { generateID } from '@/utils/id';
+import { generateID } from '@/utils/core';
 
 export class CPUStatsHandler {
   constructor(

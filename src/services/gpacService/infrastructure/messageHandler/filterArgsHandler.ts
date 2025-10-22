@@ -1,5 +1,5 @@
 import { WSMessageType } from '@/services/ws/types';
-import { generateID } from '@/utils/id';
+import { generateID } from '@/utils/core';
 import { MessageHandlerDependencies } from './types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { FilterArgument } from '@/types';

@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { LuPackage2 } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatNumber } from '@/utils/helper';
+import { formatNumber } from '@/utils/formatting';
 
 interface PacketsCardProps {
   pck_done?: number;

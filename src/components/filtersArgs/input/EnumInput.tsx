@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '../../../utils/cn';
+import { cn } from '@/utils/core';
 
 interface EnumInputProps {
   value?: string | number;

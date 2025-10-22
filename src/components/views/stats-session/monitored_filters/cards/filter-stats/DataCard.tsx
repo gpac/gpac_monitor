@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { LuHardDrive } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatBytes } from '@/utils/helper';
+import { formatBytes } from '@/utils/formatting';
 
 interface DataCardProps {
   bytes_done?: number;

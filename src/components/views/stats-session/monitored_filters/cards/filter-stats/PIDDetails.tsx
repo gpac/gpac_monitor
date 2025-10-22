@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { formatBytes } from '@/utils/helper';
+import { formatBytes } from '@/utils/formatting';
 
 interface PIDDetailsProps {
   name: string;

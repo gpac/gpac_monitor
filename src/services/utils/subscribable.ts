@@ -1,4 +1,4 @@
-import { generateID } from '../../utils/id';
+import { generateID } from '@/utils/core';
 
 export type SubscriberFn<D, N = undefined, E extends object = ExtraData> = (
   data: D,

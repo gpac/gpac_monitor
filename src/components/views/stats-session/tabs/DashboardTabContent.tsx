@@ -15,7 +15,7 @@ import {
   ActivityIndicator,
   ActivityLevel,
 } from '@/components/ui/activity-indicator';
-import { formatBytes, formatNumber } from '@/utils/helper';
+import { formatBytes, formatNumber } from '@/utils/formatting';
 import type { StatsCounters, SystemStats } from '../hooks/useStatsCalculations';
 
 interface DashboardTabContentProps {

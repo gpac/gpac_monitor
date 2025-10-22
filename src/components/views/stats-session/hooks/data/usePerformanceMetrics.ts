@@ -5,7 +5,7 @@ import {
   formatPacketRate,
   formatTime,
   formatNumber,
-} from '@/utils/helper';
+} from '@/utils/formatting';
 
 export interface PerformanceData {
   throughput: {

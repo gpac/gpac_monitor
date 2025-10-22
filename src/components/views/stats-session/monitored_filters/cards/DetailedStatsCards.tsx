@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { LuActivity, LuPackage2, LuHardDrive } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { formatBytes, formatTime, formatNumber } from '@/utils/helper';
+import { formatBytes, formatTime, formatNumber } from '@/utils/formatting';
 import { FilterStatsResponse } from '../../../../../types/domain/gpac/filter-stats';
 
 interface PIDMetricsCardProps {

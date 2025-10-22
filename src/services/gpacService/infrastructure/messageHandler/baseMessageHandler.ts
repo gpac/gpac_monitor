@@ -1,7 +1,7 @@
 import { WebSocketBase } from '../../../ws/WebSocketBase';
 import { GpacNodeData } from '../../../../types/domain/gpac/model';
 import { GpacNotificationHandlers } from '../../types';
-import { generateID } from '@/utils/id';
+import { generateID } from '@/utils/core';
 import { SessionStatsHandler } from './sessionStatsHandler';
 import { FilterStatsHandler } from './filterStatsHandler';
 import { MessageThrottler } from '../../../utils/MessageThrottler';

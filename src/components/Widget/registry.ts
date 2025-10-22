@@ -7,7 +7,7 @@ import MetricsMonitor from '../views/cpu/MetricsMonitor';
 import AudioMonitor from '../views/audio/AudioMonitor';
 import GraphMonitor from '../views/graph/GraphMonitor';
 import MultiFilterMonitor from '../views/stats-session/session-overview/entry';
-import { generateID } from '@/utils/id';
+import { generateID } from '@/utils/core';
 
 export interface WidgetDefinition {
   type: WidgetType;

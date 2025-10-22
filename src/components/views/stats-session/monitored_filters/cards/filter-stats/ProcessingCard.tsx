@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { LuActivity } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatTime } from '@/utils/helper';
+import { formatTime } from '@/utils/formatting';
 
 interface ProcessingCardProps {
   tasks?: number;

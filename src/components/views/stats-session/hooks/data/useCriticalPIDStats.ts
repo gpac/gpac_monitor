@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { TabPIDData } from '@/types/domain/gpac/filter-stats';
-import { getHealthStatusFromMetrics } from '@/utils/helper';
+import { getHealthStatusFromMetrics } from '@/utils/metrics';
 
 export interface CriticalState {
   key: string;

@@ -7,7 +7,7 @@ import {
   StringInput,
   FractionInput,
 } from '../filtersArgs/input';
-import { convertArgumentValue } from '../../utils/filtersArguments';
+import { convertArgumentValue } from '@/utils/gpac';
 import { updateFilterArgument } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch } from '@/shared/hooks/redux';
 import { FilterArgumentBase } from './types';

@@ -1,4 +1,4 @@
-import { Subscribable } from '../services/utils/subscribable';
+import { Subscribable } from '../../services/utils/subscribable';
 
 interface ResizeData {
   width: number;

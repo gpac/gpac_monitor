@@ -1,5 +1,5 @@
 import { TimeFraction } from '@/types/domain/gpac/model';
-import { formatTime } from '@/utils/helper';
+import { formatTime } from '@/utils/formatting';
 
 /**
  * Formats frames per second from TimeFraction

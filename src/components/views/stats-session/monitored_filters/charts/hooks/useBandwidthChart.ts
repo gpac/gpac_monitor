@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { formatBytes, formatChartTime } from '@/utils/helper';
+import { formatBytes, formatChartTime } from '@/utils/formatting';
 import { MAX_POINTS } from '../config/bandwidthChartConfig';
 
 export interface DataPoint {

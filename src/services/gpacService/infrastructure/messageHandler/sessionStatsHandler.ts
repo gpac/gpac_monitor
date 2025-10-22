@@ -1,7 +1,7 @@
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { WSMessageType } from '@/services/ws/types';
 import { SessionFilterStatistics } from '../../../../types/domain/gpac/model';
-import { generateID } from '@/utils/id';
+import { generateID } from '@/utils/core';
 import { MessageHandlerDependencies } from './types';
 
 export class SessionStatsHandler {

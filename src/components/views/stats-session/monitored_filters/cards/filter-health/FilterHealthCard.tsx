@@ -2,7 +2,7 @@ import { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
-import { formatTime } from '@/utils/helper';
+import { formatTime } from '@/utils/formatting';
 import { getFilterHealthInfo } from '../shared/statusHelpers';
 
 interface FilterHealthCardProps {

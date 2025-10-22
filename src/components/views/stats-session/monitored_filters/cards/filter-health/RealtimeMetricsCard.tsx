@@ -5,7 +5,7 @@ import {
   formatBytes,
   formatPacketRate,
   microsecondsToSeconds,
-} from '@/utils/helper';
+} from '@/utils/formatting';
 
 interface RealtimeMetricsCardProps {
   filter: OverviewTabData;

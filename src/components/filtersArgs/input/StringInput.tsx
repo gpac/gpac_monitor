@@ -1,6 +1,6 @@
 import { GenericInput } from './GenericInput';
 import type { FilterArgumentInputProps } from '../types';
-import { cn } from '../../../utils/cn';
+import { cn } from '@/utils/core';
 import React from 'react';
 
 interface StringInputProps extends FilterArgumentInputProps<'str'> {

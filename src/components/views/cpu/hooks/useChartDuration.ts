@@ -3,7 +3,7 @@ import {
   ChartDuration,
   getDurationInMs,
   getMaxPointsFromDuration,
-} from '@/utils/chartDuration';
+} from '@/utils/charts';
 
 /**
  * Hook for managing chart duration, window duration, and max points

@@ -6,7 +6,7 @@ import {
   GpacLogConfig,
   GpacLogConfigString,
 } from '@/types/domain/gpac/log-types';
-import { generateID } from '@/utils/id';
+import { generateID } from '@/utils/core';
 import { MessageHandlerDependencies, MessageHandlerCallbacks } from './types';
 import { logWorkerService } from '@/services/workers/logWorkerService';
 

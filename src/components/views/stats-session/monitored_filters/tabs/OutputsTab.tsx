@@ -5,13 +5,13 @@ import {
 } from '@/types/domain/gpac/filter-stats';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { formatBytes } from '@/utils/helper';
+import { formatBytes } from '@/utils/formatting';
 import {
   getOverallStatus,
   getPIDStatusBadge,
   getGlobalStatus,
-} from '@/utils/pidStatus';
-import { getMediaTypeInfo } from '@/utils/filterMonitorUtils';
+} from '@/utils/gpac';
+import { getMediaTypeInfo } from '@/utils/gpac';
 
 interface OutputsTabProps {
   filterData: FilterStatsResponse;
