@@ -12,11 +12,15 @@ import {
   TooltipTrigger,
 } from '../../ui/tooltip';
 import { getBorderStyle } from '../utils/argumentStyles';
+import { GpacArgument, GPACTypes } from '../types';
+import { ArgumentUpdate } from '@/shared/store/slices/filterArgumentSlice';
+
+type GPACValue = GPACTypes[keyof GPACTypes] | null;
 
 interface ArgumentItemProps {
-  arg: any;
-  updateStatus?: { status: string; value: any };
-  onValueChange: (argName: string, newValue: any) => void;
+  arg: GpacArgument;
+  updateStatus?: ArgumentUpdate;
+  onValueChange: (argName: string, newValue: GPACValue) => void;
 }
 
 const ArgumentItem: React.FC<ArgumentItemProps> = memo(
@@ -26,7 +30,7 @@ const ArgumentItem: React.FC<ArgumentItemProps> = memo(
     const isUpdatable = !!arg.update;
 
     const handleChange = useCallback(
-      (newValue: any) => {
+      (newValue: GPACValue) => {
         onValueChange(arg.name, newValue);
       },
       [arg.name, onValueChange],
@@ -96,7 +100,7 @@ const ArgumentItem: React.FC<ArgumentItemProps> = memo(
           <FilterArgumentInput
             argument={{
               name: arg.name,
-              type: type,
+              type: type as keyof GPACTypes,
               desc: arg.desc,
               hint: arg.hint,
               default: arg.default,

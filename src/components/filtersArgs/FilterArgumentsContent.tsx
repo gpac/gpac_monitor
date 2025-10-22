@@ -5,10 +5,13 @@ import {
 } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import ArgumentItem from './arguments/ArgumentItem';
+import { GpacArgument, GPACTypes } from './types';
+
+type GPACValue = GPACTypes[keyof GPACTypes] | null;
 
 interface FilterArgumentsContentProps {
   filterId: number;
-  filterArgs: any[];
+  filterArgs: GpacArgument[];
   showExpert?: boolean;
   showAdvanced?: boolean;
 }
@@ -35,7 +38,7 @@ const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
   );
 
   const handleValueChange = useCallback(
-    (argName: string, newValue: any) => {
+    (argName: string, newValue: GPACValue) => {
       const arg = filterArgs.find((a) => a.name === argName);
 
       if (arg?.update) {

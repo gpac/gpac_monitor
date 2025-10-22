@@ -1,42 +1,5 @@
-// Types spécifiques aux FilterArgs
-export interface GPACTypes {
-  // Numerics
-  sint: number;
-  luint: number;
-  uint: number;
-  lsint: number;
-  flt: number;
-  dbl: number;
-  bool: string;
-  // Fractions
-  frac: string;
-  lfrac: string;
-  // Strings
-  str: string;
-  cstr: string;
-  '4cc': string;
-  //Vectors
-  v2di: [number, number];
-  v2d: [number, number];
-  v3di: [number, number, number];
-  v4di: [number, number, number, number];
-  //binaries types
-  mem: ArrayBuffer;
-  cmem: ArrayBuffer;
-  ptr: number;
-  //list types
-  strl: string[];
-  uintl: number[];
-  sintl: number[];
-  '4ccl': string[];
-  v2il: Array<[number, number]>;
-  // Media format types
-  pfmt: string;
-  afmt: string;
-  cprm: string;
-  cftc: string;
-  cmxc: string;
-}
+// Re-export GPACTypes from the canonical source
+export type { GPACTypes } from '@/types/domain/gpac/gpac_args';
 
 // Utils for validating GPAC complexes types
 export const gpacValidators = {

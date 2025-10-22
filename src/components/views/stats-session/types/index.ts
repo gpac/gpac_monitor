@@ -1,4 +1,3 @@
-// Types pour les métriques de buffer
 export interface BufferMetrics {
   current: number;
   total: number;
@@ -22,7 +21,6 @@ export interface FilterBufferStats {
 
 export type TrendDirection = 'stable' | 'increasing' | 'decreasing';
 
-// Types pour le monitoring des filtres
 export interface FilterMetric {
   timestamp: number;
   bytes_done: number;
@@ -50,7 +48,6 @@ export interface FilterStatus {
   nb_packets_done: number;
 }
 
-// Types pour les composants de monitoring
 export interface MetricCardProps {
   title: string;
   value: number;
