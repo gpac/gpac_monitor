@@ -5,11 +5,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const mockSubscribe = vi.fn();
 const mockGetFilterDetails = vi.fn();
+const mockSubscribeToFilterArgs = vi.fn();
 
 vi.mock('@/shared/hooks/useGpacService', () => ({
   useGpacService: () => ({
     subscribe: mockSubscribe,
     getFilterDetails: mockGetFilterDetails,
+    subscribeToFilterArgs: mockSubscribeToFilterArgs,
   }),
 }));
 
@@ -50,8 +52,8 @@ describe('useFilterArgs', () => {
       expect.any(Function),
     );
 
-    // Vérifier que getFilterDetails est appelé
-    expect(mockGetFilterDetails).toHaveBeenCalledWith(42);
+    // Vérifier que subscribeToFilterArgs est appelé
+    expect(mockSubscribeToFilterArgs).toHaveBeenCalledWith(42);
 
     // Simuler la réception des données
     const mockFilterArgs = [

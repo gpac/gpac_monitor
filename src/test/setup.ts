@@ -13,3 +13,11 @@ global.WebSocket = class MockWebSocket {
   close() {}
   send() {}
 } as any;
+
+// Mock ResizeObserver globally
+global.ResizeObserver = class MockResizeObserver {
+  constructor(callback: ResizeObserverCallback) {}
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as any;

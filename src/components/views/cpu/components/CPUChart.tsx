@@ -3,7 +3,6 @@ import { Chart, ChartDataPoint, ChartConfig } from '@/components/common/Chart';
 
 export interface CPUDataPoint extends ChartDataPoint {
   cpu_percent: number;
-  memory_percent: number;
 }
 
 interface CPUChartProps {
@@ -22,21 +21,21 @@ export const CPUChart = memo(
   }: CPUChartProps) => {
     const cpuChartConfig: ChartConfig = useMemo(
       () => ({
-        title: 'CPU Usage over time',
+        title: 'CPU Usage',
         icon: '',
         height: 200,
         maxPoints,
         windowDuration,
         throttleInterval: 150,
         yAxisDomain: [0, 100],
-        yAxisTicks: [0, 50, 100],
+        yAxisTicks: [0, 25, 50, 75, 100],
         yAxisFormatter: (value: number) => `${value}%`,
         areas: [
           {
             dataKey: 'cpu_percent',
-            name: 'GPAC Process',
+            name: 'CPU',
             stroke: '#ef4444',
-            fill: 'url(#processGradient)',
+            fill: 'url(#cpuGradient)',
             strokeWidth: 2,
           },
         ],
@@ -46,7 +45,7 @@ export const CPUChart = memo(
         },
         gradients: [
           {
-            id: 'processGradient',
+            id: 'cpuGradient',
             color: '#ef4444',
             opacity: { start: 0.6, end: 0.1 },
           },
@@ -55,16 +54,19 @@ export const CPUChart = memo(
       [maxPoints, windowDuration],
     );
 
-    const createDataPoint = (
-      timestamp: number,
-      time: string,
-      currentValue: number,
-    ): CPUDataPoint => ({
-      timestamp,
-      time,
-      cpu_percent: currentValue,
-      memory_percent: 0,
-    });
+    const createDataPoint = useMemo(
+      () =>
+        (
+          timestamp: number,
+          time: string,
+          _currentValue: number,
+        ): CPUDataPoint => ({
+          timestamp,
+          time,
+          cpu_percent: currentCPUPercent,
+        }),
+      [currentCPUPercent],
+    );
 
     return (
       <Chart
@@ -76,3 +78,5 @@ export const CPUChart = memo(
     );
   },
 );
+
+CPUChart.displayName = 'CPUChart';

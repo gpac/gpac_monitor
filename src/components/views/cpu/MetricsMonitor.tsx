@@ -2,9 +2,8 @@ import React, { useState, useDeferredValue, useMemo } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 
 import { CPUChart } from './components/CPUChart';
+import { MemoryUsageChart } from './components/MemoryUsageChart';
 import { CPUOverview } from './components/CPUOverview';
-
-import { MemoryChart } from './components/MemoryChart';
 import { useCPUStats } from './hooks/useCPUStats';
 import WidgetWrapper from '@/components/common/WidgetWrapper';
 import { CPUHistoryBadge } from './components/CPUHistoryBadge';
@@ -114,11 +113,11 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(
               maxPoints={maxPoints}
               windowDuration={windowDuration}
             />
-            <MemoryChart
-              currentMemoryPercent={metricsValues.currentMemoryPercent}
-              currentMemoryProcess={metricsValues.currentMemoryProcess}
+            <MemoryUsageChart
+              currentMemoryBytes={metricsValues.currentMemoryProcess}
               isLive={chartLiveState}
-              /*  maxPoints={maxPoints} */
+              maxPoints={maxPoints}
+              windowDuration={windowDuration}
             />
           </div>
         </div>
