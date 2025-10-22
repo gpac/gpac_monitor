@@ -30,17 +30,17 @@ const WidgetSelector: React.FC<WidgetSelectorProps> = ({
           className={`
             flex items-center gap-2 px-3 py-2 rounded-lg
             transition-all duration-200 ease-out
-            focus:outline-none focus:ring-2 focus:ring-red-600/50 focus:ring-offset-2 focus:ring-offset-gray-900
+            focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/30
             ${
               isOpen
-                ? 'bg-monitor-surface text-white ring-2 ring-red-600/50'
-                : ' text-gray-300 hover:bg-monitor-surface/70 hover:text-white'
+                ? 'bg-monitor-panel text-white ring-1 ring-emerald-400/30'
+                : 'text-white/70 hover:bg-white/5 hover:text-white'
             }
           `}
           aria-label="Toggle widgets menu"
           aria-expanded={isOpen}
         >
-          <FiLayout className="w-4 h-4" />
+          <FiLayout className="w-4 h-4 text-emerald-400" />
           <span className="font-small text-ui ">Widgets</span>
           <FaChevronDown
             className={`w-3 h-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -50,7 +50,7 @@ const WidgetSelector: React.FC<WidgetSelectorProps> = ({
 
       <PopoverContent
         className="
-          w-64 bg-gray-900 border border-gray-700 rounded-lg shadow-xl p-3 z-50
+           w-72 bg-monitor-surface ring-1 ring-monitor-line rounded-xl shadow-none p-2 z-50
           data-[state=open]:animate-popoverShow
           data-[state=closed]:animate-popoverHide
         "

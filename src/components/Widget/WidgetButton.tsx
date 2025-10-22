@@ -35,12 +35,13 @@ export const WidgetButton: React.FC<WidgetButtonProps> = ({
       className={`
       group w-full flex items-center justify-between p-3 rounded-lg
       transition-all duration-150 ease-out
-      focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:ring-offset-2 focus:ring-offset-black
+      focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/30
 
       ${
         isActive
-          ? 'bg-slate-800 border-transparent text-emerald-500 shadow-[inset_0_0_0_1px_rgba(16,185,129,.25)]'
-          : 'bg-slate-950/50 border-transparent text-subtle hover:bg-slate-800/80 hover:border-slate-500/50'
+          ? 'bg-monitor-panel ring-1 ring-emerald-400/25 text-emerald-400'
+          : 'bg-monitor-panel text-monitor-text-secondary hover:bg-white/4'
+      }
       }
     `}
     >
@@ -50,22 +51,22 @@ export const WidgetButton: React.FC<WidgetButtonProps> = ({
           ${
             isActive
               ? 'text-emerald-400'
-              : 'text-muted group-hover:text-slate-100'
+              : 'text-monitor-text-muted group-hover:text-monitor-text-primary'
           }`}
         />
         <span
           className={`text-sm font-medium
           ${
             isActive
-              ? 'text-slate-100'
-              : 'text-slate-300 group-hover:text-slate-100'
+              ? 'text-monitor-text-primary'
+              : 'text-monitor-text-secondary group-hover:text-monitor-text-primary'
           }`}
         >
           {title}
         </span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center bg-monitor-surface gap-2">
         {isActive && (
           <div className="flex items-center gap-1 text-xs text-emerald-400">
             <FiCheck className="w-3 h-3" />

@@ -6,7 +6,7 @@ import FilterArgumentsContent from '../../filtersArgs/FilterArgumentsContent';
 import PropertiesHeader from './PropertiesHeader';
 
 /**
- * Properties panel - Pure container (style only).
+ * Properties panel
  * Displays filter arguments when a node is selected.
  */
 const PropertiesPanel: React.FC = () => {
@@ -23,7 +23,7 @@ const PropertiesPanel: React.FC = () => {
   if (!selectedNode) {
     return (
       <div className="flex flex-col bg-monitor-panel items-center justify-center p-4 text-center ring-1 ring-monitor-line rounded-xl mt-4">
-        + <FiSettings className="w-12 h-12 text-monitor-text-muted mb-3" />+{' '}
+        <FiSettings className="w-12 h-12 text-monitor-text-muted mb-3" />{' '}
         <h3 className="text-sm font-medium text-monitor-text-secondary mb-1">
           No nodes selected
         </h3>
