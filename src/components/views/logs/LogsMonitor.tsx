@@ -130,13 +130,13 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
       const colorClasses = {
         error: 'text-danger',
         warning: 'text-warning',
-        info: 'text-info',
+        info: 'text-emerald-300/90',
         debug: 'text-debug',
         quiet: 'text-muted',
       };
 
       return (
-        <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-gray-700 bg-gray-800/80 font-ui">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-gray-700 bg-monitor-panel font-ui">
           <span className="text-xs">
             <RiGlobalFill className="w-4 h-4" />
           </span>

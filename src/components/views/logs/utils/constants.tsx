@@ -69,14 +69,14 @@ export const LOG_ENTRY_CONFIG = {
     0: 'text-gray-500 shrink-0 mt-1',
     1: 'text-red-500 shrink-0 mt-1',
     2: 'text-yellow-500 shrink-0 mt-1',
-    3: 'text-green-700/60 shrink-0 mt-1',
+    3: 'text-emerald-300/90 shrink-0 mt-1',
     4: 'text-blue-300 shrink-0 mt-1',
   },
   styles: {
     0: 'text-gray-500',
     1: 'text-red-500',
     2: 'text-yellow-500',
-    3: 'text-green-500/70',
+    3: 'text-emerald-300/90',
     4: 'text-blue-300',
   },
   names: {
