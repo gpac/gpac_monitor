@@ -53,39 +53,39 @@ const StatsCard: React.FC<StatsCardProps> = ({
   className = '',
 }) => {
   const getTrendIcon = () => {
-    if (trend === 'up') return <LuArrowUp className="h-3 w-3 text-green-500" />;
+    if (trend === 'up')
+      return <LuArrowUp className="h-3 w-3 text-emerald-400" />;
     if (trend === 'down')
-      return <LuArrowDown className="h-3 w-3 text-red-500" />;
+      return <LuArrowDown className="h-3 w-3 text-rose-400" />;
     return null;
   };
 
   const getTrendColor = () => {
-    if (trend === 'up') return 'text-green-600';
-    if (trend === 'down') return 'text-red-600';
-    return 'text-muted-foreground';
+    if (trend === 'up') return 'text-emerald-400';
+    if (trend === 'down') return 'text-rose-400';
+    return 'text-monitor-text-muted';
   };
 
   return (
     <Card
-      className={`transition-all hover:shadow-md bg-stat border-0 ${className}`}
+      className={`bg-monitor-panel ring-1 ring-monitor-line border-transparent rounded-lg shadow-none hover:bg-white/4 transition-colors ${className}`}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-2">
-        <CardTitle className="text-xs font-medium text-muted-foreground stat-label">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-2">
+        <CardTitle className="text-xs font-medium text-monitor-text-muted">
           {title}
         </CardTitle>
-        <div
-          className="flex items-center gap-1 stat-label
-        "
-        >
+        <div className="flex items-center gap-1 text-monitor-text-muted">
           {activityLevel && (
             <ActivityIndicator level={activityLevel} size="sm" />
           )}
           {icon}
         </div>
       </CardHeader>
-      <CardContent className="p-2 pt-0">
+      <CardContent className="p-3 pt-0">
         <div className="flex items-baseline gap-1">
-          <div className="text-lg font-bold">{value}</div>
+          <div className="text-lg font-bold text-monitor-text-primary tabular-nums">
+            {value}
+          </div>
           {getTrendIcon()}
         </div>
 
@@ -94,7 +94,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
         )}
 
         {badge && (
-          <Badge variant="secondary" className="mt-1 text-xs">
+          <Badge className="mt-1 text-xs bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-400/20">
             {badge}
           </Badge>
         )}
@@ -106,13 +106,13 @@ const StatsCard: React.FC<StatsCardProps> = ({
               className="h-1"
               color={
                 progress > 80
-                  ? 'bg-red-500'
+                  ? 'bg-rose-500'
                   : progress > 50
-                    ? 'bg-yellow-500'
-                    : 'bg-green-00'
+                    ? 'bg-amber-400'
+                    : 'bg-emerald-500'
               }
             />
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-monitor-text-muted mt-1 tabular-nums">
               {progress.toFixed(1)}%
             </p>
           </div>
@@ -144,21 +144,21 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Statistics Overview */}
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <Badge variant="outline" className="text-xs">
+        <div className="flex items-center justify-between mb-3">
+          <Badge className="text-xs bg-white/5 ring-1 ring-monitor-line text-monitor-text-secondary">
             Refresh: {refreshInterval}
           </Badge>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 justify-center max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
           {/* Data Processed */}
           <StatsCard
             title="Data Processed"
             value={formatBytes(systemStats.totalBytes)}
-            icon={<LuDatabase className="h-4 w-4 text-muted-foreground" />}
+            icon={<LuDatabase className="h-4 w-4 text-monitor-text-muted" />}
             description={`${formatNumber(systemStats.totalPackets)} packets`}
             trend={systemStats.totalBytes > 0 ? 'up' : 'neutral'}
             activityLevel={
@@ -184,7 +184,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
           <StatsCard
             title="Pipeline Status"
             value={`${statsCounters.sources}→${statsCounters.sinks}`}
-            icon={<LuActivity className="h-4 w-4 text-muted-foreground" />}
+            icon={<LuActivity className="h-4 w-4 text-monitor-text-muted" />}
             description="Sources to sinks"
             badge={statsCounters.processing > 0 ? 'Processing' : 'Idle'}
             trend={

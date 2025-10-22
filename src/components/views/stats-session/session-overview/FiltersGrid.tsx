@@ -27,7 +27,8 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
 
     // Memoize the filtered and sorted data
     const sortedFilters = useMemo(() => {
-      return filtersWithLiveStats.sort((a, b) => {
+      const list = [...filtersWithLiveStats];
+      return list.sort((a, b) => {
         // Prioritize monitored filters first
         const aMonitored = monitoredFilters.has(a.idx || -1);
         const bMonitored = monitoredFilters.has(b.idx || -1);
@@ -41,12 +42,12 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
 
     return (
       <div className="flex flex-col h-full">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-lg font-semibold text-monitor-text-primary">
             Filters
             <Badge
               variant="secondary"
-              className="ml-1 h-6 text-sm text-info tabular-nums"
+              className="ml-1 h-6 px-2 text-sm tabular-nums bg-white/5 ring-1 ring-monitor-line text-emerald-400"
             >
               {filtersCount}
             </Badge>
@@ -55,7 +56,7 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
 
         <ScrollArea className="flex-1">
           {filtersCount > 0 ? (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 md:gap-4 xl:gap-5">
               {sortedFilters.map((enrichedFilterOverview) => (
                 <FilterStatCard
                   key={
@@ -74,8 +75,8 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
           ) : (
             <div className="flex items-center justify-center h-full">
               <div className="text-center space-y-4 p-8">
-                <div className="rounded-lg border bg-card/50 p-8 shadow-sm">
-                  <h3 className="text-lg font-medium mb-2 stat">
+                <div className="rounded-lg ring-1 ring-monitor-line bg-monitor-panel p-8 shadow-none">
+                  <h3 className="text-lg font-medium mb-2 text-monitor-text-secondary">
                     No filters found
                   </h3>
                 </div>

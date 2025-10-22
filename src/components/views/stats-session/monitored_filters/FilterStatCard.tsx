@@ -71,19 +71,19 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
     return (
       <Card
-        className={`cursor-pointer bg-stat overflow-hidden transition-shadow hover:shadow-md ${monitoredClass}`}
+        className={`cursor-pointer bg-stat overflow-hidden transition-colors bg-monitor-panel ring-1 ring-monitor-line hover:bg-white/4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/30 ${monitoredClass}`}
         onClick={handleClick}
       >
         <CardHeader className="p-3 pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-medium truncate stat">
+            <CardTitle className="text-sm font-medium truncate tracking-tight text-monitor-text-primary">
               {filter.name}
             </CardTitle>
             <div className="flex items-center gap-1 ml-2">
               {isMonitored && (
                 <Badge
                   variant="outline"
-                  className="flex h-5 items-center gap-1 px-1"
+                  className="flex h-5 items-center gap-1 px-1 ring-1 ring-emerald-400/30 text-emerald-400 bg-emerald-500/10"
                 >
                   <LuEye className="h-3 w-3" />
                 </Badge>
@@ -96,7 +96,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                       ? 'outline'
                       : 'secondary'
                 }
-                className={`h-2 px-2 text-[10px] leading-none `}
+                className={`h-2 px-2 text-[10px] leading-none capitalize ring-1 ring-monitor-line bg-white/5 text-monitor-text-secondary`}
                 style={{
                   minHeight: '16px',
                   paddingTop: '0',
@@ -107,36 +107,34 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
               </Badge>
             </div>
           </div>
-          <CardDescription className="mt-1 flex items-center gap-1 text-xs">
+          <CardDescription className="mt-1 flex items-center gap-1 text-xs text-monitor-text-muted">
             <LuActivity className="h-3 w-3" />
-            <span className="truncate text-muted-foreground stat">
-              {filter.status || 'No status'}
-            </span>
+            <span className="truncate">{filter.status || 'No status'}</span>
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-3 p-3 pt-0">
           <div className="grid grid-cols-3 gap-3">
             <div className="flex flex-col">
-              <div className="flex items-center gap-1 text-xs  mb-1">
-                <span className="stat stat-label">I/O PIDs</span>
+              <div className="flex items-center gap-1 text-xs mb-1 text-monitor-text-muted">
+                <span>I/O PIDs</span>
               </div>
-              <p className="text-xs font-medium stat">
+              <p className="text-xs font-medium tabular-nums text-monitor-text-secondary">
                 {filter.nb_ipid || 0}/{filter.nb_opid || 0}
               </p>
             </div>
 
             <div className="flex flex-col">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+              <div className="flex items-center gap-1 text-xs text-monitor-text-muted mb-1">
                 <span className="stat stat-label">Data</span>
               </div>
-              <p className="text-xs font-medium  stat">
+              <p className="text-xs font-medium tabular-nums text-monitor-text-secondary">
                 {formatBytes(filter.bytes_done)}
               </p>
             </div>
 
             <div className="flex flex-col">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+              <div className="flex items-center gap-1 text-xs text-monitor-text-muted mb-1">
                 <LuActivity className="h-3 w-3" />
                 <span className="stat stat-label">Activity</span>
               </div>
@@ -144,7 +142,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                 <div
                   className={`h-2 w-2 rounded-full ${getActivityColorClass(activityLevel)}`}
                 />
-                <span className="text-xs stat">
+                <span className="text-xs text-monitor-text-secondary">
                   {getActivityLabel(activityLevel)}
                 </span>
               </div>
@@ -154,10 +152,12 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
           {hasBufferInfo && (
             <div>
               <div className="mb-1 flex justify-between text-xs">
-                <span className="text-xs text-muted-foreground stat stat-label">
+                <span className="text-xs text-monitor-text-muted">
                   Buffer usage
                 </span>
-                <span className="text-xs stat">{bufferUsage}%</span>
+                <span className="text-xs tabular-nums text-monitor-text-secondary">
+                  {bufferUsage}%
+                </span>
               </div>
               <Progress
                 value={bufferUsage}
@@ -169,10 +169,11 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
           <div className="flex justify-between items-center gap-1 text-xs">
             {hasPackets && (
-              <Badge variant="outline" className="h-4 px-1.5 py-0 text-xs">
-                <span className="stat-value">
-                  {formatNumber(filter.pck_done)} pkt
-                </span>
+              <Badge
+                variant="outline"
+                className="h-4 px-1.5 py-0 text-xs ring-1 ring-monitor-line bg-white/5 text-monitor-text-secondary"
+              >
+                {formatNumber(filter.pck_done)} pkt
               </Badge>
             )}
             {hasTime && (
@@ -182,7 +183,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             )}
             {filter.errors && filter.errors > 0 && (
               <Badge variant="destructive" className="h-4 px-1.5 py-0 text-xs">
-                <span className="stat-value">{filter.errors} err</span>
+                <span className="tabular-nums">{filter.errors} err</span>
               </Badge>
             )}
           </div>

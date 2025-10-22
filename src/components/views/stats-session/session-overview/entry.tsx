@@ -108,8 +108,11 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     if (isLoading) {
       return (
         <WidgetWrapper id={id} title={title}>
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+          <div
+            className="flex items-center justify-center h-full"
+            aria-busy="true"
+          >
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-400/60 border-t-transparent" />
           </div>
         </WidgetWrapper>
       );
@@ -118,9 +121,9 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     if (staticFilters.length === 0) {
       return (
         <WidgetWrapper id={id} title={title}>
-          <div className="flex flex-col items-center justify-center h-full p-4 text-gray-400">
-            <p>No filters available</p>
-            <p className="text-sm mt-2">
+          <div className="flex flex-col items-center justify-center h-full p-4 text-monitor-text-secondary">
+            <p className="text-monitor-text-primary">No filters available</p>
+            <p className="text-sm mt-2 text-monitor-text-muted">
               Waiting Waiting for graph construction...
             </p>
           </div>
