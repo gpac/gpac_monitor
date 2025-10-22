@@ -1,13 +1,12 @@
 import { Input } from '../../ui/input';
+import { Spinner } from '../../ui/spinner';
 import { useState, useEffect } from 'react';
 import { useDebounce, useFirstMountState } from 'react-use';
 import type { FilterArgumentInputProps } from '../types';
 
-export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
-  value,
-  onChange,
-  rules,
-}) => {
+export const FractionInput: React.FC<
+  FilterArgumentInputProps<'frac'> & { isPending?: boolean }
+> = ({ value, onChange, rules, isPending = false }) => {
   const parseFraction = (
     val: string | number | undefined,
   ): [number, number] => {
@@ -65,8 +64,10 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
     setFraction(parseFraction(value));
   }, [value]);
 
+  const isDisabled = rules?.disabled || isPending;
+
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-1.5 w-full">
       <Input
         type="number"
         value={fraction[0]}
@@ -76,7 +77,7 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
             setFraction([newNum, fraction[1]]);
           }
         }}
-        disabled={rules?.disabled}
+        disabled={isDisabled}
         className="h-7 w-16 text-xs bg-gray-800/60 border-gray-600/50 hover:bg-gray-700/50 focus:ring-1 focus:ring-blue-500/50 transition-colors"
       />
       <span className="text-gray-500 text-xs">/</span>
@@ -90,9 +91,10 @@ export const FractionInput: React.FC<FilterArgumentInputProps<'frac'>> = ({
             setFraction([fraction[0], newDen]);
           }
         }}
-        disabled={rules?.disabled}
+        disabled={isDisabled}
         className="h-7 w-16 text-xs bg-gray-800/60 border-gray-600/50 hover:bg-gray-700/50 focus:ring-1 focus:ring-blue-500/50 transition-colors"
       />
+      {isPending && <Spinner size="sm" className="text-info" />}
     </div>
   );
 };

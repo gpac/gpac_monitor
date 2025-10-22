@@ -79,37 +79,47 @@ export const GenericInput: React.FC<GenericInputProps> = ({
           onCheckedChange={handleChange}
           disabled={switchDisabled}
         />
-        {isPending && <Spinner size="sm" className="text-info" />}
+        {isPending && <Spinner size="sm" className="text-blue-400" />}
       </div>
     );
   }
 
   if (type === 'number') {
+    const numberDisabled = rules?.disabled || isPending;
+
     return (
-      <Input
-        type="number"
-        value={debounce ? String(localValue ?? '') : String(value ?? '')}
-        onChange={(_e) => {
-          const val = _e.target.value === '' ? null : Number(_e.target.value);
-          handleChange(val);
-        }}
-        min={rules?.min}
-        max={rules?.max}
-        step={rules?.step}
-        disabled={rules?.disabled}
-        className={INPUT_STYLES}
-      />
+      <div className="flex items-center gap-2 w-full">
+        <Input
+          type="number"
+          value={debounce ? String(localValue ?? '') : String(value ?? '')}
+          onChange={(_e) => {
+            const val = _e.target.value === '' ? null : Number(_e.target.value);
+            handleChange(val);
+          }}
+          min={rules?.min}
+          max={rules?.max}
+          step={rules?.step}
+          disabled={numberDisabled}
+          className={INPUT_STYLES}
+        />
+        {isPending && <Spinner size="sm" className="text-blue-400" />}
+      </div>
     );
   }
 
+  const textDisabled = rules?.disabled || isPending;
+
   return (
-    <Input
-      type="text"
-      value={debounce ? (localValue as string) : (value as string) || ''}
-      onChange={(e) => handleChange(e.target.value || null)}
-      placeholder={rules?.placeholder}
-      disabled={rules?.disabled}
-      className={INPUT_STYLES}
-    />
+    <div className="flex items-center gap-2 w-full">
+      <Input
+        type="text"
+        value={debounce ? (localValue as string) : (value as string) || ''}
+        onChange={(e) => handleChange(e.target.value || null)}
+        placeholder={rules?.placeholder}
+        disabled={textDisabled}
+        className={INPUT_STYLES}
+      />
+      {isPending && <Spinner size="sm" className="text-blue-400" />}
+    </div>
   );
 };

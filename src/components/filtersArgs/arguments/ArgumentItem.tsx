@@ -2,7 +2,6 @@ import React, { memo, useCallback } from 'react';
 import { FilterArgumentInput } from '../FilterArgumentInput';
 import { cn } from '@/utils/core';
 import { Badge } from '../../ui/badge';
-import { Spinner } from '../../ui/spinner';
 import { FaCircleInfo } from 'react-icons/fa6';
 import {
   Tooltip,
@@ -27,6 +26,7 @@ const ArgumentItem: React.FC<ArgumentItemProps> = memo(
   ({ arg, updateStatus, onValueChange }) => {
     const type = arg.type || typeof arg.value;
     const isPending = updateStatus?.status === 'pending';
+    const isSuccess = updateStatus?.status === 'success';
     const isUpdatable = !!arg.update;
 
     const handleChange = useCallback(
@@ -86,8 +86,7 @@ const ArgumentItem: React.FC<ArgumentItemProps> = memo(
 
           {/* Status indicators */}
           <div className="flex gap-1 shrink-0 items-center">
-            {isPending && <Spinner size="sm" className="text-blue-400" />}
-            {isUpdatable && !isPending && (
+            {isSuccess && (
               <Badge variant="success" className="text-[8px] px-1.5 py-0 h-4">
                 ✓
               </Badge>

@@ -9,12 +9,14 @@ interface NumberInputProps {
     max?: number;
     step?: number;
   };
+  isPending?: boolean;
 }
 
 export const NumberInput: React.FC<NumberInputProps> = ({
   value,
   onChange,
   rules,
+  isPending = false,
 }) => {
   return (
     <GenericInput
@@ -22,6 +24,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
       value={value}
       onChange={onChange}
       rules={rules}
+      isPending={isPending}
     />
   );
 };

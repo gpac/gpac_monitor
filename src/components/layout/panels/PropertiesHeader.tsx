@@ -46,7 +46,7 @@ const PropertiesHeader: React.FC<PropertiesHeaderProps> = ({
         </label>
         <label className="flex items-center gap-2 cursor-pointer">
           <Checkbox checked={showExpert} onCheckedChange={onToggleExpert} />
-          <span className="text-emerald-400">Expert</span>
+          <span className="text-amber-600">Expert</span>
         </label>
       </div>
     </div>
