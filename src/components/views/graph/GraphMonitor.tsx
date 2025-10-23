@@ -3,7 +3,7 @@ import { WidgetProps } from '../../../types/ui/widget';
 import useGraphMonitor from './hooks/state/useGraphMonitor';
 import { GraphMonitorUI } from './ui';
 
-const GraphMonitor: React.FC<WidgetProps> = ({ id, title, config }) => {
+const GraphMonitor: React.FC<WidgetProps> = ({ id, config }) => {
   const {
     isLoading,
     connectionError,
@@ -21,7 +21,6 @@ const GraphMonitor: React.FC<WidgetProps> = ({ id, title, config }) => {
   return (
     <GraphMonitorUI
       id={id}
-      title={title}
       config={config}
       isLoading={isLoading}
       connectionError={connectionError}

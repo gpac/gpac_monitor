@@ -3,10 +3,9 @@ import WidgetWrapper from '../../common/WidgetWrapper';
 
 interface AudioMonitorProps {
   id: string;
-  title: string;
 }
 
-const AudioMonitor: React.FC<AudioMonitorProps> = ({ id, title }) => {
+const AudioMonitor: React.FC<AudioMonitorProps> = ({ id }) => {
   const [levels, setLevels] = useState({ left: 0, right: 0 });
 
   useEffect(() => {
@@ -21,7 +20,7 @@ const AudioMonitor: React.FC<AudioMonitorProps> = ({ id, title }) => {
   }, []);
 
   return (
-    <WidgetWrapper id={id} title={title}>
+    <WidgetWrapper id={id}>
       <div className="flex justify-around items-end h-48">
         <div className="flex flex-col items-center">
           <div className="h-40 w-6 bg-gray-700 rounded relative">

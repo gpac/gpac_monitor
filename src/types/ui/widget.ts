@@ -35,6 +35,5 @@ export interface WidgetConfig {
 
 export interface WidgetProps {
   id: string;
-  title: string;
   config: WidgetConfig;
 }

@@ -8,7 +8,8 @@ import { WidgetProps } from '@/types/ui/widget';
 import { Node, Edge, NodeMouseHandler } from '@xyflow/react';
 import { LayoutOptions } from '../../utils/GraphLayout';
 
-interface GraphMonitorUIProps extends WidgetProps {
+interface GraphMonitorUIProps extends Omit<WidgetProps, 'config'> {
+  config?: any;
   isLoading: boolean;
   connectionError: string | null;
   retryConnection: () => void;
@@ -24,7 +25,6 @@ interface GraphMonitorUIProps extends WidgetProps {
 
 const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
   id,
-  title,
   isLoading,
   connectionError,
   retryConnection,
@@ -45,14 +45,13 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
   }) as { ref: React.RefObject<HTMLElement> };
   const containerRef = ref as React.RefObject<HTMLDivElement>;
   if (isLoading) {
-    return <LoadingState id={id} title={title} message="Connexion à GPAC..." />;
+    return <LoadingState id={id} message="Connexion à GPAC..." />;
   }
 
   if (connectionError) {
     return (
       <ConnectionErrorState
         id={id}
-        title={title}
         errorMessage={connectionError}
         onRetry={retryConnection}
       />
@@ -60,7 +59,7 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
   }
 
   return (
-    <WidgetWrapper id={id} title={title}>
+    <WidgetWrapper id={id}>
       <div
         ref={containerRef}
         className={`relative h-full w-full ${isResizing ? 'contain-layout contain-style pointer-events-none' : ''}`}

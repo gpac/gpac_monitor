@@ -47,7 +47,6 @@ const DashboardLayout: React.FC = () => {
       <div key={widget.id}>
         <Component
           id={widget.id}
-          title={widget.title}
           config={
             configs[widget.id] || {
               isMaximized: false,

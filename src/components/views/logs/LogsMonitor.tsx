@@ -30,14 +30,13 @@ import { Button } from '@/components/ui/button';
 
 interface LogsMonitorProps {
   id: string;
-  title: string;
 }
 
 const LogsFooter = React.memo(({ count }: { count: number }) => (
   <div className="text-center text-xs text-gray-500 py-1">{count} logs</div>
 ));
 
-const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
+const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   const [autoScroll, _setAutoScroll] = useState(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const dispatch = useAppDispatch();
@@ -188,7 +187,6 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id, title }) => {
   return (
     <WidgetWrapper
       id={id}
-      title={title}
       statusBadge={statusBadge}
       customActions={
         <div className="flex items-center gap-2">

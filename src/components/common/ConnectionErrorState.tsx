@@ -3,19 +3,17 @@ import WidgetWrapper from '../common/WidgetWrapper';
 
 interface ConnectionErrorStateProps {
   id: string;
-  title: string;
   errorMessage: string;
   onRetry: () => void;
 }
 
 const ConnectionErrorState: React.FC<ConnectionErrorStateProps> = ({
   id,
-  title,
   errorMessage,
   onRetry,
 }) => {
   return (
-    <WidgetWrapper id={id} title={title}>
+    <WidgetWrapper id={id}>
       <div className="flex flex-col items-center justify-center h-full p-4">
         <div className="text-red-500 mb-4">Connexion error</div>
         <div className="text-gray-400 text-center">{errorMessage}</div>

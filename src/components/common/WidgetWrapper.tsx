@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
+import { getWidgetDefinition } from '../Widget/registry';
 
 import { LuX, LuRotateCcw } from 'react-icons/lu';
 import {
@@ -13,8 +14,6 @@ import {
 
 interface WidgetWrapperProps {
   id: string;
-  title: string;
-  icon?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
   customActions?: React.ReactNode;
@@ -34,7 +33,6 @@ const buttonStyles = {
 
 const WidgetWrapper = ({
   id,
-  title,
   children,
   className = '',
   customActions,
@@ -42,6 +40,18 @@ const WidgetWrapper = ({
 }: WidgetWrapperProps) => {
   const dispatch = useAppDispatch();
   const [isResizing, setIsResizing] = useState(false);
+
+  // Get widget data from Redux
+  const widget = useAppSelector((state) =>
+    state.widgets.activeWidgets.find((w) => w.id === id),
+  );
+
+  // Get icon from registry
+  const iconDef = useMemo(() => {
+    if (!widget?.type) return null;
+    const def = getWidgetDefinition(widget.type);
+    return def ? def.icon : null;
+  }, [widget?.type]);
 
   // Optimized resize hook
   const { ref: resizeRef } = useOptimizedResize({
@@ -100,7 +110,13 @@ const WidgetWrapper = ({
         className={`${headerStyles.base} cursor-move drag-indicator bg-gray-900/70 flex justify-center`}
       >
         <div className={headerStyles.title}>
-          <h3 className="text-base font-medium">{title}</h3>
+          {iconDef &&
+            React.createElement(iconDef, {
+              className: 'w-4 h-4 text-secondary font-ui',
+            })}
+          <h3 className="text-base font-medium font-ui text-secondary">
+            {widget?.title}
+          </h3>
           {statusBadge && <div className="min-w-32 ">{statusBadge}</div>}
         </div>
 
@@ -169,12 +185,7 @@ const WidgetWrapper = ({
             </button>
           )}
 
-          <button
-            onClick={handleClose}
-            className={buttonStyles.base}
-            title="Close widget"
-            type="button"
-          >
+          <button onClick={handleClose} title="Close widget" type="button">
             <LuX className="w-4 h-4" />
           </button>
         </div>
