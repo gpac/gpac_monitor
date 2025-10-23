@@ -1,9 +1,8 @@
+import { LuMonitorCheck, LuSquareArrowUpRight } from 'react-icons/lu';
 import type { GpacNodeData } from '@/types/domain/gpac/model';
-
 import { Button } from '@/components/ui/button';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React from 'react';
-import { LuMonitorCheck } from 'react-icons/lu';
 
 interface StatsTabsProps {
   activeTab: string;
@@ -49,12 +48,11 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
           {onDetachTab && (
             <Button
               variant="ghost"
-              size="sm"
               className="ml-1 h-4 w-4 rounded-full p-0 hover:bg-slate-600"
               onClick={(e) => onDetachTab(idx, filter.name, e)}
               title="Detach as overlay"
             >
-              🪟
+              <LuSquareArrowUpRight />
             </Button>
           )}
           <Button

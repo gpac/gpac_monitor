@@ -114,9 +114,21 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     const handleDetachTab = useCallback(
       (filterIdx: number, filterName: string, e: React.MouseEvent) => {
         e.stopPropagation();
+
+        // Create detached widget
         dispatch(detachFilterTab({ filterIdx, filterName }));
+
+        // Close tab from sidebar
+        setMonitoredFiltersState((prev) => {
+          const newMap = new Map(prev);
+          newMap.delete(filterIdx);
+          return newMap;
+        });
+
+        // Return to dashboard view
+        setActiveTab('main');
       },
-      [dispatch],
+      [dispatch, setMonitoredFiltersState, setActiveTab],
     );
 
     // DETACHED MODE: Display single filter full screen
