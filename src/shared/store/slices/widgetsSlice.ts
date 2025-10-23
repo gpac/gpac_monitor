@@ -168,6 +168,47 @@ const widgetsSlice = createSlice({
       const layoutName = action.payload;
       delete state.savedLayouts[layoutName];
     },
+    detachFilterTab: (
+      state,
+      action: PayloadAction<{ filterIdx: number; filterName?: string }>,
+    ) => {
+      const { filterIdx, filterName } = action.payload;
+
+      // Créer widget détaché
+      const detachedWidget = createWidgetInstance(WidgetType.FILTERSESSION);
+      if (!detachedWidget) return;
+
+      detachedWidget.isDetached = true;
+      detachedWidget.detachedFilterIdx = filterIdx;
+      detachedWidget.title = filterName || `Filter ${filterIdx}`;
+      detachedWidget.x = 2;
+      detachedWidget.y = 2;
+      detachedWidget.w = 6;
+      detachedWidget.h = 6;
+
+      state.activeWidgets.push(detachedWidget);
+
+      // Créer config pour ce widget
+      state.configs[detachedWidget.id] = {
+        isMaximized: false,
+        isMinimized: false,
+        settings: {},
+      };
+    },
+    attachFilterTab: (state, action: PayloadAction<{ widgetId: string }>) => {
+      const { widgetId } = action.payload;
+
+      // Retirer widget détaché
+      state.activeWidgets = state.activeWidgets.filter(
+        (w) => w.id !== widgetId,
+      );
+
+      // Retirer config
+      if (state.configs[widgetId]) {
+        const { [widgetId]: _, ...remainingConfigs } = state.configs;
+        state.configs = remainingConfigs;
+      }
+    },
   },
 });
 
@@ -182,6 +223,8 @@ export const {
   saveLayout,
   loadLayout,
   deleteLayout,
+  detachFilterTab,
+  attachFilterTab,
 } = widgetsSlice.actions;
 
 // Memoized selectors

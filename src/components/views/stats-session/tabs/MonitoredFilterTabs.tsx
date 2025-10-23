@@ -45,8 +45,8 @@ interface MonitoredFilterTabProps {
   onCardClick: (idx: number) => void;
 }
 
-const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = ({
-  idx,
+// Internal component without TabsContent wrapper (for detached mode)
+export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   filter,
   isActive,
   onCardClick,
@@ -104,7 +104,7 @@ const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = ({
           )
         : [],
     };
-  }, [filterWithStats]);
+  }, [filterWithStats, stats]);
 
   const handleBack = () => {
     // Navigate back to the main dashboard view
@@ -112,12 +112,22 @@ const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = ({
   };
 
   return (
-    <TabsContent value={`filter-${idx}`} className="flex-1 p-4">
+    <div className="flex-1 p-4">
       <FilterTabContent
         {...tabsData}
-        filterData={stats as any} // Convert MonitoredFilterStats to FilterStatsResponse
+        filterData={stats as any}
         onBack={handleBack}
       />
+    </div>
+  );
+};
+
+export const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = (
+  props,
+) => {
+  return (
+    <TabsContent value={`filter-${props.idx}`} className="flex-1 p-4">
+      <MonitoredFilterContent {...props} />
     </TabsContent>
   );
 };

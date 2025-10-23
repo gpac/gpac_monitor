@@ -10,6 +10,7 @@ interface StatsTabsProps {
   onValueChange: (value: string) => void;
   monitoredFilters: Map<number, GpacNodeData>;
   onCloseTab: (idx: number, e: React.MouseEvent) => void;
+  onDetachTab?: (idx: number, filterName: string, e: React.MouseEvent) => void;
   tabsRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -17,6 +18,7 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
   onValueChange,
   monitoredFilters,
   onCloseTab,
+  onDetachTab,
   tabsRef,
 }) => {
   return (
@@ -44,6 +46,17 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
           onClick={() => onValueChange(`filter-${idx}`)}
         >
           <span>{filter.name}</span>
+          {onDetachTab && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="ml-1 h-4 w-4 rounded-full p-0 hover:bg-slate-600"
+              onClick={(e) => onDetachTab(idx, filter.name, e)}
+              title="Detach as overlay"
+            >
+              🪟
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="sm"

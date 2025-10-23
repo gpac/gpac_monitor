@@ -54,6 +54,8 @@ const DashboardLayout: React.FC = () => {
               settings: {},
             }
           }
+          isDetached={widget.isDetached}
+          detachedFilterIdx={widget.detachedFilterIdx}
         />
       </div>
     );

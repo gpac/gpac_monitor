@@ -187,18 +187,6 @@ const logsSlice = createSlice({
       });
     },
 
-    /** Clear all log buffers for all tools */
-    clearAllBuffers: (state) => {
-      Object.values(GpacLogTool).forEach((tool) => {
-        state.buffers[tool] = [];
-      });
-    },
-
-    /** Clear log buffer for a specific tool */
-    clearBufferForTool: (state, action: PayloadAction<GpacLogTool>) => {
-      state.buffers[action.payload] = [];
-    },
-
     /** Update buffer size limit and truncate existing buffers if needed */
     setMaxEntriesPerTool: (state, action: PayloadAction<number>) => {
       state.maxEntriesPerTool = action.payload;
@@ -279,8 +267,6 @@ export const {
   selectAllToolsInFilter,
   appendLogs,
   appendLogsForAllTools,
-  clearAllBuffers,
-  clearBufferForTool,
   setMaxEntriesPerTool,
   setSubscriptionStatus,
   restoreConfig,

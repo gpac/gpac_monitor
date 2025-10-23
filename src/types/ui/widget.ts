@@ -17,6 +17,8 @@ export interface Widget {
   h: number;
   isResizable?: boolean;
   isDraggable?: boolean;
+  isDetached?: boolean;
+  detachedFilterIdx?: number;
 }
 export interface WidgetComponent {
   id: string;
@@ -36,4 +38,6 @@ export interface WidgetConfig {
 export interface WidgetProps {
   id: string;
   config: WidgetConfig;
+  isDetached?: boolean;
+  detachedFilterIdx?: number;
 }

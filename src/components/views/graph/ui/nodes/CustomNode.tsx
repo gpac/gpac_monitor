@@ -1,11 +1,8 @@
-import React, { useMemo, memo, useEffect, useRef } from 'react';
+import React, { useMemo, memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
-import { useFilterArgs } from '../../hooks/interaction/useFilterArgs';
-import { useAppDispatch } from '@/shared/hooks/redux';
-import { setSelectedNode } from '@/shared/store/slices/widgetsSlice';
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
@@ -19,8 +16,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   selected,
   ...nodeProps
 }) => {
-  const dispatch = useAppDispatch();
-  const { label, ipid, opid, nb_ipid, nb_opid, idx, name } = data;
+  const { label, ipid, opid, nb_ipid, nb_opid } = data;
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -32,39 +28,38 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   );
 
   const [textColor, backgroundColor] = useGraphColors(node);
-  const { getFilterArgs, hasFilterArgs, requestFilterArgs } = useFilterArgs();
-  const requestedRef = useRef(false);
 
   // Sync with Redux when selected
-  useEffect(() => {
-    if (!selected) {
-      requestedRef.current = false;
-      return;
-    }
-
-    if (!hasFilterArgs(idx) && !requestedRef.current) {
-      requestedRef.current = true;
-      requestFilterArgs(idx);
-    }
-
-    const interval = setInterval(() => {
-      const args = getFilterArgs(idx);
-      if (args && args.length > 0) {
-        dispatch(setSelectedNode({ idx, name, gpac_args: args }));
-        clearInterval(interval);
-      }
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, [
-    selected,
-    idx,
-    name,
-    hasFilterArgs,
-    requestFilterArgs,
-    getFilterArgs,
-    dispatch,
-  ]);
+  // TEMPORARILY DISABLED: Properties panel will be accessed via settings icon
+  // useEffect(() => {
+  //   if (!selected) {
+  //     requestedRef.current = false;
+  //     return;
+  //   }
+  //
+  //   if (!hasFilterArgs(idx) && !requestedRef.current) {
+  //     requestedRef.current = true;
+  //     requestFilterArgs(idx);
+  //   }
+  //
+  //   const interval = setInterval(() => {
+  //     const args = getFilterArgs(idx);
+  //     if (args && args.length > 0) {
+  //       dispatch(setSelectedNode({ idx, name, gpac_args: args }));
+  //       clearInterval(interval);
+  //     }
+  //   }, 100);
+  //
+  //   return () => clearInterval(interval);
+  // }, [
+  //   selected,
+  //   idx,
+  //   name,
+  //   hasFilterArgs,
+  //   requestFilterArgs,
+  //   getFilterArgs,
+  //   dispatch,
+  // ]);
   // Create input handles only if nb_ipid > 0
   const inputHandles =
     nb_ipid > 0

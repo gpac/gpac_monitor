@@ -9,172 +9,235 @@ import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { StatsTabs } from '../tabs/SessionStatsTabs';
 import { DashboardTabContent } from '../tabs/DashboardTabContent';
-import { MonitoredFilterTabs } from '../tabs/MonitoredFilterTabs';
+import {
+  MonitoredFilterTabs,
+  MonitoredFilterContent,
+} from '../tabs/MonitoredFilterTabs';
+import { useAppDispatch } from '@/shared/hooks/redux';
+import { detachFilterTab } from '@/shared/store/slices/widgetsSlice';
 
-const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(({ id }) => {
-  const [activeTab, setActiveTab] = useState('main');
-  const [isResizing, setIsResizing] = useState(false);
-  const [monitoredFiltersState, setMonitoredFiltersState] = useState<
-    Map<number, EnrichedFilterOverview>
-  >(new Map());
+const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
+  ({ id, isDetached, detachedFilterIdx }) => {
+    const dispatch = useAppDispatch();
+    const [activeTab, setActiveTab] = useState('main');
+    const [isResizing, setIsResizing] = useState(false);
+    const [monitoredFiltersState, setMonitoredFiltersState] = useState<
+      Map<number, EnrichedFilterOverview>
+    >(new Map());
 
-  // Optimize complex stats calculations during resize
-  const { ref } = useOptimizedResize({
-    onResizeStart: () => setIsResizing(true),
-    onResizeEnd: () => setIsResizing(false),
-    debounce: 20, // Slightly higher for complex calculations
-    throttle: true,
-  }) as { ref: React.RefObject<HTMLElement> };
-  const containerRef = ref as React.RefObject<HTMLDivElement>;
+    // Optimize complex stats calculations during resize
+    const { ref } = useOptimizedResize({
+      onResizeStart: () => setIsResizing(true),
+      onResizeEnd: () => setIsResizing(false),
+      debounce: 20, // Slightly higher for complex calculations
+      throttle: true,
+    }) as { ref: React.RefObject<HTMLElement> };
+    const containerRef = ref as React.RefObject<HTMLDivElement>;
 
-  // Memoize isDashboardActive to prevent unnecessary recalculations
-  const isDashboardActive = useMemo(() => activeTab === 'main', [activeTab]);
-  const tabsRef = useRef<HTMLDivElement>(null);
+    // Memoize isDashboardActive to prevent unnecessary recalculations
+    const isDashboardActive = useMemo(() => activeTab === 'main', [activeTab]);
+    const tabsRef = useRef<HTMLDivElement>(null);
 
-  const { isLoading, sessionStats, staticFilters } =
-    useMultiFilterMonitor(isDashboardActive);
+    const { isLoading, sessionStats, staticFilters } =
+      useMultiFilterMonitor(isDashboardActive);
 
-  // Optimize the enriched filter collection with stable keys and memoization
-  // Skip expensive calculations during resize
-  const enrichedGraphFilterCollection = useMemo(() => {
-    if (staticFilters.length === 0 || isResizing) {
-      return []; // Return empty array if no data or during resize to avoid expensive operations
+    // Optimize the enriched filter collection with stable keys and memoization
+    // Skip expensive calculations during resize
+    const enrichedGraphFilterCollection = useMemo(() => {
+      if (staticFilters.length === 0 || isResizing) {
+        return []; // Return empty array if no data or during resize to avoid expensive operations
+      }
+
+      return staticFilters.map((staticFilter): EnrichedFilterOverview => {
+        const dynamicStats = sessionStats.find(
+          (stat) => stat.idx === staticFilter.idx,
+        );
+        return {
+          ...staticFilter,
+          ipid: Object.fromEntries(
+            Object.entries(staticFilter.ipid).map(([key, value]) => [
+              key,
+              { ...value, buffer: 0, buffer_total: 0 },
+            ]),
+          ),
+          opid: Object.fromEntries(
+            Object.entries(staticFilter.opid).map(([key, value]) => [
+              key,
+              { ...value, buffer: 0, buffer_total: 0 },
+            ]),
+          ),
+          status: dynamicStats?.status || staticFilter.status,
+          bytes_done: dynamicStats?.bytes_done || 0,
+          bytes_sent: dynamicStats?.bytes_sent || 0,
+          pck_done: dynamicStats?.pck_done || 0,
+          pck_sent: dynamicStats?.pck_sent || 0,
+          time: dynamicStats?.time || 0,
+          tasks: 0,
+          errors: 0,
+        };
+      });
+    }, [staticFilters, sessionStats, isResizing]);
+
+    // Use the stats calculations hook directly (it's already optimized internally)
+    const { statsCounters, systemStats } = useStatsCalculations(
+      staticFilters,
+      sessionStats,
+    );
+
+    // Use the original inline approach for useTabManagement to avoid type issues
+    const { handleCardClick, handleCloseTab } = useTabManagement({
+      rawFiltersFromServer: enrichedGraphFilterCollection,
+      monitoredFilters: monitoredFiltersState,
+      setMonitoredFilters: setMonitoredFiltersState,
+      activeTab,
+      setActiveTab,
+      tabsRef,
+    });
+
+    // Memoize callbacks to prevent child re-renders
+    const memoizedHandleCardClick = useCallback(
+      (filterIndex: number) => {
+        handleCardClick(filterIndex);
+      },
+      [handleCardClick],
+    );
+
+    const memoizedHandleCloseTab = useCallback(
+      (filterIndex: number, event?: React.MouseEvent) => {
+        if (event) {
+          handleCloseTab(filterIndex, event);
+        }
+      },
+      [handleCloseTab],
+    );
+
+    const handleDetachTab = useCallback(
+      (filterIdx: number, filterName: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        dispatch(detachFilterTab({ filterIdx, filterName }));
+      },
+      [dispatch],
+    );
+
+    // DETACHED MODE: Display single filter full screen
+    if (isDetached && detachedFilterIdx !== undefined) {
+      const filter = enrichedGraphFilterCollection.find(
+        (f) => f.idx === detachedFilterIdx,
+      );
+
+      if (isLoading) {
+        return (
+          <WidgetWrapper id={id}>
+            <div
+              className="flex items-center justify-center h-full"
+              aria-busy="true"
+            >
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-400/60 border-t-transparent" />
+            </div>
+          </WidgetWrapper>
+        );
+      }
+
+      if (!filter) {
+        return (
+          <WidgetWrapper id={id}>
+            <div className="flex items-center justify-center h-full">
+              <p className="text-monitor-text-muted">
+                Filter {detachedFilterIdx} not found
+              </p>
+            </div>
+          </WidgetWrapper>
+        );
+      }
+
+      return (
+        <WidgetWrapper id={id}>
+          <div className="h-full">
+            <MonitoredFilterContent
+              idx={filter.idx}
+              filter={filter}
+              isActive={true}
+              onCardClick={memoizedHandleCardClick}
+            />
+          </div>
+        </WidgetWrapper>
+      );
     }
 
-    return staticFilters.map((staticFilter): EnrichedFilterOverview => {
-      const dynamicStats = sessionStats.find(
-        (stat) => stat.idx === staticFilter.idx,
+    // NORMAL MODE: multiple tabs
+    if (isLoading) {
+      return (
+        <WidgetWrapper id={id}>
+          <div
+            className="flex items-center justify-center h-full"
+            aria-busy="true"
+          >
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-400/60 border-t-transparent" />
+          </div>
+        </WidgetWrapper>
       );
-      return {
-        ...staticFilter,
-        ipid: Object.fromEntries(
-          Object.entries(staticFilter.ipid).map(([key, value]) => [
-            key,
-            { ...value, buffer: 0, buffer_total: 0 },
-          ]),
-        ),
-        opid: Object.fromEntries(
-          Object.entries(staticFilter.opid).map(([key, value]) => [
-            key,
-            { ...value, buffer: 0, buffer_total: 0 },
-          ]),
-        ),
-        status: dynamicStats?.status || staticFilter.status,
-        bytes_done: dynamicStats?.bytes_done || 0,
-        bytes_sent: dynamicStats?.bytes_sent || 0,
-        pck_done: dynamicStats?.pck_done || 0,
-        pck_sent: dynamicStats?.pck_sent || 0,
-        time: dynamicStats?.time || 0,
-        tasks: 0,
-        errors: 0,
-      };
-    });
-  }, [staticFilters, sessionStats, isResizing]);
+    }
 
-  // Use the stats calculations hook directly (it's already optimized internally)
-  const { statsCounters, systemStats } = useStatsCalculations(
-    staticFilters,
-    sessionStats,
-  );
+    if (staticFilters.length === 0) {
+      return (
+        <WidgetWrapper id={id}>
+          <div className="flex flex-col items-center justify-center h-full p-4 text-monitor-text-secondary">
+            <p className="text-monitor-text-primary">No filters available</p>
+            <p className="text-sm mt-2 text-monitor-text-muted">
+              Waiting Waiting for graph construction...
+            </p>
+          </div>
+        </WidgetWrapper>
+      );
+    }
 
-  // Use the original inline approach for useTabManagement to avoid type issues
-  const { handleCardClick, handleCloseTab } = useTabManagement({
-    rawFiltersFromServer: enrichedGraphFilterCollection,
-    monitoredFilters: monitoredFiltersState,
-    setMonitoredFilters: setMonitoredFiltersState,
-    activeTab,
-    setActiveTab,
-    tabsRef,
-  });
-
-  // Memoize callbacks to prevent child re-renders
-  const memoizedHandleCardClick = useCallback(
-    (filterIndex: number) => {
-      handleCardClick(filterIndex);
-    },
-    [handleCardClick],
-  );
-
-  const memoizedHandleCloseTab = useCallback(
-    (filterIndex: number, event?: React.MouseEvent) => {
-      if (event) {
-        handleCloseTab(filterIndex, event);
-      }
-    },
-    [handleCloseTab],
-  );
-
-  if (isLoading) {
     return (
       <WidgetWrapper id={id}>
         <div
-          className="flex items-center justify-center h-full"
-          aria-busy="true"
+          ref={containerRef}
+          className={`h-full ${isResizing ? 'contain-layout contain-style' : ''}`}
         >
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-400/60 border-t-transparent" />
-        </div>
-      </WidgetWrapper>
-    );
-  }
-
-  if (staticFilters.length === 0) {
-    return (
-      <WidgetWrapper id={id}>
-        <div className="flex flex-col items-center justify-center h-full p-4 text-monitor-text-secondary">
-          <p className="text-monitor-text-primary">No filters available</p>
-          <p className="text-sm mt-2 text-monitor-text-muted">
-            Waiting Waiting for graph construction...
-          </p>
-        </div>
-      </WidgetWrapper>
-    );
-  }
-
-  return (
-    <WidgetWrapper id={id}>
-      <div
-        ref={containerRef}
-        className={`h-full ${isResizing ? 'contain-layout contain-style' : ''}`}
-      >
-        <Tabs
-          value={activeTab}
-          onValueChange={isResizing ? () => {} : setActiveTab}
-          className="flex-1 flex flex-col"
-        >
-          <StatsTabs
-            activeTab={activeTab}
-            onValueChange={setActiveTab}
-            monitoredFilters={monitoredFiltersState}
-            onCloseTab={memoizedHandleCloseTab}
-            tabsRef={tabsRef}
-          />
-
-          <TabsContent
-            value="main"
-            className={`flex-1 p-4 ${isResizing ? 'pointer-events-none' : ''}`}
+          <Tabs
+            value={activeTab}
+            onValueChange={isResizing ? () => {} : setActiveTab}
+            className="flex-1 flex flex-col"
           >
-            <DashboardTabContent
-              systemStats={systemStats}
-              statsCounters={statsCounters}
-              filtersWithLiveStats={enrichedGraphFilterCollection}
-              filtersMatchingCriteria={enrichedGraphFilterCollection}
-              loading={isLoading || isResizing}
+            <StatsTabs
+              activeTab={activeTab}
+              onValueChange={setActiveTab}
               monitoredFilters={monitoredFiltersState}
-              onCardClick={isResizing ? () => {} : memoizedHandleCardClick}
-              refreshInterval="1s"
+              onCloseTab={memoizedHandleCloseTab}
+              onDetachTab={handleDetachTab}
+              tabsRef={tabsRef}
             />
-          </TabsContent>
 
-          <MonitoredFilterTabs
-            monitoredFilters={monitoredFiltersState}
-            activeTab={activeTab}
-            onCardClick={isResizing ? () => {} : memoizedHandleCardClick}
-          />
-        </Tabs>
-      </div>
-    </WidgetWrapper>
-  );
-});
+            <TabsContent
+              value="main"
+              className={`flex-1 p-4 ${isResizing ? 'pointer-events-none' : ''}`}
+            >
+              <DashboardTabContent
+                systemStats={systemStats}
+                statsCounters={statsCounters}
+                filtersWithLiveStats={enrichedGraphFilterCollection}
+                filtersMatchingCriteria={enrichedGraphFilterCollection}
+                loading={isLoading || isResizing}
+                monitoredFilters={monitoredFiltersState}
+                onCardClick={isResizing ? () => {} : memoizedHandleCardClick}
+                refreshInterval="1s"
+              />
+            </TabsContent>
+
+            <MonitoredFilterTabs
+              monitoredFilters={monitoredFiltersState}
+              activeTab={activeTab}
+              onCardClick={isResizing ? () => {} : memoizedHandleCardClick}
+            />
+          </Tabs>
+        </div>
+      </WidgetWrapper>
+    );
+  },
+);
 
 MultiFilterMonitor.displayName = 'MultiFilterMonitor';
 

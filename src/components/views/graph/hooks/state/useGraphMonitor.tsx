@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Node,
   Edge,
@@ -9,6 +9,7 @@ import {
 import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch } from '@/shared/hooks/redux';
+import { detachFilterTab } from '@/shared/store/slices/widgetsSlice';
 
 // Modularized hooks
 import { useGraphLayout } from '../layout/useGraphLayout';
@@ -54,7 +55,23 @@ const useGraphMonitor = () => {
     setConnectionError,
   });
 
-  const { requestFilterArgs, getFilterArgs, hasFilterArgs } = useFilterArgs();
+  const { getFilterArgs, hasFilterArgs } = useFilterArgs();
+
+  // Handle node click to create detached widget
+  const handleNodeTabDetach = useCallback(
+    (filterIdx: number) => {
+      // Find the node to get filter name
+      const node = localNodes.find((n) => parseInt(n.id) === filterIdx);
+      const filterName =
+        typeof node?.data?.name === 'string'
+          ? node.data.name
+          : `Filter ${filterIdx}`;
+
+      // Dispatch action to create detached widget
+      dispatch(detachFilterTab({ filterIdx, filterName }));
+    },
+    [dispatch, localNodes],
+  );
 
   const { handleNodesChange, handleEdgesChange, handleNodeClick } =
     useGraphHandlers({
@@ -67,7 +84,7 @@ const useGraphMonitor = () => {
       setLocalNodes,
       service,
       dispatch,
-      onNodeClick: requestFilterArgs,
+      onNodeClick: handleNodeTabDetach,
     });
 
   // Use notification system
