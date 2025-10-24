@@ -38,6 +38,10 @@
     --font-mono:
       'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco,
       'Liberation Mono', Consolas, monospace;
+    --media-video: 217 91% 60%; /* #3b82f6 */
+    --media-audio: 162 84% 39%; /* #10b981 */
+    --media-text: 36 92% 53%; /* #f59e0b */
+    --media-file: 350 82% 50%; /* #E11D48 */
   }
 }
 

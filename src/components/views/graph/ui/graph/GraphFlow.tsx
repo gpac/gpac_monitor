@@ -26,7 +26,8 @@ interface GraphFlowProps {
 }
 
 const flowStyles = {
-  background: '#111827',
+  surface: '#101722',
+  background: '',
   width: '100%',
   height: '100%',
 };

@@ -154,7 +154,6 @@ export class BaseMessageHandler {
     this.callbacks.onUpdateGraphData(data.filters);
 
     if (data.filters) {
-
       data.filters.forEach((filter: GpacNodeData) => {
         this.notificationHandlers.onFilterUpdate?.(filter);
       });

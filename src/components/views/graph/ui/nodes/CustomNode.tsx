@@ -93,7 +93,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   return (
     <div
       className={`
-        gpacer-node border-2 rounded-xl p-4 min-w-[200px] shadow-sm
+        border-2 rounded-xl p-4 shadow-sm
         ${selected ? 'ring-3 ring-emerald-500 shadow-lg' : ''}
         transition-all duration-200
       `}

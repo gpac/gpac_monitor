@@ -8,14 +8,14 @@ const determineFilterType = (filter: GraphFilterData): FilterType => {
 
   // Collect stream types from output PIDs
   if (filter.opid) {
-    Object.values(filter.opid).forEach(pid => {
+    Object.values(filter.opid).forEach((pid) => {
       if (pid.stream_type) streamTypes.add(pid.stream_type.toLowerCase());
     });
   }
 
   // Fallback to input PIDs if no output
   if (streamTypes.size === 0 && filter.ipid) {
-    Object.values(filter.ipid).forEach(pid => {
+    Object.values(filter.ipid).forEach((pid) => {
       if (pid.stream_type) streamTypes.add(pid.stream_type.toLowerCase());
     });
   }
@@ -24,9 +24,8 @@ const determineFilterType = (filter: GraphFilterData): FilterType => {
   if (streamTypes.has('visual')) return 'video';
   if (streamTypes.has('audio')) return 'audio';
   if (streamTypes.has('text')) return 'text';
-  if (streamTypes.has('file')) return 'image';
-
-  return 'other';
+  if (streamTypes.has('file')) return 'file';
+  return 'file';
 };
 
 const getFilterColor = (filterType: FilterType): string => {
@@ -34,8 +33,7 @@ const getFilterColor = (filterType: FilterType): string => {
     video: '#3b82f6',
     audio: '#10b981',
     text: '#f59e0b',
-    image: '#8b5cf6',
-    other: '#6b7280',
+    file: '#E11D48',
   };
   return colors[filterType];
 };
@@ -145,7 +143,20 @@ export function createEdgesFromFilters(
         if (pid.source_idx !== undefined && pid.source_idx !== null) {
           const edgeId = `${pid.source_idx}-${filter.idx}-${pidName}`;
           const existingEdge = existingEdges.find((e) => e.id === edgeId);
-          const filterType = determineFilterType(filter);
+
+          // Use stream_type from PID for edge color
+          const streamType = pid.stream_type?.toLowerCase() || '';
+          const filterType: FilterType =
+            streamType === 'visual'
+              ? 'video'
+              : streamType === 'audio'
+                ? 'audio'
+                : streamType === 'text'
+                  ? 'text'
+                  : streamType === 'file'
+                    ? 'file'
+                    : 'file';
+
           const filterColor = getFilterColor(filterType);
 
           // Precise mapping of sourceHandle
@@ -191,7 +202,7 @@ export function createEdgesFromFilters(
             animated: true,
             style: {
               stroke: filterColor,
-              strokeWidth: 2,
+              strokeWidth: 3,
               opacity: 0.9,
             },
             markerEnd: {

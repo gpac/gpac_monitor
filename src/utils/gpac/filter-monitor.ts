@@ -35,6 +35,6 @@ export const getMediaTypeInfo = (type: string) => {
     case 'file':
       return { icon: LuFile, label: 'File', color: 'text-purple-500' };
     default:
-      return { icon: LuFilm, label: type || 'Unknown', color: 'text-gray-500' };
+      return { icon: LuFilm, label: type || 'File', color: 'text-gray-500' };
   }
 };

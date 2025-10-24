@@ -138,7 +138,7 @@ export interface GraphFilterData {
   ipid: Record<string, { source_idx: number; stream_type: string }>;
   opid: Record<string, { stream_type: string }>;
 }
-export type FilterType = 'video' | 'audio' | 'text' | 'image' | 'other';
+export type FilterType = 'video' | 'audio' | 'text' | 'file';
 
 export interface EdgeData extends Record<string, unknown> {
   id: string;
