@@ -14,8 +14,9 @@ interface FilterTabContentProps {
   buffersData: BuffersTabData;
   inputPids: TabPIDData[];
   outputPids: TabPIDData[];
-  filterData?: FilterStatsResponse; // Added for direct filter stats access
+  filterData?: FilterStatsResponse;
   onBack: () => void;
+  onOpenProperties: () => void;
 }
 
 export const FilterTabContent: React.FC<FilterTabContentProps> = ({
@@ -26,6 +27,7 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   outputPids,
   filterData,
   onBack,
+  onOpenProperties,
 }) => {
   return (
     <DetailedStatsView
@@ -36,6 +38,7 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
       outputPids={outputPids}
       filterData={filterData}
       onBack={onBack}
+      onOpenProperties={onOpenProperties}
     />
   );
 };

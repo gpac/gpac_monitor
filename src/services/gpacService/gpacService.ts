@@ -176,6 +176,10 @@ export class GpacService implements IGpacCommunication {
       .subscribeToFilterArgs(idx);
   }
 
+  public getFilterArgsHandler() {
+    return this.messageHandler.getFilterArgsHandler();
+  }
+
   // Expose log handler
   public get logs() {
     return this.messageHandler.getLogHandler();

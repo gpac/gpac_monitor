@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { LuChevronLeft } from 'react-icons/lu';
+import { LuSettings } from 'react-icons/lu';
 import {
   OverviewTabData,
   BuffersTabData,
@@ -24,6 +24,7 @@ interface DetailedStatsViewProps {
   outputPids: TabPIDData[];
   filterData?: FilterStatsResponse;
   onBack: () => void;
+  onOpenProperties: () => void;
 }
 
 const MemoizedOverviewTab = memo(OverviewTab);
@@ -41,6 +42,7 @@ const DetailedStatsView = memo(
     outputPids,
     filterData,
     onBack,
+    onOpenProperties,
   }: DetailedStatsViewProps) => {
     const badgeVariant = useMemo(
       () =>
@@ -62,11 +64,11 @@ const DetailedStatsView = memo(
           <Button
             variant="outline"
             size="sm"
-            onClick={onBack}
+            onClick={onOpenProperties}
             className="h-7 px-2 py-0"
+            title="Display filter properties"
           >
-            <LuChevronLeft className="h-3.5 w-3.5" />
-            Back
+            <LuSettings className="h-3.5 w-3.5" />
           </Button>
           <h2 className="text-lg font-semibold">{overviewData.name}</h2>
           <Badge variant={badgeVariant}>

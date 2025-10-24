@@ -120,7 +120,6 @@ export class LogHandler {
 
   public async updateLogLevel(logLevel: GpacLogConfigString): Promise<void> {
     this.ensureLoaded();
-    console.log('[LogHandler] updateLogLevel called with:', logLevel);
 
     await this.dependencies.send({
       type: WSMessageType.UPDATE_LOG_LEVEL,
@@ -139,22 +138,11 @@ export class LogHandler {
   }
 
   public handleLogBatch(logs: GpacLogEntry[]): void {
-    console.log(
-      '[LogHandler] handleLogBatch received:',
-      logs?.length || 0,
-      'logs',
-    );
-
     // Send to worker for processing
     logWorkerService.processLogs(logs);
 
     // Send directly to Redux for immediate UI update
     if (this.callbacks?.onLogsUpdate) {
-      console.log(
-        '[LogHandler] Calling onLogsUpdate callback with',
-        logs?.length || 0,
-        'logs',
-      );
       this.callbacks.onLogsUpdate(logs);
     } else {
       console.log('[LogHandler] No onLogsUpdate callback available');
@@ -162,22 +150,11 @@ export class LogHandler {
   }
 
   public handleLogHistory(logs: GpacLogEntry[]): void {
-    console.log(
-      '[LogHandler] handleLogHistory received:',
-      logs?.length || 0,
-      'logs',
-    );
-
     // Keep the existing subscribable for backward compatibility
     this.logEntriesSubscribable.updateDataAndNotify(logs);
 
     // Send to Redux for immediate UI update
     if (this.callbacks?.onLogsUpdate) {
-      console.log(
-        '[LogHandler] Calling onLogsUpdate callback (history) with',
-        logs?.length || 0,
-        'logs',
-      );
       this.callbacks.onLogsUpdate(logs);
     } else {
       console.log(

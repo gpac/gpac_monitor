@@ -12,12 +12,14 @@ interface MonitoredFilterTabsProps {
   monitoredFilters: Map<number, EnrichedFilterOverview>;
   activeTab: string;
   onCardClick: (idx: number) => void;
+  onOpenProperties: (filter: EnrichedFilterOverview) => void;
 }
 
 export const MonitoredFilterTabs: React.FC<MonitoredFilterTabsProps> = ({
   monitoredFilters,
   activeTab,
   onCardClick,
+  onOpenProperties,
 }) => {
   return (
     <>
@@ -31,6 +33,7 @@ export const MonitoredFilterTabs: React.FC<MonitoredFilterTabsProps> = ({
             filter={filter}
             isActive={isActive}
             onCardClick={onCardClick}
+            onOpenProperties={onOpenProperties}
           />
         );
       })}
@@ -43,6 +46,7 @@ interface MonitoredFilterTabProps {
   filter: EnrichedFilterOverview;
   isActive: boolean;
   onCardClick: (idx: number) => void;
+  onOpenProperties: (filter: EnrichedFilterOverview) => void;
 }
 
 // Internal component without TabsContent wrapper (for detached mode)
@@ -50,6 +54,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   filter,
   isActive,
   onCardClick,
+  onOpenProperties,
 }) => {
   // Subscribe to live stats when tab is active
   const { stats } = useFilterStats(filter.idx, isActive, 1000);
@@ -111,12 +116,17 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
     onCardClick(-1); // Special value to indicate going back to dashboard
   };
 
+  const handleOpenProperties = () => {
+    onOpenProperties(filter);
+  };
+
   return (
     <div className="flex-1 p-4">
       <FilterTabContent
         {...tabsData}
         filterData={stats as any}
         onBack={handleBack}
+        onOpenProperties={handleOpenProperties}
       />
     </div>
   );

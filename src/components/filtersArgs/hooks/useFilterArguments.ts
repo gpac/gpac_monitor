@@ -37,7 +37,7 @@ export const useFilterArguments = (filterId: string, argumentName: string) => {
 
       updateArg();
     },
-    1000,
+    100,
     [localValue],
   );
 

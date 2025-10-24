@@ -17,7 +17,9 @@ import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   detachFilterTab,
   selectActiveWidgets,
+  setSelectedNode,
 } from '@/shared/store/slices/widgetsSlice';
+import { gpacService } from '@/services/gpacService';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, isDetached, detachedFilterIdx }) => {
@@ -45,11 +47,10 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     const { isLoading, sessionStats, staticFilters } =
       useMultiFilterMonitor(isDashboardActive);
 
-    // Optimize the enriched filter collection with stable keys and memoization
     // Skip expensive calculations during resize
     const enrichedGraphFilterCollection = useMemo(() => {
       if (staticFilters.length === 0 || isResizing) {
-        return []; // Return empty array if no data or during resize to avoid expensive operations
+        return [];
       }
 
       return staticFilters.map((staticFilter): EnrichedFilterOverview => {
@@ -145,6 +146,20 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       [dispatch, setMonitoredFiltersState, setActiveTab],
     );
 
+    const handleOpenProperties = useCallback(
+      (filter: EnrichedFilterOverview) => {
+        dispatch(
+          setSelectedNode({
+            idx: filter.idx,
+            name: filter.name,
+            gpac_args: [],
+          }),
+        );
+        gpacService.subscribeToFilterArgs(filter.idx);
+      },
+      [dispatch],
+    );
+
     // DETACHED MODE: Display single filter full screen
     if (isDetached && detachedFilterIdx !== undefined) {
       const filter = enrichedGraphFilterCollection.find(
@@ -184,6 +199,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               filter={filter}
               isActive={true}
               onCardClick={memoizedHandleCardClick}
+              onOpenProperties={handleOpenProperties}
             />
           </div>
         </WidgetWrapper>
@@ -259,6 +275,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               monitoredFilters={monitoredFiltersState}
               activeTab={activeTab}
               onCardClick={isResizing ? () => {} : memoizedHandleCardClick}
+              onOpenProperties={handleOpenProperties}
             />
           </Tabs>
         </div>

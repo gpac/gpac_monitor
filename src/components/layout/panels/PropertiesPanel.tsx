@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { setSelectedNode } from '@/shared/store/slices/widgetsSlice';
 import FilterArgumentsContent from '../../filtersArgs/FilterArgumentsContent';
 import PropertiesHeader from './PropertiesHeader';
+import { useFilterArgsSubscription } from './hooks/useFilterArgsSubscription';
 
 /**
  * Properties panel
@@ -14,6 +15,9 @@ const PropertiesPanel: React.FC = () => {
   const selectedNode = useAppSelector((state) => state.widgets.selectedNode);
   const [showExpert, setShowExpert] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Subscribe to filter args via UpdatableSubscribable
+  const filterArgs = useFilterArgsSubscription(selectedNode?.idx);
 
   const handleClose = useCallback(() => {
     dispatch(setSelectedNode(null));
@@ -49,17 +53,16 @@ const PropertiesPanel: React.FC = () => {
       </div>
       {/* Content - scrollable */}
       <div className="flex-1 overflow-y-auto">
-        {Array.isArray(selectedNode.gpac_args) &&
-        selectedNode.gpac_args.length > 0 ? (
+        {Array.isArray(filterArgs) && filterArgs.length > 0 ? (
           <FilterArgumentsContent
             filterId={selectedNode.idx}
-            filterArgs={selectedNode.gpac_args}
+            filterArgs={filterArgs}
             showExpert={showExpert}
             showAdvanced={showAdvanced}
           />
         ) : (
           <div className="text-center text-monitor-text-muted py-6 text-xs">
-            No arguments available
+            Loading arguments...
           </div>
         )}
       </div>

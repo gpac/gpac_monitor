@@ -92,7 +92,7 @@ export const updateFilterArgument = createAsyncThunk(
       }),
     );
 
-    // Clear success status after 2 seconds but keep the value
+    // Clear success status immediately (optimistic update)
     setTimeout(() => {
       dispatch(
         setArgumentUpdateStatus({
@@ -102,7 +102,7 @@ export const updateFilterArgument = createAsyncThunk(
           status: 'idle',
         }),
       );
-    }, 2000);
+    }, 100);
   },
 );
 
