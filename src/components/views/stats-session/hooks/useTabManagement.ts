@@ -1,5 +1,6 @@
 import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { useCallback } from 'react';
+import { Widget, WidgetType } from '@/types/ui/widget';
 
 interface UseTabManagementProps {
   rawFiltersFromServer: EnrichedFilterOverview[];
@@ -10,15 +11,18 @@ interface UseTabManagementProps {
   activeTab: string;
   setActiveTab: React.Dispatch<React.SetStateAction<string>>;
   tabsRef: React.RefObject<HTMLDivElement>;
+  activeWidgets: Widget[];
+  onCreateDetachedWidget: (filterIdx: number, filterName: string) => void;
 }
 
 export const useTabManagement = ({
   rawFiltersFromServer,
-  monitoredFilters,
   setMonitoredFilters,
   activeTab,
   setActiveTab,
   tabsRef,
+  activeWidgets,
+  onCreateDetachedWidget,
 }: UseTabManagementProps) => {
   const handleCardClick = useCallback(
     (idx: number) => {
@@ -36,37 +40,31 @@ export const useTabManagement = ({
         return;
       }
 
-      if (monitoredFilters.has(idx)) {
-        setActiveTab(`filter-${idx}`);
-        setTimeout(() => {
-          const tabElement = tabsRef.current?.querySelector(
-            `[data-value="filter-${idx}"]`,
-          ) as HTMLButtonElement;
-          if (tabElement) {
-            tabElement.click();
-          }
-        }, 0);
-      } else {
-        const filter = rawFiltersFromServer.find((f) => f.idx === idx);
-        if (filter) {
-          setMonitoredFilters((prev) => {
-            const newMap = new Map(prev);
-            newMap.set(idx, filter);
-            return newMap;
-          });
-          setTimeout(() => {
-            setActiveTab(`filter-${idx}`);
-          }, 0);
-        }
+      // Check if filter already has a detached widget
+      const isAlreadyDetached = activeWidgets.some(
+        (w) =>
+          w.type === WidgetType.FILTERSESSION &&
+          w.isDetached === true &&
+          w.detachedFilterIdx === idx,
+      );
+
+      if (isAlreadyDetached) {
+        // Filter already visible in detached view, ignore
+        return;
+      }
+
+      // Find filter and create detached widget
+      const filter = rawFiltersFromServer.find((f) => f.idx === idx);
+      if (filter) {
+        onCreateDetachedWidget(idx, filter.name);
       }
     },
     [
-      monitoredFilters,
       setActiveTab,
-      setMonitoredFilters,
       tabsRef,
       rawFiltersFromServer,
-      activeTab,
+      activeWidgets,
+      onCreateDetachedWidget,
     ],
   );
 

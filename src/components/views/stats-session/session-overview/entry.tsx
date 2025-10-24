@@ -13,12 +13,16 @@ import {
   MonitoredFilterTabs,
   MonitoredFilterContent,
 } from '../tabs/MonitoredFilterTabs';
-import { useAppDispatch } from '@/shared/hooks/redux';
-import { detachFilterTab } from '@/shared/store/slices/widgetsSlice';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import {
+  detachFilterTab,
+  selectActiveWidgets,
+} from '@/shared/store/slices/widgetsSlice';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, isDetached, detachedFilterIdx }) => {
     const dispatch = useAppDispatch();
+    const activeWidgets = useAppSelector(selectActiveWidgets);
     const [activeTab, setActiveTab] = useState('main');
     const [isResizing, setIsResizing] = useState(false);
     const [monitoredFiltersState, setMonitoredFiltersState] = useState<
@@ -84,6 +88,14 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       sessionStats,
     );
 
+    // Callback to create detached widget (used by dashboard card click)
+    const handleCreateDetachedWidget = useCallback(
+      (filterIdx: number, filterName: string) => {
+        dispatch(detachFilterTab({ filterIdx, filterName }));
+      },
+      [dispatch],
+    );
+
     // Use the original inline approach for useTabManagement to avoid type issues
     const { handleCardClick, handleCloseTab } = useTabManagement({
       rawFiltersFromServer: enrichedGraphFilterCollection,
@@ -92,6 +104,8 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       activeTab,
       setActiveTab,
       tabsRef,
+      activeWidgets,
+      onCreateDetachedWidget: handleCreateDetachedWidget,
     });
 
     // Memoize callbacks to prevent child re-renders
@@ -221,6 +235,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               onCloseTab={memoizedHandleCloseTab}
               onDetachTab={handleDetachTab}
               tabsRef={tabsRef}
+              activeWidgets={activeWidgets}
             />
 
             <TabsContent
@@ -236,6 +251,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
                 monitoredFilters={monitoredFiltersState}
                 onCardClick={isResizing ? () => {} : memoizedHandleCardClick}
                 refreshInterval="1s"
+                activeWidgets={activeWidgets}
               />
             </TabsContent>
 

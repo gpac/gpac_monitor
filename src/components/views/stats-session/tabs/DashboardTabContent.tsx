@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/activity-indicator';
 import { formatBytes, formatNumber } from '@/utils/formatting';
 import type { StatsCounters, SystemStats } from '../hooks/useStatsCalculations';
+import { Widget } from '@/types/ui/widget';
 
 interface DashboardTabContentProps {
   systemStats: SystemStats;
@@ -27,6 +28,7 @@ interface DashboardTabContentProps {
   monitoredFilters: Map<number, EnrichedFilterOverview>;
   onCardClick: (idx: number) => void;
   refreshInterval: string;
+  activeWidgets?: Widget[];
 }
 
 interface StatsCardProps {
@@ -131,6 +133,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
   monitoredFilters,
   onCardClick,
   refreshInterval,
+  activeWidgets = [],
 }) => {
   // Calculate activity level based on processing filters
   const getSystemActivityLevel = (): ActivityLevel => {
@@ -204,6 +207,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
           loading={loading}
           monitoredFilters={monitoredFilters}
           onCardClick={onCardClick}
+          activeWidgets={activeWidgets}
         />
       </div>
     </div>

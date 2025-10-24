@@ -8,8 +8,12 @@ import {
 } from '@xyflow/react';
 import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
-import { useAppDispatch } from '@/shared/hooks/redux';
-import { detachFilterTab } from '@/shared/store/slices/widgetsSlice';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import {
+  detachFilterTab,
+  selectActiveWidgets,
+} from '@/shared/store/slices/widgetsSlice';
+import { WidgetType } from '@/types/ui/widget';
 
 // Modularized hooks
 import { useGraphLayout } from '../layout/useGraphLayout';
@@ -57,9 +61,24 @@ const useGraphMonitor = () => {
 
   const { getFilterArgs, hasFilterArgs } = useFilterArgs();
 
+  const activeWidgets = useAppSelector(selectActiveWidgets);
+
   // Handle node click to create detached widget
   const handleNodeTabDetach = useCallback(
     (filterIdx: number) => {
+      // Check if filter already has a detached widget
+      const isAlreadyDetached = activeWidgets.some(
+        (w) =>
+          w.type === WidgetType.FILTERSESSION &&
+          w.isDetached === true &&
+          w.detachedFilterIdx === filterIdx,
+      );
+
+      if (isAlreadyDetached) {
+        // Filter already visible in detached view, ignore
+        return;
+      }
+
       // Find the node to get filter name
       const node = localNodes.find((n) => parseInt(n.id) === filterIdx);
       const filterName =
@@ -70,7 +89,7 @@ const useGraphMonitor = () => {
       // Dispatch action to create detached widget
       dispatch(detachFilterTab({ filterIdx, filterName }));
     },
-    [dispatch, localNodes],
+    [dispatch, localNodes, activeWidgets],
   );
 
   const { handleNodesChange, handleEdgesChange, handleNodeClick } =

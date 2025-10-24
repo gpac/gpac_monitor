@@ -3,6 +3,7 @@ import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FilterStatCard from '../monitored_filters/FilterStatCard';
+import { Widget, WidgetType } from '@/types/ui/widget';
 
 interface FiltersGridProps {
   filtersWithLiveStats: EnrichedFilterOverview[];
@@ -10,6 +11,7 @@ interface FiltersGridProps {
   loading: boolean;
   monitoredFilters: Map<number, EnrichedFilterOverview>;
   onCardClick: (filterIndex: number) => void;
+  activeWidgets?: Widget[];
 }
 
 export const FiltersGrid: React.FC<FiltersGridProps> = memo(
@@ -18,7 +20,21 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
     filtersMatchingCriteria,
     monitoredFilters,
     onCardClick,
+    activeWidgets = [],
   }) => {
+    // Check if a filter is detached
+    const isFilterDetached = useMemo(
+      () =>
+        (filterIdx: number): boolean => {
+          return activeWidgets.some(
+            (w) =>
+              w.type === WidgetType.FILTERSESSION &&
+              w.isDetached === true &&
+              w.detachedFilterIdx === filterIdx,
+          );
+        },
+      [activeWidgets],
+    );
     // Memoize the filters count to avoid recalculation
     const filtersCount = useMemo(
       () => filtersMatchingCriteria.length,
@@ -67,6 +83,9 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
                   filter={enrichedFilterOverview}
                   onClick={onCardClick}
                   isMonitored={monitoredFilters.has(
+                    enrichedFilterOverview.idx || -1,
+                  )}
+                  isDetached={isFilterDetached(
                     enrichedFilterOverview.idx || -1,
                   )}
                 />
