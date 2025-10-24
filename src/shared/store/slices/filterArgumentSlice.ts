@@ -102,7 +102,7 @@ export const updateFilterArgument = createAsyncThunk(
           status: 'idle',
         }),
       );
-    }, 100);
+    }, 2000);
   },
 );
 

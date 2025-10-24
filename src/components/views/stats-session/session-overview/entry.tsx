@@ -17,9 +17,10 @@ import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   detachFilterTab,
   selectActiveWidgets,
-  setSelectedNode,
 } from '@/shared/store/slices/widgetsSlice';
-import { gpacService } from '@/services/gpacService';
+import { enrichFiltersWithStats } from '../utils/filterEnrichment';
+import { createDetachTabHandler } from '../utils/tabManagement';
+import { createOpenPropertiesHandler } from '../utils/gpacArgsManagement';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, isDetached, detachedFilterIdx }) => {
@@ -47,43 +48,14 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     const { isLoading, sessionStats, staticFilters } =
       useMultiFilterMonitor(isDashboardActive);
 
-    // Skip expensive calculations during resize
+    // Enrich filters with stats
     const enrichedGraphFilterCollection = useMemo(() => {
       if (staticFilters.length === 0 || isResizing) {
         return [];
       }
-
-      return staticFilters.map((staticFilter): EnrichedFilterOverview => {
-        const dynamicStats = sessionStats.find(
-          (stat) => stat.idx === staticFilter.idx,
-        );
-        return {
-          ...staticFilter,
-          ipid: Object.fromEntries(
-            Object.entries(staticFilter.ipid).map(([key, value]) => [
-              key,
-              { ...value, buffer: 0, buffer_total: 0 },
-            ]),
-          ),
-          opid: Object.fromEntries(
-            Object.entries(staticFilter.opid).map(([key, value]) => [
-              key,
-              { ...value, buffer: 0, buffer_total: 0 },
-            ]),
-          ),
-          status: dynamicStats?.status || staticFilter.status,
-          bytes_done: dynamicStats?.bytes_done || 0,
-          bytes_sent: dynamicStats?.bytes_sent || 0,
-          pck_done: dynamicStats?.pck_done || 0,
-          pck_sent: dynamicStats?.pck_sent || 0,
-          time: dynamicStats?.time || 0,
-          tasks: 0,
-          errors: 0,
-        };
-      });
+      return enrichFiltersWithStats(staticFilters, sessionStats);
     }, [staticFilters, sessionStats, isResizing]);
 
-    // Use the stats calculations hook directly (it's already optimized internally)
     const { statsCounters, systemStats } = useStatsCalculations(
       staticFilters,
       sessionStats,
@@ -126,37 +98,18 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       [handleCloseTab],
     );
 
-    const handleDetachTab = useCallback(
-      (filterIdx: number, filterName: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-
-        // Create detached widget
-        dispatch(detachFilterTab({ filterIdx, filterName }));
-
-        // Close tab from sidebar
-        setMonitoredFiltersState((prev) => {
-          const newMap = new Map(prev);
-          newMap.delete(filterIdx);
-          return newMap;
-        });
-
-        // Return to dashboard view
-        setActiveTab('main');
-      },
-      [dispatch, setMonitoredFiltersState, setActiveTab],
+    const handleDetachTab = useMemo(
+      () =>
+        createDetachTabHandler(
+          dispatch,
+          setMonitoredFiltersState,
+          setActiveTab,
+        ),
+      [dispatch],
     );
 
-    const handleOpenProperties = useCallback(
-      (filter: EnrichedFilterOverview) => {
-        dispatch(
-          setSelectedNode({
-            idx: filter.idx,
-            name: filter.name,
-            gpac_args: [],
-          }),
-        );
-        gpacService.subscribeToFilterArgs(filter.idx);
-      },
+    const handleOpenProperties = useMemo(
+      () => createOpenPropertiesHandler(dispatch),
       [dispatch],
     );
 

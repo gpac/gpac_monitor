@@ -41,7 +41,6 @@ const DetailedStatsView = memo(
     inputPids,
     outputPids,
     filterData,
-    onBack,
     onOpenProperties,
   }: DetailedStatsViewProps) => {
     const badgeVariant = useMemo(

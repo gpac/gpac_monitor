@@ -90,10 +90,10 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
               {isDetached && (
                 <Badge
                   variant="outline"
-                  className="flex h-5 items-center gap-1 px-1 ring-1 ring-red-600/90 text-red-600/90 bg-red-200"
+                  className="flex h-5 items-center gap-1 px-1 ring-1 ring-red-600/90 text-slate-900/90 bg-red-200"
                   title="Filter is monitored (detached view)"
                 >
-                  <LuEye className="h-3 w-3" />
+                  <LuEye className="h-4 w-4" />
                 </Badge>
               )}
               <Badge
