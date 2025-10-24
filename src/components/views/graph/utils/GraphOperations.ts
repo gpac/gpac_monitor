@@ -2,34 +2,30 @@ import { FilterType, GraphFilterData } from '@/types/domain/gpac';
 import { Node, Edge, MarkerType } from '@xyflow/react';
 import { isSource } from './filterType';
 
-const determineFilterType = (
-  filterName: string,
-  filterType: string,
-): FilterType => {
-  const name = filterName.toLowerCase();
-  const type = filterType.toLowerCase();
+const determineFilterType = (filter: GraphFilterData): FilterType => {
+  // Use server-provided stream_type from PIDs for robust typing
+  const streamTypes = new Set<string>();
 
-  if (
-    name.includes('video') ||
-    type.includes('vout') ||
-    type.includes('vflip') ||
-    type.includes('nvdec')
-  ) {
-    return 'video';
+  // Collect stream types from output PIDs
+  if (filter.opid) {
+    Object.values(filter.opid).forEach(pid => {
+      if (pid.stream_type) streamTypes.add(pid.stream_type.toLowerCase());
+    });
   }
-  if (
-    name.includes('audio') ||
-    type.includes('aout') ||
-    type.includes('aenc')
-  ) {
-    return 'audio';
+
+  // Fallback to input PIDs if no output
+  if (streamTypes.size === 0 && filter.ipid) {
+    Object.values(filter.ipid).forEach(pid => {
+      if (pid.stream_type) streamTypes.add(pid.stream_type.toLowerCase());
+    });
   }
-  if (name.includes('text') || name.includes('subt') || type.includes('text')) {
-    return 'text';
-  }
-  if (name.includes('image') || type.includes('img')) {
-    return 'image';
-  }
+
+  // Map GPAC stream types to UI filter types
+  if (streamTypes.has('visual')) return 'video';
+  if (streamTypes.has('audio')) return 'audio';
+  if (streamTypes.has('text')) return 'text';
+  if (streamTypes.has('file')) return 'image';
+
   return 'other';
 };
 
@@ -54,7 +50,7 @@ export function createNodeFromFilter(
   const existingNode = existingNodes.find(
     (n) => n.id === filter.idx.toString(),
   );
-  const filterType = determineFilterType(filter.name, filter.type);
+  const filterType = determineFilterType(filter);
 
   // Calculate topological position if allFilters is provided
   let topologicalX = 150 + index * 300; // Default fallback
@@ -149,7 +145,7 @@ export function createEdgesFromFilters(
         if (pid.source_idx !== undefined && pid.source_idx !== null) {
           const edgeId = `${pid.source_idx}-${filter.idx}-${pidName}`;
           const existingEdge = existingEdges.find((e) => e.id === edgeId);
-          const filterType = determineFilterType(filter.name, filter.type);
+          const filterType = determineFilterType(filter);
           const filterColor = getFilterColor(filterType);
 
           // Precise mapping of sourceHandle

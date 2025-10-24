@@ -78,7 +78,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
     return (
       <Card
-        className={`bg-stat overflow-hidden transition-colors bg-monitor-panel focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/30 ${ringClass} ${cursorClass}`}
+        className={`bg-stat overflow-hidden transition-colors bg-monitor-panel border-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/30 ${ringClass} ${cursorClass}`}
         onClick={handleClick}
       >
         <CardHeader className="p-3 pb-2">
@@ -90,7 +90,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
               {isDetached && (
                 <Badge
                   variant="outline"
-                  className="flex h-5 items-center gap-1 px-1 ring-1 ring-red-700/90 text-red-700/90 bg-red-200"
+                  className="flex h-5 items-center gap-1 px-1 ring-1 ring-red-600/90 text-red-600/90 bg-red-200"
                   title="Filter is monitored (detached view)"
                 >
                   <LuEye className="h-3 w-3" />

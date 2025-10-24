@@ -68,13 +68,19 @@ function gpac_filter_to_minimal_object(f) {
 
     for (let i = 0; i < f.nb_ipid; i++) {
         const pidName = f.ipid_props(i, "name");
+        const streamType = f.ipid_props(i, "StreamType");
         minimalFilters.ipid[pidName] = {
             source_idx: f.ipid_source(i).idx,
+            stream_type: streamType
         };
     }
     for (let o = 0; o < f.nb_opid; o++) {
         const pidName = f.opid_props(o, "name");
-        minimalFilters.opid[pidName] = {};
+        const streamType = f.opid_props(o, "StreamType");
+        minimalFilters.opid[pidName] = {
+        
+            stream_type: streamType
+        };
     }
 
     return minimalFilters;

@@ -29,37 +29,6 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
 
   const [textColor, backgroundColor] = useGraphColors(node);
 
-  // Sync with Redux when selected
-  // TEMPORARILY DISABLED: Properties panel will be accessed via settings icon
-  // useEffect(() => {
-  //   if (!selected) {
-  //     requestedRef.current = false;
-  //     return;
-  //   }
-  //
-  //   if (!hasFilterArgs(idx) && !requestedRef.current) {
-  //     requestedRef.current = true;
-  //     requestFilterArgs(idx);
-  //   }
-  //
-  //   const interval = setInterval(() => {
-  //     const args = getFilterArgs(idx);
-  //     if (args && args.length > 0) {
-  //       dispatch(setSelectedNode({ idx, name, gpac_args: args }));
-  //       clearInterval(interval);
-  //     }
-  //   }, 100);
-  //
-  //   return () => clearInterval(interval);
-  // }, [
-  //   selected,
-  //   idx,
-  //   name,
-  //   hasFilterArgs,
-  //   requestFilterArgs,
-  //   getFilterArgs,
-  //   dispatch,
-  // ]);
   // Create input handles only if nb_ipid > 0
   const inputHandles =
     nb_ipid > 0

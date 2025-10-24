@@ -135,8 +135,8 @@ export interface GraphFilterData {
   ID: string | null;
   nb_ipid: number;
   nb_opid: number;
-  ipid: Record<string, { source_idx: number }>;
-  opid: Record<string, {}>;
+  ipid: Record<string, { source_idx: number; stream_type: string }>;
+  opid: Record<string, { stream_type: string }>;
 }
 export type FilterType = 'video' | 'audio' | 'text' | 'image' | 'other';
 
