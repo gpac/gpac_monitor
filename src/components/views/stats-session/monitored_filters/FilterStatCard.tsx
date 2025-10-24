@@ -1,5 +1,5 @@
 import { useCallback, useMemo, memo } from 'react';
-import { LuActivity, LuEye, LuSquareArrowUpRight } from 'react-icons/lu';
+import { LuActivity, LuEye } from 'react-icons/lu';
 import { GpacNodeData } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
 import { determineFilterSessionType } from '@/components/views/graph/utils/filterType';
@@ -33,7 +33,7 @@ const cachedUsageCalculations = new WeakMap<
 >();
 
 const FilterStatCard: React.FC<FilterStatCardProps> = memo(
-  ({ filter, onClick, isMonitored = false, isDetached = false }) => {
+  ({ filter, onClick, isDetached = false }) => {
     const { bufferUsage, activityLevel } = useMemo(() => {
       if (cachedUsageCalculations.has(filter)) {
         return cachedUsageCalculations.get(filter) as {
@@ -62,10 +62,14 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       }
     }, [filter.idx, onClick]);
 
-    // Detached = monitored. Simple ring: detached=blue, default=gray
+    // Detached = monitored. Ring + cursor disabled
     const ringClass = isDetached
-      ? 'ring-2 ring-blue-500/60'
-      : 'ring-1 ring-monitor-line';
+      ? 'ring-2 ring-red-700/90'
+      : 'ring-1 ring-transparent hover:ring-monitor-accent/40';
+
+    const cursorClass = isDetached
+      ? 'cursor-not-allowed opacity-60'
+      : 'cursor-pointer hover:bg-white/4';
 
     const hasBufferInfo = filter.ipid && Object.keys(filter.ipid).length > 0;
     const hasPackets = filter.pck_done && filter.pck_done > 0;
@@ -74,7 +78,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
     return (
       <Card
-        className={`cursor-pointer bg-stat overflow-hidden transition-colors bg-monitor-panel hover:bg-white/4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/30 ${ringClass}`}
+        className={`bg-stat overflow-hidden transition-colors bg-monitor-panel focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/30 ${ringClass} ${cursorClass}`}
         onClick={handleClick}
       >
         <CardHeader className="p-3 pb-2">
@@ -86,10 +90,10 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
               {isDetached && (
                 <Badge
                   variant="outline"
-                  className="flex h-5 items-center gap-1 px-1 ring-1 ring-blue-400/30 text-blue-400 bg-blue-500/10"
+                  className="flex h-5 items-center gap-1 px-1 ring-1 ring-red-700/90 text-red-700/90 bg-red-200"
                   title="Filter is monitored (detached view)"
                 >
-                  <LuSquareArrowUpRight className="h-3 w-3" />
+                  <LuEye className="h-3 w-3" />
                 </Badge>
               )}
               <Badge

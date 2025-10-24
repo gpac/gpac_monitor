@@ -25,7 +25,6 @@ export default {
           wine: "#8E1E2D",
         },
         monitor: {
-          /** Fond d'app global (header/sidebar)**/
           app: "#0c1117",
 
           surface: "#101722",
@@ -38,9 +37,9 @@ export default {
 
           /** Texte */
           text: {
-            primary: "#f2f2f2", // ~white/95
-            secondary: "#c7c7c7", // ~white/78
-            muted: "#9aa3ae", // ~slate-400ish
+            primary: "#f2f2f2",
+            secondary: "#c7c7c7",
+            muted: "#9aa3ae",
           },
         },
       },
