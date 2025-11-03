@@ -65,6 +65,15 @@ export function useLogs(options: UseLogsOptions = {}) {
           return;
         }
 
+        // Wait a bit more to ensure server is fully ready
+        // This prevents race condition where logs subscription happens
+        // before server handlers are initialized
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        if (!isMounted) {
+          return;
+        }
+
         const unsubscribeFunc = await gpacService.subscribe(
           {
             type: SubscriptionType.LOGS,
@@ -105,7 +114,7 @@ export function useLogs(options: UseLogsOptions = {}) {
       // This keeps the logs flowing to Redux store for sidebar counts
       // Logs subscription will only be cleaned up on session end or app close
     };
-  }, [enabled, handleLogsUpdate]);
+  }, [enabled, handleLogsUpdate, initialLogConfig]);
 
   const memoizedLogs = useMemo(() => logs, [logs]);
   const optimizedLogs = useDeferredValue(memoizedLogs);

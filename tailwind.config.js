@@ -107,7 +107,7 @@ export default {
             transform: "translate(-50%, -48%) scale(0.96)",
           },
         },
-        // Animations pour le popover (plus lentes et fluides)
+
         popoverShow: {
           from: {
             opacity: 0,

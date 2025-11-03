@@ -59,55 +59,60 @@ const DetailedStatsView = memo(
 
     return (
       <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onOpenProperties}
-            className="h-7 px-2 py-0"
-            title="Display filter properties"
-          >
-            <LuSettings className="h-3.5 w-3.5" />
-          </Button>
-          <h2 className="text-lg font-semibold">{overviewData.name}</h2>
-          <Badge variant={badgeVariant}>
-            {overviewData.status || 'Unknown status'}
-          </Badge>
-        </div>
-
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="sticky top-0 z-10 mb-4 h-8 justify-start border-b bg-background">
-            <TabsTrigger
-              value="overview"
-              className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="network"
-              className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Network
-            </TabsTrigger>
-            <TabsTrigger
-              value="buffers"
-              className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Buffers
-            </TabsTrigger>
-            <TabsTrigger
-              value="inputs"
-              className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Inputs ({counts.inputs})
-            </TabsTrigger>
-            <TabsTrigger
-              value="outputs"
-              className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Outputs ({counts.outputs})
-            </TabsTrigger>
-          </TabsList>
+          {/* Sticky header container with filter name, status, and tabs */}
+          <div className="sticky top-0 z-10 bg-background pb-2 space-y-2">
+            <div className="flex justify-stretch items-center gap-6">
+              <h2 className="text-lg font-semibold text-red-600/90">
+                {overviewData.name}
+              </h2>
+              <Badge variant={badgeVariant}>
+                {overviewData.status || 'Unknown status'}
+              </Badge>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onOpenProperties}
+                className="h-7 px-2 py-0"
+                title="Display filter properties"
+              >
+                <LuSettings className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <TabsList className="h-8 justify-start border-b w-full">
+              <TabsTrigger
+                value="overview"
+                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Overview
+              </TabsTrigger>
+              <TabsTrigger
+                value="network"
+                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Network
+              </TabsTrigger>
+              <TabsTrigger
+                value="buffers"
+                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Buffers
+              </TabsTrigger>
+              <TabsTrigger
+                value="inputs"
+                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Inputs ({counts.inputs})
+              </TabsTrigger>
+              <TabsTrigger
+                value="outputs"
+                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                Outputs ({counts.outputs})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent
             value="overview"
