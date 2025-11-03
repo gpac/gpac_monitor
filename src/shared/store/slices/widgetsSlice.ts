@@ -174,13 +174,22 @@ const widgetsSlice = createSlice({
     ) => {
       const { filterIdx, filterName } = action.payload;
 
-      // Créer widget détaché
+      // floating
       const detachedWidget = createWidgetInstance(WidgetType.FILTERSESSION);
       if (!detachedWidget) return;
 
       detachedWidget.isDetached = true;
       detachedWidget.detachedFilterIdx = filterIdx;
       detachedWidget.title = filterName || `Filter ${filterIdx}`;
+
+      // Enable floating mode for detached widgets
+      detachedWidget.isFloating = true;
+      detachedWidget.floatingX = 300 + state.activeWidgets.length * 30; // Cascade
+      detachedWidget.floatingY = 100 + state.activeWidgets.length * 30;
+      detachedWidget.floatingWidth = 70;
+      detachedWidget.floatingHeight = 90;
+      detachedWidget.zIndex = 1000 + state.activeWidgets.length;
+
       detachedWidget.x = 2;
       detachedWidget.y = 2;
       detachedWidget.w = 6;
@@ -188,7 +197,6 @@ const widgetsSlice = createSlice({
 
       state.activeWidgets.push(detachedWidget);
 
-      // Créer config pour ce widget
       state.configs[detachedWidget.id] = {
         isMaximized: false,
         isMinimized: false,
@@ -198,7 +206,6 @@ const widgetsSlice = createSlice({
     attachFilterTab: (state, action: PayloadAction<{ widgetId: string }>) => {
       const { widgetId } = action.payload;
 
-      // Retirer widget détaché
       state.activeWidgets = state.activeWidgets.filter(
         (w) => w.id !== widgetId,
       );
@@ -207,6 +214,62 @@ const widgetsSlice = createSlice({
       if (state.configs[widgetId]) {
         const { [widgetId]: _, ...remainingConfigs } = state.configs;
         state.configs = remainingConfigs;
+      }
+    },
+    // Floating mode actions
+    setWidgetFloating: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        isFloating: boolean;
+        x?: number;
+        y?: number;
+        width?: number;
+        height?: number;
+      }>,
+    ) => {
+      const widget = state.activeWidgets.find(
+        (w) => w.id === action.payload.id,
+      );
+      if (widget) {
+        widget.isFloating = action.payload.isFloating;
+        if (action.payload.isFloating) {
+          widget.floatingX = action.payload.x ?? 100;
+          widget.floatingY = action.payload.y ?? 100;
+          widget.floatingWidth = action.payload.width ?? 800;
+          widget.floatingHeight = action.payload.height ?? 600;
+        }
+      }
+    },
+    updateFloatingPosition: (
+      state,
+      action: PayloadAction<{
+        id: string;
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+      }>,
+    ) => {
+      const widget = state.activeWidgets.find(
+        (w) => w.id === action.payload.id,
+      );
+      if (widget && widget.isFloating) {
+        widget.floatingX = action.payload.x;
+        widget.floatingY = action.payload.y;
+        widget.floatingWidth = action.payload.width;
+        widget.floatingHeight = action.payload.height;
+      }
+    },
+    setWidgetZIndex: (
+      state,
+      action: PayloadAction<{ id: string; zIndex: number }>,
+    ) => {
+      const widget = state.activeWidgets.find(
+        (w) => w.id === action.payload.id,
+      );
+      if (widget) {
+        widget.zIndex = action.payload.zIndex;
       }
     },
   },
@@ -225,6 +288,9 @@ export const {
   deleteLayout,
   detachFilterTab,
   attachFilterTab,
+  setWidgetFloating,
+  updateFloatingPosition,
+  setWidgetZIndex,
 } = widgetsSlice.actions;
 
 // Memoized selectors

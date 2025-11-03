@@ -107,7 +107,7 @@ const WidgetWrapper = ({
       className={containerClasses}
     >
       <div
-        className={`${headerStyles.base} cursor-move drag-indicator bg-gray-900/70 flex justify-center`}
+        className={`${headerStyles.base} cursor-move drag-indicator widget-drag-handle bg-gray-900/70 flex justify-center`}
       >
         <div className={headerStyles.title}>
           {iconDef &&

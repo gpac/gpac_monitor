@@ -17,12 +17,6 @@ const BuffersTab = memo(({ data }: BuffersTabProps) => {
     useBufferMetrics(data);
   const { name } = data;
 
-  console.log('[BuffersTab] Buffer stats for filter', name, ':', {
-    totalPids: processedBuffers.length,
-    bufferDetails: processedBuffers,
-    totalBufferInfo,
-  });
-
   if (!hasBuffers) {
     return (
       <ScrollArea className="h-[400px]">

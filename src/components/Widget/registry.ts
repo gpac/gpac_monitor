@@ -16,6 +16,9 @@ export interface WidgetDefinition {
   component: React.ElementType;
   defaultSize: { w: number; h: number };
   defaultPosition?: { x: number; y: number };
+  defaultFloatingPosition?: { x: number; y: number };
+  defaultFloatingSize?: { width: number; height: number };
+  defaultZIndex?: number;
   description?: string;
   enabled: boolean;
 }
@@ -28,6 +31,9 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     component: AudioMonitor,
     defaultSize: { w: 4, h: 4 },
     defaultPosition: { x: 9, y: 8 },
+    defaultFloatingPosition: { x: 900, y: 500 },
+    defaultFloatingSize: { width: 500, height: 400 },
+    defaultZIndex: 1003,
     description: 'Monitor audio levels in real-time.',
     enabled: false,
   },
@@ -38,6 +44,9 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     component: MetricsMonitor,
     defaultSize: { w: 5, h: 7 },
     defaultPosition: { x: 8, y: 0 },
+    defaultFloatingPosition: { x: 1200, y: 80 },
+    defaultFloatingSize: { width: 600, height: 500 },
+    defaultZIndex: 1001,
     description: 'Display real-time system performance metrics.',
     enabled: true,
   },
@@ -48,6 +57,9 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     component: LogsMonitor,
     defaultSize: { w: 5, h: 6 },
     defaultPosition: { x: 9, y: 8 },
+    defaultFloatingPosition: { x: 300, y: 500 },
+    defaultFloatingSize: { width: 800, height: 600 },
+    defaultZIndex: 1002,
     description: 'View and filter system logs.',
     enabled: true,
   },
@@ -58,6 +70,9 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     component: GraphMonitor,
     defaultSize: { w: 7, h: 6 },
     defaultPosition: { x: 0, y: 8 },
+    defaultFloatingPosition: { x: 600, y: 80 },
+    defaultFloatingSize: { width: 550, height: 500 },
+    defaultZIndex: 1004,
     description: 'Visualize the processing pipeline graph.',
     enabled: true,
   },
@@ -68,6 +83,9 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     component: MultiFilterMonitor,
     defaultSize: { w: 7, h: 7 },
     defaultPosition: { x: 0, y: 0 },
+    defaultFloatingPosition: { x: 300, y: 80 },
+    defaultFloatingSize: { width: 850, height: 750 },
+    defaultZIndex: 1000,
     description: 'Manage session filters effectively.',
     enabled: true,
   },
@@ -88,6 +106,8 @@ export const createWidgetInstance = (type: WidgetType): Widget | null => {
     y,
     w,
     h,
+    // Floating mode disabled by default (only for detached widgets)
+    isFloating: false,
   };
 };
 
