@@ -3,8 +3,8 @@ import {
   saveLayout,
   loadLayout,
   deleteLayout,
-  selectSavedLayouts,
 } from '../store/slices/widgetsSlice';
+import { selectSavedLayouts } from '../store/selectors/widgets';
 
 export const useLayoutManager = () => {
   const dispatch = useAppDispatch();

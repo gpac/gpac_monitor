@@ -14,10 +14,8 @@ import {
   MonitoredFilterContent,
 } from '../tabs/MonitoredFilterTabs';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import {
-  detachFilterTab,
-  selectActiveWidgets,
-} from '@/shared/store/slices/widgetsSlice';
+import { detachFilterTab } from '@/shared/store/slices/widgetsSlice';
+import { selectActiveWidgets } from '@/shared/store/selectors/widgets';
 import { enrichFiltersWithStats } from '../utils/filterEnrichment';
 import { createDetachTabHandler } from '../utils/tabManagement';
 import { createOpenPropertiesHandler } from '../utils/gpacArgsManagement';

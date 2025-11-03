@@ -1,10 +1,8 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { selectLogCounts } from '@/shared/store/selectors/sidebarSelectors';
-import {
-  addWidget,
-  selectActiveWidgets,
-} from '@/shared/store/slices/widgetsSlice';
+import { addWidget } from '@/shared/store/slices/widgetsSlice';
+import { selectActiveWidgets } from '@/shared/store/selectors/widgets';
 import { setUIFilter } from '@/shared/store/slices/logsSlice';
 import { WidgetType } from '@/types/ui/widget';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';

@@ -108,6 +108,8 @@ export const createWidgetInstance = (type: WidgetType): Widget | null => {
     h,
     // Floating mode disabled by default (only for detached widgets)
     isFloating: false,
+    // Default z-index for grid widgets
+    zIndex: def.defaultZIndex || 1,
   };
 };
 

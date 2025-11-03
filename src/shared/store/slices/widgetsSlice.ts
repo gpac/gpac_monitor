@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Widget, WidgetType, WidgetConfig } from '@/types/ui/widget';
-import { createSelector } from '@reduxjs/toolkit';
 import {
   createWidgetInstance,
   widgetRegistry,
@@ -27,20 +26,6 @@ export interface WidgetsState {
     gpac_args: any[];
   } | null;
 }
-
-export const selectActiveWidgets = (state: RootState) =>
-  state.widgets.activeWidgets;
-export const selectWidgetConfigs = (state: RootState) => state.widgets.configs;
-export const selectSavedLayouts = (state: RootState) =>
-  state.widgets.savedLayouts;
-
-export const selectWidgetById = createSelector(
-  [
-    (state: RootState) => state.widgets.activeWidgets,
-    (_: RootState, widgetId: string) => widgetId,
-  ],
-  (widgets, widgetId) => widgets.find((w) => w.id === widgetId),
-);
 
 const defaultConfig: WidgetConfig = {
   isMaximized: false,
@@ -292,21 +277,5 @@ export const {
   updateFloatingPosition,
   setWidgetZIndex,
 } = widgetsSlice.actions;
-
-// Memoized selectors
-const selectWidgetConfigsInternal = (state: { widgets: WidgetsState }) =>
-  state.widgets.configs;
-const defaultWidgetConfig: WidgetConfig = {
-  isMaximized: false,
-  isMinimized: false,
-  settings: {},
-};
-
-/** Memoized selector for widget config by ID */
-export const makeSelectWidgetConfig = () =>
-  createSelector(
-    [selectWidgetConfigsInternal, (_: any, id: string) => id],
-    (configs, id) => configs[id] ?? defaultWidgetConfig,
-  );
 
 export default widgetsSlice.reducer;

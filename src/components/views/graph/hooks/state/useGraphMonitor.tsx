@@ -9,10 +9,8 @@ import {
 import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import {
-  detachFilterTab,
-  selectActiveWidgets,
-} from '@/shared/store/slices/widgetsSlice';
+import { detachFilterTab } from '@/shared/store/slices/widgetsSlice';
+import { selectActiveWidgets } from '@/shared/store/selectors/widgets';
 import { WidgetType } from '@/types/ui/widget';
 
 // Modularized hooks

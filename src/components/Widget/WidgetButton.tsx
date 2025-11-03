@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { addWidget } from '@/shared/store/slices/widgetsSlice';
-import { selectActiveWidgets } from '@/shared/store/slices/widgetsSlice';
+import { selectActiveWidgets } from '@/shared/store/selectors/widgets';
 import { WidgetType } from '@/types/ui/widget';
 import { IconType } from 'react-icons';
 import { FiPlus, FiCheck } from 'react-icons/fi';

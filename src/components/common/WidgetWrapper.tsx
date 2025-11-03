@@ -9,8 +9,8 @@ import {
   minimizeWidget,
   maximizeWidget,
   restoreWidget,
-  makeSelectWidgetConfig,
 } from '@/shared/store/slices/widgetsSlice';
+import { makeSelectWidgetConfig } from '@/shared/store/selectors/widgets';
 
 interface WidgetWrapperProps {
   id: string;
