@@ -52,13 +52,6 @@ class LogProcessor {
     const logsToSend = this.buffer.splice(0, BATCH_SIZE);
     this.totalSent += logsToSend.length;
 
-    // Debug log every 50 batches
-    if (this.totalSent % 500 === 0) {
-      console.log(
-        `[LogWorker] Sent: ${this.totalSent}, Processed: ${this.totalProcessed}, Buffer: ${this.buffer.length}`,
-      );
-    }
-
     // Send to the main thread
     self.postMessage({
       type: 'PROCESSED_LOGS',
