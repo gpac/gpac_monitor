@@ -1,9 +1,8 @@
 import React, { useState, useDeferredValue, useMemo } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 
-import { CPUChart } from './components/CPUChart';
-import { MemoryUsageChart } from './components/MemoryUsageChart';
-import { CPUOverview } from './components/CPUOverview';
+import { CpuMemoryChart } from './components/CpuMemoryChart';
+import { CpuMemoryOverview } from './components/CpuMemoryOverview';
 import { useCPUStats } from './hooks/useCPUStats';
 import WidgetWrapper from '@/components/common/WidgetWrapper';
 import { CPUHistoryBadge } from './components/CPUHistoryBadge';
@@ -14,11 +13,8 @@ import {
   CPU_HISTORY_STORAGE_KEY,
 } from './constants';
 
-// Static CSS classes extracted to prevent recreation on every render
-const BASE_CONTAINER_CLASS = 'container mx-auto space-y-4 p-4';
+const BASE_CONTAINER_CLASS = 'container mx-auto space-y-2 p-2';
 const RESIZING_CLASS = 'contain-layout contain-style';
-const BASE_GRID_CLASS = 'grid grid-cols-1 gap-4 lg:grid-cols-2';
-const GRID_RESIZING_CLASS = 'pointer-events-none';
 
 interface MetricsMonitorProps {
   id: string;
@@ -76,11 +72,6 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
     [isResizing],
   );
 
-  const gridClassName = useMemo(
-    () => `${BASE_GRID_CLASS}${isResizing ? ` ${GRID_RESIZING_CLASS}` : ''}`,
-    [isResizing],
-  );
-
   const chartLiveState = useMemo(
     () => isLive && !isResizing,
     [isLive, isResizing],
@@ -95,22 +86,17 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
     <WidgetWrapper id={id} statusBadge={statusBadge}>
       <div ref={containerRef} className={containerClassName}>
         <div className="w-full">
-          <CPUOverview
+          <CpuMemoryOverview
             cpuUsage={metricsValues.currentCPUPercent}
-            memoryProcess={metricsValues.currentMemoryProcess}
+            memoryBytes={metricsValues.currentMemoryProcess}
             totalCores={metricsValues.totalCores}
             isLoading={metricsValues.isLoading}
           />
         </div>
 
-        <div className={gridClassName}>
-          <CPUChart
+        <div className="w-full">
+          <CpuMemoryChart
             currentCPUPercent={metricsValues.currentCPUPercent}
-            isLive={chartLiveState}
-            maxPoints={maxPoints}
-            windowDuration={windowDuration}
-          />
-          <MemoryUsageChart
             currentMemoryBytes={metricsValues.currentMemoryProcess}
             isLive={chartLiveState}
             maxPoints={maxPoints}

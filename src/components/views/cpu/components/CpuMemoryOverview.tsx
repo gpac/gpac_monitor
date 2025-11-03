@@ -1,23 +1,23 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatPercent } from '@/utils/formatting';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
-interface CPUOverviewProps {
+interface CpuMemoryOverviewProps {
   cpuUsage: number;
-  memoryPercent?: number;
+  memoryBytes: number;
   totalCores?: number;
   isLoading?: boolean;
-  memoryProcess?: number;
 }
 
-export const CPUOverview = memo<CPUOverviewProps>(
-  ({ cpuUsage = 0, totalCores = 0, isLoading = false }) => {
+export const CpuMemoryOverview = memo<CpuMemoryOverviewProps>(
+  ({ cpuUsage = 0, memoryBytes = 0, totalCores = 0, isLoading = false }) => {
+    const memoryMB = useMemo(() => memoryBytes / (1024 * 1024), [memoryBytes]);
     return (
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <Card className="bg-stat border-0">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
-              CPU Usage
+              CPU
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -25,6 +25,22 @@ export const CPUOverview = memo<CPUOverviewProps>(
               <span className="text-2xl font-semibold text-info tabular-nums">
                 {isLoading ? '...' : formatPercent(cpuUsage)}
               </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-stat border-0">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
+              Memory
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-semibold text-info tabular-nums">
+                {isLoading ? '...' : memoryMB.toFixed(2)}
+              </span>
+              <span className="text-xs text-muted-foreground">MB</span>
             </div>
           </CardContent>
         </Card>
@@ -48,3 +64,5 @@ export const CPUOverview = memo<CPUOverviewProps>(
     );
   },
 );
+
+CpuMemoryOverview.displayName = 'CpuMemoryOverview';

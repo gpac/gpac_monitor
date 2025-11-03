@@ -65,11 +65,6 @@ export function useLogs(options: UseLogsOptions = {}) {
           return;
         }
 
-        // Wait a bit more to ensure server is fully ready
-        // This prevents race condition where logs subscription happens
-        // before server handlers are initialized
-        await new Promise((resolve) => setTimeout(resolve, 150));
-
         if (!isMounted) {
           return;
         }

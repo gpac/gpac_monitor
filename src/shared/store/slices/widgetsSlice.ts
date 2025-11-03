@@ -175,10 +175,17 @@ const widgetsSlice = createSlice({
       detachedWidget.floatingHeight = 90;
       detachedWidget.zIndex = 1000 + state.activeWidgets.length;
 
-      detachedWidget.x = 2;
-      detachedWidget.y = 2;
-      detachedWidget.w = 6;
-      detachedWidget.h = 6;
+      // Calculate grid position to fill space after logs
+      // Logs: x=3, w=5, so available space starts at x=8
+      // Count existing detached filters to position them side by side
+      const detachedCount = state.activeWidgets.filter(
+        (w) => w.isDetached && w.type === WidgetType.FILTERSESSION,
+      ).length;
+
+      detachedWidget.x = 8 + (detachedCount % 2) * 2; // x=8 or x=10 (alternate)
+      detachedWidget.y = 6 + Math.floor(detachedCount / 2) * 6; // y=6, y=12, etc.
+      detachedWidget.w = 2; // Compact width (2 filters fit in 4 columns)
+      detachedWidget.h = 6; // Same height as logs
 
       state.activeWidgets.push(detachedWidget);
 
