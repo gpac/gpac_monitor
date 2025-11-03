@@ -33,7 +33,7 @@ const WidgetSelector: React.FC<WidgetSelectorProps> = ({
             focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/30
             ${
               isOpen
-                ? 'bg-monitor-panel text-white ring-1 ring-emerald-400/30'
+                ? ' bg-monitor-panel/55 text-white ring-1 ring-emerald-400/30'
                 : 'text-white/70 hover:bg-white/5 hover:text-white'
             }
           `}

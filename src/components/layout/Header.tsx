@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiLayout } from 'react-icons/fi';
 import { LayoutManager } from './LayoutManager';
 import WidgetSelector from '../Widget/WidgetSelector';
+import LogCounters from './LogCounters';
 
 interface HeaderProps {}
 
@@ -43,6 +44,8 @@ const Header: React.FC<HeaderProps> = () => {
             onToggle={() => setShowWidgetSelector(!showWidgetSelector)}
             onClose={() => setShowWidgetSelector(false)}
           />
+
+          <LogCounters />
         </div>
 
         {/* Right: Layout Manager */}

@@ -31,7 +31,7 @@ const LogCounterItem = React.memo<LogCounterItemProps>(
         disabled={!hasCount}
         aria-label={`${count} ${label} - Click to open logs monitor`}
         className={`
-          flex items-center justify-between gap-2 px-3 py-1.5 rounded-md
+          flex justify-between gap-2 px-3 py-1.5 rounded-md
           transition-all duration-150 ease-out font-ui text-sm
           ${
             hasCount
@@ -40,13 +40,10 @@ const LogCounterItem = React.memo<LogCounterItemProps>(
           }
         `}
       >
-        <div className="flex items-center gap-2">
+        <div className="flex  justify-center gap-2">
           <Icon
             className={`w-3.5 h-3.5 ${hasCount ? colorClass : 'text-gray-600'}`}
           />
-          <span className={`${hasCount ? 'text-gray-300' : 'text-gray-600'}`}>
-            {label}
-          </span>
         </div>
         <span
           className={`
@@ -85,7 +82,10 @@ const LogCounters: React.FC = () => {
   };
 
   return (
-    <div className="space-y-1">
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-medium text-muted uppercase tracking-wider">
+        Logs
+      </span>
       <LogCounterItem
         icon={FaTimesCircle}
         label="Errors"
