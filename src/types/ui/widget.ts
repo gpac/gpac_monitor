@@ -22,9 +22,9 @@ export interface Widget {
   // Floating mode (overlay above sidebar)
   isFloating?: boolean;
   floatingX?: number; // in pixels
-  floatingY?: number; // in pixels
-  floatingWidth?: number; // in pixels
-  floatingHeight?: number; // in pixels
+  floatingY?: number;
+  floatingWidth?: number;
+  floatingHeight?: number;
   zIndex?: number;
 }
 export interface WidgetComponent {

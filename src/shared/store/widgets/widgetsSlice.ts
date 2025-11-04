@@ -56,11 +56,6 @@ const widgetsSlice = createSlice({
     detachFilter: reducers.detachFilterReducer,
     attachFilter: reducers.attachFilterReducer,
     closeFilter: reducers.closeFilterReducer,
-
-    // Floating mode actions
-    setWidgetFloating: reducers.setWidgetFloatingReducer,
-    updateFloatingPosition: reducers.updateFloatingPositionReducer,
-    setWidgetZIndex: reducers.setWidgetZIndexReducer,
   },
 });
 
@@ -80,10 +75,6 @@ export const {
   detachFilter,
   attachFilter,
   closeFilter,
-  // Floating mode
-  setWidgetFloating,
-  updateFloatingPosition,
-  setWidgetZIndex,
 } = widgetsSlice.actions;
 
 export default widgetsSlice.reducer;

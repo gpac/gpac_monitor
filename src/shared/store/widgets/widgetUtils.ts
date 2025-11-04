@@ -148,20 +148,32 @@ export const detachFilterReducer = (
   widget.isDetached = true;
   widget.detachedFilterIdx = idx;
   widget.title = name;
-  widget.isFloating = true;
-  widget.floatingX = 300 + state.activeWidgets.length * 30;
-  widget.floatingY = 100 + state.activeWidgets.length * 30;
-  widget.floatingWidth = 70;
-  widget.floatingHeight = 90;
-  widget.zIndex = 1000 + state.activeWidgets.length;
 
+  // Get all grid widgets (non-detached)
+  const gridWidgets = state.activeWidgets.filter((w) => !w.isDetached);
+
+  // Calculate max Y from existing grid widgets
+  const maxY = gridWidgets.reduce((max, w) => Math.max(max, w.y + w.h), 0);
+
+  // Count existing detached widgets
   const detachedCount = Object.values(state.viewByFilter).filter(
     (v) => v?.mode === 'detached',
   ).length;
-  widget.x = 8 + (detachedCount % 2) * 2;
-  widget.y = 6 + Math.floor(detachedCount / 2) * 6;
-  widget.w = 2;
-  widget.h = 6;
+
+  // Position in grid at bottom, with smart layout
+  const cols = 12;
+  const widgetWidth = 4;
+  const widgetHeight = 6;
+  const maxWidgetsPerRow = Math.floor(cols / widgetWidth);
+
+  const row = Math.floor(detachedCount / maxWidgetsPerRow);
+  const col = detachedCount % maxWidgetsPerRow;
+
+  widget.x = col * widgetWidth;
+  widget.y = maxY + row * (widgetHeight + 1);
+  widget.w = widgetWidth;
+  widget.h = widgetHeight;
+  widget.isFloating = false;
 
   state.activeWidgets.push(widget as Widget);
   state.configs[widget.id] = {
@@ -205,59 +217,6 @@ export const closeFilterReducer = (
   }
 
   delete state.viewByFilter[filterIdx];
-};
-
-// Floating mode reducers
-export const setWidgetFloatingReducer = (
-  state: WidgetsState,
-  action: PayloadAction<{
-    id: string;
-    isFloating: boolean;
-    x?: number;
-    y?: number;
-    width?: number;
-    height?: number;
-  }>,
-) => {
-  const widget = state.activeWidgets.find((w) => w.id === action.payload.id);
-  if (widget) {
-    widget.isFloating = action.payload.isFloating;
-    if (action.payload.isFloating) {
-      widget.floatingX = action.payload.x ?? 100;
-      widget.floatingY = action.payload.y ?? 100;
-      widget.floatingWidth = action.payload.width ?? 800;
-      widget.floatingHeight = action.payload.height ?? 600;
-    }
-  }
-};
-
-export const updateFloatingPositionReducer = (
-  state: WidgetsState,
-  action: PayloadAction<{
-    id: string;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  }>,
-) => {
-  const widget = state.activeWidgets.find((w) => w.id === action.payload.id);
-  if (widget && widget.isFloating) {
-    widget.floatingX = action.payload.x;
-    widget.floatingY = action.payload.y;
-    widget.floatingWidth = action.payload.width;
-    widget.floatingHeight = action.payload.height;
-  }
-};
-
-export const setWidgetZIndexReducer = (
-  state: WidgetsState,
-  action: PayloadAction<{ id: string; zIndex: number }>,
-) => {
-  const widget = state.activeWidgets.find((w) => w.id === action.payload.id);
-  if (widget) {
-    widget.zIndex = action.payload.zIndex;
-  }
 };
 
 export const setSelectedNodeReducer = (

@@ -117,7 +117,9 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
           </div>
           <CardDescription className="mt-1 flex items-center gap-1 text-xs text-monitor-text-muted">
             <LuActivity className="h-3 w-3" />
-            <span className="truncate">{filter.status || 'No status'}</span>
+            <span className="truncate text-info">
+              {filter.status || 'No status'}
+            </span>
           </CardDescription>
         </CardHeader>
 

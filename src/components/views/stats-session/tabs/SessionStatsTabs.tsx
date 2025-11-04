@@ -61,7 +61,7 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
             {onDetachTab && (
               <Button
                 variant="ghost"
-                className="ml-1 h-4 w-4 rounded-full p-0 hover:bg-slate-600"
+                className="ml-1 h-5 w-5 rounded-full p-0 hover:bg-slate-600"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDetachTab(filterIdx, filter.name, e);

@@ -7,7 +7,6 @@ import {
   NetworkTabData,
   FilterStatsResponse,
 } from '@/types/domain/gpac/filter-stats';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OverviewTab from './tabs/OverviewTab';
@@ -43,12 +42,6 @@ const DetailedStatsView = memo(
     filterData,
     onOpenProperties,
   }: DetailedStatsViewProps) => {
-    const badgeVariant = useMemo(
-      () =>
-        overviewData.status?.includes('error') ? 'destructive' : 'secondary',
-      [overviewData.status],
-    );
-
     const counts = useMemo(
       () => ({
         inputs: inputPids.length,
@@ -60,15 +53,12 @@ const DetailedStatsView = memo(
     return (
       <div className="space-y-2">
         <Tabs defaultValue="overview" className="w-full">
-          {/* Sticky header container with filter name, status, and tabs */}
-          <div className="sticky top-0 z-10 bg-background pb-2 space-y-2">
+          <div className="sticky top-0 z-10 bg-background pb-2 space-y-2 backdrop-blur-sm ">
             <div className="flex justify-stretch items-center gap-6">
               <h2 className="text-lg font-semibold text-red-600/90">
                 {overviewData.name}
               </h2>
-              <Badge variant={badgeVariant}>
-                {overviewData.status || 'Unknown status'}
-              </Badge>
+
               <Button
                 variant="outline"
                 size="sm"

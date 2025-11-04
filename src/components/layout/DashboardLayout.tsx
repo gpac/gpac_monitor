@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import {
   Responsive,
@@ -11,7 +11,6 @@ import 'react-resizable/css/styles.css';
 import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
 import Header from './Header';
 import Sidebar from './Sidebar';
-import FloatingWidget from './FloatingWidget';
 import { Widget } from '../../types/ui/widget';
 import { getWidgetDefinition } from '../Widget/registry';
 
@@ -22,28 +21,8 @@ const DashboardLayout: React.FC = () => {
   const activeWidgets = useAppSelector((state) => state.widgets.activeWidgets);
   const configs = useAppSelector((state) => state.widgets.configs);
 
-  // Separate grid and floating widgets
-  const { gridWidgets, floatingWidgets } = useMemo(() => {
-    return activeWidgets.reduce(
-      (acc, widget) => {
-        if (widget.isFloating) {
-          acc.floatingWidgets.push(widget);
-        } else {
-          acc.gridWidgets.push(widget);
-        }
-        return acc;
-      },
-      { gridWidgets: [] as Widget[], floatingWidgets: [] as Widget[] },
-    );
-  }, [activeWidgets]);
-
-  // Calculate max z-index for floating widgets
-  const maxZIndex = useMemo(() => {
-    return Math.max(0, ...floatingWidgets.map((w) => w.zIndex || 1000));
-  }, [floatingWidgets]);
-
   const layouts: RGLLayouts = {
-    lg: gridWidgets.map((widget) => ({
+    lg: activeWidgets.map((widget) => ({
       i: widget.id,
       x: widget.x,
       y: widget.y,
@@ -122,16 +101,9 @@ const DashboardLayout: React.FC = () => {
             containerPadding={[16, 16]}
             draggableCancel=".no-drag"
           >
-            {gridWidgets.map(renderWidget)}
+            {activeWidgets.map(renderWidget)}
           </ResponsiveGridLayout>
         </main>
-
-        {/* Floating widgets (overlay above everything) */}
-        {floatingWidgets.map((widget) => (
-          <FloatingWidget key={widget.id} widget={widget} maxZIndex={maxZIndex}>
-            {renderWidget(widget)}
-          </FloatingWidget>
-        ))}
       </div>
     </div>
   );
