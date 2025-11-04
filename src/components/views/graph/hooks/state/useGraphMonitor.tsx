@@ -9,7 +9,7 @@ import {
 import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { detachFilterTab } from '@/shared/store/slices/widgetsSlice';
+import { detachFilter } from '@/shared/store/slices/widgetsSlice';
 import { selectActiveWidgets } from '@/shared/store/selectors/widgets';
 import { WidgetType } from '@/types/ui/widget';
 
@@ -85,7 +85,7 @@ const useGraphMonitor = () => {
           : `Filter ${filterIdx}`;
 
       // Dispatch action to create detached widget
-      dispatch(detachFilterTab({ filterIdx, filterName }));
+      dispatch(detachFilter({ idx: filterIdx, name: filterName }));
     },
     [dispatch, localNodes, activeWidgets],
   );

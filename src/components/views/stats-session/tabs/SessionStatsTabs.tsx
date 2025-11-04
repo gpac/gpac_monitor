@@ -1,37 +1,33 @@
-import { LuMonitorCheck, LuSquareArrowUpRight, LuBan } from 'react-icons/lu';
-import type { GpacNodeData } from '@/types/domain/gpac/model';
+import { LuMonitorCheck, LuSquareArrowUpRight } from 'react-icons/lu';
+import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Button } from '@/components/ui/button';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Widget, WidgetType } from '@/types/ui/widget';
 import React from 'react';
+import { useAppSelector } from '@/shared/hooks/redux';
 
 interface StatsTabsProps {
   activeTab: string;
   onValueChange: (value: string) => void;
-  monitoredFilters: Map<number, GpacNodeData>;
+  allFilters: EnrichedFilterOverview[]; // All available filters
   onCloseTab: (idx: number, e: React.MouseEvent) => void;
   onDetachTab?: (idx: number, filterName: string, e: React.MouseEvent) => void;
   tabsRef: React.RefObject<HTMLDivElement>;
-  activeWidgets?: Widget[];
 }
 
 export const StatsTabs: React.FC<StatsTabsProps> = ({
   onValueChange,
-  monitoredFilters,
+  allFilters,
   onCloseTab,
   onDetachTab,
   tabsRef,
-  activeWidgets = [],
 }) => {
-  // Check if a filter has a detached widget
-  const isFilterDetached = (filterIdx: number): boolean => {
-    return activeWidgets.some(
-      (w) =>
-        w.type === WidgetType.FILTERSESSION &&
-        w.isDetached === true &&
-        w.detachedFilterIdx === filterIdx,
-    );
-  };
+  // Read viewByFilter from Redux (single source of truth)
+  const viewByFilter = useAppSelector((state) => state.widgets.viewByFilter);
+
+  // Derive inline filters from viewByFilter
+  const inlineFilters = Object.entries(viewByFilter)
+    .filter(([_, view]) => view?.mode === 'inline')
+    .map(([idx]) => Number(idx));
 
   return (
     <TabsList
@@ -48,53 +44,41 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
         <span>Dashboard</span>
       </TabsTrigger>
 
-      {/* Tabs for monitored filters */}
-      {Array.from(monitoredFilters.entries()).map(([idx, filter]) => {
-        const isDetached = isFilterDetached(idx);
+      {/* Tabs for inline filters (derived from viewByFilter) */}
+      {inlineFilters.map((filterIdx) => {
+        const filter = allFilters.find((f) => f.idx === filterIdx);
+        if (!filter) return null;
 
         return (
           <TabsTrigger
-            key={`tab-${idx}`}
-            value={`filter-${idx}`}
+            key={`tab-${filterIdx}`}
+            value={`filter-${filterIdx}`}
             className="flex items-center gap-1"
-            data-value={`filter-${idx}`}
-            onClick={() => onValueChange(`filter-${idx}`)}
+            data-value={`filter-${filterIdx}`}
+            onClick={() => onValueChange(`filter-${filterIdx}`)}
           >
             <span>{filter.name}</span>
             {onDetachTab && (
               <Button
                 variant="ghost"
-                className={`ml-1 h-4 w-4 rounded-full p-0 ${
-                  isDetached
-                    ? 'cursor-not-allowed opacity-50'
-                    : 'hover:bg-slate-600'
-                }`}
+                className="ml-1 h-4 w-4 rounded-full p-0 hover:bg-slate-600"
                 onClick={(e) => {
-                  if (!isDetached) {
-                    onDetachTab(idx, filter.name, e);
-                  } else {
-                    e.stopPropagation();
-                  }
+                  e.stopPropagation();
+                  onDetachTab(filterIdx, filter.name, e);
                 }}
-                disabled={isDetached}
-                title={
-                  isDetached
-                    ? 'Filter already open in detached view'
-                    : 'Detach as overlay'
-                }
+                title="Detach as overlay"
               >
-                {isDetached ? (
-                  <LuBan className="text-red-400" />
-                ) : (
-                  <LuSquareArrowUpRight />
-                )}
+                <LuSquareArrowUpRight />
               </Button>
             )}
             <Button
               variant="ghost"
               size="sm"
               className="ml-1 h-4 w-4 rounded-full p-0"
-              onClick={(e) => onCloseTab(idx, e)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCloseTab(filterIdx, e);
+              }}
             >
               ×
             </Button>
