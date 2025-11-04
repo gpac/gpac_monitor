@@ -38,7 +38,7 @@ export class BaseMessageHandler {
     // @ts-expect-error used by sessionStatsHandlerfv
     private isLoaded?: () => boolean,
   ) {
-    // Initialize message batcher (RAF-based batching for high-frequency messages)
+    // Initialize message batcher (RAF-based batching for logs only)
     this.messageBatcher = new WSMessageBatcher();
 
     // Initialize specialized handlers
@@ -64,54 +64,9 @@ export class BaseMessageHandler {
       callbacks,
     );
 
-    // Register batch handlers for high-frequency messages
-    this.registerBatchHandlers();
-  }
-
-  /**
-   * Register handlers for batched message processing
-   * High-frequency messages (logs, stats) are batched and processed once per frame
-   */
-  private registerBatchHandlers(): void {
-    // Log batch handler
-    this.messageBatcher.registerHandler('log_batch', (messages: any[]) => {
-      // Aggregate all logs from all messages in this frame
-      const allLogs = messages.flatMap((msg) => msg.logs || []);
-      if (allLogs.length > 0) {
-        this.logHandler.handleLogBatch(allLogs);
-      }
-    });
-
-    // Session stats handler
-    this.messageBatcher.registerHandler('session_stats', (messages: any[]) => {
-      // Use only the last stats message in the frame (most recent)
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.stats) {
-        this.sessionStatsHandler.handleSessionStats(lastMessage.stats);
-      }
-    });
-
-    // CPU stats handler
-    this.messageBatcher.registerHandler('cpu_stats', (messages: any[]) => {
-      // Use only the last CPU stats in the frame
-      const lastMessage = messages[messages.length - 1];
-      if (lastMessage.stats) {
-        this.cpuStatsHandler.handleCPUStats(lastMessage.stats);
-      }
-    });
-
-    // Filter stats handler
-    this.messageBatcher.registerHandler('filter_stats', (messages: any[]) => {
-      // Group by filter idx and process each
-      const byFilterIdx = new Map<number, any>();
-      for (const msg of messages) {
-        if (msg.idx !== undefined) {
-          byFilterIdx.set(msg.idx, msg); // Keep last message per filter
-        }
-      }
-      for (const [_, filterData] of byFilterIdx) {
-        this.filterStatsHandler.handleFilterStatsUpdate(filterData);
-      }
+    // Register log batch handler (only high-frequency message type)
+    this.messageBatcher.registerLogHandler((logs) => {
+      this.logHandler.handleLogBatch(logs);
     });
   }
 
@@ -224,34 +179,29 @@ export class BaseMessageHandler {
 
   private handleSessionStatsMessage(data: any): void {
     if (data.stats && Array.isArray(data.stats)) {
-      // Queue message for RAF batch processing
-      this.messageBatcher.add('session_stats', data);
+      // Process immediately (low frequency: ~1 msg/sec)
+      this.sessionStatsHandler.handleSessionStats(data.stats);
     }
   }
 
   private handleCpuStatsMessage(data: any): void {
-    // Queue message for RAF batch processing
-    this.messageBatcher.add('cpu_stats', data);
+    if (data.stats) {
+      // Process immediately (low frequency: ~6 msgs/sec)
+      this.cpuStatsHandler.handleCPUStats(data.stats);
+    }
   }
 
   private handleFilterStatsMessage(data: any): void {
     if (data.idx !== undefined) {
-      // Queue message for RAF batch processing
-      this.messageBatcher.add('filter_stats', data);
-    } else {
-      // filter_stats message missing idx
+      // Process immediately (low frequency: ~1 msg/sec per filter)
+      this.filterStatsHandler.handleFilterStatsUpdate(data);
     }
   }
 
   private handleLogBatchMessage(data: LogBatchResponse): void {
     if (data.logs && Array.isArray(data.logs)) {
-      // Queue logs for RAF batch processing (CRITICAL for performance)
-      this.messageBatcher.add('log_batch', data);
-    } else {
-      console.log(
-        '[BaseMessageHandler] No logs in data or data.logs not an array:',
-        data,
-      );
+      // Batch logs (high frequency: bursts possible with multiple filters)
+      this.messageBatcher.addLogBatch(data);
     }
   }
 

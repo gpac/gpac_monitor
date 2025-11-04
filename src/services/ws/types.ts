@@ -5,6 +5,8 @@ import {
   GpacLogConfig,
   GpacLogConfigString,
 } from '@/types/domain/gpac/log-types';
+import { CPUStats } from '@/types/domain/system';
+import { FilterStatsResponse as FilterStats } from '@/types/domain/gpac/filter-stats';
 
 // Base interface for all messages
 export interface BaseWSMessage {
@@ -177,6 +179,17 @@ export interface LogStatusResponse extends BaseWSResponse {
 export interface LogConfigChangedResponse extends BaseWSResponse {
   message: 'log_config_changed';
   logLevel: GpacLogConfig;
+}
+
+export interface CPUStatsResponse extends BaseWSResponse {
+  message: 'cpu_stats';
+  stats: CPUStats;
+}
+
+export interface FilterStatsUpdateResponse extends BaseWSResponse {
+  message: 'filter_stats';
+  idx: number;
+  stats: FilterStats;
 }
 
 export type WSMessage =

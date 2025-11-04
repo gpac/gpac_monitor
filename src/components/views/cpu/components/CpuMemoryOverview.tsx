@@ -22,7 +22,7 @@ export const CpuMemoryOverview = memo<CpuMemoryOverviewProps>(
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
-              <span className="text-2xl font-semibold text-info tabular-nums">
+              <span className="text-xl font-semibold text-info tabular-nums">
                 {isLoading ? '...' : formatPercent(cpuUsage)}
               </span>
             </div>
@@ -37,7 +37,7 @@ export const CpuMemoryOverview = memo<CpuMemoryOverviewProps>(
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-semibold text-info tabular-nums">
+              <span className="text-xl  font-semibold text-info tabular-nums">
                 {isLoading ? '...' : memoryMB.toFixed(2)}
               </span>
               <span className="text-xs text-muted-foreground">MB</span>
@@ -53,7 +53,7 @@ export const CpuMemoryOverview = memo<CpuMemoryOverviewProps>(
           </CardHeader>
           <CardContent>
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-semibold text-info tabular-nums">
+              <span className="text-xl font-semibold text-info tabular-nums">
                 {isLoading ? '...' : totalCores}
               </span>
               <span className="text-xs text-muted-foreground">Cores</span>
