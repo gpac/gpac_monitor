@@ -4,10 +4,10 @@ import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { setSelectedEdge } from '@/shared/store/slices/graphSlice';
 import { setSelectedFilterForArgs } from '@/shared/store/slices/filterArgumentSlice';
 import FilterArgumentsContent from '@/components/filtersArgs/FilterArgumentsContent';
-import IPIDPropertiesContent from './IPIDPropertiesContent';
+import IPIDPropertiesContent from '../../IPIDProperties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';
 import { useFetchIPIDProperties } from './hooks/useFetchIPIDProperties';
-import { useFilterArgsSubscription } from './hooks/useFilterArgsSubscription';
+import { useFilterArgsSubscription } from '../../filtersArgs/hooks/useFilterArgsSubscription';
 
 const PropertiesPanel: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -18,7 +18,6 @@ const PropertiesPanel: React.FC = () => {
     (state) => state.filterArgument.selectedFilterForArgs,
   );
   const filters = useAppSelector((state) => state.graph.filters);
-
 
   const getFilterName = (filterIdx: number): string => {
     const filter = filters.find((f) => f.idx === filterIdx);
