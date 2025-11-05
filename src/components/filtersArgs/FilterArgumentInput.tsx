@@ -54,14 +54,13 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
 
         let convertedValue;
         if (isEnum) {
-          // For enums: send text value directly (GPAC expects text values)
+          // For enums: send text value directly
           convertedValue = String(localValue);
         } else {
           // For other types: use standard conversion
           convertedValue = convertArgumentValue(localValue, argument.type);
         }
 
-        // Call the parent onChange handler
         onChange(convertedValue as InputValue<T> | null);
 
         // If the argument is updatable and we have a filterId, dispatch the update action
@@ -76,7 +75,7 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
         }
       } catch (error) {
         console.error('Error converting value:', error);
-        // Reset to previous value on error
+
         setLocalValue(value);
       }
     },
@@ -94,7 +93,6 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
 
   // Handle immediate updates for boolean arguments when filterId is provided
   const handleImmediateUpdate = (newValue: any) => {
-    // Check if this is an enum argument
     const isEnum =
       argument.min_max_enum &&
       (argument.min_max_enum.includes('|') ||
@@ -102,20 +100,15 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
 
     let convertedValue;
     if (isEnum) {
-      // For enums: send text value directly (GPAC expects text values)
       convertedValue = String(newValue);
     } else {
-      // For other types: use standard conversion
       convertedValue = convertArgumentValue(newValue, argument.type);
     }
 
-    // Update local value immediately
     setLocalValue(convertedValue as InputValue<T>);
 
-    // Call the parent onChange handler
     onChange(convertedValue as InputValue<T> | null);
 
-    // If we have filterId and argument is updatable, dispatch immediately
     if (filterId && argument.update && !standalone) {
       dispatch(
         updateFilterArgument({
@@ -181,7 +174,6 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
       case 'v2d':
       case 'v3di':
       case 'v4di':
-        // Format vecteurs comme le collègue: -1x-1, 1x2x3, etc.
         return (
           <StringInput
             {...(inputProps as FilterArgumentInputProps<'str'>)}
@@ -224,7 +216,6 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
 
       case 'str':
       default:
-        // For enums, pass min_max_enum as options
         return (
           <StringInput
             {...(inputProps as FilterArgumentInputProps<'str'>)}

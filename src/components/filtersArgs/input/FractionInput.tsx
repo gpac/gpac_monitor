@@ -36,7 +36,6 @@ export const FractionInput: React.FC<
       }
     }
 
-    //Echec return [0, 1]
     return [0, 1];
   };
 
