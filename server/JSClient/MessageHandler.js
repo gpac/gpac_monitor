@@ -108,6 +108,20 @@ function MessageHandler(client) {
                             message: 'log_status',
                             status: status
                         }));
+                    },
+
+                    'get_ipid_props': () => {
+                        print("Getting IPID properties for filter " + jtext['filterIdx'] + " PID " + jtext['ipidIdx']);
+                        const props = this.client.pidPropsCollector.collectIpidProps(
+                            jtext['filterIdx'],
+                            jtext['ipidIdx']
+                        );
+                        this.client.client.send(JSON.stringify({
+                            message: 'ipid_props_response',
+                            filterIdx: jtext['filterIdx'],
+                            ipidIdx: jtext['ipidIdx'],
+                            properties: props
+                        }));
                     }
                 };
 

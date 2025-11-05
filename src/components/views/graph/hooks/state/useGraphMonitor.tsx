@@ -10,6 +10,7 @@ import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { detachFilter } from '@/shared/store/slices/widgetsSlice';
+import { setSelectedEdge } from '@/shared/store/slices/graphSlice';
 import { selectActiveWidgets } from '@/shared/store/selectors/widgets';
 import { WidgetType } from '@/types/ui/widget';
 
@@ -90,7 +91,15 @@ const useGraphMonitor = () => {
     [dispatch, localNodes, activeWidgets],
   );
 
-  const { handleNodesChange, handleEdgesChange, handleNodeClick } =
+  // Handle edge click for PID properties
+  const handleEdgeTabSelect = useCallback(
+    (filterIdx: number, ipidIdx: number) => {
+      dispatch(setSelectedEdge({ filterIdx, ipidIdx }));
+    },
+    [dispatch],
+  );
+
+  const { handleNodesChange, handleEdgesChange, handleNodeClick, handleEdgeClick } =
     useGraphHandlers({
       onNodesChange,
       onEdgesChange,
@@ -102,6 +111,7 @@ const useGraphMonitor = () => {
       service,
       dispatch,
       onNodeClick: handleNodeTabDetach,
+      onEdgeClick: handleEdgeTabSelect,
     });
 
   // Use notification system
@@ -171,6 +181,7 @@ const useGraphMonitor = () => {
     handleNodesChange,
     handleEdgesChange,
     handleNodeClick,
+    handleEdgeClick,
     layoutOptions,
     handleLayoutChange,
     autoLayout,

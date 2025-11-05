@@ -25,11 +25,6 @@ export interface WidgetsState {
   activeWidgets: Widget[];
   configs: Record<string, WidgetConfig>;
   savedLayouts: Record<string, LayoutState>;
-  selectedNode: {
-    idx: number;
-    name: string;
-    gpac_args: any[];
-  } | null;
   viewByFilter: Record<number, FilterView | undefined>;
 }
 
@@ -44,7 +39,6 @@ const widgetsSlice = createSlice({
     minimizeWidget: reducers.minimizeWidgetReducer,
     restoreWidget: reducers.restoreWidgetReducer,
     updateWidgetPosition: reducers.updateWidgetPositionReducer,
-    setSelectedNode: reducers.setSelectedNodeReducer,
 
     // Layout management
     saveLayout: reducers.saveLayoutReducer,
@@ -66,7 +60,6 @@ export const {
   minimizeWidget,
   restoreWidget,
   updateWidgetPosition,
-  setSelectedNode,
   saveLayout,
   loadLayout,
   deleteLayout,

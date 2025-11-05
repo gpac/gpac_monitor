@@ -5,7 +5,7 @@ import LoadingState from '@/components/common/LoadingState';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import GraphFlow from './GraphFlow';
 import { WidgetProps } from '@/types/ui/widget';
-import { Node, Edge, NodeMouseHandler } from '@xyflow/react';
+import { Node, Edge, NodeMouseHandler, EdgeMouseHandler } from '@xyflow/react';
 import { LayoutOptions } from '../../utils/GraphLayout';
 
 interface GraphMonitorUIProps extends Omit<WidgetProps, 'config'> {
@@ -18,6 +18,7 @@ interface GraphMonitorUIProps extends Omit<WidgetProps, 'config'> {
   onNodesChange: (changes: any[]) => void;
   onEdgesChange: (changes: any[]) => void;
   onNodeClick?: NodeMouseHandler;
+  onEdgeClick?: EdgeMouseHandler;
   layoutOptions: LayoutOptions;
   onLayoutChange: (options: LayoutOptions) => void;
   onAutoLayout: () => void;
@@ -33,10 +34,11 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
   onNodesChange,
   onEdgesChange,
   onNodeClick,
+  onEdgeClick,
 }) => {
   const [isResizing, setIsResizing] = useState(false);
 
-  // Optimize ReactFlow during resize - very important for complex graphs
+  // Optimize ReactFlow during resize 
   const { ref } = useOptimizedResize({
     onResizeStart: () => setIsResizing(true),
     onResizeEnd: () => setIsResizing(false),
@@ -70,6 +72,7 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
+          onEdgeClick={onEdgeClick}
           isResizing={isResizing}
         />
       </div>

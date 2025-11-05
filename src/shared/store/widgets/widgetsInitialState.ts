@@ -22,6 +22,5 @@ export const initialState: WidgetsState = {
   activeWidgets: activeWidgets,
   configs,
   savedLayouts: {},
-  selectedNode: null,
   viewByFilter: {},
 };

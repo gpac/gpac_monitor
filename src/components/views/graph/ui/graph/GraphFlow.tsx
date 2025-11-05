@@ -10,6 +10,7 @@ import {
   NodeChange,
   EdgeChange,
   NodeMouseHandler,
+  EdgeMouseHandler,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import CustomNode from '../nodes/CustomNode';
@@ -22,6 +23,7 @@ interface GraphFlowProps {
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onNodeClick?: NodeMouseHandler;
+  onEdgeClick?: EdgeMouseHandler;
   isResizing?: boolean;
 }
 
@@ -41,6 +43,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   onNodesChange,
   onEdgesChange,
   onNodeClick,
+  onEdgeClick,
   isResizing = false,
 }) => {
   const { handleMiniMapClick, handleMiniMapDrag } = useMinimapNavigation();
@@ -54,6 +57,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         onNodesChange={isResizing ? () => {} : onNodesChange}
         onEdgesChange={isResizing ? () => {} : onEdgesChange}
         onNodeClick={isResizing ? undefined : onNodeClick}
+        onEdgeClick={isResizing ? undefined : onEdgeClick}
         fitView={!isResizing}
         minZoom={0.1}
         maxZoom={4}

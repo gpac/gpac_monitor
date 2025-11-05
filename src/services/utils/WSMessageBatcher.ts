@@ -3,14 +3,6 @@ import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 /**
  * Batches log messages and processes them once per frame (RAF cadence)
- *
- * Why only logs?
- * - Logs: High frequency (10-200+ msgs/sec with 4 filters) → batch critical
- * - Stats: Low frequency (~1 msg/sec per filter) → batch adds latency
- *
- * Performance impact:
- * - Before: N log messages → N Redux dispatches → N React commits
- * - After: N log messages → 1 batch → 1 React commit (~60fps)
  */
 export class WSMessageBatcher {
   private pendingLogs: LogBatchResponse[] = [];

@@ -19,13 +19,7 @@ export interface Widget {
   isDraggable?: boolean;
   isDetached?: boolean;
   detachedFilterIdx?: number;
-  // Floating mode (overlay above sidebar)
-  isFloating?: boolean;
-  floatingX?: number; // in pixels
-  floatingY?: number;
-  floatingWidth?: number;
-  floatingHeight?: number;
-  zIndex?: number;
+
 }
 export interface WidgetComponent {
   id: string;

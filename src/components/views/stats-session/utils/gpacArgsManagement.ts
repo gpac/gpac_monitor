@@ -1,19 +1,22 @@
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
-import { gpacService } from '@/services/gpacService';
 import { Dispatch } from '@reduxjs/toolkit';
-import { setSelectedNode } from '@/shared/store/slices/widgetsSlice';
+import { setSelectedFilterForArgs } from '@/shared/store/slices/filterArgumentSlice';
+import { setSelectedEdge } from '@/shared/store/slices/graphSlice';
 
 /**
- * Creates a handler for opening filter properties panel
- * Responsibility: GPAC arguments request and display
+ * Creates a handler for opening filter settings in PropertiesPanel
+ * Responsibility: Redux state update only
+ * Note: The WebSocket subscription is handled by useFilterArgsSubscription hook
  */
 export function createOpenPropertiesHandler(dispatch: Dispatch) {
   return (filter: EnrichedFilterOverview) => {
-    // Open properties panel
+    // Clear edge selection (mutual exclusivity)
+    dispatch(setSelectedEdge(null));
+
+    // Update Redux state to show filter args in PropertiesPanel
+    // The hook useFilterArgsSubscription will handle the WebSocket subscription
     dispatch(
-      setSelectedNode({ idx: filter.idx, name: filter.name, gpac_args: [] }),
+      setSelectedFilterForArgs({ idx: filter.idx, name: filter.name }),
     );
-    // Request filter arguments
-    gpacService.subscribeToFilterArgs(filter.idx);
   };
 }

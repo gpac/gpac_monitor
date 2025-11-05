@@ -173,7 +173,7 @@ export const detachFilterReducer = (
   widget.y = maxY + row * (widgetHeight + 1);
   widget.w = widgetWidth;
   widget.h = widgetHeight;
-  widget.isFloating = false;
+
 
   state.activeWidgets.push(widget as Widget);
   state.configs[widget.id] = {
@@ -217,11 +217,4 @@ export const closeFilterReducer = (
   }
 
   delete state.viewByFilter[filterIdx];
-};
-
-export const setSelectedNodeReducer = (
-  state: WidgetsState,
-  action: PayloadAction<WidgetsState['selectedNode']>,
-) => {
-  state.selectedNode = action.payload;
 };

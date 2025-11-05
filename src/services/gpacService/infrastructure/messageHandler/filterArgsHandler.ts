@@ -162,6 +162,7 @@ export class FilterArgsHandler {
 
   /**
    * Subscribes to filter args details updates
+   * Automatically triggers WebSocket request if first subscriber
    */
   public subscribeToFilterArgsDetails(
     filterIdx: number,
@@ -171,12 +172,19 @@ export class FilterArgsHandler {
     this.ensureLoaded();
 
     let subscribable = this.filterArgsSubscribables.get(filterIdx);
+    const isFirstSubscriber = !subscribable;
+
     if (!subscribable) {
       subscribable = new UpdatableSubscribable<FilterArgument[]>([]);
       this.filterArgsSubscribables.set(filterIdx, subscribable);
     }
 
     const unsubscribe = subscribable.subscribe(callback, { immediate: false });
+
+    // Trigger WebSocket request only for first subscriber
+    if (isFirstSubscriber) {
+      this.subscribeToFilterArgs(filterIdx);
+    }
 
     return () => {
       unsubscribe();

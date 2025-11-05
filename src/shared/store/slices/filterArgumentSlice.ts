@@ -12,10 +12,12 @@ export interface ArgumentUpdate {
 
 export interface FilterArgumentState {
   updates: Record<string, ArgumentUpdate>;
+  selectedFilterForArgs: { idx: number; name: string } | null;
 }
 
 const initialState: FilterArgumentState = {
   updates: {},
+  selectedFilterForArgs: null,
 };
 
 // Slice
@@ -37,6 +39,12 @@ export const filterArgumentSlice = createSlice({
       const key = `${action.payload.filterId}_${action.payload.name}`;
       delete state.updates[key];
     },
+    setSelectedFilterForArgs: (
+      state,
+      action: PayloadAction<{ idx: number; name: string } | null>,
+    ) => {
+      state.selectedFilterForArgs = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(updateFilterArgument.pending, (state, action) => {
@@ -53,8 +61,11 @@ export const filterArgumentSlice = createSlice({
 });
 
 // Actions
-export const { setArgumentUpdateStatus, clearArgumentUpdate } =
-  filterArgumentSlice.actions;
+export const {
+  setArgumentUpdateStatus,
+  clearArgumentUpdate,
+  setSelectedFilterForArgs,
+} = filterArgumentSlice.actions;
 
 // Thunk
 

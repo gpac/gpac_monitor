@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { gpacService } from '@/services/gpacService';
+import { useGpacService } from '@/shared/hooks/useGpacService';
 import { FilterArgument } from '@/types';
 
 /**
@@ -7,6 +7,7 @@ import { FilterArgument } from '@/types';
  * Returns live filter arguments when they arrive from server
  */
 export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
+  const gpacService = useGpacService();
   const [args, setArgs] = useState<FilterArgument[]>([]);
 
   useEffect(() => {
@@ -23,7 +24,7 @@ export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
       });
 
     return unsubscribe;
-  }, [filterIdx]);
+  }, [filterIdx, gpacService]);
 
   return args;
 };

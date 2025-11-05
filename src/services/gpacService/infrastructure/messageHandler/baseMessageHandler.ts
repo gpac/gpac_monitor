@@ -11,6 +11,7 @@ import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
+import { PidPropsHandler } from './pidPropsHandler';
 import {
   LogBatchResponse,
   LogHistoryResponse,
@@ -26,6 +27,7 @@ export class BaseMessageHandler {
   private cpuStatsHandler: CPUStatsHandler;
   private filterArgsHandler: FilterArgsHandler;
   private logHandler: LogHandler;
+  private pidPropsHandler: PidPropsHandler;
   private messageBatcher: WSMessageBatcher;
 
   constructor(
@@ -63,6 +65,7 @@ export class BaseMessageHandler {
       isLoaded || (() => true),
       callbacks,
     );
+    this.pidPropsHandler = new PidPropsHandler(dependencies);
 
     // Register log batch handler (only high-frequency message type)
     this.messageBatcher.registerLogHandler((logs) => {
@@ -85,6 +88,9 @@ export class BaseMessageHandler {
   }
   public getLogHandler(): LogHandler {
     return this.logHandler;
+  }
+  public getPidPropsHandler(): PidPropsHandler {
+    return this.pidPropsHandler;
   }
 
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
@@ -147,6 +153,9 @@ export class BaseMessageHandler {
         break;
       case 'update_arg_response':
         this.handleUpdateArgResponseMessage(data);
+        break;
+      case 'ipid_props_response':
+        this.handleIpidPropsResponseMessage(data);
         break;
       default:
       // Unknown message type
@@ -225,6 +234,10 @@ export class BaseMessageHandler {
 
   private handleUpdateArgResponseMessage(data: any): void {
     this.filterArgsHandler.handleUpdateArgResponse(data);
+  }
+
+  private handleIpidPropsResponseMessage(data: any): void {
+    this.pidPropsHandler.handleIpidPropsResponse(data);
   }
 
   /**

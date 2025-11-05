@@ -22,6 +22,7 @@ import {
   SubscriptionType,
 } from '@/types/communication/subscription';
 import { GpacLogConfig } from '@/types/domain/gpac/log-types';
+import { PidProperty } from '@/types';
 
 export class GpacService implements IGpacCommunication {
   private static instance: GpacService | null = null;
@@ -208,6 +209,20 @@ export class GpacService implements IGpacCommunication {
     return this.messageHandler
       .getFilterArgsHandler()
       .updateFilterArg(idx, name, argName, newValue);
+  }
+
+  public async getPidProps(
+    filterIdx: number | undefined,
+    ipidIdx: number | undefined
+  ): Promise<PidProperty[]> {
+    if (!this.isLoaded()) {
+      throw new Error('Service not loaded');
+    }
+    if (typeof filterIdx !== 'number' || typeof ipidIdx !== 'number') {
+      throw new Error('filterIdx and ipidIdx must be numbers');
+    }
+    const pidPropsMap = await this.messageHandler.getPidPropsHandler().fetchIpidProps(filterIdx, ipidIdx);
+    return Object.values(pidPropsMap);
   }
 
   private setupWebSocketHandlers(): void {

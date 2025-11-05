@@ -1,6 +1,6 @@
 import { Widget, WidgetType } from '@/types';
 import { LuFileText, LuGauge, LuShare2, LuVolume2 } from 'react-icons/lu';
-import { FiLayout } from 'react-icons/fi';
+import { TbFilterCog } from "react-icons/tb";
 import { IconType } from 'react-icons';
 import LogsMonitor from '../views/logs/LogsMonitor';
 import MetricsMonitor from '../views/cpu/MetricsMonitor';
@@ -36,7 +36,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   [WidgetType.FILTERSESSION]: {
     type: WidgetType.FILTERSESSION,
     title: 'Session Filters',
-    icon: FiLayout,
+    icon: TbFilterCog,
     component: MultiFilterMonitor,
     defaultSize: { w: 5, h: 6 },
     defaultPosition: { x: 0, y: 0 },
@@ -94,10 +94,7 @@ export const createWidgetInstance = (type: WidgetType): Widget | null => {
     y,
     w,
     h,
-    // Floating mode disabled by default (only for detached widgets)
-    isFloating: false,
-    // Default z-index for grid widgets
-    zIndex: def.defaultZIndex || 1,
+  
   };
 };
 

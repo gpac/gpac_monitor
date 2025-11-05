@@ -139,10 +139,12 @@ export function createEdgesFromFilters(
 
   filters.forEach((filter) => {
     if (filter.ipid) {
-      Object.entries(filter.ipid).forEach(([pidName, pid]: [string, any]) => {
-        if (pid.source_idx !== undefined && pid.source_idx !== null) {
-          const edgeId = `${pid.source_idx}-${filter.idx}-${pidName}`;
-          const existingEdge = existingEdges.find((e) => e.id === edgeId);
+      Object.entries(filter.ipid).forEach(
+        ([pidName, pid]: [string, any], ipidIndex: number) => {
+          if (pid.source_idx !== undefined && pid.source_idx !== null) {
+            // Use numeric ipidIndex for stable edge ID (not pidName which may change)
+            const edgeId = `${pid.source_idx}-${filter.idx}-${ipidIndex}`;
+            const existingEdge = existingEdges.find((e) => e.id === edgeId);
 
           // Use stream_type from PID for edge color
           const streamType = pid.stream_type?.toLowerCase() || '';
@@ -212,7 +214,8 @@ export function createEdgesFromFilters(
             selected: existingEdge?.selected,
           });
         }
-      });
+        },
+      );
     }
   });
   console.log('New edges created:', newEdges);

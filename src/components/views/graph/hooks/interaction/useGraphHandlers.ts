@@ -1,5 +1,5 @@
 import { useCallback, MutableRefObject } from 'react';
-import { Node, Edge, NodeMouseHandler } from '@xyflow/react';
+import { Node, Edge, NodeMouseHandler, EdgeMouseHandler } from '@xyflow/react';
 import { Dispatch } from '@reduxjs/toolkit';
 
 interface UseGraphHandlersProps {
@@ -13,6 +13,7 @@ interface UseGraphHandlersProps {
   service: any;
   dispatch: Dispatch;
   onNodeClick?: (filterIdx: number) => void;
+  onEdgeClick?: (filterIdx: number, ipidIdx: number) => void;
 }
 
 /**
@@ -27,17 +28,18 @@ export const useGraphHandlers = ({
   nodesRef,
   edgesRef,
   onNodeClick,
+  onEdgeClick,
 }: UseGraphHandlersProps) => {
   // Handle node changes (position, selection, etc)
   const handleNodesChange = useCallback(
     (changes: any[]) => {
-      // Let React Flow handle its internal state updates
+      
       onNodesChange(changes);
 
-      // Then separately update our local reference for position changes
+
       changes.forEach((change) => {
         if (change.type === 'position' && change.position) {
-          // Update the specific node's position in our ref
+     
           const nodeIndex = nodesRef.current.findIndex(
             (n) => n.id === change.id,
           );
@@ -72,9 +74,26 @@ export const useGraphHandlers = ({
     [onNodeClick],
   );
 
+  const handleEdgeClick: EdgeMouseHandler = useCallback(
+    (_event, edge) => {
+      // Parse edge ID: "sourceIdx-destIdx-ipidIdx"
+      const parts = edge.id.split('-');
+      if (parts.length === 3) {
+        const filterIdx = parseInt(parts[1], 10);
+        const ipidIdx = parseInt(parts[2], 10);
+
+        if (!isNaN(filterIdx) && !isNaN(ipidIdx)) {
+          onEdgeClick?.(filterIdx, ipidIdx);
+        }
+      }
+    },
+    [onEdgeClick],
+  );
+
   return {
     handleNodesChange,
     handleEdgesChange,
     handleNodeClick,
+    handleEdgeClick,
   };
 };
