@@ -146,74 +146,74 @@ export function createEdgesFromFilters(
             const edgeId = `${pid.source_idx}-${filter.idx}-${ipidIndex}`;
             const existingEdge = existingEdges.find((e) => e.id === edgeId);
 
-          // Use stream_type from PID for edge color
-          const streamType = pid.stream_type?.toLowerCase() || '';
-          const filterType: FilterType =
-            streamType === 'visual'
-              ? 'video'
-              : streamType === 'audio'
-                ? 'audio'
-                : streamType === 'text'
-                  ? 'text'
-                  : streamType === 'file'
-                    ? 'file'
-                    : 'file';
+            // Use stream_type from PID for edge color
+            const streamType = pid.stream_type?.toLowerCase() || '';
+            const filterType: FilterType =
+              streamType === 'visual'
+                ? 'video'
+                : streamType === 'audio'
+                  ? 'audio'
+                  : streamType === 'text'
+                    ? 'text'
+                    : streamType === 'file'
+                      ? 'file'
+                      : 'file';
 
-          const filterColor = getFilterColor(filterType);
+            const filterColor = getFilterColor(filterType);
 
-          // Precise mapping of sourceHandle
-          const sourceFilter = filters.find((f) => f.idx === pid.source_idx);
-          let sourceHandle: string | undefined;
+            // Precise mapping of sourceHandle
+            const sourceFilter = filters.find((f) => f.idx === pid.source_idx);
+            let sourceHandle: string | undefined;
 
-          if (sourceFilter?.opid) {
-            // If the PID has an explicit source_pid
-            if (pid.source_pid) {
-              sourceHandle = pid.source_pid;
+            if (sourceFilter?.opid) {
+              // If the PID has an explicit source_pid
+              if (pid.source_pid) {
+                sourceHandle = pid.source_pid;
+              }
+              // If only one output PID, use it
+              else if (Object.keys(sourceFilter.opid).length === 1) {
+                sourceHandle = Object.keys(sourceFilter.opid)[0];
+              }
+              // Search by similar name
+              else {
+                const matchingOutputPid = Object.keys(sourceFilter.opid).find(
+                  (opid) =>
+                    opid === pidName ||
+                    opid.includes(pidName) ||
+                    pidName.includes(opid),
+                );
+                sourceHandle =
+                  matchingOutputPid || Object.keys(sourceFilter.opid)[0];
+              }
             }
-            // If only one output PID, use it
-            else if (Object.keys(sourceFilter.opid).length === 1) {
-              sourceHandle = Object.keys(sourceFilter.opid)[0];
-            }
-            // Search by similar name
-            else {
-              const matchingOutputPid = Object.keys(sourceFilter.opid).find(
-                (opid) =>
-                  opid === pidName ||
-                  opid.includes(pidName) ||
-                  pidName.includes(opid),
-              );
-              sourceHandle =
-                matchingOutputPid || Object.keys(sourceFilter.opid)[0];
-            }
+
+            // Skip virtual connections
+            const isVirtual = pid.virtual || false;
+            if (isVirtual) return;
+
+            newEdges.push({
+              id: edgeId,
+              source: pid.source_idx.toString(),
+              target: filter.idx.toString(),
+              sourceHandle: sourceHandle,
+              targetHandle: pidName,
+              type: 'simplebezier',
+              data: {
+                filterType,
+              },
+              animated: true,
+              style: {
+                stroke: filterColor,
+                strokeWidth: 3,
+                opacity: 0.9,
+              },
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+                color: filterColor,
+              },
+              selected: existingEdge?.selected,
+            });
           }
-
-          // Skip virtual connections
-          const isVirtual = pid.virtual || false;
-          if (isVirtual) return;
-
-          newEdges.push({
-            id: edgeId,
-            source: pid.source_idx.toString(),
-            target: filter.idx.toString(),
-            sourceHandle: sourceHandle,
-            targetHandle: pidName,
-            type: 'bezier',
-            data: {
-              filterType,
-            },
-            animated: true,
-            style: {
-              stroke: filterColor,
-              strokeWidth: 3,
-              opacity: 0.9,
-            },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              color: filterColor,
-            },
-            selected: existingEdge?.selected,
-          });
-        }
         },
       );
     }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import {
   Responsive,
@@ -9,12 +9,12 @@ import {
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
-import { openSidebar } from '@/shared/store/slices/layoutSlice';
-import { LuChevronRight } from 'react-icons/lu';
+import { closeSidebar } from '@/shared/store/slices/layoutSlice';
 import Header from './Header';
-import Sidebar from './Sidebar';
+import Sidebar from './Sidebar/Sidebar';
 import { Widget } from '../../types/ui/widget';
 import { getWidgetDefinition } from '../Widget/registry';
+import SidebarCloseButton from './Sidebar/SidebarCloseButton';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -23,54 +23,55 @@ const DashboardLayout: React.FC = () => {
   const activeWidgets = useAppSelector((state) => state.widgets.activeWidgets);
   const configs = useAppSelector((state) => state.widgets.configs);
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
+  const isDraggingRef = useRef(false);
 
-  // Force grid recalculation after sidebar transition
-  React.useLayoutEffect(() => {
-    const timer = setTimeout(() => {
-      window.dispatchEvent(new Event('resize'));
-    }, 320); // Match transition duration
-    return () => clearTimeout(timer);
-  }, [isSidebarOpen]);
+  // Memoize layouts object to prevent recreation
+  const layouts: RGLLayouts = useMemo(
+    () => ({
+      lg: activeWidgets.map((widget) => ({
+        i: widget.id,
+        x: widget.x,
+        y: widget.y,
+        w: widget.w,
+        h: widget.h,
+        minW: 2,
+        minH: 2,
+      })),
+    }),
+    [activeWidgets],
+  );
 
-  const layouts: RGLLayouts = {
-    lg: activeWidgets.map((widget) => ({
-      i: widget.id,
-      x: widget.x,
-      y: widget.y,
-      w: widget.w,
-      h: widget.h,
-      minW: 2,
-      minH: 2,
-    })),
-  };
+  // Memoize renderWidget to prevent recreation
+  const renderWidget = useCallback(
+    (widget: Widget) => {
+      const definition = getWidgetDefinition(widget.type);
 
-  const renderWidget = (widget: Widget) => {
-    const definition = getWidgetDefinition(widget.type);
+      if (!definition) {
+        console.warn(`No definition found for widget type: ${widget.type}`);
+        return null;
+      }
 
-    if (!definition) {
-      console.warn(`No definition found for widget type: ${widget.type}`);
-      return null;
-    }
+      const Component = definition.component;
 
-    const Component = definition.component;
-
-    return (
-      <div key={widget.id}>
-        <Component
-          id={widget.id}
-          config={
-            configs[widget.id] || {
-              isMaximized: false,
-              isMinimized: false,
-              settings: {},
+      return (
+        <div key={widget.id}>
+          <Component
+            id={widget.id}
+            config={
+              configs[widget.id] || {
+                isMaximized: false,
+                isMinimized: false,
+                settings: {},
+              }
             }
-          }
-          isDetached={widget.isDetached}
-          detachedFilterIdx={widget.detachedFilterIdx}
-        />
-      </div>
-    );
-  };
+            isDetached={widget.isDetached}
+            detachedFilterIdx={widget.detachedFilterIdx}
+          />
+        </div>
+      );
+    },
+    [configs],
+  );
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -80,57 +81,80 @@ const DashboardLayout: React.FC = () => {
       </div>
 
       <div className="flex pt-16">
-        {/* Sidebar with dynamic width and slide transition */}
+        {/* Sidebar with GPU-accelerated transform transition */}
         <div
-          className={`fixed top-16 bottom-0 z-10 bg-gray-800 transition-all duration-300 ease-in-out ${
-            isSidebarOpen ? 'left-0 w-64' : 'w-0 -left-64'
-          }`}
+          id="app-sidebar"
+          className="fixed top-16 bottom-0 left-0 w-64 z-10 bg-slate-800 transition-transform duration-300 ease-in-out will-change-transform"
+          style={{
+            transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+          }}
         >
-          {isSidebarOpen && <Sidebar />}
+          <Sidebar />
         </div>
 
-        {/* Floating button to open sidebar when closed */}
-        {!isSidebarOpen && (
-          <button
-            onClick={() => dispatch(openSidebar())}
-            className="fixed left-4 top-20 z-20 bg-gray-700 hover:bg-gray-600 p-2 rounded-md transition-colors shadow-lg"
-            aria-label="Open sidebar"
-            title="Open properties sidebar"
-          >
-            <LuChevronRight className="w-5 h-5 text-slate-200" />
-          </button>
+        {/* Floating button to close sidebar when open */}
+        {isSidebarOpen && (
+          <SidebarCloseButton onClose={() => dispatch(closeSidebar())} />
         )}
 
         <main
-          className={`flex-1 transition-all duration-300 ease-in-out ${
-            isSidebarOpen ? 'pl-64' : 'pl-0'
-          } p-6`}
+          className="flex-1 p-6"
+          style={{
+            marginLeft: isSidebarOpen ? '220px' : '0',
+            transition: 'margin-left 300ms ease-in-out',
+          }}
         >
           {/* Grid widgets */}
           <ResponsiveGridLayout
             className="layout"
             layouts={layouts}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 24, md: 24, sm: 12, xs: 6, xxs: 2 }} // ← ici
+            cols={{ lg: 24, md: 24, sm: 12, xs: 6, xxs: 2 }}
             rowHeight={60}
-            onLayoutChange={(currentLayout: Layout[]) => {
-              currentLayout.forEach((item: Layout) => {
-                dispatch(
-                  updateWidgetPosition({
-                    id: item.i,
-                    x: item.x,
-                    y: item.y,
-                    w: item.w,
-                    h: item.h,
-                  }),
-                );
-              });
+            onDragStart={() => {
+              isDraggingRef.current = true;
+            }}
+            onDragStop={(
+              _layout: Layout[],
+              _oldItem: Layout,
+              newItem: Layout,
+            ) => {
+              isDraggingRef.current = false;
+              dispatch(
+                updateWidgetPosition({
+                  id: newItem.i,
+                  x: newItem.x,
+                  y: newItem.y,
+                  w: newItem.w,
+                  h: newItem.h,
+                }),
+              );
+            }}
+            onResizeStart={() => {
+              isDraggingRef.current = true;
+            }}
+            onResizeStop={(
+              _layout: Layout[],
+              _oldItem: Layout,
+              newItem: Layout,
+            ) => {
+              isDraggingRef.current = false;
+              dispatch(
+                updateWidgetPosition({
+                  id: newItem.i,
+                  x: newItem.x,
+                  y: newItem.y,
+                  w: newItem.w,
+                  h: newItem.h,
+                }),
+              );
             }}
             isDraggable={true}
             isResizable={true}
             margin={[16, 16]}
             containerPadding={[16, 16]}
             draggableCancel=".no-drag"
+            useCSSTransforms={true}
           >
             {activeWidgets.map(renderWidget)}
           </ResponsiveGridLayout>

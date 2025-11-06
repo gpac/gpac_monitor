@@ -1,11 +1,11 @@
 import React from 'react';
 
-import PropertiesPanel from './panels/PropertiesPanel';
+import PropertiesPanel from '../panels/PropertiesPanel';
 
 const Sidebar: React.FC = () => {
   return (
     <aside
-      className="w-64 bg-monitor-app border-gray-800 h-full flex flex-col"
+      className="w-64 bg-monitor-app border-gray-800 h-full flex flex-col bg-opacity-90"
       role="complementary"
       aria-label="Dashboard widgets sidebar"
     >
