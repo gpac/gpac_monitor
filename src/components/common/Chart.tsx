@@ -216,10 +216,14 @@ export const Chart = memo(
         </CardHeader>
         <CardContent>
           <div
-            style={{ width: '100%', height: mergedConfig.height }}
+            style={{
+              width: '100%',
+              height: mergedConfig.height,
+              minHeight: mergedConfig.height,
+            }}
             className={`gpu-optimized ${isResizing ? 'contain-layout contain-style is-interacting' : ''}`}
           >
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minHeight={200}>
               <AreaChart
                 key={mergedConfig.maxPoints}
                 data={dataPoints}

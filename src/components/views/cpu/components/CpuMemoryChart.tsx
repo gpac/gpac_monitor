@@ -110,10 +110,10 @@ export const CpuMemoryChart = memo(
         </CardHeader>
         <CardContent>
           <div
-            style={{ width: '100%', height: 250 }}
+            style={{ width: '100%', height: 250, minHeight: 250 }}
             className={`gpu-optimized ${isResizing ? 'contain-layout contain-style is-interacting' : ''}`}
           >
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minHeight={250}>
               <AreaChart
                 data={dataPoints}
                 margin={{ top: 5, right: 10, left: 10, bottom: 5 }}

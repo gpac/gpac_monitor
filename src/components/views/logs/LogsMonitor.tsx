@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { RiGlobalFill, RiScrollToBottomLine } from 'react-icons/ri';
-import WidgetWrapper from '../../common/WidgetWrapper';
+import WidgetWrapper from '../../Widget/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';

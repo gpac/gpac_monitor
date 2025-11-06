@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { WidgetStatusBadge } from '@/components/common/WidgetStatusBadge';
+import { WidgetStatusBadge } from '@/components/Widget/WidgetStatusBadge';
 import { ChartDuration, DURATION_LABELS } from '@/utils/charts';
 
 interface CPUHistoryBadgeProps {

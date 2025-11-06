@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
-import { getWidgetDefinition } from '../Widget/registry';
+import { getWidgetDefinition } from './registry';
 
 import { LuX, LuRotateCcw } from 'react-icons/lu';
 import {

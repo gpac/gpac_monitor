@@ -8,11 +8,9 @@ import {
 } from '@xyflow/react';
 import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { detachFilter } from '@/shared/store/slices/widgetsSlice';
+import { useAppDispatch } from '@/shared/hooks/redux';
 import { setSelectedEdge } from '@/shared/store/slices/graphSlice';
-import { selectActiveWidgets } from '@/shared/store/selectors/widgets';
-import { WidgetType } from '@/types/ui/widget';
+import { openSidebar } from '@/shared/store/slices/layoutSlice';
 
 // Modularized hooks
 import { useGraphLayout } from '../layout/useGraphLayout';
@@ -60,59 +58,32 @@ const useGraphMonitor = () => {
 
   const { getFilterArgs, hasFilterArgs } = useFilterArgs();
 
-  const activeWidgets = useAppSelector(selectActiveWidgets);
-
-  // Handle node click to create detached widget
-  const handleNodeTabDetach = useCallback(
-    (filterIdx: number) => {
-      // Check if filter already has a detached widget
-      const isAlreadyDetached = activeWidgets.some(
-        (w) =>
-          w.type === WidgetType.FILTERSESSION &&
-          w.isDetached === true &&
-          w.detachedFilterIdx === filterIdx,
-      );
-
-      if (isAlreadyDetached) {
-        // Filter already visible in detached view, ignore
-        return;
-      }
-
-      // Find the node to get filter name
-      const node = localNodes.find((n) => parseInt(n.id) === filterIdx);
-      const filterName =
-        typeof node?.data?.name === 'string'
-          ? node.data.name
-          : `Filter ${filterIdx}`;
-
-      // Dispatch action to create detached widget
-      dispatch(detachFilter({ idx: filterIdx, name: filterName }));
-    },
-    [dispatch, localNodes, activeWidgets],
-  );
-
-  // Handle edge click for PID properties
+  // Handle edge click for PID properties and open sidebar
   const handleEdgeTabSelect = useCallback(
     (filterIdx: number, ipidIdx: number) => {
       dispatch(setSelectedEdge({ filterIdx, ipidIdx }));
+      dispatch(openSidebar());
     },
     [dispatch],
   );
 
-  const { handleNodesChange, handleEdgesChange, handleNodeClick, handleEdgeClick } =
-    useGraphHandlers({
-      onNodesChange,
-      onEdgesChange,
-      localNodes,
-      localEdges,
-      nodesRef,
-      edgesRef,
-      setLocalNodes,
-      service,
-      dispatch,
-      onNodeClick: handleNodeTabDetach,
-      onEdgeClick: handleEdgeTabSelect,
-    });
+  const {
+    handleNodesChange,
+    handleEdgesChange,
+    handleNodeClick,
+    handleEdgeClick,
+  } = useGraphHandlers({
+    onNodesChange,
+    onEdgesChange,
+    localNodes,
+    localEdges,
+    nodesRef,
+    edgesRef,
+    setLocalNodes,
+    service,
+    dispatch,
+    onEdgeClick: handleEdgeTabSelect,
+  });
 
   // Use notification system
   useGraphNotifications({

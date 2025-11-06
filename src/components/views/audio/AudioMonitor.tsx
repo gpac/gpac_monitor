@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import WidgetWrapper from '../../common/WidgetWrapper';
+import WidgetWrapper from '../../Widget/WidgetWrapper';
 
 interface AudioMonitorProps {
   id: string;

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import WidgetWrapper from '@/components/common/WidgetWrapper';
+import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import LoadingState from '@/components/common/LoadingState';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
@@ -38,7 +38,7 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
 }) => {
   const [isResizing, setIsResizing] = useState(false);
 
-  // Optimize ReactFlow during resize 
+  // Optimize ReactFlow during resize
   const { ref } = useOptimizedResize({
     onResizeStart: () => setIsResizing(true),
     onResizeEnd: () => setIsResizing(false),

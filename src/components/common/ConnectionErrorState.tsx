@@ -1,5 +1,5 @@
 import React from 'react';
-import WidgetWrapper from '../common/WidgetWrapper';
+import WidgetWrapper from '../Widget/WidgetWrapper';
 
 interface ConnectionErrorStateProps {
   id: string;

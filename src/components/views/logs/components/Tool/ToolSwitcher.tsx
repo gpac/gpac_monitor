@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import * as Checkbox from '@radix-ui/react-checkbox';
 import { FaCheck } from 'react-icons/fa';
 import { ToolSwitcherItem } from './ToolSwitcherItem';
-import { WidgetStatusBadge } from '@/components/common/WidgetStatusBadge';
+import { WidgetStatusBadge } from '@/components/Widget/WidgetStatusBadge';
 
 const EmptyToolFallback = React.memo(
   ({

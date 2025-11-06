@@ -2,6 +2,7 @@ import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Dispatch } from '@reduxjs/toolkit';
 import { setSelectedFilterForArgs } from '@/shared/store/slices/filterArgumentSlice';
 import { setSelectedEdge } from '@/shared/store/slices/graphSlice';
+import { openSidebar } from '@/shared/store/slices/layoutSlice';
 
 /**
  * Creates a handler for opening filter settings in PropertiesPanel
@@ -15,8 +16,9 @@ export function createOpenPropertiesHandler(dispatch: Dispatch) {
 
     // Update Redux state to show filter args in PropertiesPanel
     // The hook useFilterArgsSubscription will handle the WebSocket subscription
-    dispatch(
-      setSelectedFilterForArgs({ idx: filter.idx, name: filter.name }),
-    );
+    dispatch(setSelectedFilterForArgs({ idx: filter.idx, name: filter.name }));
+
+    // Open the sidebar to display the properties
+    dispatch(openSidebar());
   };
 }

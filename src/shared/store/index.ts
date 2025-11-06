@@ -4,6 +4,7 @@ import widgetsReducer from './slices/widgetsSlice';
 import filterArgumentSlice from './slices/filterArgumentSlice';
 import sessionStatsReducer from './slices/sessionStatsSlice';
 import logsReducer from './slices/logsSlice';
+import layoutReducer from './slices/layoutSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     logs: logsReducer,
     widgets: widgetsReducer,
     sessionStats: sessionStatsReducer,
+    layout: layoutReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -2,7 +2,7 @@ import React, { useMemo, useState, useRef, useCallback } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/useMultiFilterMonitor';
 import { useStatsCalculations } from '@/components/views/stats-session/hooks/useStatsCalculations';
-import WidgetWrapper from '@/components/common/WidgetWrapper';
+import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import { WidgetProps } from '@/types/ui/widget';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Tabs, TabsContent } from '@/components/ui/tabs';

@@ -80,8 +80,18 @@ export const BandwidthChart = memo(
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div style={{ width: '100%', height: CHART_HEIGHT }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div
+            style={{
+              width: '100%',
+              height: CHART_HEIGHT,
+              minHeight: CHART_HEIGHT,
+            }}
+          >
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              minHeight={CHART_HEIGHT}
+            >
               <LineChart data={dataPoints} margin={CHART_MARGIN}>
                 <CartesianGrid
                   strokeDasharray="3 3"

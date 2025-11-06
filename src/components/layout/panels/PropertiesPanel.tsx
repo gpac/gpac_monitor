@@ -3,6 +3,7 @@ import { FiSettings } from 'react-icons/fi';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { setSelectedEdge } from '@/shared/store/slices/graphSlice';
 import { setSelectedFilterForArgs } from '@/shared/store/slices/filterArgumentSlice';
+import { closeSidebar } from '@/shared/store/slices/layoutSlice';
 import FilterArgumentsContent from '@/components/filtersArgs/FilterArgumentsContent';
 import IPIDPropertiesContent from '../../IPIDProperties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';
@@ -37,10 +38,12 @@ const PropertiesPanel: React.FC = () => {
   // Close handlers
   const handleCloseEdge = useCallback(() => {
     dispatch(setSelectedEdge(null));
+    dispatch(closeSidebar());
   }, [dispatch]);
 
   const handleCloseFilterArgs = useCallback(() => {
     dispatch(setSelectedFilterForArgs(null));
+    dispatch(closeSidebar());
   }, [dispatch]);
 
   // Determine mode

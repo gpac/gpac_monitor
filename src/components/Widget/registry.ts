@@ -23,23 +23,13 @@ export interface WidgetDefinition {
 }
 
 export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
-  [WidgetType.AUDIO]: {
-    type: WidgetType.AUDIO,
-    title: 'Audio Monitor',
-    icon: LuVolume2,
-    component: AudioMonitor,
-    defaultSize: { w: 4, h: 4 },
-    defaultPosition: { x: 9, y: 8 },
-    defaultZIndex: 1003,
-    description: 'Monitor audio levels in real-time.',
-    enabled: false,
-  },
   [WidgetType.FILTERSESSION]: {
     type: WidgetType.FILTERSESSION,
     title: 'Session Filters',
     icon: TbFilterCog,
     component: MultiFilterMonitor,
-    defaultSize: { w: 5, h: 6 },
+    // 10 colonnes sur 24
+    defaultSize: { w: 10, h: 6 },
     defaultPosition: { x: 0, y: 0 },
     defaultZIndex: 1000,
     description: 'Manage session filters effectively.',
@@ -50,8 +40,8 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     title: 'Pipeline Graph',
     icon: LuShare2,
     component: GraphMonitor,
-    defaultSize: { w: 7, h: 6 },
-    defaultPosition: { x: 5, y: 0 },
+    defaultSize: { w: 14, h: 6 },
+    defaultPosition: { x: 10, y: 0 },
     defaultZIndex: 1004,
     description: 'Visualize the processing pipeline graph.',
     enabled: true,
@@ -61,7 +51,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     title: 'System Metrics',
     icon: LuGauge,
     component: MetricsMonitor,
-    defaultSize: { w: 3, h: 6 },
+    defaultSize: { w: 6, h: 6 },
     defaultPosition: { x: 0, y: 6 },
     defaultZIndex: 1001,
     description: 'Display real-time system performance metrics.',
@@ -73,13 +63,25 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     title: 'System Logs',
     icon: LuFileText,
     component: LogsMonitor,
-    defaultSize: { w: 5, h: 6 },
-    defaultPosition: { x: 3, y: 6 },
+    defaultSize: { w: 10, h: 6 },
+    defaultPosition: { x: 6, y: 6 },
     defaultZIndex: 1002,
     description: 'View and filter system logs.',
     enabled: true,
   },
+  [WidgetType.AUDIO]: {
+    type: WidgetType.AUDIO,
+    title: 'Audio Monitor',
+    icon: LuVolume2,
+    component: AudioMonitor,
+    defaultSize: { w: 8, h: 4 },
+    defaultPosition: { x: 16, y: 6 },
+    defaultZIndex: 1003,
+    description: 'Monitor audio levels in real-time.',
+    enabled: false,
+  },
 };
+
 export const createWidgetInstance = (type: WidgetType): Widget | null => {
   const def = widgetRegistry[type];
   if (!def || !def.enabled) return null;

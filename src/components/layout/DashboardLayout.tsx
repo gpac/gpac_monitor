@@ -9,6 +9,8 @@ import {
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
+import { openSidebar } from '@/shared/store/slices/layoutSlice';
+import { LuChevronRight } from 'react-icons/lu';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import { Widget } from '../../types/ui/widget';
@@ -20,6 +22,15 @@ const DashboardLayout: React.FC = () => {
   const dispatch = useAppDispatch();
   const activeWidgets = useAppSelector((state) => state.widgets.activeWidgets);
   const configs = useAppSelector((state) => state.widgets.configs);
+  const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
+
+  // Force grid recalculation after sidebar transition
+  React.useLayoutEffect(() => {
+    const timer = setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 320); // Match transition duration
+    return () => clearTimeout(timer);
+  }, [isSidebarOpen]);
 
   const layouts: RGLLayouts = {
     lg: activeWidgets.map((widget) => ({
@@ -69,18 +80,38 @@ const DashboardLayout: React.FC = () => {
       </div>
 
       <div className="flex pt-16">
-        {/* Sidebar fixe */}
-        <div className="fixed left-0 top-16 bottom-0 w-64 z-10 bg-gray-800">
-          <Sidebar />
+        {/* Sidebar with dynamic width and slide transition */}
+        <div
+          className={`fixed top-16 bottom-0 z-10 bg-gray-800 transition-all duration-300 ease-in-out ${
+            isSidebarOpen ? 'left-0 w-64' : 'w-0 -left-64'
+          }`}
+        >
+          {isSidebarOpen && <Sidebar />}
         </div>
 
-        <main className="flex-1 pl-64 p-6]">
+        {/* Floating button to open sidebar when closed */}
+        {!isSidebarOpen && (
+          <button
+            onClick={() => dispatch(openSidebar())}
+            className="fixed left-4 top-20 z-20 bg-gray-700 hover:bg-gray-600 p-2 rounded-md transition-colors shadow-lg"
+            aria-label="Open sidebar"
+            title="Open properties sidebar"
+          >
+            <LuChevronRight className="w-5 h-5 text-slate-200" />
+          </button>
+        )}
+
+        <main
+          className={`flex-1 transition-all duration-300 ease-in-out ${
+            isSidebarOpen ? 'pl-64' : 'pl-0'
+          } p-6`}
+        >
           {/* Grid widgets */}
           <ResponsiveGridLayout
-            className="layout "
+            className="layout"
             layouts={layouts}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-            cols={{ lg: 12, md: 12, sm: 6, xs: 4, xxs: 2 }}
+            cols={{ lg: 24, md: 24, sm: 12, xs: 6, xxs: 2 }} // ← ici
             rowHeight={60}
             onLayoutChange={(currentLayout: Layout[]) => {
               currentLayout.forEach((item: Layout) => {

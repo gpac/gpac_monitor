@@ -1,5 +1,5 @@
 import React from 'react';
-import WidgetWrapper from './WidgetWrapper';
+import WidgetWrapper from '../Widget/WidgetWrapper';
 
 interface LoadingStateProps {
   id: string;

@@ -16,6 +16,8 @@ import '@xyflow/react/dist/style.css';
 import CustomNode from '../nodes/CustomNode';
 import { useMinimapNavigation } from '../../hooks/layout/useMinimapNavigation';
 import { getImmediateGraphColor } from '../../hooks/layout/useGraphColors';
+import { useAppDispatch } from '@/shared/hooks/redux';
+import { closeSidebar } from '@/shared/store/slices/layoutSlice';
 
 interface GraphFlowProps {
   nodes: Node[];
@@ -46,7 +48,13 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   onEdgeClick,
   isResizing = false,
 }) => {
+  const dispatch = useAppDispatch();
   const { handleMiniMapClick, handleMiniMapDrag } = useMinimapNavigation();
+
+  // Close sidebar when clicking on empty area of the graph
+  const handlePaneClick = () => {
+    dispatch(closeSidebar());
+  };
 
   return (
     <div style={flowStyles} className={isResizing ? 'resize-optimized' : ''}>
@@ -58,11 +66,12 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         onEdgesChange={isResizing ? () => {} : onEdgesChange}
         onNodeClick={isResizing ? undefined : onNodeClick}
         onEdgeClick={isResizing ? undefined : onEdgeClick}
+        onPaneClick={isResizing ? undefined : handlePaneClick}
         fitView={!isResizing}
         minZoom={0.1}
         maxZoom={4}
         defaultEdgeOptions={{
-          type: 'bezier',
+          type: 'simplebezier',
           animated: !isResizing,
           style: { stroke: '#6b7280', strokeWidth: 3 },
         }}

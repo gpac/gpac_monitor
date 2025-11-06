@@ -1,12 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { FiLayout } from 'react-icons/fi';
+import { LuPanelLeft, LuPanelLeftClose } from 'react-icons/lu';
 import { LayoutManager } from './LayoutManager';
 import WidgetSelector from '../Widget/WidgetSelector';
 import LogCounters from './LogCounters';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
 
 interface HeaderProps {}
 
 const Header: React.FC<HeaderProps> = () => {
+  const dispatch = useAppDispatch();
+  const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const [showLayoutManager, setShowLayoutManager] = useState(false);
   const [showWidgetSelector, setShowWidgetSelector] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -48,8 +53,23 @@ const Header: React.FC<HeaderProps> = () => {
           <LogCounters />
         </div>
 
-        {/* Right: Layout Manager */}
+        {/* Right: Sidebar Toggle + Layout Manager */}
         <div className="flex items-center gap-4">
+          <button
+            onClick={() => dispatch(toggleSidebar())}
+            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
+            title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+          >
+            {isSidebarOpen ? (
+              <LuPanelLeftClose className="w-4 h-4" />
+            ) : (
+              <LuPanelLeft className="w-4 h-4" />
+            )}
+            <span className="hidden sm:inline">
+              {isSidebarOpen ? 'Hide' : 'Show'} Properties
+            </span>
+          </button>
+
           <div className="h-6 w-px bg-gray-700" />
           <button
             onClick={() => setShowLayoutManager(!showLayoutManager)}
