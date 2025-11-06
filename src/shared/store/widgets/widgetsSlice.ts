@@ -26,6 +26,7 @@ export interface WidgetsState {
   configs: Record<string, WidgetConfig>;
   savedLayouts: Record<string, LayoutState>;
   viewByFilter: Record<number, FilterView | undefined>;
+  currentLayout?: string;
 }
 
 const widgetsSlice = createSlice({

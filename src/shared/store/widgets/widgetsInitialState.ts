@@ -23,4 +23,5 @@ export const initialState: WidgetsState = {
   configs,
   savedLayouts: {},
   viewByFilter: {},
+  currentLayout: undefined,
 };

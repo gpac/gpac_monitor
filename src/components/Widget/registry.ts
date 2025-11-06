@@ -1,6 +1,6 @@
 import { Widget, WidgetType } from '@/types';
 import { LuFileText, LuGauge, LuShare2, LuVolume2 } from 'react-icons/lu';
-import { TbFilterCog } from "react-icons/tb";
+import { TbFilterCog } from 'react-icons/tb';
 import { IconType } from 'react-icons';
 import LogsMonitor from '../views/logs/LogsMonitor';
 import MetricsMonitor from '../views/cpu/MetricsMonitor';
@@ -19,6 +19,7 @@ export interface WidgetDefinition {
   defaultZIndex?: number;
   description?: string;
   enabled: boolean;
+  fixedPosition?: boolean;
 }
 
 export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
@@ -65,6 +66,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     defaultZIndex: 1001,
     description: 'Display real-time system performance metrics.',
     enabled: true,
+    fixedPosition: true,
   },
   [WidgetType.LOGS]: {
     type: WidgetType.LOGS,
@@ -94,7 +96,7 @@ export const createWidgetInstance = (type: WidgetType): Widget | null => {
     y,
     w,
     h,
-  
+    fixedPosition: def.fixedPosition,
   };
 };
 

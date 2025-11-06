@@ -12,6 +12,17 @@ export const addWidgetReducer = (
   if (!instance) return;
   const exists = state.activeWidgets.some((w) => w.type === instance.type);
   if (exists) return;
+
+  // Restore position from current layout if fixedPosition
+  if (instance.fixedPosition && state.currentLayout) {
+    const layout = state.savedLayouts[state.currentLayout];
+    const saved = layout?.widgets.find((w) => w.type === instance.type);
+    if (saved) {
+      instance.x = saved.x;
+      instance.y = saved.y;
+    }
+  }
+
   state.activeWidgets.push(instance as Widget);
 };
 
@@ -77,7 +88,7 @@ export const updateWidgetPositionReducer = (
   }>,
 ) => {
   const widget = state.activeWidgets.find((w) => w.id === action.payload.id);
-  if (widget) {
+  if (widget && !widget.fixedPosition) {
     widget.x = action.payload.x;
     widget.y = action.payload.y;
     widget.w = action.payload.w;
@@ -97,6 +108,7 @@ export const saveLayoutReducer = (
     configs: { ...state.configs },
     createdAt: new Date().toISOString(),
   };
+  state.currentLayout = layoutName;
 };
 
 export const loadLayoutReducer = (
@@ -108,6 +120,7 @@ export const loadLayoutReducer = (
   if (layout) {
     state.activeWidgets = [...layout.widgets];
     state.configs = { ...layout.configs };
+    state.currentLayout = layoutName;
   }
 };
 
@@ -173,7 +186,6 @@ export const detachFilterReducer = (
   widget.y = maxY + row * (widgetHeight + 1);
   widget.w = widgetWidth;
   widget.h = widgetHeight;
-
 
   state.activeWidgets.push(widget as Widget);
   state.configs[widget.id] = {

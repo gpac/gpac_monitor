@@ -19,7 +19,7 @@ export interface Widget {
   isDraggable?: boolean;
   isDetached?: boolean;
   detachedFilterIdx?: number;
-
+  fixedPosition?: boolean;
 }
 export interface WidgetComponent {
   id: string;
