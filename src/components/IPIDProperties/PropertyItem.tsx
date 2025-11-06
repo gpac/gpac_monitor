@@ -13,14 +13,14 @@ const PropertyItem: React.FC<PropertyItemProps> = memo(({ property }) => {
     <div className="px-3 py-2 hover:bg-monitor-hover transition-colors">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
-          <div className="text-xs font-medium text-monitor-text-primary truncate">
+          <div className="text-xs font-cond text-monitor-text-primary truncate">
             {property.name}
           </div>
           <div className="text-xs text-monitor-text-muted mt-0.5">
             {property.type}
           </div>
         </div>
-        <div className="text-xs text-monitor-text-secondary font-mono text-right break-all">
+        <div className="text-xs text-info font-cond text-right break-all">
           {formatGpacValue(property.value, property.type)}
         </div>
       </div>
