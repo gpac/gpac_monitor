@@ -25,7 +25,14 @@ const DashboardLayout: React.FC = () => {
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const isDraggingRef = useRef(false);
 
-  // Memoize layouts object to prevent recreation
+  // Memoize layouts object - only recreate if widget positions/sizes change
+  // Use JSON.stringify to create a stable key based on layout properties only
+  const layoutKey = useMemo(
+    () =>
+      activeWidgets.map((w) => `${w.id}:${w.x}:${w.y}:${w.w}:${w.h}`).join('|'),
+    [activeWidgets],
+  );
+
   const layouts: RGLLayouts = useMemo(
     () => ({
       lg: activeWidgets.map((widget) => ({
@@ -38,7 +45,7 @@ const DashboardLayout: React.FC = () => {
         minH: 2,
       })),
     }),
-    [activeWidgets],
+    [layoutKey], // Only recreate when layout actually changes
   );
 
   // Memoize renderWidget to prevent recreation

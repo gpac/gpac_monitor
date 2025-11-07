@@ -15,11 +15,6 @@ export interface HeaderLogCounts {
 /**
  * Header Log Counts - Filtered according to stored config, excludes debug
  * Used by Header to display persistent log counts
- *
- * PERFORMANCE OPTIMIZED:
- * - Pre-computes level thresholds as Map (O(1) lookup)
- * - Single pass through logs (O(n))
- * - No string splitting in hot path
  */
 export const selectLogCounts = createSelector(
   [selectLogsState, selectLevelsByTool, selectDefaultAllLevel],

@@ -15,6 +15,21 @@ import BuffersTab from './tabs/BuffersTab';
 import InputsTab from './tabs/InputsTab';
 import OutputsTab from './tabs/OutputsTab';
 
+// Constant fallback - calculated once at module load (not per render)
+const EMPTY_FILTER_DATA: FilterStatsResponse = {
+  idx: 0,
+  status: '',
+  bytes_done: 0,
+  bytes_sent: 0,
+  pck_done: 0,
+  pck_sent: 0,
+  time: 0,
+  nb_ipid: 0,
+  nb_opid: 0,
+  ipids: {},
+  opids: {},
+};
+
 interface DetailedStatsViewProps {
   overviewData: OverviewTabData;
   networkData: NetworkTabData;
@@ -39,7 +54,7 @@ const DetailedStatsView = memo(
     buffersData,
     inputPids,
     outputPids,
-    filterData,
+    filterData = EMPTY_FILTER_DATA, // Use constant fallback
     onOpenProperties,
   }: DetailedStatsViewProps) => {
     const counts = useMemo(
@@ -135,20 +150,7 @@ const DetailedStatsView = memo(
             className="data-[state=inactive]:hidden"
           >
             <MemoizedInputsTab
-              filterData={
-                filterData || {
-                  idx: 0,
-                  status: '',
-                  bytes_done: 0,
-                  bytes_sent: 0,
-                  pck_done: 0,
-                  pck_sent: 0,
-                  time: 0,
-                  nb_ipid: 0,
-                  nb_opid: 0,
-                  ipids: {},
-                }
-              }
+              filterData={filterData}
               filterName={overviewData.name}
             />
           </TabsContent>
@@ -158,20 +160,7 @@ const DetailedStatsView = memo(
             className="data-[state=inactive]:hidden"
           >
             <MemoizedOutputsTab
-              filterData={
-                filterData || {
-                  idx: 0,
-                  status: '',
-                  bytes_done: 0,
-                  bytes_sent: 0,
-                  pck_done: 0,
-                  pck_sent: 0,
-                  time: 0,
-                  nb_ipid: 0,
-                  nb_opid: 0,
-                  opids: {},
-                }
-              }
+              filterData={filterData}
               filterName={overviewData.name}
             />
           </TabsContent>

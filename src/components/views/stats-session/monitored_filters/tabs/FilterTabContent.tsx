@@ -29,16 +29,17 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   onBack,
   onOpenProperties,
 }) => {
-  return (
-    <DetailedStatsView
-      overviewData={overviewData}
-      networkData={networkData}
-      buffersData={buffersData}
-      inputPids={inputPids}
-      outputPids={outputPids}
-      filterData={filterData}
-      onBack={onBack}
-      onOpenProperties={onOpenProperties}
-    />
-  );
+  // Don't pass filterData if undefined, let DetailedStatsView use its default
+  const props = {
+    overviewData,
+    networkData,
+    buffersData,
+    inputPids,
+    outputPids,
+    onBack,
+    onOpenProperties,
+    ...(filterData && { filterData }), // Only pass if defined
+  };
+
+  return <DetailedStatsView {...props} />;
 };
