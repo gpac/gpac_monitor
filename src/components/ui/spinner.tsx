@@ -19,6 +19,11 @@ export function Spinner({ size = 'md', className, ...props }: SpinnerProps) {
         className,
       )}
       role="status"
+      style={{
+        // GPU-accelerated rotation, no main thread repaint
+        willChange: 'transform',
+        transform: 'translateZ(0)',
+      }}
       {...props}
     >
       <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">

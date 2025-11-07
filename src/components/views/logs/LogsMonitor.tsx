@@ -1,10 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from 'react';
+import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { RiGlobalFill, RiScrollToBottomLine } from 'react-icons/ri';
 import WidgetWrapper from '../../Widget/WidgetWrapper';
@@ -37,7 +31,6 @@ const LogsFooter = React.memo(({ count }: { count: number }) => (
 ));
 
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
-  const [autoScroll, _setAutoScroll] = useState(true);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const dispatch = useAppDispatch();
 
@@ -82,21 +75,6 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
 
   // Auto-sync per-tool configuration with backend
   useLogsService();
-
-  const scrollToBottom = useCallback(() => {
-    if (autoScroll) {
-      virtuosoRef.current?.scrollToIndex({
-        index: visibleLogs.length - 1,
-        behavior: 'smooth',
-      });
-    }
-  }, [autoScroll, visibleLogs.length]);
-
-  useEffect(() => {
-    if (visibleLogs.length > 0) {
-      scrollToBottom();
-    }
-  }, [visibleLogs.length, scrollToBottom]);
 
   // Handler for toggling highlight on a log
   const handleToggleHighlight = useCallback(
@@ -260,10 +238,13 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
           <Virtuoso
             ref={virtuosoRef}
             data={visibleLogs}
+            followOutput={atBottom ? 'auto' : false}
+            computeItemKey={(_, log) => generateLogId(log)}
             style={{
               height: '100%',
               fontFamily: "'Roboto Mono', 'Courier New', monospace",
               willChange: 'transform',
+              contain: 'layout paint',
             }}
             className="rounded px-2 py-1 text-sm bg-stat stat"
             itemContent={(_, log) => {

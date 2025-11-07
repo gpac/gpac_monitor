@@ -1,17 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: [
-    "./index.html",
-    "./src/**/*.{js,jsx,ts,tsx}",
-    "./src/components/**/*.{ts,tsx}",
-    "./src/components/common/**/*.{ts,tsx}",
-    "./src/components/layout/**/*.{ts,tsx}",
-    "./src/components/widgets/**/*.{ts,tsx}",
-    "./src/store/**/*.{ts,tsx}",
-    "./src/services/**/*.{ts,tsx}",
-    "./src/utils/**/*.{ts,tsx}",
-    "./src/types/**/*.{ts,tsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -65,20 +54,14 @@ export default {
       },
 
       animation: {
-        "drag-indicator": "dragPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         overlayShow: "overlayShow 150ms cubic-bezier(0.16, 1, 0.5, 1)",
         overlayHide: "overlayHide 150ms cubic-bezier(0.16, 1, 0.5, 1)",
         contentShow: "contentShow 150ms cubic-bezier(0.16, 1, 0.5, 1)",
         contentHide: "contentHide 150ms cubic-bezier(0.16, 1, 0.5, 1)",
-        // Animations pour le popover (plus lentes et fluides)
         popoverShow: "popoverShow 300ms cubic-bezier(0.16, 1, 0.3, 1)",
         popoverHide: "popoverHide 200ms cubic-bezier(0.5, 0, 0.84, 0)",
       },
       keyframes: {
-        dragPulse: {
-          "0%, 100%": { opacity: 0.5 },
-          "50%": { opacity: 0.25 },
-        },
         overlayShow: {
           from: { opacity: 0 },
           to: { opacity: 1 },

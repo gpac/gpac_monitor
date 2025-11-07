@@ -15,7 +15,7 @@ import BuffersTab from './tabs/BuffersTab';
 import InputsTab from './tabs/InputsTab';
 import OutputsTab from './tabs/OutputsTab';
 
-// Constant fallback - calculated once at module load (not per render)
+// Constant fallback
 const EMPTY_FILTER_DATA: FilterStatsResponse = {
   idx: 0,
   status: '',
@@ -68,7 +68,7 @@ const DetailedStatsView = memo(
     return (
       <div className="space-y-2">
         <Tabs defaultValue="overview" className="w-full">
-          <div className="sticky top-0 z-10 bg-background pb-2 space-y-2 backdrop-blur-sm ">
+          <div className="sticky top-0 z-10 bg-background pb-2 space-y-2  ">
             <div className="flex justify-stretch items-center gap-6">
               <h2 className="text-lg font-semibold text-red-600/90">
                 {overviewData.name}
@@ -119,46 +119,26 @@ const DetailedStatsView = memo(
             </TabsList>
           </div>
 
-          <TabsContent
-            value="overview"
-            forceMount
-            className="data-[state=inactive]:hidden"
-          >
+          <TabsContent value="overview">
             <MemoizedOverviewTab filter={overviewData} />
           </TabsContent>
-          <TabsContent
-            value="network"
-            forceMount
-            className="data-[state=inactive]:hidden"
-          >
+          <TabsContent value="network">
             <MemoizedNetworkTab
               data={networkData}
               filterName={overviewData.name}
               refreshInterval={5000}
             />
           </TabsContent>
-          <TabsContent
-            value="buffers"
-            forceMount
-            className="data-[state=inactive]:hidden"
-          >
+          <TabsContent value="buffers">
             <MemoizedBuffersTab data={buffersData} />
           </TabsContent>
-          <TabsContent
-            value="inputs"
-            forceMount
-            className="data-[state=inactive]:hidden"
-          >
+          <TabsContent value="inputs">
             <MemoizedInputsTab
               filterData={filterData}
               filterName={overviewData.name}
             />
           </TabsContent>
-          <TabsContent
-            value="outputs"
-            forceMount
-            className="data-[state=inactive]:hidden"
-          >
+          <TabsContent value="outputs">
             <MemoizedOutputsTab
               filterData={filterData}
               filterName={overviewData.name}
@@ -166,6 +146,37 @@ const DetailedStatsView = memo(
           </TabsContent>
         </Tabs>
       </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    // Custom comparison to prevent re-renders when only frequently-changing data updates
+
+    const filterDataUnchanged =
+      prevProps.filterData?.idx === nextProps.filterData?.idx &&
+      prevProps.filterData?.status === nextProps.filterData?.status;
+
+    // Overview data contains frequently changing metrics
+    const overviewUnchanged =
+      prevProps.overviewData.name === nextProps.overviewData.name &&
+      prevProps.overviewData.idx === nextProps.overviewData.idx;
+
+    // Network data changes frequently (bytes_sent/received)
+    const networkUnchanged =
+      prevProps.networkData === nextProps.networkData ||
+      (prevProps.networkData.bytesSent === nextProps.networkData.bytesSent &&
+        prevProps.networkData.bytesReceived ===
+          nextProps.networkData.bytesReceived);
+
+    // Arrays of PIDs - compare lengths (cheap) rather than deep comparison
+    const pidsUnchanged =
+      prevProps.inputPids.length === nextProps.inputPids.length &&
+      prevProps.outputPids.length === nextProps.outputPids.length;
+
+    return (
+      filterDataUnchanged &&
+      overviewUnchanged &&
+      networkUnchanged &&
+      pidsUnchanged
     );
   },
 );

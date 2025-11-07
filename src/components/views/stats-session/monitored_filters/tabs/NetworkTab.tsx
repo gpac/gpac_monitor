@@ -144,6 +144,14 @@ const NetworkTab = memo(
       </ScrollArea>
     );
   },
+  (prevProps, nextProps) => {
+    // Only re-render if filter name changes (not on data updates)
+    // Data updates are handled internally by useNetworkMetrics
+    return (
+      prevProps.filterName === nextProps.filterName &&
+      prevProps.refreshInterval === nextProps.refreshInterval
+    );
+  },
 );
 
 NetworkTab.displayName = 'NetworkTab';

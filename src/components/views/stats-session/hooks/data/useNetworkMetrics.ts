@@ -43,18 +43,23 @@ export const useNetworkMetrics = (
     timestamp: Date.now(),
   });
 
-  const [currentStats, setCurrentStats] = useState(data);
-  const [instantRates, setInstantRates] = useState({
-    bytesSentRate: 0,
-    bytesReceivedRate: 0,
-    packetsSentRate: 0,
-    packetsReceivedRate: 0,
+  // Single state for all metrics (reduce 2 state updates to 1)
+  const [metrics, setMetrics] = useState({
+    currentStats: data,
+    instantRates: {
+      bytesSentRate: 0,
+      bytesReceivedRate: 0,
+      packetsSentRate: 0,
+      packetsReceivedRate: 0,
+    },
   });
 
   // Calculate instant rates
   useEffect(() => {
     const now = Date.now();
     const timeDiff = (now - lastBytesRef.current.timestamp) / 1000;
+
+    let newInstantRates = metrics.instantRates;
 
     if (timeDiff > 0) {
       const bytesSentDelta = data.bytesSent - lastBytesRef.current.sent;
@@ -65,38 +70,46 @@ export const useNetworkMetrics = (
       const packetsReceivedDelta =
         data.packetsReceived - lastBytesRef.current.packetsReceived;
 
-      setInstantRates({
+      newInstantRates = {
         bytesSentRate: Math.max(0, bytesSentDelta / timeDiff),
         bytesReceivedRate: Math.max(0, bytesReceivedDelta / timeDiff),
         packetsSentRate: Math.max(0, packetsSentDelta / timeDiff),
         packetsReceivedRate: Math.max(0, packetsReceivedDelta / timeDiff),
-      });
+      };
+
+      lastBytesRef.current = {
+        sent: data.bytesSent,
+        received: data.bytesReceived,
+        packetsSent: data.packetsSent,
+        packetsReceived: data.packetsReceived,
+        timestamp: now,
+      };
     }
 
-    lastBytesRef.current = {
-      sent: data.bytesSent,
-      received: data.bytesReceived,
-      packetsSent: data.packetsSent,
-      packetsReceived: data.packetsReceived,
-      timestamp: now,
-    };
-
-    setCurrentStats(data);
-  }, [data, filterName]);
+    // Single state update with both current stats and rates
+    setMetrics({
+      currentStats: data,
+      instantRates: newInstantRates,
+    });
+  }, [data, filterName, metrics.instantRates]);
 
   // Format statistics for display
   const formattedStats = useMemo(
     () => ({
-      bytesSent: formatBytes(currentStats.bytesSent),
-      bytesReceived: formatBytes(currentStats.bytesReceived),
-      packetsSent: currentStats.packetsSent.toLocaleString(),
-      packetsReceived: currentStats.packetsReceived.toLocaleString(),
-      bytesSentRate: formatBitrate(instantRates.bytesSentRate * 8),
-      bytesReceivedRate: formatBitrate(instantRates.bytesReceivedRate * 8),
-      packetsSentRate: formatPacketRate(instantRates.packetsSentRate),
-      packetsReceivedRate: formatPacketRate(instantRates.packetsReceivedRate),
+      bytesSent: formatBytes(metrics.currentStats.bytesSent),
+      bytesReceived: formatBytes(metrics.currentStats.bytesReceived),
+      packetsSent: metrics.currentStats.packetsSent.toLocaleString(),
+      packetsReceived: metrics.currentStats.packetsReceived.toLocaleString(),
+      bytesSentRate: formatBitrate(metrics.instantRates.bytesSentRate * 8),
+      bytesReceivedRate: formatBitrate(
+        metrics.instantRates.bytesReceivedRate * 8,
+      ),
+      packetsSentRate: formatPacketRate(metrics.instantRates.packetsSentRate),
+      packetsReceivedRate: formatPacketRate(
+        metrics.instantRates.packetsReceivedRate,
+      ),
     }),
-    [currentStats, instantRates],
+    [metrics],
   );
 
   // Activity level logic
@@ -127,8 +140,8 @@ export const useNetworkMetrics = (
   };
 
   return {
-    currentStats,
-    instantRates,
+    currentStats: metrics.currentStats,
+    instantRates: metrics.instantRates,
     formattedStats,
     getActivityLevel,
   };

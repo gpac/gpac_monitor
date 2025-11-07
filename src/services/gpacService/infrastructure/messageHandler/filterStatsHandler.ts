@@ -1,8 +1,14 @@
 import type { MonitoredFilterStats } from '@/types/domain/gpac';
 import { WSMessageType } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
+import { MessageThrottler } from '@/services/utils/MessageThrottler';
 import { generateID } from '@/utils/core';
 import { MessageHandlerDependencies } from './types';
+
+// Throttle interval for filter stats updates (ms)
+// Server sends every 1000ms, but we throttle UI updates to 500ms (2 fps)
+// to reduce main thread contention during video playback
+const FILTER_STATS_THROTTLE_MS = 500;
 
 export class FilterStatsHandler {
   constructor(
@@ -11,6 +17,7 @@ export class FilterStatsHandler {
   ) {}
   private pendingFilterSubscribeRequests = new Map<number, Promise<void>>();
   private pendingFilterUnsubscribeRequests = new Map<number, Promise<void>>();
+  private messageThrottler = new MessageThrottler();
 
   // Timeouts for delayed auto-unsubscription to avoid premature cleanup during React re-renders
   private filterAutoUnsubscribeTimeouts = new Map<number, NodeJS.Timeout>();
@@ -94,13 +101,22 @@ export class FilterStatsHandler {
 
   /**
    * Handles filter statistics updates from the server
+   * Throttled to reduce main thread load during video playback
    */
   public handleFilterStatsUpdate(filter: MonitoredFilterStats): void {
     const idx = filter.idx;
     const subscribable = this.filterStatsSubscribableMap.get(idx);
-    if (subscribable) {
-      subscribable.updateDataAndNotify(filter);
-    }
+    if (!subscribable) return;
+
+    // Throttle updates to reduce UI repaints
+    this.messageThrottler.throttle(
+      `filter_stats_${idx}`,
+      (data: MonitoredFilterStats) => {
+        subscribable.updateDataAndNotify(data);
+      },
+      FILTER_STATS_THROTTLE_MS,
+      filter,
+    );
   }
 
   /**

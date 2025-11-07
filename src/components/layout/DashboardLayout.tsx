@@ -107,7 +107,7 @@ const DashboardLayout: React.FC = () => {
         <main
           className="flex-1 p-6"
           style={{
-            marginLeft: isSidebarOpen ? '' : '0',
+            marginLeft: isSidebarOpen ? '200px' : '0',
             transition: 'margin-left 300ms ease-in-out',
             opacity: isDraggingRef.current ? 0.2 : 1,
           }}

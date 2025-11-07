@@ -46,11 +46,16 @@ export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
   return (
     <div
       className={cn(
-        'rounded-full animate-pulse shadow-lg',
+        'rounded-full shadow-lg',
         colorClasses,
         sizeClasses,
         className,
       )}
+      style={{
+        // GPU-accelerated, no repaint on main thread
+        willChange: 'transform',
+        transform: 'translateZ(0)',
+      }}
     />
   );
 };
