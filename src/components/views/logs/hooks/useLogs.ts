@@ -38,7 +38,6 @@ export function useLogs(options: UseLogsOptions = {}) {
         }
 
         const trimmed = allLogs.slice(-maxEntries);
-        console.log('[useLogs] Trimmed to:', trimmed.length, 'logs');
         return trimmed;
       });
     },
@@ -84,7 +83,6 @@ export function useLogs(options: UseLogsOptions = {}) {
         if (isMounted) {
           /*   unsubscribe = unsubscribeFunc; */
           setIsSubscribed(true);
-          console.log('[useLogs] Subscription successful');
         } else {
           unsubscribeFunc();
         }
@@ -100,16 +98,13 @@ export function useLogs(options: UseLogsOptions = {}) {
     setupSubscription();
 
     return () => {
-      console.log(
-        '[useLogs] Component unmounting - keeping logs subscription for sidebar',
-      );
       isMounted = false;
       setIsSubscribed(false);
       // NOTE: We deliberately do NOT call unsubscribe() here
       // This keeps the logs flowing to Redux store for sidebar counts
       // Logs subscription will only be cleaned up on session end or app close
     };
-  }, [enabled, handleLogsUpdate, initialLogConfig]);
+  }, [enabled, handleLogsUpdate, initialLogConfig, logs.length]);
 
   const memoizedLogs = useMemo(() => logs, [logs]);
   const optimizedLogs = useDeferredValue(memoizedLogs);

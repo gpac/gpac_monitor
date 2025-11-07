@@ -27,17 +27,10 @@ export function useLogsService() {
   const lastConfigRef = useRef<string>('');
 
   const updateBackendConfig = useCallback(
-    async (config: string, reason?: string) => {
+    async (config: string, _reason?: string) => {
       try {
-        console.log(
-          '[useLogsService] Updating backend config:',
-          config,
-          reason ? `(${reason})` : '',
-        );
-
         // Only send if there are actual changes
         if (config.trim() === '') {
-          console.log('[useLogsService] No changes to send');
           return;
         }
 
@@ -47,8 +40,6 @@ export function useLogsService() {
         // Mark config as sent to track future changes
         dispatch(markConfigAsSent());
         lastConfigRef.current = configString;
-
-        console.log('[useLogsService] Backend config updated successfully');
       } catch (error) {
         console.error(
           '[useLogsService] Failed to update backend config:',
@@ -61,25 +52,14 @@ export function useLogsService() {
 
   // Update backend when config changes
   useEffect(() => {
-    console.log('[useLogsService] Effect triggered:', {
-      isSubscribed,
-      configString,
-      lastConfig: lastConfigRef.current,
-    });
-
     // Only update if we're subscribed and config actually changed
     if (!isSubscribed || configString === lastConfigRef.current) {
-      console.log('[useLogsService] No update needed:', {
-        isSubscribed,
-        configChanged: configString !== lastConfigRef.current,
-      });
       return;
     }
 
     // Parse and analyze the config changes
     const changes = parseConfigChanges(configString);
     if (changes.length === 0) {
-      console.log('[useLogsService] No valid changes to process');
       return;
     }
 
@@ -90,12 +70,8 @@ export function useLogsService() {
     );
 
     if (analysis.needsBackend) {
-      console.log('[useLogsService] Backend call required:', analysis.reason);
       updateBackendConfig(analysis.backendOnlyChanges, analysis.reason);
     } else {
-      console.log(
-        '[useLogsService] All changes can be handled by frontend filtering - no backend call needed',
-      );
       // Don't mark as sent for frontend-only changes to preserve backend state tracking
       lastConfigRef.current = configString;
     }
