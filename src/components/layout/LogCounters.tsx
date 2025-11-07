@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { selectLogCounts } from '@/shared/store/selectors/sidebarSelectors';
+import { selectLogCounts } from '@/shared/store/selectors/headerSelectors';
 import { addWidget } from '@/shared/store/slices/widgetsSlice';
 import { selectActiveWidgets } from '@/shared/store/selectors/widgets';
 import { setUIFilter } from '@/shared/store/slices/logsSlice';

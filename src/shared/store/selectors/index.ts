@@ -8,4 +8,4 @@ export * from './logs';
 export * from './gpacArgs';
 
 // Sidebar selectors
-export * from './sidebarSelectors';
+export * from './headerSelectors';
