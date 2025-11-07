@@ -1,6 +1,5 @@
 import { LuMonitorCheck, LuSquareArrowUpRight } from 'react-icons/lu';
 import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
-import { Button } from '@/components/ui/button';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
@@ -59,29 +58,42 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
           >
             <span>{filter.name}</span>
             {onDetachTab && (
-              <Button
-                variant="ghost"
-                className="ml-1 h-5 w-5 rounded-full p-0 hover:bg-slate-600"
+              <span
+                className="ml-1 inline-flex h-5 w-5 cursor-pointer items-center justify-center rounded-full hover:bg-slate-600"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDetachTab(filterIdx, filter.name, e);
                 }}
                 title="Detach as overlay"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.stopPropagation();
+                    onDetachTab(filterIdx, filter.name, e as any);
+                  }
+                }}
               >
                 <LuSquareArrowUpRight />
-              </Button>
+              </span>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-1 h-4 w-4 rounded-full p-0"
+            <span
+              className="ml-1 inline-flex h-4 w-4 cursor-pointer items-center justify-center rounded-full hover:bg-slate-600"
               onClick={(e) => {
                 e.stopPropagation();
                 onCloseTab(filterIdx, e);
               }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation();
+                  onCloseTab(filterIdx, e as any);
+                }
+              }}
             >
               ×
-            </Button>
+            </span>
           </TabsTrigger>
         );
       })}

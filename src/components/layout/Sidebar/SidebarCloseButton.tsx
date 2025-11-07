@@ -65,8 +65,8 @@ const SidebarCloseButton = memo<SidebarCloseButtonProps>(({ onClose }) => {
     <button
       onClick={() => onCloseRef.current?.()}
       className={BUTTON_CLASSES}
-      aria-label="Fermer la barre latérale"
-      title="Fermer la barre latérale • Ctrl/⌘ + B"
+      aria-label="Close sidebar"
+      title="Close sidebar • Ctrl/⌘ + B"
       aria-controls="app-sidebar"
       aria-expanded={true}
     >

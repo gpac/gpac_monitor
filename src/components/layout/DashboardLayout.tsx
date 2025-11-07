@@ -84,7 +84,7 @@ const DashboardLayout: React.FC = () => {
         {/* Sidebar with GPU-accelerated transform transition */}
         <div
           id="app-sidebar"
-          className="fixed top-16 bottom-0 left-0 w-64 z-10 bg-slate-800 transition-transform duration-300 ease-in-out will-change-transform"
+          className="fixed top-16 bottom-0 left-0 w-64 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
           }}
@@ -100,8 +100,9 @@ const DashboardLayout: React.FC = () => {
         <main
           className="flex-1 p-6"
           style={{
-            marginLeft: isSidebarOpen ? '220px' : '0',
+            marginLeft: isSidebarOpen ? '' : '0',
             transition: 'margin-left 300ms ease-in-out',
+            opacity: isDraggingRef.current ? 0.2 : 1,
           }}
         >
           {/* Grid widgets */}

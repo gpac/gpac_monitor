@@ -74,6 +74,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           type: 'simplebezier',
           animated: !isResizing,
           style: { stroke: '#6b7280', strokeWidth: 3 },
+          ariaLabel: 'Clickable edge to see IPID properties',
         }}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
         proOptions={{ hideAttribution: true }}

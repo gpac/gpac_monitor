@@ -47,7 +47,7 @@ const GraphMonitorUI: React.FC<GraphMonitorUIProps> = ({
   }) as { ref: React.RefObject<HTMLElement> };
   const containerRef = ref as React.RefObject<HTMLDivElement>;
   if (isLoading) {
-    return <LoadingState id={id} message="Connexion à GPAC..." />;
+    return <LoadingState id={id} message="Connecting to GPAC..." />;
   }
 
   if (connectionError) {

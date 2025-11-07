@@ -223,7 +223,12 @@ export const Chart = memo(
             }}
             className={`gpu-optimized ${isResizing ? 'contain-layout contain-style is-interacting' : ''}`}
           >
-            <ResponsiveContainer width="100%" height="100%" minHeight={200}>
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              minHeight={200}
+              debounce={1}
+            >
               <AreaChart
                 key={mergedConfig.maxPoints}
                 data={dataPoints}

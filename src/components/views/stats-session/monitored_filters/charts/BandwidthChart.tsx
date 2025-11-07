@@ -91,6 +91,7 @@ export const BandwidthChart = memo(
               width="100%"
               height="100%"
               minHeight={CHART_HEIGHT}
+              debounce={1}
             >
               <LineChart data={dataPoints} margin={CHART_MARGIN}>
                 <CartesianGrid

@@ -7,7 +7,7 @@ interface IPIDPropertiesContentProps {
 }
 
 /**
- * Display IPID properties in a scrollable list
+ * Display IPID properties in a scrollable list_-
  */
 const IPIDPropertiesContent: React.FC<IPIDPropertiesContentProps> = memo(
   ({ properties }) => {
