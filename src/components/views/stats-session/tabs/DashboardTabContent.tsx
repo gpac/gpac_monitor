@@ -18,6 +18,7 @@ import {
 import { formatBytes, formatNumber } from '@/utils/formatting';
 import type { StatsCounters, SystemStats } from '../hooks/useStatsCalculations';
 import { Widget } from '@/types/ui/widget';
+import { CommandLineInfo } from '@/components/CommandLineDialog';
 
 interface DashboardTabContentProps {
   systemStats: SystemStats;
@@ -151,9 +152,12 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
       {/* Statistics Overview */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <Badge className="text-xs bg-white/5 ring-1 ring-monitor-line text-monitor-text-secondary">
-            Refresh: {refreshInterval}
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge className="text-xs bg-white/5 ring-1 ring-monitor-line text-monitor-text-secondary">
+              Refresh: {refreshInterval}
+            </Badge>
+            <CommandLineInfo />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">

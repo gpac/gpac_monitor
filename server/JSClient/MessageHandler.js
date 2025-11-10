@@ -122,6 +122,11 @@ function MessageHandler(client) {
                             ipidIdx: jtext['ipidIdx'],
                             properties: props
                         }));
+                    },
+
+                    'get_command_line': () => {
+                        print("Getting GPAC command line");
+                        this.client.commandLineManager.sendCommandLine();
                     }
                 };
 

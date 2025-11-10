@@ -48,6 +48,7 @@ export enum WSMessageType {
   UPDATE_LOG_LEVEL = 'update_log_level',
   GET_LOG_STATUS = 'get_log_status',
   GET_PNG = 'get_png',
+  GET_COMMAND_LINE = 'get_command_line',
 }
 
 // Types of messages we receive from the server
@@ -64,6 +65,7 @@ export enum WSResponseType {
   LOG_HISTORY = 'log_history',
   LOG_STATUS = 'log_status',
   LOG_CONFIG_CHANGED = 'log_config_changed',
+  COMMAND_LINE_RESPONSE = 'command_line_response',
 }
 
 export interface GetAllFiltersMessage extends BaseWSMessage {
@@ -161,6 +163,10 @@ export interface GetLogStatusMessage extends BaseWSMessage {
   type: WSMessageType.GET_LOG_STATUS;
 }
 
+export interface GetCommandLineMessage extends BaseWSMessage {
+  type: WSMessageType.GET_COMMAND_LINE;
+}
+
 export interface LogBatchResponse extends BaseWSResponse {
   message: 'log_batch';
   logs: GpacLogEntry[];
@@ -192,6 +198,13 @@ export interface FilterStatsUpdateResponse extends BaseWSResponse {
   stats: FilterStats;
 }
 
+export interface CommandLineResponse extends BaseWSResponse {
+  message: 'command_line_response';
+  commandLine: string | null;
+  error?: string;
+  timestamp: number;
+}
+
 export type WSMessage =
   | GetAllFiltersMessage
   | GetArgsDetailsMessage
@@ -207,6 +220,7 @@ export type WSMessage =
   | SubscribeLogsMessage
   | UnsubscribeLogsMessage
   | UpdateLogLevelMessage
-  | GetLogStatusMessage;
+  | GetLogStatusMessage
+  | GetCommandLineMessage;
 
 export type WSResponse = ErrorResponse | FiltersListResponse;

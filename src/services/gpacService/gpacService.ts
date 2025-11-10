@@ -213,7 +213,7 @@ export class GpacService implements IGpacCommunication {
 
   public async getPidProps(
     filterIdx: number | undefined,
-    ipidIdx: number | undefined
+    ipidIdx: number | undefined,
   ): Promise<PidProperty[]> {
     if (!this.isLoaded()) {
       throw new Error('Service not loaded');
@@ -221,8 +221,17 @@ export class GpacService implements IGpacCommunication {
     if (typeof filterIdx !== 'number' || typeof ipidIdx !== 'number') {
       throw new Error('filterIdx and ipidIdx must be numbers');
     }
-    const pidPropsMap = await this.messageHandler.getPidPropsHandler().fetchIpidProps(filterIdx, ipidIdx);
+    const pidPropsMap = await this.messageHandler
+      .getPidPropsHandler()
+      .fetchIpidProps(filterIdx, ipidIdx);
     return Object.values(pidPropsMap);
+  }
+
+  public async getCommandLine(): Promise<string | null> {
+    if (!this.isLoaded()) {
+      throw new Error('Service not loaded');
+    }
+    return this.messageHandler.getCommandLineHandler().fetch();
   }
 
   private setupWebSocketHandlers(): void {

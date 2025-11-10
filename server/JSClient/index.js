@@ -4,6 +4,7 @@ import { FilterManager } from './FilterManager.js';
 import { CpuStatsManager } from './CpuStatsManager.js';
 import { LogManager } from './LogManager.js';
 import { PidPropsCollector } from './PidPropsCollector.js';
+import { CommandLineManager } from './CommandLineManager.js';
 
 function JSClient(id, client, all_clients, draned_once_ref) {
     this.id = id;
@@ -16,6 +17,7 @@ function JSClient(id, client, all_clients, draned_once_ref) {
     this.cpuStatsManager = new CpuStatsManager(this);
     this.logManager = new LogManager(this);
     this.pidPropsCollector = new PidPropsCollector(this);
+    this.commandLineManager = new CommandLineManager(this);
 
     this.on_client_data = function(msg) {
         this.messageHandler.handleMessage(msg, all_clients);
