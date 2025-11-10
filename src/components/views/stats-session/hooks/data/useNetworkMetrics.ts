@@ -56,6 +56,22 @@ export const useNetworkMetrics = (
 
   // Calculate instant rates
   useEffect(() => {
+    // Check if data actually changed
+    const hasChanged =
+      data.bytesSent !== lastBytesRef.current.sent ||
+      data.bytesReceived !== lastBytesRef.current.received ||
+      data.packetsSent !== lastBytesRef.current.packetsSent ||
+      data.packetsReceived !== lastBytesRef.current.packetsReceived;
+
+    if (!hasChanged) {
+      // Data hasn't changed, just update currentStats without recalculating rates
+      setMetrics((prev) => ({
+        ...prev,
+        currentStats: data,
+      }));
+      return;
+    }
+
     const now = Date.now();
     const timeDiff = (now - lastBytesRef.current.timestamp) / 1000;
 
