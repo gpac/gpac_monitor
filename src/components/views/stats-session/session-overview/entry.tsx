@@ -143,7 +143,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     }
 
     // NORMAL MODE: multiple tabs
-    // Show loading only on initial load, not when disconnecting
+
     if (isLoading && staticFilters.length === 0) {
       return <ConnectionErrorState id={id} isLoading={true} />;
     }

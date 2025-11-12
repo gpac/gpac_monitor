@@ -2,7 +2,6 @@ import React, { memo } from 'react';
 import {
   ReactFlow,
   MiniMap,
-  Controls,
   Background,
   BackgroundVariant,
   Node,
@@ -14,6 +13,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import CustomNode from '../nodes/CustomNode';
+import GraphLegend from './GraphLegend';
 import { useMinimapNavigation } from '../../hooks/layout/useMinimapNavigation';
 import { getImmediateGraphColor } from '../../hooks/layout/useGraphColors';
 import { useAppDispatch } from '@/shared/hooks/redux';
@@ -81,10 +81,6 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         selectionKeyCode={null}
       >
         <Background color="#4b5563" gap={16} variant={BackgroundVariant.Dots} />
-        <Controls
-          className="bg-gray-800 border-gray-700 fill-gray-400"
-          showInteractive={!isResizing}
-        />
         <MiniMap
           nodeColor={(node) => getImmediateGraphColor(node)}
           nodeStrokeWidth={2}
@@ -101,6 +97,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           zoomable={!isResizing}
           ariaLabel="Minimap for graph navigation"
         />
+        <GraphLegend />
       </ReactFlow>
     </div>
   );
