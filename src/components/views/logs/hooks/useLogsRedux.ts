@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   selectCurrentTool,
@@ -94,20 +94,35 @@ export function useLogsRedux() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(currentConfig));
   }, [currentConfig]);
 
-  return {
-    // State
-    currentTool,
-    levelsByTool,
-    defaultAllLevel,
-    visibleToolsFilter,
-    visibleLogs,
+  return useMemo(
+    () => ({
+      // State
+      currentTool,
+      levelsByTool,
+      defaultAllLevel,
+      visibleToolsFilter,
+      visibleLogs,
 
-    // Actions
-    setTool: handleSetTool,
-    setToolLevel: handleSetToolLevel,
-    setDefaultAllLevel: handleSetDefaultAllLevel,
-    toggleToolFilter: handleToggleToolFilter,
-    clearFilter: handleClearFilter,
-    selectAllTools: handleSelectAllTools,
-  };
+      // Actions (already memoized via useCallback)
+      setTool: handleSetTool,
+      setToolLevel: handleSetToolLevel,
+      setDefaultAllLevel: handleSetDefaultAllLevel,
+      toggleToolFilter: handleToggleToolFilter,
+      clearFilter: handleClearFilter,
+      selectAllTools: handleSelectAllTools,
+    }),
+    [
+      currentTool,
+      levelsByTool,
+      defaultAllLevel,
+      visibleToolsFilter,
+      visibleLogs,
+      handleSetTool,
+      handleSetToolLevel,
+      handleSetDefaultAllLevel,
+      handleToggleToolFilter,
+      handleClearFilter,
+      handleSelectAllTools,
+    ],
+  );
 }

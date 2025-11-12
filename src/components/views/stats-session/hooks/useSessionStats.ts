@@ -17,9 +17,7 @@ export function useSessionStats(enabled = true, interval = 1000) {
 
   useEffect(() => {
     if (!enabled || !isReady) {
-      if (stats.length > 0) {
-        setStats([]);
-      }
+      setStats([]);
       return;
     }
 

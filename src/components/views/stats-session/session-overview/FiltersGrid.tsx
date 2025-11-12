@@ -44,7 +44,11 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
     );
 
     const sortedFilters = useMemo(() => {
-      const list = [...enrichedFilters];
+      // Filter out detached filters to avoid duplicate rendering
+      const list = enrichedFilters.filter(
+        (f) => !isFilterDetached(f.idx || -1),
+      );
+
       return list.sort((a, b) => {
         const aMonitored = monitoredFilters.has(a.idx || -1);
         const bMonitored = monitoredFilters.has(b.idx || -1);
@@ -53,7 +57,7 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
 
         return (b.bytes_done || 0) - (a.bytes_done || 0);
       });
-    }, [enrichedFilters, monitoredFilters]);
+    }, [enrichedFilters, monitoredFilters, isFilterDetached]);
 
     return (
       <div className="flex flex-col h-full">

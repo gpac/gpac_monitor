@@ -3,31 +3,29 @@ import { useState, useEffect, useRef } from 'react';
 export function useDisplayQueue<T>(value: T): T {
   const [display, setDisplay] = useState(value);
   const latest = useRef(value);
-  const pending = useRef(false);
-  const raf = useRef<number>();
+  const raf = useRef<number | undefined>();
 
-  // Receive the new value
+  // Update display on next frame when value changes
   useEffect(() => {
     latest.current = value;
-    pending.current = true; // mark “something has changed”
-  }, [value]);
 
-  // Copy to UI state at rAF cadence, BUT only if different
-  useEffect(() => {
-    const tick = () => {
-      if (pending.current && display !== latest.current) {
-        pending.current = false;
-        setDisplay(latest.current); // a single setState for a batch of updates
-      }
-      raf.current = requestAnimationFrame(tick);
-    };
-    raf.current = requestAnimationFrame(tick);
+    if (display === value || raf.current !== undefined) {
+      return;
+    }
+
+    // Schedule single RAF update
+    raf.current = requestAnimationFrame(() => {
+      setDisplay(latest.current);
+      raf.current = undefined;
+    });
+
     return () => {
       if (raf.current !== undefined) {
         cancelAnimationFrame(raf.current);
+        raf.current = undefined;
       }
     };
-  }, [display]);
+  }, [value, display]);
 
   return display;
 }

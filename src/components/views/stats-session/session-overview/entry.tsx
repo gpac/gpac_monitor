@@ -3,6 +3,7 @@ import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/useMultiFilterMonitor';
 import { useStatsCalculations } from '@/components/views/stats-session/hooks/useStatsCalculations';
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
+import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import { WidgetProps } from '@/types/ui/widget';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -109,22 +110,10 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
     // DETACHED MODE: Display single filter fullscreen
     if (isDetached && detachedFilterIdx !== undefined) {
+      // Skip loading check for detached widgets - show data immediately
       const filter = enrichedGraphFilterCollection.find(
         (f) => f.idx === detachedFilterIdx,
       );
-
-      if (isLoading) {
-        return (
-          <WidgetWrapper id={id}>
-            <div
-              className="flex items-center justify-center h-full"
-              aria-busy="true"
-            >
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-400/60 border-t-transparent" />
-            </div>
-          </WidgetWrapper>
-        );
-      }
 
       if (!filter) {
         return (
@@ -154,26 +143,18 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     }
 
     // NORMAL MODE: multiple tabs
-    if (isLoading) {
-      return (
-        <WidgetWrapper id={id}>
-          <div
-            className="flex items-center justify-center h-full"
-            aria-busy="true"
-          >
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-400/60 border-t-transparent" />
-          </div>
-        </WidgetWrapper>
-      );
+    // Show loading only on initial load, not when disconnecting
+    if (isLoading && staticFilters.length === 0) {
+      return <ConnectionErrorState id={id} isLoading={true} />;
     }
 
-    if (staticFilters.length === 0) {
+    if (!isLoading && staticFilters.length === 0) {
       return (
         <WidgetWrapper id={id}>
           <div className="flex flex-col items-center justify-center h-full p-4 text-monitor-text-secondary">
             <p className="text-monitor-text-primary">No filters available</p>
             <p className="text-sm mt-2 text-monitor-text-muted">
-              Waiting Waiting for graph construction...
+              Waiting for graph construction...
             </p>
           </div>
         </WidgetWrapper>

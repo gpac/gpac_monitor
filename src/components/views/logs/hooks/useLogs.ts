@@ -45,9 +45,7 @@ export function useLogs(options: UseLogsOptions = {}) {
 
   useEffect(() => {
     if (!enabled || !isReady) {
-      if (logs.length > 0) {
-        setLogs([]);
-      }
+      setLogs([]);
       setIsSubscribed(false);
       return;
     }
@@ -88,7 +86,7 @@ export function useLogs(options: UseLogsOptions = {}) {
       isMounted = false;
       setIsSubscribed(false);
     };
-  }, [enabled, isReady, handleLogsUpdate, initialLogConfig, logs.length]);
+  }, [enabled, isReady, handleLogsUpdate, initialLogConfig]);
 
   const memoizedLogs = useMemo(() => logs, [logs]);
   const optimizedLogs = useDeferredValue(memoizedLogs);

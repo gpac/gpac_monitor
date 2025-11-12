@@ -2,7 +2,6 @@ import type { MonitoredFilterStats } from '@/types/domain/gpac';
 import { useState, useEffect, useCallback } from 'react';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
-import { useServiceReady } from '@/shared/hooks/useServiceReady';
 
 export function useFilterStats(
   filterId: number | undefined,
@@ -10,7 +9,6 @@ export function useFilterStats(
   interval = 1000,
 ) {
   const [stats, setStats] = useState<MonitoredFilterStats | null>(null);
-  const { isReady } = useServiceReady({ enabled });
 
   const handleStatsUpdate = useCallback(
     (newStats: MonitoredFilterStats) => {
@@ -20,10 +18,8 @@ export function useFilterStats(
   );
 
   useEffect(() => {
-    if (filterId === undefined || !enabled || !isReady) {
-      if (stats !== null) {
-        setStats(null);
-      }
+    if (filterId === undefined || !enabled || !gpacService.isConnected()) {
+      setStats(null);
       return;
     }
 
@@ -65,7 +61,7 @@ export function useFilterStats(
         unsubscribe();
       }
     };
-  }, [filterId, enabled, isReady, interval, handleStatsUpdate, stats]);
+  }, [filterId, enabled, interval, handleStatsUpdate]);
 
   return {
     stats,
