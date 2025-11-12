@@ -96,6 +96,7 @@ export const CpuMemoryChartUplot = memo(
         </CardHeader>
         <CardContent>
           <div
+            style={{ width: '100%', height: 250, minHeight: 250 }}
             className={`gpu-optimized ${isResizing ? 'contain-layout contain-style is-interacting' : ''}`}
           >
             <UplotChart data={data} options={options} className="w-full" />

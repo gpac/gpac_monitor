@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useRef, useLayoutEffect, useState } from 'react';
 import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/UplotChart';
@@ -19,6 +19,9 @@ export const BandwidthCombinedChart = memo(
     bytesReceived,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
   }: BandwidthCombinedChartProps) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [dimensions, setDimensions] = useState({ width: 400, height: 200 });
+
     const { dataPoints: uploadPoints } = useBandwidthChart({
       currentBytes: bytesSent,
       refreshInterval,
@@ -28,6 +31,13 @@ export const BandwidthCombinedChart = memo(
       currentBytes: bytesReceived,
       refreshInterval,
     });
+
+    useLayoutEffect(() => {
+      if (containerRef.current) {
+        const { width } = containerRef.current.getBoundingClientRect();
+        setDimensions({ width: width || 400, height: 200 });
+      }
+    }, []);
 
     const { data, options } = useMemo(() => {
       const maxLength = Math.max(uploadPoints.length, downloadPoints.length);
@@ -53,13 +63,15 @@ export const BandwidthCombinedChart = memo(
         uploadData,
         downloadData,
         timeLabels,
+        width: dimensions.width,
+        height: dimensions.height,
       });
 
       return { data: alignedData, options: opts };
-    }, [uploadPoints, downloadPoints]);
+    }, [uploadPoints, downloadPoints, dimensions]);
 
     return (
-      <Card className="bg-stat border-transparent w-full">
+      <Card className="bg-stat border-transparent">
         <CardHeader className="pb-2">
           <CardTitle className="flex justify-center items-center gap-2 text-sm stat stat-label">
             <LuArrowUpDown className="h-4 w-4" />
@@ -67,7 +79,12 @@ export const BandwidthCombinedChart = memo(
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <UplotChart data={data} options={options} className="w-auto" />
+          <div
+            ref={containerRef}
+            style={{ width: '100%', height: 200, minHeight: 200 }}
+          >
+            <UplotChart data={data} options={options} className="w-full" />
+          </div>
         </CardContent>
       </Card>
     );

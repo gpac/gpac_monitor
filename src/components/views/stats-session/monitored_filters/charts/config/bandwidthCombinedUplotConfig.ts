@@ -5,16 +5,20 @@ export interface BandwidthCombinedConfigParams {
   uploadData: number[];
   downloadData: number[];
   timeLabels: string[];
+  width?: number;
+  height?: number;
 }
 
 export const createBandwidthCombinedConfig = ({
   uploadData,
   downloadData,
   timeLabels,
+  width = 400,
+  height = 200,
 }: BandwidthCombinedConfigParams): uPlot.Options => {
   return {
-    width: 400,
-    height: 200,
+    width,
+    height,
     padding: [10, 10, 5, 5],
     cursor: {
       show: true,
