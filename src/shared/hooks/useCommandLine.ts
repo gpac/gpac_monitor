@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useGpacService } from './useGpacService';
+import { useServiceReady } from './useServiceReady';
 
 /**
  * Hook to retrieve the GPAC command line (fetched once per session)
  */
 export const useCommandLine = () => {
   const gpacService = useGpacService();
+  const { isReady } = useServiceReady();
   const [commandLine, setCommandLine] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+
     let isMounted = true;
 
     const fetchCommandLine = async () => {
@@ -32,7 +38,7 @@ export const useCommandLine = () => {
     return () => {
       isMounted = false;
     };
-  }, [gpacService]);
+  }, [gpacService, isReady]);
 
   return { commandLine, isLoading };
 };

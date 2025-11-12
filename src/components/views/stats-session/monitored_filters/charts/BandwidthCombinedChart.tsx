@@ -75,7 +75,22 @@ export const BandwidthCombinedChart = memo(
         <CardHeader className="pb-2">
           <CardTitle className="flex justify-center items-center gap-2 text-sm stat stat-label">
             <LuArrowUpDown className="h-4 w-4" />
-            Upload / Download Bandwidth
+            <span className="flex items-center gap-1.5">
+              <span
+                className="w-3 h-0.5"
+                style={{ backgroundColor: '#10b981' }}
+              />
+              Upload
+            </span>
+            /
+            <span className="flex items-center gap-1.5">
+              <span
+                className="w-3 h-0.5"
+                style={{ backgroundColor: '#3b82f6' }}
+              />
+              Download
+            </span>
+            Bandwidth
           </CardTitle>
         </CardHeader>
         <CardContent>

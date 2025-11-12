@@ -91,7 +91,21 @@ export const CpuMemoryChartUplot = memo(
       <Card ref={chartRef} className="bg-stat border-transparent">
         <CardHeader className="pb-2">
           <CardTitle className="flex justify-center items-center gap-2 text-sm stat stat-label">
-            Memory / CPU
+            <span className="flex items-center gap-1.5">
+              <span
+                className="w-3 h-0.5"
+                style={{ backgroundColor: '#38bdf8' }}
+              />
+              Memory
+            </span>
+            /
+            <span className="flex items-center gap-1.5">
+              <span
+                className="w-3 h-0.5"
+                style={{ backgroundColor: '#ef4444' }}
+              />
+              CPU
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
