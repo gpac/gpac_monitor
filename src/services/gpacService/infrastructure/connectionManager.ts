@@ -39,9 +39,11 @@ export class ConnectionManager {
       this.onConnectionSuccess();
     } catch (error) {
       this.isConnecting = false;
+      store.dispatch(setLoading(false));
       this.notificationHandlers.onError?.(error as Error);
       this.notificationHandlers.onConnectionStatus?.(false);
-      this.handleDisconnect();
+      // Don't call handleDisconnect here - it will be called by onclose event
+      // This prevents recursive reconnection attempts
       throw error;
     }
   }
@@ -65,23 +67,36 @@ export class ConnectionManager {
       return;
     }
 
-    if (
-      !this.isConnecting &&
-      !this.ws.isConnected() &&
-      this.reconnectAttempts < GPAC_CONSTANTS.MAX_RECONNECT_ATTEMPTS
-    ) {
+    // Check if max attempts reached before scheduling reconnect
+    if (this.reconnectAttempts >= GPAC_CONSTANTS.MAX_RECONNECT_ATTEMPTS) {
+      console.log(
+        '[ConnectionManager] Max reconnection attempts reached - stopping',
+      );
+      this.isManualDisconnect = true; // Prevent further reconnection attempts
+      store.dispatch(setError('Failed to connect to GPAC server'));
+      return;
+    }
+
+    // Only reconnect if not already connecting and not connected
+    if (!this.isConnecting && !this.ws.isConnected()) {
       const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 10000);
+      console.log(
+        `[ConnectionManager] Scheduling reconnection attempt ${this.reconnectAttempts + 1}/${GPAC_CONSTANTS.MAX_RECONNECT_ATTEMPTS} in ${delay}ms`,
+      );
+
       if (this.reconnectTimeout) {
         clearTimeout(this.reconnectTimeout);
       }
+
       this.reconnectTimeout = setTimeout(() => {
         this.reconnectAttempts++;
-        this.connect().catch(console.error);
+        this.connect().catch((error) => {
+          console.error(
+            `[ConnectionManager] Reconnection attempt ${this.reconnectAttempts} failed:`,
+            error,
+          );
+        });
       }, delay);
-    } else if (
-      this.reconnectAttempts >= GPAC_CONSTANTS.MAX_RECONNECT_ATTEMPTS
-    ) {
-      store.dispatch(setError('Failed to connect to GPAC server'));
     }
   }
 

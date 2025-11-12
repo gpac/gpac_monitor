@@ -1,7 +1,7 @@
 import React, { useState, useDeferredValue, useMemo } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 
-import { CpuMemoryChart } from './components/CpuMemoryChart';
+import { CpuMemoryChartUplot } from './components/CpuMemoryChartUplot';
 import { CpuMemoryOverview } from './components/CpuMemoryOverview';
 import { useCPUStats } from './hooks/useCPUStats';
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
@@ -95,7 +95,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
         </div>
 
         <div className="w-full">
-          <CpuMemoryChart
+          <CpuMemoryChartUplot
             currentCPUPercent={metricsValues.currentCPUPercent}
             currentMemoryBytes={metricsValues.currentMemoryProcess}
             isLive={chartLiveState}

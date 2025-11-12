@@ -4,7 +4,7 @@ import { NetworkTabData } from '@/types/domain/gpac/filter-stats';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { BandwidthChart } from '../charts/BandwidthChart';
+import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';
 import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 
 interface NetworkTabProps {
@@ -130,15 +130,9 @@ const NetworkTab = memo(
               </CardContent>
             </Card>
 
-            <BandwidthChart
-              currentBytes={currentStats.bytesSent}
-              type="sent"
-              refreshInterval={refreshInterval}
-            />
-
-            <BandwidthChart
-              currentBytes={currentStats.bytesReceived}
-              type="received"
+            <BandwidthCombinedChart
+              bytesSent={currentStats.bytesSent}
+              bytesReceived={currentStats.bytesReceived}
               refreshInterval={refreshInterval}
             />
           </div>
@@ -146,7 +140,6 @@ const NetworkTab = memo(
       </ScrollArea>
     );
   },
-
 );
 
 NetworkTab.displayName = 'NetworkTab';

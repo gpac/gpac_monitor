@@ -44,3 +44,24 @@ export const formatBufferTime = (microseconds: number): string => {
   if (milliseconds >= 1000) return `${(milliseconds / 1000).toFixed(1)} s`;
   return `${Math.floor(milliseconds)} ms`;
 };
+
+/**
+ * Format seconds for chart X-axis display
+ * 0-60s -> "Xs", 60-3600s -> "Xm Ys", >3600s -> "Xh Ym"
+ */
+export const formatChartSeconds = (seconds: number): string => {
+  if (seconds < 60) return `${seconds.toFixed(0)}s`;
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+
+  if (minutes < 60) {
+    return remainingSeconds > 0
+      ? `${minutes}m ${remainingSeconds}s`
+      : `${minutes}m`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+};
