@@ -34,6 +34,7 @@ export class GpacService implements IGpacCommunication {
 
   private notificationHandlers: GpacNotificationHandlers = {};
   private _isLoaded: boolean = false;
+  private _readyPromise: Promise<void> | null = null;
 
   public onMessage?: (message: any) => void;
   public onError?: (error: Error) => void;
@@ -135,6 +136,13 @@ export class GpacService implements IGpacCommunication {
 
   public isLoaded(): boolean {
     return this._isLoaded && this.isConnected();
+  }
+
+  public ready(): Promise<void> {
+    if (!this._readyPromise) {
+      this._readyPromise = this.load().then(() => {});
+    }
+    return this._readyPromise;
   }
 
   public sendMessage(message: GpacMessage): void {
@@ -248,6 +256,7 @@ export class GpacService implements IGpacCommunication {
 
     this.ws.addDisconnectHandler(() => {
       this._isLoaded = false;
+      this._readyPromise = null;
       this.onDisconnect?.();
       this.connectionManager.handleDisconnect();
     });

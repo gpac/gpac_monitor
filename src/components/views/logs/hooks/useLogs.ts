@@ -10,6 +10,7 @@ import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectLogsConfigString } from '@/shared/store/selectors/logs/logsConfigSelectors';
+import { useServiceReady } from '@/shared/hooks/useServiceReady';
 
 interface UseLogsOptions {
   enabled?: boolean;
@@ -22,7 +23,7 @@ export function useLogs(options: UseLogsOptions = {}) {
   const [logs, setLogs] = useState<GpacLogEntry[]>([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
 
-  // Get initial log configuration from store
+  const { isReady } = useServiceReady({ enabled });
   const initialLogConfig = useAppSelector(selectLogsConfigString);
 
   const handleLogsUpdate = useCallback(
@@ -32,20 +33,18 @@ export function useLogs(options: UseLogsOptions = {}) {
       setLogs((currentLogs) => {
         const allLogs = currentLogs.concat(newLogs);
 
-        // Keep only the latest maxEntries logs
         if (allLogs.length <= maxEntries) {
           return allLogs;
         }
 
-        const trimmed = allLogs.slice(-maxEntries);
-        return trimmed;
+        return allLogs.slice(-maxEntries);
       });
     },
     [maxEntries],
   );
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !isReady) {
       if (logs.length > 0) {
         setLogs([]);
       }
@@ -53,21 +52,10 @@ export function useLogs(options: UseLogsOptions = {}) {
       return;
     }
 
-    /*  let unsubscribe: (() => void) | null = null; */
     let isMounted = true;
 
     const setupSubscription = async () => {
       try {
-        await gpacService.load();
-
-        if (!isMounted) {
-          return;
-        }
-
-        if (!isMounted) {
-          return;
-        }
-
         const unsubscribeFunc = await gpacService.subscribe(
           {
             type: SubscriptionType.LOGS,
@@ -81,7 +69,6 @@ export function useLogs(options: UseLogsOptions = {}) {
         );
 
         if (isMounted) {
-          /*   unsubscribe = unsubscribeFunc; */
           setIsSubscribed(true);
         } else {
           unsubscribeFunc();
@@ -100,11 +87,8 @@ export function useLogs(options: UseLogsOptions = {}) {
     return () => {
       isMounted = false;
       setIsSubscribed(false);
-      // NOTE: We deliberately do NOT call unsubscribe() here
-      // This keeps the logs flowing to Redux store for sidebar counts
-      // Logs subscription will only be cleaned up on session end or app close
     };
-  }, [enabled, handleLogsUpdate, initialLogConfig, logs.length]);
+  }, [enabled, isReady, handleLogsUpdate, initialLogConfig, logs.length]);
 
   const memoizedLogs = useMemo(() => logs, [logs]);
   const optimizedLogs = useDeferredValue(memoizedLogs);

@@ -2,9 +2,11 @@ import type { CPUStats } from '@/types/domain/system';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
+import { useServiceReady } from '@/shared/hooks/useServiceReady';
 
 export function useCPUStats(enabled = true, interval = 150) {
   const [stats, setStats] = useState<CPUStats[]>([]);
+  const { isReady } = useServiceReady({ enabled });
 
   const statsRef = useRef<CPUStats[]>([]);
   statsRef.current = stats;
@@ -21,7 +23,7 @@ export function useCPUStats(enabled = true, interval = 150) {
   }, []);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !isReady) {
       if (stats.length > 0) {
         setStats([]);
       }
@@ -33,12 +35,6 @@ export function useCPUStats(enabled = true, interval = 150) {
 
     const setupSubscription = async () => {
       try {
-        await gpacService.load();
-
-        if (!isMounted) {
-          return;
-        }
-
         const unsubscribeFunc = await gpacService.subscribe(
           {
             type: SubscriptionType.CPU_STATS,
@@ -71,7 +67,7 @@ export function useCPUStats(enabled = true, interval = 150) {
         unsubscribe();
       }
     };
-  }, [enabled, interval, handleStatsUpdate]);
+  }, [enabled, isReady, interval, handleStatsUpdate]);
 
   return {
     stats,

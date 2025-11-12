@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { SessionFilterStatistics } from '@/types/domain/gpac/model';
+import { useServiceReady } from '@/shared/hooks/useServiceReady';
 
 export function useSessionStats(enabled = true, interval = 1000) {
   const [stats, setStats] = useState<SessionFilterStatistics[]>([]);
+  const { isReady } = useServiceReady({ enabled });
 
   const handleSessionStatsUpdate = useCallback(
     (newStats: SessionFilterStatistics[]) => {
@@ -14,7 +16,7 @@ export function useSessionStats(enabled = true, interval = 1000) {
   );
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !isReady) {
       if (stats.length > 0) {
         setStats([]);
       }
@@ -26,12 +28,6 @@ export function useSessionStats(enabled = true, interval = 1000) {
 
     const setupSubscription = async () => {
       try {
-        await gpacService.load();
-
-        if (!isMounted) {
-          return;
-        }
-
         const unsubscribeFunc = await gpacService.subscribe(
           {
             type: SubscriptionType.SESSION_STATS,
@@ -65,7 +61,7 @@ export function useSessionStats(enabled = true, interval = 1000) {
         unsubscribe();
       }
     };
-  }, [enabled, interval, handleSessionStatsUpdate]);
+  }, [enabled, isReady, interval, handleSessionStatsUpdate]);
 
   return {
     stats,
