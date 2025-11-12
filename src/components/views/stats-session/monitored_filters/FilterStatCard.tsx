@@ -1,8 +1,6 @@
-import { useCallback, useMemo, memo } from 'react';
+import { useCallback, memo } from 'react';
 import { LuActivity, LuEye } from 'react-icons/lu';
-import { GpacNodeData } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
-import { determineFilterSessionType } from '@/components/views/graph/utils/filterType';
 import {
   Card,
   CardContent,
@@ -11,50 +9,27 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { formatBytes, formatTime, formatNumber } from '@/utils/formatting';
-import {
-  getActivityLevel,
-  getActivityLabel,
-  getActivityColorClass,
-  getBufferProgressColor,
-  calculateBufferUsage,
-} from '@/utils/metrics';
+import { getBufferProgressColor } from '@/utils/metrics';
+import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
 
 interface FilterStatCardProps {
-  filter: GpacNodeData;
+  filter: EnrichedFilterData;
   onClick?: (idx: number) => void;
   isMonitored?: boolean;
   isDetached?: boolean;
 }
 
-const cachedUsageCalculations = new WeakMap<
-  GpacNodeData,
-  { bufferUsage: number; activityLevel: string }
->();
-
 const FilterStatCard: React.FC<FilterStatCardProps> = memo(
   ({ filter, onClick, isDetached = false }) => {
-    const { bufferUsage, activityLevel } = useMemo(() => {
-      if (cachedUsageCalculations.has(filter)) {
-        return cachedUsageCalculations.get(filter) as {
-          bufferUsage: number;
-          activityLevel: string;
-        };
-      }
-
-      const bufferUsage = calculateBufferUsage(filter.ipid);
-
-      const activityLevel = getActivityLevel(
-        filter.pck_done,
-        filter.bytes_done,
-      );
-
-      const result = { bufferUsage, activityLevel };
-      cachedUsageCalculations.set(filter, result);
-      return result;
-    }, [filter]);
-
-    const sessionType = determineFilterSessionType(filter);
+    const {
+      bufferUsage,
+      activityColor,
+      activityLabel,
+      sessionType,
+      formattedBytes,
+      formattedTime,
+      formattedPackets,
+    } = filter.computed;
 
     const handleClick = useCallback(() => {
       if (onClick && filter.idx !== undefined) {
@@ -139,7 +114,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                 <span className="stat stat-label">Data</span>
               </div>
               <p className="text-xs font-medium tabular-nums text-monitor-text-secondary">
-                {formatBytes(filter.bytes_done)}
+                {formattedBytes}
               </p>
             </div>
 
@@ -149,11 +124,9 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                 <span className="stat stat-label">Activity</span>
               </div>
               <div className="flex items-center gap-1">
-                <div
-                  className={`h-2 w-2 rounded-full ${getActivityColorClass(activityLevel)}`}
-                />
+                <div className={`h-2 w-2 rounded-full ${activityColor}`} />
                 <span className="text-xs text-monitor-text-secondary">
-                  {getActivityLabel(activityLevel)}
+                  {activityLabel}
                 </span>
               </div>
             </div>
@@ -183,12 +156,12 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                 variant="outline"
                 className="h-4 px-1.5 py-0 text-xs ring-1 ring-monitor-line bg-white/5 text-monitor-text-secondary"
               >
-                {formatNumber(filter.pck_done)} pkt
+                {formattedPackets} pkt
               </Badge>
             )}
             {hasTime && (
               <Badge variant="outline" className="h-4 px-1.5 py-0 text-xs">
-                <span className="stat-value">{formatTime(filter.time)}</span>
+                <span className="stat-value">{formattedTime}</span>
               </Badge>
             )}
             {filter.errors && filter.errors > 0 && (
@@ -199,6 +172,22 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
           </div>
         </CardContent>
       </Card>
+    );
+  },
+  (prevProps, nextProps) => {
+    const prev = prevProps.filter;
+    const next = nextProps.filter;
+
+    return (
+      prev.idx === next.idx &&
+      prev.bytes_done === next.bytes_done &&
+      prev.pck_done === next.pck_done &&
+      prev.time === next.time &&
+      prev.status === next.status &&
+      prev.errors === next.errors &&
+      prev.nb_ipid === next.nb_ipid &&
+      prev.nb_opid === next.nb_opid &&
+      prevProps.isDetached === nextProps.isDetached
     );
   },
 );

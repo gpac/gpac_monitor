@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FilterStatCard from '../monitored_filters/FilterStatCard';
 import { Widget, WidgetType } from '@/types/ui/widget';
+import { useEnrichedStats } from '../hooks/useEnrichedStats';
 
 interface FiltersGridProps {
   filtersWithLiveStats: EnrichedFilterOverview[];
@@ -22,7 +23,8 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
     onCardClick,
     activeWidgets = [],
   }) => {
-    // Check if a filter is detached
+    const enrichedFilters = useEnrichedStats(filtersWithLiveStats);
+
     const isFilterDetached = useMemo(
       () =>
         (filterIdx: number): boolean => {
@@ -35,26 +37,23 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
         },
       [activeWidgets],
     );
-    // Memoize the filters count to avoid recalculation
+
     const filtersCount = useMemo(
       () => filtersMatchingCriteria.length,
       [filtersMatchingCriteria.length],
     );
 
-    // Memoize the filtered and sorted data
     const sortedFilters = useMemo(() => {
-      const list = [...filtersWithLiveStats];
+      const list = [...enrichedFilters];
       return list.sort((a, b) => {
-        // Prioritize monitored filters first
         const aMonitored = monitoredFilters.has(a.idx || -1);
         const bMonitored = monitoredFilters.has(b.idx || -1);
         if (aMonitored && !bMonitored) return -1;
         if (!aMonitored && bMonitored) return 1;
 
-        // Then sort by activity (bytes processed)
         return (b.bytes_done || 0) - (a.bytes_done || 0);
       });
-    }, [filtersWithLiveStats, monitoredFilters]);
+    }, [enrichedFilters, monitoredFilters]);
 
     return (
       <div className="flex flex-col h-full">

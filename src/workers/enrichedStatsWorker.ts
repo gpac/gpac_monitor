@@ -1,0 +1,148 @@
+import { GpacNodeData } from '@/types/domain/gpac/model';
+
+// Lightweight versions of utility functions (no imports from @/utils)
+const calculateBufferUsage = (ipid: Record<string, any> = {}): number => {
+  const pidEntries = Object.values(ipid);
+  if (pidEntries.length === 0) return 0;
+
+  const totalBuffer = pidEntries.reduce(
+    (sum, pid) => sum + (pid.buffer || 0),
+    0,
+  );
+  const totalMaxBuffer = pidEntries.reduce(
+    (sum, pid) => sum + (pid.max_buffer || 0),
+    0,
+  );
+
+  if (totalMaxBuffer === 0) return 0;
+  return Math.min(100, Math.round((totalBuffer / totalMaxBuffer) * 100));
+};
+
+const getActivityLevel = (
+  pckDone: number = 0,
+  bytesDone: number = 0,
+): string => {
+  if (pckDone === 0 && bytesDone === 0) return 'idle';
+  if (pckDone < 100) return 'low';
+  if (pckDone < 1000) return 'medium';
+  return 'high';
+};
+
+const getActivityColorClass = (activityLevel: string): string => {
+  switch (activityLevel) {
+    case 'high':
+      return 'bg-danger';
+    case 'medium':
+      return 'bg-info';
+    case 'low':
+      return 'bg-warning';
+    default:
+      return 'bg-slate-500/50';
+  }
+};
+
+const getActivityLabel = (activityLevel: string): string => {
+  switch (activityLevel) {
+    case 'high':
+      return 'High';
+    case 'medium':
+      return 'Medium';
+    case 'low':
+      return 'Low';
+    default:
+      return 'Idle';
+  }
+};
+
+const determineFilterSessionType = (filter: GpacNodeData): string => {
+  const hasInputs = filter.nb_ipid && filter.nb_ipid > 0;
+  const hasOutputs = filter.nb_opid && filter.nb_opid > 0;
+
+  if (!hasInputs && hasOutputs) return 'source';
+  if (hasInputs && !hasOutputs) return 'sink';
+  return 'process';
+};
+
+const formatBytes = (bytes: number = 0): string => {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
+};
+
+const formatTime = (ms: number = 0): string => {
+  if (ms === 0) return '0ms';
+  if (ms < 1000) return `${ms}ms`;
+  const seconds = ms / 1000;
+  if (seconds < 60) return `${seconds.toFixed(1)}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}m ${remainingSeconds}s`;
+};
+
+const formatNumber = (num: number = 0): string => {
+  if (num < 1000) return num.toString();
+  if (num < 1000000) return `${(num / 1000).toFixed(1)}K`;
+  return `${(num / 1000000).toFixed(1)}M`;
+};
+
+// Enriched filter data with pre-computed values
+export interface EnrichedFilterData extends GpacNodeData {
+  computed: {
+    bufferUsage: number;
+    activityLevel: string;
+    activityColor: string;
+    activityLabel: string;
+    sessionType: string;
+    formattedBytes: string;
+    formattedTime: string;
+    formattedPackets: string;
+  };
+}
+
+export interface EnrichStatsMessage {
+  type: 'ENRICH_STATS';
+  filters: GpacNodeData[];
+}
+
+export interface EnrichedStatsResponse {
+  type: 'ENRICHED_STATS';
+  enrichedFilters: EnrichedFilterData[];
+}
+
+// Process incoming filters and enrich them
+self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
+  const { type, filters } = event.data;
+
+  if (type === 'ENRICH_STATS') {
+    const enrichedFilters: EnrichedFilterData[] = filters.map((filter) => {
+      const bufferUsage = calculateBufferUsage(filter.ipid);
+      const activityLevel = getActivityLevel(
+        filter.pck_done,
+        filter.bytes_done,
+      );
+
+      return {
+        ...filter,
+        computed: {
+          bufferUsage,
+          activityLevel,
+          activityColor: getActivityColorClass(activityLevel),
+          activityLabel: getActivityLabel(activityLevel),
+          sessionType: determineFilterSessionType(filter),
+          formattedBytes: formatBytes(filter.bytes_done),
+          formattedTime: formatTime(filter.time),
+          formattedPackets: formatNumber(filter.pck_done),
+        },
+      };
+    });
+
+    self.postMessage({
+      type: 'ENRICHED_STATS',
+      enrichedFilters,
+    } as EnrichedStatsResponse);
+  }
+});
+
+export default null;
