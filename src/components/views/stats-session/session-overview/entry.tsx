@@ -5,7 +5,6 @@ import { useStatsCalculations } from '@/components/views/stats-session/hooks/use
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import { WidgetProps } from '@/types/ui/widget';
-import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { StatsTabs } from '../tabs/SessionStatsTabs';
 import { DashboardTabContent } from '../tabs/DashboardTabContent';
@@ -21,6 +20,10 @@ import {
 } from '@/shared/store/slices/widgetsSlice';
 import { enrichFiltersWithStats } from '../utils/filterEnrichment';
 import { createOpenPropertiesHandler } from '../utils/gpacArgsManagement';
+import {
+  deriveMonitoredFilterMap,
+  deriveInlineFilterMap,
+} from '../utils/monitoredFilterMaps';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, isDetached, detachedFilterIdx }) => {
@@ -58,23 +61,17 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       sessionStats,
     );
 
-    // Derive inline filters from viewByFilter
-    const inlineFilterMap = useMemo(() => {
-      const inlineFilters = Object.entries(viewByFilter)
-        .filter(([_, view]) => view?.mode === 'inline')
-        .map(([idx]) => Number(idx));
+    // Derive monitored filters maps
+    const monitoredFilterMap = useMemo(
+      () =>
+        deriveMonitoredFilterMap(viewByFilter, enrichedGraphFilterCollection),
+      [viewByFilter, enrichedGraphFilterCollection],
+    );
 
-      return new Map(
-        inlineFilters
-          .map((idx) => {
-            const filter = enrichedGraphFilterCollection.find(
-              (f) => f.idx === idx,
-            );
-            return filter ? [idx, filter] : null;
-          })
-          .filter(Boolean) as Array<[number, EnrichedFilterOverview]>,
-      );
-    }, [viewByFilter, enrichedGraphFilterCollection]);
+    const inlineFilterMap = useMemo(
+      () => deriveInlineFilterMap(monitoredFilterMap, viewByFilter),
+      [monitoredFilterMap, viewByFilter],
+    );
 
     // Handlers
     const handleCardClick = useCallback(
@@ -108,7 +105,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       [dispatch],
     );
 
-    // DETACHED MODE: Display single filter fullscreen
     if (isDetached && detachedFilterIdx !== undefined) {
       // Skip loading check for detached widgets - show data immediately
       const filter = enrichedGraphFilterCollection.find(
@@ -191,7 +187,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
                 filtersWithLiveStats={enrichedGraphFilterCollection}
                 filtersMatchingCriteria={enrichedGraphFilterCollection}
                 loading={isLoading || isResizing}
-                monitoredFilters={inlineFilterMap}
+                monitoredFilters={monitoredFilterMap}
                 onCardClick={isResizing ? () => {} : handleCardClick}
                 refreshInterval="1s"
                 activeWidgets={[]}

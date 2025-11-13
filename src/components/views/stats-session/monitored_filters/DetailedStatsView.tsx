@@ -94,12 +94,6 @@ const DetailedStatsView = memo(
                 Network
               </TabsTrigger>
               <TabsTrigger
-                value="buffers"
-                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-              >
-                Buffers
-              </TabsTrigger>
-              <TabsTrigger
                 value="inputs"
                 className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
               >

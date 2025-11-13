@@ -36,6 +36,13 @@ export const removeWidgetReducer = (
     const { [widgetId]: _, ...remainingConfigs } = state.configs;
     state.configs = remainingConfigs;
   }
+
+  // Clean up viewByFilter if this was a detached filter widget
+  for (const [filterIdx, view] of Object.entries(state.viewByFilter)) {
+    if (view?.widgetId === widgetId) {
+      delete state.viewByFilter[Number(filterIdx)];
+    }
+  }
 };
 
 export const maximizeWidgetReducer = (

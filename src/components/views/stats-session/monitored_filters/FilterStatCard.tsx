@@ -1,6 +1,7 @@
 import { useCallback, memo } from 'react';
-import { LuActivity, LuEye } from 'react-icons/lu';
+import { LuActivity } from 'react-icons/lu';
 import { Badge } from '@/components/ui/badge';
+import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import {
   Card,
   CardContent,
@@ -20,7 +21,7 @@ interface FilterStatCardProps {
 }
 
 const FilterStatCard: React.FC<FilterStatCardProps> = memo(
-  ({ filter, onClick, isDetached = false }) => {
+  ({ filter, onClick, isMonitored = false, isDetached = false }) => {
     const {
       bufferUsage,
       activityColor,
@@ -37,8 +38,9 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       }
     }, [filter.idx, onClick]);
 
-    // Detached = monitored. Ring + cursor disabled
-    const ringClass = isDetached
+    // Monitored (inline or detached) = highlighted ring
+    const isMonitoredOrDetached = isMonitored || isDetached;
+    const ringClass = isMonitoredOrDetached
       ? 'ring-2 ring-red-700/90'
       : 'ring-1 ring-transparent hover:ring-monitor-accent/40';
 
@@ -62,15 +64,16 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
               {filter.name}
             </CardTitle>
             <div className="flex items-center gap-1 ml-2">
-              {isDetached && (
-                <Badge
-                  variant="outline"
-                  className="flex h-5 items-center gap-1 px-1 ring-1 ring-red-600/90 text-slate-900/90 bg-red-200"
-                  title="Filter is monitored (detached view)"
-                >
-                  <LuEye className="h-4 w-4" />
-                </Badge>
-              )}
+              <MonitoredBadge
+                isMonitored={isMonitoredOrDetached}
+                title={
+                  isDetached
+                    ? 'Filter is monitored (detached view)'
+                    : isMonitored
+                      ? 'Filter is monitored (inline view)'
+                      : ''
+                }
+              />
               <Badge
                 variant={
                   sessionType === 'source'
@@ -187,7 +190,8 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       prev.errors === next.errors &&
       prev.nb_ipid === next.nb_ipid &&
       prev.nb_opid === next.nb_opid &&
-      prevProps.isDetached === nextProps.isDetached
+      prevProps.isDetached === nextProps.isDetached &&
+      prevProps.isMonitored === nextProps.isMonitored
     );
   },
 );
