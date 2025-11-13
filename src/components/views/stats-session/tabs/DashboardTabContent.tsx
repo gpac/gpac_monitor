@@ -16,7 +16,7 @@ import {
   ActivityLevel,
 } from '@/components/ui/activity-indicator';
 import { formatBytes, formatNumber } from '@/utils/formatting';
-import type { StatsCounters, SystemStats } from '../hooks/useStatsCalculations';
+import type { StatsCounters, SystemStats } from '../hooks/stats';
 import { Widget } from '@/types/ui/widget';
 import { CommandLineInfo } from '@/components/CommandLineDialog';
 

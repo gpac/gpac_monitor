@@ -5,7 +5,7 @@ import {
   detachFilter,
   closeFilter,
 } from '@/shared/store/slices/widgetsSlice';
-import { createOpenPropertiesHandler } from '../utils/gpacArgsManagement';
+import { createOpenPropertiesHandler } from '../../utils/gpacArgsManagement';
 
 /**
  * Hook to provide filter action handlers

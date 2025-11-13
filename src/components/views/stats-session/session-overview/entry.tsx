@@ -1,9 +1,8 @@
 import React, { useMemo, useState, useRef } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
-import { useStatsCalculations } from '../hooks/useStatsCalculations';
-import { useMonitoredFilters } from '../hooks/useMonitoredFilters';
-import { useFilterHandlers } from '../hooks/useFilterHandlers';
+import { useStatsCalculations } from '../hooks/stats';
+import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import { WidgetProps } from '@/types/ui/widget';

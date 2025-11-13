@@ -4,7 +4,7 @@ import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import {
   getAllMonitoredFilters,
   getInlineFilters,
-} from '../utils/monitoredFilterMaps';
+} from '../../utils/monitoredFilterMaps';
 
 /**
  * Hook to get monitored filter maps from Redux state

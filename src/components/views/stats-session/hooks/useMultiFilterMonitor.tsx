@@ -7,7 +7,7 @@ import {
   GraphFilterData,
   SessionFilterStatistics,
 } from '@/types/domain/gpac/model';
-import { useSessionStats } from './useSessionStats';
+import { useSessionStats } from './stats/useSessionStats';
 
 interface MultiFilterMonitorState {
   isLoading: boolean;

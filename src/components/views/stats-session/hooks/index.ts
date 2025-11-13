@@ -1,6 +1,13 @@
-// Subscription hooks - for managing data subscriptions and session state
-export { useFilterStats } from './useFilterStats';
-export { useSessionStats } from './useSessionStats';
+// FilterCard hooks - for managing card state and expansion
+export { useFilterCardState } from './filterCard';
 
-// Component data hooks - for processing and formatting component data
-export * from './data';
+// Filter management hooks - for monitoring and handling filter interactions
+export { useMonitoredFilters, useFilterHandlers } from './filters';
+
+// Statistics hooks - for processing and calculating stats data
+export {
+  useEnrichedStats,
+  useSessionStats,
+  useStatsCalculations,
+  useFilterStats,
+} from './stats';

@@ -111,31 +111,66 @@ export interface EnrichedStatsResponse {
   enrichedFilters: EnrichedFilterData[];
 }
 
+// Cache for enriched filters to prevent unnecessary re-creation
+const enrichedCache = new Map<string | number, EnrichedFilterData>();
+
 // Process incoming filters and enrich them
 self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
   const { type, filters } = event.data;
 
   if (type === 'ENRICH_STATS') {
     const enrichedFilters: EnrichedFilterData[] = filters.map((filter) => {
+      const key = filter.idx ?? filter.ID ?? filter.name;
+      const cached = enrichedCache.get(key);
+
       const bufferUsage = calculateBufferUsage(filter.ipid);
       const activityLevel = getActivityLevel(
         filter.pck_done,
         filter.bytes_done,
       );
+      const sessionType = determineFilterSessionType(filter);
+      const formattedBytes = formatBytes(filter.bytes_done);
+      const formattedTime = formatTime(filter.time);
+      const formattedPackets = formatNumber(filter.pck_done);
+      const activityColor = getActivityColorClass(activityLevel);
+      const activityLabel = getActivityLabel(activityLevel);
 
-      return {
+      // Check if computed values changed
+      if (
+        cached &&
+        cached.idx === filter.idx &&
+        cached.name === filter.name &&
+        cached.errors === filter.errors &&
+        cached.computed.bufferUsage === bufferUsage &&
+        cached.computed.activityLevel === activityLevel &&
+        cached.computed.activityColor === activityColor &&
+        cached.computed.activityLabel === activityLabel &&
+        cached.computed.sessionType === sessionType &&
+        cached.computed.formattedBytes === formattedBytes &&
+        cached.computed.formattedTime === formattedTime &&
+        cached.computed.formattedPackets === formattedPackets
+      ) {
+        // Return cached object to maintain reference equality
+        return cached;
+      }
+
+      // Create new enriched object only if data changed
+      const enriched: EnrichedFilterData = {
         ...filter,
         computed: {
           bufferUsage,
           activityLevel,
-          activityColor: getActivityColorClass(activityLevel),
-          activityLabel: getActivityLabel(activityLevel),
-          sessionType: determineFilterSessionType(filter),
-          formattedBytes: formatBytes(filter.bytes_done),
-          formattedTime: formatTime(filter.time),
-          formattedPackets: formatNumber(filter.pck_done),
+          activityColor,
+          activityLabel,
+          sessionType,
+          formattedBytes,
+          formattedTime,
+          formattedPackets,
         },
       };
+
+      enrichedCache.set(key, enriched);
+      return enriched;
     });
 
     self.postMessage({

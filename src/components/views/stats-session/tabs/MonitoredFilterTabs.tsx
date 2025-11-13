@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
-import { useFilterStats } from '@/components/views/stats-session/hooks/useFilterStats';
+import { useFilterStats } from '@/components/views/stats-session/hooks/stats';
 import {
   FilterStatsResponse,
   PIDproperties,
