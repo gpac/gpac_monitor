@@ -1,17 +1,12 @@
-import { memo, useMemo, useState } from 'react';
+import { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/UplotChart';
-import uPlot from 'uplot';
-import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { useChartData } from '../hooks/useChartData';
 import { createCpuMemoryUplotConfig } from './uplotConfig';
-
-export interface CpuMemoryDataPoint {
-  timestamp: number;
-  time: string;
-  cpu_percent: number;
-  memory_mb: number;
-}
+import {
+  prepareCpuMemoryData,
+  calculateMemoryYMax,
+} from '@/utils/charts/cpuMemory';
 
 interface CpuMemoryChartUplotProps {
   currentCPUPercent: number;
@@ -29,29 +24,15 @@ export const CpuMemoryChartUplot = memo(
     maxPoints = 400,
     windowDuration,
   }: CpuMemoryChartUplotProps) => {
-    const [isResizing, setIsResizing] = useState(false);
-
     const currentMemoryMB = useMemo(
       () => currentMemoryBytes / (1024 * 1024),
       [currentMemoryBytes],
     );
 
-    const memoryYAxisMax = useMemo(() => {
-      const minScale = 100;
-      const roundTo = 50;
-      const calculated = Math.ceil((currentMemoryMB * 1.5) / roundTo) * roundTo;
-      return Math.max(minScale, calculated);
-    }, [currentMemoryMB]);
-
-    const { ref } = useOptimizedResize({
-      onResizeStart: () => setIsResizing(true),
-      onResizeEnd: () => setIsResizing(false),
-      debounce: 32,
-      throttle: true,
-      useTransform: true,
-    }) as { ref: React.RefObject<HTMLElement> };
-
-    const chartRef = ref as React.RefObject<HTMLDivElement>;
+    const memoryYAxisMax = useMemo(
+      () => calculateMemoryYMax(currentMemoryMB),
+      [currentMemoryMB],
+    );
 
     const { dataPoints } = useChartData(
       currentCPUPercent,
@@ -63,32 +44,23 @@ export const CpuMemoryChartUplot = memo(
     );
 
     const { data, options } = useMemo(() => {
-      const firstTimestamp =
-        dataPoints.length > 0 ? dataPoints[0].timestamp : 0;
-      const relativeSeconds = dataPoints.map(
-        (p) => (p.timestamp - firstTimestamp) / 1000,
-      );
-      const memoryData = dataPoints.map((p) => p.memory_mb);
-      const cpuData = dataPoints.map((p) => p.cpu_percent);
-
-      const alignedData: uPlot.AlignedData = [
-        relativeSeconds,
-        memoryData,
-        cpuData,
-      ];
+      const { alignedData, relativeSeconds, memoryData, cpuData } =
+        prepareCpuMemoryData(dataPoints);
 
       const opts = createCpuMemoryUplotConfig({
         memoryYAxisMax,
         relativeSeconds,
         memoryData,
         cpuData,
+        width: 300,
+        height: 180,
       });
 
       return { data: alignedData, options: opts };
     }, [dataPoints, memoryYAxisMax]);
 
     return (
-      <Card ref={chartRef} className="bg-stat border-transparent">
+      <Card className="bg-stat border-transparent">
         <CardHeader className="pb-2">
           <CardTitle className="flex justify-center items-center gap-2 text-sm stat stat-label">
             <span className="flex items-center gap-1.5">
@@ -109,10 +81,7 @@ export const CpuMemoryChartUplot = memo(
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div
-            style={{ width: '100%', height: 250, minHeight: 250 }}
-            className={`gpu-optimized ${isResizing ? 'contain-layout contain-style is-interacting' : ''}`}
-          >
+          <div style={{ width: '100%', height: 250, minHeight: 150 }}>
             <UplotChart data={data} options={options} className="w-full" />
           </div>
         </CardContent>

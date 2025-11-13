@@ -23,16 +23,14 @@ const GraphLegend = memo(() => {
         bg-gray-900/90 backdrop-blur border border-gray-700
         shadow-lg"
       >
-        <div className="text-xs font-medium text-gray-400 mb-1">
-          Stream Types
-        </div>
+        <div className="text-xs font-cond text-gray-400 mb-1">Stream Types</div>
         {LEGEND_ITEMS.map(({ type, label, color }) => (
           <div key={type} className="flex items-center gap-2">
             <div
               className="w-8 h-0.5 rounded-full"
               style={{ backgroundColor: color }}
             />
-            <span className="text-xs text-gray-300">{label}</span>
+            <span className="text-xs font-cond text-gray-300">{label}</span>
           </div>
         ))}
       </div>

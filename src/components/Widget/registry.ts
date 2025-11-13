@@ -28,7 +28,6 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     title: 'Session Filters',
     icon: TbFilterCog,
     component: MultiFilterMonitor,
-    // 10 colonnes sur 24
     defaultSize: { w: 10, h: 6 },
     defaultPosition: { x: 0, y: 0 },
     defaultZIndex: 1000,
@@ -56,7 +55,6 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     defaultZIndex: 1001,
     description: 'Display real-time system performance metrics.',
     enabled: true,
-    fixedPosition: true,
   },
   [WidgetType.LOGS]: {
     type: WidgetType.LOGS,

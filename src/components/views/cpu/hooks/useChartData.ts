@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { CpuMemoryDataPoint } from '../components/CpuMemoryChartUplot';
+import { CpuMemoryDataPoint } from '@/utils/charts/cpuMemory';
 
 export const useChartData = (
   currentCPUPercent: number,
