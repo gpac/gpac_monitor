@@ -1,7 +1,9 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
-import { useMultiFilterMonitor } from '@/components/views/stats-session/hooks/useMultiFilterMonitor';
-import { useStatsCalculations } from '@/components/views/stats-session/hooks/useStatsCalculations';
+import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
+import { useStatsCalculations } from '../hooks/useStatsCalculations';
+import { useMonitoredFilters } from '../hooks/useMonitoredFilters';
+import { useFilterHandlers } from '../hooks/useFilterHandlers';
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import { WidgetProps } from '@/types/ui/widget';
@@ -12,47 +14,29 @@ import {
   MonitoredFilterTabs,
   MonitoredFilterContent,
 } from '../tabs/MonitoredFilterTabs';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import {
-  openFilterInline,
-  detachFilter,
-  closeFilter,
-} from '@/shared/store/slices/widgetsSlice';
 import { enrichFiltersWithStats } from '../utils/filterEnrichment';
-import { createOpenPropertiesHandler } from '../utils/gpacArgsManagement';
-import {
-  deriveMonitoredFilterMap,
-  deriveInlineFilterMap,
-} from '../utils/monitoredFilterMaps';
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, isDetached, detachedFilterIdx }) => {
-    const dispatch = useAppDispatch();
-    const viewByFilter = useAppSelector((state) => state.widgets.viewByFilter);
     const [activeTab, setActiveTab] = useState('main');
     const [isResizing, setIsResizing] = useState(false);
+    const tabsRef = useRef<HTMLDivElement>(null);
 
-    // Optimize complex stats calculations during resize
     const { ref } = useOptimizedResize({
       onResizeStart: () => setIsResizing(true),
       onResizeEnd: () => setIsResizing(false),
-      debounce: 20, // Slightly higher for complex calculations
+      debounce: 20,
       throttle: true,
     }) as { ref: React.RefObject<HTMLElement> };
     const containerRef = ref as React.RefObject<HTMLDivElement>;
 
-    // Memoize isDashboardActive to prevent unnecessary recalculations
     const isDashboardActive = useMemo(() => activeTab === 'main', [activeTab]);
-    const tabsRef = useRef<HTMLDivElement>(null);
 
     const { isLoading, sessionStats, staticFilters } =
       useMultiFilterMonitor(isDashboardActive);
 
-    // Enrich filters with stats
     const enrichedGraphFilterCollection = useMemo(() => {
-      if (staticFilters.length === 0 || isResizing) {
-        return [];
-      }
+      if (staticFilters.length === 0 || isResizing) return [];
       return enrichFiltersWithStats(staticFilters, sessionStats);
     }, [staticFilters, sessionStats, isResizing]);
 
@@ -61,49 +45,16 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       sessionStats,
     );
 
-    // Derive monitored filters maps
-    const monitoredFilterMap = useMemo(
-      () =>
-        deriveMonitoredFilterMap(viewByFilter, enrichedGraphFilterCollection),
-      [viewByFilter, enrichedGraphFilterCollection],
+    const { monitoredFilterMap, inlineFilterMap } = useMonitoredFilters(
+      enrichedGraphFilterCollection,
     );
 
-    const inlineFilterMap = useMemo(
-      () => deriveInlineFilterMap(monitoredFilterMap, viewByFilter),
-      [monitoredFilterMap, viewByFilter],
-    );
-
-    // Handlers
-    const handleCardClick = useCallback(
-      (filterIdx: number) => {
-        dispatch(openFilterInline(filterIdx));
-        setActiveTab(`filter-${filterIdx}`);
-      },
-      [dispatch],
-    );
-
-    const handleDetachTab = useCallback(
-      (filterIdx: number, filterName: string, e: React.MouseEvent) => {
-        e.stopPropagation();
-        dispatch(detachFilter({ idx: filterIdx, name: filterName }));
-        setActiveTab('main');
-      },
-      [dispatch],
-    );
-
-    const handleCloseTab = useCallback(
-      (filterIdx: number, e: React.MouseEvent) => {
-        e.stopPropagation();
-        dispatch(closeFilter(filterIdx));
-        setActiveTab('main');
-      },
-      [dispatch],
-    );
-
-    const handleOpenProperties = useMemo(
-      () => createOpenPropertiesHandler(dispatch),
-      [dispatch],
-    );
+    const {
+      handleCardClick,
+      handleDetachTab,
+      handleCloseTab,
+      handleOpenProperties,
+    } = useFilterHandlers(setActiveTab);
 
     if (isDetached && detachedFilterIdx !== undefined) {
       // Skip loading check for detached widgets - show data immediately

@@ -2,10 +2,9 @@ import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { FilterView } from '@/shared/store/slices/widgetsSlice';
 
 /**
- * Derive monitored filters map from viewByFilter state
- * Includes both inline and detached filters
+ * Get all monitored filters (inline + detached)
  */
-export const deriveMonitoredFilterMap = (
+export const getAllMonitoredFilters = (
   viewByFilter: Record<number, FilterView | undefined>,
   enrichedFilters: EnrichedFilterOverview[],
 ): Map<number, EnrichedFilterOverview> => {
@@ -24,9 +23,9 @@ export const deriveMonitoredFilterMap = (
 };
 
 /**
- * Derive inline-only filters map from monitored filters
+ * Get inline-only filters from monitored filters
  */
-export const deriveInlineFilterMap = (
+export const getInlineFilters = (
   monitoredFilters: Map<number, EnrichedFilterOverview>,
   viewByFilter: Record<number, FilterView | undefined>,
 ): Map<number, EnrichedFilterOverview> => {
