@@ -63,22 +63,16 @@ const LogCounters: React.FC = () => {
   const dispatch = useAppDispatch();
   const logCounts = useAppSelector(selectLogCounts);
   const activeWidgets = useAppSelector(selectActiveWidgets);
-
-  // Check if LogMonitor is already open
   const logWidgetExists = activeWidgets.some((w) => w.type === WidgetType.LOGS);
 
   const handleOpenLogsFiltered = (level: GpacLogLevel) => {
-    // Set UI filter (Layer 2: view layer only)
     dispatch(setUIFilter([level]));
-
-    // If widget doesn't exist, open it
     if (!logWidgetExists) {
       const definition = getWidgetDefinition(WidgetType.LOGS);
       if (definition) {
         dispatch(addWidget(WidgetType.LOGS));
       }
     }
-    // If widget already exists, Redux state change will trigger re-render
   };
 
   return (

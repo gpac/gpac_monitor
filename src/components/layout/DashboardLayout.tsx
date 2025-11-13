@@ -41,7 +41,6 @@ const DashboardLayout: React.FC = () => {
     [activeWidgets], // Only recreate when activeWidgets reference changes
   );
 
-  // Memoize renderWidget to prevent recreation
   const renderWidget = useCallback(
     (widget: Widget) => {
       const definition = getWidgetDefinition(widget.type);
@@ -75,13 +74,11 @@ const DashboardLayout: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-950">
-      {/* Header fixe en haut */}
       <div className="fixed top-0 left-0 right-0 h-16 z-20">
         <Header />
       </div>
 
       <div className="flex pt-16">
-        {/* Sidebar with GPU-accelerated transform transition */}
         <div
           id="app-sidebar"
           className="fixed top-16 bottom-0 left-0 w-64 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
@@ -91,8 +88,6 @@ const DashboardLayout: React.FC = () => {
         >
           <Sidebar />
         </div>
-
-        {/* Floating button to close sidebar when open */}
         {isSidebarOpen && (
           <SidebarCloseButton onClose={() => dispatch(closeSidebar())} />
         )}
@@ -105,7 +100,6 @@ const DashboardLayout: React.FC = () => {
             opacity: isDraggingRef.current ? 0.2 : 1,
           }}
         >
-          {/* Grid widgets */}
           <ResponsiveGridLayout
             className="layout"
             layouts={layouts}
