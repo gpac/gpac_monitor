@@ -2,7 +2,6 @@ import { memo, useMemo } from 'react';
 import { LuSettings } from 'react-icons/lu';
 import {
   OverviewTabData,
-  BuffersTabData,
   TabPIDData,
   NetworkTabData,
   FilterStatsResponse,
@@ -11,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
-import BuffersTab from './tabs/BuffersTab';
 import InputsTab from './tabs/InputsTab';
 import OutputsTab from './tabs/OutputsTab';
 
@@ -33,7 +31,6 @@ const EMPTY_FILTER_DATA: FilterStatsResponse = {
 interface DetailedStatsViewProps {
   overviewData: OverviewTabData;
   networkData: NetworkTabData;
-  buffersData: BuffersTabData;
   inputPids: TabPIDData[];
   outputPids: TabPIDData[];
   filterData?: FilterStatsResponse;
@@ -43,7 +40,6 @@ interface DetailedStatsViewProps {
 
 const MemoizedOverviewTab = memo(OverviewTab);
 const MemoizedNetworkTab = memo(NetworkTab);
-const MemoizedBuffersTab = memo(BuffersTab);
 const MemoizedInputsTab = memo(InputsTab);
 const MemoizedOutputsTab = memo(OutputsTab);
 
@@ -51,7 +47,6 @@ const DetailedStatsView = memo(
   ({
     overviewData,
     networkData,
-    buffersData,
     inputPids,
     outputPids,
     filterData = EMPTY_FILTER_DATA, // Use constant fallback
@@ -128,9 +123,6 @@ const DetailedStatsView = memo(
               filterName={overviewData.name}
               refreshInterval={5000}
             />
-          </TabsContent>
-          <TabsContent value="buffers">
-            <MemoizedBuffersTab data={buffersData} />
           </TabsContent>
           <TabsContent value="inputs">
             <MemoizedInputsTab
