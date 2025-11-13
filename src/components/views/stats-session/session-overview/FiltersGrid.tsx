@@ -2,7 +2,7 @@ import React, { memo, useMemo } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import FilterStatCard from '../monitored_filters/filterCard';
+import FilterStatCard from '../monitored_filters/FilterStatCard';
 import { Widget } from '@/types/ui/widget';
 import { useEnrichedStats } from '../hooks/stats';
 import {
