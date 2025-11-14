@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { LuUpload, LuDownload } from 'react-icons/lu';
 import { NetworkTabData } from '@/types/domain/gpac/filter-stats';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';
@@ -21,121 +21,103 @@ const NetworkTab = memo(
     filterName,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
   }: NetworkTabProps) => {
-    console.log('[NetworkTab] Received data:', data, 'filterName:', filterName);
-
     const { currentStats, instantRates, formattedStats, getActivityLevel } =
       useNetworkMetrics(data, filterName);
 
     return (
       <ScrollArea className="h-[400px]">
         <div className="space-y-4">
-          {/* Real-time throughput overview */}
+          {/* Stats cards side by side */}
           <div className="grid grid-cols-2 gap-4">
             <Card className="bg-stat border-transparent">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <LuUpload className="h-4 w-4 stat-label" />
-                    Upload Rate
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {/* Header: title + badge */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-0.5 h-5 rounded-full bg-emerald-500" />
+                      <LuUpload className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Upload
+                      </span>
+                    </div>
+                    <Badge
+                      variant={
+                        getActivityLevel(instantRates.bytesSentRate).variant
+                      }
+                      className="text-[11px] h-5 px-2"
+                    >
+                      {getActivityLevel(instantRates.bytesSentRate).level}
+                    </Badge>
                   </div>
-                  <Badge
-                    variant={
-                      getActivityLevel(instantRates.bytesSentRate).variant
-                    }
-                  >
-                    {getActivityLevel(instantRates.bytesSentRate).level}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold stat text-info tabular-nums">
+
+                  {/* Main rate - HERO */}
+                  <div className="text-2xl font-bold text-emerald-500 tabular-nums leading-none">
                     {formattedStats.bytesSentRate}
                   </div>
-                  <div className="text-xs text-muted-foreground  stat-label">
-                    Data Rate
-                  </div>
-                </div>
 
-                <div className="pt-2 border-t border-border/50">
-                  <div className="grid grid-cols-2 gap-y-1 text-xs">
-                    <div className="text-muted-foreground stat-label">
-                      Total
-                    </div>
-                    <div className="font-medium stat text-info tabular-nums">
+                  {/* Secondary stats - single line */}
+                  <div className="text-[11px] text-muted-foreground">
+                    <span className="font-medium">
                       {formattedStats.bytesSent}
-                    </div>
-                    <div className="text-muted-foreground stat-label">
-                      Packets
-                    </div>
-                    <div className="font-medium stat text-info tabular-nums">
-                      {formattedStats.packetsSent}
-                    </div>
+                    </span>
+                    <span className="mx-1.5">·</span>
+                    <span className="font-medium">
+                      {formattedStats.packetsSent} packets
+                    </span>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card className="bg-stat border-transparent">
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2">
-                    <LuDownload className="h-4 w-4 stat-label" />
-                    Download Rate
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {/* Header: title + badge */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-0.5 h-5 rounded-full bg-blue-500" />
+                      <LuDownload className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        Download
+                      </span>
+                    </div>
+                    <Badge
+                      variant={
+                        getActivityLevel(instantRates.bytesReceivedRate).variant
+                      }
+                      className="text-[11px] h-5 px-2"
+                    >
+                      {getActivityLevel(instantRates.bytesReceivedRate).level}
+                    </Badge>
                   </div>
-                  <Badge
-                    variant={
-                      getActivityLevel(instantRates.bytesReceivedRate).variant
-                    }
-                  >
-                    {getActivityLevel(instantRates.bytesReceivedRate).level}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-1">
-                  <div className="text-2xl font-bold stat text-info tabular-nums">
+
+                  {/* Main rate - HERO */}
+                  <div className="text-2xl font-bold text-blue-500 tabular-nums leading-none">
                     {formattedStats.bytesReceivedRate}
                   </div>
-                  <div className="text-xs text-muted-foreground stat-label">
-                    Data Rate
-                  </div>
-                </div>
 
-                <div className="space-y-1">
-                  <div className="text-lg font-semibold stat text-info tabular-nums">
-                    {formattedStats.packetsReceivedRate}
-                  </div>
-                  <div className="text-xs text-muted-foreground stat-label">
-                    Packet Rate
-                  </div>
-                </div>
-
-                <div className="pt-2 border-t border-border/50">
-                  <div className="grid grid-cols-2 gap-y-1 text-xs">
-                    <div className="text-muted-foreground stat-label">
-                      Total
-                    </div>
-                    <div className="font-medium stat text-info tabular-nums">
+                  {/* Secondary stats - single line */}
+                  <div className="text-[11px] text-muted-foreground">
+                    <span className="font-medium">
                       {formattedStats.bytesReceived}
-                    </div>
-                    <div className="text-muted-foreground stat-label">
-                      Packets
-                    </div>
-                    <div className="font-medium stat text-info tabular-nums">
-                      {formattedStats.packetsReceived}
-                    </div>
+                    </span>
+                    <span className="mx-1.5">·</span>
+                    <span className="font-medium">
+                      {formattedStats.packetsReceived} packets
+                    </span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-
-            <BandwidthCombinedChart
-              bytesSent={currentStats.bytesSent}
-              bytesReceived={currentStats.bytesReceived}
-              refreshInterval={refreshInterval}
-            />
           </div>
+
+          {/* Combined chart below */}
+          <BandwidthCombinedChart
+            bytesSent={currentStats.bytesSent}
+            bytesReceived={currentStats.bytesReceived}
+            refreshInterval={refreshInterval}
+          />
         </div>
       </ScrollArea>
     );

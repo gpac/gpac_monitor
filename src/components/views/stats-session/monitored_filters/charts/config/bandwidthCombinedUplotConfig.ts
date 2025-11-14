@@ -1,5 +1,5 @@
 import uPlot from 'uplot';
-import { formatBytes } from '@/utils/formatting';
+import { formatBitrate } from '@/utils/formatting/numbers';
 
 export interface BandwidthCombinedConfigParams {
   uploadData: number[];
@@ -64,10 +64,10 @@ export const createBandwidthCombinedConfig = ({
 
           const time = timeLabels[idx] || '--';
           const upload = uploadData[idx]
-            ? `${formatBytes(uploadData[idx])}/s`
+            ? formatBitrate(uploadData[idx] * 8)
             : '--';
           const download = downloadData[idx]
-            ? `${formatBytes(downloadData[idx])}/s`
+            ? formatBitrate(downloadData[idx] * 8)
             : '--';
 
           tooltip.innerHTML = `
@@ -89,14 +89,14 @@ export const createBandwidthCombinedConfig = ({
         stroke: '#10b981',
         width: 2,
         fill: 'rgba(16, 185, 129, 0.15)',
-        value: (_u, v) => (v == null ? '--' : `${formatBytes(v)}/s`),
+        value: (_u, v) => (v == null ? '--' : formatBitrate(v * 8)),
       },
       {
         label: 'Download',
         stroke: '#3b82f6',
         width: 2,
         fill: 'rgba(59, 130, 246, 0.15)',
-        value: (_u, v) => (v == null ? '--' : `${formatBytes(v)}/s`),
+        value: (_u, v) => (v == null ? '--' : formatBitrate(v * 8)),
       },
     ],
     scales: {
@@ -122,7 +122,7 @@ export const createBandwidthCombinedConfig = ({
         ticks: { stroke: '#6ee7b7', size: 5, width: 2 },
         font: '10px monospace',
         size: 80,
-        values: (_u, vals) => vals.map((v) => `${formatBytes(v)}/s`),
+        values: (_u, vals) => vals.map((v) => formatBitrate(v * 8)),
       },
     ],
   };

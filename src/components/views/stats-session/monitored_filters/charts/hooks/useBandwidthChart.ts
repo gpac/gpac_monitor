@@ -88,6 +88,8 @@ export const useBandwidthChart = ({
       const elapsedSecs = (now - lastTimestamp) / 1000;
       const latestBytes = currentBytesRef.current;
       const bytesDelta = latestBytes - lastBytesRef.current;
+      if (bytesDelta === 0) return;
+
       const bytesPerSecond = Math.max(0, bytesDelta / elapsedSecs);
 
       addSamplePoint(bytesPerSecond, now);
@@ -96,7 +98,6 @@ export const useBandwidthChart = ({
     return () => clearInterval(intervalId);
   }, [refreshInterval, addSamplePoint]);
 
-  // Tooltip formatter (stable reference)
   const tooltipFormatter = useCallback(
     (value: number | string | Array<number | string>) => {
       if (typeof value === 'number') {
