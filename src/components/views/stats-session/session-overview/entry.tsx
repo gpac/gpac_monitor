@@ -2,6 +2,7 @@ import React, { useMemo, useState, useRef } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
 import { useStatsCalculations } from '../hooks/stats';
+import { useEnrichedStats } from '../hooks/stats';
 import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
@@ -34,18 +35,24 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     const { isLoading, sessionStats, staticFilters } =
       useMultiFilterMonitor(isDashboardActive);
 
-    const enrichedGraphFilterCollection = useMemo(() => {
+    // Merge static graph data with dynamic session stats
+    const filtersWithSessionStats = useMemo(() => {
       if (staticFilters.length === 0 || isResizing) return [];
       return enrichFiltersWithStats(staticFilters, sessionStats);
     }, [staticFilters, sessionStats, isResizing]);
 
+    // Add computed metrics via worker (activityLevel, sessionType, formatted values)
+    const filtersWithComputedMetrics = useEnrichedStats(
+      filtersWithSessionStats,
+    );
+
     const { statsCounters, systemStats } = useStatsCalculations(
-      staticFilters,
+      filtersWithComputedMetrics,
       sessionStats,
     );
 
     const { monitoredFilterMap, inlineFilterMap } = useMonitoredFilters(
-      enrichedGraphFilterCollection,
+      filtersWithComputedMetrics,
     );
 
     const {
@@ -57,7 +64,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
     if (isDetached && detachedFilterIdx !== undefined) {
       // Skip loading check for detached widgets - show data immediately
-      const filter = enrichedGraphFilterCollection.find(
+      const filter = filtersWithComputedMetrics.find(
         (f) => f.idx === detachedFilterIdx,
       );
 
@@ -121,7 +128,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
             <StatsTabs
               activeTab={activeTab}
               onValueChange={setActiveTab}
-              allFilters={enrichedGraphFilterCollection}
+              allFilters={filtersWithComputedMetrics}
               onCloseTab={handleCloseTab}
               onDetachTab={handleDetachTab}
               tabsRef={tabsRef}
@@ -134,8 +141,8 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               <DashboardTabContent
                 systemStats={systemStats}
                 statsCounters={statsCounters}
-                filtersWithLiveStats={enrichedGraphFilterCollection}
-                filtersMatchingCriteria={enrichedGraphFilterCollection}
+                filtersWithLiveStats={filtersWithComputedMetrics}
+                filtersMatchingCriteria={filtersWithComputedMetrics}
                 loading={isLoading || isResizing}
                 monitoredFilters={monitoredFilterMap}
                 onCardClick={isResizing ? () => {} : handleCardClick}

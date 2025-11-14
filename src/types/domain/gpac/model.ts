@@ -51,6 +51,18 @@ export interface EnrichedFilterOverview extends Record<string, unknown> {
   pck_done: number;
   pck_sent: number;
   time: number;
+
+  // Computed metrics (added by enrichedStatsWorker)
+  computed?: {
+    bufferUsage: number;
+    activityLevel: string;
+    activityColor: string;
+    activityLabel: string;
+    sessionType: string;
+    formattedBytes: string;
+    formattedTime: string;
+    formattedPackets: string;
+  };
 }
 
 export interface GpacNodeData extends EnrichedFilterOverview {}

@@ -8,7 +8,7 @@ import {
   LuPlay,
 } from 'react-icons/lu';
 import { FiltersGrid } from '../session-overview/FiltersGrid';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import {
@@ -57,53 +57,53 @@ const StatsCard: React.FC<StatsCardProps> = ({
 }) => {
   const getTrendIcon = () => {
     if (trend === 'up')
-      return <LuArrowUp className="h-3 w-3 text-emerald-400" />;
+      return <LuArrowUp className="h-3.5 w-3.5 text-teal-400/80" />;
     if (trend === 'down')
-      return <LuArrowDown className="h-3 w-3 text-rose-400" />;
+      return <LuArrowDown className="h-3.5 w-3.5 text-rose-400/80" />;
     return null;
-  };
-
-  const getTrendColor = () => {
-    if (trend === 'up') return 'text-emerald-400';
-    if (trend === 'down') return 'text-rose-400';
-    return 'text-monitor-text-muted';
   };
 
   return (
     <Card
-      className={`bg-monitor-panel ring-1 ring-monitor-line border-transparent rounded-lg shadow-none hover:bg-white/4 transition-colors ${className}`}
+      className={`bg-monitor-panel/60 border border-white/[0.03] rounded-lg shadow-none hover:bg-monitor-panel/80 transition-colors h-[80px] ${className}`}
     >
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 pb-2">
-        <CardTitle className="text-xs font-medium text-monitor-text-muted">
-          {title}
-        </CardTitle>
-        <div className="flex items-center gap-1 text-monitor-text-muted">
-          {activityLevel && (
-            <ActivityIndicator level={activityLevel} size="sm" />
-          )}
-          {icon}
+      <CardContent className="p-4 h-full flex flex-col justify-between">
+        {/* Top row: title + icon */}
+        <div className="flex items-center justify-between mb-1">
+          <CardTitle className="text-[11px] font-medium text-monitor-text-muted/60 uppercase tracking-wider">
+            {title}
+          </CardTitle>
+          <div className="flex items-center gap-2 opacity-30">
+            {activityLevel && (
+              <ActivityIndicator level={activityLevel} size="sm" />
+            )}
+            <div className="opacity-70">{icon}</div>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent className="p-3 pt-0">
-        <div className="flex items-baseline gap-1">
-          <div className="text-lg font-bold text-monitor-text-primary tabular-nums">
+
+        {/* Middle row: main value + trend */}
+        <div className="flex items-baseline gap-2 my-auto">
+          <div className="text-3xl font-bold text-slate-50 tabular-nums leading-none">
             {value}
           </div>
           {getTrendIcon()}
         </div>
 
+        {/* Bottom row: description or badge */}
         {description && (
-          <p className={`text-xs mt-1 ${getTrendColor()}`}>{description}</p>
+          <p className="text-[11px] text-monitor-text-muted/50 leading-tight">
+            {description}
+          </p>
         )}
 
-        {badge && (
-          <Badge className="mt-1 text-xs bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-400/20">
+        {badge && !description && (
+          <Badge className="text-xs bg-teal-500/10 text-teal-400 ring-1 ring-teal-400/20 w-fit">
             {badge}
           </Badge>
         )}
 
         {progress !== undefined && (
-          <div className="mt-2">
+          <div className="mt-1">
             <Progress
               value={progress}
               className="h-1"
@@ -112,12 +112,9 @@ const StatsCard: React.FC<StatsCardProps> = ({
                   ? 'bg-rose-500'
                   : progress > 50
                     ? 'bg-amber-400'
-                    : 'bg-emerald-500'
+                    : 'bg-teal-500'
               }
             />
-            <p className="text-xs text-monitor-text-muted mt-1 tabular-nums">
-              {progress.toFixed(1)}%
-            </p>
           </div>
         )}
       </CardContent>
@@ -136,17 +133,6 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
   refreshInterval,
   activeWidgets = [],
 }) => {
-  // Calculate activity level based on processing filters
-  const getSystemActivityLevel = (): ActivityLevel => {
-    const processingRatio =
-      statsCounters.total > 0
-        ? statsCounters.processing / statsCounters.total
-        : 0;
-    if (processingRatio > 0.7) return 'high';
-    if (processingRatio > 0.3) return 'medium';
-    return 'low';
-  };
-
   return (
     <div className="space-y-4">
       {/* Statistics Overview */}
@@ -160,46 +146,48 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-0">
           {/* Data Processed */}
-          <StatsCard
-            title="Data Processed"
-            value={formatBytes(systemStats.totalBytes)}
-            icon={<LuDatabase className="h-4 w-4 text-monitor-text-muted" />}
-            description={`${formatNumber(systemStats.totalPackets)} packets`}
-            trend={systemStats.totalBytes > 0 ? 'up' : 'neutral'}
-            activityLevel={
-              systemStats.totalBytes > 1000000
-                ? 'high'
-                : systemStats.totalBytes > 100000
-                  ? 'medium'
-                  : 'low'
-            }
-          />
+          <div className="relative">
+            <StatsCard
+              title="Data Processed"
+              value={formatBytes(systemStats.totalBytes)}
+              icon={<LuDatabase className="h-4 w-4" />}
+              description={`${formatNumber(systemStats.totalPackets)} packets`}
+              trend={systemStats.totalBytes > 0 ? 'up' : 'neutral'}
+              activityLevel={systemStats.dataProcessingActivityLevel}
+            />
+            <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-12 w-px bg-white/[0.06]" />
+          </div>
 
           {/* Processing Activity */}
-          <StatsCard
-            title="Processing Activity"
-            value={statsCounters.processing}
-            icon={<LuPlay className="h-4 w-4 text-muted-foreground" />}
-            description={`${((statsCounters.processing / Math.max(statsCounters.total, 1)) * 100).toFixed(1)}% active`}
-            trend={statsCounters.processing > 0 ? 'up' : 'neutral'}
-            activityLevel={getSystemActivityLevel()}
-          />
+          <div className="relative lg:px-4">
+            <StatsCard
+              title="Processing Activity"
+              value={statsCounters.processing}
+              icon={<LuPlay className="h-4 w-4" />}
+              description={`${((statsCounters.processing / Math.max(statsCounters.total, 1)) * 100).toFixed(1)}% active`}
+              trend={statsCounters.processing > 0 ? 'up' : 'neutral'}
+              activityLevel={systemStats.systemActivityLevel}
+            />
+            <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 h-12 w-px bg-white/[0.06]" />
+          </div>
 
-          {/* Pipeline Health */}
-          <StatsCard
-            title="Pipeline Status"
-            value={`${statsCounters.sources}→${statsCounters.sinks}`}
-            icon={<LuActivity className="h-4 w-4 text-monitor-text-muted" />}
-            description="Sources to sinks"
-            badge={statsCounters.processing > 0 ? 'Processing' : 'Idle'}
-            trend={
-              statsCounters.sources > 0 && statsCounters.sinks > 0
-                ? 'up'
-                : 'neutral'
-            }
-          />
+          {/* Pipeline Status */}
+          <div className="lg:pl-4">
+            <StatsCard
+              title="Pipeline Status"
+              value={`${statsCounters.sources}→${statsCounters.sinks}`}
+              icon={<LuActivity className="h-4 w-4" />}
+              description="Sources to sinks"
+              badge={statsCounters.processing > 0 ? 'Processing' : 'Idle'}
+              trend={
+                statsCounters.sources > 0 && statsCounters.sinks > 0
+                  ? 'up'
+                  : 'neutral'
+              }
+            />
+          </div>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 import { GpacNodeData } from '@/types/domain/gpac/model';
 
-// Lightweight versions of utility functions (no imports from @/utils)
+// Lightweight versions of utility functions
 const calculateBufferUsage = (ipid: Record<string, any> = {}): number => {
   const pidEntries = Object.values(ipid);
   if (pidEntries.length === 0) return 0;
