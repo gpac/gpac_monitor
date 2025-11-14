@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/UplotChart';
 import { useChartData } from '../hooks/useChartData';
 import { createCpuMemoryUplotConfig } from './uplotConfig';
-import RenderCount from '@/components/views/graph/ui/graph/RenderCount';
 import {
   prepareCpuMemoryData,
   calculateMemoryYMax,
@@ -62,7 +61,6 @@ export const CpuMemoryChartUplot = memo(
 
     return (
       <Card className="bg-stat border-transparent">
-        <RenderCount componentName="CpuMemoryChartUplot" />
         <CardHeader className="pb-2">
           <CardTitle className="flex justify-center items-center gap-2 text-sm stat stat-label">
             <span className="flex items-center gap-1.5">

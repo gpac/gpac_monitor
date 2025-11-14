@@ -7,7 +7,6 @@ import { useCPUStats } from './hooks/useCPUStats';
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import { CPUHistoryBadge } from './components/CPUHistoryBadge';
 import { useChartDuration } from './hooks/useChartDuration';
-import RenderCount from '@/components/views/graph/ui/graph/RenderCount';
 import {
   CHART_CPU_UPDATE_INTERVAL,
   DEFAULT_CPU_HISTORY,
@@ -74,7 +73,6 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
 
   return (
     <WidgetWrapper id={id} statusBadge={statusBadge}>
-      <RenderCount componentName="MetricsMonitor" />
       <div ref={containerRef} className={containerClassName}>
         <div className="w-full">
           <CpuMemoryOverview
