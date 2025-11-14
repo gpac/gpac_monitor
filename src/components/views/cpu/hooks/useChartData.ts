@@ -14,26 +14,44 @@ export const useChartData = (
   const lastRecordedMemoryRef = useRef<number>(0);
   const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Refs to avoid recreating callback on every value change
+  const currentCPURef = useRef(currentCPUPercent);
+  const currentMemoryRef = useRef(currentMemoryMB);
+  const isLiveRef = useRef(isLive);
+  const maxPointsRef = useRef(maxPoints);
+  const windowDurationRef = useRef(windowDuration);
+
+  currentCPURef.current = currentCPUPercent;
+  currentMemoryRef.current = currentMemoryMB;
+  isLiveRef.current = isLive;
+  maxPointsRef.current = maxPoints;
+  windowDurationRef.current = windowDuration;
+
   const updateDataPoints = useCallback(() => {
+    const cpu = currentCPURef.current;
+    const memory = currentMemoryRef.current;
+
     if (
-      !isLive ||
-      (currentCPUPercent === lastRecordedCPURef.current &&
-        currentMemoryMB === lastRecordedMemoryRef.current)
+      !isLiveRef.current ||
+      (cpu === lastRecordedCPURef.current &&
+        memory === lastRecordedMemoryRef.current)
     )
       return;
 
-    lastRecordedCPURef.current = currentCPUPercent;
-    lastRecordedMemoryRef.current = currentMemoryMB;
+    lastRecordedCPURef.current = cpu;
+    lastRecordedMemoryRef.current = memory;
     const now = Date.now();
 
     setDataPoints((prevPoints) => {
       let filteredPoints = prevPoints;
+      const maxPts = maxPointsRef.current;
+      const winDur = windowDurationRef.current;
 
-      if (windowDuration && windowDuration !== Infinity) {
-        const cutoff = now - windowDuration;
+      if (winDur && winDur !== Infinity) {
+        const cutoff = now - winDur;
         filteredPoints = prevPoints.filter((p) => p.timestamp >= cutoff);
-      } else if (prevPoints.length >= maxPoints) {
-        filteredPoints = prevPoints.slice(prevPoints.length - maxPoints + 1);
+      } else if (prevPoints.length >= maxPts) {
+        filteredPoints = prevPoints.slice(prevPoints.length - maxPts + 1);
       }
 
       const oldestTimestamp =
@@ -44,8 +62,8 @@ export const useChartData = (
       const newPoint: CpuMemoryDataPoint = {
         timestamp: now,
         time,
-        cpu_percent: currentCPUPercent,
-        memory_mb: currentMemoryMB,
+        cpu_percent: cpu,
+        memory_mb: memory,
       };
       const newPoints = [...filteredPoints, newPoint];
 
@@ -55,7 +73,7 @@ export const useChartData = (
         time: `${((point.timestamp - oldest) / 1000).toFixed(1)}s`,
       }));
     });
-  }, [currentCPUPercent, currentMemoryMB, isLive, maxPoints, windowDuration]);
+  }, []); // Empty deps - stable callback
 
   useEffect(() => {
     setDataPoints((prev) => {

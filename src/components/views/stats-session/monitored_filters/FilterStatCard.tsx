@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
-import RenderCount from '@/components/views/graph/ui/graph/RenderCount';
 
 interface FilterStatCardProps {
   filter: EnrichedFilterData;
@@ -62,8 +61,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
         className={`flex flex-col gap-1.5 p-2.5 rounded-lg bg-monitor-panel border-transparent transition-colors ${ringClass} ${cursorClass}`}
         onClick={handleClick}
       >
-        <RenderCount componentName={`FilterStatCard-${filter.name}`} />
-
         {/* Line 1: Name + Type + Activity */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">

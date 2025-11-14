@@ -6,6 +6,9 @@ import { useServiceReady } from '@/shared/hooks/useServiceReady';
 
 export function useCPUStats(enabled = true, interval = 150) {
   const [stats, setStats] = useState<CPUStats[]>([]);
+  const [currentCPU, setCurrentCPU] = useState(0);
+  const [currentMemory, setCurrentMemory] = useState(0);
+  const [totalCores, setTotalCores] = useState(0);
   const { isReady } = useServiceReady({ enabled });
 
   const statsRef = useRef<CPUStats[]>([]);
@@ -16,6 +19,15 @@ export function useCPUStats(enabled = true, interval = 150) {
       const newStatsArray = [...prev.slice(-299), newStats];
       return newStatsArray;
     });
+
+    // Extract primitive values to avoid object reference issues
+    const cpu = newStats.process_cpu_usage || 0;
+    const memory = newStats.process_memory || 0;
+    const cores = newStats.nb_cores || 0;
+
+    setCurrentCPU((prev) => (prev !== cpu ? cpu : prev));
+    setCurrentMemory((prev) => (prev !== memory ? memory : prev));
+    setTotalCores((prev) => (prev !== cores ? cores : prev));
   });
 
   const handleStatsUpdate = useCallback((newStats: CPUStats) => {
@@ -72,5 +84,8 @@ export function useCPUStats(enabled = true, interval = 150) {
   return {
     stats,
     isSubscribed: stats.length > 0,
+    currentCPU,
+    currentMemory,
+    totalCores,
   };
 }

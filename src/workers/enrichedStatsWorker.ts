@@ -18,13 +18,24 @@ const calculateBufferUsage = (ipid: Record<string, any> = {}): number => {
   return Math.min(100, Math.round((totalBuffer / totalMaxBuffer) * 100));
 };
 
+// Activity level based on byte rate (real data throughput)
+// Thresholds to adjust based on actual streaming context
 const getActivityLevel = (
-  pckDone: number = 0,
   bytesDone: number = 0,
+  elapsedMs: number = 0,
 ): string => {
-  if (pckDone === 0 && bytesDone === 0) return 'idle';
-  if (pckDone < 100) return 'low';
-  if (pckDone < 1000) return 'medium';
+  if (elapsedMs <= 0) return 'idle';
+
+  const elapsedSeconds = elapsedMs / 1000;
+  const byteRate = bytesDone / elapsedSeconds; // bytes per second
+
+  const BYTE_RATE_IDLE = 100_000; // ~0.8 Mbps
+  const BYTE_RATE_LOW = 1_000_000; // ~8 Mbps
+  const BYTE_RATE_MEDIUM = 5_000_000; // ~40 Mbps
+
+  if (byteRate < BYTE_RATE_IDLE) return 'idle';
+  if (byteRate < BYTE_RATE_LOW) return 'low';
+  if (byteRate < BYTE_RATE_MEDIUM) return 'medium';
   return 'high';
 };
 
@@ -124,10 +135,7 @@ self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
       const cached = enrichedCache.get(key);
 
       const bufferUsage = calculateBufferUsage(filter.ipid);
-      const activityLevel = getActivityLevel(
-        filter.pck_done,
-        filter.bytes_done,
-      );
+      const activityLevel = getActivityLevel(filter.bytes_done, filter.time);
       const sessionType = determineFilterSessionType(filter);
       const formattedBytes = formatBytes(filter.bytes_done);
       const formattedTime = formatTime(filter.time);
