@@ -6,6 +6,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { CustomTooltip } from '@/components/ui/tooltip';
 import { useCommandLine } from '@/shared/hooks/useCommandLine';
 
 export const CommandLineInfo = () => {
@@ -22,15 +23,17 @@ export const CommandLineInfo = () => {
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center gap-1 text-monitor-text-muted hover:text-monitor-text-primary"
-        >
-          <LuInfo className="h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
+      <CustomTooltip content="Show GPAC command line">
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex items-center gap-1 text-monitor-text-muted hover:text-monitor-text-primary"
+          >
+            <LuInfo className="h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+      </CustomTooltip>
       <PopoverContent
         className="w-[600px] max-w-[90vw] bg-monitor-panel border-monitor-line p-3"
         align="end"

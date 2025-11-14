@@ -94,11 +94,11 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
         {/* Line 2: Metrics + PIDs */}
         <div className="flex items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2 font-mono tabular-nums text-monitor-text-muted">
+          <div className="flex items-center gap-2 font-mono  tabular-nums text-monitor-text-muted">
             {hasPackets && (
               <>
                 <span>{formattedPackets} pkt</span>
-                <span className="text-monitor-text-subtle">•</span>
+                <span className="text-monitor-text-subtle ">•</span>
               </>
             )}
             {formattedBytes && (

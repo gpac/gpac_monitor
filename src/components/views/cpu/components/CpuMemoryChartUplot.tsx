@@ -52,7 +52,7 @@ export const CpuMemoryChartUplot = memo(
         relativeSeconds,
         memoryData,
         cpuData,
-        width: 300,
+        width: 400,
         height: 180,
       });
 
@@ -81,7 +81,14 @@ export const CpuMemoryChartUplot = memo(
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div style={{ width: '100%', height: 250, minHeight: 150 }}>
+          <div
+            style={{
+              width: '100%',
+              height: 250,
+              minHeight: 150,
+              minWidth: 300,
+            }}
+          >
             <UplotChart data={data} options={options} className="w-full" />
           </div>
         </CardContent>
