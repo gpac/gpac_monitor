@@ -18,22 +18,32 @@ export const UplotChart = memo(
   ({ data, options, className, onCreate, onDestroy }: UplotChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const chartRef = useRef<uPlot | null>(null);
+    const onCreateRef = useRef(onCreate);
+    const onDestroyRef = useRef(onDestroy);
 
+    // Keep refs up to date
+    useEffect(() => {
+      onCreateRef.current = onCreate;
+      onDestroyRef.current = onDestroy;
+    });
+
+    // Create chart - recreate only when options change (memoized by parent)
     useEffect(() => {
       if (!containerRef.current) return;
 
       const chart = new uPlot(options, data, containerRef.current);
       chartRef.current = chart;
-      onCreate?.(chart);
+      onCreateRef.current?.(chart);
 
       return () => {
         if (!chartRef.current) return;
-        onDestroy?.(chartRef.current);
+        onDestroyRef.current?.(chartRef.current);
         chartRef.current.destroy();
         chartRef.current = null;
       };
-    }, []);
+    }, [options]); // Options is memoized by parent - stable unless data changes
 
+    // Update size without recreating chart
     useEffect(() => {
       if (!chartRef.current) return;
       const { width, height } = options;
@@ -43,6 +53,7 @@ export const UplotChart = memo(
       }
     }, [options.width, options.height]);
 
+    // Update data without recreating chart
     useEffect(() => {
       if (!chartRef.current) return;
       chartRef.current.setData(data);
@@ -51,10 +62,10 @@ export const UplotChart = memo(
     return <div ref={containerRef} className={className} />;
   },
   (prev, next) => {
+    // Memo based on stable references (parent should memoize options)
     return (
       prev.data === next.data &&
-      prev.options.width === next.options.width &&
-      prev.options.height === next.options.height &&
+      prev.options === next.options &&
       prev.className === next.className
     );
   },
