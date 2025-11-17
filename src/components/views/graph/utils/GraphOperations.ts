@@ -1,17 +1,10 @@
 import { FilterType, GraphFilterData } from '@/types/domain/gpac';
 import { Node, Edge, MarkerType } from '@xyflow/react';
 import { isSource } from './filterType';
-import { determineFilterType } from '@/utils/filters/streamType';
-
-const getFilterColor = (filterType: FilterType): string => {
-  const colors = {
-    video: '#3b82f6',
-    audio: '#10b981',
-    text: '#f59e0b',
-    file: '#E11D48',
-  };
-  return colors[filterType];
-};
+import {
+  determineFilterType,
+  getFilterColor,
+} from '@/utils/filters/streamType';
 
 // Create a node from a filter object
 export function createNodeFromFilter(
