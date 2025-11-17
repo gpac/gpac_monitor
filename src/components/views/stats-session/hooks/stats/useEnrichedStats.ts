@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { GpacNodeData } from '@/types/domain/gpac/model';
 import { enrichedStatsWorkerService } from '@/services/workers/enrichedStatsWorkerService';
 import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
@@ -8,6 +8,11 @@ export function useEnrichedStats(rawFilters: GpacNodeData[]) {
     [],
   );
   const isProcessingRef = useRef(false);
+
+  // Stabilize rawFilters by creating a serialized key
+  const filtersKey = useMemo(() => {
+    return rawFilters.map((f) => `${f.idx}-${f.bytes_done}`).join(',');
+  }, [rawFilters]);
 
   useEffect(() => {
     if (rawFilters.length === 0) {
@@ -32,7 +37,7 @@ export function useEnrichedStats(rawFilters: GpacNodeData[]) {
       unsubscribe();
       isProcessingRef.current = false;
     };
-  }, [rawFilters]);
+  }, [filtersKey]); // Use stable key instead of rawFilters
 
   return enrichedFilters;
 }

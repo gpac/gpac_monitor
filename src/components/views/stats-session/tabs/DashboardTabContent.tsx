@@ -19,6 +19,7 @@ import { formatBytes, formatNumber } from '@/utils/formatting';
 import type { StatsCounters, SystemStats } from '../hooks/stats';
 import { Widget } from '@/types/ui/widget';
 import { CommandLineInfo } from '@/components/CommandLineDialog';
+import RenderCount from '@/components/views/graph/ui/graph/RenderCount';
 
 interface DashboardTabContentProps {
   systemStats: SystemStats;
@@ -67,6 +68,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
     <Card
       className={`bg-monitor-panel/60 border border-white/[0.03] rounded-lg shadow-none hover:bg-monitor-panel/80 transition-colors h-[80px] ${className}`}
     >
+      <RenderCount componentName={`StatsCard-${title}`} />
       <CardContent className="p-4 h-full flex flex-col justify-between">
         {/* Top row: title + icon */}
         <div className="flex items-center justify-between mb-1">
@@ -135,6 +137,7 @@ export const DashboardTabContent: React.FC<DashboardTabContentProps> = ({
 }) => {
   return (
     <div className="space-y-4">
+      <RenderCount componentName="DashboardTabContent" />
       {/* Statistics Overview */}
       <div>
         <div className="flex items-center justify-between mb-3">

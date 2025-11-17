@@ -7,6 +7,7 @@ import {
   FilterStatsResponse,
   PIDproperties,
 } from '@/types/domain/gpac/filter-stats';
+import RenderCount from '@/components/views/graph/ui/graph/RenderCount';
 
 interface MonitoredFilterTabsProps {
   monitoredFilters: Map<number, EnrichedFilterOverview>;
@@ -58,6 +59,8 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
 }) => {
   // Subscribe to live stats when tab is active
   const { stats } = useFilterStats(filter.idx, isActive, 1000);
+
+  const componentName = `MonitoredFilterContent-Filter-${filter.idx}`;
 
   // Merge static filter data with live stats
   const filterWithStats = useMemo(
@@ -122,6 +125,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
 
   return (
     <div className="flex-1 p-4">
+      <RenderCount componentName={componentName} />
       <FilterTabContent
         {...tabsData}
         filterData={stats as any}
