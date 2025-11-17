@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from 'react';
+import React, { useMemo, useState, useRef, useCallback } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
 import { useStatsCalculations } from '../hooks/stats';
@@ -16,6 +16,9 @@ import {
 } from '../tabs/MonitoredFilterTabs';
 import { enrichFiltersWithStats } from '../utils/filterEnrichment';
 import RenderCount from '@/components/views/graph/ui/graph/RenderCount';
+import { Widget } from '@/types/ui/widget';
+
+const EMPTY_ACTIVE_WIDGETS: Widget[] = [];
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, isDetached, detachedFilterIdx }) => {
@@ -62,6 +65,12 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       handleCloseTab,
       handleOpenProperties,
     } = useFilterHandlers(setActiveTab);
+    const noopTabChange = useCallback(() => {}, []);
+    const noopCardClick = useCallback(() => {}, []);
+
+    //safe callbacks to prevent actions during resizing
+    const safeOnTabChange = isResizing ? noopTabChange : setActiveTab;
+    const safeOnCardClick = isResizing ? noopCardClick : handleCardClick;
 
     if (isDetached && detachedFilterIdx !== undefined) {
       // Skip loading check for detached widgets - show data immediately
@@ -130,7 +139,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
         >
           <Tabs
             value={activeTab}
-            onValueChange={isResizing ? () => {} : setActiveTab}
+            onValueChange={safeOnTabChange}
             className="flex-1 flex flex-col"
           >
             <StatsTabs
@@ -153,16 +162,16 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
                 filtersMatchingCriteria={filtersWithComputedMetrics}
                 loading={isLoading || isResizing}
                 monitoredFilters={monitoredFilterMap}
-                onCardClick={isResizing ? () => {} : handleCardClick}
+                onCardClick={safeOnCardClick}
                 refreshInterval="1s"
-                activeWidgets={[]}
+                activeWidgets={EMPTY_ACTIVE_WIDGETS}
               />
             </TabsContent>
 
             <MonitoredFilterTabs
               monitoredFilters={inlineFilterMap}
               activeTab={activeTab}
-              onCardClick={isResizing ? () => {} : handleCardClick}
+              onCardClick={safeOnCardClick}
               onOpenProperties={handleOpenProperties}
             />
           </Tabs>
