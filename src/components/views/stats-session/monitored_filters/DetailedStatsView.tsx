@@ -111,11 +111,12 @@ const DetailedStatsView = memo(
           <TabsContent value="overview">
             <MemoizedOverviewTab filter={overviewData} />
           </TabsContent>
-          <TabsContent value="network">
+          <TabsContent value="network" className="data-[state=inactive]:hidden">
             <MemoizedNetworkTab
+              filterId={overviewData.idx.toString()}
               data={networkData}
               filterName={overviewData.name}
-              refreshInterval={5000}
+              refreshInterval={1000}
             />
           </TabsContent>
           <TabsContent value="inputs">

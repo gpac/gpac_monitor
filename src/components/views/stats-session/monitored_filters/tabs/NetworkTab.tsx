@@ -8,6 +8,7 @@ import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';
 import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 
 interface NetworkTabProps {
+  filterId: string;
   data: NetworkTabData;
   filterName: string;
   refreshInterval?: number;
@@ -17,6 +18,7 @@ const DEFAULT_REFRESH_INTERVAL = 1000;
 
 const NetworkTab = memo(
   ({
+    filterId,
     data,
     filterName,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
@@ -114,6 +116,7 @@ const NetworkTab = memo(
 
           {/* Combined chart below */}
           <BandwidthCombinedChart
+            filterId={filterId}
             bytesSent={currentStats.bytesSent}
             bytesReceived={currentStats.bytesReceived}
             refreshInterval={refreshInterval}

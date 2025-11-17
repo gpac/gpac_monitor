@@ -14,7 +14,7 @@ export const createBandwidthCombinedConfig = ({
   downloadData,
   timeLabels,
   width = 400,
-  height = 200,
+  height = 180,
 }: BandwidthCombinedConfigParams): uPlot.Options => {
   return {
     width,
@@ -36,31 +36,47 @@ export const createBandwidthCombinedConfig = ({
         (u) => {
           const { left = 0, top = 0, idx } = u.cursor;
 
-          if (idx === null || idx === undefined) {
-            const tooltip = u.root.querySelector('.u-tooltip');
-            if (tooltip) (tooltip as HTMLElement).style.display = 'none';
-            return;
-          }
+          let tooltip = u.root.querySelector(
+            '.u-tooltip',
+          ) as HTMLElement | null;
 
-          let tooltip = u.root.querySelector('.u-tooltip') as HTMLElement;
           if (!tooltip) {
             tooltip = document.createElement('div');
             tooltip.className = 'u-tooltip';
             tooltip.style.cssText = `
-              position: absolute;
-              background: rgb(2 6 23);
-              color: rgb(226 232 240);
-              border: 1px solid hsl(var(--border));
-              border-radius: 6px;
-              padding: 8px 10px;
-              font-size: 11px;
-              font-family: monospace;
-              pointer-events: none;
-              z-index: 100;
-              white-space: nowrap;
-            `;
+        position: absolute;
+        background: rgb(2 6 23);
+        color: rgb(226 232 240);
+        border: 1px solid hsl(var(--border));
+        border-radius: 6px;
+        padding: 8px 10px;
+        font-size: 11px;
+        font-family: monospace;
+        pointer-events: none;
+        z-index: 100;
+        white-space: nowrap;
+      `;
             u.root.appendChild(tooltip);
           }
+
+          if (!tooltip) return;
+
+          //  if idx is null during a refresh, don't change anything
+          if (idx == null) {
+            return;
+          }
+
+          const lastIdx = (u as any)._lastTooltipIdx as number | null;
+
+          // If we're on the same point, just update the position, not the content
+          if (lastIdx === idx) {
+            tooltip.style.left = `${left + 15}px`;
+            tooltip.style.top = `${top + 15}px`;
+            return;
+          }
+
+          // Store the new index
+          (u as any)._lastTooltipIdx = idx;
 
           const time = timeLabels[idx] || '--';
           const upload = uploadData[idx]
@@ -71,10 +87,10 @@ export const createBandwidthCombinedConfig = ({
             : '--';
 
           tooltip.innerHTML = `
-            <div style="margin-bottom: 4px; color: #6ee7b7;">Time: ${time}</div>
-            <div style="color: #10b981;">Upload: ${upload}</div>
-            <div style="color: #3b82f6;">Download: ${download}</div>
-          `;
+      <div style="margin-bottom: 4px; color: #6ee7b7;">Time: ${time}</div>
+      <div style="color: #10b981;">Upload: ${upload}</div>
+      <div style="color: #3b82f6;">Download: ${download}</div>
+    `;
 
           tooltip.style.display = 'block';
           tooltip.style.left = `${left + 15}px`;
@@ -87,15 +103,15 @@ export const createBandwidthCombinedConfig = ({
       {
         label: 'Upload',
         stroke: '#10b981',
-        width: 2,
-        fill: 'rgba(16, 185, 129, 0.15)',
+        width: 0.7,
+
         value: (_u, v) => (v == null ? '--' : formatBitrate(v * 8)),
       },
       {
         label: 'Download',
         stroke: '#3b82f6',
-        width: 2,
-        fill: 'rgba(59, 130, 246, 0.15)',
+        width: 0.7,
+
         value: (_u, v) => (v == null ? '--' : formatBitrate(v * 8)),
       },
     ],

@@ -1,4 +1,4 @@
-import { memo, useMemo, useRef, useLayoutEffect, useState } from 'react';
+import { memo, useMemo, useRef, useEffect, useState } from 'react';
 import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/UplotChart';
@@ -8,6 +8,7 @@ import { createBandwidthCombinedConfig } from './config/bandwidthCombinedUplotCo
 import { DEFAULT_REFRESH_INTERVAL } from './config/bandwidthChartConfig';
 
 interface BandwidthCombinedChartProps {
+  filterId: string;
   bytesSent: number;
   bytesReceived: number;
   refreshInterval?: number;
@@ -15,6 +16,7 @@ interface BandwidthCombinedChartProps {
 
 export const BandwidthCombinedChart = memo(
   ({
+    filterId,
     bytesSent,
     bytesReceived,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
@@ -23,34 +25,42 @@ export const BandwidthCombinedChart = memo(
     const [dimensions, setDimensions] = useState({ width: 400, height: 230 });
 
     const { dataPoints: uploadPoints } = useBandwidthChart({
+      filterId,
       currentBytes: bytesSent,
       refreshInterval,
+      type: 'upload',
     });
 
     const { dataPoints: downloadPoints } = useBandwidthChart({
+      filterId,
       currentBytes: bytesReceived,
       refreshInterval,
+      type: 'download',
     });
 
-    useLayoutEffect(() => {
-      if (containerRef.current) {
-        const { width } = containerRef.current.getBoundingClientRect();
-        setDimensions({ width: width || 400, height: 230 });
-      }
+    useEffect(() => {
+      if (!containerRef.current) return;
+
+      const { width } = containerRef.current.getBoundingClientRect();
+      setDimensions({ width: width || 400, height: 230 });
     }, []);
 
     const { data, options } = useMemo(() => {
       const maxLength = Math.max(uploadPoints.length, downloadPoints.length);
-      const indices = Array.from({ length: maxLength }, (_, i) => i);
+      const indices = Array.from(
+        { length: maxLength },
+        (_unused, index) => index,
+      );
 
       const uploadData = indices.map(
-        (i) => uploadPoints[i]?.bytesPerSecond || 0,
+        (index) => uploadPoints[index]?.value || 0,
       );
       const downloadData = indices.map(
-        (i) => downloadPoints[i]?.bytesPerSecond || 0,
+        (index) => downloadPoints[index]?.value || 0,
       );
       const timeLabels = indices.map(
-        (i) => uploadPoints[i]?.time || downloadPoints[i]?.time || '',
+        (index) =>
+          uploadPoints[index]?.time || downloadPoints[index]?.time || '',
       );
 
       const alignedData: uPlot.AlignedData = [

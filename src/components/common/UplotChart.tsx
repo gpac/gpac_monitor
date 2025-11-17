@@ -12,7 +12,7 @@ export interface UplotChartProps {
 
 /**
  * Low-level wrapper for uPlot chart
- * Ultra-performant canvas-based charting for real-time monitoring
+ *
  */
 export const UplotChart = memo(
   ({ data, options, className, onCreate, onDestroy }: UplotChartProps) => {
@@ -27,16 +27,25 @@ export const UplotChart = memo(
       onCreate?.(chart);
 
       return () => {
-        onDestroy?.(chart);
-        chart.destroy();
+        if (!chartRef.current) return;
+        onDestroy?.(chartRef.current);
+        chartRef.current.destroy();
         chartRef.current = null;
       };
-    }, [options, onCreate, onDestroy]);
+    }, []);
 
     useEffect(() => {
-      if (chartRef.current && data) {
-        chartRef.current.setData(data);
+      if (!chartRef.current) return;
+      const { width, height } = options;
+
+      if (typeof width === 'number' && typeof height === 'number') {
+        chartRef.current.setSize({ width, height });
       }
+    }, [options.width, options.height]);
+
+    useEffect(() => {
+      if (!chartRef.current) return;
+      chartRef.current.setData(data);
     }, [data]);
 
     return <div ref={containerRef} className={className} />;
@@ -44,7 +53,8 @@ export const UplotChart = memo(
   (prev, next) => {
     return (
       prev.data === next.data &&
-      prev.options === next.options &&
+      prev.options.width === next.options.width &&
+      prev.options.height === next.options.height &&
       prev.className === next.className
     );
   },

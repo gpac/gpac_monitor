@@ -9,3 +9,6 @@ export * from './gpacArgs';
 
 // Sidebar selectors
 export * from './headerSelectors';
+
+// Monitored filter selectors
+export * from './monitoredFilter';

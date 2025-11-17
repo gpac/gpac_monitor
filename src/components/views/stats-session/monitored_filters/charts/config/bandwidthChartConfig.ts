@@ -55,7 +55,6 @@ export const TOOLTIP_STYLE = {
  */
 export const X_AXIS_TICK = {
   fontSize: 10,
-  fill: 'hsl(var(--muted-foreground))',
 };
 
 /**
@@ -63,5 +62,4 @@ export const X_AXIS_TICK = {
  */
 export const Y_AXIS_TICK = {
   fontSize: 10,
-  fill: 'hsl(var(--muted-foreground))',
 };

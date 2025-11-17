@@ -1,6 +1,16 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { formatBytes, formatChartTime } from '@/utils/formatting';
-import { MAX_POINTS } from '../config/bandwidthChartConfig';
+import {
+  addNetworkDataPoint,
+  ChartDataPoint,
+} from '@/shared/store/slices/monitoredFilterSlice';
+import { RootState } from '@/shared/store';
+import {
+  selectFilterUploadData,
+  selectFilterDownloadData,
+} from '@/shared/store/selectors';
+import { useGpacService } from '@/shared/hooks/useGpacService';
 
 export interface DataPoint {
   time: string;
@@ -9,15 +19,27 @@ export interface DataPoint {
 }
 
 interface UseBandwidthChartOptions {
+  filterId: string;
   currentBytes: number;
   refreshInterval: number;
+  type: 'upload' | 'download';
 }
 
 export const useBandwidthChart = ({
+  filterId,
   currentBytes,
   refreshInterval,
+  type,
 }: UseBandwidthChartOptions) => {
-  const [dataPoints, setDataPoints] = useState<DataPoint[]>([]);
+  const dispatch = useDispatch();
+  const gpacService = useGpacService();
+
+  // Select data from Redux store based on type
+  const dataPoints = useSelector((state: RootState) =>
+    type === 'upload'
+      ? selectFilterUploadData(state, filterId)
+      : selectFilterDownloadData(state, filterId),
+  );
 
   const lastBytesRef = useRef<number>(currentBytes);
   const lastTimestampRef = useRef<number>(Date.now());
@@ -37,49 +59,57 @@ export const useBandwidthChart = ({
   // Add sample point to chart
   const addSamplePoint = useCallback(
     (bytesPerSecond: number, sampleTimestamp: number) => {
-      const newPoint: DataPoint = {
+      const newPoint: ChartDataPoint = {
         time: formatChartTime(),
         timestamp: sampleTimestamp,
-        bytesPerSecond,
+        value: bytesPerSecond,
       };
 
-      setDataPoints((prev) => {
-        const newPoints = [...prev, newPoint];
-        return newPoints.length > MAX_POINTS
-          ? newPoints.slice(-MAX_POINTS)
-          : newPoints;
-      });
+      // Dispatch to Redux - slice handles sliding window automatically
+      dispatch(
+        addNetworkDataPoint({
+          filterId,
+          type,
+          point: newPoint,
+        }),
+      );
 
       lastBytesRef.current = currentBytesRef.current;
       lastTimestampRef.current = sampleTimestamp;
     },
-    [],
+    [dispatch, filterId, type],
   );
 
-  // Initialize chart data ONCE on mount
+  // Initialize refs ONCE on mount
   useEffect(() => {
     if (isInitializedRef.current) return;
 
     const now = Date.now();
-    lastBytesRef.current = currentBytes;
-    lastTimestampRef.current = now;
     isInitializedRef.current = true;
 
-    // Add initial point immediately
-    setDataPoints([
-      {
-        time: formatChartTime(),
-        timestamp: now,
-        bytesPerSecond: 0,
-      },
-    ]);
-  }, [currentBytes]);
+    // If we have existing data in Redux (returning to tab or already monitoring)
+    if (dataPoints.length > 0) {
+      // Continue from last known data point
+      const lastDataPoint = dataPoints[dataPoints.length - 1];
+      lastTimestampRef.current = lastDataPoint.timestamp;
+      lastBytesRef.current = currentBytes;
+      return;
+    }
+
+    lastBytesRef.current = currentBytes;
+    lastTimestampRef.current = now;
+  }, [currentBytes, dataPoints, dispatch, filterId, type]);
 
   // Update bandwidth data at refresh interval
   useEffect(() => {
     if (!isInitializedRef.current) return;
 
-    const intervalId = setInterval(() => {
+    // Calculate and add first point immediately (don't wait for interval)
+    const addPoint = () => {
+      if (!gpacService.isConnected()) {
+        return;
+      }
+
       const now = Date.now();
       const lastTimestamp = lastTimestampRef.current;
 
@@ -88,15 +118,30 @@ export const useBandwidthChart = ({
       const elapsedSecs = (now - lastTimestamp) / 1000;
       const latestBytes = currentBytesRef.current;
       const bytesDelta = latestBytes - lastBytesRef.current;
-      if (bytesDelta === 0) return;
-
       const bytesPerSecond = Math.max(0, bytesDelta / elapsedSecs);
 
       addSamplePoint(bytesPerSecond, now);
-    }, refreshInterval);
+    };
 
+    // Add first point immediately if no existing data
+    if (dataPoints.length === 0) {
+      // Use setTimeout to ensure currentBytes is up-to-date
+      const immediateTimeout = setTimeout(addPoint, 100);
+      const cleanupImmediate = () => clearTimeout(immediateTimeout);
+
+      // Set up recurring interval
+      const intervalId = setInterval(addPoint, refreshInterval);
+
+      return () => {
+        cleanupImmediate();
+        clearInterval(intervalId);
+      };
+    }
+
+    // If we have existing data, just use the interval
+    const intervalId = setInterval(addPoint, refreshInterval);
     return () => clearInterval(intervalId);
-  }, [refreshInterval, addSamplePoint]);
+  }, [refreshInterval, addSamplePoint, gpacService, dataPoints.length]);
 
   const tooltipFormatter = useCallback(
     (value: number | string | Array<number | string>) => {
