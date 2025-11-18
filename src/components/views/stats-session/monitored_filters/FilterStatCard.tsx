@@ -58,7 +58,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
     return (
       <div
-        className={`flex flex-col gap-1.5 p-2.5 rounded-lg bg-monitor-panel border-transparent transition-colors ${ringClass} ${cursorClass}`}
+        className={`flex flex-col gap-1.5 p-2.5 rounded-lg bg-black/20 border-transparent transition-colors ${ringClass} ${cursorClass}`}
         onClick={handleClick}
       >
         {/* Line 1: Name + Type + Activity */}

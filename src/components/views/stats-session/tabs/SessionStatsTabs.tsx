@@ -4,6 +4,7 @@ import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
 
+
 interface StatsTabsProps {
   activeTab: string;
   onValueChange: (value: string) => void;
