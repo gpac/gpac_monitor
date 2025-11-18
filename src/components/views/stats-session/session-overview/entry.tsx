@@ -15,7 +15,6 @@ import {
   MonitoredFilterContent,
 } from '../tabs/MonitoredFilterTabs';
 import { enrichFiltersWithStats } from '../utils/filterEnrichment';
-import RenderCount from '@/components/views/graph/ui/graph/RenderCount';
 import { Widget } from '@/types/ui/widget';
 
 const EMPTY_ACTIVE_WIDGETS: Widget[] = [];
@@ -81,9 +80,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       if (!filter) {
         return (
           <WidgetWrapper id={id}>
-            <RenderCount
-              componentName={`MultiFilterMonitor-Detached-${detachedFilterIdx}-NotFound`}
-            />
             <div className="flex items-center justify-center h-full">
               <p className="text-monitor-text-muted">
                 Filter {detachedFilterIdx} not found
@@ -95,9 +91,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
       return (
         <WidgetWrapper id={id}>
-          <RenderCount
-            componentName={`MultiFilterMonitor-Detached-Filter-${detachedFilterIdx}`}
-          />
           <div className="h-full">
             <MonitoredFilterContent
               idx={filter.idx}
@@ -132,7 +125,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
 
     return (
       <WidgetWrapper id={id}>
-        <RenderCount componentName="MultiFilterMonitor-Normal" />
         <div
           ref={containerRef}
           className={`h-full ${isResizing ? 'contain-layout contain-style' : ''}`}

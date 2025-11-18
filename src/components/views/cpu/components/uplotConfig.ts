@@ -6,8 +6,6 @@ export interface UplotConfigParams {
   relativeSeconds: number[];
   memoryData: number[];
   cpuData: number[];
-  width?: number;
-  height?: number;
 }
 
 export const createCpuMemoryUplotConfig = ({
@@ -15,12 +13,10 @@ export const createCpuMemoryUplotConfig = ({
   relativeSeconds,
   memoryData,
   cpuData,
-  width = 300,
-  height = 250,
 }: UplotConfigParams): uPlot.Options => {
   return {
-    width,
-    height,
+    width: 100, // Will be auto-resized by UplotChart
+    height: 100, //ç
     padding: [10, 10, 5, 5],
     cursor: {
       show: true,

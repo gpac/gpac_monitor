@@ -85,8 +85,8 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           nodeColor={(node) => getImmediateGraphColor(node)}
           nodeStrokeWidth={2}
           nodeStrokeColor="#374151"
-          maskColor="rgba(0, 0, 0, 0.4)"
-          className="bg-gray-800 border border-gray-700 rounded-lg shadow-lg"
+          maskColor="rgba(0, 0, 0, 0.8)"
+          className="bg-gray-900 border border-gray-900 rounded-lg shadow-lg"
           style={{
             backgroundColor: '#1f2937',
             border: '1px solid #374151',

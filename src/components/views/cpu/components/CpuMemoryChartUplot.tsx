@@ -52,8 +52,6 @@ export const CpuMemoryChartUplot = memo(
         relativeSeconds,
         memoryData,
         cpuData,
-        width: 400,
-        height: 180,
       });
 
       return { data: alignedData, options: opts };
@@ -80,16 +78,18 @@ export const CpuMemoryChartUplot = memo(
             </span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-2">
           <div
             style={{
               width: '100%',
-              height: 250,
-              minHeight: 150,
-              minWidth: 300,
+              height: '200px',
             }}
           >
-            <UplotChart data={data} options={options} className="w-full" />
+            <UplotChart
+              data={data}
+              options={options}
+              className="w-full h-full"
+            />
           </div>
         </CardContent>
       </Card>

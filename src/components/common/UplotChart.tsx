@@ -35,6 +35,12 @@ export const UplotChart = memo(
       chartRef.current = chart;
       onCreateRef.current?.(chart);
 
+      // Set initial size from container after creation (zero re-renders)
+      const rect = containerRef.current.getBoundingClientRect();
+      if (rect.width > 0 && rect.height > 0) {
+        chart.setSize({ width: rect.width, height: rect.height });
+      }
+
       return () => {
         if (!chartRef.current) return;
         onDestroyRef.current?.(chartRef.current);
@@ -43,21 +49,26 @@ export const UplotChart = memo(
       };
     }, [options]); // Options is memoized by parent - stable unless data changes
 
-    // Update size without recreating chart
-    useEffect(() => {
-      if (!chartRef.current) return;
-      const { width, height } = options;
-
-      if (typeof width === 'number' && typeof height === 'number') {
-        chartRef.current.setSize({ width, height });
-      }
-    }, [options.width, options.height]);
-
     // Update data without recreating chart
     useEffect(() => {
       if (!chartRef.current) return;
       chartRef.current.setData(data);
     }, [data]);
+
+    // Auto-resize on window resize (inspired by uPlot examples)
+    useEffect(() => {
+      const handleResize = () => {
+        if (!containerRef.current || !chartRef.current) return;
+
+        const rect = containerRef.current.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          chartRef.current.setSize({ width: rect.width, height: rect.height });
+        }
+      };
+
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     return <div ref={containerRef} className={className} />;
   },
