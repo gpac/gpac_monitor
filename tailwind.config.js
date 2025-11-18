@@ -21,6 +21,7 @@ export default {
           panel: "#0f141b",
 
           line: "#ffffff1a",
+          download: "#6081B7",
 
           divider: "#ffffff1a",
 

@@ -95,7 +95,7 @@ const NetworkTab = memo(
                   </div>
 
                   {/* Main rate - HERO */}
-                  <div className="text-2xl font-bold text-blue-500 tabular-nums leading-none">
+                  <div className="text-2xl font-bold text-monitor-download tabular-nums leading-none">
                     {formattedStats.bytesReceivedRate}
                   </div>
 
