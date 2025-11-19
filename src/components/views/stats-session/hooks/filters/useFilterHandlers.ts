@@ -1,11 +1,11 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useAppDispatch } from '@/shared/hooks/redux';
 import {
   openFilterInline,
   detachFilter,
   closeFilter,
 } from '@/shared/store/slices/widgetsSlice';
-import { createOpenPropertiesHandler } from '../../utils/gpacArgsManagement';
+import { useOpenProperties } from '@/shared/hooks/useOpenProperties';
 
 /**
  * Hook to provide filter action handlers
@@ -13,6 +13,7 @@ import { createOpenPropertiesHandler } from '../../utils/gpacArgsManagement';
  */
 export const useFilterHandlers = (onTabChange?: (tab: string) => void) => {
   const dispatch = useAppDispatch();
+  const { openFilterProperties } = useOpenProperties();
 
   const handleCardClick = useCallback(
     (filterIdx: number) => {
@@ -40,15 +41,10 @@ export const useFilterHandlers = (onTabChange?: (tab: string) => void) => {
     [dispatch, onTabChange],
   );
 
-  const handleOpenProperties = useMemo(
-    () => createOpenPropertiesHandler(dispatch),
-    [dispatch],
-  );
-
   return {
     handleCardClick,
     handleDetachTab,
     handleCloseTab,
-    handleOpenProperties,
+    handleOpenProperties: openFilterProperties,
   };
 };

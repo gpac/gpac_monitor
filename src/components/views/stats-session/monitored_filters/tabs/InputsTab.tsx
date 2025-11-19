@@ -1,35 +1,92 @@
-import { memo } from 'react';
-import {
-  FilterStatsResponse,
-  TabPIDData,
-} from '@/types/domain/gpac/filter-stats';
+import { memo, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatBytes } from '@/utils/formatting';
-import {
-  getOverallStatus,
-  getPIDStatusBadge,
-  getGlobalStatus,
-} from '@/utils/gpac';
+import { getOverallStatus, getPIDStatusBadge } from '@/utils/gpac';
 import { getMediaTypeInfo } from '@/utils/gpac';
+import { FaCircleInfo } from 'react-icons/fa6';
+import { useOpenProperties } from '@/shared/hooks/useOpenProperties';
+import type {
+  InputCardProps,
+  InputsTabProps,
+  PIDWithIndex,
+} from '../../types';
+import { useInputsTabData } from './hooks/useInputsTabData';
 
-interface InputsTabProps {
-  filterData: FilterStatsResponse;
-  filterName: string;
-}
 
-interface InputCardProps {
+// Compact navigation item for quick access
+interface InputNavItemProps {
   inputName: string;
-  pidsByType: Record<string, TabPIDData[]>;
+  pidsByType: Record<string, PIDWithIndex[]>;
+  filterIdx: number;
 }
 
-const InputCard = memo(({ inputName, pidsByType }: InputCardProps) => {
+const InputNavItem = memo(
+  ({ inputName, pidsByType, filterIdx }: InputNavItemProps) => {
+    const { openPIDProperties } = useOpenProperties();
+
+    // Memoize expensive calculations
+    const { allPids, firstPid, mediaTypes } = useMemo(() => {
+      const pids = Object.values(pidsByType).flat();
+      return {
+        allPids: pids,
+        firstPid: pids[0],
+        mediaTypes: Object.keys(pidsByType),
+      };
+    }, [pidsByType]);
+
+    // Memoize click handler to avoid re-creating on each render
+    const handleClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (firstPid) {
+          openPIDProperties({ filterIdx, ipidIdx: firstPid.ipidIdx });
+        }
+      },
+      [firstPid, filterIdx, openPIDProperties],
+    );
+
+    return (
+      <div className="flex items-center gap-2 p-2 rounded-lg bg-background/50 hover:bg-background/70 transition-colors">
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          <span className="text-sm font-medium truncate">{inputName}</span>
+          <div className="flex items-center gap-1">
+            {mediaTypes.map((type) => {
+              const mediaInfo = getMediaTypeInfo(type);
+              const MediaIcon = mediaInfo.icon;
+              return (
+                <MediaIcon
+                  key={type}
+                  className={`h-3 w-3 ${mediaInfo.color}`}
+                  title={mediaInfo.label}
+                />
+              );
+            })}
+          </div>
+        </div>
+        <Badge variant="outline" className="text-xs tabular-nums">
+          {allPids.length}
+        </Badge>
+        <FaCircleInfo
+          className="h-4 w-4 cursor-pointer text-muted-foreground hover:text-primary transition-colors flex-shrink-0"
+          onClick={handleClick}
+          title={`View ${inputName} properties`}
+        />
+      </div>
+    );
+  },
+);
+
+InputNavItem.displayName = 'InputNavItem';
+
+const InputCard = memo(({ inputName, pidsByType, filterIdx }: InputCardProps) => {
+  const { openPIDProperties } = useOpenProperties();
   const allPids = Object.values(pidsByType).flat();
   const overallStatus = getOverallStatus(allPids);
   const StatusIcon = overallStatus.icon;
 
   // Render media section for any type
-  const renderMediaSection = (pids: TabPIDData[], type: string) => {
+  const renderMediaSection = (pids: PIDWithIndex[], type: string) => {
     return (
       <div className="space-y-3">
         {pids.map((pid) => {
@@ -46,6 +103,16 @@ const InputCard = memo(({ inputName, pidsByType }: InputCardProps) => {
                       {pid.codec.toUpperCase()}
                     </Badge>
                   )}
+                  <FaCircleInfo
+                    className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-primary transition-colors"
+                    onClick={() => {
+                      openPIDProperties({
+                        filterIdx,
+                        ipidIdx: pid.ipidIdx,
+                      });
+                    }}
+                    title={`View ${pid.name} properties`}
+                  />
                 </div>
                 <Badge variant={statusBadge.variant} className="text-xs">
                   {statusBadge.text}
@@ -55,7 +122,7 @@ const InputCard = memo(({ inputName, pidsByType }: InputCardProps) => {
               {/* Key Metrics */}
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div>
-                  <div className="text-sm font-medium text-info tabular-nums">
+                  <div className="text-sm po-medium text-info tabular-nums">
                     {formatBytes(pid.buffer)}
                   </div>
                   <div className="text-xs text-muted-foreground">Buffer</div>
@@ -128,12 +195,6 @@ const InputCard = memo(({ inputName, pidsByType }: InputCardProps) => {
                     <span className="text-sm font-medium">
                       {mediaInfo.label}
                     </span>
-                    <Badge
-                      variant="outline"
-                      className="text-xs ml-auto text-info tabular-nums"
-                    >
-                      {pids.length} stream{pids.length > 1 ? 's' : ''}
-                    </Badge>
                   </div>
                   {renderMediaSection(pids, type)}
                 </div>
@@ -153,50 +214,20 @@ const InputCard = memo(({ inputName, pidsByType }: InputCardProps) => {
 InputCard.displayName = 'InputCard';
 
 const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
-  const inputPids = filterData.ipids ? Object.values(filterData.ipids) : [];
-
-  // Group PIDs by input source and by type
-  const groupedInputs = inputPids.reduce(
-    (acc, pid) => {
-      // Extract input name (remove suffix if present)
-      const inputName = pid.name.split('_')[0] || pid.name;
-
-      if (!acc[inputName]) {
-        acc[inputName] = {};
-      }
-
-      // Group by actual PID type
-      const pidType = pid.type || 'Unknown';
-      if (!acc[inputName][pidType]) {
-        acc[inputName][pidType] = [];
-      }
-      acc[inputName][pidType].push(pid);
-
-      return acc;
-    },
-    {} as Record<string, Record<string, TabPIDData[]>>,
-  );
-
-  const inputNames = Object.keys(groupedInputs);
-
-  const globalStatus = getGlobalStatus(inputPids, inputNames.length);
+  const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
+    useInputsTabData(filterData);
 
   return (
     <div className="space-y-4">
       {/* Global Status Bar */}
-      {inputPids.length > 0 && (
-        <div className="bg-background/30 border rounded-lg p-3">
+      {inputPidsWithIndices.length > 0 && (
+        <div className="bg-background/30 border-transparent rounded-lg p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">Global Status</span>
               <div className="flex items-center gap-3 text-sm">
                 <span className="text-info tabular-nums">
-                  {globalStatus.totalItems} Input
-                  {globalStatus.totalItems > 1 ? 's' : ''}
-                </span>
-                <span className="text-muted-foreground">•</span>
-                <span className="text-info tabular-nums">
-                  {globalStatus.totalPids} Stream
+                  {globalStatus.totalPids} Input
                   {globalStatus.totalPids > 1 ? 's' : ''}
                 </span>
               </div>
@@ -224,6 +255,25 @@ const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
         </div>
       )}
 
+      {/* Quick Access Navigation - Only show when multiple inputs */}
+      {inputNames.length > 1 && (
+        <div className="bg-background/30 border-transparent rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-sm font-medium">Quick Access</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+            {inputNames.map((inputName) => (
+              <InputNavItem
+                key={inputName}
+                inputName={inputName}
+                pidsByType={groupedInputs[inputName]}
+                filterIdx={filterData.idx}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Inputs Grid */}
       {inputNames.length > 0 ? (
         <div className="grid grid-cols-1 gap-4">
@@ -232,6 +282,7 @@ const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
               key={inputName}
               inputName={inputName}
               pidsByType={groupedInputs[inputName]}
+              filterIdx={filterData.idx}
             />
           ))}
         </div>

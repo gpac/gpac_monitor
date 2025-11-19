@@ -1,3 +1,5 @@
+import { FilterStatsResponse, TabPIDData } from "@/types";
+
 export interface BufferMetrics {
   current: number;
   total: number;
@@ -77,4 +79,29 @@ export interface GPACFilterStats {
   time: number;
   nb_ipid: number;
   nb_opid: number;
+}
+
+/**
+ * PID data with position index for edge mapping
+ * ipidIdx is the position index (0, 1, 2...), NOT the key name
+ */
+export interface PIDWithIndex extends TabPIDData {
+  ipidIdx: number;
+}
+
+/**
+ * Props for InputsTab component
+ */
+export interface InputsTabProps {
+  filterData: FilterStatsResponse;
+  filterName: string;
+}
+
+/**
+ * Props for InputCard component
+ */
+export interface InputCardProps {
+  inputName: string;
+  pidsByType: Record<string, PIDWithIndex[]>;
+  filterIdx: number;
 }

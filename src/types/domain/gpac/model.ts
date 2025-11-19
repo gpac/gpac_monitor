@@ -1,5 +1,6 @@
 import { Node, Edge, EdgeProps } from '@xyflow/react';
 import { GpacArgument } from '../../../components/filtersArgs/types';
+import type { PIDproperties } from './filter-stats';
 
 // MONITORING
 
@@ -24,6 +25,8 @@ export interface MonitoredFilterStats {
   time: number;
   nb_ipid: number;
   nb_opid: number;
+  ipids?: Record<string, PIDproperties>;
+  opids?: Record<string, PIDproperties>;
 }
 export interface EnrichedFilterOverview extends Record<string, unknown> {
   // STATIC GRAPH DATA

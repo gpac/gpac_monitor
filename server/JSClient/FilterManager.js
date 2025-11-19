@@ -4,7 +4,7 @@ import {
     gpac_filter_to_minimal_object,
     on_all_connected
 } from '../filterUtils.js';
-import { PidDataCollector } from './PidDataCollector.js';
+import { PidDataCollector } from './PID/PidDataCollector.js';
 import { ArgumentHandler } from './ArgumentHandler.js';
 
 function FilterManager(client, draned_once_ref) {

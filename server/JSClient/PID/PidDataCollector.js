@@ -2,10 +2,12 @@ function PidDataCollector() {
     
     this.collectInputPids = function(filter) {
         const ipids = {};
-        
+
         for (let i = 0; i < filter.nb_ipid; i++) {
             const pid = {};
-            pid.name = filter.ipid_props(i, "name"); 
+            const originalName = filter.ipid_props(i, "name");
+            // Make name unique when multiple PIDs have the same name
+            pid.name = filter.nb_ipid > 1 && originalName ? `${originalName}_${i}` : originalName;
             pid.buffer = filter.ipid_props(i, "buffer");
             pid.nb_pck_queued = filter.ipid_props(i, "nb_pck_queued");
             pid.would_block = filter.ipid_props(i, "would_block");
@@ -44,8 +46,9 @@ function PidDataCollector() {
                 pid.stats.total_process_time = stats.total_process_time;
             }
 
-            const name = pid.name || `ipid_${i}`;
-            ipids[name] = pid;
+            // Use pid.name as key (already made unique above)
+            const key = pid.name || `ipid_${i}`;
+            ipids[key] = pid;
         }
         
         return ipids;
@@ -58,7 +61,9 @@ function PidDataCollector() {
             const pid = {};
 
             // Direct stream properties
-            pid.name = filter.opid_props(i, "name");
+            const originalName = filter.opid_props(i, "name");
+            // Make name unique when multiple PIDs have the same name
+            pid.name = filter.nb_opid > 1 && originalName ? `${originalName}_${i}` : originalName;
             pid.buffer = filter.opid_props(i, "buffer");
             pid.max_buffer = filter.opid_props(i, "max_buffer"); 
             pid.nb_pck_queued = filter.opid_props(i, "nb_pck_queued");
@@ -95,8 +100,9 @@ function PidDataCollector() {
                 pid.stats.total_process_time = stats.total_process_time;
             }
 
-            const name = pid.name || `opid_${i}`;
-            opids[name] = pid;
+            // Use pid.name as key (already made unique above)
+            const key = pid.name || `opid_${i}`;
+            opids[key] = pid;
         }
 
         return opids;

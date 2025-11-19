@@ -3,7 +3,7 @@ import { SessionManager } from './SessionManager.js';
 import { FilterManager } from './FilterManager.js';
 import { CpuStatsManager } from './CpuStatsManager.js';
 import { LogManager } from './LogManager.js';
-import { PidPropsCollector } from './PidPropsCollector.js';
+import { PidPropsCollector } from './PID/PidPropsCollector.js';
 import { CommandLineManager } from './CommandLineManager.js';
 
 function JSClient(id, client, all_clients, draned_once_ref) {

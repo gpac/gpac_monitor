@@ -92,14 +92,42 @@ const formatBytes = (bytes: number = 0): string => {
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 };
 
-const formatTime = (ms: number = 0): string => {
-  if (ms === 0) return '0ms';
-  if (ms < 1000) return `${ms}ms`;
-  const seconds = ms / 1000;
+/**
+ * Format time in compact form for dashboard display
+ * Input: microseconds from GPAC (f.time)
+ * Output: Compact readable format
+ */
+const formatTime = (microseconds: number = 0): string => {
+  if (microseconds === 0) return '0ms';
+
+  // < 1ms: show microseconds
+  if (microseconds < 1000) return `${microseconds.toFixed(0)}μs`;
+
+  const milliseconds = microseconds / 1000;
+
+  // < 1s: show milliseconds
+  if (milliseconds < 1000) return `${milliseconds.toFixed(0)}ms`;
+
+  const seconds = milliseconds / 1000;
+
+  // < 1min: show seconds with 1 decimal
   if (seconds < 60) return `${seconds.toFixed(1)}s`;
-  const minutes = Math.floor(seconds / 60);
+
+  const totalMinutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
-  return `${minutes}m ${remainingSeconds}s`;
+
+  // < 1h: show mm:ss format (compact)
+  if (totalMinutes < 60) {
+    const mm = totalMinutes.toString().padStart(2, '0');
+    const ss = remainingSeconds.toString().padStart(2, '0');
+    return `${mm}:${ss}`;
+  }
+
+  // >= 1h: show h:mm format
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const mmFormatted = minutes.toString().padStart(2, '0');
+  return `${hours}:${mmFormatted}h`;
 };
 
 const formatNumber = (num: number = 0): string => {
