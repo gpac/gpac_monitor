@@ -22,7 +22,7 @@ function SessionManager(client) {
     };
 
     /**
-     * Compute all_packets_done flag (Ticket B2)
+  
      * @param {Array} filters - Active filters to check
      * @returns {boolean} true if all filters with inputs have all PIDs EOS
      */
@@ -91,11 +91,6 @@ function SessionManager(client) {
 
             session.lock_filters(false);
 
-            // Log  verification
-            print(`[SessionManager] Stats: ${stats.length} filters, all_packets_done=${all_packets_done}, session.last_task=${session.last_task}, allFiltersEos=${allFiltersEos}`);
-            if (stats.length > 0) {
-                print(`[SessionManager] Sample filter[0]: idx=${stats[0].idx}, is_eos=${stats[0].is_eos}, last_packet_sent=${stats[0].last_packet_sent}, timestamp=${stats[0].last_packet_sent_timestamp}`);
-            }
 
             if (this.client.client) {
                 this.client.client.send(JSON.stringify({

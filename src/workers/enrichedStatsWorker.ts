@@ -18,6 +18,16 @@ const calculateBufferUsage = (ipid: Record<string, any> = {}): number => {
   return Math.min(100, Math.round((totalBuffer / totalMaxBuffer) * 100));
 };
 
+// Calculate packet rate (packets per second)
+const calculatePacketRate = (
+  pckDone: number = 0,
+  timeUs: number = 0,
+): number => {
+  if (timeUs <= 0) return 0;
+  const timeSeconds = timeUs / 1_000_000;
+  return Math.round(pckDone / timeSeconds);
+};
+
 // Activity level based on byte rate (real data throughput)
 // Thresholds to adjust based on actual streaming context
 const getActivityLevel = (
@@ -98,6 +108,12 @@ const formatNumber = (num: number = 0): string => {
   return `${(num / 1000000).toFixed(1)}M`;
 };
 
+const formatPacketRate = (rate: number): string => {
+  if (rate === 0) return '0 pkt/s';
+  if (rate < 1000) return `${rate} pkt/s`;
+  return `${(rate / 1000).toFixed(1)}K pkt/s`;
+};
+
 // Enriched filter data with pre-computed values
 export interface EnrichedFilterData extends GpacNodeData {
   computed: {
@@ -109,6 +125,9 @@ export interface EnrichedFilterData extends GpacNodeData {
     formattedBytes: string;
     formattedTime: string;
     formattedPackets: string;
+    // Real-time performance metric
+    packetRate: number;
+    formattedPacketRate: string;
   };
 }
 
@@ -143,6 +162,10 @@ self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
       const activityColor = getActivityColorClass(activityLevel);
       const activityLabel = getActivityLabel(activityLevel);
 
+      // Real-time performance metric
+      const packetRate = calculatePacketRate(filter.pck_done, filter.time);
+      const formattedPacketRate = formatPacketRate(packetRate);
+
       // Check if computed values changed
       if (
         cached &&
@@ -156,7 +179,9 @@ self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
         cached.computed.sessionType === sessionType &&
         cached.computed.formattedBytes === formattedBytes &&
         cached.computed.formattedTime === formattedTime &&
-        cached.computed.formattedPackets === formattedPackets
+        cached.computed.formattedPackets === formattedPackets &&
+        cached.computed.packetRate === packetRate &&
+        cached.computed.formattedPacketRate === formattedPacketRate
       ) {
         // Return cached object to maintain reference equality
         return cached;
@@ -174,6 +199,8 @@ self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
           formattedBytes,
           formattedTime,
           formattedPackets,
+          packetRate,
+          formattedPacketRate,
         },
       };
 

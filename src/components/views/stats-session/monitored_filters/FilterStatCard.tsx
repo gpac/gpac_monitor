@@ -25,6 +25,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       formattedBytes,
       formattedTime,
       formattedPackets,
+      formattedPacketRate,
     } = filter.computed;
 
     const hasPackets = Boolean(filter.pck_done && filter.pck_done > 0);
@@ -91,11 +92,17 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
         {/* Line 2: Metrics + PIDs */}
         <div className="flex items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2 font-mono  tabular-nums text-monitor-text-muted">
+          <div className="flex items-center gap-2 font-mono tabular-nums text-monitor-text-muted">
             {hasPackets && (
               <>
                 <span>{formattedPackets} pkt</span>
-                <span className="text-monitor-text-subtle ">•</span>
+                <span className="text-monitor-text-subtle">•</span>
+              </>
+            )}
+            {hasTime && (
+              <>
+                <span className="text-info">{formattedPacketRate}</span>
+                <span className="text-monitor-text-subtle">•</span>
               </>
             )}
             {formattedBytes && (
@@ -137,6 +144,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       prev.computed.formattedPackets === next.computed.formattedPackets &&
       prev.computed.formattedBytes === next.computed.formattedBytes &&
       prev.computed.formattedTime === next.computed.formattedTime &&
+      prev.computed.formattedPacketRate === next.computed.formattedPacketRate &&
       prev.computed.activityColor === next.computed.activityColor &&
       prev.computed.activityLabel === next.computed.activityLabel &&
       prev.computed.sessionType === next.computed.sessionType &&
