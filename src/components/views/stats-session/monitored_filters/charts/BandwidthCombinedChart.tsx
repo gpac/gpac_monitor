@@ -38,11 +38,27 @@ export const BandwidthCombinedChart = memo(
       type: 'download',
     });
 
+    // Resize observer to adapt chart to container size
     useEffect(() => {
       if (!containerRef.current) return;
 
-      const { width } = containerRef.current.getBoundingClientRect();
-      setDimensions({ width: width || 400, height: 230 });
+      const updateDimensions = () => {
+        if (containerRef.current) {
+          const { width } = containerRef.current.getBoundingClientRect();
+          setDimensions({ width: width || 400, height: 230 });
+        }
+      };
+
+      // Initial measurement
+      updateDimensions();
+
+      // Observe resize
+      const resizeObserver = new ResizeObserver(updateDimensions);
+      resizeObserver.observe(containerRef.current);
+
+      return () => {
+        resizeObserver.disconnect();
+      };
     }, []);
 
     const { data, options } = useMemo(() => {
