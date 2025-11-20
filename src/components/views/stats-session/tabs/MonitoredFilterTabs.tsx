@@ -4,7 +4,10 @@ import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
 import { useFilterStats } from '@/components/views/stats-session/hooks/stats';
 import { useAppDispatch } from '@/shared/hooks/redux';
-import { clearInitialTab } from '@/shared/store/slices/graphSlice';
+import {
+  clearInitialTab,
+  InitialTabType,
+} from '@/shared/store/slices/graphSlice';
 import { store } from '@/shared/store';
 import {
   FilterStatsResponse,
@@ -61,15 +64,22 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
 }) => {
   const dispatch = useAppDispatch();
 
-  // Capture initialTab once on mount (no re-renders on change)
-  const initialTabRef = useRef(store.getState().graph.initialTab);
+  // Track initialTab - capture when tab becomes active
+  const initialTabRef = useRef<InitialTabType | null>(null);
+  const wasActiveRef = useRef(false);
 
-  // Clear initialTab after capturing it (one-time use)
+  // Capture initialTab when tab becomes active (not on mount)
   useEffect(() => {
-    if (initialTabRef.current) {
-      dispatch(clearInitialTab());
+    if (isActive && !wasActiveRef.current) {
+      // Tab just became active - capture initialTab
+      const currentInitialTab = store.getState().graph.initialTab;
+      initialTabRef.current = currentInitialTab;
+      if (currentInitialTab) {
+        dispatch(clearInitialTab());
+      }
     }
-  }, [dispatch]);
+    wasActiveRef.current = isActive;
+  }, [isActive, dispatch]);
 
   // Subscribe to live stats when tab is active
   const { stats } = useFilterStats(filter.idx, isActive, 1000);

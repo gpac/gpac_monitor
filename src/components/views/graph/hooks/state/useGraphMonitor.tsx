@@ -9,10 +9,7 @@ import {
 import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch } from '@/shared/hooks/redux';
-import {
-  setSelectedNode,
-  setInitialTab,
-} from '@/shared/store/slices/graphSlice';
+import { setSelectedNode } from '@/shared/store/slices/graphSlice';
 
 // Modularized hooks
 import { useGraphLayout } from '../layout/useGraphLayout';
@@ -60,11 +57,10 @@ const useGraphMonitor = () => {
 
   const { getFilterArgs, hasFilterArgs } = useFilterArgs();
 
-  // Handle node click to select filter and show InputsTab
-  const handleNodeTabSelect = useCallback(
+  // Handle node click to select filter (toolbar will appear)
+  const handleNodeSelect = useCallback(
     (filterIdx: number) => {
       dispatch(setSelectedNode(String(filterIdx)));
-      dispatch(setInitialTab('inputs'));
     },
     [dispatch],
   );
@@ -80,7 +76,7 @@ const useGraphMonitor = () => {
       setLocalNodes,
       service,
       dispatch,
-      onNodeClick: handleNodeTabSelect,
+      onNodeClick: handleNodeSelect,
     });
 
   // Use notification system

@@ -10,6 +10,11 @@ import { RootState } from '@/shared/store/types';
 
 export type InitialTabType = 'overview' | 'network' | 'inputs' | 'outputs';
 
+export interface PendingFilterOpen {
+  filterIdx: number;
+  initialTab: InitialTabType;
+}
+
 export interface GraphState {
   filters: GraphFilterData[];
   nodes: Node[];
@@ -19,6 +24,7 @@ export interface GraphState {
   redraw: boolean;
   selectedNodeId: string | null;
   initialTab: InitialTabType | null;
+  pendingFilterOpen: PendingFilterOpen | null;
   lastUpdate: number;
   selectedFilterDetails: GraphFilterData | null;
 }
@@ -32,6 +38,7 @@ const initialState: GraphState = {
   redraw: false,
   selectedNodeId: null,
   initialTab: null,
+  pendingFilterOpen: null,
   lastUpdate: Date.now(),
   selectedFilterDetails: null,
 };
@@ -90,6 +97,9 @@ const graphSlice = createSlice({
         state.selectedNodeId = action.payload;
       }
     },
+    clearSelectedNode(state) {
+      state.selectedNodeId = null;
+    },
     setFilterDetails: (
       state,
       action: PayloadAction<GraphFilterData | null>,
@@ -114,6 +124,15 @@ const graphSlice = createSlice({
     clearInitialTab: (state) => {
       state.initialTab = null;
     },
+    /** Request to open a filter with a specific initial tab */
+    requestFilterOpen: (state, action: PayloadAction<PendingFilterOpen>) => {
+      state.pendingFilterOpen = action.payload;
+      state.initialTab = action.payload.initialTab;
+    },
+    /** Clear the pending filter open request */
+    clearPendingFilterOpen: (state) => {
+      state.pendingFilterOpen = null;
+    },
   },
 });
 export const {
@@ -122,11 +141,14 @@ export const {
   updateGraphData,
   updateLayout,
   setSelectedNode,
+  clearSelectedNode,
   setFilterDetails,
   clearFilterDetails,
   setSelectedFilterDetails,
   setInitialTab,
   clearInitialTab,
+  requestFilterOpen,
+  clearPendingFilterOpen,
 } = graphSlice.actions;
 
 export const selectFilterNameById = (state: RootState, filterId: string) => {

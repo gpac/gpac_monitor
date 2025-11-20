@@ -3,6 +3,7 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
+import NodeToolbarActions from './NodeToolbarActions';
 
 interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
@@ -91,116 +92,122 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   );
 
   return (
-    <div
-      className={`
-        border-2 rounded-xl p-4 shadow-sm
-        ${selected ? 'ring-3 ring-emerald-500 shadow-lg' : ''}
-        transition-all duration-200
-      `}
-      style={containerStyle}
-    >
-      {inputHandles.map(({ id, type, position, index }) => (
-        <Handle
-          key={`input-${id}`}
-          id={id}
-          type={type}
-          position={position}
-          style={{
-            ...handleStyle,
-            top: getHandleY(index, inputHandles.length),
-            transform: 'translateY(-50%)',
-          }}
-        />
-      ))}
-
+    <>
+      <NodeToolbarActions filterIdx={data.idx} filterName={data.name} />
       <div
-        className="rounded-t-xl -m-4 mb-2 px-4 py-3 shadow-sm"
-        style={headerStyle}
+        className={`
+          border-2 rounded-xl p-4 shadow-sm
+          ${selected ? 'ring-3 ring-emerald-500 shadow-lg' : ''}
+          transition-all duration-200
+        `}
+        style={containerStyle}
       >
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold text-sm drop-shadow-sm" style={textStyle}>
-            {label}
-          </h3>
-          <div
-            className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
-            style={textStyle}
-            title={
-              sessionType === 'source'
-                ? 'Source Filter'
-                : sessionType === 'sink'
-                  ? 'Sink Filter'
-                  : 'Processing Filter'
-            }
-          >
-            {sessionType.toUpperCase()}
+        {inputHandles.map(({ id, type, position, index }) => (
+          <Handle
+            key={`input-${id}`}
+            id={id}
+            type={type}
+            position={position}
+            style={{
+              ...handleStyle,
+              top: getHandleY(index, inputHandles.length),
+              transform: 'translateY(-50%)',
+            }}
+          />
+        ))}
+
+        <div
+          className="rounded-t-xl -m-4 mb-2 px-4 py-3 shadow-sm"
+          style={headerStyle}
+        >
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-sm drop-shadow-sm" style={textStyle}>
+              {label}
+            </h3>
+            <div
+              className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
+              style={textStyle}
+              title={
+                sessionType === 'source'
+                  ? 'Source Filter'
+                  : sessionType === 'sink'
+                    ? 'Sink Filter'
+                    : 'Processing Filter'
+              }
+            >
+              {sessionType.toUpperCase()}
+            </div>
           </div>
         </div>
+
+        {/* Node content */}
+        <div className="node-drag-handle cursor-move">
+          <div className="flex justify-between items-start mb-2">
+            {/* INPUTS on the left */}
+            <div className="flex-1 text-xs text-gray-600 pr-2">
+              {nb_ipid > 0 && (
+                <>
+                  <span className="font-medium text-gray-300 block text-left">
+                    INPUTS
+                  </span>
+                  <div className="mt-1">
+                    {Object.keys(ipid).map((pidId) => (
+                      <div
+                        key={pidId}
+                        className="text-xs text-gray-200 truncate"
+                      >
+                        {pidId}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* OUTPUTS on the right */}
+            <div className="flex-1 text-xs text-gray-800 pl-2">
+              {nb_opid > 0 && (
+                <>
+                  <span className="font-medium text-gray-300 block text-right">
+                    OUTPUTS
+                  </span>
+                  <div className="mt-1">
+                    {Object.keys(opid).map((pidId) => (
+                      <div
+                        key={pidId}
+                        className="text-xs text-gray-200 text-right truncate"
+                      >
+                        {pidId}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Statistics */}
+          <div className="text-xs text-gray-200 pt-2 border-t border-gray-200 text-center">
+            IPIDs: {nb_ipid} | OPIDs: {nb_opid}
+          </div>
+        </div>
+
+        {/* Output handles */}
+        {outputHandles.map(({ id, type, position, index }) => (
+          <Handle
+            key={`output-${id}`}
+            id={id}
+            type={type}
+            position={position}
+            style={{
+              ...handleStyle,
+              top: getHandleY(index, outputHandles.length),
+              transform: 'translateY(-50%)',
+            }}
+          />
+        ))}
       </div>
-
-      {/* Node content */}
-      <div className="node-drag-handle cursor-move">
-        <div className="flex justify-between items-start mb-2">
-          {/* INPUTS on the left */}
-          <div className="flex-1 text-xs text-gray-600 pr-2">
-            {nb_ipid > 0 && (
-              <>
-                <span className="font-medium text-gray-300 block text-left">
-                  INPUTS
-                </span>
-                <div className="mt-1">
-                  {Object.keys(ipid).map((pidId) => (
-                    <div key={pidId} className="text-xs text-gray-200 truncate">
-                      {pidId}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* OUTPUTS on the right */}
-          <div className="flex-1 text-xs text-gray-800 pl-2">
-            {nb_opid > 0 && (
-              <>
-                <span className="font-medium text-gray-300 block text-right">
-                  OUTPUTS
-                </span>
-                <div className="mt-1">
-                  {Object.keys(opid).map((pidId) => (
-                    <div
-                      key={pidId}
-                      className="text-xs text-gray-200 text-right truncate"
-                    >
-                      {pidId}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Statistics */}
-        <div className="text-xs text-gray-200 pt-2 border-t border-gray-200 text-center">
-          IPIDs: {nb_ipid} | OPIDs: {nb_opid}
-        </div>
-      </div>
-
-      {/* Output handles */}
-      {outputHandles.map(({ id, type, position, index }) => (
-        <Handle
-          key={`output-${id}`}
-          id={id}
-          type={type}
-          position={position}
-          style={{
-            ...handleStyle,
-            top: getHandleY(index, outputHandles.length),
-            transform: 'translateY(-50%)',
-          }}
-        />
-      ))}
-    </div>
+    </>
   );
 };
 const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {

@@ -181,13 +181,13 @@ const OutputsTab = memo(({ filterData, filterName }: OutputsTabProps) => {
 
   const outputNames = Object.keys(groupedOutputs);
 
-  const globalStatus = getGlobalStatus(outputPids, outputNames.length);
+  const globalStatus = getGlobalStatus(outputPids, outputPids.length);
 
   return (
     <div className="space-y-4">
       {/* Global Status Bar */}
       {outputPids.length > 0 && (
-        <div className="bg-background/30 border rounded-lg p-3">
+        <div className="bg-background/30 border-transparent rounded-lg p-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium">Global Status</span>

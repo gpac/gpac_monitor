@@ -1,4 +1,4 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useEffect } from 'react';
 import { LuSettings } from 'react-icons/lu';
 import {
   OverviewTabData,
@@ -55,6 +55,17 @@ const DetailedStatsView = memo(
     onOpenProperties,
     initialTab,
   }: DetailedStatsViewProps) => {
+    const [activeTab, setActiveTab] = useState<string>(
+      initialTab || 'overview',
+    );
+
+    // Update active tab when initialTab changes
+    useEffect(() => {
+      if (initialTab) {
+        setActiveTab(initialTab);
+      }
+    }, [initialTab]);
+
     const counts = useMemo(
       () => ({
         inputs: inputPids.length,
@@ -65,7 +76,7 @@ const DetailedStatsView = memo(
 
     return (
       <div className="space-y-2">
-        <Tabs defaultValue={initialTab || 'overview'} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="sticky backdrop-blur-sm top-0 z-10 bg-background pb-2 space-y-2  ">
             <div className="flex justify-stretch items-center gap-6">
               <h2 className="text-lg font-semibold text-red-600/90">

@@ -10,7 +10,8 @@ import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
 import { useStatsCalculations } from '../hooks/stats';
 import { useEnrichedStats } from '../hooks/stats';
 import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
-import { useAppSelector } from '@/shared/hooks/redux';
+import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
+import { clearPendingFilterOpen } from '@/shared/store/slices/graphSlice';
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import { WidgetProps } from '@/types/ui/widget';
@@ -28,6 +29,7 @@ const EMPTY_ACTIVE_WIDGETS: Widget[] = [];
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, isDetached, detachedFilterIdx }) => {
+    const dispatch = useAppDispatch();
     const [activeTab, setActiveTab] = useState('main');
     const [isResizing, setIsResizing] = useState(false);
     const tabsRef = useRef<HTMLDivElement>(null);
@@ -72,22 +74,17 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       handleOpenProperties,
     } = useFilterHandlers(setActiveTab);
 
-    // Listen for node clicks from graph to open filter tab
-    // Use ref to track last processed nodeId and avoid re-renders
-    const lastProcessedNodeId = useRef<string | null>(null);
-    const selectedNodeId = useAppSelector(
-      (state) => state.graph.selectedNodeId,
+    // Listen for pending filter open requests from NodeToolbar
+    const pendingFilterOpen = useAppSelector(
+      (state) => state.graph.pendingFilterOpen,
     );
 
     useEffect(() => {
-      if (selectedNodeId && selectedNodeId !== lastProcessedNodeId.current) {
-        lastProcessedNodeId.current = selectedNodeId;
-        const filterIdx = parseInt(selectedNodeId, 10);
-        if (!isNaN(filterIdx)) {
-          handleCardClick(filterIdx);
-        }
+      if (pendingFilterOpen) {
+        handleCardClick(pendingFilterOpen.filterIdx);
+        dispatch(clearPendingFilterOpen());
       }
-    }, [selectedNodeId, handleCardClick]);
+    }, [pendingFilterOpen, handleCardClick, dispatch]);
 
     const noopTabChange = useCallback(() => {}, []);
     const noopCardClick = useCallback(() => {}, []);

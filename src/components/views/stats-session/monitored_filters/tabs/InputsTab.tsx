@@ -256,7 +256,7 @@ const InputsTab = memo(({ filterData, filterName }: InputsTabProps) => {
 
       {/* Quick Access Navigation - Only show when multiple inputs */}
       {inputNames.length > 1 && (
-        <div className="bg-stat border border-transparent rounded-lg p-3">
+        <div className="bg-stat  border-transparent rounded-lg p-3">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[11px] text-muted-foreground tabular-nums">
               {inputNames.length} inputs
