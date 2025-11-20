@@ -1,4 +1,4 @@
-import { FilterStatsResponse, TabPIDData } from "@/types";
+import { FilterStatsResponse, TabPIDData } from '@/types';
 
 export interface BufferMetrics {
   current: number;
@@ -6,19 +6,6 @@ export interface BufferMetrics {
   isDynamic: boolean;
   usagePercentage: number;
   status: 'normal' | 'warning' | 'critical';
-}
-
-export interface FilterBufferStats {
-  input: Record<string, BufferMetrics>;
-  output: Record<string, BufferMetrics>;
-  fpsStats: {
-    current: number | null;
-    trend: 'stable' | 'increasing' | 'decreasing';
-  };
-  latencyStats: {
-    value: number | null;
-    unit: 'ms' | 's';
-  };
 }
 
 export type TrendDirection = 'stable' | 'increasing' | 'decreasing';
@@ -67,18 +54,6 @@ export interface PIDMetricsCardProps {
   inputCount: number;
   outputCount: number;
   name: string;
-}
-
-export interface GPACFilterStats {
-  idx: number;
-  status: string;
-  bytes_done: number;
-  bytes_sent: number;
-  pck_sent: number;
-  pck_done: number;
-  time: number;
-  nb_ipid: number;
-  nb_opid: number;
 }
 
 /**

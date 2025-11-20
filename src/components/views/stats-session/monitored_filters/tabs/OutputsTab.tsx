@@ -47,9 +47,11 @@ const OutputCard = memo(({ outputName, pidsByType }: OutputCardProps) => {
                     </Badge>
                   )}
                 </div>
-                <Badge variant={statusBadge.variant} className="text-xs">
-                  {statusBadge.text}
-                </Badge>
+                {statusBadge && (
+                  <Badge variant={statusBadge.variant} className="text-xs">
+                    {statusBadge.text}
+                  </Badge>
+                )}
               </div>
 
               {/* Key Metrics */}
@@ -208,15 +210,14 @@ const OutputsTab = memo(({ filterData, filterName }: OutputsTabProps) => {
                   {globalStatus.errors > 1 ? 's' : ''}
                 </Badge>
               )}
-              {globalStatus.warnings > 0 && (
-                <Badge variant="secondary" className="text-xs tabular-nums">
-                  {globalStatus.warnings} Warning
-                  {globalStatus.warnings > 1 ? 's' : ''}
-                </Badge>
-              )}
               {globalStatus.active > 0 && (
                 <Badge variant="default" className="text-xs tabular-nums">
                   {globalStatus.active} Active
+                </Badge>
+              )}
+              {globalStatus.eos > 0 && (
+                <Badge variant="secondary" className="text-xs tabular-nums">
+                  {globalStatus.eos} EOS
                 </Badge>
               )}
             </div>

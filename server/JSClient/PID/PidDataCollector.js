@@ -22,6 +22,7 @@ function PidDataCollector() {
             pid.width = filter.ipid_props(i, "Width");
             pid.height = filter.ipid_props(i, "Height");
             pid.pixelformat = filter.ipid_props(i, "PixelFormat");
+            pid.bitrate= filter.ipid_props(i, "Bitrate");
 
             // For audio
             pid.samplerate = filter.ipid_props(i, "SampleRate");

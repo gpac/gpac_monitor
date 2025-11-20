@@ -22,6 +22,11 @@ export const getOverallStatus = (pids: TabPIDData[]): StatusInfo => {
     return { status: 'Active', variant: 'default', icon: LuCheck };
   }
 
+  // Check if all PIDs are EOS (end of stream)
+  if (allPids.length > 0 && allPids.every((pid) => pid.eos)) {
+    return { status: 'EOS', variant: 'secondary', icon: LuCheck };
+  }
+
   return { status: 'Idle', variant: 'outline', icon: LuCheck };
 };
 
@@ -33,8 +38,9 @@ export const getPIDStatusBadge = (pid: TabPIDData) => {
     return { text: 'Disconnected', variant: 'destructive' as const };
   if (pid.would_block)
     return { text: 'Blocked', variant: 'destructive' as const };
-  if (pid.eos) return { text: 'EOS', variant: 'secondary' as const };
   if (pid.playing) return { text: 'Playing', variant: 'default' as const };
+  // EOS is shown at card level, not on individual PIDs
+  if (pid.eos) return null;
   return { text: 'Idle', variant: 'outline' as const };
 };
 
@@ -45,14 +51,14 @@ export const getGlobalStatus = (pids: TabPIDData[], itemCount: number) => {
   const totalErrors = pids.filter(
     (pid) => pid.stats.disconnected || pid.would_block,
   ).length;
-  const totalWarnings = pids.filter((pid) => pid.eos).length;
   const totalActive = pids.filter((pid) => pid.playing).length;
+  const totalEos = pids.filter((pid) => pid.eos).length;
 
   return {
     totalItems: itemCount,
     totalPids: pids.length,
     errors: totalErrors,
-    warnings: totalWarnings,
     active: totalActive,
+    eos: totalEos,
   };
 };

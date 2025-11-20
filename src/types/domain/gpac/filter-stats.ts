@@ -56,6 +56,7 @@ export interface PIDproperties {
   nb_pck_queued: number | null;
   would_block: boolean | null;
   eos: boolean;
+  bitrate: number | null;
   playing: boolean | null;
   timescale: number;
   codec: string;
