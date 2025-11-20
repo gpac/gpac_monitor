@@ -14,7 +14,7 @@ export const PIDMetricsCard = memo(({ filter }: PIDMetricsCardProps) => (
     <CardContent>
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center">
-          <div className="text-2xl font-bold text-info tabular-nums">
+          <div className="text-2xl font-bold text-monitor-text-secondary tabular-nums">
             {filter.nb_ipid}
           </div>
           <div className="text-xs text-muted-foreground stat-label">
@@ -22,7 +22,7 @@ export const PIDMetricsCard = memo(({ filter }: PIDMetricsCardProps) => (
           </div>
         </div>
         <div className="text-center">
-          <div className="text-2xl font-bold text-info tabular-nums">
+          <div className="text-2xl font-bold text-monitor-secondary tabular-nums">
             {filter.nb_opid}
           </div>
           <div className="text-xs text-muted-foreground stat-label">

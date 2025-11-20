@@ -1,9 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { FiSettings } from 'react-icons/fi';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { setSelectedEdge } from '@/shared/store/slices/graphSlice';
-import { setSelectedFilterForArgs } from '@/shared/store/slices/filterArgumentSlice';
-import { closeSidebar } from '@/shared/store/slices/layoutSlice';
+import { useAppSelector } from '@/shared/hooks/redux';
+import { useSidebar } from '@/shared/hooks/useSidebar';
 import FilterArgumentsContent from '@/components/filtersArgs/FilterArgumentsContent';
 import IPIDPropertiesContent from '../../IPIDProperties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';
@@ -11,13 +9,7 @@ import { useFetchIPIDProperties } from './hooks/useFetchIPIDProperties';
 import { useFilterArgsSubscription } from '../../filtersArgs/hooks/useFilterArgsSubscription';
 
 const PropertiesPanel: React.FC = () => {
-  const dispatch = useAppDispatch();
-
-  // Redux state
-  const selectedEdge = useAppSelector((state) => state.graph.selectedEdge);
-  const selectedFilterForArgs = useAppSelector(
-    (state) => state.filterArgument.selectedFilterForArgs,
-  );
+  const { sidebarContent, closeSidebar } = useSidebar();
   const filters = useAppSelector((state) => state.graph.filters);
 
   const getFilterName = (filterIdx: number): string => {
@@ -29,28 +21,21 @@ const PropertiesPanel: React.FC = () => {
   const [showExpert, setShowExpert] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const ipidProperties = useFetchIPIDProperties(
-    selectedEdge?.filterIdx,
-    selectedEdge?.ipidIdx,
-  );
-  const filterArgs = useFilterArgsSubscription(selectedFilterForArgs?.idx);
+  // Determine filterIdx and ipidIdx based on sidebar content
+  const filterIdxForPid =
+    sidebarContent?.type === 'pid-props' ? sidebarContent.filterIdx : undefined;
+  const ipidIdx =
+    sidebarContent?.type === 'pid-props' ? sidebarContent.ipidIdx : undefined;
+  const filterIdxForArgs =
+    sidebarContent?.type === 'filter-args'
+      ? sidebarContent.filterIdx
+      : undefined;
 
-  // Close handlers
-  const handleCloseEdge = useCallback(() => {
-    dispatch(setSelectedEdge(null));
-    dispatch(closeSidebar());
-  }, [dispatch]);
-
-  const handleCloseFilterArgs = useCallback(() => {
-    dispatch(setSelectedFilterForArgs(null));
-    dispatch(closeSidebar());
-  }, [dispatch]);
-
-  // Determine mode
-  const mode = selectedEdge ? 'ipid' : selectedFilterForArgs ? 'filter' : null;
+  const ipidProperties = useFetchIPIDProperties(filterIdxForPid, ipidIdx);
+  const filterArgs = useFilterArgsSubscription(filterIdxForArgs);
 
   // Empty state
-  if (!mode) {
+  if (!sidebarContent) {
     return (
       <div className="flex flex-col bg-monitor-panel items-center justify-center p-4 text-center ring-1 ring-monitor-line rounded-xl mt-4">
         <FiSettings className="w-12 h-12 text-monitor-text-muted mb-3" />
@@ -58,44 +43,44 @@ const PropertiesPanel: React.FC = () => {
           No selection
         </h3>
         <p className="text-xs text-monitor-text-muted">
-          Click on an edge or filter settings to see properties
+          Click on a filter settings to see properties
         </p>
       </div>
     );
   }
 
-  // Render based on mode
+  // Render based on content type
   return (
     <div className="flex flex-col mt-4 flex-1 bg-monitor-surface border border-monitor-line">
       {/* Header - sticky */}
       <div className="sticky top-0 z-20 bg-monitor-surface border-b border-monitor-line">
-        {mode === 'ipid' && selectedEdge ? (
+        {sidebarContent.type === 'pid-props' ? (
           <PropertiesHeader
-            filterName={`${getFilterName(selectedEdge.filterIdx)} IPIDs`}
+            filterName={`${getFilterName(sidebarContent.filterIdx)} IPIDs`}
             mode="ipid"
-            onClose={handleCloseEdge}
+            onClose={closeSidebar}
           />
-        ) : mode === 'filter' && selectedFilterForArgs ? (
+        ) : sidebarContent.type === 'filter-args' ? (
           <PropertiesHeader
-            filterName={selectedFilterForArgs.name}
+            filterName={sidebarContent.filterName}
             mode="filter"
             showExpert={showExpert}
             showAdvanced={showAdvanced}
             onToggleExpert={setShowExpert}
             onToggleAdvanced={setShowAdvanced}
-            onClose={handleCloseFilterArgs}
+            onClose={closeSidebar}
           />
         ) : null}
       </div>
 
       {/* Content - scrollable */}
       <div className="flex-1 overflow-y-auto">
-        {mode === 'ipid' ? (
+        {sidebarContent.type === 'pid-props' ? (
           <IPIDPropertiesContent properties={ipidProperties} />
-        ) : mode === 'filter' && selectedFilterForArgs ? (
+        ) : sidebarContent.type === 'filter-args' ? (
           Array.isArray(filterArgs) && filterArgs.length > 0 ? (
             <FilterArgumentsContent
-              filterId={selectedFilterForArgs.idx}
+              filterId={sidebarContent.filterIdx}
               filterArgs={filterArgs}
               showExpert={showExpert}
               showAdvanced={showAdvanced}

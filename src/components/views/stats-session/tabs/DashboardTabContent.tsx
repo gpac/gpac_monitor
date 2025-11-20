@@ -83,7 +83,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
 
         {/* Middle row: main value + trend */}
         <div className="flex items-baseline gap-2 my-auto">
-          <div className="text-3xl font-bold text-slate-50 tabular-nums leading-none">
+          <div className="text-2xl font-bold text-slate-50 tabular-nums leading-none">
             {value}
           </div>
           {getTrendIcon()}

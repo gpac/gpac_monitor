@@ -5,7 +5,7 @@ import { formatBytes } from '@/utils/formatting';
 import { getOverallStatus, getPIDStatusBadge } from '@/utils/gpac';
 import { getMediaTypeInfo } from '@/utils/gpac';
 import { FaCircleInfo } from 'react-icons/fa6';
-import { useOpenProperties } from '@/shared/hooks/useOpenProperties';
+import { useSidebar } from '@/shared/hooks/useSidebar';
 import type { InputCardProps, InputsTabProps, PIDWithIndex } from '../../types';
 import { useInputsTabData } from './hooks/useInputsTabData';
 
@@ -18,7 +18,7 @@ interface InputNavItemProps {
 
 const InputNavItem = memo(
   ({ inputName, pidsByType, filterIdx }: InputNavItemProps) => {
-    const { openPIDProperties } = useOpenProperties();
+    const { openPIDProps } = useSidebar();
 
     // Memoize expensive calculations
     const { firstPid, mediaTypes } = useMemo(() => {
@@ -35,10 +35,10 @@ const InputNavItem = memo(
       (e: React.MouseEvent) => {
         e.stopPropagation();
         if (firstPid) {
-          openPIDProperties({ filterIdx, ipidIdx: firstPid.ipidIdx });
+          openPIDProps({ filterIdx, ipidIdx: firstPid.ipidIdx });
         }
       },
-      [firstPid, filterIdx, openPIDProperties],
+      [firstPid, filterIdx, openPIDProps],
     );
 
     return (
@@ -73,7 +73,7 @@ InputNavItem.displayName = 'InputNavItem';
 
 const InputCard = memo(
   ({ inputName, pidsByType, filterIdx }: InputCardProps) => {
-    const { openPIDProperties } = useOpenProperties();
+    const { openPIDProps } = useSidebar();
     const allPids = Object.values(pidsByType).flat();
     const overallStatus = getOverallStatus(allPids);
     const StatusIcon = overallStatus.icon;
@@ -99,7 +99,7 @@ const InputCard = memo(
                     <FaCircleInfo
                       className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-primary transition-colors"
                       onClick={() => {
-                        openPIDProperties({
+                        openPIDProps({
                           filterIdx,
                           ipidIdx: pid.ipidIdx,
                         });

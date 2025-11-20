@@ -5,7 +5,7 @@ import {
   detachFilter,
   closeFilter,
 } from '@/shared/store/slices/widgetsSlice';
-import { useOpenProperties } from '@/shared/hooks/useOpenProperties';
+import { useSidebar } from '@/shared/hooks/useSidebar';
 
 /**
  * Hook to provide filter action handlers
@@ -13,7 +13,7 @@ import { useOpenProperties } from '@/shared/hooks/useOpenProperties';
  */
 export const useFilterHandlers = (onTabChange?: (tab: string) => void) => {
   const dispatch = useAppDispatch();
-  const { openFilterProperties } = useOpenProperties();
+  const { openFilterArgs } = useSidebar();
 
   const handleCardClick = useCallback(
     (filterIdx: number) => {
@@ -45,6 +45,6 @@ export const useFilterHandlers = (onTabChange?: (tab: string) => void) => {
     handleCardClick,
     handleDetachTab,
     handleCloseTab,
-    handleOpenProperties: openFilterProperties,
+    handleOpenProperties: openFilterArgs,
   };
 };

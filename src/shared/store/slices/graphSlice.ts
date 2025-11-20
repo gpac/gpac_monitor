@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Node, Edge } from '@xyflow/react';
 import { throttle } from 'lodash';
-import { GraphFilterData, SelectedEdgeInfo } from '@/types/domain/gpac';
+import { GraphFilterData } from '@/types/domain/gpac';
 import {
   createEdgesFromFilters,
   createNodesFromFilters,
@@ -21,7 +21,6 @@ export interface GraphState {
   initialTab: InitialTabType | null;
   lastUpdate: number;
   selectedFilterDetails: GraphFilterData | null;
-  selectedEdge: SelectedEdgeInfo | null;
 }
 
 const initialState: GraphState = {
@@ -35,7 +34,6 @@ const initialState: GraphState = {
   initialTab: null,
   lastUpdate: Date.now(),
   selectedFilterDetails: null,
-  selectedEdge: null,
 };
 
 const THROTTLE_INTERVAL = 500;
@@ -90,16 +88,6 @@ const graphSlice = createSlice({
     setSelectedNode(state, action: PayloadAction<string>) {
       if (state.selectedNodeId !== action.payload) {
         state.selectedNodeId = action.payload;
-        // Clear edge selection when node is selected
-        state.selectedEdge = null;
-      }
-    },
-    setSelectedEdge(state, action: PayloadAction<SelectedEdgeInfo | null>) {
-      state.selectedEdge = action.payload;
-      if (action.payload) {
-        // Clear node selection when edge is selected
-        state.selectedNodeId = null;
-        state.selectedFilterDetails = null;
       }
     },
     setFilterDetails: (
@@ -134,7 +122,6 @@ export const {
   updateGraphData,
   updateLayout,
   setSelectedNode,
-  setSelectedEdge,
   setFilterDetails,
   clearFilterDetails,
   setSelectedFilterDetails,

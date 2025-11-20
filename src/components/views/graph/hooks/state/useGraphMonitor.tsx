@@ -10,11 +10,9 @@ import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch } from '@/shared/hooks/redux';
 import {
-  setSelectedEdge,
   setSelectedNode,
   setInitialTab,
 } from '@/shared/store/slices/graphSlice';
-import { openSidebar } from '@/shared/store/slices/layoutSlice';
 
 // Modularized hooks
 import { useGraphLayout } from '../layout/useGraphLayout';
@@ -71,33 +69,19 @@ const useGraphMonitor = () => {
     [dispatch],
   );
 
-  // Handle edge click for PID properties and open sidebar
-  const handleEdgeTabSelect = useCallback(
-    (filterIdx: number, ipidIdx: number) => {
-      dispatch(setSelectedEdge({ filterIdx, ipidIdx }));
-      dispatch(openSidebar());
-    },
-    [dispatch],
-  );
-
-  const {
-    handleNodesChange,
-    handleEdgesChange,
-    handleNodeClick,
-    handleEdgeClick,
-  } = useGraphHandlers({
-    onNodesChange,
-    onEdgesChange,
-    localNodes,
-    localEdges,
-    nodesRef,
-    edgesRef,
-    setLocalNodes,
-    service,
-    dispatch,
-    onNodeClick: handleNodeTabSelect,
-    onEdgeClick: handleEdgeTabSelect,
-  });
+  const { handleNodesChange, handleEdgesChange, handleNodeClick } =
+    useGraphHandlers({
+      onNodesChange,
+      onEdgesChange,
+      localNodes,
+      localEdges,
+      nodesRef,
+      edgesRef,
+      setLocalNodes,
+      service,
+      dispatch,
+      onNodeClick: handleNodeTabSelect,
+    });
 
   // Use notification system
   useGraphNotifications({
@@ -166,7 +150,6 @@ const useGraphMonitor = () => {
     handleNodesChange,
     handleEdgesChange,
     handleNodeClick,
-    handleEdgeClick,
     layoutOptions,
     handleLayoutChange,
     autoLayout,
