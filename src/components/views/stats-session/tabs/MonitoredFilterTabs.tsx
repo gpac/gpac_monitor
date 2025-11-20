@@ -1,8 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
 import { useFilterStats } from '@/components/views/stats-session/hooks/stats';
+import { useAppDispatch } from '@/shared/hooks/redux';
+import { clearInitialTab } from '@/shared/store/slices/graphSlice';
+import { store } from '@/shared/store';
 import {
   FilterStatsResponse,
   PIDproperties,
@@ -56,6 +59,18 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   onCardClick,
   onOpenProperties,
 }) => {
+  const dispatch = useAppDispatch();
+
+  // Capture initialTab once on mount (no re-renders on change)
+  const initialTabRef = useRef(store.getState().graph.initialTab);
+
+  // Clear initialTab after capturing it (one-time use)
+  useEffect(() => {
+    if (initialTabRef.current) {
+      dispatch(clearInitialTab());
+    }
+  }, [dispatch]);
+
   // Subscribe to live stats when tab is active
   const { stats } = useFilterStats(filter.idx, isActive, 1000);
 
@@ -127,6 +142,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         filterData={stats as any}
         onBack={handleBack}
         onOpenProperties={handleOpenProperties}
+        initialTab={initialTabRef.current || undefined}
       />
     </div>
   );

@@ -8,6 +8,8 @@ import {
 } from '@/components/views/graph/utils/GraphOperations';
 import { RootState } from '@/shared/store/types';
 
+export type InitialTabType = 'overview' | 'network' | 'inputs' | 'outputs';
+
 export interface GraphState {
   filters: GraphFilterData[];
   nodes: Node[];
@@ -16,6 +18,7 @@ export interface GraphState {
   error: string | null;
   redraw: boolean;
   selectedNodeId: string | null;
+  initialTab: InitialTabType | null;
   lastUpdate: number;
   selectedFilterDetails: GraphFilterData | null;
   selectedEdge: SelectedEdgeInfo | null;
@@ -29,6 +32,7 @@ const initialState: GraphState = {
   error: null,
   redraw: false,
   selectedNodeId: null,
+  initialTab: null,
   lastUpdate: Date.now(),
   selectedFilterDetails: null,
   selectedEdge: null,
@@ -116,6 +120,12 @@ const graphSlice = createSlice({
       state.selectedFilterDetails = action.payload;
       console.log('DETAILS DU FILTRE SÉLECTIONNÉ :', action.payload);
     },
+    setInitialTab: (state, action: PayloadAction<InitialTabType | null>) => {
+      state.initialTab = action.payload;
+    },
+    clearInitialTab: (state) => {
+      state.initialTab = null;
+    },
   },
 });
 export const {
@@ -128,6 +138,8 @@ export const {
   setFilterDetails,
   clearFilterDetails,
   setSelectedFilterDetails,
+  setInitialTab,
+  clearInitialTab,
 } = graphSlice.actions;
 
 export const selectFilterNameById = (state: RootState, filterId: string) => {

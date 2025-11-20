@@ -1,9 +1,16 @@
-import React, { useMemo, useState, useRef, useCallback } from 'react';
+import React, {
+  useMemo,
+  useState,
+  useRef,
+  useCallback,
+  useEffect,
+} from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
 import { useStatsCalculations } from '../hooks/stats';
 import { useEnrichedStats } from '../hooks/stats';
 import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
+import { useAppSelector } from '@/shared/hooks/redux';
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import { WidgetProps } from '@/types/ui/widget';
@@ -64,6 +71,24 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       handleCloseTab,
       handleOpenProperties,
     } = useFilterHandlers(setActiveTab);
+
+    // Listen for node clicks from graph to open filter tab
+    // Use ref to track last processed nodeId and avoid re-renders
+    const lastProcessedNodeId = useRef<string | null>(null);
+    const selectedNodeId = useAppSelector(
+      (state) => state.graph.selectedNodeId,
+    );
+
+    useEffect(() => {
+      if (selectedNodeId && selectedNodeId !== lastProcessedNodeId.current) {
+        lastProcessedNodeId.current = selectedNodeId;
+        const filterIdx = parseInt(selectedNodeId, 10);
+        if (!isNaN(filterIdx)) {
+          handleCardClick(filterIdx);
+        }
+      }
+    }, [selectedNodeId, handleCardClick]);
+
     const noopTabChange = useCallback(() => {}, []);
     const noopCardClick = useCallback(() => {}, []);
 

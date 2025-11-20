@@ -6,6 +6,7 @@ import {
   NetworkTabData,
   FilterStatsResponse,
 } from '@/types/domain/gpac/filter-stats';
+import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import DetailedStatsView from '../DetailedStatsView';
 
 interface FilterTabContentProps {
@@ -17,27 +18,28 @@ interface FilterTabContentProps {
   filterData?: FilterStatsResponse;
   onBack: () => void;
   onOpenProperties: () => void;
+  initialTab?: InitialTabType;
 }
 
 export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   overviewData,
   networkData,
-  buffersData,
   inputPids,
   outputPids,
   filterData,
   onBack,
   onOpenProperties,
+  initialTab,
 }) => {
   // Don't pass filterData if undefined, let DetailedStatsView use its default
   const props = {
     overviewData,
     networkData,
-    buffersData,
     inputPids,
     outputPids,
     onBack,
     onOpenProperties,
+    initialTab,
     ...(filterData && { filterData }), // Only pass if defined
   };
 

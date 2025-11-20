@@ -23,8 +23,8 @@ const InputNavItem = memo(
     // Memoize expensive calculations
     const { firstPid, mediaTypes } = useMemo(() => {
       const pids = Object.values(pidsByType).flat();
+
       return {
-        allPids: pids,
         firstPid: pids[0],
         mediaTypes: Object.keys(pidsByType),
       };

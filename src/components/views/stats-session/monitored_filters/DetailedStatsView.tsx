@@ -8,6 +8,7 @@ import {
 } from '@/types/domain/gpac/filter-stats';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
 import InputsTab from './tabs/InputsTab';
@@ -36,6 +37,7 @@ interface DetailedStatsViewProps {
   filterData?: FilterStatsResponse;
   onBack: () => void;
   onOpenProperties: () => void;
+  initialTab?: InitialTabType;
 }
 
 const MemoizedOverviewTab = memo(OverviewTab);
@@ -51,6 +53,7 @@ const DetailedStatsView = memo(
     outputPids,
     filterData = EMPTY_FILTER_DATA, // Use constant fallback
     onOpenProperties,
+    initialTab,
   }: DetailedStatsViewProps) => {
     const counts = useMemo(
       () => ({
@@ -62,7 +65,7 @@ const DetailedStatsView = memo(
 
     return (
       <div className="space-y-2">
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs defaultValue={initialTab || 'overview'} className="w-full">
           <div className="sticky top-0 z-10 bg-background pb-2 space-y-2  ">
             <div className="flex justify-stretch items-center gap-6">
               <h2 className="text-lg font-semibold text-red-600/90">

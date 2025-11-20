@@ -9,7 +9,11 @@ import {
 import { useToast } from '@/shared/hooks/useToast';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppDispatch } from '@/shared/hooks/redux';
-import { setSelectedEdge } from '@/shared/store/slices/graphSlice';
+import {
+  setSelectedEdge,
+  setSelectedNode,
+  setInitialTab,
+} from '@/shared/store/slices/graphSlice';
 import { openSidebar } from '@/shared/store/slices/layoutSlice';
 
 // Modularized hooks
@@ -58,6 +62,15 @@ const useGraphMonitor = () => {
 
   const { getFilterArgs, hasFilterArgs } = useFilterArgs();
 
+  // Handle node click to select filter and show InputsTab
+  const handleNodeTabSelect = useCallback(
+    (filterIdx: number) => {
+      dispatch(setSelectedNode(String(filterIdx)));
+      dispatch(setInitialTab('inputs'));
+    },
+    [dispatch],
+  );
+
   // Handle edge click for PID properties and open sidebar
   const handleEdgeTabSelect = useCallback(
     (filterIdx: number, ipidIdx: number) => {
@@ -82,6 +95,7 @@ const useGraphMonitor = () => {
     setLocalNodes,
     service,
     dispatch,
+    onNodeClick: handleNodeTabSelect,
     onEdgeClick: handleEdgeTabSelect,
   });
 

@@ -14,7 +14,7 @@ export interface StatusInfo {
 export const getOverallStatus = (pids: TabPIDData[]): StatusInfo => {
   const allPids = pids;
 
-  if (allPids.some((pid) => pid.stats.disconnected || pid.would_block)) {
+  if (allPids.some((pid) => pid.stats?.disconnected || pid.would_block)) {
     return { status: 'Error', variant: 'destructive', icon: LuCircleAlert };
   }
 
@@ -34,10 +34,11 @@ export const getOverallStatus = (pids: TabPIDData[]): StatusInfo => {
  * Get status badge info for individual PID
  */
 export const getPIDStatusBadge = (pid: TabPIDData) => {
-  if (pid.stats.disconnected)
+  if (pid.stats?.disconnected)
     return { text: 'Disconnected', variant: 'destructive' as const };
   if (pid.would_block)
     return { text: 'Blocked', variant: 'destructive' as const };
+  if (pid.eos) return { text: 'EOS', variant: 'secondary' as const };
   if (pid.playing) return { text: 'Playing', variant: 'default' as const };
   // EOS is shown at card level, not on individual PIDs
   if (pid.eos) return null;
@@ -49,7 +50,7 @@ export const getPIDStatusBadge = (pid: TabPIDData) => {
  */
 export const getGlobalStatus = (pids: TabPIDData[], itemCount: number) => {
   const totalErrors = pids.filter(
-    (pid) => pid.stats.disconnected || pid.would_block,
+    (pid) => pid.stats?.disconnected || pid.would_block,
   ).length;
   const totalActive = pids.filter((pid) => pid.playing).length;
   const totalEos = pids.filter((pid) => pid.eos).length;
