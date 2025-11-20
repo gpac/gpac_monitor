@@ -43,10 +43,10 @@ export const MonitoredBadge = memo(
     return (
       <Badge
         variant={variant}
-        className={`flex h-5 items-center gap-1 px-1 ring-1 ring-red-600/90 text-slate-900/90 bg-red-200 ${className}`}
+        className={`flex h-4 items-center gap-1 px-1 ring-1 ring-red-600/90 text-slate-200/90 ${className}`}
         title={title}
       >
-        <LuEye className="h-4 w-4" />
+        <LuEye className="h-3 w-3" />
       </Badge>
     );
   },

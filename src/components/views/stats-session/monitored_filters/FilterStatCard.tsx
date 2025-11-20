@@ -38,7 +38,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
     const ringClass = useMemo(() => {
       return isMonitoredOrDetached
-        ? 'ring-2 ring-red-700/90'
+        ? 'ring-1 ring-red-700/90'
         : 'ring-1 ring-transparent hover:ring-monitor-accent/40';
     }, [isMonitoredOrDetached]);
 
@@ -59,16 +59,19 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
     return (
       <div
-        className={`flex flex-col gap-1.5 p-2.5 rounded-lg bg-black/20 border-transparent transition-colors ${ringClass} ${cursorClass}`}
+        className={`relativeflex flex-col gap-1.5 p-2.5 rounded-lg bg-black/20 border-transparent transition-colors ${ringClass} ${cursorClass}`}
         onClick={handleClick}
       >
+        {isMonitored && !isDetached && (
+          <MonitoredBadge
+            isMonitored
+            title="Filter is monitored"
+            className="absolute -top-0.5 -left-0.5"
+          />
+        )}
         {/* Line 1: Name + Type + Activity */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <MonitoredBadge
-              isMonitored={isMonitored && !isDetached}
-              title="Filter is monitored"
-            />
             <span className="font-ui font-semibold text-sm text-monitor-text-primary truncate">
               {filter.name}
             </span>
@@ -91,41 +94,40 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
         </div>
 
         {/* Line 2: Metrics + PIDs */}
-        <div className="flex items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2 font-mono tabular-nums text-monitor-text-muted">
-            {hasPackets && (
-              <>
-                <span>{formattedPackets} pkt</span>
-                <span className="text-monitor-text-subtle">•</span>
-              </>
-            )}
-            {hasTime && (
-              <>
-                <span className="text-info">{formattedPacketRate}</span>
-                <span className="text-monitor-text-subtle">•</span>
-              </>
-            )}
-            {formattedBytes && (
-              <>
-                <span>{formattedBytes}</span>
-                {hasTime && <span className="text-monitor-text-subtle">•</span>}
-              </>
-            )}
-            {hasTime && <span>{formattedTime}</span>}
-            {filter.errors && filter.errors > 0 && (
-              <>
-                <span className="text-monitor-text-subtle">•</span>
-                <span className="text-rose-400">{filter.errors} err</span>
-              </>
-            )}
-          </div>
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-mono tabular-nums text-monitor-text-muted">
+          {hasPackets && (
+            <>
+              <span>{formattedPackets} pkt</span>
+              <span className="text-monitor-text-subtle">•</span>
+            </>
+          )}
+          {hasTime && (
+            <>
+              <span className="text-info">{formattedPacketRate}</span>
+              <span className="text-monitor-text-subtle">•</span>
+            </>
+          )}
+          {formattedBytes && (
+            <>
+              <span>{formattedBytes}</span>
+              {hasTime && <span className="text-monitor-text-subtle">•</span>}
+            </>
+          )}
+          {hasTime && <span>{formattedTime}</span>}
+          {filter.errors && filter.errors > 0 && (
+            <>
+              <span className="text-monitor-text-subtle">•</span>
+              <span className="text-rose-400">{filter.errors} err</span>
+            </>
+          )}
+        </div>
 
-          <div className="flex items-center gap-1 font-mono tabular-nums text-monitor-text-muted shrink-0">
-            <span className="text-[10px] uppercase tracking-wider">PIDs</span>
-            <span>
-              {filter.nb_ipid || 0}/{filter.nb_opid || 0}
-            </span>
-          </div>
+        {/* Line 3: PIDs */}
+        <div className="flex items-center justify-end gap-1 text-[8px] font-mono tabular-nums text-monitor-text-muted">
+          <span className="uppercase tracking-wider">PIDs</span>
+          <span>
+            {filter.nb_ipid || 0}/{filter.nb_opid || 0}
+          </span>
         </div>
       </div>
     );
