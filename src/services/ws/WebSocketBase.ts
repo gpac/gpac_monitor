@@ -28,6 +28,7 @@ export class WebSocketBase {
       );
 
       this.parserWorker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+        console.log('[Worker] Received:', event.data.handlerKey);
         const { handlerKey, parsedData, error } = event.data;
 
         if (error) {
