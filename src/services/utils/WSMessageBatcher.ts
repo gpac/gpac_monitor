@@ -2,13 +2,14 @@ import { LogBatchResponse } from '@/services/ws/types';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 /**
- * Batches log messages and processes them once per frame (RAF cadence)
+ * Batches log messages with throttled dispatch (max 2x/second)
  */
 export class WSMessageBatcher {
   private pendingLogs: LogBatchResponse[] = [];
-  private rafScheduled = false;
-  private rafId: number | null = null;
+  private flushScheduled = false;
+  private timeoutId: ReturnType<typeof setTimeout> | null = null;
   private handler: ((logs: GpacLogEntry[]) => void) | null = null;
+  private readonly FLUSH_INTERVAL = 500; // 2 dispatches/second max
 
   /**
    * Add a log batch message to the queue
@@ -17,10 +18,10 @@ export class WSMessageBatcher {
   addLogBatch(message: LogBatchResponse): void {
     this.pendingLogs.push(message);
 
-    // Schedule flush if not already scheduled
-    if (!this.rafScheduled) {
-      this.rafScheduled = true;
-      this.rafId = requestAnimationFrame(() => this.flush());
+    // Schedule flush with throttle
+    if (!this.flushScheduled) {
+      this.flushScheduled = true;
+      this.timeoutId = setTimeout(() => this.flush(), this.FLUSH_INTERVAL);
     }
   }
 
@@ -29,14 +30,19 @@ export class WSMessageBatcher {
    */
   private flush(): void {
     if (this.pendingLogs.length === 0 || !this.handler) {
-      this.rafScheduled = false;
+      this.flushScheduled = false;
       return;
     }
 
-    // Aggregate all logs from all messages in this frame
-    const allLogs = this.pendingLogs.flatMap((msg) => msg.logs || []);
+    // Aggregate all logs efficiently (avoid flatMap)
+    const allLogs: GpacLogEntry[] = [];
+    for (const msg of this.pendingLogs) {
+      if (msg.logs) {
+        allLogs.push(...msg.logs);
+      }
+    }
     this.pendingLogs = [];
-    this.rafScheduled = false;
+    this.flushScheduled = false;
 
     // Process aggregated logs once
     if (allLogs.length > 0) {
@@ -53,14 +59,14 @@ export class WSMessageBatcher {
   }
 
   /**
-   * Clear all pending messages and cancel RAF
+   * Clear all pending messages and cancel timeout
    */
   clear(): void {
-    if (this.rafId !== null) {
-      cancelAnimationFrame(this.rafId);
-      this.rafId = null;
+    if (this.timeoutId !== null) {
+      clearTimeout(this.timeoutId);
+      this.timeoutId = null;
     }
     this.pendingLogs = [];
-    this.rafScheduled = false;
+    this.flushScheduled = false;
   }
 }
