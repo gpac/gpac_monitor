@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, memo } from 'react';
+import { FaExclamationTriangle } from 'react-icons/fa';
 import { Badge } from '@/components/ui/badge';
 import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
@@ -8,10 +9,11 @@ interface FilterStatCardProps {
   onClick?: (idx: number) => void;
   isMonitored?: boolean;
   isDetached?: boolean;
+  isStalled?: boolean;
 }
 
 const FilterStatCard: React.FC<FilterStatCardProps> = memo(
-  ({ filter, onClick, isMonitored = false, isDetached = false }) => {
+  ({ filter, onClick, isMonitored = false, isDetached = false, isStalled = false }) => {
     const handleClick = useCallback(() => {
       if (onClick && filter.idx !== undefined) {
         onClick(filter.idx);
@@ -72,9 +74,15 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
         {/* Line 1: Name + Type + Activity */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className="font-ui font-semibold text-sm text-monitor-text-primary truncate">
+            <span className={`font-ui font-semibold text-sm truncate ${isStalled ? 'text-amber-500' : 'text-monitor-text-primary'}`}>
               {filter.name}
             </span>
+            {isStalled && (
+              <FaExclamationTriangle
+                className="h-3.5 w-3.5 text-amber-500 flex-shrink-0"
+                title="Stalled - no packets sent"
+              />
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -152,6 +160,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       prev.computed.sessionType === next.computed.sessionType &&
       prevProps.isMonitored === nextProps.isMonitored &&
       prevProps.isDetached === nextProps.isDetached &&
+      prevProps.isStalled === nextProps.isStalled &&
       prevProps.onClick === nextProps.onClick
     );
   },

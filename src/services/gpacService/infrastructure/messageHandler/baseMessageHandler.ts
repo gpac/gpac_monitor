@@ -199,6 +199,8 @@ export class BaseMessageHandler {
     if (data.stats && Array.isArray(data.stats)) {
       // Process immediately (low frequency: ~1 msg/sec)
       this.sessionStatsHandler.handleSessionStats(data.stats);
+      // Dispatch to Redux for stall detection
+      this.callbacks.onUpdateSessionStats(data.stats);
     }
   }
 

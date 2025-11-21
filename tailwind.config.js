@@ -16,7 +16,7 @@ export default {
         monitor: {
           app: "#0c1117",
 
-          surface: "#101722",
+          surface: "#0b1016",
 
           panel: "#0f141b",
 

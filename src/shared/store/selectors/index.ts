@@ -12,3 +12,6 @@ export * from './headerSelectors';
 
 // Monitored filter selectors
 export * from './monitoredFilter';
+
+// Session stats selectors
+export * from './session';

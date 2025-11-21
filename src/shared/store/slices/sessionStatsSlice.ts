@@ -8,6 +8,9 @@ export interface SessionFilterStats {
   time: number;
   idx: number;
   bytes_sent: number;
+  is_eos?: boolean;
+  last_packet_sent?: number;
+  last_packet_sent_timestamp?: number;
 }
 
 export type StatsMode = 'session' | 'filter';
@@ -15,6 +18,7 @@ export type StatsMode = 'session' | 'filter';
 export interface SessionStatsState {
   mode: StatsMode;
   sessionStats: Record<string, SessionFilterStats>;
+  previousSessionStats: Record<string, SessionFilterStats>;
   selectedFilterId: string | null;
   lastUpdate: number | null;
   isLoading: boolean;
@@ -25,6 +29,7 @@ export interface SessionStatsState {
 const initialState: SessionStatsState = {
   mode: 'session',
   sessionStats: {},
+  previousSessionStats: {},
   selectedFilterId: null,
   lastUpdate: null,
   isLoading: false,
@@ -40,6 +45,9 @@ const sessionStatsSlice = createSlice({
       state,
       action: PayloadAction<SessionFilterStats[]>,
     ) => {
+      // Save previous stats for stall detection
+      state.previousSessionStats = state.sessionStats;
+
       const newStats: Record<string, SessionFilterStats> = {};
       action.payload.forEach((filter) => {
         newStats[filter.idx.toString()] = filter;

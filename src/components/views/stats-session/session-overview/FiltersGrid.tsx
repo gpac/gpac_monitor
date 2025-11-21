@@ -1,4 +1,5 @@
 import React, { memo, useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -9,6 +10,7 @@ import {
   isFilterDetached,
   isFilterMonitored,
 } from '../utils/filterMonitoringUtils';
+import { selectStalledFilters } from '@/shared/store/selectors';
 
 interface FiltersGridProps {
   filtersWithLiveStats: EnrichedFilterOverview[];
@@ -28,6 +30,7 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
     activeWidgets = [],
   }) => {
     const enrichedFilters = useEnrichedStats(filtersWithLiveStats);
+    const stalledFilters = useSelector(selectStalledFilters);
 
     const filtersCount = useMemo(
       () => filtersMatchingCriteria.length,
@@ -81,6 +84,7 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
                     onClick={onCardClick}
                     isMonitored={isFilterMonitored(filterIdx, monitoredFilters)}
                     isDetached={isFilterDetached(filterIdx, activeWidgets)}
+                    isStalled={stalledFilters[filterIdx.toString()] ?? false}
                   />
                 );
               })}

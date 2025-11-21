@@ -84,7 +84,7 @@ const PIDMetricsCard = memo(
             <div className="text-[10px] text-muted-foreground">Buffer</div>
           </div>
           <div>
-            <div className="text-xs font-medium text-info tabular-nums">
+            <div className="text-xs font-medium text-muted-foreground tabular-nums">
               {pid.bitrate || 0}
             </div>
             <div className="text-[10px] text-muted-foreground">Bitrate</div>
