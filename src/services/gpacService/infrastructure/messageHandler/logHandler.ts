@@ -138,14 +138,8 @@ export class LogHandler {
   }
 
   public handleLogBatch(logs: GpacLogEntry[]): void {
-    // Send to worker for processing
-    logWorkerService.processLogs(logs);
-
-    // Send directly to Redux for immediate UI update
     if (this.callbacks?.onLogsUpdate) {
       this.callbacks.onLogsUpdate(logs);
-    } else {
-      console.log('[LogHandler] No onLogsUpdate callback available');
     }
   }
 
