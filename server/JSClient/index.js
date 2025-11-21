@@ -27,12 +27,11 @@ function JSClient(id, client, all_clients, draned_once_ref) {
         console.log(`JSClient ${this.id}: Starting cleanup`);
 
         try {
-            // Nettoyer le LogManager en priorité (libère sys.on_log)
+            // (releases sys.on_log)
             if (this.logManager) {
                 this.logManager.forceUnsubscribe();
             }
 
-            // Nettoyer les autres managers
             if (this.sessionManager && typeof this.sessionManager.cleanup === 'function') {
                 this.sessionManager.cleanup();
             }
