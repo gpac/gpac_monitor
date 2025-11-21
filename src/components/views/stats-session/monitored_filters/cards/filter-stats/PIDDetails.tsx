@@ -17,7 +17,7 @@ export const PIDDetails = memo(
     const bufferUsage = buffer_total > 0 ? (buffer / buffer_total) * 100 : 0;
 
     return (
-      <Card className="bg-stat border-transparent">
+      <Card className="bg-monitor-panel border-transparent">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm">{name}</CardTitle>

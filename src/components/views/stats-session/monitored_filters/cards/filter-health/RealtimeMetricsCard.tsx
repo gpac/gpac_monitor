@@ -40,7 +40,7 @@ export const RealtimeMetricsCard = memo(
     const metrics = useMemo(() => calculateMetrics(filter), [filter]);
 
     return (
-      <Card className="bg-stat border-transparent">
+      <Card className="bg-monitor-panel border-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="text-sm">Real-time Metrics</CardTitle>
         </CardHeader>

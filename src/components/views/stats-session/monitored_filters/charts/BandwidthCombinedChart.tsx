@@ -97,7 +97,7 @@ export const BandwidthCombinedChart = memo(
     }, [uploadPoints, downloadPoints, dimensions]);
 
     return (
-      <Card className="bg-stat border-transparent">
+      <Card className="bg-monitor-panel border-transparent">
         <CardHeader className="pb-3">
           <CardTitle className="flex justify-center items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <LuArrowUpDown className="h-4 w-4 opacity-60" />

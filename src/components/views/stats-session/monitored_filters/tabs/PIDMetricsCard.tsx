@@ -43,7 +43,7 @@ const PIDMetricsCard = memo(
 
     return (
       <div
-        className={`bg-stat rounded-md border-l-2 ${borderColor} hover:bg-background/60 transition-colors`}
+        className={`bg-monitor-panel rounded-md border-l-2 ${borderColor} hover:bg-background/60 transition-colors`}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-white/5">

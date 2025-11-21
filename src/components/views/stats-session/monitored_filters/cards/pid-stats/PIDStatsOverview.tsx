@@ -27,7 +27,7 @@ export const PIDStatsOverview = memo(
     return (
       <div className="space-y-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* PID Header Card */}
-        <Card className="bg-stat border-transparent">
+        <Card className="bg-monitor-panel border-transparent">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">

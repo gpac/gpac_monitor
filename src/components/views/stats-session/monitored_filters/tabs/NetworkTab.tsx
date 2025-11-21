@@ -31,7 +31,7 @@ const NetworkTab = memo(
         <div className="space-y-4">
           {/* Stats cards side by side */}
           <div className="grid grid-cols-2 gap-4">
-            <Card className="bg-stat border-transparent">
+            <Card className="bg-monitor-panel border-transparent">
               <CardContent className="p-4">
                 <div className="space-y-3">
                   {/* Header: title + badge */}
@@ -72,7 +72,7 @@ const NetworkTab = memo(
               </CardContent>
             </Card>
 
-            <Card className="bg-stat border-transparent">
+            <Card className="bg-monitor-panel border-transparent">
               <CardContent className="p-4">
                 <div className="space-y-3">
                   {/* Header: title + badge */}

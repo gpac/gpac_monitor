@@ -17,7 +17,7 @@ export const PerformanceMetrics = memo(
     const performanceData = usePerformanceMetrics(pidData);
 
     return (
-      <Card className="bg-stat border-transparent">
+      <Card className="bg-monitor-panel border-transparent">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-sm">
             <LuActivity className="h-4 w-4" />

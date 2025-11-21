@@ -16,7 +16,7 @@ export const FilterHealthCard = memo(({ filter }: FilterHealthCardProps) => {
   const formattedUptime = useMemo(() => formatTime(time), [time]);
 
   return (
-    <Card className="bg-stat border-transparent">
+    <Card className="bg-monitor-panel border-transparent">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between text-sm">
           <span>Filter Health</span>

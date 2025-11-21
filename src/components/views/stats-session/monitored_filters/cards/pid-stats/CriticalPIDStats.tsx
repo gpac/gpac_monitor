@@ -29,7 +29,7 @@ export const CriticalPIDStats = memo(({ pidData }: CriticalPIDStatsProps) => {
   const HealthIcon = getHealthIcon(overallHealth.status);
 
   return (
-    <Card className="bg-stat border-transparent">
+    <Card className="bg-monitor-panel border-transparent">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-sm">

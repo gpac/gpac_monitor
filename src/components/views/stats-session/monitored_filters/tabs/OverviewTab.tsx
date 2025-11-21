@@ -39,7 +39,7 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
           }}
         />
 
-        <div className="grid grid-cols-1 bg-stat border-0 gap-4 sm:grid-cols-3 ">
+        <div className="grid grid-cols-1 bg-monitor-panel border-0 gap-4 sm:grid-cols-3 ">
           {/* Processing Card */}
           <ProcessingCard tasks={filter.tasks} time={filter.time} />
 

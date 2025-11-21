@@ -7,7 +7,7 @@ interface PIDMetricsCardProps {
 }
 
 export const PIDMetricsCard = memo(({ filter }: PIDMetricsCardProps) => (
-  <Card className="bg-stat border-transparent">
+  <Card className="bg-monitor-panel border-transparent">
     <CardHeader className="pb-2">
       <CardTitle className="text-sm">PID Metrics</CardTitle>
     </CardHeader>

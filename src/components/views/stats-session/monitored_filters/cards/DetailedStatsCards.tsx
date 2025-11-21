@@ -10,7 +10,7 @@ interface PIDMetricsCardProps {
 }
 
 export const PIDMetricsCard = memo(({ data }: PIDMetricsCardProps) => (
-  <Card className="bg-stat border-transparent">
+  <Card className="bg-monitor-panel border-transparent">
     <CardHeader className="pb-2">
       <CardTitle className="text-sm ">PID Metrics</CardTitle>
     </CardHeader>
@@ -39,7 +39,7 @@ interface ProcessingCardProps {
 }
 
 export const ProcessingCard = memo(({ tasks, time }: ProcessingCardProps) => (
-  <Card className="bg-stat border-transparent">
+  <Card className="bg-monitor-panel border-transparent">
     <CardHeader className="pb-2">
       <CardTitle className="flex items-center gap-2 text-sm">
         <LuActivity className="h-4 w-4" />
@@ -67,7 +67,7 @@ interface PacketsCardProps {
 
 export const PacketsCard = memo(
   ({ pck_done, pck_sent, pck_ifce_sent }: PacketsCardProps) => (
-    <Card className="bg-stat border-transparent">
+    <Card className="bg-monitor-panel border-transparent">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
           <LuPackage2 className="h-4 w-4" />
@@ -108,7 +108,7 @@ interface DataCardProps {
 }
 
 export const DataCard = memo(({ bytes_done, bytes_sent }: DataCardProps) => (
-  <Card className="bg-stat border-transparent">
+  <Card className="bg-monitor-panel border-transparent">
     <CardHeader className="pb-2">
       <CardTitle className="flex items-center gap-2 text-sm">
         <LuHardDrive className="h-4 w-4" />
@@ -146,7 +146,7 @@ export const PIDDetails = memo(
     const bufferUsage = buffer_total > 0 ? (buffer / buffer_total) * 100 : 0;
 
     return (
-      <Card className="bg-stat border-transparent">
+      <Card className="bg-monitor-panel border-transparent">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm">{name}</CardTitle>
