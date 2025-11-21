@@ -159,17 +159,20 @@ const logsSlice = createSlice({
         logsByTool[tool].push(log);
       });
 
-      // Apply to each tool's buffer
+      // Apply to each tool's buffer using push (more efficient than spread)
       Object.entries(logsByTool).forEach(([tool, toolLogs]) => {
-        const currentBuffer = state.buffers[tool as GpacLogTool] || [];
-        const allLogs = [...currentBuffer, ...toolLogs];
+        const toolKey = tool as GpacLogTool;
+        if (!state.buffers[toolKey]) {
+          state.buffers[toolKey] = [];
+        }
 
-        if (allLogs.length <= state.maxEntriesPerTool) {
-          state.buffers[tool as GpacLogTool] = allLogs;
-        } else {
-          state.buffers[tool as GpacLogTool] = allLogs.slice(
-            -state.maxEntriesPerTool,
-          );
+        const buffer = state.buffers[toolKey];
+        buffer.push(...toolLogs);
+
+        // Trim if over limit
+        const overflow = buffer.length - state.maxEntriesPerTool;
+        if (overflow > 0) {
+          state.buffers[toolKey] = buffer.slice(overflow);
         }
       });
     },

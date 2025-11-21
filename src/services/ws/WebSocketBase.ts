@@ -1,11 +1,54 @@
 import { MessageFormatter } from './formatters/messageFormatters';
 import { WebSocketNotificationService } from './notificationService';
 
+interface WorkerResponse {
+  id: number;
+  handlerKey: string;
+  parsedData: unknown;
+  error?: string;
+}
+
 export class WebSocketBase {
   private socket: WebSocket | null = null;
   private messageHandlers: {
     [key: string]: ((connection: WebSocketBase, dataView: DataView) => void)[];
   } = {};
+  private parserWorker: Worker | null = null;
+  private messageId = 0;
+
+  constructor() {
+    this.initParserWorker();
+  }
+
+  private initParserWorker(): void {
+    try {
+      this.parserWorker = new Worker(
+        new URL('./workers/wsParserWorker.ts', import.meta.url),
+        { type: 'module' },
+      );
+
+      this.parserWorker.onmessage = (event: MessageEvent<WorkerResponse>) => {
+        const { handlerKey, parsedData, error } = event.data;
+
+        if (error) {
+          console.error('[WebSocket Worker] Parse error:', error);
+        }
+
+        // Convert parsed data back to DataView for handler compatibility
+        const dataView = MessageFormatter.createDataView(parsedData);
+        this.callMessageHandlers(handlerKey, dataView);
+      };
+
+      this.parserWorker.onerror = (error) => {
+        console.error('[WebSocket Worker] Error:', error);
+        // Worker failed, will fallback to inline parsing
+        this.parserWorker = null;
+      };
+    } catch (error) {
+      console.warn('[WebSocket] Worker not available, using inline parsing');
+      this.parserWorker = null;
+    }
+  }
 
   public isConnected(): boolean {
     return this.socket !== null && this.socket.readyState === WebSocket.OPEN;
@@ -56,57 +99,15 @@ export class WebSocketBase {
         };
 
         this.socket.onmessage = (event: MessageEvent) => {
-          try {
-            let data: string;
-
-            // Handle different message formats
-            if (event.data instanceof ArrayBuffer) {
-              const dataView = new DataView(event.data);
-              data = MessageFormatter.decodeDataView(dataView);
-            } else {
-              data = event.data;
-            }
-
-            // Handle messages with "json:" prefix or direct JSON
-            if (data.startsWith('json:') || data.startsWith('{')) {
-              const parsedData = MessageFormatter.parseReceived(data);
-              const dataView = MessageFormatter.createDataView(parsedData);
-
-              const handlerKey = data.startsWith('json:') ? 'json:' : 'json';
-              this.callMessageHandlers(handlerKey, dataView);
-              return;
-            }
-
-            // Legacy format handling for compatibility
-            const dataView = new DataView(
-              event.data instanceof ArrayBuffer
-                ? event.data
-                : new TextEncoder().encode(data).buffer,
-            );
-
-            if (dataView.byteLength >= 4) {
-              const id = String.fromCharCode(
-                dataView.getInt8(0),
-                dataView.getInt8(1),
-                dataView.getInt8(2),
-                dataView.getInt8(3),
-              );
-
-              const handlers = this.messageHandlers[id];
-              if (handlers && handlers.length > 0) {
-                handlers.forEach((handler) => handler(this, dataView));
-                return;
-              }
-            }
-
-            this.callMessageHandlers('__default__', dataView);
-          } catch (error) {
-            const errorDataView =
-              event.data instanceof ArrayBuffer
-                ? new DataView(event.data)
-                : new DataView(new TextEncoder().encode(event.data).buffer);
-            this.callMessageHandlers('__default__', errorDataView);
+          // Use Worker if available (offloads heavy parsing)
+          if (this.parserWorker) {
+            const id = ++this.messageId;
+            this.parserWorker.postMessage({ id, data: event.data });
+            return;
           }
+
+          // Fallback: inline parsing (blocks Main Thread)
+          this.parseMessageInline(event.data);
         };
 
         this.socket.onclose = (event) => {
@@ -139,6 +140,56 @@ export class WebSocketBase {
         console.error('[WebSocket] Error during disconnect:', error);
       }
       this.socket = null;
+    }
+  }
+
+  private parseMessageInline(eventData: ArrayBuffer | string): void {
+    try {
+      let data: string;
+
+      if (eventData instanceof ArrayBuffer) {
+        const dataView = new DataView(eventData);
+        data = MessageFormatter.decodeDataView(dataView);
+      } else {
+        data = eventData;
+      }
+
+      if (data.startsWith('json:') || data.startsWith('{')) {
+        const parsedData = MessageFormatter.parseReceived(data);
+        const dataView = MessageFormatter.createDataView(parsedData);
+        const handlerKey = data.startsWith('json:') ? 'json:' : 'json';
+        this.callMessageHandlers(handlerKey, dataView);
+        return;
+      }
+
+      const dataView = new DataView(
+        eventData instanceof ArrayBuffer
+          ? eventData
+          : new TextEncoder().encode(data).buffer,
+      );
+
+      if (dataView.byteLength >= 4) {
+        const id = String.fromCharCode(
+          dataView.getInt8(0),
+          dataView.getInt8(1),
+          dataView.getInt8(2),
+          dataView.getInt8(3),
+        );
+
+        const handlers = this.messageHandlers[id];
+        if (handlers && handlers.length > 0) {
+          handlers.forEach((handler) => handler(this, dataView));
+          return;
+        }
+      }
+
+      this.callMessageHandlers('__default__', dataView);
+    } catch {
+      const errorDataView =
+        eventData instanceof ArrayBuffer
+          ? new DataView(eventData)
+          : new DataView(new TextEncoder().encode(String(eventData)).buffer);
+      this.callMessageHandlers('__default__', errorDataView);
     }
   }
 

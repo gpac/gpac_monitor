@@ -2,7 +2,7 @@ import uPlot from 'uplot';
 
 export interface CpuMemoryDataPoint {
   timestamp: number;
-  time: string;
+  time?: string;
   cpu_percent: number;
   memory_mb: number;
 }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { CpuMemoryDataPoint } from '@/utils/charts/cpuMemory';
 
 export const useChartData = (
@@ -10,111 +10,50 @@ export const useChartData = (
   throttleInterval: number,
 ) => {
   const [dataPoints, setDataPoints] = useState<CpuMemoryDataPoint[]>([]);
-  const lastRecordedCPURef = useRef<number>(0);
-  const lastRecordedMemoryRef = useRef<number>(0);
-  const throttleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastUpdateRef = useRef<number>(0);
 
-  // Refs to avoid recreating callback on every value change
-  const currentCPURef = useRef(currentCPUPercent);
-  const currentMemoryRef = useRef(currentMemoryMB);
-  const isLiveRef = useRef(isLive);
-  const maxPointsRef = useRef(maxPoints);
-  const windowDurationRef = useRef(windowDuration);
+  useEffect(() => {
+    if (!isLive) return;
 
-  currentCPURef.current = currentCPUPercent;
-  currentMemoryRef.current = currentMemoryMB;
-  isLiveRef.current = isLive;
-  maxPointsRef.current = maxPoints;
-  windowDurationRef.current = windowDuration;
-
-  const updateDataPoints = useCallback(() => {
-    const cpu = currentCPURef.current;
-    const memory = currentMemoryRef.current;
-
-    if (
-      !isLiveRef.current ||
-      (cpu === lastRecordedCPURef.current &&
-        memory === lastRecordedMemoryRef.current)
-    )
-      return;
-
-    lastRecordedCPURef.current = cpu;
-    lastRecordedMemoryRef.current = memory;
     const now = Date.now();
 
-    setDataPoints((prevPoints) => {
-      let filteredPoints = prevPoints;
-      const maxPts = maxPointsRef.current;
-      const winDur = windowDurationRef.current;
+    // Throttle updates
+    if (now - lastUpdateRef.current < throttleInterval) return;
+    lastUpdateRef.current = now;
 
-      if (winDur && winDur !== Infinity) {
-        const cutoff = now - winDur;
-        filteredPoints = prevPoints.filter((p) => p.timestamp >= cutoff);
-      } else if (prevPoints.length >= maxPts) {
-        filteredPoints = prevPoints.slice(prevPoints.length - maxPts + 1);
-      }
-
-      const oldestTimestamp =
-        filteredPoints.length > 0 ? filteredPoints[0].timestamp : now;
-      const relativeSeconds = ((now - oldestTimestamp) / 1000).toFixed(1);
-      const time = `${relativeSeconds}s`;
-
+    setDataPoints((prev) => {
+      // Add new point with timestamp only (relative time calculated in chart)
       const newPoint: CpuMemoryDataPoint = {
         timestamp: now,
-        time,
-        cpu_percent: cpu,
-        memory_mb: memory,
+        cpu_percent: currentCPUPercent,
+        memory_mb: currentMemoryMB,
       };
-      const newPoints = [...filteredPoints, newPoint];
 
-      const oldest = newPoints[0].timestamp;
-      return newPoints.map((point) => ({
-        ...point,
-        time: `${((point.timestamp - oldest) / 1000).toFixed(1)}s`,
-      }));
-    });
-  }, []); // Empty deps - stable callback
+      // Use push for efficiency
+      const newPoints = [...prev, newPoint];
 
-  useEffect(() => {
-    setDataPoints((prev) => {
-      if (prev.length === 0) return prev;
-
-      const now = Date.now();
-      let filtered = prev;
-
+      // Trim based on window or max points
+      let trimmed = newPoints;
       if (windowDuration && windowDuration !== Infinity) {
         const cutoff = now - windowDuration;
-        filtered = prev.filter((p) => p.timestamp >= cutoff);
-      } else if (prev.length > maxPoints) {
-        filtered = prev.slice(prev.length - maxPoints);
+        const firstValidIdx = trimmed.findIndex((p) => p.timestamp >= cutoff);
+        if (firstValidIdx > 0) {
+          trimmed = trimmed.slice(firstValidIdx);
+        }
+      } else if (trimmed.length > maxPoints) {
+        trimmed = trimmed.slice(trimmed.length - maxPoints);
       }
 
-      if (filtered.length === 0) return prev;
-
-      const oldest = filtered[0].timestamp;
-      return filtered.map((point) => ({
-        ...point,
-        time: `${((point.timestamp - oldest) / 1000).toFixed(1)}s`,
-      }));
+      return trimmed;
     });
-  }, [maxPoints, windowDuration]);
-
-  useEffect(() => {
-    if (throttleTimerRef.current) {
-      clearTimeout(throttleTimerRef.current);
-    }
-
-    throttleTimerRef.current = setTimeout(() => {
-      updateDataPoints();
-      throttleTimerRef.current = null;
-    }, throttleInterval);
-
-    return () => {
-      if (throttleTimerRef.current) {
-        clearTimeout(throttleTimerRef.current);
-      }
-    };
-  }, [currentCPUPercent, currentMemoryMB, updateDataPoints, throttleInterval]);
+  }, [
+    currentCPUPercent,
+    currentMemoryMB,
+    isLive,
+    maxPoints,
+    windowDuration,
+    throttleInterval,
+  ]);
 
   return { dataPoints };
 };
