@@ -1,5 +1,6 @@
 import { MessageFormatter } from './formatters/messageFormatters';
 import { WebSocketNotificationService } from './notificationService';
+import WsParserWorker from './workers/wsParserWorker?worker&inline';
 
 interface WorkerResponse {
   id: number;
@@ -22,10 +23,7 @@ export class WebSocketBase {
 
   private initParserWorker(): void {
     try {
-      this.parserWorker = new Worker(
-        new URL('./workers/wsParserWorker.ts', import.meta.url),
-        { type: 'module' },
-      );
+      this.parserWorker = new WsParserWorker({ name: 'wsParserWorker' });
 
       this.parserWorker.onmessage = (event: MessageEvent<WorkerResponse>) => {
         const { handlerKey, parsedData, error } = event.data;

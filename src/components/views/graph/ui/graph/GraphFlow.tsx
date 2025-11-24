@@ -64,7 +64,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         onNodeClick={isResizing ? undefined : onNodeClick}
         onPaneClick={isResizing ? undefined : handlePaneClick}
         fitView={!isResizing}
-        minZoom={0.1}
+        minZoom={0.01}
         maxZoom={4}
         defaultEdgeOptions={{
           type: 'simplebezier',
