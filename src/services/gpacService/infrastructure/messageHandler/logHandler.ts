@@ -46,10 +46,6 @@ export class LogHandler {
     return true;
   }
 
-  private static generateMessageId(): string {
-    return generateID();
-  }
-
   public async subscribeToLogs(
     logLevel: GpacLogConfig = 'all@quiet',
   ): Promise<void> {
@@ -70,7 +66,7 @@ export class LogHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.SUBSCRIBE_LOGS,
-          id: LogHandler.generateMessageId(),
+          id: generateID(),
           logLevel,
         });
         this.isSubscribed = true;
@@ -101,7 +97,7 @@ export class LogHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.UNSUBSCRIBE_LOGS,
-          id: LogHandler.generateMessageId(),
+          id: generateID(),
         });
         this.isSubscribed = false;
 
@@ -123,7 +119,7 @@ export class LogHandler {
 
     await this.dependencies.send({
       type: WSMessageType.UPDATE_LOG_LEVEL,
-      id: LogHandler.generateMessageId(),
+      id: generateID(),
       logLevel,
     });
   }
@@ -133,7 +129,7 @@ export class LogHandler {
 
     await this.dependencies.send({
       type: WSMessageType.GET_LOG_STATUS,
-      id: LogHandler.generateMessageId(),
+      id: generateID(),
     });
   }
 

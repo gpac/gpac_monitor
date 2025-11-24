@@ -5,12 +5,15 @@ import { getPIDStatusBadge, getMediaTypeInfo } from '@/utils/gpac';
 import { FaCircleInfo } from 'react-icons/fa6';
 import type { PIDWithIndex } from '../../types';
 
+type PIDCardVariant = 'input' | 'output';
+
 interface PIDMetricsCardProps {
   pid: PIDWithIndex;
   type: string;
   filterIdx: number;
   onOpenProps: (filterIdx: number, ipidIdx: number) => void;
   showPropsButton?: boolean;
+  variant?: PIDCardVariant;
 }
 
 // Border color by media type
@@ -29,6 +32,7 @@ const PIDMetricsCard = memo(
     filterIdx,
     onOpenProps,
     showPropsButton = true,
+    variant = 'input',
   }: PIDMetricsCardProps) => {
     const statusBadge = getPIDStatusBadge(pid);
     const mediaInfo = getMediaTypeInfo(type);
@@ -84,28 +88,53 @@ const PIDMetricsCard = memo(
           </div>
         </div>
 
-        {/* KPIs */}
+        {/* KPIs - Different metrics for input vs output */}
         <div className="grid grid-cols-3 gap-2 px-3 py-2 text-center">
-          <div>
-            <div className="text-xs font-medium text-info tabular-nums">
-              {formatBytes(pid.buffer)}
-            </div>
-            <div className="text-[10px] text-muted-foreground">Buffer</div>
-          </div>
-          <div>
-            <div className="text-xs font-medium text-muted-foreground tabular-nums">
-              {pid.bitrate || 0}
-            </div>
-            <div className="text-[10px] text-muted-foreground">Bitrate</div>
-          </div>
-          <div>
-            <div className="text-xs font-medium text-info tabular-nums">
-              {thirdValue}
-            </div>
-            <div className="text-[10px] text-muted-foreground">
-              {thirdLabel}
-            </div>
-          </div>
+          {variant === 'input' ? (
+            <>
+              <div>
+                <div className="text-xs font-medium text-info tabular-nums">
+                  {formatBytes(pid.buffer)}
+                </div>
+                <div className="text-[10px] text-muted-foreground">Buffer</div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-muted-foreground tabular-nums">
+                  {pid.bitrate || 0}
+                </div>
+                <div className="text-[10px] text-muted-foreground">Bitrate</div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-info tabular-nums">
+                  {thirdValue}
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  {thirdLabel}
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <div className="text-xs font-medium text-info tabular-nums">
+                  {pid.nb_pck_queued || 0}
+                </div>
+                <div className="text-[10px] text-muted-foreground">Queued</div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-muted-foreground tabular-nums">
+                  {formatBytes(pid.buffer)}
+                </div>
+                <div className="text-[10px] text-muted-foreground">Buffer</div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-info tabular-nums">
+                  {pid.bitrate || 0}
+                </div>
+                <div className="text-[10px] text-muted-foreground">Bitrate</div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Audio sample rate */}

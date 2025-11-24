@@ -27,9 +27,6 @@ export class FilterArgsHandler {
     }
     return true;
   }
-  private static generateMessageId(): string {
-    return generateID();
-  }
   /**
    * Subscribes to filter args
    */
@@ -47,7 +44,7 @@ export class FilterArgsHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.FILTER_ARGS_DETAILS,
-          id: FilterArgsHandler.generateMessageId(),
+          id: generateID(),
           idx,
         });
       } finally {
@@ -77,7 +74,7 @@ export class FilterArgsHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.STOP_FILTER_ARGS,
-          id: FilterArgsHandler.generateMessageId(),
+          id: generateID(),
           idx,
         });
       } finally {
@@ -124,7 +121,7 @@ export class FilterArgsHandler {
 
       await this.dependencies.send({
         type: WSMessageType.UPDATE_ARG,
-        id: FilterArgsHandler.generateMessageId(),
+        id: generateID(),
         idx,
         name,
         argName,

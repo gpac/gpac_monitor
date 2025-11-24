@@ -99,6 +99,7 @@ const OutputsTab = memo(
                   filterIdx={filterData.idx}
                   onOpenProps={handleOpenProps}
                   showPropsButton={false}
+                  variant="output"
                 />
               ))}
             </div>

@@ -26,9 +26,6 @@ export class CPUStatsHandler {
     }
     return true;
   }
-  private static generateMessageId(): string {
-    return generateID();
-  }
   // logic for subscribing and unsubscribing to cpu stats
   public async subscribeToCPUStats(interval = 150): Promise<void> {
     this.ensureLoaded();
@@ -43,7 +40,7 @@ export class CPUStatsHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.SUBSCRIBE_CPU_STATS,
-          id: CPUStatsHandler.generateMessageId(),
+          id: generateID(),
           interval,
         });
       } finally {
@@ -67,7 +64,7 @@ export class CPUStatsHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.UNSUBSCRIBE_CPU_STATS,
-          id: CPUStatsHandler.generateMessageId(),
+          id: generateID(),
         });
       } finally {
         // Clear the pending request when done (success or failure)

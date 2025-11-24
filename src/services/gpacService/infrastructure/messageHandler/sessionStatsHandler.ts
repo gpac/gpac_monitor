@@ -30,10 +30,6 @@ export class SessionStatsHandler {
     return true;
   }
 
-  private static generateMessageId(): string {
-    return generateID();
-  }
-
   public async subscribeToSession(interval = 1000): Promise<void> {
     this.ensureLoaded();
 
@@ -47,7 +43,7 @@ export class SessionStatsHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.SUBSCRIBE_SESSION,
-          id: SessionStatsHandler.generateMessageId(),
+          id: generateID(),
           interval,
         });
       } finally {
@@ -72,7 +68,7 @@ export class SessionStatsHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.UNSUBSCRIBE_SESSION,
-          id: SessionStatsHandler.generateMessageId(),
+          id: generateID(),
         });
       } finally {
         // Clear the pending request when done (success or failure)

@@ -32,9 +32,6 @@ export class FilterStatsHandler {
     }
     return true;
   }
-  private static generateMessageId(): string {
-    return generateID();
-  }
   /**
    * Subscribes to filter statistics updates
    */
@@ -55,7 +52,7 @@ export class FilterStatsHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.SUBSCRIBE_FILTER_STATS,
-          id: FilterStatsHandler.generateMessageId(),
+          id: generateID(),
           idx,
           interval,
         });
@@ -86,7 +83,7 @@ export class FilterStatsHandler {
       try {
         await this.dependencies.send({
           type: WSMessageType.UNSUBSCRIBE_FILTER_STATS,
-          id: FilterStatsHandler.generateMessageId(),
+          id: generateID(),
           idx,
         });
       } finally {
