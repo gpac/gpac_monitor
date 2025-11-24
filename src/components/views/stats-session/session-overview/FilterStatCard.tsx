@@ -74,13 +74,13 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
         {/* Line 1: Name + Type + Activity */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <span className={`font-ui font-semibold text-sm truncate ${isStalled ? 'text-amber-500' : 'text-monitor-text-primary'}`}>
+            <span className="font-ui font-semibold text-sm truncate text-monitor-text-primary">
               {filter.name}
             </span>
             {isStalled && (
               <FaExclamationTriangle
                 className="h-3.5 w-3.5 text-amber-500 flex-shrink-0"
-                title="Stalled - no packets sent"
+                title="Stalled - no media progress"
               />
             )}
           </div>

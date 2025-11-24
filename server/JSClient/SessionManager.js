@@ -37,7 +37,7 @@ function SessionManager(client) {
             for (let i = 0; i < f.nb_ipid; i++) {
                 const eos = f.ipid_props(i, 'eos');
                 if (!eos) {
-                    return false; // Found non-EOS input
+                    return false; 
                 }
             }
         }
@@ -54,7 +54,6 @@ function SessionManager(client) {
 
             const stats = [];
             const filters = [];
-            const now = Date.now(); 
 
             session.lock_filters(true);
             for (let i = 0; i < session.nb_filters; i++) {
@@ -69,7 +68,7 @@ function SessionManager(client) {
                     obj[field] = f[field];
                 }
 
-                //alculate is_eos (all input PIDs are EOS)
+                //calculate is_eos (all input PIDs are EOS)
                 let allInputsEos = f.nb_ipid > 0;
                 for (let j = 0; j < f.nb_ipid; j++) {
                     if (!f.ipid_props(j, 'eos')) {
@@ -79,8 +78,8 @@ function SessionManager(client) {
                 }
                 obj.is_eos = allInputsEos;
 
-                obj.last_packet_sent = f.pck_sent || 0;
-                obj.last_packet_sent_timestamp = now;
+                // Media timestamp of last packet sent (Fraction or null)
+                obj.last_ts_sent = f.last_ts_sent || null;
 
                 stats.push(obj);
             }

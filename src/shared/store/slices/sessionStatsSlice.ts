@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { TimeFraction } from '../../../types/domain/gpac/model';
 
 export interface SessionFilterStats {
   status: string;
@@ -9,8 +10,7 @@ export interface SessionFilterStats {
   idx: number;
   bytes_sent: number;
   is_eos?: boolean;
-  last_packet_sent?: number;
-  last_packet_sent_timestamp?: number;
+  last_ts_sent?: TimeFraction | null;
 }
 
 export type StatsMode = 'session' | 'filter';
