@@ -38,6 +38,7 @@ interface DetailedStatsViewProps {
   onBack: () => void;
   onOpenProperties: () => void;
   initialTab?: InitialTabType;
+  isLoading?: boolean;
 }
 
 const MemoizedOverviewTab = memo(OverviewTab);
@@ -54,6 +55,7 @@ const DetailedStatsView = memo(
     filterData = EMPTY_FILTER_DATA, // Use constant fallback
     onOpenProperties,
     initialTab,
+    isLoading = false,
   }: DetailedStatsViewProps) => {
     const [activeTab, setActiveTab] = useState<string>(
       initialTab || 'overview',
@@ -137,12 +139,14 @@ const DetailedStatsView = memo(
             <MemoizedInputsTab
               filterData={filterData}
               filterName={overviewData.name}
+              isLoading={isLoading}
             />
           </TabsContent>
           <TabsContent value="outputs">
             <MemoizedOutputsTab
               filterData={filterData}
               filterName={overviewData.name}
+              isLoading={isLoading}
             />
           </TabsContent>
         </Tabs>

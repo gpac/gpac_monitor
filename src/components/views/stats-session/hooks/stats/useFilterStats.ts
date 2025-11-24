@@ -9,10 +9,12 @@ export function useFilterStats(
   interval = 1000,
 ) {
   const [stats, setStats] = useState<MonitoredFilterStats | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleStatsUpdate = useCallback(
     (newStats: MonitoredFilterStats) => {
       setStats(newStats);
+      setIsLoading(false);
     },
     [filterId],
   );
@@ -20,11 +22,16 @@ export function useFilterStats(
   useEffect(() => {
     if (filterId === undefined || !enabled || !gpacService.isConnected()) {
       setStats(null);
+      setIsLoading(false);
       return;
     }
 
     let unsubscribe: (() => void) | null = null;
     let isMounted = true;
+
+    // Clear old data and set loading when starting subscription (batched = 1 re-render)
+    setStats(null);
+    setIsLoading(true);
 
     const setupSubscription = async () => {
       try {
@@ -49,6 +56,7 @@ export function useFilterStats(
       } catch (error) {
         if (isMounted) {
           setStats(null);
+          setIsLoading(false);
         }
       }
     };
@@ -65,6 +73,7 @@ export function useFilterStats(
 
   return {
     stats,
+    isLoading,
     isSubscribed: !!stats,
   };
 }

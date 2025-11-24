@@ -22,7 +22,7 @@ const NodeToolbarActions: React.FC<NodeToolbarActionsProps> = ({
     dispatch(requestFilterOpen({ filterIdx, initialTab: 'inputs' }));
     dispatch(clearSelectedNode());
     // Deselect all nodes in React Flow to hide the toolbar
-    setNodes((nodes) => nodes.map((n) => ({ ...n, selected: false })));
+    setNodes((nodes) => nodes.map((node) => ({ ...node, selected: false })));
   }, [dispatch, filterIdx, setNodes]);
 
   return (

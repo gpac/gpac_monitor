@@ -19,6 +19,7 @@ interface FilterTabContentProps {
   onBack: () => void;
   onOpenProperties: () => void;
   initialTab?: InitialTabType;
+  isLoading?: boolean;
 }
 
 export const FilterTabContent: React.FC<FilterTabContentProps> = ({
@@ -30,6 +31,7 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   onBack,
   onOpenProperties,
   initialTab,
+  isLoading = false,
 }) => {
   // Don't pass filterData if undefined, let DetailedStatsView use its default
   const props = {
@@ -40,6 +42,7 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
     onBack,
     onOpenProperties,
     initialTab,
+    isLoading,
     ...(filterData && { filterData }), // Only pass if defined
   };
 

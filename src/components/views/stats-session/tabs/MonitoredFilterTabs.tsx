@@ -64,25 +64,29 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
 }) => {
   const dispatch = useAppDispatch();
 
-  // Track initialTab - capture when tab becomes active
+  // Track initialTab - capture synchronously when tab becomes active
   const initialTabRef = useRef<InitialTabType | null>(null);
-  const wasActiveRef = useRef(false);
+  const hasCapturedRef = useRef(false);
 
-  // Capture initialTab when tab becomes active (not on mount)
+  // Capture initialTab synchronously during render (no re-render, available immediately)
+  if (isActive && !hasCapturedRef.current) {
+    hasCapturedRef.current = true;
+    initialTabRef.current = store.getState().graph.initialTab;
+  }
+
+  // Clear initialTab in effect (after render)
   useEffect(() => {
-    if (isActive && !wasActiveRef.current) {
-      // Tab just became active - capture initialTab
-      const currentInitialTab = store.getState().graph.initialTab;
-      initialTabRef.current = currentInitialTab;
-      if (currentInitialTab) {
-        dispatch(clearInitialTab());
-      }
+    if (initialTabRef.current) {
+      dispatch(clearInitialTab());
     }
-    wasActiveRef.current = isActive;
-  }, [isActive, dispatch]);
+  }, [dispatch]);
 
   // Subscribe to live stats when tab is active
-  const { stats } = useFilterStats(filter.idx, isActive, 1000);
+  const { stats, isLoading } = useFilterStats(filter.idx, isActive, 1000);
+
+  // Effective loading: true if explicitly loading OR stats don't match current filter
+  const effectiveIsLoading =
+    isLoading || (isActive && (!stats || stats.idx !== filter.idx));
 
   // Merge static filter data with live stats
   const filterWithStats = useMemo(
@@ -153,6 +157,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         onBack={handleBack}
         onOpenProperties={handleOpenProperties}
         initialTab={initialTabRef.current || undefined}
+        isLoading={effectiveIsLoading}
       />
     </div>
   );

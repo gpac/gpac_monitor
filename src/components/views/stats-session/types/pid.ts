@@ -14,6 +14,7 @@ export interface PIDWithIndex extends TabPIDData {
 export interface InputsTabProps {
   filterData: FilterStatsResponse;
   filterName: string;
+  isLoading?: boolean;
 }
 
 /**
