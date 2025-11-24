@@ -9,7 +9,7 @@ export class WSMessageBatcher {
   private flushScheduled = false;
   private timeoutId: ReturnType<typeof setTimeout> | null = null;
   private handler: ((logs: GpacLogEntry[]) => void) | null = null;
-  private readonly FLUSH_INTERVAL = 500; // 2 dispatches/second max
+  private readonly FLUSH_INTERVAL = 500;
 
   /**
    * Add a log batch message to the queue

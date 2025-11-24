@@ -42,7 +42,7 @@ const getInitialState = (): LogsState => {
       defaultAllLevel: config.defaultAllLevel || GpacLogLevel.QUIET,
       visibleToolsFilter: config.visibleToolsFilter || [],
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
-      maxEntriesPerTool: 5000,
+      maxEntriesPerTool: 500,
       isSubscribed: false,
       highlightedLogId: null,
       uiFilter: null,
@@ -59,7 +59,7 @@ const getInitialState = (): LogsState => {
       defaultAllLevel: GpacLogLevel.QUIET,
       visibleToolsFilter: [],
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
-      maxEntriesPerTool: 5000,
+      maxEntriesPerTool: 500,
       isSubscribed: false,
       highlightedLogId: null,
       uiFilter: null,
@@ -146,37 +146,33 @@ const logsSlice = createSlice({
     /** Distribute and append logs to appropriate tool buffers based on log.tool property */
     appendLogsForAllTools: (state, action: PayloadAction<GpacLogEntry[]>) => {
       const logs = action.payload;
-
       if (logs.length === 0) return;
 
-      // Group logs by tool
-      const logsByTool: Record<string, GpacLogEntry[]> = {};
-      logs.forEach((log) => {
+      const { buffers, maxEntriesPerTool } = state;
+
+      // push direct
+      for (let i = 0; i < logs.length; i++) {
+        const log = logs[i];
         const tool = log.tool as GpacLogTool;
-        if (!logsByTool[tool]) {
-          logsByTool[tool] = [];
-        }
-        logsByTool[tool].push(log);
-      });
 
-      // Apply to each tool's buffer using push (more efficient than spread)
-      Object.entries(logsByTool).forEach(([tool, toolLogs]) => {
-        const toolKey = tool as GpacLogTool;
-        if (!state.buffers[toolKey]) {
-          state.buffers[toolKey] = [];
+        let buffer = buffers[tool];
+        if (!buffer) {
+          buffer = buffers[tool] = [];
         }
 
-        const buffer = state.buffers[toolKey];
-        buffer.push(...toolLogs);
+        buffer.push(log);
+      }
 
-        // Trim if over limit
-        const overflow = buffer.length - state.maxEntriesPerTool;
+      // 2) trim per tool
+      for (const tool in buffers) {
+        const buffer = buffers[tool as GpacLogTool]!;
+        const overflow = buffer.length - maxEntriesPerTool;
         if (overflow > 0) {
-          state.buffers[toolKey] = buffer.slice(overflow);
+          // mutation in-place
+          buffer.splice(0, overflow);
         }
-      });
+      }
     },
-
     /** Update buffer size limit and truncate existing buffers if needed */
     setMaxEntriesPerTool: (state, action: PayloadAction<number>) => {
       state.maxEntriesPerTool = action.payload;
