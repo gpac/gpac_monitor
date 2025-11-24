@@ -10,6 +10,7 @@ interface PIDMetricsCardProps {
   type: string;
   filterIdx: number;
   onOpenProps: (filterIdx: number, ipidIdx: number) => void;
+  showPropsButton?: boolean;
 }
 
 // Border color by media type
@@ -22,7 +23,13 @@ const getBorderColor = (type: string): string => {
 };
 
 const PIDMetricsCard = memo(
-  ({ pid, type, filterIdx, onOpenProps }: PIDMetricsCardProps) => {
+  ({
+    pid,
+    type,
+    filterIdx,
+    onOpenProps,
+    showPropsButton = true,
+  }: PIDMetricsCardProps) => {
     const statusBadge = getPIDStatusBadge(pid);
     const mediaInfo = getMediaTypeInfo(type);
     const MediaIcon = mediaInfo.icon;
@@ -67,11 +74,13 @@ const PIDMetricsCard = memo(
                 {statusBadge.text}
               </Badge>
             )}
-            <FaCircleInfo
-              className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-primary transition-colors"
-              onClick={() => onOpenProps(filterIdx, pid.ipidIdx)}
-              title="View properties"
-            />
+            {showPropsButton && (
+              <FaCircleInfo
+                className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-primary transition-colors"
+                onClick={() => onOpenProps(filterIdx, pid.ipidIdx)}
+                title="View properties"
+              />
+            )}
           </div>
         </div>
 
