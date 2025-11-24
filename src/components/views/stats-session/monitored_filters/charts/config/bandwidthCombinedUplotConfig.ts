@@ -116,7 +116,7 @@ export const createBandwidthCombinedConfig = ({
       },
     ],
     scales: {
-      x: { time: false },
+      x: { time: false, distr: 2 },
       y: {},
     },
     axes: [
@@ -128,7 +128,7 @@ export const createBandwidthCombinedConfig = ({
         size: 50,
         values: (_u, vals) =>
           vals.map((v) => {
-            const idx = Math.round(v);
+            const idx = v as number;
             return timeLabels[idx] || '';
           }),
       },
