@@ -5,72 +5,33 @@ import {
   EnrichedFilterData,
 } from '@/workers/enrichedStatsWorker';
 import EnrichedStatsWorker from '../../workers/enrichedStatsWorker?worker&inline';
+import { BaseWorkerService } from './BaseWorkerService';
 
-export class EnrichedStatsWorkerService {
-  private worker: Worker | null = null;
-  private subscribers: Set<(filters: EnrichedFilterData[]) => void> = new Set();
-
+class EnrichedStatsWorkerService extends BaseWorkerService<
+  GpacNodeData[],
+  EnrichedFilterData[]
+> {
   constructor() {
-    this.initWorker();
+    super('EnrichedStatsWorkerService', 'ENRICHED_STATS');
   }
 
-  private initWorker() {
-    try {
-      this.worker = new EnrichedStatsWorker({ name: 'enrichedStatsWorker' });
-
-      this.worker.onmessage = (event: MessageEvent<EnrichedStatsResponse>) => {
-        const { type, enrichedFilters } = event.data;
-
-        if (type === 'ENRICHED_STATS') {
-          this.subscribers.forEach((callback) => {
-            try {
-              callback(enrichedFilters);
-            } catch (error) {
-              console.error(
-                '[EnrichedStatsWorkerService] Callback error:',
-                error,
-              );
-            }
-          });
-        }
-      };
-
-      this.worker.onerror = (error) => {
-        console.error('[EnrichedStatsWorkerService] Worker error:', error);
-      };
-    } catch (error) {
-      console.error(
-        '[EnrichedStatsWorkerService] Failed to create worker:',
-        error,
-      );
-    }
+  protected createWorker(): Worker {
+    return new EnrichedStatsWorker({ name: 'enrichedStatsWorker' });
   }
 
-  enrichStats(filters: GpacNodeData[]) {
-    if (!this.worker) return;
-
-    const message: EnrichStatsMessage = {
-      type: 'ENRICH_STATS',
-      filters,
-    };
-
-    this.worker.postMessage(message);
+  protected extractData(
+    eventData: EnrichedStatsResponse,
+  ): EnrichedFilterData[] {
+    return eventData.enrichedFilters;
   }
 
-  subscribe(callback: (filters: EnrichedFilterData[]) => void): () => void {
-    this.subscribers.add(callback);
-
-    return () => {
-      this.subscribers.delete(callback);
-    };
+  protected createMessage(filters: GpacNodeData[]): EnrichStatsMessage {
+    return { type: 'ENRICH_STATS', filters };
   }
 
-  destroy() {
-    if (this.worker) {
-      this.worker.terminate();
-      this.worker = null;
-    }
-    this.subscribers.clear();
+  // Alias for backward compatibility
+  enrichStats(filters: GpacNodeData[]): void {
+    this.process(filters);
   }
 }
 

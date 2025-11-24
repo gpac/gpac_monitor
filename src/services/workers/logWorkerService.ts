@@ -1,74 +1,36 @@
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import { LogWorkerMessage, LogWorkerResponse } from '@/workers/logWorker';
 import LogWorker from '../../workers/logWorker?worker&inline';
+import { BaseWorkerService } from './BaseWorkerService';
 
-export class LogWorkerService {
-  private worker: Worker | null = null;
-  private subscribers: Set<(logs: GpacLogEntry[]) => void> = new Set();
-
+class LogWorkerService extends BaseWorkerService<
+  GpacLogEntry[],
+  GpacLogEntry[]
+> {
   constructor() {
-    this.initWorker();
+    super('LogWorkerService', 'PROCESSED_LOGS');
   }
 
-  private initWorker() {
-    try {
-      // Créer le Worker
-
-      this.worker = new LogWorker({ name: 'logWorker' });
-      // Écouter les messages du Worker
-      this.worker.onmessage = (event: MessageEvent<LogWorkerResponse>) => {
-        const { type, logs } = event.data;
-
-        if (type === 'PROCESSED_LOGS') {
-          // Notifier tous les subscribers
-          this.subscribers.forEach((callback) => {
-            try {
-              callback(logs);
-            } catch (error) {
-              console.error('[LogWorkerService] Callback error:', error);
-            }
-          });
-        }
-      };
-
-      this.worker.onerror = (error) => {
-        console.error('[LogWorkerService] Worker error:', error);
-      };
-    } catch (error) {
-      console.error('[LogWorkerService] Failed to create worker:', error);
-    }
+  protected createWorker(): Worker {
+    return new LogWorker({ name: 'logWorker' });
   }
 
-  // Envoyer des logs au Worker pour traitement
-  processLogs(logs: GpacLogEntry[]) {
-    if (!this.worker || logs.length === 0) return;
-
-    const message: LogWorkerMessage = {
-      type: 'PROCESS_LOGS',
-      logs,
-    };
-
-    this.worker.postMessage(message);
+  protected extractData(eventData: LogWorkerResponse): GpacLogEntry[] {
+    return eventData.logs;
   }
 
-  // S'abonner aux logs traités
-  subscribe(callback: (logs: GpacLogEntry[]) => void): () => void {
-    this.subscribers.add(callback);
-
-    return () => {
-      this.subscribers.delete(callback);
-    };
+  protected createMessage(logs: GpacLogEntry[]): LogWorkerMessage {
+    return { type: 'PROCESS_LOGS', logs };
   }
 
-  // Nettoyer le Worker
-  destroy() {
-    if (this.worker) {
-      this.worker.terminate();
-      this.worker = null;
-    }
-    this.subscribers.clear();
+  protected validateInput(logs: GpacLogEntry[]): boolean {
+    return logs.length > 0;
+  }
+
+  // Alias for backward compatibility
+  processLogs(logs: GpacLogEntry[]): void {
+    this.process(logs);
   }
 }
 
-// Instance singleton
 export const logWorkerService = new LogWorkerService();
