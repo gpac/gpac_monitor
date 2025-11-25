@@ -13,7 +13,13 @@ interface FilterStatCardProps {
 }
 
 const FilterStatCard: React.FC<FilterStatCardProps> = memo(
-  ({ filter, onClick, isMonitored = false, isDetached = false, isStalled = false }) => {
+  ({
+    filter,
+    onClick,
+    isMonitored = false,
+    isDetached = false,
+    isStalled = false,
+  }) => {
     const handleClick = useCallback(() => {
       if (onClick && filter.idx !== undefined) {
         onClick(filter.idx);
@@ -105,33 +111,40 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs font-mono tabular-nums text-monitor-text-muted">
           {hasPackets && (
             <>
-              <span>{formattedPackets} pkt</span>
+              <span title="Packets processed">{formattedPackets} pkt</span>
               <span className="text-monitor-text-subtle">•</span>
             </>
           )}
           {hasTime && (
             <>
-              <span className="text-info">{formattedPacketRate}</span>
+              <span className="text-info" title="Packet rate">
+                {formattedPacketRate}
+              </span>
               <span className="text-monitor-text-subtle">•</span>
             </>
           )}
           {formattedBytes && (
             <>
-              <span>{formattedBytes}</span>
+              <span title="Data processed">{formattedBytes}</span>
               {hasTime && <span className="text-monitor-text-subtle">•</span>}
             </>
           )}
-          {hasTime && <span>{formattedTime}</span>}
+          {hasTime && <span title="Processing time">{formattedTime}</span>}
           {filter.errors && filter.errors > 0 && (
             <>
               <span className="text-monitor-text-subtle">•</span>
-              <span className="text-rose-400">{filter.errors} err</span>
+              <span className="text-rose-400" title="Errors encountered">
+                {filter.errors} err
+              </span>
             </>
           )}
         </div>
 
         {/* Line 3: PIDs */}
-        <div className="flex items-center justify-end gap-1 text-[8px] font-mono tabular-nums text-monitor-text-muted">
+        <div
+          className="flex items-center justify-end gap-1 text-[8px] font-mono tabular-nums text-monitor-text-muted"
+          title="Input PIDs / Output PIDs"
+        >
           <span className="uppercase tracking-wider">PIDs</span>
           <span>
             {filter.nb_ipid || 0}/{filter.nb_opid || 0}
