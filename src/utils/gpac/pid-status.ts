@@ -49,9 +49,8 @@ export const getPIDStatusBadge = (pid: TabPIDData) => {
  * Calculate global status for multiple inputs/outputs
  */
 export const getGlobalStatus = (pids: TabPIDData[], itemCount: number) => {
-  const totalErrors = pids.filter(
-    (pid) => pid.stats?.disconnected || pid.would_block,
-  ).length;
+  const totalErrors = pids.filter((pid) => pid.stats?.disconnected).length;
+  const totalBlocked = pids.filter((pid) => pid.would_block).length;
   const totalActive = pids.filter((pid) => pid.playing).length;
   const totalEos = pids.filter((pid) => pid.eos).length;
 
@@ -59,6 +58,7 @@ export const getGlobalStatus = (pids: TabPIDData[], itemCount: number) => {
     totalItems: itemCount,
     totalPids: pids.length,
     errors: totalErrors,
+    blocked: totalBlocked,
     active: totalActive,
     eos: totalEos,
   };

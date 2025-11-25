@@ -66,12 +66,25 @@ function PidDataCollector() {
             // Make name unique when multiple PIDs have the same name
             pid.name = filter.nb_opid > 1 && originalName ? `${originalName}_${i}` : originalName;
             pid.buffer = filter.opid_props(i, "buffer");
-            pid.max_buffer = filter.opid_props(i, "max_buffer"); 
+            pid.max_buffer = filter.opid_props(i, "max_buffer");
             pid.nb_pck_queued = filter.opid_props(i, "nb_pck_queued");
             pid.would_block = filter.opid_props(i, "would_block");
+            pid.eos = filter.opid_props(i, "eos");
             const statsEos = filter.opid_stats(i);
             pid.eos_received = statsEos?.eos_received;
             pid.playing = filter.opid_props(i, "playing");
+
+            // Debug logging for critical OPID properties
+            console.log(`[PidDataCollector] Filter ${filter.name} - OPID[${i}] "${pid.name}":`,
+                JSON.stringify({
+                    would_block: pid.would_block,
+                    eos: pid.eos,
+                    eos_received: pid.eos_received,
+                    playing: pid.playing,
+                    buffer: pid.buffer,
+                    nb_pck_queued: pid.nb_pck_queued
+                }, null, 2)
+            );
 
             // Media type specific properties
             pid.timescale = filter.opid_props(i, "Timescale");
