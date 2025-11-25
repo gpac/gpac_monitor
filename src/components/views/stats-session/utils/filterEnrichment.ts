@@ -34,6 +34,7 @@ export function enrichFiltersWithStats(
       time: dynamicStats?.time || 0,
       tasks: 0,
       errors: 0,
+      is_eos: dynamicStats?.is_eos ?? false,
     };
   });
 }

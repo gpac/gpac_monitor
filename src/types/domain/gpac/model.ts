@@ -14,6 +14,7 @@ export interface SessionFilterStatistics extends Record<string, unknown> {
   time: number;
   nb_ipid: number;
   nb_opid: number;
+  is_eos?: boolean;
 }
 export interface MonitoredFilterStats {
   idx: number;
@@ -54,6 +55,7 @@ export interface EnrichedFilterOverview extends Record<string, unknown> {
   pck_done: number;
   pck_sent: number;
   time: number;
+  is_eos?: boolean;
 
   // Computed metrics (added by enrichedStatsWorker)
   computed?: {

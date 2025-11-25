@@ -98,6 +98,17 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             >
               {sessionTypeLabel}
             </Badge>
+            {filter.is_eos && (
+              <Badge
+                variant="outline"
+                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
+             bg-emerald-900/15 text-emerald-300
+             border border-emerald-700/60
+             rounded-sm"
+              >
+                EOS
+              </Badge>
+            )}
             <div className="flex items-center gap-1">
               <div className={`h-2 w-2 rounded-full ${activityColor}`} />
               <span className="text-xs font-medium text-monitor-text-secondary">
@@ -164,6 +175,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       prev.nb_ipid === next.nb_ipid &&
       prev.nb_opid === next.nb_opid &&
       prev.errors === next.errors &&
+      prev.is_eos === next.is_eos &&
       prev.computed.formattedPackets === next.computed.formattedPackets &&
       prev.computed.formattedBytes === next.computed.formattedBytes &&
       prev.computed.formattedTime === next.computed.formattedTime &&
