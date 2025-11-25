@@ -1,10 +1,9 @@
 import { Widget, WidgetType } from '@/types';
-import { LuFileText, LuGauge, LuShare2, LuVolume2 } from 'react-icons/lu';
+import { LuFileText, LuGauge, LuShare2 } from 'react-icons/lu';
 import { TbFilterCog } from 'react-icons/tb';
 import { IconType } from 'react-icons';
 import LogsMonitor from '../views/logs/LogsMonitor';
 import MetricsMonitor from '../views/cpu/MetricsMonitor';
-import AudioMonitor from '../views/audio/AudioMonitor';
 import GraphMonitor from '../views/graph/GraphMonitor';
 import MultiFilterMonitor from '../views/stats-session/session-overview/entry';
 import { generateID } from '@/utils/core';
@@ -66,17 +65,6 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     defaultZIndex: 1002,
     description: 'View and filter system logs.',
     enabled: true,
-  },
-  [WidgetType.AUDIO]: {
-    type: WidgetType.AUDIO,
-    title: 'Audio Monitor',
-    icon: LuVolume2,
-    component: AudioMonitor,
-    defaultSize: { w: 8, h: 4 },
-    defaultPosition: { x: 16, y: 6 },
-    defaultZIndex: 1003,
-    description: 'Monitor audio levels in real-time.',
-    enabled: false,
   },
 };
 
