@@ -27,8 +27,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
     }, [filter.idx, onClick]);
 
     const {
-      activityColor,
-      activityLabel,
       sessionType,
       formattedBytes,
       formattedTime,
@@ -77,7 +75,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             className="absolute -top-0.5 -left-0.5"
           />
         )}
-        {/* Line 1: Name + Type + Activity */}
+        {/* Line 1: Name + Type + Status */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0 flex-1">
             <span className="font-ui font-semibold text-sm truncate text-monitor-text-primary">
@@ -109,12 +107,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                 EOS
               </Badge>
             )}
-            <div className="flex items-center gap-1">
-              <div className={`h-2 w-2 rounded-full ${activityColor}`} />
-              <span className="text-xs font-medium text-monitor-text-secondary">
-                {activityLabel}
-              </span>
-            </div>
           </div>
         </div>
 
@@ -136,7 +128,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
           )}
           {formattedBytes && (
             <>
-              <span title="Data processed">{formattedBytes}</span>
+              <span title="Total data processed">{formattedBytes}</span>
               {hasTime && <span className="text-monitor-text-subtle">•</span>}
             </>
           )}
@@ -180,8 +172,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       prev.computed.formattedBytes === next.computed.formattedBytes &&
       prev.computed.formattedTime === next.computed.formattedTime &&
       prev.computed.formattedPacketRate === next.computed.formattedPacketRate &&
-      prev.computed.activityColor === next.computed.activityColor &&
-      prev.computed.activityLabel === next.computed.activityLabel &&
       prev.computed.sessionType === next.computed.sessionType &&
       prevProps.isMonitored === nextProps.isMonitored &&
       prevProps.isDetached === nextProps.isDetached &&
