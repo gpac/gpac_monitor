@@ -12,6 +12,7 @@ function FilterManager(client, draned_once_ref) {
     this.draned_once_ref = draned_once_ref;
     this.details_needed = {};
     this.filterSubscriptions = {};
+    this.lastSentByFilter = {};
     this.pidDataCollector = new PidDataCollector();
     this.argumentHandler = new ArgumentHandler(client);
 
@@ -24,7 +25,7 @@ function FilterManager(client, draned_once_ref) {
             });
             print("-------------------------");
             print(JSON.stringify(minimalFiltersList, null, 1));
-
+// Display the graph structure
             if (this.client.client) {
                 this.client.client.send(JSON.stringify({ 
                     'message': 'filters', 
@@ -59,32 +60,38 @@ function FilterManager(client, draned_once_ref) {
             interval: interval || 1000,
             fields: FILTER_SUBSCRIPTION_FIELDS
         };
-        this.initializeFilterStatsLoop(idx);
+        this.lastSentByFilter[idx] = 0; // Force first send
+
+        // Start SessionManager loop if not running
+        this.client.sessionManager.sendStats();
     };
 
     this.unsubscribeFromFilter = function(idx) {
         delete this.filterSubscriptions[idx];
+        delete this.lastSentByFilter[idx];
     };
 
-    this.initializeFilterStatsLoop = function(idx) {
-        const sub = this.filterSubscriptions[idx];
-        if (!sub) return;
-        
-        session.post_task(() => {
-            if (!this.filterSubscriptions[idx]) return false;
-            
+    this.tick = function(now) {
+        // Iterate through all subscribed filters
+        for (const idxStr in this.filterSubscriptions) {
+            const idx = parseInt(idxStr);
+            const sub = this.filterSubscriptions[idxStr];
+            const lastSent = this.lastSentByFilter[idxStr] || 0;
+
+            if (now - lastSent < sub.interval) continue;
+
             session.lock_filters(true);
             let fObj = null;
             for (let i = 0; i < session.nb_filters; i++) {
                 const f = session.get_filter(i);
                 if (f.is_destroyed()) continue;
-                if (f.idx == idx) {
+                if (f.idx === idx) {
                     fObj = f;
                     break;
                 }
             }
             session.lock_filters(false);
-            
+
             if (fObj && this.client.client) {
                 const payload = { idx };
                 for (const field of sub.fields) {
@@ -98,10 +105,15 @@ function FilterManager(client, draned_once_ref) {
                     message: 'filter_stats',
                     ...payload
                 }));
+
+                this.lastSentByFilter[idxStr] = now;
             }
-            
-            return this.filterSubscriptions[idx] ? sub.interval : false;
-        });
+        }
+    };
+
+    this.handleSessionEnd = function() {
+        this.filterSubscriptions = {};
+        this.lastSentByFilter = {};
     };
 
     this.updateArgument = function(idx, name, argName, newValue) {

@@ -24,23 +24,25 @@ function LogManager(client) {
             return;
         }
 
-        this.logLevel = logLevel 
-   
+        this.logLevel = logLevel
+
         this.isSubscribed = true;
 
-        
+
 
         try {
             this.originalLogConfig = sys.get_logs(true);
-        
-         
+
+
 
             sys.on_log = (tool, level, message) => {
                 this.handleLog(tool, level, message);
             };
 
             sys.set_logs(this.logLevel);
-           
+
+            // Start SessionManager loop if not running
+            this.client.sessionManager.sendStats();
 
         } catch (error) {
             console.error("LogManager: Failed to start log capturing:", error);

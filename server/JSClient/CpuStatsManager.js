@@ -13,6 +13,9 @@ function CpuStatsManager(client) {
         this.interval = interval || 150;
         this.fields = fields || CPU_STATS_FIELDS;
         this.lastSent = 0; // Force first send on next tick
+
+        // Start SessionManager loop if not running
+        this.client.sessionManager.sendStats();
     };
 
     this.unsubscribe = function() {

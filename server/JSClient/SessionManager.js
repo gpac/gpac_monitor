@@ -7,6 +7,7 @@ import { DEFAULT_FILTER_FIELDS } from '../config.js';
 function SessionManager(client) {
     this.client = client;
     this.isSubscribed = false;
+    this.isMonitoringLoopRunning = false;
     this.interval = 1000;
     this.fields = [];
 
@@ -45,21 +46,42 @@ function SessionManager(client) {
         return true;
     };
 
+    this.hasActiveSubscriptions = function() {
+        return this.isSubscribed ||
+               this.client.cpuStatsManager.isSubscribed ||
+               this.client.logManager.isSubscribed ||
+               Object.keys(this.client.filterManager.filterSubscriptions).length > 0;
+    };
+
     this.sendStats = function() {
+        if (this.isMonitoringLoopRunning) return; // Monitoring loop already running
+        this.isMonitoringLoopRunning = true;
+
         session.post_task(() => {
             const now = Date.now();
 
             if (session.last_task) {
                 this.unsubscribe();
-                // Cleanup monitoring managers
+                // Cleanup monitoring managers on session end
                 this.client.cpuStatsManager.handleSessionEnd();
                 this.client.logManager.handleSessionEnd();
+                this.client.filterManager.handleSessionEnd();
+                this.isMonitoringLoopRunning = false;
                 return false;
             }
 
-            // Tick monitoring managers (single post_task for all managers)
+            // Tick all monitoring managers (single post_task for all managers)
             this.client.cpuStatsManager.tick(now);
             this.client.logManager.tick(now);
+            this.client.filterManager.tick(now);
+
+            // Only collect session stats if SessionManager is subscribed
+            if (!this.isSubscribed) {
+                // Continue loop if any manager is active
+                const shouldContinue = this.hasActiveSubscriptions();
+                if (!shouldContinue) this.isMonitoringLoopRunning = false;
+                return shouldContinue ? this.interval : false;
+            }
 
             const stats = [];
             const filters = [];
@@ -108,7 +130,10 @@ function SessionManager(client) {
                 }));
             }
 
-            return this.isSubscribed ? this.interval : false;
+            // Continue loop if any manager is active
+            const shouldContinue = this.hasActiveSubscriptions();
+            if (!shouldContinue) this.isMonitoringLoopRunning = false;
+            return shouldContinue ? this.interval : false;
         });
     };
 }
