@@ -12,7 +12,6 @@ function LogManager(client) {
     this.originalLogConfig = null; // Backup of original GPAC log config
     this.pendingLogs = []; // Batch buffer for outgoing logs
     this.incomingBuffer = []; // Non-blocking buffer for incoming logs
-    this.processingScheduled = false; // Processing schedule flag
     this.batchTimer = null; // Batching timer state
 
     /**
@@ -88,30 +87,18 @@ function LogManager(client) {
             message: message?.length > 500 ? message.substring(0, 500) + '...' : message
         };
 
-
-
-        // Just add to buffer - NO WebSocket operations on main thread
+        // Just add to buffer - will be processed by tick()
         this.incomingBuffer.push(log);
-
-
-        // Schedule processing if not already scheduled
-        if (!this.processingScheduled) {
-            this.scheduleLogProcessing();
-        }
     };
 
     /**
-     * Schedule log processing on next tick (non-blocking)
+     * Tick function called by SessionManager - processes incoming logs
      */
-    this.scheduleLogProcessing = function() {
-        if (this.processingScheduled) return;
-        
-        this.processingScheduled = true;
-        session.post_task(() => {
+    this.tick = function(now) {
+        if (!this.isSubscribed) return;
+        if (this.incomingBuffer.length > 0) {
             this.processIncomingLogs();
-            this.processingScheduled = false;
-            return false;
-        }, 1); 
+        }
     };
 
     /**
@@ -262,7 +249,6 @@ function LogManager(client) {
             this.logs = [];
             this.pendingLogs = [];
             this.incomingBuffer = [];
-            this.processingScheduled = false;
 
             // Clear timers
             this.batchTimer = null;
@@ -271,6 +257,13 @@ function LogManager(client) {
         } catch (error) {
             console.error("LogManager: Error during force cleanup:", error);
         }
+    };
+
+    /**
+     * Handle session end - cleanup resources
+     */
+    this.handleSessionEnd = function() {
+        this.forceUnsubscribe();
     };
 }
 

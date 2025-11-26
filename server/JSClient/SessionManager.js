@@ -47,10 +47,19 @@ function SessionManager(client) {
 
     this.sendStats = function() {
         session.post_task(() => {
+            const now = Date.now();
+
             if (session.last_task) {
                 this.unsubscribe();
+                // Cleanup monitoring managers
+                this.client.cpuStatsManager.handleSessionEnd();
+                this.client.logManager.handleSessionEnd();
                 return false;
             }
+
+            // Tick monitoring managers (single post_task for all managers)
+            this.client.cpuStatsManager.tick(now);
+            this.client.logManager.tick(now);
 
             const stats = [];
             const filters = [];

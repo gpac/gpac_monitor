@@ -4,69 +4,68 @@ import { CPU_STATS_FIELDS } from '../config.js';
 function CpuStatsManager(client) {
     this.client = client;
     this.isSubscribed = false;
-    this.interval = 50;
+    this.interval = 150;
     this.fields = CPU_STATS_FIELDS;
+    this.lastSent = 0;
 
     this.subscribe = function(interval, fields) {
         this.isSubscribed = true;
-        this.interval = interval || 50;
+        this.interval = interval || 150;
         this.fields = fields || CPU_STATS_FIELDS;
-        this.sendStats();
+        this.lastSent = 0; // Force first send on next tick
     };
 
     this.unsubscribe = function() {
         this.isSubscribed = false;
     };
 
-    this.sendStats = function() {
-        session.post_task(() => {
-            if (session.last_task) {
-                this.unsubscribe();
-                return false;
-            }
-            if (!this.isSubscribed) return false;
-            
-            const now = Date.now();
-            const cpuStats = {
-                timestamp: now,
-                total_cpu_usage: sys.total_cpu_usage,
-                process_cpu_usage: sys.process_cpu_usage,
-                process_memory: sys.process_memory,
-                physical_memory: sys.physical_memory,
-                physical_memory_avail: sys.physical_memory_avail,
-                gpac_memory: sys.gpac_memory,
-                nb_cores: sys.nb_cores,
-                thread_count: sys.thread_count,
+    this.tick = function(now) {
+        if (!this.isSubscribed) return;
+        if (now - this.lastSent < this.interval) return;
 
-                memory_usage_percent: 0,
-                process_memory_percent: 0,
-                gpac_memory_percent: 0,
-                cpu_efficiency: 0
-            };
+        const cpuStats = {
+            timestamp: now,
+            total_cpu_usage: sys.total_cpu_usage,
+            process_cpu_usage: sys.process_cpu_usage,
+            process_memory: sys.process_memory,
+            physical_memory: sys.physical_memory,
+            physical_memory_avail: sys.physical_memory_avail,
+            gpac_memory: sys.gpac_memory,
+            nb_cores: sys.nb_cores,
+            thread_count: sys.thread_count,
 
-            if (sys.physical_memory > 0) {
-                cpuStats.memory_usage_percent =
-                    ((sys.physical_memory - sys.physical_memory_avail) / sys.physical_memory) * 100;
-                cpuStats.process_memory_percent =
-                    (sys.process_memory / sys.physical_memory) * 100;
-                cpuStats.gpac_memory_percent =
-                    (sys.gpac_memory / sys.physical_memory) * 100;
-            }
+            memory_usage_percent: 0,
+            process_memory_percent: 0,
+            gpac_memory_percent: 0,
+            cpu_efficiency: 0
+        };
 
-            if (sys.total_cpu_usage > 0) {
-                cpuStats.cpu_efficiency =
-                    (sys.process_cpu_usage / sys.total_cpu_usage) * 100;
-            }
+        if (sys.physical_memory > 0) {
+            cpuStats.memory_usage_percent =
+                ((sys.physical_memory - sys.physical_memory_avail) / sys.physical_memory) * 100;
+            cpuStats.process_memory_percent =
+                (sys.process_memory / sys.physical_memory) * 100;
+            cpuStats.gpac_memory_percent =
+                (sys.gpac_memory / sys.physical_memory) * 100;
+        }
 
-            if (this.client.client) {
-                this.client.client.send(JSON.stringify({
-                    message: 'cpu_stats',
-                    stats: cpuStats
-                }));
-            }
-            
-            return this.isSubscribed ? this.interval : false;
-        });
+        if (sys.total_cpu_usage > 0) {
+            cpuStats.cpu_efficiency =
+                (sys.process_cpu_usage / sys.total_cpu_usage) * 100;
+        }
+
+        if (this.client.client) {
+            this.client.client.send(JSON.stringify({
+                message: 'cpu_stats',
+                stats: cpuStats
+            }));
+        }
+
+        this.lastSent = now;
+    };
+
+    this.handleSessionEnd = function() {
+        this.unsubscribe();
     };
 }
 
