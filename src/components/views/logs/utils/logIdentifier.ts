@@ -1,16 +1,24 @@
+import { nanoid } from 'nanoid';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
-import { generateID } from '@/utils/core/id';
 
-/**
- * Unique identifier for a log entry
- * Format: "${timestamp}_${nanoid}"
- */
 export type LogId = string;
 
+// External cache: key = log object, value = ID
+const logIdCache = new WeakMap<GpacLogEntry, LogId>();
+
 /**
- * Generate a unique ID for a log entry
- * Uses timestamp for context + nanoid for uniqueness
+ * Returns a stable ID for a log entry.
+ * - First call for a given log → generates `${timestamp}_${nanoid(6)}`
+ * - Subsequent calls on the same object → returns the same ID
+ * - NO mutation of the log object (compatible with Redux/Immer)
  */
 export const generateLogId = (log: GpacLogEntry): LogId => {
-  return `${log.timestamp}_${generateID()}`;
+  let id = logIdCache.get(log);
+
+  if (!id) {
+    id = `${log.timestamp}_${nanoid(6)}`;
+    logIdCache.set(log, id);
+  }
+
+  return id;
 };
