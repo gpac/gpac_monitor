@@ -1,9 +1,9 @@
-import { MessageHandler } from './MessageHandler.js';
-import { SessionManager } from './SessionManager.js';
-import { FilterManager } from './FilterManager.js';
-import { CpuStatsManager } from './CpuStatsManager.js';
-import { LogManager } from './LogManager.js';
-import { PidPropsCollector } from './PID/PidPropsCollector.js';
+import { MessageHandler } from './Messaging/MessageHandler.js';
+import { SessionManager } from './Session/SessionManager.js';
+import { FilterManager } from './Filters/FilterManager.js';
+import { CpuStatsManager } from './Sys/CpuStatsManager.js';
+import { LogManager } from './Sys/LogManager.js';
+import { PidPropsCollector } from './Filters/PID/PidPropsCollector.js';
 import { CommandLineManager } from './CommandLineManager.js';
 
 function JSClient(id, client, all_clients, draned_once_ref) {
