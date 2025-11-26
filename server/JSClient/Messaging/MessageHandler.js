@@ -41,18 +41,20 @@ function MessageHandler(client) {
                         print("Subscribing to session");
                         const interval = jtext['interval'] || 1000;
                         const fields = jtext['fields'] || DEFAULT_FILTER_FIELDS;
-                        this.client.sessionManager.subscribe(interval, fields);
+                        this.client.sessionStatsManager.subscribe(interval, fields);
+                        this.client.sessionManager.startMonitoringLoop();
                     },
-                    
+
                     'unsubscribe_session': () => {
                         print("Unsubscribing to session");
-                        this.client.sessionManager.unsubscribe();
+                        this.client.sessionStatsManager.unsubscribe();
                     },
                     
                     'subscribe_filter': () => {
                         const idx = jtext.idx;
                         const interval = jtext.interval || 1000;
                         this.client.filterManager.subscribeToFilter(idx, interval);
+                        this.client.sessionManager.startMonitoringLoop();
                     },
                     
                     'unsubscribe_filter': () => {
@@ -77,6 +79,7 @@ function MessageHandler(client) {
                         const interval = jtext['interval'] || 150;
                         const fields = jtext['fields'] || [];
                         this.client.cpuStatsManager.subscribe(interval, fields);
+                        this.client.sessionManager.startMonitoringLoop();
                     },
                     
                     'unsubscribe_cpu_stats': () => {
@@ -88,6 +91,7 @@ function MessageHandler(client) {
                         print("Subscribing to GPAC logs");
                         const logLevel = jtext['logLevel'] || "all@warning";
                         this.client.logManager.subscribe(logLevel);
+                        this.client.sessionManager.startMonitoringLoop();
                     },
                     
                     'unsubscribe_logs': () => {

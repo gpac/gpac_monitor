@@ -1,4 +1,5 @@
 import { MessageHandler } from './Messaging/MessageHandler.js';
+import { SessionStatsManager } from './Session/SessionStatsManager.js';
 import { SessionManager } from './Session/SessionManager.js';
 import { FilterManager } from './Filters/FilterManager.js';
 import { CpuStatsManager } from './Sys/CpuStatsManager.js';
@@ -9,9 +10,9 @@ import { CommandLineManager } from './CommandLineManager.js';
 function JSClient(id, client, all_clients, draned_once_ref) {
     this.id = id;
     this.client = client;
-
-    // Initialize modular components
+    
     this.messageHandler = new MessageHandler(this);
+    this.sessionStatsManager = new SessionStatsManager(this);
     this.sessionManager = new SessionManager(this);
     this.filterManager = new FilterManager(this, draned_once_ref);
     this.cpuStatsManager = new CpuStatsManager(this);
