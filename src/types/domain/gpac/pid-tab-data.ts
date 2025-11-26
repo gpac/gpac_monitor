@@ -33,7 +33,6 @@ export interface OutputPIDData extends BasePIDData {
   buffer: number;
   buffer_total?: number;
   max_buffer?: number;
-  eos: boolean;
   playing: boolean | null;
   nb_pck_queued: number | null;
 }

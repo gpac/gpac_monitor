@@ -69,6 +69,7 @@ function PidDataCollector() {
             pid.max_buffer = filter.opid_props(i, "max_buffer");
             pid.nb_pck_queued = filter.opid_props(i, "nb_pck_queued");
             pid.would_block = filter.opid_props(i, "would_block");
+            pid.eos = filter.opid_props(i, "eos");
             const statsEos = filter.opid_stats(i);
             pid.eos_received = statsEos?.eos_received;
             pid.playing = filter.opid_props(i, "playing");
