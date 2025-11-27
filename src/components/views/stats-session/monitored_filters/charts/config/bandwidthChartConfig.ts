@@ -6,8 +6,8 @@
 /** Maximum data points to retain (5 minutes at 1Hz) */
 export const MAX_POINTS = 300;
 
-/** Default refresh interval in milliseconds (1 second for real-time) */
-export const DEFAULT_REFRESH_INTERVAL = 1000;
+/** Default refresh interval in milliseconds (500ms for real-time) */
+export const DEFAULT_REFRESH_INTERVAL = 500;
 
 /** Chart height in pixels */
 export const CHART_HEIGHT = 150;

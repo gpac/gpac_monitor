@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { LuActivity } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatTime } from '@/utils/formatting';
+import { metricValueFont, metricLabelFont } from '@/utils/responsiveFonts';
 
 interface ProcessingCardProps {
   tasks?: number;
@@ -18,14 +19,22 @@ export const ProcessingCard = memo(({ tasks, time }: ProcessingCardProps) => (
     </CardHeader>
     <CardContent className="space-y-2">
       <div className="flex justify-between">
-        <span className="text-xs text-muted-foreground stat-label">Tasks</span>
-        <span className="text-sm font-medium text-info tabular-nums">
+        <span className={`${metricLabelFont} text-muted-foreground stat-label`}>
+          Tasks
+        </span>
+        <span
+          className={`${metricValueFont} font-medium text-info tabular-nums`}
+        >
           {tasks || 0}
         </span>
       </div>
       <div className="flex justify-between">
-        <span className="text-xs text-muted-foreground stat-label">Time</span>
-        <span className="text-sm font-medium text-info tabular-nums">
+        <span className={`${metricLabelFont} text-muted-foreground stat-label`}>
+          Time
+        </span>
+        <span
+          className={`${metricValueFont} font-medium text-info tabular-nums`}
+        >
           {formatTime(time)}
         </span>
       </div>

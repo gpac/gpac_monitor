@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { LuHardDrive } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatBytes } from '@/utils/formatting';
+import { metricValueFont, metricLabelFont } from '@/utils/responsiveFonts';
 
 interface DataCardProps {
   bytes_done?: number;
@@ -18,14 +19,22 @@ export const DataCard = memo(({ bytes_done, bytes_sent }: DataCardProps) => (
     </CardHeader>
     <CardContent className="space-y-2">
       <div className="flex justify-between">
-        <span className="text-xs text-muted-foreground stat-label">Done</span>
-        <span className="text-sm font-medium text-info tabular-nums">
+        <span className={`${metricLabelFont} text-muted-foreground stat-label`}>
+          Done
+        </span>
+        <span
+          className={`${metricValueFont} font-medium text-info tabular-nums`}
+        >
           {formatBytes(bytes_done || 0)}
         </span>
       </div>
       <div className="flex justify-between">
-        <span className="text-xs text-muted-foreground stat-label">Sent</span>
-        <span className="text-sm font-medium text-info tabular-nums">
+        <span className={`${metricLabelFont} text-muted-foreground stat-label`}>
+          Sent
+        </span>
+        <span
+          className={`${metricValueFont} font-medium text-info tabular-nums`}
+        >
           {formatBytes(bytes_sent || 0)}
         </span>
       </div>

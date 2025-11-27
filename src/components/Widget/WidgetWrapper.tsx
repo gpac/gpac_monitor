@@ -91,7 +91,7 @@ const WidgetWrapper = ({
   //Memoized container classes with resize optimization
   const containerClasses = React.useMemo(() => {
     return [
-      'flex flex-col bg-foreground/10 overflow-hidden rounded-lg widget-anim',
+      'flex flex-col bg-foreground/10 overflow-hidden rounded-sm widget-anim',
       isMaximized ? 'fixed inset-4 z-50 w-auto h-auto' : '',
       isMinimized ? 'h-12' : 'h-full',
       isResizing ? 'is-interacting pointer-events-none' : '',

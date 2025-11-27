@@ -78,7 +78,7 @@ const DashboardLayout: React.FC = () => {
         <Header />
       </div>
 
-      <div className="flex pt-16">
+      <div className="flex pt-8">
         <div
           id="app-sidebar"
           className="fixed top-16 bottom-0 left-0 w-64 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
@@ -93,7 +93,7 @@ const DashboardLayout: React.FC = () => {
         )}
 
         <main
-          className="flex-1 p-6"
+          className="flex-1 p-4"
           style={{
             marginLeft: isSidebarOpen ? '200px' : '0',
             transition: 'margin-left 300ms ease-in-out',

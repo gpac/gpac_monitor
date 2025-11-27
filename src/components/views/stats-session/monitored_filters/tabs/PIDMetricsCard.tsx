@@ -6,6 +6,14 @@ import { getPIDStatusBadge, getMediaTypeInfo } from '@/utils/gpac';
 import { FaCircleInfo } from 'react-icons/fa6';
 import type { PIDWithIndex } from '../../types';
 import PIDMetadataBadges from './PIDMetadataBadges';
+import {
+  metricValueFont,
+  metricLabelFont,
+  technicalDetailsFont,
+  headerFont,
+  formatIdentifierFont,
+  badgeFont,
+} from '@/utils/responsiveFonts';
 
 type PIDCardVariant = 'input' | 'output';
 
@@ -64,9 +72,13 @@ const PIDMetricsCard = memo(
             <MediaIcon
               className={`h-3.5 w-3.5 flex-shrink-0 ${mediaInfo.color}`}
             />
-            <span className="text-sm font-medium truncate">{pid.name}</span>
+            <span className={`${headerFont} font-medium truncate`}>
+              {pid.name}
+            </span>
             {pid.codec && (
-              <span className="text-[10px] text-muted-foreground uppercase">
+              <span
+                className={`${formatIdentifierFont} text-muted-foreground uppercase`}
+              >
                 {pid.codec}
               </span>
             )}
@@ -74,12 +86,16 @@ const PIDMetricsCard = memo(
             {variant === 'output' && (
               <>
                 {isVisual && pid.pixelformat && (
-                  <span className="text-[9px] text-muted-foreground font-mono uppercase">
+                  <span
+                    className={`${formatIdentifierFont} text-muted-foreground font-mono uppercase`}
+                  >
                     {pid.pixelformat}
                   </span>
                 )}
                 {isAudio && pid.samplerate && (
-                  <span className="text-[9px] text-muted-foreground font-mono">
+                  <span
+                    className={`${formatIdentifierFont} text-muted-foreground font-mono`}
+                  >
                     {(pid.samplerate / 1000).toFixed(0)}kHz
                   </span>
                 )}
@@ -91,7 +107,7 @@ const PIDMetricsCard = memo(
             {statusBadge && (
               <Badge
                 variant={statusBadge.variant}
-                className="text-[10px] px-1.5 py-0 h-5"
+                className={`${badgeFont} px-1.5 py-0 h-5`}
               >
                 {statusBadge.text}
               </Badge>
@@ -113,58 +129,86 @@ const PIDMetricsCard = memo(
           {variant === 'input' ? (
             <>
               <div>
-                <div className="text-xs font-medium text-info tabular-nums">
+                <div
+                  className={`${metricValueFont} font-medium text-info tabular-nums`}
+                >
                   {formatBytes(pid.buffer)}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Buffer</div>
+                <div className={`${metricLabelFont} text-muted-foreground`}>
+                  Buffer
+                </div>
               </div>
               <div>
-                <div className="text-xs font-medium text-muted-foreground tabular-nums">
+                <div
+                  className={`${metricValueFont} font-medium text-muted-foreground tabular-nums`}
+                >
                   {pid.bitrate || 0}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Bitrate</div>
+                <div className={`${metricLabelFont} text-muted-foreground`}>
+                  Bitrate
+                </div>
               </div>
               <div>
-                <div className="text-xs font-medium text-info tabular-nums">
+                <div
+                  className={`${metricValueFont} font-medium text-info tabular-nums`}
+                >
                   {pid.nb_pck_queued || 0}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Queued</div>
+                <div className={`${metricLabelFont} text-muted-foreground`}>
+                  Queued
+                </div>
               </div>
             </>
           ) : (
             <>
               {/* 1. Packets traités */}
               <div>
-                <div className="text-xs font-medium text-info tabular-nums">
+                <div
+                  className={`${metricValueFont} font-medium text-info tabular-nums`}
+                >
                   {pid.stats?.nb_processed?.toLocaleString() || 0}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Packets</div>
+                <div className={`${metricLabelFont} text-muted-foreground`}>
+                  Packets
+                </div>
               </div>
 
               {/* 2. Bitrate moyen */}
               <div>
-                <div className="text-xs font-medium text-muted-foreground tabular-nums">
+                <div
+                  className={`${metricValueFont} font-medium text-muted-foreground tabular-nums`}
+                >
                   {formatBitrate(pid.stats?.average_bitrate)}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Bitrate</div>
+                <div className={`${metricLabelFont} text-muted-foreground`}>
+                  Bitrate
+                </div>
               </div>
 
               {/* 3. Buffer / Queue */}
               <div>
-                <div className="text-xs font-medium text-info tabular-nums">
+                <div
+                  className={`${metricValueFont} font-medium text-info tabular-nums`}
+                >
                   {pid.nb_pck_queued ?? 0}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Queued</div>
+                <div className={`${metricLabelFont} text-muted-foreground`}>
+                  Queued
+                </div>
               </div>
 
               {/* 4. Perf peak */}
               <div>
-                <div className="text-xs font-medium text-warning tabular-nums">
+                <div
+                  className={`${metricValueFont} font-medium text-warning tabular-nums`}
+                >
                   {pid.stats?.max_process_time
                     ? `${pid.stats.max_process_time}µs`
                     : '-'}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Peak</div>
+                <div className={`${metricLabelFont} text-muted-foreground`}>
+                  Peak
+                </div>
               </div>
             </>
           )}
@@ -175,7 +219,9 @@ const PIDMetricsCard = memo(
           <div className="border-t border-white/5">
             <Accordion>
               <AccordionItem value="details" title="Technical Details">
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[9px] font-mono text-muted-foreground">
+                <div
+                  className={`grid grid-cols-2 gap-x-4 gap-y-1 ${technicalDetailsFont} font-mono text-muted-foreground`}
+                >
                   {pid.id && (
                     <div className="flex justify-between">
                       <span>ID:</span>

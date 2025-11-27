@@ -16,7 +16,7 @@ export const createCpuMemoryUplotConfig = ({
 }: UplotConfigParams): uPlot.Options => {
   return {
     width: 100, // Will be auto-resized by UplotChart
-    height: 100, //ç
+    height: 100, //
     padding: [10, 10, 5, 5],
     cursor: {
       show: true,

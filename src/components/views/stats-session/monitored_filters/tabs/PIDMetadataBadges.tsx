@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
+import { technicalDetailsFont } from '@/utils/responsiveFonts';
 
 interface PIDMetadataBadgesProps {
   pid: PIDproperties;
@@ -20,7 +21,7 @@ const PIDMetadataBadges = memo(({ pid }: PIDMetadataBadgesProps) => {
       {pid.language && (
         <Badge
           variant="outline"
-          className="text-[9px] px-1.5 py-0 h-4 font-mono uppercase bg-background/40"
+          className={`${technicalDetailsFont} px-1.5 py-0 h-4 font-mono uppercase bg-background/40`}
         >
           {pid.language}
         </Badge>
@@ -28,7 +29,7 @@ const PIDMetadataBadges = memo(({ pid }: PIDMetadataBadgesProps) => {
       {pid.role && (
         <Badge
           variant="secondary"
-          className="text-[9px] px-1.5 py-0 h-4 bg-blue-900/30 text-blue-300 border-blue-700/50"
+          className={`${technicalDetailsFont} px-1.5 py-0 h-4 bg-blue-900/30 text-blue-300 border-blue-700/50`}
         >
           {pid.role}
         </Badge>

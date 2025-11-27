@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { LuPackage2 } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatNumber } from '@/utils/formatting';
+import { metricValueFont, metricLabelFont } from '@/utils/responsiveFonts';
 
 interface PacketsCardProps {
   pck_done?: number;
@@ -20,23 +21,39 @@ export const PacketsCard = memo(
       </CardHeader>
       <CardContent className="space-y-2">
         <div className="flex justify-between">
-          <span className="text-xs text-muted-foreground stat-label">Done</span>
-          <span className="text-sm font-medium text-info tabular-nums">
+          <span
+            className={`${metricLabelFont} text-muted-foreground stat-label`}
+          >
+            Done
+          </span>
+          <span
+            className={`${metricValueFont} font-medium text-info tabular-nums`}
+          >
             {formatNumber(pck_done || 0)}
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-xs text-muted-foreground stat-label">Sent</span>
-          <span className="text-sm font-medium text-info tabular-nums">
+          <span
+            className={`${metricLabelFont} text-muted-foreground stat-label`}
+          >
+            Sent
+          </span>
+          <span
+            className={`${metricValueFont} font-medium text-info tabular-nums`}
+          >
             {formatNumber(pck_sent || 0)}
           </span>
         </div>
         {pck_ifce_sent !== undefined && (
           <div className="flex justify-between">
-            <span className="text-xs text-muted-foreground stat-label">
+            <span
+              className={`${metricLabelFont} text-muted-foreground stat-label`}
+            >
               Interface Sent
             </span>
-            <span className="text-sm font-medium text-info tabular-nums">
+            <span
+              className={`${metricValueFont} font-medium text-info tabular-nums`}
+            >
               {formatNumber(pck_ifce_sent)}
             </span>
           </div>
