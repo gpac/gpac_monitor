@@ -58,24 +58,24 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
   const isExpanded = expandedItems.has(value);
 
   return (
-    <div className=" rounded-lg bg-gray-800/50">
+    <div className="rounded-lg">
       <button
         onClick={() => toggleExpanded(value)}
-        className="w-full flex items-center justify-between p-4 text-sm font-medium text-gray-200 hover:bg-gray-700/50 transition-colors rounded-lg"
+        className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:text-ui transition-colors"
       >
         {title}
         <LuChevronDown
-          className={`w-4 h-4 text-gray-400 transition-transform duration-300 ease-out ${
+          className={`w-3 h-3 transition-transform duration-200 ease-out ${
             isExpanded ? 'transform rotate-180' : ''
           }`}
         />
       </button>
       <div
         className={`overflow-hidden transition-all duration-200 ease-out ${
-          isExpanded ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+          isExpanded ? 'max-h-96 opacity-100 pt-1' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="p-4 border-t border-gray-700">{children}</div>
+        <div className="px-3 pb-2">{children}</div>
       </div>
     </div>
   );

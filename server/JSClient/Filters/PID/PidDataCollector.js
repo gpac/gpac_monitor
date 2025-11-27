@@ -110,6 +110,15 @@ function PidDataCollector() {
                 // Timing stats (for "time since last packet" and first packet time)
                 pid.stats.last_ts_sent = stats.last_ts_sent;
                 pid.stats.first_process_time = stats.first_process_time;
+
+                // Debug: Log OPID stats
+                console.log(`[PidDataCollector] OPID ${pid.name} stats:`, JSON.stringify({
+                    nb_processed: stats.nb_processed,
+                    avg_bitrate: stats.average_bitrate,
+                    max_bitrate: stats.max_bitrate,
+                    disconnected: stats.disconnected,
+                    max_proc_time: stats.max_process_time
+                }));
             }
 
             // Use pid.name as key (already made unique above)

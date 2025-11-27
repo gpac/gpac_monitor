@@ -1,8 +1,9 @@
-import { memo, useState, useCallback } from 'react';
+import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { formatBytes } from '@/utils/formatting';
+import { Accordion, AccordionItem } from '@/components/ui/accordion';
+import { formatBytes, formatBitrate } from '@/utils/formatting';
 import { getPIDStatusBadge, getMediaTypeInfo } from '@/utils/gpac';
-import { FaCircleInfo, FaChevronDown, FaChevronUp } from 'react-icons/fa6';
+import { FaCircleInfo } from 'react-icons/fa6';
 import type { PIDWithIndex } from '../../types';
 import PIDMetadataBadges from './PIDMetadataBadges';
 
@@ -35,11 +36,6 @@ const PIDMetricsCard = memo(
     showPropsButton = true,
     variant = 'input',
   }: PIDMetricsCardProps) => {
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-    const toggleDetails = useCallback(() => {
-      setIsDetailsOpen((prev) => !prev);
-    }, []);
-
     const statusBadge = getPIDStatusBadge(pid);
     const mediaInfo = getMediaTypeInfo(type);
     const MediaIcon = mediaInfo.icon;
@@ -73,6 +69,21 @@ const PIDMetricsCard = memo(
               <span className="text-[10px] text-muted-foreground uppercase">
                 {pid.codec}
               </span>
+            )}
+            {/* Format info (Output only) */}
+            {variant === 'output' && (
+              <>
+                {isVisual && pid.pixelformat && (
+                  <span className="text-[9px] text-muted-foreground font-mono uppercase">
+                    {pid.pixelformat}
+                  </span>
+                )}
+                {isAudio && pid.samplerate && (
+                  <span className="text-[9px] text-muted-foreground font-mono">
+                    {(pid.samplerate / 1000).toFixed(0)}kHz
+                  </span>
+                )}
+              </>
             )}
             <PIDMetadataBadges pid={pid} />
           </div>
@@ -122,86 +133,78 @@ const PIDMetricsCard = memo(
             </>
           ) : (
             <>
+              {/* 1. Packets traités */}
               <div>
                 <div className="text-xs font-medium text-info tabular-nums">
                   {pid.stats?.nb_processed?.toLocaleString() || 0}
                 </div>
                 <div className="text-[10px] text-muted-foreground">Packets</div>
               </div>
+
+              {/* 2. Bitrate moyen */}
               <div>
                 <div className="text-xs font-medium text-muted-foreground tabular-nums">
-                  {pid.stats?.average_bitrate
-                    ? pid.stats.average_bitrate >= 1000000
-                      ? `${(pid.stats.average_bitrate / 1000000).toFixed(2)} Mb/s`
-                      : `${(pid.stats.average_bitrate / 1000).toFixed(1)} kb/s`
-                    : '0 b/s'}
+                  {formatBitrate(pid.stats?.average_bitrate)}
                 </div>
                 <div className="text-[10px] text-muted-foreground">Bitrate</div>
               </div>
+
+              {/* 3. Buffer / Queue */}
               <div>
                 <div className="text-xs font-medium text-info tabular-nums">
-                  {formatBytes(pid.buffer)}
+                  {pid.nb_pck_queued ?? 0}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Buffer</div>
+                <div className="text-[10px] text-muted-foreground">Queued</div>
               </div>
+
+              {/* 4. Perf peak */}
               <div>
-                <div className="text-xs font-medium text-info tabular-nums uppercase">
-                  {isVisual && pid.pixelformat
-                    ? pid.pixelformat
-                    : isAudio && pid.samplerate
-                      ? `${(pid.samplerate / 1000).toFixed(0)}k`
-                      : '-'}
+                <div className="text-xs font-medium text-warning tabular-nums">
+                  {pid.stats?.max_process_time
+                    ? `${pid.stats.max_process_time}µs`
+                    : '-'}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Format</div>
+                <div className="text-[10px] text-muted-foreground">Peak</div>
               </div>
             </>
           )}
         </div>
 
-        {/* Technical Details - Collapsible (Output only) */}
+        {/* Technical Details - Accordion (Output only) */}
         {hasTechnicalDetails && (
           <div className="border-t border-white/5">
-            <button
-              onClick={toggleDetails}
-              className="w-full px-3 py-1.5 flex items-center justify-between text-[10px] text-muted-foreground hover:text-ui transition-colors"
-            >
-              <span>Technical Details</span>
-              {isDetailsOpen ? (
-                <FaChevronUp className="h-2.5 w-2.5" />
-              ) : (
-                <FaChevronDown className="h-2.5 w-2.5" />
-              )}
-            </button>
-            {isDetailsOpen && (
-              <div className="px-3 pb-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[9px] font-mono text-muted-foreground">
-                {pid.id && (
-                  <div className="flex justify-between">
-                    <span>ID:</span>
-                    <span className="text-info">{pid.id}</span>
-                  </div>
-                )}
-                {pid.trackNumber && (
-                  <div className="flex justify-between">
-                    <span>Track:</span>
-                    <span className="text-info">{pid.trackNumber}</span>
-                  </div>
-                )}
-                {pid.timescale && (
-                  <div className="flex justify-between">
-                    <span>Timescale:</span>
-                    <span className="text-info">{pid.timescale}</span>
-                  </div>
-                )}
-                {pid.stats?.max_process_time && (
-                  <div className="flex justify-between">
-                    <span>Peak:</span>
-                    <span className="text-info">
-                      {pid.stats.max_process_time}µs
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+            <Accordion>
+              <AccordionItem value="details" title="Technical Details">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[9px] font-mono text-muted-foreground">
+                  {pid.id && (
+                    <div className="flex justify-between">
+                      <span>ID:</span>
+                      <span className="text-info">{pid.id}</span>
+                    </div>
+                  )}
+                  {pid.trackNumber && (
+                    <div className="flex justify-between">
+                      <span>Track:</span>
+                      <span className="text-info">{pid.trackNumber}</span>
+                    </div>
+                  )}
+                  {pid.timescale && (
+                    <div className="flex justify-between">
+                      <span>Timescale:</span>
+                      <span className="text-info">{pid.timescale}</span>
+                    </div>
+                  )}
+                  {pid.stats?.max_process_time && (
+                    <div className="flex justify-between">
+                      <span>Peak:</span>
+                      <span className="text-info">
+                        {pid.stats.max_process_time}µs
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </AccordionItem>
+            </Accordion>
           </div>
         )}
       </div>
