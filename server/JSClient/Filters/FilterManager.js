@@ -57,7 +57,7 @@ function FilterManager(client, draned_once_ref) {
 
     this.subscribeToFilter = function(idx, interval) {
         this.filterSubscriptions[idx] = {
-            interval: interval || 1000,
+            interval: interval || 500,
             fields: FILTER_SUBSCRIPTION_FIELDS
         };
         this.lastSentByFilter[idx] = 0; // Force first send
