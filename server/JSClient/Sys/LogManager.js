@@ -8,7 +8,8 @@ function LogManager(client) {
     this.client = client;
     this.isSubscribed = false;
     this.logLevel = "all@quiet";
-    this.logs = []; // Historical logs storage (max 500)
+    this.logs = []; // Historical logs storage (adaptive limit)
+    this.maxHistorySize = 500; // Adaptive: 500-2000 based on log level
     this.originalLogConfig = null; // Backup of original GPAC log config
     this.pendingLogs = []; // Batch buffer for outgoing logs
     this.incomingBuffer = []; // Non-blocking buffer for incoming logs
@@ -117,9 +118,11 @@ function LogManager(client) {
 
         // Process each log
         for (const log of logsToProcess) {
-            // Keep history limited
-            if (this.logs.length >= 10000) {
-                this.logs.shift();
+            // Keep history limited (adaptive based on log level)
+            if (this.logs.length >= this.maxHistorySize) {
+                // Batch delete for performance (remove 10% of buffer)
+                const deleteCount = Math.floor(this.maxHistorySize * 0.1);
+                this.logs.splice(0, deleteCount);
             }
             this.logs.push(log);
 
@@ -156,7 +159,9 @@ function LogManager(client) {
     this.updateLogLevel = function(logLevel) {
         if (!this.isSubscribed) return;
 
-      
+        // Adaptive buffer sizing based on log verbosity
+        const isVerbose = logLevel.includes('debug') || logLevel.includes('info');
+        this.maxHistorySize = isVerbose ? 2000 : 500;
 
         try {
             this.logs = [];

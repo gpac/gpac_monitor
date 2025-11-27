@@ -5,8 +5,6 @@ import { DEFAULT_FILTER_FIELDS } from '../config.js';
  *
  * Responsibilities:
  * - Subscribe/unsubscribe to session stats
- * - Collect filter statistics (bytes_done, pck_sent, etc.)
- * - Compute EOS status (is_eos, all_packets_done)
  * - Send session_stats messages to client
  */
 function SessionStatsManager(client) {

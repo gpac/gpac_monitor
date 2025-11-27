@@ -73,18 +73,6 @@ function PidDataCollector() {
             pid.eos_received = statsEos?.eos_received;
             pid.playing = filter.opid_props(i, "playing");
 
-            // Debug logging for critical OPID properties
-            console.log(`[PidDataCollector] Filter ${filter.name} - OPID[${i}] "${pid.name}":`,
-                JSON.stringify({
-                    would_block: pid.would_block,
-                    eos: pid.eos,
-                    eos_received: pid.eos_received,
-                    playing: pid.playing,
-                    buffer: pid.buffer,
-                    nb_pck_queued: pid.nb_pck_queued
-                }, null, 2)
-            );
-
             // Media type specific properties
             pid.timescale = filter.opid_props(i, "Timescale");
             pid.codec = filter.opid_props(i, "CodecID");
@@ -99,6 +87,13 @@ function PidDataCollector() {
             pid.samplerate = filter.opid_props(i, "SampleRate");
             pid.channels = filter.opid_props(i, "Channels");
 
+            // Identification & Metadata (for UX badges and tooltips)
+            pid.id = filter.opid_props(i, "ID");
+            pid.trackNumber = filter.opid_props(i, "TrackNumber");
+            pid.serviceID = filter.opid_props(i, "ServiceID");
+            pid.language = filter.opid_props(i, "Language");
+            pid.role = filter.opid_props(i, "Role");
+
             // Detailed statistics
             const stats = filter.opid_stats(i);
             if (stats) {
@@ -111,6 +106,10 @@ function PidDataCollector() {
                 pid.stats.nb_processed = stats.nb_processed;
                 pid.stats.max_process_time = stats.max_process_time;
                 pid.stats.total_process_time = stats.total_process_time;
+
+                // Timing stats (for "time since last packet" and first packet time)
+                pid.stats.last_ts_sent = stats.last_ts_sent;
+                pid.stats.first_process_time = stats.first_process_time;
             }
 
             // Use pid.name as key (already made unique above)
