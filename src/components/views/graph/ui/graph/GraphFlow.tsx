@@ -65,14 +65,14 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         onPaneClick={isResizing ? undefined : handlePaneClick}
         fitView={!isResizing}
         minZoom={0.01}
-        maxZoom={4}
+        maxZoom={2}
         defaultEdgeOptions={{
           type: 'simplebezier',
           animated: !isResizing,
           style: { stroke: '#6b7280', strokeWidth: 3 },
           ariaLabel: 'Clickable edge to see IPID properties',
         }}
-        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
         proOptions={{ hideAttribution: true }}
         selectionKeyCode={null}
       >

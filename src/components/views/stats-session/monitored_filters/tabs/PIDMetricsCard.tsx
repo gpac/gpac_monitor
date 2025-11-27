@@ -1,9 +1,10 @@
-import { memo } from 'react';
+import { memo, useState, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { formatBytes } from '@/utils/formatting';
 import { getPIDStatusBadge, getMediaTypeInfo } from '@/utils/gpac';
-import { FaCircleInfo } from 'react-icons/fa6';
+import { FaCircleInfo, FaChevronDown, FaChevronUp } from 'react-icons/fa6';
 import type { PIDWithIndex } from '../../types';
+import PIDMetadataBadges from './PIDMetadataBadges';
 
 type PIDCardVariant = 'input' | 'output';
 
@@ -34,23 +35,28 @@ const PIDMetricsCard = memo(
     showPropsButton = true,
     variant = 'input',
   }: PIDMetricsCardProps) => {
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const toggleDetails = useCallback(() => {
+      setIsDetailsOpen((prev) => !prev);
+    }, []);
+
     const statusBadge = getPIDStatusBadge(pid);
     const mediaInfo = getMediaTypeInfo(type);
     const MediaIcon = mediaInfo.icon;
     const borderColor = getBorderColor(type);
 
-    // Third metric based on type
+    // Format detection
     const t = type.toLowerCase();
     const isVisual = t === 'visual' || t === 'video';
     const isAudio = t === 'audio';
-    const thirdValue =
-      isVisual && pid.width && pid.height
-        ? `${pid.width}x${pid.height}`
-        : isAudio && pid.channels
-          ? `${pid.channels}ch`
-          : pid.nb_pck_queued || 0;
-    const thirdLabel =
-      isVisual && pid.width ? 'Res' : isAudio ? 'Ch' : 'Queued';
+
+    // Has technical details?
+    const hasTechnicalDetails =
+      variant === 'output' &&
+      (pid.id ||
+        pid.trackNumber ||
+        pid.timescale ||
+        pid.stats?.max_process_time);
 
     return (
       <div
@@ -68,6 +74,7 @@ const PIDMetricsCard = memo(
                 {pid.codec}
               </span>
             )}
+            <PIDMetadataBadges pid={pid} />
           </div>
           <div className="flex items-center gap-1.5">
             {statusBadge && (
@@ -78,18 +85,20 @@ const PIDMetricsCard = memo(
                 {statusBadge.text}
               </Badge>
             )}
-            {showPropsButton && (
+            {showPropsButton && variant === 'input' && (
               <FaCircleInfo
                 className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-primary transition-colors"
                 onClick={() => onOpenProps(filterIdx, pid.ipidIdx)}
-                title="View properties"
+                title="View input properties"
               />
             )}
           </div>
         </div>
 
-        {/* KPIs - Different metrics for input vs output */}
-        <div className="grid grid-cols-3 gap-2 px-3 py-2 text-center">
+        {/* KPIs - 4 columns for outputs, 3 for inputs */}
+        <div
+          className={`grid ${variant === 'output' ? 'grid-cols-4' : 'grid-cols-3'} gap-2 px-3 py-2 text-center`}
+        >
           {variant === 'input' ? (
             <>
               <div>
@@ -106,43 +115,93 @@ const PIDMetricsCard = memo(
               </div>
               <div>
                 <div className="text-xs font-medium text-info tabular-nums">
-                  {thirdValue}
+                  {pid.nb_pck_queued || 0}
                 </div>
-                <div className="text-[10px] text-muted-foreground">
-                  {thirdLabel}
-                </div>
+                <div className="text-[10px] text-muted-foreground">Queued</div>
               </div>
             </>
           ) : (
             <>
               <div>
                 <div className="text-xs font-medium text-info tabular-nums">
-                  {pid.nb_pck_queued || 0}
+                  {pid.stats?.nb_processed?.toLocaleString() || 0}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Queued</div>
+                <div className="text-[10px] text-muted-foreground">Packets</div>
               </div>
               <div>
                 <div className="text-xs font-medium text-muted-foreground tabular-nums">
+                  {pid.stats?.average_bitrate
+                    ? pid.stats.average_bitrate >= 1000000
+                      ? `${(pid.stats.average_bitrate / 1000000).toFixed(2)} Mb/s`
+                      : `${(pid.stats.average_bitrate / 1000).toFixed(1)} kb/s`
+                    : '0 b/s'}
+                </div>
+                <div className="text-[10px] text-muted-foreground">Bitrate</div>
+              </div>
+              <div>
+                <div className="text-xs font-medium text-info tabular-nums">
                   {formatBytes(pid.buffer)}
                 </div>
                 <div className="text-[10px] text-muted-foreground">Buffer</div>
               </div>
               <div>
-                <div className="text-xs font-medium text-info tabular-nums">
-                  {pid.bitrate || 0}
+                <div className="text-xs font-medium text-info tabular-nums uppercase">
+                  {isVisual && pid.pixelformat
+                    ? pid.pixelformat
+                    : isAudio && pid.samplerate
+                      ? `${(pid.samplerate / 1000).toFixed(0)}k`
+                      : '-'}
                 </div>
-                <div className="text-[10px] text-muted-foreground">Bitrate</div>
+                <div className="text-[10px] text-muted-foreground">Format</div>
               </div>
             </>
           )}
         </div>
 
-        {/* Audio sample rate */}
-        {isAudio && pid.samplerate && (
-          <div className="px-3 pb-2 text-center">
-            <span className="text-[10px] text-muted-foreground tabular-nums">
-              {(pid.samplerate / 1000).toFixed(1)} kHz
-            </span>
+        {/* Technical Details - Collapsible (Output only) */}
+        {hasTechnicalDetails && (
+          <div className="border-t border-white/5">
+            <button
+              onClick={toggleDetails}
+              className="w-full px-3 py-1.5 flex items-center justify-between text-[10px] text-muted-foreground hover:text-ui transition-colors"
+            >
+              <span>Technical Details</span>
+              {isDetailsOpen ? (
+                <FaChevronUp className="h-2.5 w-2.5" />
+              ) : (
+                <FaChevronDown className="h-2.5 w-2.5" />
+              )}
+            </button>
+            {isDetailsOpen && (
+              <div className="px-3 pb-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[9px] font-mono text-muted-foreground">
+                {pid.id && (
+                  <div className="flex justify-between">
+                    <span>ID:</span>
+                    <span className="text-info">{pid.id}</span>
+                  </div>
+                )}
+                {pid.trackNumber && (
+                  <div className="flex justify-between">
+                    <span>Track:</span>
+                    <span className="text-info">{pid.trackNumber}</span>
+                  </div>
+                )}
+                {pid.timescale && (
+                  <div className="flex justify-between">
+                    <span>Timescale:</span>
+                    <span className="text-info">{pid.timescale}</span>
+                  </div>
+                )}
+                {pid.stats?.max_process_time && (
+                  <div className="flex justify-between">
+                    <span>Peak:</span>
+                    <span className="text-info">
+                      {pid.stats.max_process_time}µs
+                    </span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

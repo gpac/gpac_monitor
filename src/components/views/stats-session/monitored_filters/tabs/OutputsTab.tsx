@@ -107,7 +107,6 @@ const OutputsTab = memo(
                   type={type}
                   filterIdx={filterData.idx}
                   onOpenProps={handleOpenProps}
-                  showPropsButton={false}
                   variant="output"
                 />
               ))}

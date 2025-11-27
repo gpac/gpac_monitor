@@ -24,6 +24,8 @@ export interface PIDStats {
   nb_processed: number;
   max_process_time: number;
   total_process_time: number;
+  last_ts_sent?: number;
+  first_process_time?: number;
 }
 
 /**
@@ -56,6 +58,7 @@ export interface PIDproperties {
   nb_pck_queued: number | null;
   would_block: boolean | null;
   eos: boolean;
+  eos_received?: boolean;
   bitrate: number | null;
   playing: boolean | null;
   timescale: number;
@@ -68,6 +71,13 @@ export interface PIDproperties {
   channels: number | null;
   source_idx: number;
   stats: PIDStats;
+
+  // Identification & Metadata (UX: badges + tooltips)
+  id?: string;
+  trackNumber?: number;
+  serviceID?: string;
+  language?: string;
+  role?: string;
 }
 
 // =======================================
