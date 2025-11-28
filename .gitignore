@@ -21,6 +21,8 @@ pnpm-debug.log*
 # Ignore video and documentation files
 *.hvc
 *.mp4
+*.hevc
+*.mov
 *.mkv
 *.md
 *.avc
