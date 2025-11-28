@@ -6,7 +6,7 @@
  * CPU chart update interval in milliseconds
  * Used for chart data collection frequency
  */
-export const CHART_CPU_UPDATE_INTERVAL = 150;
+export const CHART_CPU_UPDATE_INTERVAL = 250;
 
 /**
  * Default chart history duration

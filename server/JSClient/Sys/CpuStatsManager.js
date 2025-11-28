@@ -4,13 +4,13 @@ import { CPU_STATS_FIELDS } from '../config.js';
 function CpuStatsManager(client) {
     this.client = client;
     this.isSubscribed = false;
-    this.interval = 150;
+    this.interval = 250;
     this.fields = CPU_STATS_FIELDS;
     this.lastSent = 0;
 
     this.subscribe = function(interval, fields) {
         this.isSubscribed = true;
-        this.interval = interval || 150;
+        this.interval = interval || 250;
         this.fields = fields || CPU_STATS_FIELDS;
         this.lastSent = 0; // Force first send on next tick
 
