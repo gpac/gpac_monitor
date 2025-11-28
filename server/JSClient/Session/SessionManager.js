@@ -27,10 +27,11 @@ function SessionManager(client) {
 
             if (session.last_task) {
                 // Cleanup all managers on session end
-                this.client.sessionStatsManager.handleSessionEnd();
+               
                 this.client.cpuStatsManager.handleSessionEnd();
                 this.client.logManager.handleSessionEnd();
                 this.client.filterManager.handleSessionEnd();
+                this.client.sessionStatsManager.handleSessionEnd();
                 this.isMonitoringLoopRunning = false;
                 return false;
             }
@@ -52,9 +53,6 @@ function SessionManager(client) {
             }
             if (this.client.cpuStatsManager.isSubscribed) {
                 interval = Math.min(interval, this.client.cpuStatsManager.interval);
-            }
-            if (this.client.logManager.isSubscribed) {
-                interval = Math.min(interval, this.client.logManager.interval || 1000);
             }
 
             return shouldContinue ? interval : false;
