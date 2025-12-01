@@ -43,19 +43,14 @@ export const CpuMemoryChartUplot = memo(
       150,
     );
 
-    const { data, options } = useMemo(() => {
-      const { alignedData, relativeSeconds, memoryData, cpuData } =
-        prepareCpuMemoryData(dataPoints);
+    const options = useMemo(() => {
+      return createCpuMemoryUplotConfig({ memoryYAxisMax });
+    }, [memoryYAxisMax]);
 
-      const opts = createCpuMemoryUplotConfig({
-        memoryYAxisMax,
-        relativeSeconds,
-        memoryData,
-        cpuData,
-      });
-
-      return { data: alignedData, options: opts };
-    }, [dataPoints, memoryYAxisMax]);
+    const data = useMemo(() => {
+      const { alignedData } = prepareCpuMemoryData(dataPoints);
+      return alignedData;
+    }, [dataPoints]);
 
     return (
       <Card className="bg-stat border-transparent">

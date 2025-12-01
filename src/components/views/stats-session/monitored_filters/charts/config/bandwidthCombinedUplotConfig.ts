@@ -1,18 +1,15 @@
 import uPlot from 'uplot';
+import React from 'react';
 import { formatBitrate } from '@/utils/formatting/numbers';
 
 export interface BandwidthCombinedConfigParams {
-  uploadData: number[];
-  downloadData: number[];
-  timeLabels: string[];
+  timeLabelsRef: React.MutableRefObject<string[]>;
   width?: number;
   height?: number;
 }
 
 export const createBandwidthCombinedConfig = ({
-  uploadData,
-  downloadData,
-  timeLabels,
+  timeLabelsRef,
   width = 400,
   height = 180,
 }: BandwidthCombinedConfigParams): uPlot.Options => {
@@ -78,12 +75,12 @@ export const createBandwidthCombinedConfig = ({
           // Store the new index
           (u as any)._lastTooltipIdx = idx;
 
-          const time = timeLabels[idx] || '--';
-          const upload = uploadData[idx]
-            ? formatBitrate(uploadData[idx] * 8)
+          const time = timeLabelsRef.current[idx] || '--';
+          const upload = u.data[1][idx]
+            ? formatBitrate(u.data[1][idx] * 8)
             : '--';
-          const download = downloadData[idx]
-            ? formatBitrate(downloadData[idx] * 8)
+          const download = u.data[2][idx]
+            ? formatBitrate(u.data[2][idx] * 8)
             : '--';
 
           tooltip.innerHTML = `
@@ -129,7 +126,7 @@ export const createBandwidthCombinedConfig = ({
         values: (_u, vals) =>
           vals.map((v) => {
             const idx = v as number;
-            return timeLabels[idx] || '';
+            return timeLabelsRef.current[idx] || '';
           }),
       },
       {

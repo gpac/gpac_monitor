@@ -3,16 +3,10 @@ import { formatChartSeconds } from '@/utils/formatting/time';
 
 export interface UplotConfigParams {
   memoryYAxisMax: number;
-  relativeSeconds: number[];
-  memoryData: number[];
-  cpuData: number[];
 }
 
 export const createCpuMemoryUplotConfig = ({
   memoryYAxisMax,
-  relativeSeconds,
-  memoryData,
-  cpuData,
 }: UplotConfigParams): uPlot.Options => {
   return {
     width: 100, // Will be auto-resized by UplotChart
@@ -61,9 +55,9 @@ export const createCpuMemoryUplotConfig = ({
             u.root.appendChild(tooltip);
           }
 
-          const time = formatChartSeconds(relativeSeconds[idx]);
-          const memory = memoryData[idx]?.toFixed(2) || '--';
-          const cpu = cpuData[idx]?.toFixed(2) || '--';
+          const time = formatChartSeconds(u.data[0][idx]);
+          const memory = u.data[1][idx]?.toFixed(2) || '--';
+          const cpu = u.data[2][idx]?.toFixed(2) || '--';
 
           tooltip.innerHTML = `
             <div style="margin-bottom: 4px; color: #6ee7b7;">Time: ${time}</div>

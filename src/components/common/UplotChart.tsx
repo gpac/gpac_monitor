@@ -47,7 +47,7 @@ export const UplotChart = memo(
         chartRef.current.destroy();
         chartRef.current = null;
       };
-    }, [options]); // Options is memoized by parent - stable unless data changes
+    }, [options]);
 
     // Update data without recreating chart
     useEffect(() => {
@@ -55,7 +55,6 @@ export const UplotChart = memo(
       chartRef.current.setData(data);
     }, [data]);
 
-    // Auto-resize on window resize (inspired by uPlot examples)
     useEffect(() => {
       const handleResize = () => {
         if (!containerRef.current || !chartRef.current) return;

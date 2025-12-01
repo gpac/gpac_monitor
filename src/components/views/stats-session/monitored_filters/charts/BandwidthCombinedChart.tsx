@@ -23,6 +23,7 @@ export const BandwidthCombinedChart = memo(
   }: BandwidthCombinedChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 400, height: 230 });
+    const timeLabelsRef = useRef<string[]>([]);
 
     const { dataPoints: uploadPoints } = useBandwidthChart({
       filterId,
@@ -61,7 +62,15 @@ export const BandwidthCombinedChart = memo(
       };
     }, []);
 
-    const { data, options } = useMemo(() => {
+    const options = useMemo(() => {
+      return createBandwidthCombinedConfig({
+        timeLabelsRef,
+        width: dimensions.width,
+        height: dimensions.height,
+      });
+    }, [dimensions]);
+
+    const data = useMemo(() => {
       const maxLength = Math.max(uploadPoints.length, downloadPoints.length);
       const indices = Array.from(
         { length: maxLength },
@@ -74,7 +83,7 @@ export const BandwidthCombinedChart = memo(
       const downloadData = indices.map(
         (index) => downloadPoints[index]?.value || 0,
       );
-      const timeLabels = indices.map(
+      timeLabelsRef.current = indices.map(
         (index) =>
           uploadPoints[index]?.time || downloadPoints[index]?.time || '',
       );
@@ -85,16 +94,8 @@ export const BandwidthCombinedChart = memo(
         downloadData,
       ];
 
-      const opts = createBandwidthCombinedConfig({
-        uploadData,
-        downloadData,
-        timeLabels,
-        width: dimensions.width,
-        height: dimensions.height,
-      });
-
-      return { data: alignedData, options: opts };
-    }, [uploadPoints, downloadPoints, dimensions]);
+      return alignedData;
+    }, [uploadPoints, downloadPoints]);
 
     return (
       <Card className="bg-monitor-panel border-transparent">
