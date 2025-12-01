@@ -235,4 +235,17 @@ export class LogHandler {
       immediate: true,
     });
   }
+
+  public cleanup(): void {
+    if (this.logAutoUnsubscribeTimeout) {
+      clearTimeout(this.logAutoUnsubscribeTimeout);
+      this.logAutoUnsubscribeTimeout = null;
+    }
+    if (this.workerUnsubscribe) {
+      this.workerUnsubscribe();
+      this.workerUnsubscribe = null;
+    }
+    // Cleanup worker intervals
+    logWorkerService.cleanup();
+  }
 }

@@ -64,7 +64,18 @@ export abstract class BaseWorkerService<TInput, TOutput> {
     };
   }
 
+  cleanup(): void {
+    if (this.worker) {
+      try {
+        this.worker.postMessage({ type: 'CLEANUP' });
+      } catch (error) {
+        console.warn(`[${this.serviceName}] Failed to send cleanup message:`, error);
+      }
+    }
+  }
+
   destroy(): void {
+    this.cleanup();
     if (this.worker) {
       this.worker.terminate();
       this.worker = null;

@@ -66,6 +66,7 @@ export enum WSResponseType {
   LOG_STATUS = 'log_status',
   LOG_CONFIG_CHANGED = 'log_config_changed',
   COMMAND_LINE_RESPONSE = 'command_line_response',
+  SESSION_END = 'session_end',
 }
 
 export interface GetAllFiltersMessage extends BaseWSMessage {
@@ -203,6 +204,13 @@ export interface CommandLineResponse extends BaseWSResponse {
   commandLine: string | null;
   error?: string;
   timestamp: number;
+}
+
+export interface SessionEndResponse {
+  message: 'session_end';
+  reason?: 'user_stop' | 'error' | 'timeout' | 'completed';
+  duration?: number;
+  timestamp?: number;
 }
 
 export type WSMessage =

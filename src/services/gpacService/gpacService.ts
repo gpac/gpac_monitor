@@ -50,6 +50,7 @@ export class GpacService implements IGpacCommunication {
     const dependencies = {
       isConnected: () => this.isConnected(),
       send: (message: any) => this.send(message),
+      stopReconnection: () => this.connectionManager.stopReconnection(),
     };
 
     this.messageHandler = new BaseMessageHandler(
@@ -125,7 +126,9 @@ export class GpacService implements IGpacCommunication {
   }
 
   public disconnect(): void {
+    console.log('[GpacService] Disconnecting service');
     this.cleanup();
+    this.messageHandler.cleanup();
     this.connectionManager.disconnect();
     clearStoreFilters();
   }
@@ -257,6 +260,7 @@ export class GpacService implements IGpacCommunication {
     this.ws.addDisconnectHandler(() => {
       this._isLoaded = false;
       this._readyPromise = null;
+      this.messageHandler.cleanup();
       this.onDisconnect?.();
       this.connectionManager.handleDisconnect();
     });

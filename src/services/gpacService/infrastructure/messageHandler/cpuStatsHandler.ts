@@ -127,4 +127,11 @@ export class CPUStatsHandler {
       }
     };
   }
+
+  public cleanup(): void {
+    if (this.cpuAutoUnsubscribeTimeout) {
+      clearTimeout(this.cpuAutoUnsubscribeTimeout);
+      this.cpuAutoUnsubscribeTimeout = null;
+    }
+  }
 }

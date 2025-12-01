@@ -131,4 +131,12 @@ export class PidPropsHandler {
     });
     keysToDelete.forEach((key) => this.cache.delete(key));
   }
+
+  /**
+   * Cleanup all pending requests and timeouts
+   */
+  public cleanup(): void {
+    this.pendingRequests.forEach((pending) => clearTimeout(pending.timeout));
+    this.pendingRequests.clear();
+  }
 }

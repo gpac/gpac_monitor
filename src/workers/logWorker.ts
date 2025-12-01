@@ -1,10 +1,14 @@
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 // Types for communication with the Worker
-export interface LogWorkerMessage {
-  type: 'PROCESS_LOGS';
-  logs: GpacLogEntry[];
-}
+export type LogWorkerMessage =
+  | {
+      type: 'PROCESS_LOGS';
+      logs: GpacLogEntry[];
+    }
+  | {
+      type: 'CLEANUP';
+    };
 
 export interface LogWorkerResponse {
   type: 'PROCESSED_LOGS';
@@ -74,13 +78,27 @@ class LogProcessor {
     }, FLUSH_INTERVAL);
   }
 
+  private flushIntervalId: NodeJS.Timeout | null = null;
+
   private startFlushTimer() {
     // Periodic flush to avoid logs getting stuck
-    setInterval(() => {
+    this.flushIntervalId = setInterval(() => {
       if (this.buffer.length > 0 && !this.flushTimeout) {
         this.flush();
       }
     }, FLUSH_INTERVAL);
+  }
+
+  public cleanup() {
+    if (this.flushIntervalId) {
+      clearInterval(this.flushIntervalId);
+      this.flushIntervalId = null;
+    }
+    if (this.flushTimeout) {
+      clearTimeout(this.flushTimeout);
+      this.flushTimeout = null;
+    }
+    this.buffer = [];
   }
 }
 
@@ -89,11 +107,14 @@ const processor = new LogProcessor();
 
 // Listen for messages from the main thread
 self.addEventListener('message', (event: MessageEvent<LogWorkerMessage>) => {
-  const { type, logs } = event.data;
+  const { type } = event.data;
 
   switch (type) {
     case 'PROCESS_LOGS':
-      processor.addLogs(logs);
+      processor.addLogs(event.data.logs);
+      break;
+    case 'CLEANUP':
+      processor.cleanup();
       break;
     default:
       console.warn('[LogWorker] Unknown message type:', type);

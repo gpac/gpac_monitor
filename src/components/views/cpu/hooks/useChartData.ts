@@ -11,6 +11,10 @@ export const useChartData = (
 ) => {
   const [dataPoints, setDataPoints] = useState<CpuMemoryDataPoint[]>([]);
   const lastUpdateRef = useRef<number>(0);
+  const lastValuesRef = useRef<{ cpu: number; memory: number }>({
+    cpu: -1,
+    memory: -1,
+  });
 
   useEffect(() => {
     if (!isLive) return;
@@ -19,7 +23,17 @@ export const useChartData = (
 
     // Throttle updates
     if (now - lastUpdateRef.current < throttleInterval) return;
+
+    // Only add point if values have changed (prevents waste when GPAC stopped)
+    if (
+      lastValuesRef.current.cpu === currentCPUPercent &&
+      lastValuesRef.current.memory === currentMemoryMB
+    ) {
+      return;
+    }
+
     lastUpdateRef.current = now;
+    lastValuesRef.current = { cpu: currentCPUPercent, memory: currentMemoryMB };
 
     setDataPoints((prev) => {
       // Add new point with timestamp only (relative time calculated in chart)

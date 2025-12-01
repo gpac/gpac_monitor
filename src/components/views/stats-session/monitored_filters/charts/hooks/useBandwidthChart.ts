@@ -103,10 +103,16 @@ export const useBandwidthChart = ({
   // Update bandwidth data at refresh interval
   useEffect(() => {
     if (!isInitializedRef.current) return;
+    if (!gpacService.isConnected()) return;
+
+    let intervalId: NodeJS.Timeout | null = null;
+    let immediateTimeout: NodeJS.Timeout | null = null;
 
     // Calculate and add first point immediately (don't wait for interval)
     const addPoint = () => {
       if (!gpacService.isConnected()) {
+        // Connection lost - stop the interval
+        if (intervalId) clearInterval(intervalId);
         return;
       }
 
@@ -126,21 +132,22 @@ export const useBandwidthChart = ({
     // Add first point immediately if no existing data
     if (dataPoints.length === 0) {
       // Use setTimeout to ensure currentBytes is up-to-date
-      const immediateTimeout = setTimeout(addPoint, 100);
-      const cleanupImmediate = () => clearTimeout(immediateTimeout);
+      immediateTimeout = setTimeout(addPoint, 100);
 
       // Set up recurring interval
-      const intervalId = setInterval(addPoint, refreshInterval);
+      intervalId = setInterval(addPoint, refreshInterval);
 
       return () => {
-        cleanupImmediate();
-        clearInterval(intervalId);
+        if (immediateTimeout) clearTimeout(immediateTimeout);
+        if (intervalId) clearInterval(intervalId);
       };
     }
 
     // If we have existing data, just use the interval
-    const intervalId = setInterval(addPoint, refreshInterval);
-    return () => clearInterval(intervalId);
+    intervalId = setInterval(addPoint, refreshInterval);
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [refreshInterval, addSamplePoint, gpacService, dataPoints.length]);
 
   const tooltipFormatter = useCallback(

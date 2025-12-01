@@ -6,9 +6,11 @@ export interface MessageHandlerCallbacks {
   onUpdateSessionStats: (stats: any) => void;
   onLogsUpdate: (logs: GpacLogEntry[]) => void;
   onLogSubscriptionChange: (isSubscribed: boolean) => void;
+  onSessionEnd?: (data: any) => void;
 }
 
 export interface MessageHandlerDependencies {
   isConnected: () => boolean;
   send: (message: any) => Promise<void>;
+  stopReconnection: () => void;
 }

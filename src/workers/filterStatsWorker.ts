@@ -1,10 +1,14 @@
 import { MonitoredFilterStats } from '@/types/domain/gpac';
 
 // Types for communication with the Worker
-export interface FilterStatsWorkerMessage {
-  type: 'PROCESS_FILTER_STATS';
-  stats: MonitoredFilterStats;
-}
+export type FilterStatsWorkerMessage =
+  | {
+      type: 'PROCESS_FILTER_STATS';
+      stats: MonitoredFilterStats;
+    }
+  | {
+      type: 'CLEANUP';
+    };
 
 export interface FilterStatsWorkerResponse {
   type: 'PROCESSED_FILTER_STATS';
@@ -84,9 +88,11 @@ class FilterStatsProcessor {
     }
   }
 
+  private flushIntervalId: NodeJS.Timeout | null = null;
+
   private startFlushTimer() {
     // Periodic flush to prevent stats from getting stuck
-    setInterval(() => {
+    this.flushIntervalId = setInterval(() => {
       const hasData = Array.from(this.buffersByFilter.values()).some(
         (buf) => buf.length > 0,
       );
@@ -95,6 +101,15 @@ class FilterStatsProcessor {
         this.flush();
       }
     }, FLUSH_INTERVAL);
+  }
+
+  public cleanup() {
+    if (this.flushIntervalId) {
+      clearInterval(this.flushIntervalId);
+      this.flushIntervalId = null;
+    }
+    this.clearFlushTimeout();
+    this.buffersByFilter.clear();
   }
 }
 
@@ -105,10 +120,15 @@ const processor = new FilterStatsProcessor();
 self.addEventListener(
   'message',
   (event: MessageEvent<FilterStatsWorkerMessage>) => {
-    const { type, stats } = event.data;
+    const { type } = event.data;
 
-    if (type === 'PROCESS_FILTER_STATS') {
-      processor.addStats(stats);
+    switch (type) {
+      case 'PROCESS_FILTER_STATS':
+        processor.addStats(event.data.stats);
+        break;
+      case 'CLEANUP':
+        processor.cleanup();
+        break;
     }
   },
 );

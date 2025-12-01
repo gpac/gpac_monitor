@@ -193,4 +193,9 @@ export class FilterStatsHandler {
       }
     };
   }
+
+  public cleanup(): void {
+    this.filterAutoUnsubscribeTimeouts.forEach((timeout) => clearTimeout(timeout));
+    this.filterAutoUnsubscribeTimeouts.clear();
+  }
 }

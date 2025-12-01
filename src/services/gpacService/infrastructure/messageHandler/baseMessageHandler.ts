@@ -166,6 +166,9 @@ export class BaseMessageHandler {
       case 'command_line_response':
         this.commandLineHandler.handleCommandLineResponse(data);
         break;
+      case 'session_end':
+        this.handleSessionEnd(data);
+        break;
       default:
       // Unknown message type
     }
@@ -251,6 +254,21 @@ export class BaseMessageHandler {
     this.pidPropsHandler.handleIpidPropsResponse(data);
   }
 
+  private handleSessionEnd(data: any): void {
+    console.log('[BaseMessageHandler] Session end received:', data.reason);
+
+    // Stop reconnection attempts immediately
+    this.dependencies.stopReconnection();
+
+    // Cleanup all resources immediately
+    this.cleanup();
+
+    // Notify callbacks (optional)
+    if (this.callbacks.onSessionEnd) {
+      this.callbacks.onSessionEnd(data);
+    }
+  }
+
   /**
    * Checks if the WebSocket client is connected
    *
@@ -269,5 +287,20 @@ export class BaseMessageHandler {
    */
   protected static generateMessageId(): string {
     return generateID();
+  }
+
+  /**
+   * Cleanup all handlers and timers (called on disconnect)
+   */
+  public cleanup(): void {
+    // Clear message batcher
+    this.messageBatcher.clear();
+
+    // Cleanup all handlers with timeouts
+    this.cpuStatsHandler.cleanup();
+    this.sessionStatsHandler.cleanup();
+    this.filterStatsHandler.cleanup();
+    this.logHandler.cleanup();
+    this.pidPropsHandler.cleanup();
   }
 }

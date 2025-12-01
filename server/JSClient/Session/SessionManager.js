@@ -26,8 +26,19 @@ function SessionManager(client) {
             const now = Date.now();
 
             if (session.last_task) {
+                // Send session_end message to frontend before cleanup
+                try {
+                    this.client.client.send(JSON.stringify({
+                        message: 'session_end',
+                        reason: 'completed',
+                        timestamp: now
+                    }));
+                    print('[SessionManager] Session end message sent');
+                } catch (e) {
+                    print('[SessionManager] Failed to send session_end message:', e);
+                }
+
                 // Cleanup all managers on session end
-               
                 this.client.cpuStatsManager.handleSessionEnd();
                 this.client.logManager.handleSessionEnd();
                 this.client.filterManager.handleSessionEnd();

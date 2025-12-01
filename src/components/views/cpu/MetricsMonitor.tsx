@@ -21,7 +21,6 @@ interface MetricsMonitorProps {
 }
 
 const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
-  const [isLive, _setIsLive] = useState(true);
   const [isResizing, setIsResizing] = useState(false);
 
   // Chart duration management (encapsulated logic)
@@ -41,7 +40,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   const containerRef = ref as React.RefObject<HTMLDivElement>;
 
   const { isSubscribed, currentCPU, currentMemory, totalCores } = useCPUStats(
-    isLive,
+    true,
     CHART_CPU_UPDATE_INTERVAL,
   );
 
@@ -59,11 +58,6 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   const containerClassName = useMemo(
     () => `${BASE_CONTAINER_CLASS}${isResizing ? ` ${RESIZING_CLASS}` : ''}`,
     [isResizing],
-  );
-
-  const chartLiveState = useMemo(
-    () => isLive && !isResizing,
-    [isLive, isResizing],
   );
 
   const statusBadge = useMemo(
@@ -87,7 +81,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
           <CpuMemoryChartUplot
             currentCPUPercent={metricsValues.currentCPUPercent}
             currentMemoryBytes={metricsValues.currentMemoryProcess}
-            isLive={chartLiveState}
+            isLive={!isResizing}
             maxPoints={maxPoints}
             windowDuration={windowDuration}
           />

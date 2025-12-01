@@ -129,4 +129,11 @@ export class SessionStatsHandler {
       }
     };
   }
+
+  public cleanup(): void {
+    if (this.sessionAutoUnsubscribeTimeout) {
+      clearTimeout(this.sessionAutoUnsubscribeTimeout);
+      this.sessionAutoUnsubscribeTimeout = null;
+    }
+  }
 }
