@@ -1,4 +1,4 @@
-import { DEFAULT_FILTER_FIELDS } from '../config.js';
+import { DEFAULT_FILTER_FIELDS, UPDATE_INTERVALS } from '../config.js';
 
 /**
  * SessionStatsManager - Manages session statistics collection
@@ -10,12 +10,12 @@ import { DEFAULT_FILTER_FIELDS } from '../config.js';
 function SessionStatsManager(client) {
     this.client = client;
     this.isSubscribed = false;
-    this.interval = 1000;
+    this.interval = UPDATE_INTERVALS.SESSION_STATS;
     this.fields = [];
 
     this.subscribe = function(interval, fields) {
         this.isSubscribed = true;
-        this.interval = interval || 1000;
+        this.interval = interval || UPDATE_INTERVALS.SESSION_STATS;
         this.fields = fields || DEFAULT_FILTER_FIELDS;
     };
 
@@ -95,6 +95,7 @@ function SessionStatsManager(client) {
         if (this.client.client) {
             this.client.client.send(JSON.stringify({
                 message: 'session_stats',
+                interval: this.interval,
                 all_packets_done,
                 stats
             }));

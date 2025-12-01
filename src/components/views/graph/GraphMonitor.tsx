@@ -3,6 +3,7 @@ import { WidgetProps } from '../../../types/ui/widget';
 import useGraphMonitor from './hooks/state/useGraphMonitor';
 import { GraphMonitorUI } from './ui';
 
+
 const GraphMonitor: React.FC<WidgetProps> = ({ id, config }) => {
   const {
     isLoading,
@@ -19,21 +20,23 @@ const GraphMonitor: React.FC<WidgetProps> = ({ id, config }) => {
   } = useGraphMonitor();
 
   return (
-    <GraphMonitorUI
-      id={id}
-      config={config}
-      isLoading={isLoading}
-      connectionError={connectionError}
-      retryConnection={retryConnection}
-      nodes={localNodes}
-      edges={localEdges}
-      onNodesChange={handleNodesChange}
-      onEdgesChange={handleEdgesChange}
-      onNodeClick={handleNodeClick}
-      layoutOptions={layoutOptions}
-      onLayoutChange={handleLayoutChange}
-      onAutoLayout={autoLayout}
-    />
+    <>
+      <GraphMonitorUI
+        id={id}
+        config={config}
+        isLoading={isLoading}
+        connectionError={connectionError}
+        retryConnection={retryConnection}
+        nodes={localNodes}
+        edges={localEdges}
+        onNodesChange={handleNodesChange}
+        onEdgesChange={handleEdgesChange}
+        onNodeClick={handleNodeClick}
+        layoutOptions={layoutOptions}
+        onLayoutChange={handleLayoutChange}
+        onAutoLayout={autoLayout}
+      />
+    </>
   );
 };
 

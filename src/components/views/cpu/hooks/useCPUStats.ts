@@ -31,6 +31,7 @@ export function useCPUStats(enabled = true, interval = 150) {
   });
 
   const handleStatsUpdate = useCallback((newStats: CPUStats) => {
+    console.log('[useCPUStats] Received new stats:', newStats.process_cpu_usage);
     stableCallback.current(newStats);
   }, []);
 

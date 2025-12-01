@@ -34,12 +34,18 @@ export const useGraphState = (
 
   // Transformed nodes and edges with proper positioning and state
   const nodes = useMemo(
-    () => updateNodesWithPositions(reduxNodes, nodesRef),
+    () => {
+      console.log('[useGraphState] Redux nodes changed, updating...');
+      return updateNodesWithPositions(reduxNodes, nodesRef);
+    },
     [reduxNodes, nodesRef],
   );
 
   const edges = useMemo(
-    () => updateEdgesWithState(reduxEdges, edgesRef),
+    () => {
+      console.log('[useGraphState] Redux edges changed, updating...');
+      return updateEdgesWithState(reduxEdges, edgesRef);
+    },
     [reduxEdges, edgesRef],
   );
 

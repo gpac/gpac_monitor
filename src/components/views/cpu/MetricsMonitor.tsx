@@ -13,6 +13,7 @@ import {
   CPU_HISTORY_STORAGE_KEY,
 } from './constants';
 
+
 const BASE_CONTAINER_CLASS = 'container mx-auto space-y-2 p-2';
 const RESIZING_CLASS = 'contain-layout contain-style';
 

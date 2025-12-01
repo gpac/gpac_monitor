@@ -19,12 +19,18 @@ const PID_PROPS_LITE = [];
 const FILTER_SUBSCRIPTION_FIELDS = [
     'status', 'bytes_done', 'bytes_sent', 'pck_done', 'pck_sent', 'time', 'nb_ipid', 'nb_opid'
 ];
-
+// Update intervals for subscriptions (in milliseconds)
+const UPDATE_INTERVALS = {
+    SESSION_STATS: 1000,   
+    FILTER_STATS: 1000, 
+    CPU_STATS: 250,         
+};
 export {
     DEFAULT_FILTER_FIELDS,
     CPU_STATS_FIELDS,
     FILTER_PROPS_LITE,
     FILTER_ARGS_LITE,
     PID_PROPS_LITE,
-    FILTER_SUBSCRIPTION_FIELDS
+    FILTER_SUBSCRIPTION_FIELDS,
+    UPDATE_INTERVALS,
 };

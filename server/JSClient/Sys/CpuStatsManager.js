@@ -1,16 +1,16 @@
 import { Sys as sys } from 'gpaccore';
-import { CPU_STATS_FIELDS } from '../config.js';
+import { CPU_STATS_FIELDS, UPDATE_INTERVALS } from '../config.js';
 
 function CpuStatsManager(client) {
     this.client = client;
     this.isSubscribed = false;
-    this.interval = 250;
+    this.interval = UPDATE_INTERVALS.CPU_STATS;
     this.fields = CPU_STATS_FIELDS;
     this.lastSent = 0;
 
     this.subscribe = function(interval, fields) {
         this.isSubscribed = true;
-        this.interval = interval || 250;
+        this.interval = interval || UPDATE_INTERVALS.CPU_STATS;
         this.fields = fields || CPU_STATS_FIELDS;
         this.lastSent = 0; // Force first send on next tick
 
@@ -60,6 +60,7 @@ function CpuStatsManager(client) {
         if (this.client.client) {
             this.client.client.send(JSON.stringify({
                 message: 'cpu_stats',
+                interval: this.interval,
                 stats: cpuStats
             }));
         }

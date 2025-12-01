@@ -1,4 +1,4 @@
-import { FILTER_SUBSCRIPTION_FIELDS } from '../config.js';
+import { FILTER_SUBSCRIPTION_FIELDS, UPDATE_INTERVALS } from '../config.js';
 import {
     gpac_filter_to_object,
     gpac_filter_to_minimal_object,
@@ -57,7 +57,7 @@ function FilterManager(client, draned_once_ref) {
 
     this.subscribeToFilter = function(idx, interval) {
         this.filterSubscriptions[idx] = {
-            interval: interval || 500,
+            interval: interval || UPDATE_INTERVALS.FILTER_STATS,
             fields: FILTER_SUBSCRIPTION_FIELDS
         };
         this.lastSentByFilter[idx] = 0; // Force first send
@@ -103,6 +103,7 @@ function FilterManager(client, draned_once_ref) {
 
                 this.client.client.send(JSON.stringify({
                     message: 'filter_stats',
+                    interval: sub.interval,
                     ...payload
                 }));
 

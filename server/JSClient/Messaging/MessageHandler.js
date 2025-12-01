@@ -1,4 +1,4 @@
-import { DEFAULT_FILTER_FIELDS } from '../config.js';
+import { DEFAULT_FILTER_FIELDS, UPDATE_INTERVALS } from '../config.js';
 
 function MessageHandler(client) {
     this.client = client;
@@ -38,9 +38,9 @@ function MessageHandler(client) {
                     },
                     
                     'subscribe_session': () => {
-                        print("Subscribing to session");
-                        const interval = jtext['interval'] || 1000;
+                        const interval = jtext['interval'] || UPDATE_INTERVALS.SESSION_STATS;
                         const fields = jtext['fields'] || DEFAULT_FILTER_FIELDS;
+                        print(`[MessageHandler] Subscribing to session (interval: ${interval}ms)`);
                         this.client.sessionStatsManager.subscribe(interval, fields);
                         this.client.sessionManager.startMonitoringLoop();
                     },
@@ -52,7 +52,8 @@ function MessageHandler(client) {
                     
                     'subscribe_filter': () => {
                         const idx = jtext.idx;
-                        const interval = jtext.interval || 1000;
+                        const interval = jtext.interval || UPDATE_INTERVALS.FILTER_STATS;
+                        print(`[MessageHandler] Subscribing to filter ${idx} (interval: ${interval}ms)`);
                         this.client.filterManager.subscribeToFilter(idx, interval);
                         this.client.sessionManager.startMonitoringLoop();
                     },
@@ -75,9 +76,9 @@ function MessageHandler(client) {
                     },
                     
                     'subscribe_cpu_stats': () => {
-                        print("Subscribing to CPU stats");
-                        const interval = jtext['interval'] || 150;
+                        const interval = jtext['interval'] || UPDATE_INTERVALS.CPU_STATS;
                         const fields = jtext['fields'] || [];
+                        print(`[MessageHandler] Subscribing to CPU stats (interval: ${interval}ms)`);
                         this.client.cpuStatsManager.subscribe(interval, fields);
                         this.client.sessionManager.startMonitoringLoop();
                     },
