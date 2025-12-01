@@ -240,14 +240,6 @@ const PIDMetricsCard = memo(
                       <span className="text-info">{pid.timescale}</span>
                     </div>
                   )}
-                  {pid.stats?.max_process_time && (
-                    <div className="flex justify-between">
-                      <span>Peak:</span>
-                      <span className="text-info">
-                        {pid.stats.max_process_time}µs
-                      </span>
-                    </div>
-                  )}
                 </div>
               </AccordionItem>
             </Accordion>

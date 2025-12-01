@@ -3,7 +3,6 @@ import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Badge } from '@/components/ui/badge';
 import { getGlobalStatus } from '@/utils/gpac';
 import PIDMetricsCard from './PIDMetricsCard';
-import PIDTable from './PIDTable';
 import type { PIDWithIndex } from '../../types';
 
 interface OutputsTabProps {
@@ -92,26 +91,18 @@ const OutputsTab = memo(
 
         {/* PIDs Display - Table mode for >3, Grid mode for ≤3 */}
         {allPidsWithType.length > 0 ? (
-          allPidsWithType.length > 3 ? (
-            <PIDTable
-              pids={pidsWithIndices}
-              filterIdx={filterData.idx}
-              onOpenProps={handleOpenProps}
-            />
-          ) : (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3">
-              {allPidsWithType.map(({ pid, type }) => (
-                <PIDMetricsCard
-                  key={`${pid.name}-${pid.ipidIdx}`}
-                  pid={pid}
-                  type={type}
-                  filterIdx={filterData.idx}
-                  onOpenProps={handleOpenProps}
-                  variant="output"
-                />
-              ))}
-            </div>
-          )
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3">
+            {allPidsWithType.map(({ pid, type }) => (
+              <PIDMetricsCard
+                key={`${pid.name}-${pid.ipidIdx}`}
+                pid={pid}
+                type={type}
+                filterIdx={filterData.idx}
+                onOpenProps={handleOpenProps}
+                variant="output"
+              />
+            ))}
+          </div>
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
