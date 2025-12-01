@@ -81,6 +81,7 @@ export interface FiltersListResponse extends BaseWSResponse {
 
 export interface SessionStatsResponse extends BaseWSResponse {
   message: 'session_stats';
+  interval?: number;
   stats: SessionFilterStatistics[];
 }
 
@@ -190,11 +191,13 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
 
 export interface CPUStatsResponse extends BaseWSResponse {
   message: 'cpu_stats';
+  interval?: number;
   stats: CPUStats;
 }
 
 export interface FilterStatsUpdateResponse extends BaseWSResponse {
   message: 'filter_stats';
+  interval?: number;
   idx: number;
   stats: FilterStats;
 }

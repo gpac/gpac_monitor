@@ -289,7 +289,7 @@ export class GpacService implements IGpacCommunication {
               timestamp: Date.now(),
               subscriptionId,
             });
-          }, config.interval || 1000);
+          });
 
       case SubscriptionType.FILTER_STATS:
         if (config.filterIdx === undefined) {
@@ -299,17 +299,13 @@ export class GpacService implements IGpacCommunication {
         }
         return this.messageHandler
           .getFilterStatsHandler()
-          .subscribeToFilterStatsUpdates(
-            config.filterIdx,
-            (data) => {
-              callback({
-                data: data as T,
-                timestamp: Date.now(),
-                subscriptionId,
-              });
-            },
-            config.interval || 1000,
-          );
+          .subscribeToFilterStatsUpdates(config.filterIdx, (data) => {
+            callback({
+              data: data as T,
+              timestamp: Date.now(),
+              subscriptionId,
+            });
+          });
 
       case SubscriptionType.CPU_STATS:
         return this.messageHandler
@@ -320,7 +316,7 @@ export class GpacService implements IGpacCommunication {
               timestamp: Date.now(),
               subscriptionId,
             });
-          }, config.interval || 150);
+          });
 
       case SubscriptionType.LOGS:
         return this.messageHandler

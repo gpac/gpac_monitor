@@ -16,7 +16,6 @@ export class SessionStatsHandler {
   // Timeouts for delayed auto-unsubscription to avoid premature cleanup during React re-renders
   private sessionAutoUnsubscribeTimeout: NodeJS.Timeout | null = null;
 
-  // Property and methods for statistics management
   private sessionStatsSubscribable = new UpdatableSubscribable<
     SessionFilterStatistics[]
   >([]);
@@ -30,7 +29,7 @@ export class SessionStatsHandler {
     return true;
   }
 
-  public async subscribeToSession(interval = 1000): Promise<void> {
+  public async subscribeToSession(): Promise<void> {
     this.ensureLoaded();
 
     // Check if there's already a pending subscribe request
@@ -44,7 +43,6 @@ export class SessionStatsHandler {
         await this.dependencies.send({
           type: WSMessageType.SUBSCRIBE_SESSION,
           id: generateID(),
-          interval,
         });
       } finally {
         // Clear the pending request when done (success or failure)
@@ -85,7 +83,6 @@ export class SessionStatsHandler {
 
   public subscribeToSessionStats(
     callback: (stats: SessionFilterStatistics[]) => void,
-    interval = 1000,
   ): () => void {
     // Cancel any pending auto-unsubscribe since we have a new subscriber
     if (this.sessionAutoUnsubscribeTimeout) {
@@ -103,8 +100,9 @@ export class SessionStatsHandler {
     );
 
     // If this is the first subscriber, automatically subscribe to server
+    // Server will use its configured interval
     if (isFirstSubscriber) {
-      this.subscribeToSession(interval).catch((_error) => {});
+      this.subscribeToSession().catch((_error) => {});
     }
 
     return () => {

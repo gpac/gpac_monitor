@@ -35,10 +35,7 @@ export class FilterStatsHandler {
   /**
    * Subscribes to filter statistics updates
    */
-  public async subscribeToFilterStats(
-    idx: number,
-    interval = 1000,
-  ): Promise<void> {
+  public async subscribeToFilterStats(idx: number): Promise<void> {
     this.ensureLoaded();
 
     // Check if there's already a pending subscribe request for this filter
@@ -50,11 +47,11 @@ export class FilterStatsHandler {
     // Create and store the promise
     const promise = (async () => {
       try {
+        // Don't send interval - let server use its config
         await this.dependencies.send({
           type: WSMessageType.SUBSCRIBE_FILTER_STATS,
           id: generateID(),
           idx,
-          interval,
         });
       } finally {
         // Clear the pending request when done (success or failure)
@@ -126,7 +123,6 @@ export class FilterStatsHandler {
   public subscribeToFilterStatsUpdates(
     idx: number,
     callback: (filter: MonitoredFilterStats) => void,
-    interval = 1000,
   ): () => void {
     // Cancel any pending auto-unsubscribe for this filter since we have a new subscriber
     const existingTimeout = this.filterAutoUnsubscribeTimeouts.get(idx);
@@ -162,8 +158,9 @@ export class FilterStatsHandler {
     );
 
     // If this is the first subscriber, automatically subscribe to server
+    // Server will use its configured interval
     if (isFirstSubscriber) {
-      this.subscribeToFilterStats(idx, interval).catch(() => {});
+      this.subscribeToFilterStats(idx).catch(() => {});
     }
 
     return () => {
@@ -195,7 +192,9 @@ export class FilterStatsHandler {
   }
 
   public cleanup(): void {
-    this.filterAutoUnsubscribeTimeouts.forEach((timeout) => clearTimeout(timeout));
+    this.filterAutoUnsubscribeTimeouts.forEach((timeout) =>
+      clearTimeout(timeout),
+    );
     this.filterAutoUnsubscribeTimeouts.clear();
   }
 }

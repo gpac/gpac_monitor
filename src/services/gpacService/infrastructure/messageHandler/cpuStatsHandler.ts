@@ -17,7 +17,7 @@ export class CPUStatsHandler {
 
   // Timeouts for delayed auto-unsubscription to avoid premature cleanup during React re-renders
   private cpuAutoUnsubscribeTimeout: NodeJS.Timeout | null = null;
-  // Property and methods for statistics management
+
   private cpuStatsSubscribable = new UpdatableSubscribable<CPUStats[]>([]);
   private ensureLoaded(): boolean {
     if (!this.isLoaded()) {
@@ -27,7 +27,7 @@ export class CPUStatsHandler {
     return true;
   }
   // logic for subscribing and unsubscribing to cpu stats
-  public async subscribeToCPUStats(interval = 150): Promise<void> {
+  public async subscribeToCPUStats(): Promise<void> {
     this.ensureLoaded();
 
     // Check if there's already a pending subscribe request
@@ -38,10 +38,10 @@ export class CPUStatsHandler {
     // Create and store the promise
     this.pendingCPUStatsSubscribe = (async () => {
       try {
+        // Don't send interval - let server use its config
         await this.dependencies.send({
           type: WSMessageType.SUBSCRIBE_CPU_STATS,
           id: generateID(),
-          interval,
         });
       } finally {
         this.pendingCPUStatsSubscribe = null;
@@ -83,7 +83,6 @@ export class CPUStatsHandler {
   }
   public subscribeToCPUStatsUpdates(
     callback: (stats: CPUStats) => void,
-    interval = 150,
   ): () => void {
     // Cancel any pending auto-unsubscribe since we have a new subscriber
     if (this.cpuAutoUnsubscribeTimeout) {
@@ -101,8 +100,9 @@ export class CPUStatsHandler {
     );
 
     // If this is the first subscriber, automatically subscribe to server
+    // Server will use its configured interval
     if (isFirstSubscriber) {
-      this.subscribeToCPUStats(interval).catch(() => {});
+      this.subscribeToCPUStats().catch(() => {});
     }
 
     return () => {
