@@ -170,7 +170,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="w-48 bg-gray-950 max-h-80 overflow-y-auto border-transparent"
+          className="w-48 bg-monitor-surface/55 max-h-80 overflow-y-auto border-transparent"
         >
           {/* ALL control at the top */}
           {configuredTools.length > 0 && (

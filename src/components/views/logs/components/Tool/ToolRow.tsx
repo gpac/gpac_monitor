@@ -66,7 +66,7 @@ export const ToolRow = memo(function ToolRow({
           </DropdownMenuSubTrigger>
 
           <DropdownMenuSubContent
-            className="z-50 bg-slate-950/95 border border-slate-700/50
+            className="z-50 bg-monitor-surface/55 border border-slate-700/50
               shadow-lg shadow-black/40 rounded-md"
             onMouseLeave={onMouseLeaveSubMenu}
           >

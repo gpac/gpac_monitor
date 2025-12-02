@@ -36,7 +36,7 @@ export const CPUHistoryBadge = memo<CPUHistoryBadgeProps>(
             </WidgetStatusBadge>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end" className="bg-monitor-surface">
           <DropdownMenuRadioGroup
             value={value}
             onValueChange={(val) => onChange(val as ChartDuration)}

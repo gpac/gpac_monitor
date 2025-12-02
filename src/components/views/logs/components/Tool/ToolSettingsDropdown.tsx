@@ -106,7 +106,7 @@ export const ToolSettingsDropdown = memo(
             onScroll={() => setOpenSubMenu(null)}
             className=" z-20 w-64 max-h-80 overflow-y-auto p-0
             rounded-xl border border-slate-700/50
-            bg-slate-950/90 backdrop-blur
+            bg-monitor-panel/55 
             shadow-xl shadow-black/50"
           >
             <div className="relative font-cond text-slate-200 text-xs">
