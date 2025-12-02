@@ -40,31 +40,25 @@ export const RealtimeMetricsCard = memo(
     const metrics = useMemo(() => calculateMetrics(filter), [filter]);
 
     return (
-      <Card className="bg-monitor-panel border-transparent">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm">Real-time Metrics</CardTitle>
+      <Card className="bg-monitor-panel/60 border-b border-r border-monitor-line/10">
+        <CardHeader className="pb-1 pt-2 px-2">
+          <CardTitle className="text-xs font-medium">Real-time</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground stat-label">
-                Throughput
-              </div>
-              <div className="text-lg font-semibold stat text-info tabular-nums">
+        <CardContent className="p-2">
+          <div className="space-y-1">
+            <div className="flex justify-between items-baseline">
+              <div className="text-xs text-muted-foreground">Throughput</div>
+              <div className="text-sm font-semibold text-info tabular-nums">
                 {metrics.throughput}
               </div>
             </div>
 
-            <div className="space-y-1">
-              <div className="text-xs text-muted-foreground stat-label">
-                Packet Rate
-              </div>
-              <div className="text-lg font-semibold stat text-info tabular-nums">
+            <div className="flex justify-between items-baseline">
+              <div className="text-xs text-muted-foreground">Packet Rate</div>
+              <div className="text-sm font-semibold text-info tabular-nums">
                 {metrics.packetRate}
               </div>
             </div>
-
-            <div className="space-y-1"></div>
           </div>
         </CardContent>
       </Card>

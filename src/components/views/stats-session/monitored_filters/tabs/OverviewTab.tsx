@@ -1,63 +1,94 @@
 import { memo } from 'react';
 import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  PIDMetricsCard,
-  ProcessingCard,
-  PacketsCard,
-  DataCard,
-  FilterHealthCard,
-  RealtimeMetricsCard,
-} from '../cards';
+import { PacketsCard, DataCard, RealtimeMetricsCard } from '../cards';
+import { Badge } from '@/components/ui/badge';
+import { formatTime } from '@/utils/formatting';
+import { getFilterHealthInfo } from '../cards/shared/statusHelpers';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
 }
 
 const OverviewTab = memo(({ filter }: OverviewTabProps) => {
+  const { status, type, idx, time } = filter;
+  const healthInfo = getFilterHealthInfo(status);
+  const formattedUptime = formatTime(time);
+
   return (
-    <ScrollArea className="h-[400px]">
-      <div className="space-y-4">
-        {/* Filter Health */}
-        <FilterHealthCard filter={filter} />
+    <div className="flex flex-col h-full gap-2 p-2">
+      {/* ROW 1: Status Strip Bar - Single compact line */}
+      <div className="flex items-center gap-2 px-3 py-2 bg-monitor-panel/40 rounded border-b border-monitor-line/10 text-xs shrink-0">
+        <span className="font-medium text-info">[{type || 'unknown'}]</span>
+        <Badge
+          variant={healthInfo.variant}
+          className="text-xs py-0 px-1.5 h-fit"
+        >
+          ● {healthInfo.label}
+        </Badge>
+        <span className="text-muted-foreground/50">·</span>
+        <span className="text-muted-foreground">Index: {idx}</span>
+        <span className="text-muted-foreground/50">·</span>
+        <span className="text-muted-foreground">
+          Uptime:{' '}
+          <span className="font-medium tabular-nums">{formattedUptime}</span>
+        </span>
+        <span className="ml-auto text-muted-foreground/70 text-xs">
+          Live <span className="text-error animate-pulse">⏺</span>
+        </span>
+      </div>
 
-        {/* Real-time Metrics - NEW */}
-        <RealtimeMetricsCard filter={filter} />
+      {/* ROW 2: Compact KPIs grid - 3 columns */}
+      <div className="grid grid-cols-3 gap-2 shrink-0">
+        {/* Column 1: Filter Health + PIDs */}
+        <div className="flex flex-col gap-2">
+          {/* Compact Health Card */}
+          <div className="bg-monitor-panel/60 border-r border-monitor-line/10 rounded p-2">
+            <div className="text-xs font-medium text-info mb-1">Health</div>
+            <div className={`text-xs font-medium ${healthInfo.color} py-1`}>
+              {status || 'Unknown'}
+            </div>
+          </div>
+          {/* Compact PIDs Card */}
+          <div className="bg-monitor-panel/60 border-r  border-monitor-line/10 rounded p-2">
+            <div className="text-xs font-medium text-info mb-1">PIDs</div>
+            <div className="text-xs space-y-0.5">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Ipid:</span>
+                <span className="font-medium">{filter.nb_ipid}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Opid:</span>
+                <span className="font-medium">{filter.nb_opid}</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-        {/* PID Metrics */}
-        <PIDMetricsCard
-          filter={{
-            idx: filter.idx,
-            status: filter.status,
-            bytes_done: filter.bytes_done,
-            bytes_sent: filter.bytes_sent,
-            pck_done: filter.pck_done,
-            pck_sent: filter.pck_sent,
-            time: filter.time,
-            nb_ipid: filter.nb_ipid,
-            nb_opid: filter.nb_opid,
-          }}
-        />
+        {/* Column 2: Bitrate & Packet Rate */}
+        <div className="flex flex-col gap-2">
+          {/* Compact Realtime Metrics */}
+          <RealtimeMetricsCard filter={filter} />
+        </div>
 
-        <div className="grid grid-cols-1 bg-monitor-panel border-0 gap-4 sm:grid-cols-3 ">
-          {/* Processing Card */}
-          <ProcessingCard tasks={filter.tasks} time={filter.time} />
-
-          {/* Packets Card */}
+        {/* Column 3: Packets & Data */}
+        <div className="flex flex-col gap-2">
+          {/* Stacked Packets + Data */}
           <PacketsCard
             pck_done={filter.pck_done}
             pck_sent={filter.pck_sent}
             pck_ifce_sent={filter.pck_ifce_sent}
           />
-
-          {/* Data Card */}
           <DataCard
             bytes_done={filter.bytes_done}
             bytes_sent={filter.bytes_sent}
           />
         </div>
       </div>
-    </ScrollArea>
+
+      <div className="flex-1 overflow-hidden">
+        {/* Space for collapsible sections in the future */}
+      </div>
+    </div>
   );
 });
 
