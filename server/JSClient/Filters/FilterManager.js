@@ -63,7 +63,7 @@ function FilterManager(client, draned_once_ref) {
         this.lastSentByFilter[idx] = 0; // Force first send
 
         // Start SessionManager loop if not running
-        this.client.sessionManager.sendStats();
+        this.client.sessionManager.startMonitoringLoop();
     };
 
     this.unsubscribeFromFilter = function(idx) {

@@ -15,7 +15,7 @@ function CpuStatsManager(client) {
         this.lastSent = 0; // Force first send on next tick
 
         // Start SessionManager loop if not running
-        this.client.sessionManager.sendStats();
+        this.client.sessionManager.startMonitoringLoop();
     };
 
     this.unsubscribe = function() {

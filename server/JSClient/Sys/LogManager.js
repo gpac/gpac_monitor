@@ -43,7 +43,7 @@ function LogManager(client) {
             sys.set_logs(this.logLevel);
 
             // Start SessionManager loop if not running
-            this.client.sessionManager.sendStats();
+            this.client.sessionManager.startMonitoringLoop();
 
         } catch (error) {
             console.error("LogManager: Failed to start log capturing:", error);
