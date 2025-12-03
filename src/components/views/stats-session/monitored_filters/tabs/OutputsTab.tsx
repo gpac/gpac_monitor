@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { getGlobalStatus } from '@/utils/gpac';
 import PIDMetricsCard from './PIDMetricsCard';
 import type { PIDWithIndex } from '../../types';
+import { TAB_STYLES } from './styles';
 
 interface OutputsTabProps {
   filterData: FilterStatsResponse;
@@ -38,19 +39,19 @@ const OutputsTab = memo(
     const handleOpenProps = () => {};
 
     return (
-      <div className="space-y-3">
+      <div className={TAB_STYLES.SPACE_Y_2}>
         {/* Global Status Bar */}
         {pidsWithIndices.length > 0 && (
-          <div className="bg-background/30 rounded-lg px-3 py-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+          <div className={TAB_STYLES.STATUS_BAR_CONTAINER}>
+            <div className={TAB_STYLES.STATUS_BAR_CONTENT}>
+              <div className={TAB_STYLES.STATUS_BAR_LEFT}>
                 <span className="text-xs font-medium">Status</span>
                 <span className="text-xs text-info tabular-nums">
                   {globalStatus.totalPids} stream
                   {globalStatus.totalPids > 1 ? 's' : ''}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className={TAB_STYLES.STATUS_BAR_RIGHT}>
                 {globalStatus.errors > 0 && (
                   <Badge
                     variant="destructive"
@@ -89,9 +90,9 @@ const OutputsTab = memo(
           </div>
         )}
 
-        {/* PIDs Display - Table mode for >3, Grid mode for ≤3 */}
+        {/* PIDs Display - Grid mode */}
         {allPidsWithType.length > 0 ? (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-2">
             {allPidsWithType.map(({ pid, type }) => (
               <PIDMetricsCard
                 key={`${pid.name}-${pid.ipidIdx}`}

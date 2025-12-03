@@ -77,10 +77,10 @@ const DetailedStatsView = memo(
     );
 
     return (
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="sticky backdrop-blur-sm top-0 z-10 bg-background pb-2 space-y-2  ">
-            <div className="flex justify-stretch items-center gap-6">
+          <div className="sticky backdrop-blur-sm top-0 z-10 bg-background pb-2 space-y-2">
+            <div className="flex justify-stretch items-center gap-4">
               <h2 className="text-lg font-semibold text-red-600/90">
                 {overviewData.name}
               </h2>

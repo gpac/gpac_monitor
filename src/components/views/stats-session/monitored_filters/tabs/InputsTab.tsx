@@ -5,6 +5,7 @@ import type { InputsTabProps, PIDWithIndex } from '../../types';
 import { useInputsTabData } from './hooks/useInputsTabData';
 import PIDMetricsCard from './PIDMetricsCard';
 import PIDTable from './PIDTable';
+import { TAB_STYLES } from './styles';
 
 const InputsTab = memo(
   ({ filterData, filterName, isLoading = false }: InputsTabProps) => {
@@ -28,19 +29,19 @@ const InputsTab = memo(
     );
 
     return (
-      <div className="space-y-3">
+      <div className={TAB_STYLES.SPACE_Y_2}>
         {/* Global Status Bar */}
         {inputPidsWithIndices.length > 0 && (
-          <div className="bg-background/30 rounded-lg px-3 py-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
+          <div className={TAB_STYLES.STATUS_BAR_CONTAINER}>
+            <div className={TAB_STYLES.STATUS_BAR_CONTENT}>
+              <div className={TAB_STYLES.STATUS_BAR_LEFT}>
                 <span className="text-xs font-medium">Status</span>
                 <span className="text-xs text-info tabular-nums">
                   {globalStatus.totalPids} stream
                   {globalStatus.totalPids > 1 ? 's' : ''}
                 </span>
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className={TAB_STYLES.STATUS_BAR_RIGHT}>
                 {globalStatus.errors > 0 && (
                   <Badge
                     variant="destructive"
@@ -78,7 +79,7 @@ const InputsTab = memo(
               onOpenProps={handleOpenProps}
             />
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-3">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-2">
               {allPidsWithType.map(({ pid, type }) => (
                 <PIDMetricsCard
                   key={`${pid.name}-${pid.ipidIdx}`}

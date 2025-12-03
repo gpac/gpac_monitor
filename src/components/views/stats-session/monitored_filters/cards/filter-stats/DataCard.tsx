@@ -9,7 +9,7 @@ interface DataCardProps {
 }
 
 export const DataCard = memo(({ bytes_done, bytes_sent }: DataCardProps) => (
-  <Card className="bg-monitor-panel/40 rounded border-b border-r border-monitor-line/10">
+  <Card className="bg-monitor-panel/55 rounded border-0  border-r border-monitor-line/10">
     <CardHeader className="pb-1 pt-2 px-2">
       <CardTitle className="flex items-center gap-1 text-xs font-medium">
         <LuHardDrive className="h-3 w-3" />

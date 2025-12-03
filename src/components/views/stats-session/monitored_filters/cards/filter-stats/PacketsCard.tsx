@@ -11,7 +11,7 @@ interface PacketsCardProps {
 
 export const PacketsCard = memo(
   ({ pck_done, pck_sent, pck_ifce_sent }: PacketsCardProps) => (
-    <Card className="bg-monitor-panel/60 border-b border-r border-monitor-line/10">
+    <Card className="bg-monitor-panel/55 border-0  border-r border-monitor-line/10">
       <CardHeader className="pb-1 pt-2 px-2">
         <CardTitle className="flex items-center gap-1 text-xs font-medium">
           <LuPackage2 className="h-3 w-3" />

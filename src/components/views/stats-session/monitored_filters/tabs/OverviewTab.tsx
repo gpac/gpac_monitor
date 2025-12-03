@@ -4,6 +4,7 @@ import { PacketsCard, DataCard, RealtimeMetricsCard } from '../cards';
 import { Badge } from '@/components/ui/badge';
 import { formatTime } from '@/utils/formatting';
 import { getFilterHealthInfo } from '../cards/shared/statusHelpers';
+import { TAB_STYLES } from './styles';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
@@ -37,8 +38,8 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
         </span>
       </div>
 
-      {/* ROW 2: Compact KPIs grid - 3 columns */}
-      <div className="grid grid-cols-3 gap-2 shrink-0">
+      {/* ROW 2: Compact KPIs grid - Auto-adaptive based on container width */}
+      <div className={TAB_STYLES.GRID_AUTO_FIT}>
         {/* Column 1: Filter Health + PIDs */}
         <div className="flex flex-col gap-2">
           {/* Compact Health Card */}
@@ -49,7 +50,7 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
             </div>
           </div>
           {/* Compact PIDs Card */}
-          <div className="bg-monitor-panel/60 border-r  border-monitor-line/10 rounded p-2">
+          <div className="bg-monitor-panel/60 border-0 border-r border-monitor-line/10 rounded p-2">
             <div className="text-xs font-medium text-info mb-1">PIDs</div>
             <div className="text-xs space-y-0.5">
               <div className="flex justify-between">
@@ -64,15 +65,13 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
           </div>
         </div>
 
-        {/* Column 2: Bitrate & Packet Rate */}
+        {/* Column 2: Realtime Metrics */}
         <div className="flex flex-col gap-2">
-          {/* Compact Realtime Metrics */}
           <RealtimeMetricsCard filter={filter} />
         </div>
 
         {/* Column 3: Packets & Data */}
         <div className="flex flex-col gap-2">
-          {/* Stacked Packets + Data */}
           <PacketsCard
             pck_done={filter.pck_done}
             pck_sent={filter.pck_sent}
