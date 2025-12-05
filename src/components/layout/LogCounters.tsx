@@ -1,4 +1,4 @@
-import React from 'react';
+import { ComponentType, memo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { selectLogCounts } from '@/shared/store/selectors/headerSelectors';
 import { addWidget } from '@/shared/store/slices/widgetsSlice';
@@ -14,14 +14,14 @@ import {
 import { getWidgetDefinition } from '../Widget/registry';
 
 interface LogCounterItemProps {
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
   label: string;
   count: number;
   colorClass: string;
   onOpen: () => void;
 }
 
-const LogCounterItem = React.memo<LogCounterItemProps>(
+const LogCounterItem = memo<LogCounterItemProps>(
   ({ icon: Icon, label, count, colorClass, onOpen }) => {
     const hasCount = count > 0;
 
@@ -29,6 +29,7 @@ const LogCounterItem = React.memo<LogCounterItemProps>(
       <button
         onClick={onOpen}
         disabled={!hasCount}
+        title={`${count} ${label} - Click to open logs monitor`}
         aria-label={`${count} ${label} - Click to open logs monitor`}
         className={`
           flex justify-between gap-2 px-3 py-1.5 rounded-md
@@ -59,7 +60,34 @@ const LogCounterItem = React.memo<LogCounterItemProps>(
   (prevProps, nextProps) => prevProps.count === nextProps.count,
 );
 
-const LogCounters: React.FC = () => {
+const LogInfoButton = memo(() => {
+  const dispatch = useAppDispatch();
+  const activeWidgets = useAppSelector(selectActiveWidgets);
+  const logWidgetExists = activeWidgets.some((w) => w.type === WidgetType.LOGS);
+
+  const handleOpen = () => {
+    dispatch(setUIFilter([GpacLogLevel.INFO]));
+    if (!logWidgetExists) {
+      const definition = getWidgetDefinition(WidgetType.LOGS);
+      if (definition) {
+        dispatch(addWidget(WidgetType.LOGS));
+      }
+    }
+  };
+
+  return (
+    <button
+      onClick={handleOpen}
+      title="Show info logs"
+      aria-label="Show info logs"
+      className="px-2 py-1.5 rounded-md hover:bg-gray-800/60 cursor-pointer transition-all duration-150 ease-out"
+    >
+      <FaInfoCircle className="w-3.5 h-3.5 text-info" />
+    </button>
+  );
+});
+
+const LogCounters = () => {
   const dispatch = useAppDispatch();
   const logCounts = useAppSelector(selectLogCounts);
   const activeWidgets = useAppSelector(selectActiveWidgets);
@@ -94,13 +122,7 @@ const LogCounters: React.FC = () => {
         colorClass="text-warning"
         onOpen={() => handleOpenLogsFiltered(GpacLogLevel.WARNING)}
       />
-      <LogCounterItem
-        icon={FaInfoCircle}
-        label="Info"
-        count={logCounts.info}
-        colorClass="text-info"
-        onOpen={() => handleOpenLogsFiltered(GpacLogLevel.INFO)}
-      />
+      <LogInfoButton />
     </div>
   );
 };
