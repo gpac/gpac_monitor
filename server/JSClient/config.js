@@ -21,10 +21,24 @@ const FILTER_SUBSCRIPTION_FIELDS = [
 ];
 // Update intervals for subscriptions (in milliseconds)
 const UPDATE_INTERVALS = {
-    SESSION_STATS: 1000,   
-    FILTER_STATS: 1000, 
-    CPU_STATS: 250,         
+    SESSION_STATS: 1000,
+    FILTER_STATS: 1000,
+    CPU_STATS: 250,
 };
+
+// Log retention configuration
+const LOG_RETENTION = {
+    maxHistorySize: 500,
+    maxHistorySizeVerbose: 2000,
+    // Retention ratio by level (percentage to keep when cleaning)
+    keepRatio: {
+        error: 1.0,   // Keep 100%
+        warning: 0.8, // 80% 
+        info: 0.2,    //  20% 
+        debug: 0.05   // 5% 
+    }
+};
+
 export {
     DEFAULT_FILTER_FIELDS,
     CPU_STATS_FIELDS,
@@ -33,4 +47,5 @@ export {
     PID_PROPS_LITE,
     FILTER_SUBSCRIPTION_FIELDS,
     UPDATE_INTERVALS,
+    LOG_RETENTION,
 };

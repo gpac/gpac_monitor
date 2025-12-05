@@ -1,6 +1,4 @@
 import { Sys as sys } from 'gpaccore';
-import { LOG_RETENTION } from '../config.js';
-import { cleanupLogs } from './Utils/logs.js';
 
 /**
  * LogManager - Manages log subscription and batching for GPAC system logs
@@ -10,11 +8,11 @@ function LogManager(client) {
     this.client = client;
     this.isSubscribed = false;
     this.logLevel = "all@quiet";
-    this.logs = []; // Historical logs storage (adaptive limit)
-    this.maxHistorySize = LOG_RETENTION.maxHistorySize;
+    this.logs = []; // Historical logs storage (max 500)
     this.originalLogConfig = null; // Backup of original GPAC log config
     this.pendingLogs = []; // Batch buffer for outgoing logs
     this.incomingBuffer = []; // Non-blocking buffer for incoming logs
+    this.processingScheduled = false; // Processing schedule flag
     this.batchTimer = null; // Batching timer state
 
     /**
@@ -27,26 +25,23 @@ function LogManager(client) {
             return;
         }
 
-        this.logLevel = logLevel
-
+        this.logLevel = logLevel 
+   
         this.isSubscribed = true;
 
-
+        
 
         try {
             this.originalLogConfig = sys.get_logs(true);
-
-
+        
+         
 
             sys.on_log = (tool, level, message) => {
                 this.handleLog(tool, level, message);
             };
 
             sys.set_logs(this.logLevel);
-
-            // Start SessionManager loop if not running
-            this.client.sessionManager.startMonitoringLoop();
-
+           
 
         } catch (error) {
             console.error("LogManager: Failed to start log capturing:", error);
@@ -93,18 +88,30 @@ function LogManager(client) {
             message: message?.length > 500 ? message.substring(0, 500) + '...' : message
         };
 
-        // Just add to buffer - will be processed by tick()
+
+
+        // Just add to buffer - NO WebSocket operations on main thread
         this.incomingBuffer.push(log);
+
+
+        // Schedule processing if not already scheduled
+        if (!this.processingScheduled) {
+            this.scheduleLogProcessing();
+        }
     };
 
     /**
-     * Tick function called by SessionManager - processes incoming logs
+     * Schedule log processing on next tick (non-blocking)
      */
-    this.tick = function(now) {
-        if (!this.isSubscribed) return;
-        if (this.incomingBuffer.length > 0) {
+    this.scheduleLogProcessing = function() {
+        if (this.processingScheduled) return;
+        
+        this.processingScheduled = true;
+        session.post_task(() => {
             this.processIncomingLogs();
-        }
+            this.processingScheduled = false;
+            return false;
+        }, 1); 
     };
 
     /**
@@ -121,9 +128,9 @@ function LogManager(client) {
 
         // Process each log
         for (const log of logsToProcess) {
-            // Smart cleanup when buffer is full
-            if (this.logs.length >= this.maxHistorySize) {
-                this.logs = cleanupLogs(this.logs, this.maxHistorySize);
+            // Keep history limited
+            if (this.logs.length >= 5000) {
+                this.logs.shift();
             }
             this.logs.push(log);
 
@@ -160,9 +167,7 @@ function LogManager(client) {
     this.updateLogLevel = function(logLevel) {
         if (!this.isSubscribed) return;
 
-        // Adaptive buffer sizing based on log verbosity
-        const isVerbose = logLevel.includes('debug') || logLevel.includes('info');
-        this.maxHistorySize = isVerbose ? LOG_RETENTION.maxHistorySizeVerbose : LOG_RETENTION.maxHistorySize;
+      
 
         try {
             this.logs = [];
@@ -257,6 +262,7 @@ function LogManager(client) {
             this.logs = [];
             this.pendingLogs = [];
             this.incomingBuffer = [];
+            this.processingScheduled = false;
 
             // Clear timers
             this.batchTimer = null;
@@ -265,13 +271,6 @@ function LogManager(client) {
         } catch (error) {
             console.error("LogManager: Error during force cleanup:", error);
         }
-    };
-
-    /**
-     * Handle session end - cleanup resources
-     */
-    this.handleSessionEnd = function() {
-        this.forceUnsubscribe();
     };
 }
 
