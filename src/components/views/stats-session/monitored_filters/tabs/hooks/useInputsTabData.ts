@@ -5,7 +5,6 @@ import { getGlobalStatus } from '@/utils/gpac';
 
 /**
  * Hook to transform and organize input PIDs data
- * Separates business logic from UI rendering
  */
 export const useInputsTabData = (filterData: FilterStatsResponse) => {
   // Convert ipids to array with position indices (0, 1, 2...)
@@ -42,10 +41,7 @@ export const useInputsTabData = (filterData: FilterStatsResponse) => {
     );
   }, [inputPidsWithIndices]);
 
-  const inputNames = useMemo(
-    () => Object.keys(groupedInputs),
-    [groupedInputs],
-  );
+  const inputNames = useMemo(() => Object.keys(groupedInputs), [groupedInputs]);
 
   const globalStatus = useMemo(
     () => getGlobalStatus(inputPidsWithIndices, inputNames.length),

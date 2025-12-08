@@ -1,8 +1,7 @@
 import { memo } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
 import { formatBytes, formatBitrate } from '@/utils/formatting';
-import { getPIDStatusBadge, getMediaTypeInfo } from '@/utils/gpac';
+import { getMediaTypeInfo } from '@/utils/gpac';
 import { FaCircleInfo } from 'react-icons/fa6';
 import type { PIDWithIndex } from '../../types';
 import PIDMetadataBadges from './PIDMetadataBadges';
@@ -12,7 +11,6 @@ import {
   technicalDetailsFont,
   headerFont,
   formatIdentifierFont,
-  badgeFont,
 } from '@/utils/responsiveFonts';
 
 type PIDCardVariant = 'input' | 'output';
@@ -44,7 +42,6 @@ const PIDMetricsCard = memo(
     showPropsButton = true,
     variant = 'input',
   }: PIDMetricsCardProps) => {
-    const statusBadge = getPIDStatusBadge(pid);
     const mediaInfo = getMediaTypeInfo(type);
     const MediaIcon = mediaInfo.icon;
     const borderColor = getBorderColor(type);
@@ -72,6 +69,9 @@ const PIDMetricsCard = memo(
             <MediaIcon
               className={`h-3.5 w-3.5 flex-shrink-0 ${mediaInfo.color}`}
             />
+            <span className={`${formatIdentifierFont} text-muted-foreground`}>
+              IPIDS
+            </span>
             <span className={`${headerFont} font-medium truncate`}>
               {pid.name}
             </span>
@@ -104,14 +104,6 @@ const PIDMetricsCard = memo(
             <PIDMetadataBadges pid={pid} />
           </div>
           <div className="flex items-center gap-1.5">
-            {statusBadge && (
-              <Badge
-                variant={statusBadge.variant}
-                className={`${badgeFont} px-1.5 py-0 h-5`}
-              >
-                {statusBadge.text}
-              </Badge>
-            )}
             {showPropsButton && variant === 'input' && (
               <FaCircleInfo
                 className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-primary transition-colors"
@@ -119,6 +111,7 @@ const PIDMetricsCard = memo(
                 title="View input properties"
               />
             )}
+            <span>IPIDS</span>
           </div>
         </div>
 

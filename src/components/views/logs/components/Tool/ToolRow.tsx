@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
@@ -32,6 +32,15 @@ export const ToolRow = memo(function ToolRow({
   onLevelSelect,
   onMouseLeaveSubMenu,
 }: ToolRowProps) {
+  // Filter out debug level for "all" tool
+  const availableLevels = useMemo(
+    () =>
+      Object.values(GpacLogLevel).filter(
+        (level) => !(tool === GpacLogTool.ALL && level === GpacLogLevel.DEBUG),
+      ),
+    [tool],
+  );
+
   return (
     <div
       className="flex items-center z-10 px-3 py-2 text-xs
@@ -70,7 +79,7 @@ export const ToolRow = memo(function ToolRow({
               shadow-lg shadow-black/40 rounded-md"
             onMouseLeave={onMouseLeaveSubMenu}
           >
-            {Object.values(GpacLogLevel).map((level) => {
+            {availableLevels.map((level) => {
               const isSelected = effectiveLevel === level;
               return (
                 <DropdownMenuItem
