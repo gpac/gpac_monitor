@@ -87,7 +87,7 @@ function LogManager(client) {
     this.handleLog = function(tool, level, message) {
         // Only create log object - NO OTHER PROCESSING
         const log = {
-            timestamp: Date.now(),
+            timestamp: sys.clock_us(), 
             tool,
             level,
             message: message?.length > 500 ? message.substring(0, 500) + '...' : message

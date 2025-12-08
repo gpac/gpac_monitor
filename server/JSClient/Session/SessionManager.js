@@ -1,3 +1,4 @@
+import { Sys as sys } from 'gpaccore';
 /**
  * SessionManager - Orchestrates monitoring loop for all managers
  *
@@ -23,7 +24,7 @@ function SessionManager(client) {
         this.isMonitoringLoopRunning = true;
 
         session.post_task(() => {
-            const now = Date.now();
+            const now = sys.clock_us();
 
             if (session.last_task) {
                 // Send session_end message to frontend before cleanup
