@@ -38,7 +38,7 @@ export enum GpacLogTool {
   RTI = 'rti',
   RTP = 'rtp',
   SCENE = 'scene',
-  SCHED = 'sched',
+  SCHED = 'scheduler',
   SCRIPT = 'script',
   ALL = 'all',
 }
