@@ -99,17 +99,17 @@ export const BandwidthCombinedChart = memo(
 
     return (
       <Card className="bg-monitor-panel border-transparent">
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-1">
           <CardTitle className="flex justify-center items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <LuArrowUpDown className="h-4 w-4 opacity-60" />
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 rounded-full bg-emerald-500" />
-              Upload
+              <span className="w-3 h-0.5 rounded-full bg-blue-500" />
+              Download
             </span>
             /
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 rounded-full bg-blue-500" />
-              Download
+              <span className="w-3 h-0.5 rounded-full bg-emerald-500" />
+              Upload
             </span>
             <span className="opacity-60 normal-case">Mb/s</span>
           </CardTitle>

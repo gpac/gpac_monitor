@@ -56,45 +56,6 @@ const NetworkTab = memo(
                 {/* Header: title + badge */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="w-0.5 h-5 rounded-full bg-emerald-500" />
-                    <LuUpload className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Upload
-                    </span>
-                  </div>
-                  <Badge
-                    variant={uploadActivity.variant}
-                    className="text-[11px] h-5 px-2"
-                  >
-                    {uploadActivity.level}
-                  </Badge>
-                </div>
-
-                {/* Main rate - HERO */}
-                <div className="text-xl font-bold text-emerald-500 tabular-nums leading-none">
-                  {formattedStats.bytesSentRate}
-                </div>
-
-                {/* Secondary stats - single line */}
-                <div className="text-[11px] text-muted-foreground">
-                  <span className="font-medium">
-                    {formattedStats.bytesSent}
-                  </span>
-                  <span className="mx-1.5">·</span>
-                  <span className="font-medium">
-                    {formattedStats.packetsSent} packets
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-monitor-panel border-transparent">
-            <CardContent className="p-2">
-              <div className="space-y-2">
-                {/* Header: title + badge */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
                     <span className="w-0.5 h-5 rounded-full bg-blue-500" />
                     <LuDownload className="h-4 w-4 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -122,6 +83,44 @@ const NetworkTab = memo(
                   <span className="mx-1.5">·</span>
                   <span className="font-medium">
                     {formattedStats.packetsReceived} packets
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-monitor-panel border-transparent">
+            <CardContent className="p-2">
+              <div className="space-y-2">
+                {/* Header: title + badge */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-0.5 h-5 rounded-full bg-emerald-500" />
+                    <LuUpload className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Upload
+                    </span>
+                  </div>
+                  <Badge
+                    variant={uploadActivity.variant}
+                    className="text-[11px] h-5 px-2"
+                  >
+                    {uploadActivity.level}
+                  </Badge>
+                </div>
+
+                {/* Main rate - HERO */}
+                <div className="text-xl font-bold text-emerald-500 tabular-nums leading-none">
+                  {formattedStats.bytesSentRate}
+                </div>
+
+                {/* Secondary stats - single line */}
+                <div className="text-[11px] text-muted-foreground">
+                  <span className="font-medium">
+                    {formattedStats.bytesSent}
+                  </span>
+                  <span className="mx-1.5">·</span>
+                  <span className="font-medium">
+                    {formattedStats.packetsSent} packets
                   </span>
                 </div>
               </div>

@@ -52,7 +52,11 @@ export const LEVEL_BADGE_CLASSES: Record<GpacLogLevel, string> = {
   [GpacLogLevel.INFO]: 'bg-green-700/60 text-green-100 hover:opacity-80',
   [GpacLogLevel.DEBUG]: 'bg-blue-400 text-blue-100 hover:opacity-80',
 };
-export const EXCLUDED_LOG_CONFIGS = new Set(['mutex@debug', 'scheduler@debug']);
+export const EXCLUDED_LOG_CONFIGS = new Set([
+  'mutex@debug',
+  'scheduler@debug',
+  'rmtws@debug',
+]);
 
 /**
  * Log level visual configuration for log entries

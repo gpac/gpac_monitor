@@ -6,6 +6,8 @@ export interface SessionFilterStats {
   bytes_done: number;
   pck_sent: number;
   pck_done: number;
+  nb_opid: number;
+  nb_ipid: number;
   time: number;
   idx: number;
   bytes_sent: number;

@@ -111,7 +111,7 @@ const PIDMetricsCard = memo(
                 title="View input properties"
               />
             )}
-            <span>IPIDS</span>
+            <span>Properties</span>
           </div>
         </div>
 

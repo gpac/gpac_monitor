@@ -44,15 +44,23 @@ export const selectStalledFilters = createSelector(
         stalled[id] = false;
         return;
       }
+      const isSink = curr.nb_opid === 0;
+      const hasTimeStampMetrics =
+        curr.last_ts_sent !== undefined && prev.last_ts_sent !== undefined;
 
-      // Check media timestamp progress (for filters that send packets)
-      const tsChanged = timeFractionChanged(curr.last_ts_sent, prev.last_ts_sent);
+      const mediaProgress =
+        !isSink && hasTimeStampMetrics
+          ? timeFractionChanged(curr.last_ts_sent, prev.last_ts_sent)
+          : false;
 
-      // Check packet consumption (for sink filters like vout/aout)
-      const pckDoneChanged = curr.pck_done !== prev.pck_done;
+      // for filters consuming packets (sinks)
+      const hasPacketMetrics =
+        typeof curr.pck_done === 'number' && typeof prev.pck_done === 'number';
+      const packetProgress =
+        hasPacketMetrics && curr.pck_done !== prev.pck_done;
 
-      // Stalled = no media progress AND no packet consumption
-      stalled[id] = !tsChanged && !pckDoneChanged;
+      const noProgress = !mediaProgress && !packetProgress;
+      stalled[id] = !curr.is_eos && !isSink && noProgress;
     });
 
     return stalled;
