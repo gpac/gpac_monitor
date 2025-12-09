@@ -37,11 +37,10 @@ function LogManager(client) {
             this.originalLogConfig = sys.get_logs(true);
 
 
-
             sys.on_log = (tool, level, message) => {
                 this.handleLog(tool, level, message);
             };
-
+            
             sys.set_logs(this.logLevel);
 
             // Start SessionManager loop if not running

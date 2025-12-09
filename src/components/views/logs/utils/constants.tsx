@@ -54,6 +54,12 @@ export const LEVEL_BADGE_CLASSES: Record<GpacLogLevel, string> = {
 };
 
 /**
+ * Log tool/level combinations to exclude from UI display
+ * mutex@debug is internal and should not be user-configurable
+ */
+export const EXCLUDED_LOG_CONFIGS = new Set(['mutex@debug']);
+
+/**
  * Log level visual configuration for log entries
  * Maps numeric GPAC log levels (0-4) to icon components, styles, and names
  */

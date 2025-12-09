@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
-import { LEVEL_BADGE_CLASSES } from '../../utils/constants';
+import { LEVEL_BADGE_CLASSES, EXCLUDED_LOG_CONFIGS } from '../../utils/constants';
 
 interface ToolRowProps {
   tool: GpacLogTool;
@@ -32,12 +32,13 @@ export const ToolRow = memo(function ToolRow({
   onLevelSelect,
   onMouseLeaveSubMenu,
 }: ToolRowProps) {
-  // Filter out debug level for "all" tool
+  // Filter out excluded tool/level combinations (e.g., mutex@debug)
   const availableLevels = useMemo(
     () =>
-      Object.values(GpacLogLevel).filter(
-        (level) => !(tool === GpacLogTool.ALL && level === GpacLogLevel.DEBUG),
-      ),
+      Object.values(GpacLogLevel).filter((level) => {
+        const config = `${tool}@${level}`;
+        return !EXCLUDED_LOG_CONFIGS.has(config);
+      }),
     [tool],
   );
 
