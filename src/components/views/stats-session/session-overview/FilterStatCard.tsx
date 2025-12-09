@@ -132,7 +132,11 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
               {hasTime && <span className="text-monitor-text-subtle">•</span>}
             </>
           )}
-          {hasTime && <span title="Processing time">{formattedTime}</span>}
+          {hasTime && (
+            <span title="time the filter has been running">
+              {formattedTime}
+            </span>
+          )}
           {filter.errors && filter.errors > 0 && (
             <>
               <span className="text-monitor-text-subtle">•</span>

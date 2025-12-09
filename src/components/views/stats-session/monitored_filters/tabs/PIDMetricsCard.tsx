@@ -70,7 +70,7 @@ const PIDMetricsCard = memo(
               className={`h-3.5 w-3.5 flex-shrink-0 ${mediaInfo.color}`}
             />
             <span className={`${formatIdentifierFont} text-muted-foreground`}>
-              IPIDS
+              Properties
             </span>
             <span className={`${headerFont} font-medium truncate`}>
               {pid.name}
