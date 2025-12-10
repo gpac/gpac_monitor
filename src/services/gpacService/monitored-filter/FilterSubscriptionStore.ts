@@ -11,6 +11,11 @@ export class FilterSubscriptionsStore extends Subscribable<
   constructor() {
     super({ subscribedFilterIdxs: [] });
   }
+
+  public getSnapshot(): FilterSubscriptionsState {
+    return super.getSnapshot();
+  }
+
   public addFilter(filterIdx: number): void {
     if (this.data.subscribedFilterIdxs.includes(filterIdx)) {
       return;

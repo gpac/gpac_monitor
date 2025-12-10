@@ -21,3 +21,18 @@ global.ResizeObserver = class MockResizeObserver {
   unobserve() {}
   disconnect() {}
 } as any;
+
+// Mock matchMedia for uPlot and other libraries
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () => {},
+    removeListener: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    dispatchEvent: () => false,
+  }),
+});
