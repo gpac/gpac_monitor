@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from './redux';
 import {
   saveLayout,
@@ -5,6 +6,7 @@ import {
   deleteLayout,
 } from '../store/slices/widgetsSlice';
 import { selectSavedLayouts } from '../store/selectors/widgets';
+import { saveLayoutsToStorage } from '../store/widgets/layoutStorage';
 
 export const useLayoutManager = () => {
   const dispatch = useAppDispatch();
@@ -25,6 +27,10 @@ export const useLayoutManager = () => {
   const getLayoutNames = () => Object.keys(savedLayouts);
 
   const getLayout = (layoutName: string) => savedLayouts[layoutName];
+
+  useEffect(() => {
+    saveLayoutsToStorage(savedLayouts);
+  }, [savedLayouts]);
 
   return {
     savedLayouts,

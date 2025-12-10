@@ -1,5 +1,5 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { Widget, WidgetType } from '@/types/ui/widget';
+import { Widget, WidgetConfig, WidgetType } from '@/types/ui/widget';
 import { createWidgetInstance } from '@/components/Widget/registry';
 import { WidgetsState } from './widgetsSlice';
 
@@ -109,12 +109,29 @@ export const saveLayoutReducer = (
   action: PayloadAction<string>,
 ) => {
   const layoutName = action.payload;
+  // Only keep base widgets (not those detached to a filter)
+  const baseWidgets = state.activeWidgets.filter(
+    (w) => !w.isDetached && !w.detachedFilterIdx,
+  );
+  const clonedWidgets = baseWidgets.map((w) => ({ ...w }));
+  const clonedConfigs: Record<string, WidgetConfig> = {};
+  clonedWidgets.forEach((w) => {
+    const cfg = state.configs[w.id];
+    if (cfg) {
+      clonedConfigs[w.id] = {
+        ...cfg,
+        settings: { ...(cfg.settings || {}) },
+      };
+    }
+  });
+
   state.savedLayouts[layoutName] = {
     name: layoutName,
-    widgets: [...state.activeWidgets],
-    configs: { ...state.configs },
+    widgets: clonedWidgets,
+    configs: clonedConfigs,
     createdAt: new Date().toISOString(),
   };
+
   state.currentLayout = layoutName;
 };
 
@@ -124,11 +141,17 @@ export const loadLayoutReducer = (
 ) => {
   const layoutName = action.payload;
   const layout = state.savedLayouts[layoutName];
-  if (layout) {
-    state.activeWidgets = [...layout.widgets];
-    state.configs = { ...layout.configs };
-    state.currentLayout = layoutName;
-  }
+  if (!layout) return;
+  state.activeWidgets = layout.widgets.map((w) => ({ ...w }));
+  const newConfigs: Record<string, WidgetConfig> = {};
+  Object.entries(layout.configs).forEach(([id, cfg]) => {
+    newConfigs[id] = {
+      ...cfg,
+      settings: { ...(cfg.settings || {}) },
+    };
+  });
+  state.configs = newConfigs;
+  state.currentLayout = layoutName;
 };
 
 export const deleteLayoutReducer = (
