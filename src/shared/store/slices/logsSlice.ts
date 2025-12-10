@@ -42,7 +42,7 @@ const getInitialState = (): LogsState => {
       defaultAllLevel: config.defaultAllLevel || GpacLogLevel.QUIET,
       visibleToolsFilter: config.visibleToolsFilter || [],
       buffers: {} as Record<GpacLogTool, GpacLogEntry[]>,
-      maxEntriesPerTool: 500, // Reduced for performance (was 1000)
+      maxEntriesPerTool: 500, //
       isSubscribed: false,
       highlightedLogId: null,
       uiFilter: null,

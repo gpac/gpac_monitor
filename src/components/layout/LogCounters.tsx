@@ -60,32 +60,45 @@ const LogCounterItem = memo<LogCounterItemProps>(
   (prevProps, nextProps) => prevProps.count === nextProps.count,
 );
 
-const LogInfoButton = memo(() => {
-  const dispatch = useAppDispatch();
-  const activeWidgets = useAppSelector(selectActiveWidgets);
-  const logWidgetExists = activeWidgets.some((w) => w.type === WidgetType.LOGS);
+interface LogInfoButtonProps {
+  count: number;
+}
 
-  const handleOpen = () => {
-    dispatch(setUIFilter([GpacLogLevel.INFO]));
-    if (!logWidgetExists) {
-      const definition = getWidgetDefinition(WidgetType.LOGS);
-      if (definition) {
-        dispatch(addWidget(WidgetType.LOGS));
+const LogInfoButton = memo<LogInfoButtonProps>(
+  ({ count }) => {
+    const dispatch = useAppDispatch();
+    const activeWidgets = useAppSelector(selectActiveWidgets);
+    const logWidgetExists = activeWidgets.some(
+      (w) => w.type === WidgetType.LOGS,
+    );
+
+    const hasCount = count > 0;
+
+    const handleOpen = () => {
+      dispatch(setUIFilter([GpacLogLevel.INFO]));
+      if (!logWidgetExists) {
+        const definition = getWidgetDefinition(WidgetType.LOGS);
+        if (definition) {
+          dispatch(addWidget(WidgetType.LOGS));
+        }
       }
-    }
-  };
+    };
 
-  return (
-    <button
-      onClick={handleOpen}
-      title="Show info logs"
-      aria-label="Show info logs"
-      className="px-2 py-1.5 rounded-md hover:bg-gray-800/60 cursor-pointer transition-all duration-150 ease-out"
-    >
-      <FaInfoCircle className="w-3.5 h-3.5 text-info" />
-    </button>
-  );
-});
+    return (
+      <button
+        onClick={handleOpen}
+        title="Show info logs"
+        aria-label="Show info logs"
+        className="px-2 py-1.5 rounded-md hover:bg-gray-800/60 cursor-pointer transition-all duration-150 ease-out"
+      >
+        <FaInfoCircle
+          className={`w-3.5 h-3.5 ${hasCount ? 'text-info' : 'text-gray-600'}`}
+        />
+      </button>
+    );
+  },
+  (prevProps, nextProps) => prevProps.count === nextProps.count,
+);
 
 const LogCounters = () => {
   const dispatch = useAppDispatch();
@@ -122,7 +135,7 @@ const LogCounters = () => {
         colorClass="text-warning"
         onOpen={() => handleOpenLogsFiltered(GpacLogLevel.WARNING)}
       />
-      <LogInfoButton />
+      <LogInfoButton count={logCounts.info} />
     </div>
   );
 };

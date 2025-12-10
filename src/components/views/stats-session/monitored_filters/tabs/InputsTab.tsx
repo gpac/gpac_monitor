@@ -72,7 +72,7 @@ const InputsTab = memo(
         )}
         {/* PIDs Display - Table mode for >3, Grid mode for ≤3 */}
         {allPidsWithType.length > 0 ? (
-          allPidsWithType.length > 3 ? (
+          allPidsWithType.length > 1 ? (
             <PIDTable
               pids={inputPidsWithIndices}
               filterIdx={filterData.idx}

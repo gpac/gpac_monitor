@@ -20,7 +20,7 @@ export const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
   [GpacLogTool.HTTP]: 'HTTP',
   [GpacLogTool.INTERACT]: 'Interact',
   [GpacLogTool.MEDIA]: 'Media',
-  [GpacLogTool.MEM]: 'Mem',
+  [GpacLogTool.MEM]: 'Memory',
   [GpacLogTool.MMIO]: 'MMIO',
   [GpacLogTool.MODULE]: 'Module',
   [GpacLogTool.MUTEX]: 'Mutex',
@@ -31,7 +31,7 @@ export const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
   [GpacLogTool.RTI]: 'RTI',
   [GpacLogTool.RTP]: 'RTP',
   [GpacLogTool.SCENE]: 'Scene',
-  [GpacLogTool.SCHED]: 'Sched',
+  [GpacLogTool.SCHED]: 'Scheduler',
   [GpacLogTool.SCRIPT]: 'Script',
   [GpacLogTool.ALL]: 'All',
 };
@@ -56,6 +56,7 @@ export const EXCLUDED_LOG_CONFIGS = new Set([
   'mutex@debug',
   'scheduler@debug',
   'rmtws@debug',
+  'all@debug',
 ]);
 
 /**

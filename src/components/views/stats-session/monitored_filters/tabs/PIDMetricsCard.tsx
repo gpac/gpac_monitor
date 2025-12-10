@@ -69,9 +69,9 @@ const PIDMetricsCard = memo(
             <MediaIcon
               className={`h-3.5 w-3.5 flex-shrink-0 ${mediaInfo.color}`}
             />
-            <span className={`${formatIdentifierFont} text-muted-foreground`}>
-              Properties
-            </span>
+            <span
+              className={`${formatIdentifierFont} text-muted-foreground`}
+            ></span>
             <span className={`${headerFont} font-medium truncate`}>
               {pid.name}
             </span>
@@ -111,7 +111,7 @@ const PIDMetricsCard = memo(
                 title="View input properties"
               />
             )}
-            <span>Properties</span>
+            <span className="font-ui">Properties</span>
           </div>
         </div>
 

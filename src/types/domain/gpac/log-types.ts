@@ -21,7 +21,7 @@ export enum GpacLogTool {
   CONSOLE = 'console',
   CONTAINER = 'container',
   CORE = 'core',
-  CTIME = 'ctime',
+  CTIME = 'comptime',
   DASH = 'dash',
   FILTER = 'filter',
   HTTP = 'http',
