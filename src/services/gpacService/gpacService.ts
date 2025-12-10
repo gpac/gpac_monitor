@@ -23,6 +23,7 @@ import {
 } from '@/types/communication/subscription';
 import { GpacLogConfig } from '@/types/domain/gpac/log-types';
 import { PidProperty } from '@/types';
+import { FilterSubscriptionsStore } from './monitored-filter/FilterSubscriptionStore';
 
 export class GpacService implements IGpacCommunication {
   private static instance: GpacService | null = null;
@@ -35,6 +36,7 @@ export class GpacService implements IGpacCommunication {
   private notificationHandlers: GpacNotificationHandlers = {};
   private _isLoaded: boolean = false;
   private _readyPromise: Promise<void> | null = null;
+  private filterSubscriptionsStore = new FilterSubscriptionsStore();
 
   public onMessage?: (message: any) => void;
   public onError?: (error: Error) => void;
@@ -173,6 +175,9 @@ export class GpacService implements IGpacCommunication {
       idx: idx,
     });
   }
+  public get filterSubscriptions() {
+    return this.filterSubscriptionsStore;
+  }
 
   public setCurrentFilterId(id: number | null): void {
     this.coreService.setCurrentFilterId(id);
@@ -268,6 +273,7 @@ export class GpacService implements IGpacCommunication {
 
   private cleanup(): void {
     this.coreService.setCurrentFilterId(null);
+    this.filterSubscriptionsStore.clear();
   }
   public async subscribe<T = unknown>(
     config: SubscriptionConfig,
@@ -291,21 +297,28 @@ export class GpacService implements IGpacCommunication {
             });
           });
 
-      case SubscriptionType.FILTER_STATS:
+      case SubscriptionType.FILTER_STATS: {
         if (config.filterIdx === undefined) {
           throw new Error(
             'filterIdx is required for FILTER_STATS subscription',
           );
         }
-        return this.messageHandler
+        const filterIdx = config.filterIdx;
+        this.filterSubscriptionsStore.addFilter(filterIdx);
+        const unsubscribeFromFilterStats = this.messageHandler
           .getFilterStatsHandler()
-          .subscribeToFilterStatsUpdates(config.filterIdx, (data) => {
+          .subscribeToFilterStatsUpdates(filterIdx, (data) => {
             callback({
               data: data as T,
               timestamp: Date.now(),
               subscriptionId,
             });
           });
+        return () => {
+          this.filterSubscriptionsStore.removeFilter(filterIdx);
+          unsubscribeFromFilterStats();
+        };
+      }
 
       case SubscriptionType.CPU_STATS:
         return this.messageHandler

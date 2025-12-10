@@ -29,6 +29,12 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   );
 
   const [textColor, backgroundColor] = useGraphColors(node);
+  const isMonitored = data.isMonitored;
+  const borderClass = isMonitored
+    ? 'ring-4 ring-red-700/90'
+    : selected
+      ? 'ring-2 ring-sky-400'
+      : 'ring-1 ring-monitor-line';
 
   // Create input handles only if nb_ipid > 0
   const inputHandles =
@@ -96,9 +102,8 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
       <NodeToolbarActions filterIdx={data.idx} filterName={data.name} />
       <div
         className={`
-          border-2 rounded-xl p-4 shadow-sm
-          ${selected ? 'ring-3 ring-emerald-500 shadow-lg' : ''}
-          transition-all duration-200
+          border-2 rounded-md p-4 
+          ${borderClass}
         `}
         style={containerStyle}
       >
@@ -121,7 +126,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
           style={headerStyle}
         >
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm drop-shadow-sm" style={textStyle}>
+            <h3 className="font-bold text-sm " style={textStyle}>
               {label}
             </h3>
             <div
@@ -211,13 +216,13 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   );
 };
 const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
-  // Only re-render if essential props changed
   return (
     prevProps.data.idx === nextProps.data.idx &&
     prevProps.data.name === nextProps.data.name &&
     prevProps.data.nb_ipid === nextProps.data.nb_ipid &&
     prevProps.data.nb_opid === nextProps.data.nb_opid &&
     prevProps.selected === nextProps.selected &&
+    prevProps.data.isMonitored === nextProps.data.isMonitored &&
     JSON.stringify(prevProps.data.ipid) ===
       JSON.stringify(nextProps.data.ipid) &&
     JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)

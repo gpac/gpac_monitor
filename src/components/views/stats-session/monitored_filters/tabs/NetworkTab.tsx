@@ -44,7 +44,7 @@ const NetworkTab = memo(
           <span className={TAB_STYLES.STATUS_SEPARATOR}>·</span>
           <span className={TAB_STYLES.STATUS_LABEL}>Filter: {filterName}</span>
           <span className="ml-auto text-muted-foreground/70 text-xs">
-            Live <span className="text-error animate-pulse">⏺</span>
+            Live <span className="text-error ">⏺</span>
           </span>
         </div>
 

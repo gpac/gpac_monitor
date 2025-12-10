@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Node,
   Edge,
@@ -6,9 +6,12 @@ import {
   useEdgesState,
   useNodesInitialized,
 } from '@xyflow/react';
-import { useToast } from '@/shared/hooks/useToast';
-import { useGpacService } from '@/shared/hooks/useGpacService';
-import { useAppDispatch } from '@/shared/hooks/redux';
+import {
+  useGpacService,
+  useAppDispatch,
+  useToast,
+  useSubscribedFilters,
+} from '@/shared/hooks/index';
 import { setSelectedNode } from '@/shared/store/slices/graphSlice';
 
 // Modularized hooks
@@ -41,6 +44,12 @@ const useGraphMonitor = () => {
     connectionError,
     setConnectionError,
   } = useGraphState(nodesRef, edgesRef);
+  const subscribedFilterIdxs = useSubscribedFilters();
+
+  const subscribedSet = useMemo(
+    () => new Set(subscribedFilterIdxs),
+    [subscribedFilterIdxs],
+  );
 
   const { layoutOptions, handleLayoutChange, autoLayout, applyLayout } =
     useGraphLayout({
@@ -91,6 +100,7 @@ const useGraphMonitor = () => {
   useEffect(() => {
     // Only update if not currently applying a layout
     if ((nodes.length > 0 || edges.length > 0) && !isApplyingLayout.current) {
+      if (nodesRef.current === nodes && edgesRef.current === edges) return;
       setLocalNodes(nodes);
       setLocalEdges(edges);
 
@@ -101,6 +111,25 @@ const useGraphMonitor = () => {
 
   const [hasLayoutRun, setHasLayoutRun] = useState(false);
   const nodesInitialized = useNodesInitialized();
+
+  // Annotate nodes with isMonitored property
+  const annotatedNodes = useMemo(
+    () =>
+      localNodes.map((node) => {
+        const filterIdx = node.data?.idx as number | undefined;
+        const isMonitored =
+          typeof filterIdx === 'number' && subscribedSet.has(filterIdx);
+
+        return {
+          ...node,
+          data: {
+            ...node.data,
+            isMonitored,
+          },
+        };
+      }),
+    [localNodes, subscribedSet],
+  );
 
   // Reset layout flag when nodes change (new graph data)
   useEffect(() => {
@@ -141,7 +170,7 @@ const useGraphMonitor = () => {
     isLoading,
     connectionError,
     retryConnection,
-    localNodes,
+    localNodes: annotatedNodes,
     localEdges,
     handleNodesChange,
     handleEdgesChange,

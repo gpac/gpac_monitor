@@ -34,7 +34,7 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
           <span className="font-medium tabular-nums">{formattedUptime}</span>
         </span>
         <span className="ml-auto text-muted-foreground/70 text-xs">
-          Live <span className="text-error animate-pulse">⏺</span>
+          Live <span className="text-error ">⏺</span>
         </span>
       </div>
 
