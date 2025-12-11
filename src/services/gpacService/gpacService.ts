@@ -261,7 +261,7 @@ export class GpacService implements IGpacCommunication {
   }
 
   // ============================================================================
-  // DATA FETCHING
+  // PID FETCHING
   // ============================================================================
   public async getPidProps(
     filterIdx: number | undefined,
