@@ -4,7 +4,6 @@ import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
 
-
 interface StatsTabsProps {
   activeTab: string;
   onValueChange: (value: string) => void;
@@ -31,12 +30,12 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
 
   return (
     <TabsList
-      className="sticky top-0 z-50 mb-4 justify-start border-b  border-border bg-black/40 backdrop-blur-sm "
+      className="sticky top-0 z-50 mb-4 justify-start   border-border bg-black/60 backdrop-blur-sm "
       ref={tabsRef}
     >
       <TabsTrigger
         value="main"
-        className="flex items-center gap-1"
+        className="flex items-center gap-1 "
         data-value="main"
         onClick={() => onValueChange('main')}
       >

@@ -79,7 +79,7 @@ const DetailedStatsView = memo(
     return (
       <div className="flex flex-col gap-2">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="sticky backdrop-blur-sm top-0 z-10 bg-background pb-2 space-y-2">
+          <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 pb-2 space-y-2">
             <div className="flex justify-stretch items-center gap-4">
               <h2 className="text-lg font-semibold text-red-600/90">
                 {overviewData.name}
@@ -96,7 +96,7 @@ const DetailedStatsView = memo(
               </Button>
             </div>
 
-            <TabsList className="h-8 justify-start border-b w-full">
+            <TabsList className="h-8 justify-start  w-full">
               <TabsTrigger
                 value="overview"
                 className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
