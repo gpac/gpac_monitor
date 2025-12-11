@@ -26,7 +26,7 @@ const NodeToolbarActions: React.FC<NodeToolbarActionsProps> = ({
   }, [dispatch, filterIdx, setNodes]);
 
   return (
-    <NodeToolbar position={Position.Top} align="start" offset={8}>
+    <NodeToolbar position={Position.Bottom} align="start" offset={8}>
       <div className="flex items-center gap-1 bg-monitor-panel border border-slate-700 rounded-lg p-1 shadow-lg">
         <button
           onClick={handleOpenInputs}

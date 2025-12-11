@@ -3,7 +3,6 @@ import {
   ReactFlow,
   MiniMap,
   Background,
-  BackgroundVariant,
   Node,
   Edge,
   NodeChange,
@@ -76,13 +75,13 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         proOptions={{ hideAttribution: true }}
         selectionKeyCode={null}
       >
-        <Background color="#4b5563" gap={16} variant={BackgroundVariant.Dots} />
+        <Background color="#4b5563" gap={16} />
         <MiniMap
           nodeColor={(node) => getImmediateGraphColor(node)}
           nodeStrokeWidth={2}
           nodeStrokeColor="#374151"
-          maskColor="rgba(0, 0, 0, 0.8)"
-          className="bg-gray-900 border border-gray-900 rounded-lg shadow-lg"
+          maskColor="rgba(0, 0, 0, 0.5)"
+          className="bg-gray-900 border border-gray-900 rounded-md w-52 h-24"
           style={{
             backgroundColor: '#1f2937',
             border: '1px solid #374151',

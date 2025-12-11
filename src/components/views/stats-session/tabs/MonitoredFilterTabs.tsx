@@ -67,11 +67,18 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   // Track initialTab - capture synchronously when tab becomes active
   const initialTabRef = useRef<InitialTabType | null>(null);
   const hasCapturedRef = useRef(false);
+  const currentInitialTab = store.getState().graph.initialTab;
 
-  // Capture initialTab synchronously during render (no re-render, available immediately)
-  if (isActive && !hasCapturedRef.current) {
-    hasCapturedRef.current = true;
-    initialTabRef.current = store.getState().graph.initialTab;
+  // Capture initialTab synchronously during render
+  // Reset capture when initialTab changes (even if already active)
+  if (isActive) {
+    if (
+      !hasCapturedRef.current ||
+      currentInitialTab !== initialTabRef.current
+    ) {
+      hasCapturedRef.current = true;
+      initialTabRef.current = currentInitialTab;
+    }
   }
 
   // Clear initialTab in effect (after render)
