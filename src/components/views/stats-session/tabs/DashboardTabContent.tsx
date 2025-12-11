@@ -60,7 +60,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
       return <LuArrowUp className="h-3.5 w-3.5 text-teal-400/80" />;
     if (trend === 'down')
       return <LuArrowDown className="h-3.5 w-3.5 text-rose-400/80" />;
-    return null;
+    return <div className="h-3.5 w-3.5" />;
   };
 
   return (

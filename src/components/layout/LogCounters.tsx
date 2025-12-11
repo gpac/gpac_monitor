@@ -33,7 +33,7 @@ const LogCounterItem = memo<LogCounterItemProps>(
         aria-label={`${count} ${label} - Click to open logs monitor`}
         className={`
           flex justify-between gap-2 px-3 py-1.5 rounded-md
-          transition-all duration-150 ease-out font-ui text-sm
+           font-ui text-sm
           ${
             hasCount
               ? 'hover:bg-gray-800/60 cursor-pointer'
@@ -89,7 +89,7 @@ const LogInfoButton = memo<LogInfoButtonProps>(
         onClick={handleOpen}
         title="Show info logs"
         aria-label="Show info logs"
-        className="px-2 py-1.5 rounded-md hover:bg-gray-800/60 cursor-pointer transition-all duration-150 ease-out"
+        className="px-2 py-1.5 rounded-md hover:bg-gray-800/60 cursor-pointer"
       >
         <FaInfoCircle
           className={`w-3.5 h-3.5 ${hasCount ? 'text-info' : 'text-gray-600'}`}

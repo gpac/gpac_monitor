@@ -83,7 +83,7 @@ export function createNodeFromFilter(
       y: 100,
     },
 
-    className: `transition-all duration-200 ${
+    className: ` ${
       existingNode?.selected
         ? 'ring-2 ring-offset-2 ring-blue-500 shadow-lg scale-105'
         : ''

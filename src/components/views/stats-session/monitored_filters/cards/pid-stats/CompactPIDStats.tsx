@@ -48,7 +48,7 @@ export const CompactPIDStats = memo(
 
     return (
       <Card
-        className={`bg-monitor-panel border-transparent transition-all duration-200 ${
+        className={`bg-monitor-panel border-transparent  ${
           onClick
             ? 'cursor-pointer hover:bg-monitor-panel/80 hover:border-border/40'
             : ''
