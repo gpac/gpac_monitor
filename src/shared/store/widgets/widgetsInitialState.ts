@@ -2,7 +2,7 @@ import { createWidgetInstance } from '@/components/Widget/registry';
 import { widgetRegistry } from '@/components/Widget/registry';
 import { WidgetConfig, Widget } from '@/types';
 import { WidgetsState } from './widgetsSlice';
-import { loadLayoutFromStorage } from './layoutStorage';
+import { loadLayoutFromStorage, loadLastUsedLayout } from './layoutStorage';
 
 const defaultConfig: WidgetConfig = {
   isMaximized: false,
@@ -43,10 +43,17 @@ export const initialState: WidgetsState = (() => {
     return base;
   }
 
-  const defaultLayout = savedLayouts['default'];
+  // Try to load last used layout, fallback to 'default'
+  const lastUsedLayoutName = loadLastUsedLayout();
+  const layoutNameToLoad =
+    lastUsedLayoutName && savedLayouts[lastUsedLayoutName]
+      ? lastUsedLayoutName
+      : 'default';
 
-  // No default layout, but preserve all saved layouts
-  if (!defaultLayout) {
+  const layoutToLoad = savedLayouts[layoutNameToLoad];
+
+  // No layout to load, but preserve all saved layouts
+  if (!layoutToLoad) {
     return {
       ...base,
       savedLayouts,
@@ -55,9 +62,9 @@ export const initialState: WidgetsState = (() => {
 
   return {
     ...base,
-    activeWidgets: defaultLayout.widgets,
-    configs: defaultLayout.configs,
+    activeWidgets: layoutToLoad.widgets,
+    configs: layoutToLoad.configs,
     savedLayouts,
-    currentLayout: 'default',
+    currentLayout: layoutNameToLoad,
   };
 })();

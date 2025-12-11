@@ -21,6 +21,12 @@ export const selectSavedLayouts = (state: RootState) =>
   state.widgets.savedLayouts;
 
 /**
+ * Base selector for current active layout name
+ */
+export const selectCurrentLayout = (state: RootState): string | undefined =>
+  state.widgets.currentLayout;
+
+/**
  * Get widget config by ID
  */
 const selectWidgetConfigsInternal = (state: RootState) => state.widgets.configs;

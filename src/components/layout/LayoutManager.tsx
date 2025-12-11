@@ -5,7 +5,8 @@ import { useLayoutManager } from '@/shared/hooks/useLayoutManager';
 
 export const LayoutManager = () => {
   const [layoutName, setLayoutName] = useState('');
-  const { save, load, remove, getLayoutNames } = useLayoutManager();
+  const { save, load, remove, getLayoutNames, currentLayout } =
+    useLayoutManager();
 
   const handleSave = () => {
     if (layoutName.trim()) {
@@ -38,27 +39,38 @@ export const LayoutManager = () => {
 
       <div className="space-y-2">
         <h3 className="text-sm font-medium">Saved layouts:</h3>
-        {getLayoutNames().map((name) => (
-          <div key={name} className="flex gap-2 items-center">
-            <span className="flex-1 text-sm text-muted-foreground text-gray-400">
-              {name}
-            </span>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => handleLoad(name)}
-            >
-              Load
-            </Button>
-            <Button
-              size="sm"
-              variant="destructive"
-              onClick={() => handleDelete(name)}
-            >
-              Delete
-            </Button>
-          </div>
-        ))}
+        {getLayoutNames().map((name) => {
+          const isActive = currentLayout === name;
+          return (
+            <div key={name} className="flex gap-2 items-center">
+              <span
+                className={`flex-1 text-sm ${
+                  isActive
+                    ? 'text-blue-400 font-semibold'
+                    : 'text-muted-foreground text-gray-400'
+                }`}
+              >
+                {name}
+                {isActive && <span className="ml-2 text-xs">(active)</span>}
+              </span>
+              <Button
+                size="sm"
+                variant={isActive ? 'outline' : 'default'}
+                onClick={() => handleLoad(name)}
+                disabled={isActive}
+              >
+                {isActive ? 'Active' : 'Load'}
+              </Button>
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => handleDelete(name)}
+              >
+                Delete
+              </Button>
+            </div>
+          );
+        })}
         {getLayoutNames().length === 0 && (
           <p className="text-sm text-muted-foreground text-gray-400">
             No saved layouts

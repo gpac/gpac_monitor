@@ -5,12 +5,19 @@ import {
   loadLayout,
   deleteLayout,
 } from '../store/slices/widgetsSlice';
-import { selectSavedLayouts } from '../store/selectors/widgets';
-import { saveLayoutsToStorage } from '../store/widgets/layoutStorage';
+import {
+  selectSavedLayouts,
+  selectCurrentLayout,
+} from '../store/selectors/widgets';
+import {
+  saveLayoutsToStorage,
+  saveLastUsedLayout,
+} from '../store/widgets/layoutStorage';
 
 export const useLayoutManager = () => {
   const dispatch = useAppDispatch();
   const savedLayouts = useAppSelector(selectSavedLayouts);
+  const currentLayout = useAppSelector(selectCurrentLayout);
 
   const save = (layoutName: string) => {
     dispatch(saveLayout(layoutName));
@@ -32,8 +39,13 @@ export const useLayoutManager = () => {
     saveLayoutsToStorage(savedLayouts);
   }, [savedLayouts]);
 
+  useEffect(() => {
+    saveLastUsedLayout(currentLayout);
+  }, [currentLayout]);
+
   return {
     savedLayouts,
+    currentLayout,
     save,
     load,
     remove,

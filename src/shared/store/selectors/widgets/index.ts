@@ -8,5 +8,6 @@ export {
 export {
   selectActiveWidgets,
   selectSavedLayouts,
+  selectCurrentLayout,
   makeSelectWidgetConfig,
 } from './widgetsSelectors';
