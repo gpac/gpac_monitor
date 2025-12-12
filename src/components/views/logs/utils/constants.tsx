@@ -54,7 +54,7 @@ export const LEVEL_BADGE_CLASSES: Record<GpacLogLevel, string> = {
 };
 export const EXCLUDED_LOG_CONFIGS = new Set([
   'mutex@debug',
-  'scheduler@debug',
+  'sched@debug',
   'rmtws@debug',
   'all@debug',
 ]);
