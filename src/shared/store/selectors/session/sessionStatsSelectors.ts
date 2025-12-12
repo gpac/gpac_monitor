@@ -44,14 +44,12 @@ export const selectStalledFilters = createSelector(
         stalled[id] = false;
         return;
       }
-      const isSink = curr.nb_opid === 0;
       const hasTimeStampMetrics =
         curr.last_ts_sent !== undefined && prev.last_ts_sent !== undefined;
 
-      const mediaProgress =
-        !isSink && hasTimeStampMetrics
-          ? timeFractionChanged(curr.last_ts_sent, prev.last_ts_sent)
-          : false;
+      const mediaProgress = hasTimeStampMetrics
+        ? timeFractionChanged(curr.last_ts_sent, prev.last_ts_sent)
+        : false;
 
       // for filters consuming packets (sinks)
       const hasPacketMetrics =
@@ -60,7 +58,7 @@ export const selectStalledFilters = createSelector(
         hasPacketMetrics && curr.pck_done !== prev.pck_done;
 
       const noProgress = !mediaProgress && !packetProgress;
-      stalled[id] = !curr.is_eos && !isSink && noProgress;
+      stalled[id] = !curr.is_eos && noProgress;
     });
 
     return stalled;
