@@ -39,7 +39,7 @@ const ArgumentItem: React.FC<ArgumentItemProps> = memo(
     return (
       <div
         className={cn(
-          'py-2 px-3 transition-colors duration-150',
+          'py-2 px-3  duration-150',
           'hover:bg-gray-800/30',
           getBorderStyle(arg.hint),
           isPending && 'opacity-60',

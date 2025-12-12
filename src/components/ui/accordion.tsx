@@ -61,17 +61,17 @@ export const AccordionItem: React.FC<AccordionItemProps> = ({
     <div className="rounded-lg">
       <button
         onClick={() => toggleExpanded(value)}
-        className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:text-ui transition-colors"
+        className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:text-ui"
       >
         {title}
         <LuChevronDown
-          className={`w-3 h-3 transition-transform duration-200 ease-out ${
+          className={`w-3 h-3 -transform duration-200 ease-out ${
             isExpanded ? 'transform rotate-180' : ''
           }`}
         />
       </button>
       <div
-        className={`overflow-hidden transition-all duration-200 ease-out ${
+        className={`overflow-hidden  ${
           isExpanded ? 'max-h-96 opacity-100 pt-1' : 'max-h-0 opacity-0'
         }`}
       >

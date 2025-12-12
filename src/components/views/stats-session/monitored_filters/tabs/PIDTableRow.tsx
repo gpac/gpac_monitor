@@ -60,7 +60,7 @@ const PIDTableRow = memo(
 
     return (
       <tr
-        className={`${bgClass} ${!isOutput ? 'hover:bg-black/30 transition-colors cursor-pointer' : ''}`}
+        className={`${bgClass} ${!isOutput ? 'hover:bg-black/30  cursor-pointer' : ''}`}
         onClick={
           !isOutput ? () => onOpenProps(filterIdx, pid.ipidIdx) : undefined
         }

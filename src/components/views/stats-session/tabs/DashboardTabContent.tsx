@@ -65,7 +65,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
 
   return (
     <Card
-      className={`bg-monitor-panel/60 border border-white/[0.03] rounded-lg shadow-none hover:bg-monitor-panel/80 transition-colors h-[80px] ${className}`}
+      className={`bg-monitor-panel/60 border border-white/[0.03] rounded-lg shadow-none hover:bg-monitor-panel/80  h-[80px] ${className}`}
     >
       <CardContent className="p-4 h-full flex flex-col justify-between">
         {/* Top row: title + icon */}

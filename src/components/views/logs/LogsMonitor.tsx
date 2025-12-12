@@ -172,7 +172,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
             <CustomTooltip content="Clear UI filter" side="bottom">
               <button
                 onClick={() => dispatch(clearUIFilter())}
-                className="px-2 py-1 text-xs rounded bg-red-900/30 border border-red-800/50 text-red-200 hover:bg-red-900/50 transition-colors"
+                className="px-2 py-1 text-xs rounded bg-red-900/30 border border-red-800/50 text-red-200 hover:bg-red-900/50 "
               >
                 Clear Filter
               </button>
@@ -224,12 +224,12 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
                   });
                 }
               }}
-              className={`p-2 rounded-sm shadow-md border-2 transition-transform hover:scale-105
+              className={`p-2 rounded-sm shadow-md border-2  hover:scale-105
   `}
               title={atBottom ? 'Scroll to top' : 'Scroll to bottom'}
             >
               <RiScrollToBottomLine
-                className={`w-5 h-5 transform transition-transform duration-200 ${
+                className={`w-5 h-5 transform  duration-200 ${
                   atBottom ? 'rotate-180' : ''
                 }`}
               />

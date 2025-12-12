@@ -46,12 +46,12 @@ export const ToolRow = memo(function ToolRow({
     <div
       className="flex items-center z-10 px-3 py-2 text-xs
         text-slate-200 bg-slate-900
-        hover:bg-slate-800/60 transition-colors"
+        hover:bg-slate-800/60 "
       style={{ overflow: 'visible' }}
     >
       <span
         onClick={() => onToolNavigate(tool)}
-        className={`w-1/2 px-1 py-1 cursor-pointer transition
+        className={`w-1/2 px-1 py-1 cursor-pointer
           ${
             isCurrentTool
               ? 'text-slate-100 bg-slate-800 rounded-lg font-medium ring-1 ring-emerald-700/40'
@@ -66,7 +66,7 @@ export const ToolRow = memo(function ToolRow({
           <DropdownMenuSubTrigger className="p-0 h-auto">
             <Badge
               variant="logs"
-              className={`cursor-pointer transition
+              className={`cursor-pointer 
                 ring-1 ring-slate-700/40
                 ${LEVEL_BADGE_CLASSES[effectiveLevel]}
                 `}

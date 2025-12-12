@@ -53,7 +53,7 @@ const PIDMetricsCard = memo(
 
     return (
       <div
-        className={`bg-monitor-panel rounded-md border-l-2 ${borderColor} hover:bg-background/60 transition-colors`}
+        className={`bg-monitor-panel rounded-md border-l-2 ${borderColor} hover:bg-background/60 `}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-white/5">
@@ -98,7 +98,7 @@ const PIDMetricsCard = memo(
           <div className="flex items-center gap-1.5">
             {showPropsButton && variant === 'input' && (
               <FaCircleInfo
-                className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-primary transition-colors"
+                className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-primary "
                 onClick={() => onOpenProps(filterIdx, pid.ipidIdx)}
                 title="View input properties"
               />

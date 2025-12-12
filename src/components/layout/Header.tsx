@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={() => dispatch(toggleSidebar())}
-            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800 "
             title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
           >
             {isSidebarOpen ? (

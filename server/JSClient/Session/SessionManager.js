@@ -22,6 +22,12 @@ function SessionManager(client) {
     this.startMonitoringLoop = function() {
         if (this.isMonitoringLoopRunning) return;
         this.isMonitoringLoopRunning = true;
+        const processError = session.last_process_error; 
+        //error handling
+if (processError) {
+    sys.print("Erreur de processus détectée sur la session !");
+
+}
 
         session.post_task(() => {
             const now = sys.clock_us();

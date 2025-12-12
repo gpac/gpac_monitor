@@ -158,7 +158,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="px-0 py-0">
-            <WidgetStatusBadge className="cursor-pointer hover:opacity-80 transition-opacity">
+            <WidgetStatusBadge className="cursor-pointer hover:opacity-80 ">
               <span className="text-sm font-medium text-info">
                 {currentDisplayInfo.label}
                 {currentDisplayInfo.effectiveLevel &&

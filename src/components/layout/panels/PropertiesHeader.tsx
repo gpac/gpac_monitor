@@ -35,7 +35,7 @@ const PropertiesHeader: React.FC<PropertiesHeaderProps> = ({
         </div>
         <button
           onClick={onClose}
-          className="p-1 hover:bg-white/5 rounded transition-colors shrink-0"
+          className="p-1 hover:bg-white/5 rounded  shrink-0"
           aria-label="Close panel"
         >
           <IoClose className="w-4 h-4 text-monitor-text-secondary" />

@@ -52,13 +52,13 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
 
     // Pre-compute CSS classes to avoid string concatenation on each render
     const containerClass = useMemo(() => {
-      const baseClasses = 'flex items-start gap-2 mb-1 p-1 rounded hover:bg-gray-800/30 transition-colors cursor-pointer';
+      const baseClasses = 'flex items-start gap-2 mb-1 p-1 rounded hover:bg-gray-800/30  cursor-pointer';
       const highlightClasses = isHighlighted ? ' border-l-4 border-yellow-500 bg-yellow-900/70' : '';
       return baseClasses + highlightClasses;
     }, [isHighlighted]);
 
     const buttonClass = useMemo(() => {
-      const baseClasses = 'shrink-0 p-1 rounded transition-colors mt-1';
+      const baseClasses = 'shrink-0 p-1 rounded  mt-1';
       const colorClasses = isHighlighted ? ' text-yellow-500' : ' text-gray-400 hover:text-yellow-500';
       return baseClasses + colorClasses;
     }, [isHighlighted]);

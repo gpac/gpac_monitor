@@ -28,7 +28,7 @@ export const CPUHistoryBadge = memo<CPUHistoryBadgeProps>(
           <Button variant="ghost" size="sm" className="px-0 py-0">
             <WidgetStatusBadge
               icon={<LuClock className="w-4 h-4 text-info" />}
-              className="cursor-pointer hover:opacity-80 transition-opacity"
+              className="cursor-pointer hover:opacity-80 "
             >
               <span className="text-sm font-medium text-info">
                 {DURATION_LABELS[value]}
