@@ -84,10 +84,23 @@ export const getPlaybackStatus = (
 };
 
 /**
- * Gets filter health status from GPAC status string
+ * Gets filter health status from GPAC status string and stalled state
  */
-export const getFilterHealthInfo = (status: string): HealthInfo => {
+export const getFilterHealthInfo = (
+  status: string,
+  isStalled?: boolean,
+): HealthInfo => {
   const statusLower = status?.toLowerCase() || '';
+
+  // Check stalled first - highest priority for user awareness
+  if (isStalled) {
+    return {
+      variant: 'secondary',
+      color: 'text-warning',
+      bgColor: 'bg-yellow-500/10',
+      label: 'Stalled',
+    };
+  }
 
   if (statusLower.includes('error') || statusLower.includes('stop')) {
     return {

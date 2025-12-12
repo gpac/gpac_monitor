@@ -1,5 +1,6 @@
 import React, { useMemo, memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
+import { LuTriangleAlert } from 'react-icons/lu';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
@@ -9,6 +10,7 @@ interface CustomNodeProps extends NodeProps {
   data: GraphFilterData & {
     label: string;
     filterType: string;
+    isStalled?: boolean;
   } & Record<string, unknown>;
 }
 
@@ -17,7 +19,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   selected,
   ...nodeProps
 }) => {
-  const { label, ipid, opid, nb_ipid, nb_opid } = data;
+  const { label, ipid, opid, nb_ipid, nb_opid, isStalled } = data;
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -126,11 +128,20 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
           style={headerStyle}
         >
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm " style={textStyle}>
-              {label}
-            </h3>
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <h3 className="font-bold text-sm truncate" style={textStyle}>
+                {label}
+              </h3>
+              {isStalled && (
+                <LuTriangleAlert
+                  className="flex-shrink-0 text-yellow-400 animate-pulse"
+                  size={16}
+                  title="Filter is stalled - no data progress detected"
+                />
+              )}
+            </div>
             <div
-              className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full"
+              className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full flex-shrink-0"
               style={textStyle}
               title={
                 sessionType === 'source'
@@ -223,6 +234,7 @@ const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
     prevProps.data.nb_opid === nextProps.data.nb_opid &&
     prevProps.selected === nextProps.selected &&
     prevProps.data.isMonitored === nextProps.data.isMonitored &&
+    prevProps.data.isStalled === nextProps.data.isStalled &&
     JSON.stringify(prevProps.data.ipid) ===
       JSON.stringify(nextProps.data.ipid) &&
     JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)

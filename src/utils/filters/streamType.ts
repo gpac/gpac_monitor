@@ -54,10 +54,31 @@ export const FILTER_LABELS: Record<FilterType, string> = {
 };
 
 /**
+ * Border color classes for media types (used in PID cards)
+ */
+export const MEDIA_BORDER_COLORS: Record<FilterType, string> = {
+  video: 'border-l-blue-500/60',
+  audio: 'border-l-emerald-500/60',
+  text: 'border-l-amber-500/60',
+  file: 'border-l-slate-500/60',
+};
+
+/**
  * Get color for a filter type
  */
 export const getFilterColor = (filterType: FilterType): string => {
   return FILTER_COLORS[filterType];
+};
+
+/**
+ * Get border color class for media type (from GPAC stream_type)
+ */
+export const getBorderColorForMediaType = (type: string): string => {
+  const t = type.toLowerCase();
+  if (t === 'visual' || t === 'video') return MEDIA_BORDER_COLORS.video;
+  if (t === 'audio') return MEDIA_BORDER_COLORS.audio;
+  if (t === 'text') return MEDIA_BORDER_COLORS.text;
+  return MEDIA_BORDER_COLORS.file;
 };
 
 /**

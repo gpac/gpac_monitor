@@ -1,4 +1,6 @@
 import { memo } from 'react';
+import { useSelector } from 'react-redux';
+import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
 import { PacketsCard, DataCard, RealtimeMetricsCard } from '../cards';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +14,8 @@ interface OverviewTabProps {
 
 const OverviewTab = memo(({ filter }: OverviewTabProps) => {
   const { status, type, idx, time } = filter;
-  const healthInfo = getFilterHealthInfo(status);
+  const isStalled = useSelector(selectIsFilterStalled(idx.toString()));
+  const healthInfo = getFilterHealthInfo(status, isStalled);
   const formattedUptime = formatTime(time);
 
   return (

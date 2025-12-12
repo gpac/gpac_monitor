@@ -1,7 +1,8 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
 import { formatBytes, formatBitrate } from '@/utils/formatting';
 import { getMediaTypeInfo } from '@/utils/gpac';
+import { getBorderColorForMediaType } from '@/utils/filters/streamType';
 import { FaCircleInfo } from 'react-icons/fa6';
 import type { PIDWithIndex } from '../../types';
 import PIDMetadataBadges from './PIDMetadataBadges';
@@ -24,15 +25,6 @@ interface PIDMetricsCardProps {
   variant?: PIDCardVariant;
 }
 
-// Border color by media type
-const getBorderColor = (type: string): string => {
-  const t = type.toLowerCase();
-  if (t === 'visual' || t === 'video') return 'border-l-blue-500/60';
-  if (t === 'audio') return 'border-l-emerald-500/60';
-  if (t === 'text') return 'border-l-amber-500/60';
-  return 'border-l-slate-500/60';
-};
-
 const PIDMetricsCard = memo(
   ({
     pid,
@@ -42,9 +34,9 @@ const PIDMetricsCard = memo(
     showPropsButton = true,
     variant = 'input',
   }: PIDMetricsCardProps) => {
-    const mediaInfo = getMediaTypeInfo(type);
+    const mediaInfo = useMemo(() => getMediaTypeInfo(type), [type]);
     const MediaIcon = mediaInfo.icon;
-    const borderColor = getBorderColor(type);
+    const borderColor = useMemo(() => getBorderColorForMediaType(type), [type]);
 
     // Format detection
     const t = type.toLowerCase();

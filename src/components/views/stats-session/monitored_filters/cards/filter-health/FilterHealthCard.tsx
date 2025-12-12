@@ -1,4 +1,6 @@
 import { memo, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
@@ -11,8 +13,12 @@ interface FilterHealthCardProps {
 
 export const FilterHealthCard = memo(({ filter }: FilterHealthCardProps) => {
   const { status, type, idx, time } = filter;
+  const isStalled = useSelector(selectIsFilterStalled(idx.toString()));
 
-  const healthInfo = useMemo(() => getFilterHealthInfo(status), [status]);
+  const healthInfo = useMemo(
+    () => getFilterHealthInfo(status, isStalled),
+    [status, isStalled],
+  );
   const formattedUptime = useMemo(() => formatTime(time), [time]);
 
   return (
