@@ -5,10 +5,7 @@ import {
   loadLayout,
   deleteLayout,
 } from '../store/slices/widgetsSlice';
-import {
-  selectSavedLayouts,
-  selectCurrentLayout,
-} from '../store/selectors/widgets';
+import { selectSavedLayouts, selectCurrentLayout } from '../store/selectors';
 import {
   saveLayoutsToStorage,
   saveLastUsedLayout,

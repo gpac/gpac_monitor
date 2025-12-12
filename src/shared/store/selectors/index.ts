@@ -15,3 +15,6 @@ export * from './monitoredFilter';
 
 // Session stats selectors
 export * from './session';
+
+// Widgets selectors
+export * from './widgets';

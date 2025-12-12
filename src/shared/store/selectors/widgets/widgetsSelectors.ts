@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { RootState } from '../../slices/widgetsSlice';
+import type { RootState } from '../../index';
 import { WidgetConfig } from '@/types/ui/widget';
 
 const defaultWidgetConfig: WidgetConfig = {
