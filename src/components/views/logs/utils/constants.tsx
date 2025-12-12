@@ -31,7 +31,7 @@ export const TOOL_DISPLAY_NAMES: Record<GpacLogTool, string> = {
   [GpacLogTool.RTI]: 'RTI',
   [GpacLogTool.RTP]: 'RTP',
   [GpacLogTool.SCENE]: 'Scene',
-  [GpacLogTool.SCHED]: 'Scheduler',
+  [GpacLogTool.SCHED]: 'Sched',
   [GpacLogTool.SCRIPT]: 'Script',
   [GpacLogTool.ALL]: 'All',
 };
