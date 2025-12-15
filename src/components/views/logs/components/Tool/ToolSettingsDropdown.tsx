@@ -6,10 +6,12 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import { SearchBar } from '@/components/ui/search-bar';
 import { IoSettings } from 'react-icons/io5';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
 import { TOOL_DISPLAY_NAMES } from '../../utils/constants';
 import { getEffectiveLevel, sortTools } from '../../utils/toolUtils';
+import { useSearchFilter } from '@/shared/hooks/useSearchFilter';
 import { ToolRow } from './ToolRow';
 
 interface ToolSettingsDropdownProps {
@@ -36,6 +38,7 @@ export const ToolSettingsDropdown = memo(
     ) {
       const [isOpen, setIsOpen] = useState(false);
       const [openSubMenu, setOpenSubMenu] = useState<string | null>(null);
+      const [searchQuery, setSearchQuery] = useState('');
 
       const handleLevelChange = useCallback(
         (tool: GpacLogTool, level: GpacLogLevel) => {
@@ -48,10 +51,19 @@ export const ToolSettingsDropdown = memo(
 
       const sortedTools = useMemo(() => sortTools(currentTool), [currentTool]);
 
+      const filteredTools = useSearchFilter(
+        sortedTools,
+        searchQuery,
+        useCallback(
+          (tool: GpacLogTool) => [tool, TOOL_DISPLAY_NAMES[tool]],
+          [],
+        ),
+      );
+
       const toolItems = useMemo(() => {
         if (!isOpen) return [];
 
-        return sortedTools.map((tool) => {
+        return filteredTools.map((tool) => {
           const effectiveLevel = getEffectiveLevel(
             tool,
             levelsByTool,
@@ -65,7 +77,7 @@ export const ToolSettingsDropdown = memo(
             displayName: TOOL_DISPLAY_NAMES[tool],
           };
         });
-      }, [isOpen, sortedTools, levelsByTool, defaultAllLevel, currentTool]);
+      }, [isOpen, filteredTools, levelsByTool, defaultAllLevel, currentTool]);
 
       const handleLevelSelect = useCallback(
         (tool: GpacLogTool, level: GpacLogLevel) => {
@@ -80,8 +92,20 @@ export const ToolSettingsDropdown = memo(
         [handleLevelChange, levelsByTool, defaultAllLevel],
       );
 
+      const handleSearchChange = useCallback((query: string) => {
+        setSearchQuery(query);
+      }, []);
+
+      const handleOpenChange = useCallback((open: boolean) => {
+        setIsOpen(open);
+        if (!open) {
+          setSearchQuery('');
+          setOpenSubMenu(null);
+        }
+      }, []);
+
       return (
-        <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+        <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
           <DropdownMenuTrigger asChild>
             <Button
               ref={ref}
@@ -117,6 +141,13 @@ export const ToolSettingsDropdown = memo(
               >
                 <div className="px-3 py-2 text-sm text-slate-300">
                   Logs Configuration
+                </div>
+                <div className="px-3 pb-2">
+                  <SearchBar
+                    onSearchChange={handleSearchChange}
+                    placeholder="Filter tools..."
+                    debounceMs={150}
+                  />
                 </div>
                 <DropdownMenuSeparator />
                 <div
