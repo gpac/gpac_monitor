@@ -4,6 +4,7 @@ import {
   makeSelectArgumentUpdatesForFilter,
 } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { useSearchFilter } from '@/shared/hooks/useSearchFilter';
 import ArgumentItem from './arguments/ArgumentItem';
 import { GpacArgument, GPACTypes } from './types';
 
@@ -14,6 +15,7 @@ interface FilterArgumentsContentProps {
   filterArgs: GpacArgument[];
   showExpert?: boolean;
   showAdvanced?: boolean;
+  searchQuery?: string;
 }
 
 /**
@@ -26,6 +28,7 @@ const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
   filterArgs,
   showExpert = false,
   showAdvanced = false,
+  searchQuery = '',
 }) => {
   const dispatch = useAppDispatch();
 
@@ -64,9 +67,24 @@ const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
     });
   }, [filterArgs, showExpert, showAdvanced]);
 
+  // Search filtering
+  const filteredArgs = useSearchFilter(
+    visibleArgs,
+    searchQuery,
+    useCallback((arg: GpacArgument) => [arg.name, arg.desc || ''], []),
+  );
+
+  if (filteredArgs.length === 0 && searchQuery) {
+    return (
+      <div className="text-center text-monitor-text-muted py-6 text-xs">
+        No arguments match your search.
+      </div>
+    );
+  }
+
   return (
     <div className="divide-y divide-monitor-divider bg-monitor-paneloverflow-y-auto">
-      {visibleArgs.map((arg) => (
+      {filteredArgs.map((arg) => (
         <ArgumentItem
           key={arg.name}
           arg={arg}

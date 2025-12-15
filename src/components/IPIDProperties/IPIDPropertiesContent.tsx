@@ -1,16 +1,27 @@
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { PidProperty } from '@/types';
+import { useSearchFilter } from '@/shared/hooks/useSearchFilter';
 import PropertyItem from './PropertyItem';
 
 interface IPIDPropertiesContentProps {
   properties: PidProperty[];
+  searchQuery?: string;
 }
 
 /**
  * Display IPID properties in a scrollable list_-
  */
 const IPIDPropertiesContent: React.FC<IPIDPropertiesContentProps> = memo(
-  ({ properties }) => {
+  ({ properties, searchQuery = '' }) => {
+    const filteredProperties = useSearchFilter(
+      properties,
+      searchQuery,
+      useCallback(
+        (prop: PidProperty) => [prop.name, String(prop.value ?? '')],
+        [],
+      ),
+    );
+
     if (!properties || properties.length === 0) {
       return (
         <div className="text-center text-monitor-text-muted py-6 text-xs">
@@ -19,9 +30,17 @@ const IPIDPropertiesContent: React.FC<IPIDPropertiesContentProps> = memo(
       );
     }
 
+    if (filteredProperties.length === 0 && searchQuery) {
+      return (
+        <div className="text-center text-monitor-text-muted py-6 text-xs">
+          No properties match your search.
+        </div>
+      );
+    }
+
     return (
       <div className="divide-y divide-monitor-divider bg-monitor-panel overflow-y-auto">
-        {properties.map((prop) => (
+        {filteredProperties.map((prop) => (
           <PropertyItem key={prop.name} property={prop} />
         ))}
       </div>

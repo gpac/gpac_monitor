@@ -1,6 +1,7 @@
 import React from 'react';
 import { IoClose } from 'react-icons/io5';
 import { Checkbox } from '../../ui/checkbox';
+import { SearchBar } from '../../ui/search-bar';
 
 interface PropertiesHeaderProps {
   filterName: string;
@@ -10,6 +11,7 @@ interface PropertiesHeaderProps {
   onToggleExpert?: (checked: boolean) => void;
   onToggleAdvanced?: (checked: boolean) => void;
   mode?: 'filter' | 'ipid';
+  onSearchChange?: (query: string) => void;
 }
 
 const PropertiesHeader: React.FC<PropertiesHeaderProps> = ({
@@ -20,6 +22,7 @@ const PropertiesHeader: React.FC<PropertiesHeaderProps> = ({
   onToggleExpert,
   onToggleAdvanced,
   mode = 'filter',
+  onSearchChange,
 }) => {
   return (
     <div className="bg-monitor-surface border-b border-monitor-line">
@@ -56,6 +59,19 @@ const PropertiesHeader: React.FC<PropertiesHeaderProps> = ({
             <Checkbox checked={showExpert} onCheckedChange={onToggleExpert} />
             <span className="text-amber-600">Expert</span>
           </label>
+        </div>
+      )}
+
+      {/* Search Bar */}
+      {onSearchChange && (
+        <div className="px-3 pb-3">
+          <SearchBar
+            onSearchChange={onSearchChange}
+            placeholder={
+              mode === 'ipid' ? 'Filter properties...' : 'Filter arguments...'
+            }
+            debounceMs={150}
+          />
         </div>
       )}
     </div>

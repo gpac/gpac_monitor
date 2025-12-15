@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { useSidebar } from '@/shared/hooks/useSidebar';
@@ -20,6 +20,7 @@ const PropertiesPanel: React.FC = () => {
   // Local state for filter args visibility options
   const [showExpert, setShowExpert] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Determine filterIdx and ipidIdx based on sidebar content
   const filterIdxForPid =
@@ -33,6 +34,15 @@ const PropertiesPanel: React.FC = () => {
 
   const ipidProperties = useFetchIPIDProperties(filterIdxForPid, ipidIdx);
   const filterArgs = useFilterArgsSubscription(filterIdxForArgs);
+
+  // Reset search when sidebar content changes
+  useEffect(() => {
+    setSearchQuery('');
+  }, [sidebarContent]);
+
+  const handleSearchChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
 
   // Empty state
   if (!sidebarContent) {
@@ -59,6 +69,7 @@ const PropertiesPanel: React.FC = () => {
             filterName={`${getFilterName(sidebarContent.filterIdx)} IPIDs`}
             mode="ipid"
             onClose={closeSidebar}
+            onSearchChange={handleSearchChange}
           />
         ) : sidebarContent.type === 'filter-args' ? (
           <PropertiesHeader
@@ -69,6 +80,7 @@ const PropertiesPanel: React.FC = () => {
             onToggleExpert={setShowExpert}
             onToggleAdvanced={setShowAdvanced}
             onClose={closeSidebar}
+            onSearchChange={handleSearchChange}
           />
         ) : null}
       </div>
@@ -76,7 +88,10 @@ const PropertiesPanel: React.FC = () => {
       {/* Content - scrollable */}
       <div className="flex-1 overflow-y-auto">
         {sidebarContent.type === 'pid-props' ? (
-          <IPIDPropertiesContent properties={ipidProperties} />
+          <IPIDPropertiesContent
+            properties={ipidProperties}
+            searchQuery={searchQuery}
+          />
         ) : sidebarContent.type === 'filter-args' ? (
           Array.isArray(filterArgs) && filterArgs.length > 0 ? (
             <FilterArgumentsContent
@@ -84,6 +99,7 @@ const PropertiesPanel: React.FC = () => {
               filterArgs={filterArgs}
               showExpert={showExpert}
               showAdvanced={showAdvanced}
+              searchQuery={searchQuery}
             />
           ) : (
             <div className="text-center text-monitor-text-muted py-6 text-xs">
