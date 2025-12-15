@@ -60,7 +60,7 @@ const PIDTableRow = memo(
 
     return (
       <tr
-        className={`${bgClass} ${!isOutput ? 'hover:bg-black/30  cursor-pointer' : ''}`}
+        className={`${bgClass} ${!isOutput ? 'hover:bg-black/30 cursor-pointer' : ''}`}
         onClick={
           !isOutput ? () => onOpenProps(filterIdx, pid.ipidIdx) : undefined
         }
@@ -96,17 +96,17 @@ const PIDTableRow = memo(
           {pid.codec || '—'}
         </td>
         <td
-          className={`${metricValueFont} px-2 py-1.5 text-muted-foreground tabular-nums`}
+          className={`${metricValueFont} px-2 py-1.5 text-right text-muted-foreground tabular-nums whitespace-nowrap`}
         >
           {formatBytes(pid.buffer)}
         </td>
         <td
-          className={`${metricValueFont} px-2 py-1.5 text-info tabular-nums font-medium`}
+          className={`${metricValueFont} px-2 py-1.5 text-right text-info tabular-nums font-medium whitespace-nowrap`}
         >
           {pid.bitrate || 0}
         </td>
         <td
-          className={`${metricValueFont} px-2 py-1.5 text-muted-foreground tabular-nums`}
+          className={`${metricValueFont} px-2 py-1.5 text-right text-muted-foreground tabular-nums whitespace-nowrap`}
         >
           {resOrCh}
         </td>
@@ -121,7 +121,7 @@ const PIDTableRow = memo(
           )}
         </td>
         {!isOutput && (
-          <td className="px-2 py-1.5 text-right">
+          <td className={`px-2 py-1.5 text-center sticky right-0 ${bgClass}`}>
             <FaCircleInfo
               className="h-3 w-3 text-muted-foreground/50 hover:text-primary inline-block"
               title="View properties"
