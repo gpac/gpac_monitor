@@ -93,7 +93,7 @@ const DashboardLayout: React.FC = () => {
         )}
 
         <main
-          className="flex-1 p-4 transition-transform duration-300 will-change-transform"
+          className="flex-1 pr-4 pb-4 pt-4 pl-0  transition-transform duration-300 will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(256px)' : 'translateX(0)',
             opacity: isDraggingRef.current ? 0.2 : 1,
