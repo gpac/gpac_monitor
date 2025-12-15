@@ -121,7 +121,7 @@ const PIDTableRow = memo(
           )}
         </td>
         {!isOutput && (
-          <td className={`px-2 py-1.5 text-center sticky right-0 ${bgClass}`}>
+          <td className="px-2 py-1.5 text-center">
             <FaCircleInfo
               className="h-3 w-3 text-muted-foreground/50 hover:text-primary inline-block"
               title="View properties"

@@ -37,7 +37,7 @@ const PIDTable = memo(
                 Status
               </th>
               {variant === 'input' && (
-                <th className="px-2 py-1.5 w-10 text-center text-[10px] font-medium text-muted-foreground uppercase tracking-wide sticky right-0 bg-monitor-panel">
+                <th className="px-2 py-1.5 w-10 text-center text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
                   PROPERTIES
                 </th>
               )}
