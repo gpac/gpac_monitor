@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, memo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -23,7 +23,7 @@ interface ManageConnectionsDialogProps {
   onClose: () => void;
 }
 
-const ManageConnectionsDialog = React.memo(
+const ManageConnectionsDialog = memo(
   ({ isOpen, onClose }: ManageConnectionsDialogProps) => {
     const dispatch = useAppDispatch();
     const connections = useAppSelector(selectAllConnections);

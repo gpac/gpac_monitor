@@ -1,4 +1,3 @@
-import React from 'react';
 import WidgetWrapper from '../Widget/WidgetWrapper';
 
 interface LoadingStateProps {
@@ -6,7 +5,7 @@ interface LoadingStateProps {
   message?: string;
 }
 
-const LoadingState: React.FC<LoadingStateProps> = ({ id, message }) => {
+const LoadingState = ({ id, message }: LoadingStateProps) => {
   return (
     <WidgetWrapper id={id}>
       <div className="flex flex-col items-center justify-center h-full p-4">

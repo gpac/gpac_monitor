@@ -1,4 +1,3 @@
-import React from 'react';
 import WidgetWrapper from '../Widget/WidgetWrapper';
 
 interface ConnectionErrorStateProps {
@@ -8,12 +7,12 @@ interface ConnectionErrorStateProps {
   isLoading?: boolean;
 }
 
-const ConnectionErrorState: React.FC<ConnectionErrorStateProps> = ({
+const ConnectionErrorState = ({
   id,
   errorMessage,
   onRetry,
   isLoading = false,
-}) => {
+}: ConnectionErrorStateProps) => {
   if (isLoading) {
     return (
       <WidgetWrapper id={id}>

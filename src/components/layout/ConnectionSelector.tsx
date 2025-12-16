@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import { useCallback, useState, useMemo, memo } from 'react';
 import { LuPlug2 } from 'react-icons/lu';
 import { FaChevronDown } from 'react-icons/fa6';
 import {
@@ -18,7 +18,7 @@ import { getConnectionStatusClass } from '@/utils/connectionStatus';
 import { ConnectionStatus } from '@/types/communication/shared';
 import ManageConnectionsDialog from './ManageConnectionsDialog';
 
-const ConnectionSelector = React.memo(() => {
+const ConnectionSelector = memo(() => {
   const dispatch = useAppDispatch();
   const connections = useAppSelector(selectAllConnections);
   const activeConnection = useAppSelector(selectActiveConnection);

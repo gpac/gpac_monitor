@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useRef } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import {
   Responsive,
@@ -18,7 +18,7 @@ import SidebarCloseButton from './Sidebar/SidebarCloseButton';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
-const DashboardLayout: React.FC = () => {
+const DashboardLayout = () => {
   const dispatch = useAppDispatch();
   const activeWidgets = useAppSelector((state) => state.widgets.activeWidgets);
   const configs = useAppSelector((state) => state.widgets.configs);

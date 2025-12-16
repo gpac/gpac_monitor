@@ -1,10 +1,9 @@
-import React from 'react';
+import { memo } from 'react';
 import { WidgetProps } from '../../../types/ui/widget';
 import useGraphMonitor from './hooks/state/useGraphMonitor';
 import { GraphMonitorUI } from './ui';
 
-
-const GraphMonitor: React.FC<WidgetProps> = ({ id, config }) => {
+const GraphMonitor = ({ id, config }: WidgetProps) => {
   const {
     isLoading,
     connectionError,
@@ -40,4 +39,4 @@ const GraphMonitor: React.FC<WidgetProps> = ({ id, config }) => {
   );
 };
 
-export default React.memo(GraphMonitor);
+export default memo(GraphMonitor);

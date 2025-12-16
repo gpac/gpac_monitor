@@ -1,8 +1,6 @@
-import React from 'react';
-
 import PropertiesPanel from '../panels/PropertiesPanel';
 
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
   return (
     <aside
       className="w-72 bg-monitor-app border-gray-800 h-full flex flex-col bg-opacity-90"

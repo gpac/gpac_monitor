@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FiLayout } from 'react-icons/fi';
 import { LuPanelLeft, LuPanelLeftClose } from 'react-icons/lu';
 import { LayoutManager } from './LayoutManager';
@@ -8,9 +8,7 @@ import LogCounters from './LogCounters';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
 
-interface HeaderProps {}
-
-const Header: React.FC<HeaderProps> = () => {
+const Header = () => {
   const dispatch = useAppDispatch();
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const [showLayoutManager, setShowLayoutManager] = useState(false);

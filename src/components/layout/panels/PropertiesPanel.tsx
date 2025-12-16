@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { useSidebar } from '@/shared/hooks/useSidebar';
@@ -8,7 +8,7 @@ import PropertiesHeader from './PropertiesHeader';
 import { useFetchIPIDProperties } from './hooks/useFetchIPIDProperties';
 import { useFilterArgsSubscription } from '../../filtersArgs/hooks/useFilterArgsSubscription';
 
-const PropertiesPanel: React.FC = () => {
+const PropertiesPanel = () => {
   const { sidebarContent, closeSidebar } = useSidebar();
   const filters = useAppSelector((state) => state.graph.filters);
 

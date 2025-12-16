@@ -1,4 +1,3 @@
-import React from 'react';
 import { IoClose } from 'react-icons/io5';
 import { Checkbox } from '../../ui/checkbox';
 import { SearchBar } from '../../ui/search-bar';
@@ -14,7 +13,7 @@ interface PropertiesHeaderProps {
   onSearchChange?: (query: string) => void;
 }
 
-const PropertiesHeader: React.FC<PropertiesHeaderProps> = ({
+const PropertiesHeader = ({
   filterName,
   onClose,
   showExpert = false,
@@ -23,7 +22,7 @@ const PropertiesHeader: React.FC<PropertiesHeaderProps> = ({
   onToggleAdvanced,
   mode = 'filter',
   onSearchChange,
-}) => {
+}: PropertiesHeaderProps) => {
   return (
     <div className="bg-monitor-surface border-b border-monitor-line">
       {/* Title and Close Button */}
