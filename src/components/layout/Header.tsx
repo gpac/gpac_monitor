@@ -3,6 +3,7 @@ import { FiLayout } from 'react-icons/fi';
 import { LuPanelLeft, LuPanelLeftClose } from 'react-icons/lu';
 import { LayoutManager } from './LayoutManager';
 import WidgetSelector from '../Widget/WidgetSelector';
+import ConnectionSelector from './ConnectionSelector';
 import LogCounters from './LogCounters';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
@@ -43,6 +44,7 @@ const Header: React.FC<HeaderProps> = () => {
             GPAC Monitor
           </h1>
           <div className="h-6 w-px bg-gray-700" />
+          <ConnectionSelector />
           <WidgetSelector
             isOpen={showWidgetSelector}
             onToggle={() => setShowWidgetSelector(!showWidgetSelector)}

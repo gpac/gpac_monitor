@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { gpacService } from '@/services/gpacService';
+import { useAppSelector } from './redux';
+import { selectActiveConnection } from '@/shared/store/selectors';
 
 type UseServiceReadyOptions = { enabled?: boolean; timeoutMs?: number };
 type UseServiceReadyResult = {
@@ -15,9 +17,10 @@ export function useServiceReady({
   const [isReady, setIsReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const activeConnection = useAppSelector(selectActiveConnection);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || !activeConnection) {
       setIsReady(false);
       setIsLoading(false);
       setError(null);
@@ -32,7 +35,7 @@ export function useServiceReady({
       setTimeout(() => reject(new Error('Service timeout')), timeoutMs),
     );
 
-    Promise.race([gpacService.ready(), timeout])
+    Promise.race([gpacService.ready(activeConnection.address), timeout])
       .then(() => {
         if (!cancelled) {
           setIsReady(true);
@@ -50,7 +53,7 @@ export function useServiceReady({
     return () => {
       cancelled = true;
     };
-  }, [enabled, timeoutMs]);
+  }, [enabled, timeoutMs, activeConnection]);
 
   return { isReady, isLoading, error };
 }

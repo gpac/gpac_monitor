@@ -31,14 +31,14 @@ const ConnectionErrorState: React.FC<ConnectionErrorStateProps> = ({
   return (
     <WidgetWrapper id={id}>
       <div className="flex flex-col items-center justify-center h-full p-4">
-        <div className="text-red-500 mb-4">Connexion error</div>
+        <div className="text-red-500 mb-4">Connection error</div>
         <div className="text-gray-400 text-center">{errorMessage}</div>
         {onRetry && (
           <button
             onClick={onRetry}
-            className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded"
+            className="mt-4 px-4 rounded-md py-2 bg-red-900 hover:bg-red-800 "
           >
-            Réessayer
+            Retry
           </button>
         )}
       </div>

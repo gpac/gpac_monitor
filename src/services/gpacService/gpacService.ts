@@ -2,11 +2,9 @@ import { WebSocketBase } from '../ws/WebSocketBase';
 import {
   IGpacCommunication,
   GpacMessage,
-  IGpacCommunicationConfig,
   ConnectionStatus,
 } from '../../types/communication/IgpacCommunication';
 import { IGpacMessageHandler } from '../../types/communication/IGpacMessageHandler';
-import { WS_CONFIG } from './config';
 import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './infrastructure/connectionManager';
 import { BaseMessageHandler } from './infrastructure/messageHandler/baseMessageHandler';
@@ -46,10 +44,10 @@ export class GpacService implements IGpacCommunication {
   // ============================================================================
   // INITIALIZATION
   // ============================================================================
-  private constructor(private readonly address: string = WS_CONFIG.address) {
+  private constructor() {
     this.ws = new WebSocketBase();
     this.coreService = new GpacCoreService();
-    this.connectionManager = new ConnectionManager(this.ws, this.address);
+    this.connectionManager = new ConnectionManager(this.ws);
 
     const storeCallbacks = createStoreCallbacks();
 
@@ -81,13 +79,13 @@ export class GpacService implements IGpacCommunication {
     return GpacService.instance;
   }
 
-  public async load(): Promise<boolean> {
+  public async load(address: string): Promise<boolean> {
     if (this._isLoaded) {
       return true;
     }
 
     try {
-      await this.connectionManager.connect();
+      await this.connectionManager.connect(address);
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       if (!this.isConnected()) {
@@ -132,12 +130,12 @@ export class GpacService implements IGpacCommunication {
   // ============================================================================
   // CONNECTION MANAGEMENT
   // ============================================================================
-  public async connect(_config?: IGpacCommunicationConfig): Promise<void> {
-    return this.connectionManager.connect();
+  public async connect(address: string): Promise<void> {
+    return this.connectionManager.connect(address);
   }
 
-  public async connectService(): Promise<void> {
-    return this.connectionManager.connect();
+  public async connectService(address: string): Promise<void> {
+    return this.connectionManager.connect(address);
   }
 
   public disconnect(): void {
@@ -156,9 +154,9 @@ export class GpacService implements IGpacCommunication {
     return this._isLoaded && this.isConnected();
   }
 
-  public ready(): Promise<void> {
+  public ready(address: string): Promise<void> {
     if (!this._readyPromise) {
-      this._readyPromise = this.load().then(() => {});
+      this._readyPromise = this.load(address).then(() => {});
     }
     return this._readyPromise;
   }

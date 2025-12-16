@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAppDispatch } from '@/shared/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   ConnectionStatus,
   GpacCommunicationError,
@@ -7,6 +7,7 @@ import {
 import { IGpacMessageHandler } from '@/types/communication';
 import { setError, setLoading } from '@/shared/store/slices/graphSlice';
 import { useGpacService } from '@/shared/hooks/useGpacService';
+import { selectActiveConnection } from '@/shared/store/selectors';
 
 interface UseGraphConnectionProps {
   setConnectionError: (error: string | null) => void;
@@ -21,6 +22,7 @@ export const useGraphConnection = ({
 }: UseGraphConnectionProps) => {
   const dispatch = useAppDispatch();
   const service = useGpacService();
+  const activeConnection = useAppSelector(selectActiveConnection);
   // Track connection state internally
   const [isConnected, setIsConnected] = useState(false);
 
@@ -57,6 +59,11 @@ export const useGraphConnection = ({
 
   // Separate effect for establishing connection
   useEffect(() => {
+    if (!activeConnection) {
+      setConnectionError('No active connection selected');
+      return;
+    }
+
     let isMounted = true;
 
     // Try to connect to the service
@@ -71,7 +78,7 @@ export const useGraphConnection = ({
           return;
         }
 
-        await service.connectService();
+        await service.connectService(activeConnection.address);
 
         if (isMounted) {
           setConnectionError(null);
@@ -101,15 +108,20 @@ export const useGraphConnection = ({
         }
       }
     };
-  }, [service, setConnectionError, isConnected]);
+  }, [service, setConnectionError, isConnected, activeConnection]);
 
   // Function to retry connection
   const retryConnection = useCallback(() => {
+    if (!activeConnection) {
+      setConnectionError('No active connection selected');
+      return;
+    }
+
     setConnectionError(null);
 
     try {
       service
-        .connectService()
+        .connectService(activeConnection.address)
         .then(() => {
           setConnectionError(null);
         })
@@ -121,7 +133,7 @@ export const useGraphConnection = ({
         error instanceof Error ? error.message : 'Failed to retry connection';
       setConnectionError(errorMessage);
     }
-  }, [service, setConnectionError]);
+  }, [service, setConnectionError, activeConnection]);
 
   return { retryConnection, isConnected };
 };

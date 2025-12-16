@@ -10,17 +10,25 @@ export class ConnectionManager {
   private isConnecting: boolean = false;
   private isManualDisconnect: boolean = false;
   private notificationHandlers: GpacNotificationHandlers = {};
+  private address: string | null = null;
 
-  constructor(
-    private ws: WebSocketBase,
-    private address: string,
-  ) {}
+  constructor(private ws: WebSocketBase) {}
 
   public setNotificationHandlers(handlers: GpacNotificationHandlers): void {
     this.notificationHandlers = handlers;
   }
 
-  public async connect(): Promise<void> {
+  public setAddress(address: string): void {
+    this.address = address;
+  }
+
+  public async connect(address?: string): Promise<void> {
+    const targetAddress = address || this.address;
+
+    if (!targetAddress) {
+      throw new Error('[ConnectionManager] No address provided');
+    }
+
     if (this.isConnecting) {
       return;
     }
@@ -29,12 +37,13 @@ export class ConnectionManager {
       return;
     }
 
+    this.address = targetAddress;
     this.isConnecting = true;
-    this.isManualDisconnect = false; // Reset flag when connecting
+    this.isManualDisconnect = false;
     store.dispatch(setLoading(true));
 
     try {
-      await this.ws.connect(this.address);
+      await this.ws.connect(targetAddress);
       this.notificationHandlers.onConnectionStatus?.(true);
       this.onConnectionSuccess();
     } catch (error) {
@@ -42,8 +51,6 @@ export class ConnectionManager {
       store.dispatch(setLoading(false));
       this.notificationHandlers.onError?.(error as Error);
       this.notificationHandlers.onConnectionStatus?.(false);
-      // Don't call handleDisconnect here - it will be called by onclose event
-      // This prevents recursive reconnection attempts
       throw error;
     }
   }

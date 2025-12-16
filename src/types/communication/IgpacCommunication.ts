@@ -35,10 +35,10 @@ export interface IGpacCommunicationConfig {
 export interface IGpacCommunication {
   /**
    * Initiates connection with GPAC service.
-   * @param config - Connection configuration parameters
+   * @param address - WebSocket address to connect to
    * @throws {GpacConnectionError} On connection failure
    */
-  connect(config: IGpacCommunicationConfig): Promise<void>;
+  connect(address: string): Promise<void>;
 
   /**
    * Gracefully terminates connection.
