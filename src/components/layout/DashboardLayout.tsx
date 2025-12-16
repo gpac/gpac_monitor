@@ -81,7 +81,7 @@ const DashboardLayout: React.FC = () => {
       <div className="flex pt-8">
         <div
           id="app-sidebar"
-          className="fixed top-16 bottom-0 left-0 w-64 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
+          className="fixed top-16 bottom-0 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
           }}
