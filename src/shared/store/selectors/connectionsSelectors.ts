@@ -1,3 +1,4 @@
+import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
 import { GpacConnectionConfig } from '@/types/connection';
 
@@ -8,10 +9,11 @@ const selectConnectionsSlice = (state: RootState) => state.connections;
 export const selectConnectionsById = (state: RootState) =>
   selectConnectionsSlice(state).connectionsById;
 
-/** Select all connections as array */
-export const selectAllConnections = (
-  state: RootState,
-): GpacConnectionConfig[] => Object.values(selectConnectionsById(state));
+/** Select all connections as array (memoized to prevent unnecessary re-renders) */
+export const selectAllConnections = createSelector(
+  [selectConnectionsById],
+  (connectionsById): GpacConnectionConfig[] => Object.values(connectionsById),
+);
 
 /** Select active connection ID */
 export const selectActiveConnectionId = (state: RootState) =>
