@@ -57,9 +57,12 @@ export const useGraphConnection = ({
     };
   }, [communication, messageHandler]);
 
+  const connectionId = activeConnection?.id;
+  const connectionAddress = activeConnection?.address;
+
   // Separate effect for establishing connection
   useEffect(() => {
-    if (!activeConnection) {
+    if (!connectionAddress) {
       setConnectionError('No active connection selected');
       return;
     }
@@ -78,7 +81,7 @@ export const useGraphConnection = ({
           return;
         }
 
-        await service.connectService(activeConnection.address);
+        await service.connectService(connectionAddress);
 
         if (isMounted) {
           setConnectionError(null);
@@ -108,11 +111,17 @@ export const useGraphConnection = ({
         }
       }
     };
-  }, [service, setConnectionError, isConnected, activeConnection]);
+  }, [
+    service,
+    setConnectionError,
+    isConnected,
+    connectionId,
+    connectionAddress,
+  ]);
 
   // Function to retry connection
   const retryConnection = useCallback(() => {
-    if (!activeConnection) {
+    if (!connectionAddress) {
       setConnectionError('No active connection selected');
       return;
     }
@@ -121,7 +130,7 @@ export const useGraphConnection = ({
 
     try {
       service
-        .connectService(activeConnection.address)
+        .connectService(connectionAddress)
         .then(() => {
           setConnectionError(null);
         })
@@ -133,7 +142,7 @@ export const useGraphConnection = ({
         error instanceof Error ? error.message : 'Failed to retry connection';
       setConnectionError(errorMessage);
     }
-  }, [service, setConnectionError, activeConnection]);
+  }, [service, setConnectionError, connectionAddress]);
 
   return { retryConnection, isConnected };
 };

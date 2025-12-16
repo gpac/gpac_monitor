@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { LuPlug2 } from 'react-icons/lu';
 import { FaChevronDown } from 'react-icons/fa6';
 import {
@@ -6,19 +6,31 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@radix-ui/react-popover';
+import { Badge } from '@/components/ui/badge';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
+import { useConnectionStatusSync } from '@/shared/hooks/useConnectionStatusSync';
 import {
   selectAllConnections,
   selectActiveConnection,
 } from '@/shared/store/selectors';
 import { setActiveConnection } from '@/shared/store/slices/connectionsSlice';
 import { getConnectionStatusClass } from '@/utils/connectionStatus';
+import { ConnectionStatus } from '@/types/communication/shared';
+import ManageConnectionsDialog from './ManageConnectionsDialog';
 
-const ConnectionSelector: React.FC = () => {
+const ConnectionSelector = React.memo(() => {
   const dispatch = useAppDispatch();
   const connections = useAppSelector(selectAllConnections);
   const activeConnection = useAppSelector(selectActiveConnection);
   const [isOpen, setIsOpen] = useState(false);
+  const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
+
+  useConnectionStatusSync();
+
+  const isConnected = useMemo(
+    () => activeConnection?.status === ConnectionStatus.CONNECTED,
+    [activeConnection?.status],
+  );
 
   const handleSelectConnection = useCallback(
     (connectionId: string) => {
@@ -30,8 +42,11 @@ const ConnectionSelector: React.FC = () => {
 
   const handleManageConnections = useCallback(() => {
     setIsOpen(false);
-    // TODO: Open manage connections dialog
-    console.log('Open manage connections dialog');
+    setIsManageDialogOpen(true);
+  }, []);
+
+  const handleCloseManageDialog = useCallback(() => {
+    setIsManageDialogOpen(false);
   }, []);
 
   return (
@@ -56,10 +71,8 @@ const ConnectionSelector: React.FC = () => {
           <span className="font-small text-ui hidden sm:inline">
             {activeConnection?.name || 'No connection'}
           </span>
-          {activeConnection && (
-            <span
-              className={`w-2 h-2 rounded-full ${getConnectionStatusClass(activeConnection.status)}`}
-            />
+          {isConnected && (
+            <span className="w-2 h-2 rounded-full bg-emerald-600" />
           )}
           <FaChevronDown
             className={`w-3 h-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -103,9 +116,19 @@ const ConnectionSelector: React.FC = () => {
                   <div className="font-medium">{conn.name}</div>
                   <div className="text-xs text-gray-500">{conn.address}</div>
                 </div>
-                <span
-                  className={`w-2 h-2 rounded-full ${getConnectionStatusClass(conn.status)}`}
-                />
+                <div className="flex items-center gap-2">
+                  {activeConnection?.id === conn.id && (
+                    <Badge
+                      variant="success"
+                      className="text-[8px] px-1.5 py-0 h-4"
+                    >
+                      ✓
+                    </Badge>
+                  )}
+                  <span
+                    className={`w-2 h-2 rounded-full ${getConnectionStatusClass(conn.status)}`}
+                  />
+                </div>
               </button>
             ))}
           </div>
@@ -120,8 +143,15 @@ const ConnectionSelector: React.FC = () => {
           </button>
         </div>
       </PopoverContent>
+
+      <ManageConnectionsDialog
+        isOpen={isManageDialogOpen}
+        onClose={handleCloseManageDialog}
+      />
     </Popover>
   );
-};
+});
+
+ConnectionSelector.displayName = 'ConnectionSelector';
 
 export default ConnectionSelector;

@@ -40,6 +40,7 @@ export class GpacService implements IGpacCommunication {
   public onMessage?: (message: any) => void;
   public onError?: (error: Error) => void;
   public onDisconnect?: () => void;
+  public onConnectionStatusChange?: (status: ConnectionStatus) => void;
 
   // ============================================================================
   // INITIALIZATION
@@ -85,6 +86,7 @@ export class GpacService implements IGpacCommunication {
     }
 
     try {
+      this.onConnectionStatusChange?.(ConnectionStatus.CONNECTING);
       await this.connectionManager.connect(address);
       await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -97,6 +99,7 @@ export class GpacService implements IGpacCommunication {
       return true;
     } catch (error) {
       this._isLoaded = false;
+      this.onConnectionStatusChange?.(ConnectionStatus.ERROR);
       throw error;
     }
   }
@@ -104,6 +107,7 @@ export class GpacService implements IGpacCommunication {
   private setupWebSocketHandlers(): void {
     this.ws.addConnectHandler(() => {
       this.sendMessage({ type: 'get_all_filters' });
+      this.onConnectionStatusChange?.(ConnectionStatus.CONNECTED);
     });
 
     this.ws.addJsonMessageHandler(
@@ -117,6 +121,7 @@ export class GpacService implements IGpacCommunication {
       this._isLoaded = false;
       this._readyPromise = null;
       this.messageHandler.cleanup();
+      this.onConnectionStatusChange?.(ConnectionStatus.DISCONNECTED);
       this.onDisconnect?.();
       this.connectionManager.handleDisconnect();
     });

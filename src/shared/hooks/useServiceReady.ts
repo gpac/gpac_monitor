@@ -19,8 +19,11 @@ export function useServiceReady({
   const [error, setError] = useState<Error | null>(null);
   const activeConnection = useAppSelector(selectActiveConnection);
 
+  const connectionId = activeConnection?.id;
+  const connectionAddress = activeConnection?.address;
+
   useEffect(() => {
-    if (!enabled || !activeConnection) {
+    if (!enabled || !connectionAddress) {
       setIsReady(false);
       setIsLoading(false);
       setError(null);
@@ -35,7 +38,7 @@ export function useServiceReady({
       setTimeout(() => reject(new Error('Service timeout')), timeoutMs),
     );
 
-    Promise.race([gpacService.ready(activeConnection.address), timeout])
+    Promise.race([gpacService.ready(connectionAddress), timeout])
       .then(() => {
         if (!cancelled) {
           setIsReady(true);
@@ -53,7 +56,7 @@ export function useServiceReady({
     return () => {
       cancelled = true;
     };
-  }, [enabled, timeoutMs, activeConnection]);
+  }, [enabled, timeoutMs, connectionId, connectionAddress]);
 
   return { isReady, isLoading, error };
 }
