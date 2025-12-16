@@ -6,6 +6,9 @@ import sessionStatsReducer from './slices/sessionStatsSlice';
 import logsReducer from './slices/logsSlice';
 import layoutReducer from './slices/layoutSlice';
 import monitoredFilterReducer from './slices/monitoredFilterSlice';
+import connectionsReducer, {
+  connectionsListenerMiddleware,
+} from './slices/connectionsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +19,7 @@ export const store = configureStore({
     sessionStats: sessionStatsReducer,
     layout: layoutReducer,
     monitoredFilter: monitoredFilterReducer,
+    connections: connectionsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
@@ -23,7 +27,7 @@ export const store = configureStore({
         // Ignore these action types
         ignoredActions: ['graph/updateGraphData', 'graph/updateNodeData'],
       },
-    }),
+    }).prepend(connectionsListenerMiddleware.middleware),
 });
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;

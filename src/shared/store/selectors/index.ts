@@ -18,3 +18,6 @@ export * from './session';
 
 // Widgets selectors
 export * from './widgets';
+
+// Connections selectors
+export * from './connectionsSelectors';
