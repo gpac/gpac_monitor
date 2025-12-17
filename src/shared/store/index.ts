@@ -1,6 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
 import graphReducer from './slices/graphSlice';
-import widgetsReducer from './slices/widgetsSlice';
+import widgetsReducer, {
+  widgetsListenerMiddleware,
+} from './slices/widgetsSlice';
 import filterArgumentSlice from './slices/filterArgumentSlice';
 import sessionStatsReducer from './slices/sessionStatsSlice';
 import logsReducer from './slices/logsSlice';
@@ -27,7 +29,9 @@ export const store = configureStore({
         // Ignore these action types
         ignoredActions: ['graph/updateGraphData', 'graph/updateNodeData'],
       },
-    }).prepend(connectionsListenerMiddleware.middleware),
+    })
+      .prepend(connectionsListenerMiddleware.middleware)
+      .prepend(widgetsListenerMiddleware.middleware),
 });
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;
