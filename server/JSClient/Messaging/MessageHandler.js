@@ -1,4 +1,5 @@
 import { DEFAULT_FILTER_FIELDS, UPDATE_INTERVALS } from '../config.js';
+import { cacheManager } from '../Cache/CacheManager.js';
 
 function MessageHandler(client) {
     this.client = client;
@@ -132,6 +133,15 @@ function MessageHandler(client) {
                     'get_command_line': () => {
                         print("Getting GPAC command line");
                         this.client.commandLineManager.sendCommandLine();
+                    },
+
+                    'get_cache_stats': () => {
+                        print("Getting cache statistics");
+                        const stats = cacheManager.stats();
+                        this.client.client.send(JSON.stringify({
+                            message: 'cache_stats',
+                            stats: stats
+                        }));
                     }
                 };
 

@@ -1,5 +1,6 @@
 import { Sys as sys } from 'gpaccore';
 import { CPU_STATS_FIELDS, UPDATE_INTERVALS } from '../config.js';
+import { cacheManager } from '../Cache/CacheManager.js';
 
 function CpuStatsManager(client) {
     this.client = client;
@@ -26,43 +27,47 @@ function CpuStatsManager(client) {
         if (!this.isSubscribed) return;
         if (now - this.lastSent < this.interval) return;
 
-        const cpuStats = {
-            timestamp: now,
-            total_cpu_usage: sys.total_cpu_usage,
-            process_cpu_usage: sys.process_cpu_usage,
-            process_memory: sys.process_memory,
-            physical_memory: sys.physical_memory,
-            physical_memory_avail: sys.physical_memory_avail,
-            gpac_memory: sys.gpac_memory,
-            nb_cores: sys.nb_cores,
-            thread_count: sys.thread_count,
+        // Use cache to avoid redundant serialization for multiple clients
+        const serialized = cacheManager.getOrSet('cpu_stats', 50, () => {
+            const cpuStats = {
+                timestamp: now,
+                total_cpu_usage: sys.total_cpu_usage,
+                process_cpu_usage: sys.process_cpu_usage,
+                process_memory: sys.process_memory,
+                physical_memory: sys.physical_memory,
+                physical_memory_avail: sys.physical_memory_avail,
+                gpac_memory: sys.gpac_memory,
+                nb_cores: sys.nb_cores,
+                thread_count: sys.thread_count,
 
-            memory_usage_percent: 0,
-            process_memory_percent: 0,
-            gpac_memory_percent: 0,
-            cpu_efficiency: 0
-        };
+                memory_usage_percent: 0,
+                process_memory_percent: 0,
+                gpac_memory_percent: 0,
+                cpu_efficiency: 0
+            };
 
-        if (sys.physical_memory > 0) {
-            cpuStats.memory_usage_percent =
-                ((sys.physical_memory - sys.physical_memory_avail) / sys.physical_memory) * 100;
-            cpuStats.process_memory_percent =
-                (sys.process_memory / sys.physical_memory) * 100;
-            cpuStats.gpac_memory_percent =
-                (sys.gpac_memory / sys.physical_memory) * 100;
-        }
+            if (sys.physical_memory > 0) {
+                cpuStats.memory_usage_percent =
+                    ((sys.physical_memory - sys.physical_memory_avail) / sys.physical_memory) * 100;
+                cpuStats.process_memory_percent =
+                    (sys.process_memory / sys.physical_memory) * 100;
+                cpuStats.gpac_memory_percent =
+                    (sys.gpac_memory / sys.physical_memory) * 100;
+            }
 
-        if (sys.total_cpu_usage > 0) {
-            cpuStats.cpu_efficiency =
-                (sys.process_cpu_usage / sys.total_cpu_usage) * 100;
-        }
+            if (sys.total_cpu_usage > 0) {
+                cpuStats.cpu_efficiency =
+                    (sys.process_cpu_usage / sys.total_cpu_usage) * 100;
+            }
+
+            return JSON.stringify({
+                message: 'cpu_stats',
+                stats: cpuStats
+            });
+        });
 
         if (this.client.client) {
-            this.client.client.send(JSON.stringify({
-                message: 'cpu_stats',
-                interval: this.interval,
-                stats: cpuStats
-            }));
+            this.client.client.send(serialized);
         }
 
         this.lastSent = now;

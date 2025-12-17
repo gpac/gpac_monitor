@@ -6,6 +6,7 @@ import {
 } from '../filterUtils.js';
 import { PidDataCollector } from './PID/PidDataCollector.js';
 import { ArgumentHandler } from './ArgumentHandler.js';
+import { cacheManager } from '../Cache/CacheManager.js';
 
 function FilterManager(client, draned_once_ref) {
     this.client = client;
@@ -20,17 +21,23 @@ function FilterManager(client, draned_once_ref) {
         on_all_connected((all_js_filters) => {
             print("----- all connected -----");
 
-            const minimalFiltersList = all_js_filters.map((f) => {
-                return gpac_filter_to_minimal_object(f);
+            // Use cache to avoid redundant serialization for multiple clients
+            const serialized = cacheManager.getOrSet('all_filters', 100, () => {
+                const minimalFiltersList = all_js_filters.map((f) => {
+                    return gpac_filter_to_minimal_object(f);
+                });
+                print("-------------------------");
+                print(JSON.stringify(minimalFiltersList, null, 1));
+
+                return JSON.stringify({
+                    'message': 'filters',
+                    'filters': minimalFiltersList
+                });
             });
-            print("-------------------------");
-            print(JSON.stringify(minimalFiltersList, null, 1));
-// Display the graph structure
+
+            // Display the graph structure
             if (this.client.client) {
-                this.client.client.send(JSON.stringify({ 
-                    'message': 'filters', 
-                    'filters': minimalFiltersList 
-                }));
+                this.client.client.send(serialized);
             }
 
             session.post_task(() => {
@@ -80,19 +87,23 @@ function FilterManager(client, draned_once_ref) {
 
             if (now - lastSent < sub.interval) continue;
 
-            session.lock_filters(true);
-            let fObj = null;
-            for (let i = 0; i < session.nb_filters; i++) {
-                const f = session.get_filter(i);
-                if (f.is_destroyed()) continue;
-                if (f.idx === idx) {
-                    fObj = f;
-                    break;
+            // Use cache to avoid redundant serialization for multiple clients
+            const cacheKey = `filter_stats_${idx}`;
+            const serialized = cacheManager.getOrSet(cacheKey, 50, () => {
+                session.lock_filters(true);
+                let fObj = null;
+                for (let i = 0; i < session.nb_filters; i++) {
+                    const f = session.get_filter(i);
+                    if (f.is_destroyed()) continue;
+                    if (f.idx === idx) {
+                        fObj = f;
+                        break;
+                    }
                 }
-            }
-            session.lock_filters(false);
+                session.lock_filters(false);
 
-            if (fObj && this.client.client) {
+                if (!fObj) return null;
+
                 const payload = { idx };
                 for (const field of sub.fields) {
                     payload[field] = fObj[field];
@@ -101,12 +112,14 @@ function FilterManager(client, draned_once_ref) {
                 payload.ipids = this.pidDataCollector.collectInputPids(fObj);
                 payload.opids = this.pidDataCollector.collectOutputPids(fObj);
 
-                this.client.client.send(JSON.stringify({
+                return JSON.stringify({
                     message: 'filter_stats',
-                    interval: sub.interval,
                     ...payload
-                }));
+                });
+            });
 
+            if (serialized && this.client.client) {
+                this.client.client.send(serialized);
                 this.lastSentByFilter[idxStr] = now;
             }
         }
