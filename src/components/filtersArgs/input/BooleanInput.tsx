@@ -8,13 +8,13 @@ interface BooleanInputProps {
   isPending?: boolean;
 }
 
-export const BooleanInput: React.FC<BooleanInputProps> = ({
+export const BooleanInput = ({
   value,
   onChange,
   rules,
   argName,
   isPending = false,
-}) => {
+}: BooleanInputProps) => {
   return (
     <GenericInput
       type="boolean"

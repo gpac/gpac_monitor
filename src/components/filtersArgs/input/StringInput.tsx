@@ -2,22 +2,21 @@ import { GenericInput } from './GenericInput';
 import { Spinner } from '../../ui/spinner';
 import type { FilterArgumentInputProps } from '../types';
 import { cn } from '@/utils/core';
-import React from 'react';
+import { useMemo } from 'react';
 
 interface StringInputProps extends FilterArgumentInputProps<'str'> {
   enumOptions?: string;
   isPending?: boolean;
 }
 
-export const StringInput: React.FC<StringInputProps> = ({
+export const StringInput = ({
   value,
   onChange,
   rules,
   enumOptions,
   isPending = false,
-}) => {
-  // Always call useMemo to satisfy React Hooks rules
-  const parseOptions = React.useMemo(() => {
+}: StringInputProps) => {
+  const parseOptions = useMemo(() => {
     if (!enumOptions) return [];
     return enumOptions.split('|').map((opt) => {
       const trimmed = opt.trim();

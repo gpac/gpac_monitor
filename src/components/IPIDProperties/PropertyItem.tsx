@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { PidProperty, formatGpacValue } from '@/types';
 
 interface PropertyItemProps {
@@ -8,7 +8,7 @@ interface PropertyItemProps {
 /**
  * Single PID property display (read-only)
  */
-const PropertyItem: React.FC<PropertyItemProps> = memo(({ property }) => {
+const PropertyItem = memo(({ property }: PropertyItemProps) => {
   return (
     <div className="px-3 py-2 hover:bg-monitor-hover transition-colors">
       <div className="flex items-start justify-between gap-2">

@@ -1,5 +1,5 @@
-import React from 'react';
 import { cn } from '@/utils/core';
+import { useMemo } from 'react';
 
 interface EnumInputProps {
   value?: string | number;
@@ -8,13 +8,13 @@ interface EnumInputProps {
   rules?: { disabled?: boolean };
 }
 
-export const EnumInput: React.FC<EnumInputProps> = ({
+export const EnumInput = ({
   value,
   onChange,
   options,
   rules,
-}) => {
-  const parseOptions = React.useMemo(() => {
+}: EnumInputProps) => {
+  const parseOptions = useMemo(() => {
     if (!options) return [];
 
     return options.split('|').map((opt) => {

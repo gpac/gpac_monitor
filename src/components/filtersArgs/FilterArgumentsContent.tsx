@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import {
   updateFilterArgument,
   makeSelectArgumentUpdatesForFilter,
@@ -23,13 +23,13 @@ interface FilterArgumentsContentProps {
  * - Uses memoization to prevent unnecessary re-renders
  * - Extracts ArgumentItem for better performance
  */
-const FilterArgumentsContent: React.FC<FilterArgumentsContentProps> = ({
+const FilterArgumentsContent = ({
   filterId,
   filterArgs,
   showExpert = false,
   showAdvanced = false,
   searchQuery = '',
-}) => {
+}: FilterArgumentsContentProps) => {
   const dispatch = useAppDispatch();
 
   const selectArgumentUpdates = useMemo(

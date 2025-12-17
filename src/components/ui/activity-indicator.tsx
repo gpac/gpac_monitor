@@ -1,4 +1,3 @@
-import React from 'react';
 import { cn } from '@/utils/core';
 
 export type ActivityLevel = 'low' | 'medium' | 'high';
@@ -35,11 +34,11 @@ const getSizeClasses = (size: 'sm' | 'md' | 'lg') => {
   }
 };
 
-export const ActivityIndicator: React.FC<ActivityIndicatorProps> = ({
+export const ActivityIndicator = ({
   level,
   size = 'md',
   className,
-}) => {
+}: ActivityIndicatorProps) => {
   const colorClasses = getActivityColor(level);
   const sizeClasses = getSizeClasses(size);
 

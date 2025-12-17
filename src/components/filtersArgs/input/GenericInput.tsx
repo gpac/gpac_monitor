@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useDebounce, useFirstMountState } from 'react-use';
 import { Input } from '../../ui/input';
 import { Switch } from '../../ui/switch';
@@ -24,7 +24,7 @@ interface GenericInputProps {
 const INPUT_STYLES =
   'h-7 text-xs bg-gray-800/60 border-gray-600/50 hover:bg-gray-700/50 focus:ring-1 focus:ring-blue-500/50 transition-colors';
 
-export const GenericInput: React.FC<GenericInputProps> = ({
+export const GenericInput = ({
   type,
   value,
   onChange,
@@ -32,7 +32,7 @@ export const GenericInput: React.FC<GenericInputProps> = ({
   debounce = false,
   debounceMs = 100,
   isPending = false,
-}) => {
+}: GenericInputProps) => {
   const [localValue, setLocalValue] = useState(
     value ?? (type === 'string' ? '' : type === 'number' ? null : false),
   );

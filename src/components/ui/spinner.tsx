@@ -1,6 +1,7 @@
 import { cn } from '@/utils/core';
+import { HTMLAttributes } from 'react';
 
-interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
+interface SpinnerProps extends HTMLAttributes<HTMLDivElement> {
   size?: 'sm' | 'md' | 'lg';
 }
 

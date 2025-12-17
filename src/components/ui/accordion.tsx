@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import { createContext, ReactNode, useContext, useState } from 'react';
 import { LuChevronDown } from 'react-icons/lu';
 
 interface AccordionContextType {
@@ -9,14 +9,14 @@ interface AccordionContextType {
 const AccordionContext = createContext<AccordionContextType | null>(null);
 
 interface AccordionProps {
-  children: React.ReactNode;
+  children: ReactNode;
   defaultExpanded?: string[];
 }
 
-export const Accordion: React.FC<AccordionProps> = ({
+export const Accordion = ({
   children,
   defaultExpanded = [],
-}) => {
+}: AccordionProps) => {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(
     new Set(defaultExpanded),
   );
@@ -42,15 +42,15 @@ export const Accordion: React.FC<AccordionProps> = ({
 
 interface AccordionItemProps {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
   value: string;
 }
 
-export const AccordionItem: React.FC<AccordionItemProps> = ({
+export const AccordionItem = ({
   title,
   children,
   value,
-}) => {
+}: AccordionItemProps) => {
   const context = useContext(AccordionContext);
   if (!context) throw new Error('AccordionItem must be used within Accordion');
 

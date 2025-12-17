@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { FilterArgumentInput } from '../FilterArgumentInput';
 import { cn } from '@/utils/core';
 import { Badge } from '../../ui/badge';
@@ -22,8 +22,8 @@ interface ArgumentItemProps {
   onValueChange: (argName: string, newValue: GPACValue) => void;
 }
 
-const ArgumentItem: React.FC<ArgumentItemProps> = memo(
-  ({ arg, updateStatus, onValueChange }) => {
+const ArgumentItem = memo(
+  ({ arg, updateStatus, onValueChange }: ArgumentItemProps) => {
     const type = arg.type || typeof arg.value;
     const isPending = updateStatus?.status === 'pending';
     const isSuccess = updateStatus?.status === 'success';

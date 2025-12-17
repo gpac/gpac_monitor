@@ -12,12 +12,12 @@ interface NumberInputProps {
   isPending?: boolean;
 }
 
-export const NumberInput: React.FC<NumberInputProps> = ({
+export const NumberInput = ({
   value,
   onChange,
   rules,
   isPending = false,
-}) => {
+}: NumberInputProps) => {
   return (
     <GenericInput
       type="number"

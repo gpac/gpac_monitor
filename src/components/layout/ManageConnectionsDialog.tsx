@@ -1,4 +1,4 @@
-import { useState, useCallback, memo } from 'react';
+import { useState, useCallback, memo, ChangeEvent } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -57,22 +57,19 @@ const ManageConnectionsDialog = memo(
       [dispatch],
     );
 
-    const handleNameChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        setNewConnection((prev) => ({ ...prev, name: e.target.value }));
-      },
-      [],
-    );
+    const handleNameChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+      setNewConnection((prev) => ({ ...prev, name: e.target.value }));
+    }, []);
 
     const handleAddressChange = useCallback(
-      (e: React.ChangeEvent<HTMLInputElement>) => {
+      (e: ChangeEvent<HTMLInputElement>) => {
         setNewConnection((prev) => ({ ...prev, address: e.target.value }));
       },
       [],
     );
 
     const handleTypeChange = useCallback(
-      (e: React.ChangeEvent<HTMLSelectElement>) => {
+      (e: ChangeEvent<HTMLSelectElement>) => {
         setNewConnection((prev) => ({
           ...prev,
           type: e.target.value as 'local' | 'remote',

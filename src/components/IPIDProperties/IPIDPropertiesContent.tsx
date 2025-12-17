@@ -1,4 +1,4 @@
-import React, { memo, useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import { PidProperty } from '@/types';
 import { useSearchFilter } from '@/shared/hooks/useSearchFilter';
 import PropertyItem from './PropertyItem';
@@ -11,8 +11,8 @@ interface IPIDPropertiesContentProps {
 /**
  * Display IPID properties in a scrollable list_-
  */
-const IPIDPropertiesContent: React.FC<IPIDPropertiesContentProps> = memo(
-  ({ properties, searchQuery = '' }) => {
+const IPIDPropertiesContent = memo(
+  ({ properties, searchQuery = '' }: IPIDPropertiesContentProps) => {
     const filteredProperties = useSearchFilter(
       properties,
       searchQuery,

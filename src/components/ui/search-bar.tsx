@@ -1,4 +1,12 @@
-import { memo, useState, useCallback, useEffect, useRef } from 'react';
+import {
+  memo,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  ChangeEvent,
+  KeyboardEvent,
+} from 'react';
 import { IoSearchOutline, IoCloseCircle } from 'react-icons/io5';
 import { Input } from './input';
 import { cn } from '@/utils/core';
@@ -42,7 +50,7 @@ export const SearchBar = memo<SearchBarProps>(function SearchBar({
     };
   }, [value, debounceMs, onSearchChange]);
 
-  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
   }, []);
 
@@ -50,15 +58,12 @@ export const SearchBar = memo<SearchBarProps>(function SearchBar({
     setValue('');
   }, []);
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Escape') {
-        setValue('');
-        e.currentTarget.blur();
-      }
-    },
-    [],
-  );
+  const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setValue('');
+      e.currentTarget.blur();
+    }
+  }, []);
 
   return (
     <div className={cn('relative flex items-center', className)}>
