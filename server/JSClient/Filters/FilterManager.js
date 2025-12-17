@@ -62,10 +62,10 @@ function FilterManager(client, draned_once_ref) {
         this.details_needed[idx] = false;
     };
 
-    this.subscribeToFilter = function(idx, interval) {
+    this.subscribeToFilter = function(idx, interval,pidScope) {
         this.filterSubscriptions[idx] = {
             interval: interval || UPDATE_INTERVALS.FILTER_STATS,
-            fields: FILTER_SUBSCRIPTION_FIELDS
+            fields: FILTER_SUBSCRIPTION_FIELDS,pidScope: pidScope || 'both'
         };
         this.lastSentByFilter[idx] = 0; // Force first send
 
@@ -109,8 +109,22 @@ function FilterManager(client, draned_once_ref) {
                     payload[field] = fObj[field];
                 }
 
-                payload.ipids = this.pidDataCollector.collectInputPids(fObj);
-                payload.opids = this.pidDataCollector.collectOutputPids(fObj);
+                // Switch based on pidScope
+                switch (sub.pidScope) {
+                    case 'ipid':
+                        payload.ipids = this.pidDataCollector.collectInputPids(fObj);
+                        break;
+                    case 'opid':
+                        payload.opids = this.pidDataCollector.collectOutputPids(fObj);
+                        break;
+                    case 'both':
+                        payload.ipids = this.pidDataCollector.collectInputPids(fObj);
+                        payload.opids = this.pidDataCollector.collectOutputPids(fObj);
+                        break;
+                    default:
+                        // No PIDs, just filter stats
+                        break;
+                }
 
                 return JSON.stringify({
                     message: 'filter_stats',

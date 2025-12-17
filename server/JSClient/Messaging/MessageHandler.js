@@ -53,9 +53,13 @@ function MessageHandler(client) {
                     
                     'subscribe_filter': () => {
                         const idx = jtext.idx;
-                        const interval = jtext.interval || UPDATE_INTERVALS.FILTER_STATS;
-                        print(`[MessageHandler] Subscribing to filter ${idx} (interval: ${interval}ms)`);
-                        this.client.filterManager.subscribeToFilter(idx, interval);
+                        let interval = jtext.interval || UPDATE_INTERVALS.FILTER_STATS;
+                        let pidScope = jtext.pidScope || 'both';
+                        if(!pidScope) {
+                            pidScope = 'both';
+                        }
+                        print(`[MessageHandler] Subscribing to filter ${idx} (interval: ${interval}ms), pidScope: ${pidScope}`);
+                        this.client.filterManager.subscribeToFilter(idx, interval, pidScope);
                         this.client.sessionManager.startMonitoringLoop();
                     },
                     
