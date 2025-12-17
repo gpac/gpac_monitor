@@ -1,7 +1,13 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {
+  createSlice,
+  createListenerMiddleware,
+  isAnyOf,
+} from '@reduxjs/toolkit';
 import { Widget, WidgetConfig } from '@/types/ui/widget';
 import { initialState } from './widgetsInitialState';
 import * as reducers from './widgetUtils';
+import { saveLayoutsToStorage, saveLastUsedLayout } from './layoutStorage';
+import type { RootState as AppRootState } from '../index';
 
 export interface RootState {
   widgets: WidgetsState;
@@ -72,3 +78,24 @@ export const {
 } = widgetsSlice.actions;
 
 export default widgetsSlice.reducer;
+
+/** Listener middleware for localStorage persistence */
+export const widgetsListenerMiddleware = createListenerMiddleware();
+
+// Save savedLayouts when they change
+widgetsListenerMiddleware.startListening({
+  matcher: isAnyOf(saveLayout, deleteLayout),
+  effect: (_, api) => {
+    const state = api.getState() as AppRootState;
+    saveLayoutsToStorage(state.widgets.savedLayouts);
+  },
+});
+
+// Save currentLayout when it changes
+widgetsListenerMiddleware.startListening({
+  matcher: isAnyOf(saveLayout, loadLayout),
+  effect: (_, api) => {
+    const state = api.getState() as AppRootState;
+    saveLastUsedLayout(state.widgets.currentLayout);
+  },
+});
