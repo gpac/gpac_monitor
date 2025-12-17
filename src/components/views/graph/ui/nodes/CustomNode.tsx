@@ -134,8 +134,8 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
               </h3>
               {isStalled && (
                 <LuTriangleAlert
-                  className="flex-shrink-0 text-yellow-400 animate-pulse"
-                  size={16}
+                  className="flex-shrink-0 text-red-800 animate-pulse"
+                  size={32}
                   title="Filter is stalled - no data progress detected"
                 />
               )}
@@ -163,14 +163,14 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
             <div className="flex-1 text-xs text-gray-600 pr-2">
               {nb_ipid > 0 && (
                 <>
-                  <span className="font-medium text-gray-300 block text-left">
+                  <span className="font-medium text-white block text-left">
                     INPUTS
                   </span>
                   <div className="mt-1">
                     {Object.keys(ipid).map((pidId) => (
                       <div
                         key={pidId}
-                        className="text-xs text-gray-200 truncate"
+                        className="text-xs text-gray-100 truncate"
                       >
                         {pidId}
                       </div>
@@ -184,14 +184,14 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
             <div className="flex-1 text-xs text-gray-800 pl-2">
               {nb_opid > 0 && (
                 <>
-                  <span className="font-medium text-gray-300 block text-right">
+                  <span className="font-medium text-white block text-right">
                     OUTPUTS
                   </span>
                   <div className="mt-1">
                     {Object.keys(opid).map((pidId) => (
                       <div
                         key={pidId}
-                        className="text-xs text-gray-200 text-right truncate"
+                        className="text-xs text-gray-100 text-right truncate"
                       >
                         {pidId}
                       </div>
@@ -203,7 +203,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
           </div>
 
           {/* Statistics */}
-          <div className="text-xs text-gray-200 pt-2 border-t border-gray-200 text-center">
+          <div className="text-xs text-gray-100 pt-2 border-t border-gray-300 text-center">
             IPIDs: {nb_ipid} | OPIDs: {nb_opid}
           </div>
         </div>
