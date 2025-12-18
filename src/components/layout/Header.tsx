@@ -42,7 +42,7 @@ const Header = () => {
             GPAC Monitor
           </h1>
           <div className="h-6 w-px bg-gray-700" />
-              <button
+          <button
             onClick={() => window.location.reload()}
             className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors"
             title="Reload page"
@@ -50,14 +50,24 @@ const Header = () => {
           >
             <LuRotateCw className="w-4 h-4" />
           </button>
-          <ConnectionSelector />
-          <WidgetSelector
-            isOpen={showWidgetSelector}
-            onToggle={() => setShowWidgetSelector(!showWidgetSelector)}
-            onClose={() => setShowWidgetSelector(false)}
-          />
-
-          <LogCounters />
+          <span aria-label="Connection selector" title="Connection selector">
+            <ConnectionSelector />
+          </span>
+          <span
+            aria-label="Connection selector"
+            title="Connection selector"
+          ></span>
+          <span aria-label="Widget selector" title="Widget selector">
+            <WidgetSelector
+              isOpen={showWidgetSelector}
+              onToggle={() => setShowWidgetSelector(!showWidgetSelector)}
+              onClose={() => setShowWidgetSelector(false)}
+              aria-label="Widget selector"
+            />
+          </span>
+          <span aria-label="Log counters" title="Log counters">
+            <LogCounters />
+          </span>
         </div>
         <div className="flex items-center gap-4">
           <button
@@ -76,7 +86,7 @@ const Header = () => {
           </button>
 
           <div className="h-6 w-px bg-gray-700" />
-      
+
           <button
             onClick={() => setShowLayoutManager(!showLayoutManager)}
             className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
