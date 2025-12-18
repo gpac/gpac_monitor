@@ -68,7 +68,7 @@ const ConnectionSelector = memo(() => {
           aria-expanded={isOpen}
         >
           <LuPlug2 className="w-4 h-4 text-emerald-400" />
-          <span className="font-small text-ui hidden sm:inline">
+          <span className="font-xs text-ui hidden sm:inline">
             {activeConnection?.name || 'No connection'}
           </span>
           {isConnected && (
