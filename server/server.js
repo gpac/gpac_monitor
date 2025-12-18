@@ -60,12 +60,12 @@ session.set_del_filter_fun((f) => {
         sys.sleep(100);
     } 
 });
-
+/* 
 session.set_event_fun((evt) => {
     // print("Event: " + JSON.stringify(evt, null, 2));
     // if (evt.type != GF_FEVT_USER) return 0;
     // print("evt " + evt.name);
-});
+}); */
 
 // =======================================
 // WEBSOCKET CLIENT HANDLER
@@ -92,7 +92,6 @@ sys.rmt_on_new_client = function(client) {
     js_client.client.on_close = function() {
         console.log("ON_CLOSE on client ", js_client.id, " ", client.peer_address);
 
-        // CRITICAL: Clean up client resources before removal
         js_client.cleanup();
 
         remove_client(js_client.id);

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiLayout } from 'react-icons/fi';
-import { LuPanelLeft, LuPanelLeftClose } from 'react-icons/lu';
+import { LuPanelLeft, LuPanelLeftClose, LuRotateCw } from 'react-icons/lu';
 import { LayoutManager } from './LayoutManager';
 import WidgetSelector from '../Widget/WidgetSelector';
 import ConnectionSelector from './connection/ConnectionSelector';
@@ -42,6 +42,14 @@ const Header = () => {
             GPAC Monitor
           </h1>
           <div className="h-6 w-px bg-gray-700" />
+              <button
+            onClick={() => window.location.reload()}
+            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors"
+            title="Reload page"
+            aria-label="Reload page"
+          >
+            <LuRotateCw className="w-4 h-4" />
+          </button>
           <ConnectionSelector />
           <WidgetSelector
             isOpen={showWidgetSelector}
@@ -68,6 +76,7 @@ const Header = () => {
           </button>
 
           <div className="h-6 w-px bg-gray-700" />
+      
           <button
             onClick={() => setShowLayoutManager(!showLayoutManager)}
             className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"

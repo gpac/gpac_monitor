@@ -100,6 +100,17 @@ const graphSlice = createSlice({
     clearSelectedNode(state) {
       state.selectedNodeId = null;
     },
+    clearGraph(state) {
+      state.filters = [];
+      state.nodes = [];
+      state.edges = [];
+      state.selectedNodeId = null;
+      state.selectedFilterDetails = null;
+      state.error = null;
+      state.isLoading = false;
+      state.pendingFilterOpen = null;
+      state.initialTab = null;
+    },
     setFilterDetails: (
       state,
       action: PayloadAction<GraphFilterData | null>,
@@ -142,6 +153,7 @@ export const {
   updateLayout,
   setSelectedNode,
   clearSelectedNode,
+  clearGraph,
   setFilterDetails,
   clearFilterDetails,
   setSelectedFilterDetails,

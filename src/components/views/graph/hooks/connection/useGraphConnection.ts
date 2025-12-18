@@ -6,6 +6,7 @@ import {
 } from '@/types/communication';
 import { IGpacMessageHandler } from '@/types/communication';
 import { setError, setLoading } from '@/shared/store/slices/graphSlice';
+import { clearAllSessionData } from '@/shared/store/actions/globalActions';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { selectActiveConnection } from '@/shared/store/selectors';
 
@@ -126,6 +127,8 @@ export const useGraphConnection = ({
       return;
     }
 
+    // Clear previous session data before reconnecting
+    dispatch(clearAllSessionData() as any);
     setConnectionError(null);
 
     try {
@@ -142,7 +145,7 @@ export const useGraphConnection = ({
         error instanceof Error ? error.message : 'Failed to retry connection';
       setConnectionError(errorMessage);
     }
-  }, [service, setConnectionError, connectionAddress]);
+  }, [service, dispatch, setConnectionError, connectionAddress]);
 
   return { retryConnection, isConnected };
 };
