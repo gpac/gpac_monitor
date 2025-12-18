@@ -107,7 +107,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
           border-2 rounded-md p-4 
           ${borderClass}
         `}
-        style={containerStyle}o
+        style={containerStyle}
       >
         {inputHandles.map(({ id, type, position, index }) => (
           <Handle
@@ -126,7 +126,8 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
         <div
           className="rounded-t-xl -m-4 mb-2 px-4 py-3 shadow-sm"
           style={headerStyle}
-        >o
+        >
+          o
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <h3 className="font-bold text-sm truncate" style={textStyle}>
