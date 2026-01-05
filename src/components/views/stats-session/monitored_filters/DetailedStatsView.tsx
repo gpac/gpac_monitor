@@ -7,8 +7,11 @@ import {
   FilterStatsResponse,
 } from '@/types/domain/gpac/filter-stats';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
+import { useAppSelector } from '@/shared/hooks/redux';
+import { selectFilterAlerts } from '@/shared/store/selectors/headerSelectors';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
 import InputsTab from './tabs/InputsTab';
@@ -61,6 +64,13 @@ const DetailedStatsView = memo(
       initialTab || 'overview',
     );
 
+    // Get log alerts for this filter
+    const alerts = useAppSelector((state) =>
+      overviewData.idx !== undefined
+        ? selectFilterAlerts(String(overviewData.idx))(state)
+        : null,
+    );
+
     // Update active tab when initialTab changes
     useEffect(() => {
       if (initialTab) {
@@ -84,6 +94,32 @@ const DetailedStatsView = memo(
               <h2 className="text-lg font-semibold text-red-600/90">
                 {overviewData.name}
               </h2>
+
+              {/* Log Alerts Badges */}
+              {alerts && alerts.errors > 0 && (
+                <Badge
+                  variant="outline"
+                  className="h-5 px-1.5 text-[10px] uppercase tracking-wide
+                    bg-red-900/20 text-red-300
+                    border border-red-700/60
+                    rounded-sm font-semibold"
+                  title={`${alerts.errors} error(s) in logs`}
+                >
+                  {alerts.errors} ERR
+                </Badge>
+              )}
+              {alerts && alerts.warnings > 0 && (
+                <Badge
+                  variant="outline"
+                  className="h-5 px-1.5 text-[10px] uppercase tracking-wide
+                    bg-amber-900/20 text-amber-300
+                    border border-amber-700/60
+                    rounded-sm font-semibold"
+                  title={`${alerts.warnings} warning(s) in logs`}
+                >
+                  {alerts.warnings} WARN
+                </Badge>
+              )}
 
               <Button
                 variant="outline"

@@ -52,14 +52,19 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
 
     // Pre-compute CSS classes to avoid string concatenation on each render
     const containerClass = useMemo(() => {
-      const baseClasses = 'flex items-start gap-2 mb-1 p-1 rounded hover:bg-gray-800/30  cursor-pointer';
-      const highlightClasses = isHighlighted ? ' border-l-4 border-yellow-500 bg-yellow-900/70' : '';
+      const baseClasses =
+        'flex items-start gap-2 mb-1 p-1 rounded hover:bg-gray-800/30  cursor-pointer';
+      const highlightClasses = isHighlighted
+        ? ' border-l-4 border-yellow-500 bg-yellow-900/70'
+        : '';
       return baseClasses + highlightClasses;
     }, [isHighlighted]);
 
     const buttonClass = useMemo(() => {
       const baseClasses = 'shrink-0 p-1 rounded  mt-1';
-      const colorClasses = isHighlighted ? ' text-yellow-500' : ' text-gray-400 hover:text-yellow-500';
+      const colorClasses = isHighlighted
+        ? ' text-yellow-500'
+        : ' text-gray-400 hover:text-yellow-500';
       return baseClasses + colorClasses;
     }, [isHighlighted]);
 
@@ -79,6 +84,13 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
               [{logData.name}]
             </span>
             <span className="text-gray-300 shrink-0">[{log.tool}]</span>
+            {(log.level === 1 || log.level === 2) &&
+              log.caller !== null &&
+              log.caller !== undefined && (
+                <span className="text-amber-400 shrink-0">
+                  [Filter: {log.caller}]
+                </span>
+              )}
           </div>
           <div className={`text-sm ${logData.style} break-words`}>
             {log.message}
@@ -104,6 +116,7 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
       prevProps.log.timestamp === nextProps.log.timestamp &&
       prevProps.log.message === nextProps.log.message &&
       prevProps.log.level === nextProps.log.level &&
+      prevProps.log.caller === nextProps.log.caller &&
       prevProps.isHighlighted === nextProps.isHighlighted &&
       prevProps.logId === nextProps.logId
     );
