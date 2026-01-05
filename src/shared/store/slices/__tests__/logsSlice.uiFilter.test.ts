@@ -69,10 +69,40 @@ describe('UI Filter - Layer 2 Architecture', () => {
     expect(selectViewMode(store.getState())).toBe('perTool');
 
     // Set UI filter
-    store.dispatch(setUIFilter([GpacLogLevel.ERROR]));
+    store.dispatch(setUIFilter({ levels: [GpacLogLevel.ERROR] }));
 
     // Verify state
-    expect(store.getState().logs.uiFilter).toEqual([GpacLogLevel.ERROR]);
+    expect(store.getState().logs.uiFilter).toEqual({
+      levels: [GpacLogLevel.ERROR],
+    });
+    expect(selectViewMode(store.getState())).toBe('globalFilter');
+  });
+
+  it('should set uiFilter with filterKeys only', () => {
+    const store = createTestStore();
+
+    store.dispatch(setUIFilter({ filterKeys: ['12', 't:42'] }));
+
+    expect(store.getState().logs.uiFilter).toEqual({
+      filterKeys: ['12', 't:42'],
+    });
+    expect(selectViewMode(store.getState())).toBe('globalFilter');
+  });
+
+  it('should set uiFilter with levels and filterKeys', () => {
+    const store = createTestStore();
+
+    store.dispatch(
+      setUIFilter({
+        levels: [GpacLogLevel.ERROR, GpacLogLevel.WARNING],
+        filterKeys: ['t:7'],
+      }),
+    );
+
+    expect(store.getState().logs.uiFilter).toEqual({
+      levels: [GpacLogLevel.ERROR, GpacLogLevel.WARNING],
+      filterKeys: ['t:7'],
+    });
     expect(selectViewMode(store.getState())).toBe('globalFilter');
   });
 
@@ -80,7 +110,7 @@ describe('UI Filter - Layer 2 Architecture', () => {
     const store = createTestStore();
 
     // Set filter first
-    store.dispatch(setUIFilter([GpacLogLevel.WARNING]));
+    store.dispatch(setUIFilter({ levels: [GpacLogLevel.WARNING] }));
     expect(selectViewMode(store.getState())).toBe('globalFilter');
 
     // Clear filter
@@ -116,7 +146,7 @@ describe('UI Filter - Layer 2 Architecture', () => {
     );
 
     // Set UI filter to ERROR only
-    store.dispatch(setUIFilter([GpacLogLevel.ERROR]));
+    store.dispatch(setUIFilter({ levels: [GpacLogLevel.ERROR] }));
 
     // Should see errors from ALL tools (filter + mmio)
     const visibleLogs = selectVisibleLogs(store.getState());
@@ -157,7 +187,7 @@ describe('UI Filter - Layer 2 Architecture', () => {
     );
 
     // Set UI filter to WARNING only
-    store.dispatch(setUIFilter([GpacLogLevel.WARNING]));
+    store.dispatch(setUIFilter({ levels: [GpacLogLevel.WARNING] }));
 
     // Should see only warnings from all tools
     const visibleLogs = selectVisibleLogs(store.getState());
@@ -180,7 +210,7 @@ describe('UI Filter - Layer 2 Architecture', () => {
     );
 
     // Apply UI filter (Layer 2)
-    store.dispatch(setUIFilter([GpacLogLevel.ERROR]));
+    store.dispatch(setUIFilter({ levels: [GpacLogLevel.ERROR] }));
 
     // Verify Layer 1 config unchanged
     expect(store.getState().logs.levelsByTool).toEqual(initialConfig);
@@ -202,7 +232,7 @@ describe('UI Filter - Layer 2 Architecture', () => {
     );
 
     // Set filter
-    store.dispatch(setUIFilter([GpacLogLevel.ERROR]));
+    store.dispatch(setUIFilter({ levels: [GpacLogLevel.ERROR] }));
     expect(selectVisibleLogs(store.getState())).toHaveLength(1);
 
     // Clear filter

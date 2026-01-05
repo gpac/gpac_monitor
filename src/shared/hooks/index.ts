@@ -3,6 +3,7 @@ export type { HookLifecycle, HookFunction } from './types';
 export { useCommandLine } from './useCommandLine';
 export { useGpacService } from './useGpacService';
 export { useLayoutManager } from './useLayoutManager';
+export { useOpenLogsWidget } from './useOpenLogsWidget';
 export { useOptimizedResize } from './useOptimizedResize';
 export { useServiceReady } from './useServiceReady';
 export { useSidebar } from './useSidebar';

@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
-import { useAppSelector } from '@/shared/hooks/redux';
+import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
 import { selectFilterAlerts } from '@/shared/store/selectors/headerSelectors';
+import { GpacLogLevel } from '@/types/domain/gpac/log-types';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
 import InputsTab from './tabs/InputsTab';
@@ -85,7 +86,9 @@ const DetailedStatsView = memo(
       }),
       [inputPids.length, outputPids.length],
     );
-
+    const openLogsWidget = useOpenLogsWidget();
+    const filterKey =
+      overviewData.idx !== undefined ? String(overviewData.idx) : null;
     return (
       <div className="flex flex-col gap-2">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -99,8 +102,16 @@ const DetailedStatsView = memo(
               {alerts && alerts.errors > 0 && (
                 <Badge
                   variant="outline"
+                  onClick={() => {
+                    if (filterKey) {
+                      openLogsWidget({
+                        levels: [GpacLogLevel.ERROR],
+                        filterKeys: [filterKey],
+                      });
+                    }
+                  }}
                   className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                    bg-red-900/20 text-red-300
+                    bg-red-900/20 text-red-300 cursor-pointer
                     border border-red-700/60
                     rounded-sm font-semibold"
                   title={`${alerts.errors} error(s) in logs`}
@@ -111,8 +122,16 @@ const DetailedStatsView = memo(
               {alerts && alerts.warnings > 0 && (
                 <Badge
                   variant="outline"
+                  onClick={() => {
+                    if (filterKey) {
+                      openLogsWidget({
+                        levels: [GpacLogLevel.WARNING],
+                        filterKeys: [filterKey],
+                      });
+                    }
+                  }}
                   className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                    bg-amber-900/20 text-amber-300
+                    bg-amber-900/20 text-amber-300 cursor-pointer
                     border border-amber-700/60
                     rounded-sm font-semibold"
                   title={`${alerts.warnings} warning(s) in logs`}

@@ -47,7 +47,10 @@ export const selectVisibleLogs = createSelector(
     let rawLogs: GpacLogEntry[];
 
     // UI Filter active = force ALL mode (show logs from ALL configured tools)
-    const isUIFilterActive = uiFilter && uiFilter.length > 0;
+    const isUIFilterActive =
+      uiFilter &&
+      ((uiFilter.levels && uiFilter.levels.length > 0) ||
+        (uiFilter.filterKeys && uiFilter.filterKeys.length > 0));
     const isAllMode =
       isUIFilterActive || (visibleToolsFilter && visibleToolsFilter.length > 1);
 
@@ -78,8 +81,27 @@ export const selectVisibleLogs = createSelector(
 
     // Apply UI filter (Layer 2: view layer) if present
     if (isUIFilterActive) {
-      const allowedLevels = uiFilter.map((level) => LOG_LEVEL_VALUES[level]);
-      rawLogs = rawLogs.filter((log) => allowedLevels.includes(log.level));
+      // Filter by levels if specified
+      if (uiFilter.levels && uiFilter.levels.length > 0) {
+        const allowedLevels = uiFilter.levels.map(
+          (level) => LOG_LEVEL_VALUES[level],
+        );
+        rawLogs = rawLogs.filter((log) => allowedLevels.includes(log.level));
+      }
+
+      // Filter by filterKeys if specified (caller or thread_id)
+      if (uiFilter.filterKeys && uiFilter.filterKeys.length > 0) {
+        rawLogs = rawLogs.filter((log) => {
+          const filterKey =
+            log.caller !== null && log.caller !== undefined
+              ? String(log.caller)
+              : log.thread_id !== undefined
+                ? `t:${log.thread_id}`
+                : null;
+
+          return filterKey && uiFilter.filterKeys?.includes(filterKey);
+        });
+      }
     }
 
     return rawLogs;

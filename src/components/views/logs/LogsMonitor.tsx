@@ -67,6 +67,10 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   // Get UI filter (if active)
   const uiFilter = useAppSelector(selectUIFilter);
   const viewMode = useAppSelector(selectViewMode);
+  const isUIFilterActive =
+    uiFilter &&
+    ((uiFilter.levels && uiFilter.levels.length > 0) ||
+      (uiFilter.filterKeys && uiFilter.filterKeys.length > 0));
 
   // Initialize logs subscription (uses config from Redux store via useLogsService)
   useLogs({
@@ -102,8 +106,11 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
 
   const statusBadge = useMemo(() => {
     // Global Filter mode: show "all@level" badge with distinctive styling
-    if (viewMode === 'globalFilter' && uiFilter && uiFilter.length > 0) {
-      const levelStr = uiFilter[0].toLowerCase();
+    if (viewMode === 'globalFilter' && isUIFilterActive) {
+      const levelStr =
+        uiFilter?.levels && uiFilter.levels.length === 1
+          ? uiFilter.levels[0].toLowerCase()
+          : null;
       const colorClasses = {
         error: 'text-danger',
         warning: 'text-warning',
@@ -118,9 +125,13 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
             <RiGlobalFill className="w-4 h-4" />
           </span>
           <span
-            className={`text-sm font-medium ${colorClasses[levelStr as keyof typeof colorClasses] || 'text-info'}`}
+            className={`text-sm font-medium ${
+              levelStr
+                ? colorClasses[levelStr as keyof typeof colorClasses]
+                : 'text-info'
+            }`}
           >
-            all@{levelStr}
+            {levelStr ? `all@${levelStr}` : 'filtered'}
           </span>
           <span className="text-xs tabular-nums text-muted">
             ({visibleLogs.length})
@@ -148,6 +159,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   }, [
     viewMode,
     uiFilter,
+    isUIFilterActive,
     visibleLogs.length,
     currentTool,
     levelsByTool,
@@ -168,7 +180,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
       statusBadge={statusBadge}
       customActions={
         <div className="flex items-center gap-2">
-          {uiFilter && (
+          {isUIFilterActive && (
             <CustomTooltip content="Clear UI filter" side="bottom">
               <button
                 onClick={() => dispatch(clearUIFilter())}
