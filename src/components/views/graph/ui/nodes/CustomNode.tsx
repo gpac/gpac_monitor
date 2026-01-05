@@ -1,6 +1,5 @@
 import React, { useMemo, memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
-import { LuTriangleAlert } from 'react-icons/lu';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
@@ -19,7 +18,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   selected,
   ...nodeProps
 }) => {
-  const { label, ipid, opid, nb_ipid, nb_opid, isStalled } = data;
+  const { label, ipid, opid, nb_ipid, nb_opid } = data;
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -132,13 +131,6 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
               <h3 className="font-bold text-sm truncate" style={textStyle}>
                 {label}
               </h3>
-              {isStalled && (
-                <LuTriangleAlert
-                  className="flex-shrink-0 text-red-800 animate-pulse"
-                  size={32}
-                  title="Filter is stalled - no data progress detected"
-                />
-              )}
             </div>
             <div
               className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full flex-shrink-0"
