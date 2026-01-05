@@ -174,11 +174,13 @@ const logsSlice = createSlice({
         // Calculate alerts for WARNING (2) and ERROR (1)
         if (log.level === 1 || log.level === 2) {
           // Compute filter key: caller > thread_id fallback
-          const filterKey = log.caller
-            ? String(log.caller)
-            : log.thread_id !== undefined
-              ? `t:${log.thread_id}`
-              : null;
+          // Note: caller can be 0 (idx=0), so check null/undefined explicitly
+          const filterKey =
+            log.caller !== null && log.caller !== undefined
+              ? String(log.caller)
+              : log.thread_id !== undefined
+                ? `t:${log.thread_id}`
+                : null;
 
           if (filterKey) {
             if (!alertsByFilterKey[filterKey]) {

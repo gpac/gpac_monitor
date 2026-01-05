@@ -3,6 +3,8 @@ import { FaExclamationTriangle } from 'react-icons/fa';
 import { Badge } from '@/components/ui/badge';
 import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
+import { useAppSelector } from '@/shared/hooks/redux';
+import { selectFilterAlerts } from '@/shared/store/selectors/headerSelectors';
 
 interface FilterStatCardProps {
   filter: EnrichedFilterData;
@@ -20,6 +22,13 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
     isDetached = false,
     isStalled = false,
   }) => {
+    // Get log alerts for this filter by idx (unique identifier)
+    const alerts = useAppSelector((state) =>
+      filter.idx !== undefined
+        ? selectFilterAlerts(String(filter.idx))(state)
+        : null,
+    );
+
     const handleClick = useCallback(() => {
       if (onClick && filter.idx !== undefined) {
         onClick(filter.idx);
@@ -96,6 +105,31 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             >
               {sessionTypeLabel}
             </Badge>
+            {/* Log Alerts Badges */}
+            {alerts && alerts.errors > 0 && (
+              <Badge
+                variant="outline"
+                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
+                  bg-red-900/20 text-red-300
+                  border border-red-700/60
+                  rounded-sm font-semibold"
+                title={`${alerts.errors} error(s) in logs`}
+              >
+                {alerts.errors} ERR
+              </Badge>
+            )}
+            {alerts && alerts.warnings > 0 && (
+              <Badge
+                variant="outline"
+                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
+                  bg-amber-900/20 text-amber-300
+                  border border-amber-700/60
+                  rounded-sm font-semibold"
+                title={`${alerts.warnings} warning(s) in logs`}
+              >
+                {alerts.warnings} WARN
+              </Badge>
+            )}
             {filter.is_eos && (
               <Badge
                 variant="outline"
@@ -160,29 +194,9 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       </div>
     );
   },
-  (prevProps, nextProps) => {
-    // Only re-render if displayed values actually changed
-    const prev = prevProps.filter;
-    const next = nextProps.filter;
+  // Note: memo comparison removed to allow alerts updates
+  // Alerts come from Redux and need to trigger re-renders
 
-    return (
-      prev.idx === next.idx &&
-      prev.name === next.name &&
-      prev.nb_ipid === next.nb_ipid &&
-      prev.nb_opid === next.nb_opid &&
-      prev.errors === next.errors &&
-      prev.is_eos === next.is_eos &&
-      prev.computed.formattedPackets === next.computed.formattedPackets &&
-      prev.computed.formattedBytes === next.computed.formattedBytes &&
-      prev.computed.formattedTime === next.computed.formattedTime &&
-      prev.computed.formattedPacketRate === next.computed.formattedPacketRate &&
-      prev.computed.sessionType === next.computed.sessionType &&
-      prevProps.isMonitored === nextProps.isMonitored &&
-      prevProps.isDetached === nextProps.isDetached &&
-      prevProps.isStalled === nextProps.isStalled &&
-      prevProps.onClick === nextProps.onClick
-    );
-  },
 );
 
 FilterStatCard.displayName = 'FilterStatCard';

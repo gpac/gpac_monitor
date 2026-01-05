@@ -127,16 +127,17 @@ function LogManager(client) {
     };
 
     /**
-     * Serialize caller object to minimal identifier
-     * Priority: type > idx > name
+     * Serialize caller object to unique filter identifier
+     * Use idx as primary key (unique per filter instance)
      */
     this.serializeCaller = function(caller) {
         if (!caller || typeof caller !== 'object') {
             return null;
         }
 
-        // KISS: return type, fallback to idx, fallback to name
-        return caller.type || caller.idx || caller.name || null;
+        // idx is the unique identifier for GPAC filters
+        // Fallback to name for non-filter system objects
+        return caller.idx !== undefined ? caller.idx : (caller.name || null);
     };
 
     /**
