@@ -56,10 +56,10 @@ export type GpacLogConfig = `${GpacLogTool}@${GpacLogLevel}`;
 export type GpacLogConfigString = string;
 
 /**
- * GPAC log entry structure
+ * GPAC log entry structure (logx mode)
  */
 export interface GpacLogEntry {
-  /** Timestamp when the log was generated */
+  /** Timestamp when the log was generated (microseconds from sys.clock_us) */
   timestamp: number;
   /** Log tool/category */
   tool: string;
@@ -67,6 +67,10 @@ export interface GpacLogEntry {
   level: number;
   /** Log message content */
   message: string;
+  /** Thread ID that emitted the log (logx mode) */
+  thread_id?: number;
+  /** Caller identifier: filter type, idx, or name (logx mode) */
+  caller?: string | number | null;
 }
 
 /**

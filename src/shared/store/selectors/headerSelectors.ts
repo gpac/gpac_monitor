@@ -66,3 +66,22 @@ export const selectLogCounts = createSelector(
     };
   },
 );
+
+/**
+ * Get all filter alerts (warnings/errors per filter)
+ * Used by dashboard to tag filters with problems
+ */
+export const selectAllFilterAlerts = createSelector(
+  [selectLogsState],
+  (logsState) => logsState.alertsByFilterKey,
+);
+
+/**
+ * Get alerts for a specific filter by key
+ * Returns null if no alerts for this filter
+ */
+export const selectFilterAlerts = (filterKey: string) =>
+  createSelector(
+    [selectAllFilterAlerts],
+    (alerts) => alerts[filterKey] || null,
+  );

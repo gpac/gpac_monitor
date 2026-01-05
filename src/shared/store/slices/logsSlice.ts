@@ -9,6 +9,12 @@ import { LogId } from '@/components/views/logs/utils/logIdentifier';
 /** View mode for LogMonitor UI */
 export type LogViewMode = 'perTool' | 'globalFilter';
 
+/** Alert counters for a filter */
+export interface FilterAlerts {
+  warnings: number;
+  errors: number;
+}
+
 /** Redux state for  logs management with per-tool levels and buffers */
 interface LogsState {
   currentTool: GpacLogTool;
@@ -25,6 +31,7 @@ interface LogsState {
     levelsByTool: Record<GpacLogTool, GpacLogLevel>;
     defaultAllLevel: GpacLogLevel | null; // null means no config sent yet
   };
+  alertsByFilterKey: Record<string, FilterAlerts>; // Warning/error counters per filter
 }
 
 // Initialize state from localStorage
@@ -51,6 +58,7 @@ const getInitialState = (): LogsState => {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
         defaultAllLevel: null, // Indicates no config has been sent yet
       },
+      alertsByFilterKey: {},
     };
   } catch {
     return {
@@ -68,6 +76,7 @@ const getInitialState = (): LogsState => {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
         defaultAllLevel: null, // Indicates no config has been sent yet
       },
+      alertsByFilterKey: {},
     };
   }
 };
@@ -148,9 +157,9 @@ const logsSlice = createSlice({
       const logs = action.payload;
       if (logs.length === 0) return;
 
-      const { buffers, maxEntriesPerTool } = state;
+      const { buffers, maxEntriesPerTool, alertsByFilterKey } = state;
 
-      // push direct
+      // 1) push logs and increment alerts
       for (let i = 0; i < logs.length; i++) {
         const log = logs[i];
         const tool = log.tool as GpacLogTool;
@@ -161,6 +170,28 @@ const logsSlice = createSlice({
         }
 
         buffer.push(log);
+
+        // Calculate alerts for WARNING (2) and ERROR (1)
+        if (log.level === 1 || log.level === 2) {
+          // Compute filter key: caller > thread_id fallback
+          const filterKey = log.caller
+            ? String(log.caller)
+            : log.thread_id !== undefined
+              ? `t:${log.thread_id}`
+              : null;
+
+          if (filterKey) {
+            if (!alertsByFilterKey[filterKey]) {
+              alertsByFilterKey[filterKey] = { warnings: 0, errors: 0 };
+            }
+
+            if (log.level === 1) {
+              alertsByFilterKey[filterKey].errors += 1;
+            } else if (log.level === 2) {
+              alertsByFilterKey[filterKey].warnings += 1;
+            }
+          }
+        }
       }
 
       // 2) trim per tool
@@ -241,6 +272,16 @@ const logsSlice = createSlice({
       state.uiFilter = null;
       state.viewMode = 'perTool'; // Return to per-tool mode
     },
+
+    /** Clear all filter alerts */
+    clearAllAlerts: (state) => {
+      state.alertsByFilterKey = {};
+    },
+
+    /** Clear alerts for a specific filter */
+    clearFilterAlerts: (state, action: PayloadAction<string>) => {
+      delete state.alertsByFilterKey[action.payload];
+    },
   },
 });
 
@@ -260,6 +301,8 @@ export const {
   setHighlightedLog,
   setUIFilter,
   clearUIFilter,
+  clearAllAlerts,
+  clearFilterAlerts,
 } = logsSlice.actions;
 
 export default logsSlice.reducer;
