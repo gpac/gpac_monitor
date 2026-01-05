@@ -36,11 +36,13 @@ function LogManager(client) {
         try {
             this.originalLogConfig = sys.get_logs(true);
 
+            // Enable extended log API
+            sys.use_logx = true;
 
-            sys.on_log = (tool, level, message) => {
-                this.handleLog(tool, level, message);
+            sys.on_log = (tool, level, message, thread_id, caller) => {
+                this.handleLog(tool, level, message, thread_id, caller);
             };
-            
+
             sys.set_logs(this.logLevel);
 
             // Start SessionManager loop if not running
@@ -81,19 +83,34 @@ function LogManager(client) {
     };
     /**
      * Handle incoming GPAC log entry
-     *
+     * Captures extended log info (thread_id, caller) when available
      */
-    this.handleLog = function(tool, level, message) {
-        // Only create log object - NO OTHER PROCESSING
+    this.handleLog = function(tool, level, message, thread_id, caller) {
+        // Only create log object
         const log = {
-            timestamp: sys.clock_us(), 
+            timestamp: sys.clock_us(),
             tool,
             level,
-            message: message?.length > 500 ? message.substring(0, 500) + '...' : message
+            message: message?.length > 500 ? message.substring(0, 500) + '...' : message,
+            thread_id: thread_id,
+            caller: this.serializeCaller(caller)
         };
 
-        // Just add to buffer - will be processed by tick()
+
         this.incomingBuffer.push(log);
+    };
+
+    /**
+     * Serialize caller object to minimal identifier
+     * Priority: type > idx > name
+     */
+    this.serializeCaller = function(caller) {
+        if (!caller || typeof caller !== 'object') {
+            return null;
+        }
+
+        // KISS: return type, fallback to idx, fallback to name
+        return caller.type || caller.idx || caller.name || null;
     };
 
     /**
