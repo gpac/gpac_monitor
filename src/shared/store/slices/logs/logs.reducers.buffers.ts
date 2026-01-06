@@ -1,7 +1,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { GpacLogTool, GpacLogEntry } from '@/types/domain/gpac/log-types';
 import { LogsState } from './logs.types';
-import { getAlertKeysForLog } from './logs.helpers';
 
 export const buffersReducers = {
   appendLogs: (
@@ -12,14 +11,18 @@ export const buffersReducers = {
 
     if (logs.length === 0) return;
 
-    const currentBuffer = state.buffers[tool] || [];
-    const allLogs = [...currentBuffer, ...logs];
+    let buffer = state.buffers[tool];
+    if (!buffer) {
+      buffer = state.buffers[tool] = [];
+    }
 
-    // Apply ring buffer logic
-    if (allLogs.length <= state.maxEntriesPerTool) {
-      state.buffers[tool] = allLogs;
-    } else {
-      state.buffers[tool] = allLogs.slice(-state.maxEntriesPerTool);
+    // Push all logs (mutation in-place with Immer)
+    buffer.push(...logs);
+
+    // Trim if overflow
+    const overflow = buffer.length - state.maxEntriesPerTool;
+    if (overflow > 0) {
+      buffer.splice(0, overflow);
     }
   },
 
@@ -32,6 +35,7 @@ export const buffersReducers = {
     if (logs.length === 0) return;
 
     const { buffers, maxEntriesPerTool, alertsByFilterKey } = state;
+    const modifiedTools = new Set<GpacLogTool>();
 
     // 1) push logs and increment alerts
     for (let i = 0; i < logs.length; i++) {
@@ -44,35 +48,47 @@ export const buffersReducers = {
       }
 
       buffer.push(log);
+      modifiedTools.add(tool);
 
       // Calculate alerts for ERROR (1), WARNING (2), and INFO (3)
       if (log.level === 1 || log.level === 2 || log.level === 3) {
-        // Use helper to get all filter keys (caller and thread_id)
-        const filterKeys = getAlertKeysForLog(log);
-
-        // Increment counters for all applicable keys
-        for (const filterKey of filterKeys) {
-          if (!alertsByFilterKey[filterKey]) {
-            alertsByFilterKey[filterKey] = { warnings: 0, errors: 0, info: 0 };
+        // Increment directly for caller if present (avoid array allocation)
+        if (log.caller !== null && log.caller !== undefined) {
+          const callerKey = String(log.caller);
+          if (!alertsByFilterKey[callerKey]) {
+            alertsByFilterKey[callerKey] = { warnings: 0, errors: 0, info: 0 };
           }
-
           if (log.level === 1) {
-            alertsByFilterKey[filterKey].errors += 1;
+            alertsByFilterKey[callerKey].errors += 1;
           } else if (log.level === 2) {
-            alertsByFilterKey[filterKey].warnings += 1;
-          } else if (log.level === 3) {
-            alertsByFilterKey[filterKey].info += 1;
+            alertsByFilterKey[callerKey].warnings += 1;
+          } else {
+            alertsByFilterKey[callerKey].info += 1;
+          }
+        }
+
+        // Increment directly for thread_id if present
+        if (log.thread_id !== undefined) {
+          const threadKey = `t:${log.thread_id}`;
+          if (!alertsByFilterKey[threadKey]) {
+            alertsByFilterKey[threadKey] = { warnings: 0, errors: 0, info: 0 };
+          }
+          if (log.level === 1) {
+            alertsByFilterKey[threadKey].errors += 1;
+          } else if (log.level === 2) {
+            alertsByFilterKey[threadKey].warnings += 1;
+          } else {
+            alertsByFilterKey[threadKey].info += 1;
           }
         }
       }
     }
 
-    // 2) trim per tool
-    for (const tool in buffers) {
-      const buffer = buffers[tool as GpacLogTool]!;
+    // 2) trim only modified tools
+    for (const tool of modifiedTools) {
+      const buffer = buffers[tool]!;
       const overflow = buffer.length - maxEntriesPerTool;
       if (overflow > 0) {
-        // mutation in-place
         buffer.splice(0, overflow);
       }
     }
@@ -85,8 +101,9 @@ export const buffersReducers = {
     // Apply new limit to all existing buffers
     Object.keys(state.buffers).forEach((tool) => {
       const buffer = state.buffers[tool as GpacLogTool];
-      if (buffer.length > action.payload) {
-        state.buffers[tool as GpacLogTool] = buffer.slice(-action.payload);
+      const overflow = buffer.length - action.payload;
+      if (overflow > 0) {
+        buffer.splice(0, overflow);
       }
     });
   },
