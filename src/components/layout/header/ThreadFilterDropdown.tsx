@@ -11,6 +11,14 @@ import { useOpenLogsWidget } from '@/shared/hooks/useOpenLogsWidget';
 import { getThreadColor } from '@/components/views/logs/utils/logxUtils';
 
 /**
+ * Convert signed thread ID to unsigned 32-bit for display
+ * GPAC displays thread IDs as unsigned in log messages
+ */
+const toUnsignedThreadId = (threadId: number): number => {
+  return threadId >>> 0; // Convert to unsigned 32-bit
+};
+
+/**
  * Format log count for display to avoid re-renders
  * Returns exact count if < 100, otherwise "+100"
  * Note: Selector caps info counts at 100, so count === 100 means >= 100
@@ -64,6 +72,7 @@ export const ThreadFilterDropdown = memo(() => {
         <div className="max-h-[280px] overflow-y-auto">
           {threadAlerts.map((thread) => {
             const colorClasses = getThreadColor(thread.threadId);
+            const displayThreadId = toUnsignedThreadId(thread.threadId);
             return (
               <button
                 key={thread.threadId}
@@ -74,7 +83,7 @@ export const ThreadFilterDropdown = memo(() => {
                   <span
                     className={`px-2 py-0.5 rounded text-xs font-mono ${colorClasses}`}
                   >
-                    T{thread.threadId}
+                    T{displayThreadId}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-xs">
