@@ -106,7 +106,9 @@ export const selectVisibleLogs = createSelector(
           }
 
           // Match if ANY of the log's keys is in the requested filterKeys
-          return logFilterKeys.some((key) => uiFilter.filterKeys?.includes(key));
+          return logFilterKeys.some((key) =>
+            uiFilter.filterKeys?.includes(key),
+          );
         });
       }
     }
