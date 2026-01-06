@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
-import { selectFilterAlerts } from '@/shared/store/selectors/headerSelectors';
+import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';

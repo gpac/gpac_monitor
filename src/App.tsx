@@ -1,6 +1,6 @@
 import { Provider } from 'react-redux';
 import { store } from '../src/shared/store';
-import DashboardLayout from './components/layout/DashboardLayout';
+import DashboardLayout from './components/layout/header/DashboardLayout';
 import { Toaster } from './components/ui/toaster';
 
 import './index.css';

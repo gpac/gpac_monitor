@@ -48,7 +48,7 @@ export const useGraphConnection = ({
     [dispatch, setConnectionError],
   );
 
-  // Register message handler - do this outside the connection effect
+  // Register message handller
   useEffect(() => {
     // Register the handler and store the unregister function
     const unregister = communication.registerHandler(messageHandler);
@@ -103,8 +103,7 @@ export const useGraphConnection = ({
     return () => {
       isMounted = false;
 
-      // Only disconnect if we were connected
-      if (isConnected) {
+      if (service.isConnected()) {
         try {
           service.disconnect();
         } catch (err) {
@@ -115,7 +114,6 @@ export const useGraphConnection = ({
   }, [
     service,
     setConnectionError,
-    isConnected,
     connectionId,
     connectionAddress,
   ]);

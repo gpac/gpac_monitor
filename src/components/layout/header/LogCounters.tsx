@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { selectLogCounts } from '@/shared/store/selectors/headerSelectors';
+import { selectLogCounts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
 import {
   FaTimesCircle,
@@ -9,6 +9,7 @@ import {
 } from 'react-icons/fa';
 import { LogShortcutButton } from '@/shared/ui/LogShortcutButton';
 import { useOpenLogsWidget } from '@/shared/hooks/useOpenLogsWidget';
+import { ThreadFilterDropdown } from './ThreadFilterDropdown';
 
 const LOG_SHORTCUTS = [
   {
@@ -60,6 +61,12 @@ const LogCounters = memo(() => {
           onClick={() => openLogsWidget({ levels: [shortcut.level] })}
         />
       ))}
+
+      {/* Séparateur visuel */}
+      <div className="h-4 w-px bg-gray-700" />
+
+      {/* Filtre par thread */}
+      <ThreadFilterDropdown />
     </div>
   );
 });

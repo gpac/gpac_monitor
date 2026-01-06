@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { selectFilterAlerts } from '@/shared/store/selectors/headerSelectors';
+import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 
 interface FilterStatCardProps {
   filter: EnrichedFilterData;

@@ -3,13 +3,22 @@ import {
   selectLogsState,
   selectLevelsByTool,
   selectDefaultAllLevel,
-} from './logs/logsSelectors';
+} from '../logs/logsSelectors';
 import { GpacLogLevel, LOG_LEVEL_VALUES } from '@/types/domain/gpac/log-types';
+
 
 export interface HeaderLogCounts {
   error: number;
   warning: number;
   info: number;
+}
+
+export interface ThreadAlert {
+  threadId: number;
+  errors: number;
+  warnings: number;
+  info?: number;
+  total: number;
 }
 
 /**
@@ -85,3 +94,42 @@ export const selectFilterAlerts = (filterKey: string) =>
     [selectAllFilterAlerts],
     (alerts) => alerts[filterKey] || null,
   );
+
+/**
+ * Extract threads with alerts from alertsByFilterKey
+ * Returns sorted by total alerts (errors + warnings + info) descending
+ * Info counts are capped at 100 to prevent unnecessary re-renders
+ */
+export const selectThreadAlerts = createSelector(
+  [selectAllFilterAlerts],
+  (alertsByFilterKey): ThreadAlert[] => {
+    const threads: ThreadAlert[] = [];
+
+    // Extract thread_id from filterKeys (format: "t:42")
+    for (const [key, alerts] of Object.entries(alertsByFilterKey)) {
+      if (key.startsWith('t:')) {
+        const threadId = parseInt(key.substring(2), 10);
+        if (!isNaN(threadId)) {
+          const errors = alerts.errors || 0;
+          const warnings = alerts.warnings || 0;
+          // Cap info at 100 to avoid re-renders on every info log beyond 100
+          const info = Math.min(alerts.info || 0, 100);
+          const total = errors + warnings + info;
+
+          if (total > 0) {
+            threads.push({
+              threadId,
+              errors,
+              warnings,
+              info,
+              total,
+            });
+          }
+        }
+      }
+    }
+
+    // Sort by total alerts descending (most problematic first)
+    return threads.sort((a, b) => b.total - a.total);
+  },
+);

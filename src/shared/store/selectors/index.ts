@@ -8,7 +8,7 @@ export * from './logs';
 export * from './gpacArgs';
 
 // Sidebar selectors
-export * from './headerSelectors';
+export * from './header/headerSelectors';
 
 // Monitored filter selectors
 export * from './monitoredFilter';
@@ -20,4 +20,4 @@ export * from './session';
 export * from './widgets';
 
 // Connections selectors
-export * from './connectionsSelectors';
+export * from './header/connectionsSelectors';

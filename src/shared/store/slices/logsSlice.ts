@@ -13,12 +13,14 @@ export type LogViewMode = 'perTool' | 'globalFilter';
 export type LogsUIFilter = {
   levels?: GpacLogLevel[];
   filterKeys?: string[]; // caller (e.g., "12") or thread_id (e.g., "t:42")
+  
 };
 
 /** Alert counters for a filter */
 export interface FilterAlerts {
   warnings: number;
   errors: number;
+  info: number;
 }
 
 /** Redux state for  logs management with per-tool levels and buffers */
@@ -177,26 +179,32 @@ const logsSlice = createSlice({
 
         buffer.push(log);
 
-        // Calculate alerts for WARNING (2) and ERROR (1)
-        if (log.level === 1 || log.level === 2) {
-          // Compute filter key: caller > thread_id fallback
-          // Note: caller can be 0 (idx=0), so check null/undefined explicitly
-          const filterKey =
-            log.caller !== null && log.caller !== undefined
-              ? String(log.caller)
-              : log.thread_id !== undefined
-                ? `t:${log.thread_id}`
-                : null;
+        // Calculate alerts for ERROR (1), WARNING (2), and INFO (3)
+        if (log.level === 1 || log.level === 2 || log.level === 3) {
+          const filterKeys: string[] = [];
 
-          if (filterKey) {
+          // Count by caller (filter) if present
+          if (log.caller !== null && log.caller !== undefined) {
+            filterKeys.push(String(log.caller));
+          }
+
+          // Count by thread_id if present
+          if (log.thread_id !== undefined) {
+            filterKeys.push(`t:${log.thread_id}`);
+          }
+
+          // Increment counters for all applicable keys
+          for (const filterKey of filterKeys) {
             if (!alertsByFilterKey[filterKey]) {
-              alertsByFilterKey[filterKey] = { warnings: 0, errors: 0 };
+              alertsByFilterKey[filterKey] = { warnings: 0, errors: 0, info: 0 };
             }
 
             if (log.level === 1) {
               alertsByFilterKey[filterKey].errors += 1;
             } else if (log.level === 2) {
               alertsByFilterKey[filterKey].warnings += 1;
+            } else if (log.level === 3) {
+              alertsByFilterKey[filterKey].info += 1;
             }
           }
         }

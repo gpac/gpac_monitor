@@ -92,14 +92,21 @@ export const selectVisibleLogs = createSelector(
       // Filter by filterKeys if specified (caller or thread_id)
       if (uiFilter.filterKeys && uiFilter.filterKeys.length > 0) {
         rawLogs = rawLogs.filter((log) => {
-          const filterKey =
-            log.caller !== null && log.caller !== undefined
-              ? String(log.caller)
-              : log.thread_id !== undefined
-                ? `t:${log.thread_id}`
-                : null;
+          // Build all possible filter keys for this log (same logic as counting)
+          const logFilterKeys: string[] = [];
 
-          return filterKey && uiFilter.filterKeys?.includes(filterKey);
+          // Add caller if present
+          if (log.caller !== null && log.caller !== undefined) {
+            logFilterKeys.push(String(log.caller));
+          }
+
+          // Add thread_id if present
+          if (log.thread_id !== undefined) {
+            logFilterKeys.push(`t:${log.thread_id}`);
+          }
+
+          // Match if ANY of the log's keys is in the requested filterKeys
+          return logFilterKeys.some((key) => uiFilter.filterKeys?.includes(key));
         });
       }
     }

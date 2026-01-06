@@ -48,33 +48,6 @@ function LogManager(client) {
             // Start SessionManager loop if not running
             this.client.sessionManager.startMonitoringLoop();
 
-            // === TEMPORARY TEST LOGS ===
-            // Inject fake errors/warnings to test alert system
-            // Matching your command: gpac -js=server.js -i input.mp4 vout aout -rmt
-            session.post_task(() => {
-                print('[LogManager TEST] Injecting test logs for alert system...');
-
-                // Error on "fin" filter (file input)
-                this.handleLog('filter', 1, 'TEST ERROR: Failed to read frame from input.mp4', 100, { type: 'fin', name: 'fin', idx: 0 });
-
-                // Warning on "vout" filter (video output)
-                this.handleLog('filter', 2, 'TEST WARNING: Video output buffer full', 200, { type: 'vout', name: 'vout', idx: 3 });
-
-                // Error on "aout" filter (audio output)
-                this.handleLog('filter', 1, 'TEST ERROR: Audio underrun detected', 300, { type: 'aout', name: 'aout', idx: 4 });
-
-                // Another warning on "vout"
-                this.handleLog('filter', 2, 'TEST WARNING: Dropped frame due to sync', 200, { type: 'vout', name: 'vout', idx: 3 });
-
-                // Warning on system (no caller, fallback to thread_id)
-                this.handleLog('core', 2, 'TEST WARNING: High CPU usage detected', 999, null);
-
-                print('[LogManager TEST] Test logs injected! Check dashboard for badges.');
-                print('[LogManager TEST] Expected: fin (1 ERR), vout (2 WARN), aout (1 ERR)');
-                return false; // Don't repeat
-            }, 2000); // 2 seconds after subscription
-            // === END TEST LOGS ===
-
         } catch (error) {
             console.error("LogManager: Failed to start log capturing:", error);
             this.isSubscribed = false;
@@ -112,7 +85,6 @@ function LogManager(client) {
      * Captures extended log info (thread_id, caller) when available
      */
     this.handleLog = function(tool, level, message, thread_id, caller) {
-        // Only create log object
         const log = {
             timestamp: sys.clock_us(),
             tool,
@@ -121,7 +93,6 @@ function LogManager(client) {
             thread_id: thread_id,
             caller: this.serializeCaller(caller)
         };
-
 
         this.incomingBuffer.push(log);
     };
