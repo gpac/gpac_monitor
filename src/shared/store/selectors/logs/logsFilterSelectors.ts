@@ -11,6 +11,7 @@ import {
   selectVisibleToolsFilter,
   selectUIFilter,
 } from './logsSelectors';
+import { getAlertKeysForLog } from '../../slices/logs/logs.helpers';
 
 /** Filter log entries based on log level hierarchy */
 const filterLogsByLevel = (
@@ -92,18 +93,8 @@ export const selectVisibleLogs = createSelector(
       // Filter by filterKeys if specified (caller or thread_id)
       if (uiFilter.filterKeys && uiFilter.filterKeys.length > 0) {
         rawLogs = rawLogs.filter((log) => {
-          // Build all possible filter keys for this log (same logic as counting)
-          const logFilterKeys: string[] = [];
-
-          // Add caller if present
-          if (log.caller !== null && log.caller !== undefined) {
-            logFilterKeys.push(String(log.caller));
-          }
-
-          // Add thread_id if present
-          if (log.thread_id !== undefined) {
-            logFilterKeys.push(`t:${log.thread_id}`);
-          }
+          // Use helper to get all filter keys (ensures consistency with alert counting)
+          const logFilterKeys = getAlertKeysForLog(log);
 
           // Match if ANY of the log's keys is in the requested filterKeys
           return logFilterKeys.some((key) =>
