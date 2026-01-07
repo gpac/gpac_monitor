@@ -9,34 +9,40 @@ import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './infrastructure/connectionManager';
 import { BaseMessageHandler } from './infrastructure/messageHandler/baseMessageHandler';
 import { GpacCoreService } from './core/gpacCore';
-import {
-  createStoreCallbacks,
-  clearStoreFilters,
-} from './integration/storeIntegration';
-import { generateID } from '@/utils/core';
+import { createStoreCallbacks } from './integration/storeIntegration';
 import {
   SubscriptionCallback,
   SubscriptionConfig,
-  SubscriptionType,
 } from '@/types/communication/subscription';
-import { GpacLogConfig } from '@/types/domain/gpac/log-types';
 import { PidProperty } from '@/types';
 import { FilterSubscriptionsStore } from './monitored-filter/FilterSubscriptionStore';
 
+// Import modular methods
+import {
+  GpacServiceState,
+  GpacServiceCallbacks,
+} from './service/service.types';
+import { initializationMethods } from './service/service.initialization';
+import { connectionMethods } from './service/service.connection';
+import { messagingMethods } from './service/service.messaging';
+import { filterMethods } from './service/service.filters';
+import { subscriptionMethods } from './service/service.subscriptions';
+
 export class GpacService implements IGpacCommunication {
   // ============================================================================
-  // SINGLETON & PROPERTIES
+  // SINGLETON
   // ============================================================================
   private static instance: GpacService | null = null;
-  private ws: WebSocketBase;
-  private coreService: GpacCoreService;
-  private connectionManager: ConnectionManager;
-  private messageHandler: BaseMessageHandler;
-  private notificationHandlers: GpacNotificationHandlers = {};
-  private _isLoaded: boolean = false;
-  private _readyPromise: Promise<void> | null = null;
-  private filterSubscriptionsStore = new FilterSubscriptionsStore();
 
+  // ============================================================================
+  // STATE
+  // ============================================================================
+  private state: GpacServiceState;
+  private callbacks: GpacServiceCallbacks = {};
+
+  // ============================================================================
+  // PUBLIC PROPERTIES
+  // ============================================================================
   public onMessage?: (message: any) => void;
   public onError?: (error: Error) => void;
   public onDisconnect?: () => void;
@@ -46,32 +52,48 @@ export class GpacService implements IGpacCommunication {
   // INITIALIZATION
   // ============================================================================
   private constructor() {
-    this.ws = new WebSocketBase();
-    this.coreService = new GpacCoreService();
-    this.connectionManager = new ConnectionManager(this.ws);
+    const ws = new WebSocketBase();
+    const coreService = new GpacCoreService();
+    const connectionManager = new ConnectionManager(ws);
+    const filterSubscriptionsStore = new FilterSubscriptionsStore();
 
     const storeCallbacks = createStoreCallbacks();
 
     const dependencies = {
       isConnected: () => this.isConnected(),
       send: (message: any) => this.send(message),
-      stopReconnection: () => this.connectionManager.stopReconnection(),
-      markEndOfSession: () => this.connectionManager.markEndOfSession(),
+      stopReconnection: () => connectionManager.stopReconnection(),
+      markEndOfSession: () => connectionManager.markEndOfSession(),
     };
 
-    this.messageHandler = new BaseMessageHandler(
-      /*    () => this.coreService.getCurrentFilterId(), */
+    const messageHandler = new BaseMessageHandler(
       () => false,
-      this.notificationHandlers,
+      {} as GpacNotificationHandlers,
       storeCallbacks,
       dependencies,
       (message: any) => {
         this.onMessage?.(message);
-        this.coreService.notifyHandlers(message);
+        coreService.notifyHandlers(message);
       },
     );
 
-    this.setupWebSocketHandlers();
+    this.state = {
+      ws,
+      coreService,
+      connectionManager,
+      messageHandler,
+      notificationHandlers: {},
+      filterSubscriptionsStore,
+      isLoaded: false,
+      readyPromise: null,
+    };
+
+    initializationMethods.setupWebSocketHandlers(
+      this.state,
+      this.callbacks,
+      (msg) => this.sendMessage(msg),
+      () => this.state.connectionManager.handleDisconnect(),
+    );
   }
 
   public static getInstance(): GpacService {
@@ -82,163 +104,92 @@ export class GpacService implements IGpacCommunication {
   }
 
   public async load(address: string): Promise<boolean> {
-    if (this._isLoaded) {
-      return true;
-    }
-
-    try {
-      this.onConnectionStatusChange?.(ConnectionStatus.CONNECTING);
-      await this.connectionManager.connect(address);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      if (!this.isConnected()) {
-        throw new Error('Failed to establish connection');
-      }
-
-      this._isLoaded = true;
-
-      return true;
-    } catch (error) {
-      this._isLoaded = false;
-      this.onConnectionStatusChange?.(ConnectionStatus.ERROR);
-      throw error;
-    }
-  }
-
-  private setupWebSocketHandlers(): void {
-    this.ws.addConnectHandler(() => {
-      this.sendMessage({ type: 'get_all_filters' });
-      this.onConnectionStatusChange?.(ConnectionStatus.CONNECTED);
-    });
-
-    this.ws.addJsonMessageHandler(
-      this.messageHandler.handleJsonMessage.bind(this.messageHandler),
+    return initializationMethods.load(this.state, this.callbacks, address, () =>
+      this.isConnected(),
     );
-    this.ws.addDefaultMessageHandler(
-      this.messageHandler.handleDefaultMessage.bind(this.messageHandler),
-    );
-
-    this.ws.addDisconnectHandler(() => {
-      this._isLoaded = false;
-      this._readyPromise = null;
-      this.messageHandler.cleanup();
-      this.onConnectionStatusChange?.(ConnectionStatus.DISCONNECTED);
-      this.onDisconnect?.();
-      this.connectionManager.handleDisconnect();
-    });
-  }
-
-  private cleanup(): void {
-    this.coreService.setCurrentFilterId(null);
-    this.filterSubscriptionsStore.clear();
   }
 
   // ============================================================================
   // CONNECTION MANAGEMENT
   // ============================================================================
   public async connect(address: string): Promise<void> {
-    return this.connectionManager.connect(address);
+    return connectionMethods.connect(this.state, address);
   }
 
   public async connectService(address: string): Promise<void> {
-    return this.connectionManager.connect(address);
+    return connectionMethods.connect(this.state, address);
   }
 
   public disconnect(): void {
-    console.log('[GpacService] Disconnecting service');
-    this.cleanup();
-    this.messageHandler.cleanup();
-    this.connectionManager.disconnect();
-    clearStoreFilters();
+    initializationMethods.disconnect(this.state);
   }
 
   public isConnected(): boolean {
-    return this.connectionManager.isConnected();
+    return connectionMethods.isConnected(this.state);
   }
 
   public isLoaded(): boolean {
-    return this._isLoaded && this.isConnected();
+    return connectionMethods.isLoaded(this.state);
   }
 
   public ready(address: string): Promise<void> {
-    if (!this._readyPromise) {
-      this._readyPromise = this.load(address).then(() => {});
-    }
-    return this._readyPromise;
+    return connectionMethods.ready(this.state, address, (addr) =>
+      this.load(addr),
+    );
   }
 
   public getStatus(): ConnectionStatus {
-    return this.coreService.getStatus();
+    return connectionMethods.getStatus(this.state);
   }
 
   // ============================================================================
   // MESSAGE HANDLING
   // ============================================================================
   public send(message: GpacMessage): Promise<void> {
-    return Promise.resolve(this.sendMessage(message));
+    return messagingMethods.send(this.state, message);
   }
 
   public sendMessage(message: GpacMessage): void {
-    if (!this.ws.isConnected()) {
-      throw new Error('[GpacService] WebSocket not connected');
-    }
-
-    const formattedMessage = {
-      message: message.type,
-      ...message,
-    };
-    const jsonString = JSON.stringify(formattedMessage);
-    this.ws.send(jsonString);
+    messagingMethods.sendMessage(this.state, message);
   }
 
   public registerHandler(handler: IGpacMessageHandler): () => void {
-    return this.coreService.registerHandler(handler);
+    return messagingMethods.registerHandler(this.state, handler);
   }
 
   public unregisterHandler(handler: IGpacMessageHandler): void {
-    this.coreService.unregisterHandler(handler);
+    messagingMethods.unregisterHandler(this.state, handler);
   }
 
   public setNotificationHandlers(handlers: GpacNotificationHandlers): void {
-    this.notificationHandlers = handlers;
-    this.connectionManager.setNotificationHandlers(handlers);
+    messagingMethods.setNotificationHandlers(this.state, handlers);
   }
 
   // ============================================================================
   // FILTER OPERATIONS
   // ============================================================================
   public getFilterDetails(idx: number): void {
-    const currentFilterId = this.coreService.getCurrentFilterId();
-    if (currentFilterId !== null && currentFilterId !== idx) {
-      this.sendMessage({ type: 'stop_details', idx: currentFilterId });
-    }
-    this.coreService.setCurrentFilterId(idx);
-    this.sendMessage({
-      type: 'filter_args_details',
-      id: generateID(),
-      idx: idx,
-    });
+    filterMethods.getFilterDetails(this.state, idx, (msg) =>
+      this.sendMessage(msg),
+    );
   }
 
   public setCurrentFilterId(id: number | null): void {
-    this.coreService.setCurrentFilterId(id);
+    filterMethods.setCurrentFilterId(this.state, id);
   }
 
   public getCurrentFilterId(): number | null {
-    return this.coreService.getCurrentFilterId();
+    return filterMethods.getCurrentFilterId(this.state);
   }
 
   public async subscribeToFilterArgs(idx: number): Promise<void> {
-    return this.messageHandler
-      .getFilterArgsHandler()
-      .subscribeToFilterArgs(idx);
+    return filterMethods.subscribeToFilterArgs(this.state, idx);
   }
 
   public unsubscribeFromFilter(filterIdx: string): void {
-    const numericIdx = parseInt(filterIdx, 10);
-    if (!isNaN(numericIdx)) {
-      this.sendMessage({ type: 'stop_details', idx: numericIdx });
-    }
+    filterMethods.unsubscribeFromFilter(this.state, filterIdx, (msg) =>
+      this.sendMessage(msg),
+    );
   }
 
   public async updateFilterArg(
@@ -247,21 +198,22 @@ export class GpacService implements IGpacCommunication {
     argName: string,
     newValue: string | number | boolean,
   ): Promise<void> {
-    if (!this.isLoaded()) {
-      throw new Error('Service not loaded');
-    }
-
-    return this.messageHandler
-      .getFilterArgsHandler()
-      .updateFilterArg(idx, name, argName, newValue);
+    return filterMethods.updateFilterArg(
+      this.state,
+      idx,
+      name,
+      argName,
+      newValue,
+      () => this.isLoaded(),
+    );
   }
 
   public getFilterArgsHandler() {
-    return this.messageHandler.getFilterArgsHandler();
+    return filterMethods.getFilterArgsHandler(this.state);
   }
 
   public get filterSubscriptions() {
-    return this.filterSubscriptionsStore;
+    return filterMethods.getFilterSubscriptions(this.state);
   }
 
   // ============================================================================
@@ -271,30 +223,20 @@ export class GpacService implements IGpacCommunication {
     filterIdx: number | undefined,
     ipidIdx: number | undefined,
   ): Promise<PidProperty[]> {
-    if (!this.isLoaded()) {
-      throw new Error('Service not loaded');
-    }
-    if (typeof filterIdx !== 'number' || typeof ipidIdx !== 'number') {
-      throw new Error('filterIdx and ipidIdx must be numbers');
-    }
-    const pidPropsMap = await this.messageHandler
-      .getPidPropsHandler()
-      .fetchIpidProps(filterIdx, ipidIdx);
-    return Object.values(pidPropsMap);
+    return filterMethods.getPidProps(this.state, filterIdx, ipidIdx, () =>
+      this.isLoaded(),
+    );
   }
 
   public async getCommandLine(): Promise<string | null> {
-    if (!this.isLoaded()) {
-      throw new Error('Service not loaded');
-    }
-    return this.messageHandler.getCommandLineHandler().fetch();
+    return filterMethods.getCommandLine(this.state, () => this.isLoaded());
   }
 
   // ============================================================================
   // LOGS
   // ============================================================================
   public get logs() {
-    return this.messageHandler.getLogHandler();
+    return subscriptionMethods.getLogs(this.state);
   }
 
   // ============================================================================
@@ -304,92 +246,9 @@ export class GpacService implements IGpacCommunication {
     config: SubscriptionConfig,
     callback: SubscriptionCallback<T>,
   ): Promise<() => void> {
-    if (!this.isLoaded()) {
-      throw new Error('Service not loaded');
-    }
-
-    const subscriptionId = generateID();
-
-    switch (config.type) {
-      case SubscriptionType.SESSION_STATS:
-        return this.messageHandler
-          .getSessionStatsHandler()
-          .subscribeToSessionStats((data) => {
-            callback({
-              data: data as T,
-              timestamp: Date.now(),
-              subscriptionId,
-            });
-          });
-
-      case SubscriptionType.FILTER_STATS: {
-        if (config.filterIdx === undefined) {
-          throw new Error(
-            'filterIdx is required for FILTER_STATS subscription',
-          );
-        }
-        const filterIdx = config.filterIdx;
-        this.filterSubscriptionsStore.addFilter(filterIdx);
-        const unsubscribeFromFilterStats = this.messageHandler
-          .getFilterStatsHandler()
-          .subscribeToFilterStatsUpdates(filterIdx, (data) => {
-            callback({
-              data: data as T,
-              timestamp: Date.now(),
-              subscriptionId,
-            });
-          });
-        return () => {
-          this.filterSubscriptionsStore.removeFilter(filterIdx);
-          unsubscribeFromFilterStats();
-        };
-      }
-
-      case SubscriptionType.CPU_STATS:
-        return this.messageHandler
-          .getCPUStatsHandler()
-          .subscribeToCPUStatsUpdates((data) => {
-            callback({
-              data: data as T,
-              timestamp: Date.now(),
-              subscriptionId,
-            });
-          });
-
-      case SubscriptionType.LOGS:
-        return this.messageHandler
-          .getLogHandler()
-          .subscribeToLogEntries((data) => {
-            callback({
-              data: data as T,
-              timestamp: Date.now(),
-              subscriptionId,
-            });
-          }, config.logLevel as GpacLogConfig);
-
-      case SubscriptionType.FILTER_ARGS_DETAILS:
-        if (typeof config.filterIdx !== 'number') {
-          throw new Error(
-            'filterIdx is required for FILTER_ARGS_DETAILS subscription',
-          );
-        }
-        return this.messageHandler
-          .getFilterArgsHandler()
-          .subscribeToFilterArgsDetails(
-            config.filterIdx,
-            (data) => {
-              callback({
-                data: data as T,
-                timestamp: Date.now(),
-                subscriptionId,
-              });
-            },
-            config.interval || 1000,
-          );
-
-      default:
-        throw new Error(`Unsupported subscription type: ${config.type}`);
-    }
+    return subscriptionMethods.subscribe(this.state, config, callback, () =>
+      this.isLoaded(),
+    );
   }
 }
 
