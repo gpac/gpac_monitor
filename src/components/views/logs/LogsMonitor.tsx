@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { RiGlobalFill, RiScrollToBottomLine } from 'react-icons/ri';
+import { RiScrollToBottomLine } from 'react-icons/ri';
 import WidgetWrapper from '../../Widget/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
@@ -22,6 +22,7 @@ import { generateLogId } from './utils/logIdentifier';
 import { setHighlightedLog } from '@/shared/store/slices/logsSlice';
 import { Button } from '@/components/ui/button';
 import { StableNumber } from '@/utils/performance/StableNumber';
+import { renderGlobalFilterBadge } from './utils/badgeUtils';
 
 interface LogsMonitorProps {
   id: string;
@@ -108,51 +109,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   }, [highlightedLogId, visibleLogs]);
 
   const statusBadge = useMemo(() => {
-    // Global Filter mode: show "all@level" badge with distinctive styling
+    // Global Filter mode: show "all@level" badge
     if (viewMode === 'globalFilter' && isUIFilterActive) {
-      const levelStr =
-        uiFilter?.levels && uiFilter.levels.length === 1
-          ? uiFilter.levels[0].toLowerCase()
-          : null;
-      const colorClasses = {
-        error: 'text-danger',
-        warning: 'text-warning',
-        info: 'text-emerald-300/90',
-        debug: 'text-debug',
-        quiet: 'text-muted',
-      };
-
-      // Check if filtering by thread
-      const threadId =
-        uiFilter?.filterKeys?.length === 1 &&
-        uiFilter.filterKeys[0].startsWith('t:')
-          ? parseInt(uiFilter.filterKeys[0].substring(2), 10) >>> 0
-          : null;
-
-      return (
-        <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-gray-700 bg-monitor-panel font-ui">
-          <span className="text-xs">
-            <RiGlobalFill className="w-4 h-4" />
-          </span>
-          <span
-            className={`text-sm font-medium ${
-              levelStr
-                ? colorClasses[levelStr as keyof typeof colorClasses]
-                : 'text-info'
-            }`}
-          >
-            {levelStr ? `all@${levelStr}` : 'filtered'}
-          </span>
-          {threadId !== null && (
-            <span className="text-sm font-medium text-blue-400">
-              T{threadId}
-            </span>
-          )}
-          <span className="text-xs text-muted">
-            (<StableNumber value={visibleLogs.length} />)
-          </span>
-        </div>
-      );
+      return renderGlobalFilterBadge(uiFilter, visibleLogs.length);
     }
 
     // Per-tool mode: show normal ToolSwitcher
