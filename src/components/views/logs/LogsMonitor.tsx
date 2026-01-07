@@ -21,13 +21,16 @@ import { LogEntryItem } from './components/LogEntryItem';
 import { generateLogId } from './utils/logIdentifier';
 import { setHighlightedLog } from '@/shared/store/slices/logsSlice';
 import { Button } from '@/components/ui/button';
+import { StableNumber } from '@/utils/performance/StableNumber';
 
 interface LogsMonitorProps {
   id: string;
 }
 
 const LogsFooter = React.memo(({ count }: { count: number }) => (
-  <div className="text-center text-xs text-gray-500 py-1">{count} logs</div>
+  <div className="text-center text-xs text-gray-500 py-1">
+    <StableNumber value={count} /> logs
+  </div>
 ));
 
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
@@ -145,8 +148,8 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
               T{threadId}
             </span>
           )}
-          <span className="text-xs tabular-nums text-muted">
-            ({visibleLogs.length})
+          <span className="text-xs text-muted">
+            (<StableNumber value={visibleLogs.length} />)
           </span>
         </div>
       );

@@ -1,4 +1,5 @@
 import { ComponentType, memo } from 'react';
+import { StableNumber } from '@/utils/performance/StableNumber';
 
 type LogShortcutButtonProps = {
   icon: ComponentType<{ className?: string }>;
@@ -23,23 +24,20 @@ export const LogShortcutButton = memo<LogShortcutButtonProps>(
         disabled={isDisabled}
         title={title}
         aria-label={title}
-        className={`flex items-center gap-2 px-3 py-1.5 rounded-md font-ui text-sm ${
+        className={`flex items-center gap-2 px-3 py-1.5 rounded-md font-ui text-sm transition-none ${
           isDisabled
             ? 'opacity-50 cursor-not-allowed'
             : 'hover:bg-gray-800/60 cursor-pointer'
         }`}
       >
         <Icon
-          className={`w-3.5 h-3.5 ${isDisabled ? 'text-gray-600' : colorClass}`}
+          className={`w-3.5 h-3.5 transition-none ${isDisabled ? 'text-gray-600' : colorClass}`}
         />
         {count != null && (
-          <span
-            className={`tabular-nums font-medium ${
-              isDisabled ? 'text-gray-600' : colorClass
-            }`}
-          >
-            {count}
-          </span>
+          <StableNumber
+            value={count}
+            className={`font-medium ${isDisabled ? 'text-gray-600' : colorClass}`}
+          />
         )}
       </button>
     );

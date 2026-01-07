@@ -9,28 +9,21 @@ import { useAppSelector } from '@/shared/hooks/redux';
 import { selectThreadAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { useOpenLogsWidget } from '@/shared/hooks/useOpenLogsWidget';
 import { getThreadColor } from '@/components/views/logs/utils/logxUtils';
+import { StableNumber } from '@/utils/performance/StableNumber';
 
 /**
  * Convert signed thread ID to unsigned 32-bit for display
  * GPAC displays thread IDs as unsigned in log messages
  */
 const toUnsignedThreadId = (threadId: number): number => {
-  return threadId >>> 0; // Convert to unsigned 32-bit
-};
-
-/**
- * Format log count for display to avoid re-renders
- * Returns exact count if < 100, otherwise "+100"
- * Note: Selector caps info counts at 100, so count === 100 means >= 100
- */
-const formatLogCount = (count: number): string => {
-  return count === 100 ? '+100' : String(count);
+  return threadId >>> 0;
 };
 
 export const ThreadFilterDropdown = memo(() => {
-  const threadAlerts = useAppSelector(selectThreadAlerts);
-  const openLogsWidget = useOpenLogsWidget();
   const [isOpen, setIsOpen] = useState(false);
+  const openLogsWidget = useOpenLogsWidget();
+
+  const threadAlerts = useAppSelector(selectThreadAlerts);
 
   const handleThreadClick = useCallback(
     (threadId: number) => {
@@ -40,25 +33,28 @@ export const ThreadFilterDropdown = memo(() => {
     [openLogsWidget],
   );
 
-  // Don't show if no threads with alerts
   if (threadAlerts.length === 0) {
     return null;
   }
 
   const totalThreadAlerts = threadAlerts.reduce((sum, t) => sum + t.total, 0);
+  const formatLogCount = (count: number): string => {
+    return count === 100 ? '+100' : String(count);
+  };
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button
-          className="flex items-center gap-2 px-3 py-1.5 rounded-md font-ui text-sm hover:bg-gray-800/60 cursor-pointer"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-md font-ui text-sm hover:bg-gray-800/60 cursor-pointer transition-none"
           title={`${totalThreadAlerts} alert(s) across ${threadAlerts.length} thread(s)`}
           aria-label="Filter logs by thread"
         >
-          <FaStream className="w-3.5 h-3.5 text-blue-400" />
-          <span className="tabular-nums font-medium text-blue-400">
-            {threadAlerts.length}
-          </span>
+          <FaStream className="w-3.5 h-3.5 text-blue-400 transition-none" />
+          <StableNumber
+            value={threadAlerts.length}
+            className="font-medium text-blue-400"
+          />
         </button>
       </PopoverTrigger>
 
@@ -93,7 +89,7 @@ export const ThreadFilterDropdown = memo(() => {
                     </span>
                   )}
                   {thread.warnings > 0 && (
-                    <span className="text-amber-400 font-medium transition-none">
+                    <span className="text-amber-400 font-medium transition-noney">
                       {thread.warnings} warn
                     </span>
                   )}

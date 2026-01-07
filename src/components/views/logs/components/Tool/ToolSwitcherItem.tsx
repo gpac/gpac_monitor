@@ -6,6 +6,7 @@ import { FaCheck } from 'react-icons/fa';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
 import { LEVEL_COLORS } from '../../utils/constants';
 import { bgToTextColor, getEffectiveLevel } from '../../utils/toolUtils';
+import { StableNumber } from '@/utils/performance/StableNumber';
 
 interface ToolSwitcherItemProps {
   tool: GpacLogTool;
@@ -84,11 +85,15 @@ export const ToolSwitcherItem: React.FC<ToolSwitcherItemProps> = React.memo(
           </span>
           <Badge
             variant="status"
-            className={`text-xs ${textColor} ml-1`}
+            className={`text-xs ${textColor} ml-1 transition-none`}
             style={{ backgroundColor: bgColor }}
           >
             {effectiveLevel.toUpperCase()}
-            {isCritical && `(${logCount})`}
+            {isCritical && (
+              <>
+                (<StableNumber value={logCount} />)
+              </>
+            )}
           </Badge>
         </div>
       </DropdownMenuItem>

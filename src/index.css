@@ -186,6 +186,14 @@ html {
   .bg-debug {
     @apply bg-blue-500;
   }
+
+  /* Stable number display for live counters (prevents CLS) */
+  .stat-num {
+    display: inline-block;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    min-width: 3.5ch;
+  }
 }
 
 /* Custom scrollbar styles */
