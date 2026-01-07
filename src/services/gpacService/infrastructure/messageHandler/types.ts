@@ -13,4 +13,5 @@ export interface MessageHandlerDependencies {
   isConnected: () => boolean;
   send: (message: any) => Promise<void>;
   stopReconnection: () => void;
+  markEndOfSession: () => void;
 }

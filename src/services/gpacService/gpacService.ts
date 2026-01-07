@@ -56,6 +56,7 @@ export class GpacService implements IGpacCommunication {
       isConnected: () => this.isConnected(),
       send: (message: any) => this.send(message),
       stopReconnection: () => this.connectionManager.stopReconnection(),
+      markEndOfSession: () => this.connectionManager.markEndOfSession(),
     };
 
     this.messageHandler = new BaseMessageHandler(

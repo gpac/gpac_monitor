@@ -8,6 +8,7 @@ export class ConnectionManager {
   private isConnecting: boolean = false;
   private notificationHandlers: GpacNotificationHandlers = {};
   private address: string | null = null;
+  private endOfSession: boolean = false;
 
   constructor(private ws: WebSocketBase) {}
 
@@ -36,6 +37,7 @@ export class ConnectionManager {
 
     this.address = targetAddress;
     this.isConnecting = true;
+    this.endOfSession = false; // Reset flag for new connection
     store.dispatch(setLoading(true));
 
     try {
@@ -65,7 +67,16 @@ export class ConnectionManager {
       '[ConnectionManager] Connection lost - no automatic reconnection',
     );
     this.cleanup();
-    store.dispatch(setError('Connection to GPAC server lost'));
+
+    // Only show error if it's NOT a normal end of session
+    if (!this.endOfSession) {
+      store.dispatch(setError('Connection to GPAC server lost'));
+    } else {
+      store.dispatch(setError(null));
+    }
+
+    // Reset flag for next connection
+    this.endOfSession = false;
   }
 
   private onConnectionSuccess(): void {
@@ -76,6 +87,11 @@ export class ConnectionManager {
   /** Stop reconnection attempts manually (e.g., when GPAC process is closed) */
   public stopReconnection(): void {
     this.cleanup();
+  }
+
+  /** Mark session as ended normally (to avoid showing error on disconnect) */
+  public markEndOfSession(): void {
+    this.endOfSession = true;
   }
 
   private cleanup(): void {
