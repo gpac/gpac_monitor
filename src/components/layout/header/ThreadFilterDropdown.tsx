@@ -77,11 +77,11 @@ export const ThreadFilterDropdown = memo(() => {
               <button
                 key={thread.threadId}
                 onClick={() => handleThreadClick(thread.threadId)}
-                className="w-full px-3 py-2 flex items-center justify-between hover:bg-gray-800 text-left transition-colors"
+                className="w-full px-3 py-2 flex items-center justify-between hover:bg-gray-800 text-left "
               >
                 <div className="flex items-center gap-2">
                   <span
-                    className={`px-2 py-0.5 rounded text-xs font-mono ${colorClasses}`}
+                    className={`px-2 py-0.5 rounded text-xs font-mono transition-none ${colorClasses}`}
                   >
                     T{displayThreadId}
                   </span>
@@ -93,12 +93,12 @@ export const ThreadFilterDropdown = memo(() => {
                     </span>
                   )}
                   {thread.warnings > 0 && (
-                    <span className="text-amber-400 font-medium">
+                    <span className="text-amber-400 font-medium transition-none">
                       {thread.warnings} warn
                     </span>
                   )}
                   {thread.info !== undefined && thread.info > 0 && (
-                    <span className="text-info font-medium">
+                    <span className="text-info font-medium transition-none">
                       {formatLogCount(thread.info)} info
                     </span>
                   )}
