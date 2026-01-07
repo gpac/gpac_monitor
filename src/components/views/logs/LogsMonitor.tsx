@@ -119,6 +119,13 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
         quiet: 'text-muted',
       };
 
+      // Check if filtering by thread
+      const threadId =
+        uiFilter?.filterKeys?.length === 1 &&
+        uiFilter.filterKeys[0].startsWith('t:')
+          ? parseInt(uiFilter.filterKeys[0].substring(2), 10) >>> 0
+          : null;
+
       return (
         <div className="flex items-center gap-2 px-3 py-1 rounded-md border border-gray-700 bg-monitor-panel font-ui">
           <span className="text-xs">
@@ -133,6 +140,11 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
           >
             {levelStr ? `all@${levelStr}` : 'filtered'}
           </span>
+          {threadId !== null && (
+            <span className="text-sm font-medium text-blue-400">
+              T{threadId}
+            </span>
+          )}
           <span className="text-xs tabular-nums text-muted">
             ({visibleLogs.length})
           </span>
