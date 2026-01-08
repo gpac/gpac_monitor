@@ -22,7 +22,11 @@ export const configReducers = {
     state: LogsState,
     action: PayloadAction<GpacLogLevel>,
   ) => {
-    state.defaultAllLevel = action.payload;
+    const newDefaultLevel = action.payload;
+    state.defaultAllLevel = newDefaultLevel;
+
+    // Reset all tool-specific levels - all tools inherit from 'all' level
+    state.levelsByTool = {} as Record<GpacLogTool, GpacLogLevel>;
   },
 
   /** Toggle tool visibility in "all" mode */

@@ -81,15 +81,11 @@ export const ToolSettingsDropdown = memo(
 
       const handleLevelSelect = useCallback(
         (tool: GpacLogTool, level: GpacLogLevel) => {
-          const currentLevel = getEffectiveLevel(
-            tool,
-            levelsByTool,
-            defaultAllLevel,
-          );
-          if (currentLevel !== level) handleLevelChange(tool, level);
-          else setOpenSubMenu(null);
+          // Always trigger the change to allow cleanup of redundant configs
+          // Even if the effective level is the same, we need to clean levelsByTool
+          handleLevelChange(tool, level);
         },
-        [handleLevelChange, levelsByTool, defaultAllLevel],
+        [handleLevelChange],
       );
 
       const handleSearchChange = useCallback((query: string) => {
