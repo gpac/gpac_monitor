@@ -83,25 +83,54 @@ export const getPlaybackStatus = (
   return { icon: LuPause, label: 'Paused', variant: 'outline' };
 };
 
+export interface FilterAlerts {
+  errors: number;
+  warnings: number;
+  info?: number;
+}
+
 /**
- * Gets filter health status from GPAC status string and stalled state
+ * Gets filter health status from GPAC status, stalled state, and log alerts
+ * Priority: real errors > stalled > real warnings > status text > healthy
  */
 export const getFilterHealthInfo = (
   status: string,
   isStalled?: boolean,
+  alerts?: FilterAlerts | null,
 ): HealthInfo => {
   const statusLower = status?.toLowerCase() || '';
 
-  // Check stalled first - highest priority for user awareness
+  // HIGHEST PRIORITY: Real errors from logs
+  if (alerts && alerts.errors > 0) {
+    return {
+      variant: 'destructive',
+      color: 'text-red-500',
+      bgColor: 'bg-red-500/10',
+      label: 'Critical',
+    };
+  }
+
+  // SECOND: Stalled state (performance issue)
   if (isStalled) {
     return {
       variant: 'secondary',
-      color: 'text-warning',
+      color: 'text-yellow-500',
       bgColor: 'bg-yellow-500/10',
       label: 'Stalled',
     };
   }
 
+  // THIRD: Real warnings from logs
+  if (alerts && alerts.warnings > 0) {
+    return {
+      variant: 'secondary',
+      color: 'text-yellow-500',
+      bgColor: 'bg-yellow-500/10',
+      label: 'Warning',
+    };
+  }
+
+  // FOURTH: Status text analysis (fallback)
   if (statusLower.includes('error') || statusLower.includes('stop')) {
     return {
       variant: 'destructive',
@@ -118,15 +147,16 @@ export const getFilterHealthInfo = (
   ) {
     return {
       variant: 'secondary',
-      color: 'text-warning',
+      color: 'text-yellow-500',
       bgColor: 'bg-yellow-500/10',
       label: 'Warning',
     };
   }
 
+  // DEFAULT: Healthy
   return {
     variant: 'default',
-    color: 'text-info',
+    color: 'text-green-500',
     bgColor: 'bg-green-500/10',
     label: 'Healthy',
   };

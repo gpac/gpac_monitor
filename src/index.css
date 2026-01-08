@@ -171,6 +171,9 @@ html {
   .text-danger {
     @apply text-rose-400;
   }
+  .text-destructive-foreground {
+    @apply text-rose-400;
+  }
   .text-info {
     @apply text-emerald-400;
   }

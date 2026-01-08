@@ -180,7 +180,7 @@ const DetailedStatsView = memo(
           </div>
 
           <TabsContent value="overview">
-            <MemoizedOverviewTab filter={overviewData} />
+            <MemoizedOverviewTab filter={overviewData} alerts={alerts} />
           </TabsContent>
           <TabsContent value="network" className="data-[state=inactive]:hidden">
             <MemoizedNetworkTab

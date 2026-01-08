@@ -27,7 +27,7 @@ pnpm-debug.log*
 *.mkv
 *.md
 *.avc
-$.aac
+*.aac
 *.docx
 *.pdf
 *.txt

@@ -44,7 +44,7 @@ const Header = () => {
           <div className="h-6 w-px bg-gray-700" />
           <button
             onClick={() => window.location.reload()}
-            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 transition-colors"
+            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 "
             title="Reload page"
             aria-label="Reload page"
           >
@@ -89,7 +89,7 @@ const Header = () => {
 
           <button
             onClick={() => setShowLayoutManager(!showLayoutManager)}
-            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800 "
           >
             <FiLayout className="w-4 h-4" />
             Layouts

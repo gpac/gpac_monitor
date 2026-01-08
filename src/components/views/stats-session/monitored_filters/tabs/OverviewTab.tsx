@@ -5,17 +5,22 @@ import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
 import { PacketsCard, DataCard, RealtimeMetricsCard } from '../cards';
 import { Badge } from '@/components/ui/badge';
 import { formatTime } from '@/utils/formatting';
-import { getFilterHealthInfo } from '../cards/shared/statusHelpers';
+import {
+  getFilterHealthInfo,
+  type FilterAlerts,
+} from '../cards/shared/statusHelpers';
 import { TAB_STYLES } from './styles';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
+  alerts?: FilterAlerts | null;
 }
 
-const OverviewTab = memo(({ filter }: OverviewTabProps) => {
+const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
   const { status, type, idx, time } = filter;
+
   const isStalled = useSelector(selectIsFilterStalled(idx.toString()));
-  const healthInfo = getFilterHealthInfo(status, isStalled);
+  const healthInfo = getFilterHealthInfo(status, isStalled, alerts);
   const formattedUptime = formatTime(time);
 
   return (
@@ -47,8 +52,8 @@ const OverviewTab = memo(({ filter }: OverviewTabProps) => {
         <div className="flex flex-col gap-2">
           {/* Compact Health Card */}
           <div className="bg-monitor-panel/60 border-r border-monitor-line/10 rounded p-2">
-            <div className="text-xs font-medium text-info mb-1">Health</div>
-            <div className={`text-xs font-medium ${healthInfo.color} py-1`}>
+            <div className="text-xs font-medium text-gray-400 mb-1">Health</div>
+            <div className={`${healthInfo.color} text-xs font-medium py-1`}>
               {status || 'Unknown'}
             </div>
           </div>
