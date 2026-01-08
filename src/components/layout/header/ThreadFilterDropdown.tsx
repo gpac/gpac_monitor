@@ -60,7 +60,7 @@ export const ThreadFilterDropdown = memo(() => {
 
       <PopoverContent
         align="end"
-        className="bg-gray-900 border border-gray-700 rounded-md shadow-lg z-50 min-w-[220px] max-h-[320px] overflow-hidden"
+        className="bg-monitor-panel/55 border-gray-700 rounded-md shadow-lg z-50 min-w-[220px] max-h-[320px] overflow-hidden"
       >
         <div className="px-3 py-2 text-xs text-gray-400 border-b border-gray-700 font-semibold">
           Threads with Alerts
