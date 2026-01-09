@@ -171,11 +171,12 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
               {formattedTime}
             </span>
           )}
-          {filter.errors && filter.errors > 0 && (
+          {((filter.errors && filter.errors > 0) ||
+            (filter.current_errors && filter.current_errors > 0)) && (
             <>
               <span className="text-monitor-text-subtle">•</span>
               <span className="text-rose-400" title="Errors encountered">
-                {filter.errors} err
+                {(filter.errors || 0) + (filter.current_errors || 0)} err
               </span>
             </>
           )}
@@ -196,7 +197,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
   },
   // Note: memo comparison removed to allow alerts updates
   // Alerts come from Redux and need to trigger re-renders
-
 );
 
 FilterStatCard.displayName = 'FilterStatCard';

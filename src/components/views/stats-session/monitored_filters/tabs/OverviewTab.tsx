@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { useSelector } from 'react-redux';
+import { useAppSelector } from '@/shared/hooks/redux';
 import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
 import { PacketsCard, DataCard, RealtimeMetricsCard } from '../cards';
@@ -19,7 +19,7 @@ interface OverviewTabProps {
 const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
   const { status, type, idx, time } = filter;
 
-  const isStalled = useSelector(selectIsFilterStalled(idx.toString()));
+  const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
   const healthInfo = getFilterHealthInfo(status, isStalled, alerts);
   const formattedUptime = formatTime(time);
 
@@ -56,6 +56,12 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
             <div className={`${healthInfo.color} text-xs font-medium py-1`}>
               {status || 'Unknown'}
             </div>
+            {((filter.errors && filter.errors > 0) ||
+              (filter.current_errors && filter.current_errors > 0)) && (
+              <div className="text-xs text-rose-400 mt-1" title="Total errors">
+                {(filter.errors || 0) + (filter.current_errors || 0)} errors
+              </div>
+            )}
           </div>
           {/* Compact PIDs Card */}
           <div className="bg-monitor-panel/60 border-0 border-r border-monitor-line/10 rounded p-2">

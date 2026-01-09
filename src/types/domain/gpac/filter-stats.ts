@@ -110,6 +110,10 @@ export interface OverviewTabData {
   // PID counts
   nb_ipid: number;
   nb_opid: number;
+
+  // Error tracking
+  errors?: number;
+  current_errors?: number;
 }
 
 /**

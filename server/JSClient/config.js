@@ -1,5 +1,5 @@
 const DEFAULT_FILTER_FIELDS = [
-    "idx", "bytes_done", "bytes_sent", "pck_sent", "pck_done", "time", "nb_ipid", "nb_opid"
+    "idx", "bytes_done", "bytes_sent", "pck_sent", "pck_done", "time", "nb_ipid", "nb_opid", "errors", "current_errors"
 ];
 
 const CPU_STATS_FIELDS = [
@@ -9,7 +9,7 @@ const CPU_STATS_FIELDS = [
 ];
 
 const FILTER_PROPS_LITE = [
-    'name', 'status', 'bytes_done', 'type', 'ID', 'nb_ipid', 'nb_opid', 'idx', 'itag', 'pck_sent', 'pck_done', 'time'
+    'name', 'status', 'bytes_done', 'type', 'ID', 'nb_ipid', 'nb_opid', 'idx', 'itag', 'pck_sent', 'pck_done', 'time',"current_errors"
 ];
 
 const FILTER_ARGS_LITE = [];
@@ -17,7 +17,7 @@ const FILTER_ARGS_LITE = [];
 const PID_PROPS_LITE = [];
 
 const FILTER_SUBSCRIPTION_FIELDS = [
-    'status', 'bytes_done', 'bytes_sent', 'pck_done', 'pck_sent', 'time', 'nb_ipid', 'nb_opid'
+    'status', 'bytes_done', 'bytes_sent', 'pck_done', 'pck_sent', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors'
 ];
 // Update intervals for subscriptions (in milliseconds)
 const UPDATE_INTERVALS = {

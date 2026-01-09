@@ -40,6 +40,7 @@ export interface EnrichedFilterOverview extends Record<string, unknown> {
   nb_opid: number;
   tasks?: number;
   errors?: number;
+  current_errors?: number;
   ipid: Record<string, PIDData>;
   opid: Record<string, PIDData>;
   gpac_args?: GpacArgument[];
@@ -89,6 +90,7 @@ export interface CompleteFilterData extends Record<string, unknown> {
   time: number;
   tasks?: number;
   errors?: number;
+  current_errors?: number;
   ipid: Record<string, PIDData>;
   opid: Record<string, PIDData>;
   gpac_args: GpacArgument[];
