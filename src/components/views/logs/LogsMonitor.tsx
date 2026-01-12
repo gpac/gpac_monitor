@@ -12,7 +12,11 @@ import {
   selectViewMode,
 } from '@/shared/store/selectors/logs/logsSelectors';
 import { selectCriticalLogsCount } from '@/shared/store/selectors/logs/logsFilterSelectors';
-import { clearUIFilter } from '@/shared/store/slices/logsSlice';
+import {
+  clearUIFilter,
+  toggleTimestampMode,
+} from '@/shared/store/slices/logsSlice';
+import { selectTimestampMode } from '@/shared/store/selectors/logs/logsSelectors';
 import { useLogsService } from './hooks/useLogsService';
 import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/Tool/ToolSettingsDropdown';
@@ -71,6 +75,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   // Get UI filter (if active)
   const uiFilter = useAppSelector(selectUIFilter);
   const viewMode = useAppSelector(selectViewMode);
+  const timestampMode = useAppSelector(selectTimestampMode);
   const isUIFilterActive =
     uiFilter &&
     ((uiFilter.levels && uiFilter.levels.length > 0) ||
@@ -165,6 +170,21 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
             </CustomTooltip>
           )}
           <CustomTooltip
+            content={
+              timestampMode === 'relative'
+                ? 'Sort by relative time'
+                : 'Sort by absolute time'
+            }
+            side="bottom"
+          >
+            <button
+              onClick={() => dispatch(toggleTimestampMode())}
+              className="px-2 py-1 text-xs rounded bg-gray-700/50 border border-gray-600/50 text-gray-200 hover:bg-gray-700/80"
+            >
+              {timestampMode === 'relative' ? '⏱️ Relative' : '🕐 Absolute'}
+            </button>
+          </CustomTooltip>
+          <CustomTooltip
             content="Configure log levels for each tool"
             side="bottom"
           >
@@ -241,6 +261,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
                   logId={logId}
                   isHighlighted={logId === highlightedLogId}
                   onToggleHighlight={handleToggleHighlight}
+                  timestampMode={timestampMode}
                 />
               );
             }}

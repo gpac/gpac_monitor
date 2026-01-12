@@ -87,6 +87,7 @@ function LogManager(client) {
     this.handleLog = function(tool, level, message, thread_id, caller) {
         const log = {
             timestamp: sys.clock_us(),
+            timestampMs: Date.now(),
             tool,
             level,
             message: message?.length > 500 ? message.substring(0, 500) + '...' : message,

@@ -42,6 +42,12 @@ export const selectViewMode = createSelector(
   (logsState) => logsState.viewMode,
 );
 
+/** Get the timestamp mode (relative or absolute) */
+export const selectTimestampMode = createSelector(
+  [selectLogsState],
+  (logsState) => logsState.timestampMode,
+);
+
 /** Check if the logs WebSocket subscription is active */
 export const selectIsSubscribed = createSelector(
   [selectLogsState],

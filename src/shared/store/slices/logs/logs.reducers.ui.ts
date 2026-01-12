@@ -27,4 +27,10 @@ export const uiReducers = {
     state.uiFilter = null;
     state.viewMode = 'perTool'; // Return to per-tool mode
   },
+
+  /** Toggle timestamp mode between relative (sys.clock_us) and absolute (Date.now) */
+  toggleTimestampMode: (state: LogsState) => {
+    state.timestampMode =
+      state.timestampMode === 'relative' ? 'absolute' : 'relative';
+  },
 };

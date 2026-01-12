@@ -61,6 +61,8 @@ export type GpacLogConfigString = string;
 export interface GpacLogEntry {
   /** Timestamp when the log was generated (microseconds from sys.clock_us) */
   timestamp: number;
+  /** Absolute timestamp (milliseconds from Date.now) for long sessions */
+  timestampMs?: number;
   /** Log tool/category */
   tool: string;
   /** Log level (numeric value from GPAC) */

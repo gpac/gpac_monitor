@@ -10,6 +10,7 @@ import {
   selectDefaultAllLevel,
   selectVisibleToolsFilter,
   selectUIFilter,
+  selectTimestampMode,
 } from './logsSelectors';
 import { getAlertKeysForLog } from '../../slices/logs/logs.helpers';
 
@@ -43,8 +44,16 @@ export const selectVisibleLogs = createSelector(
     selectDefaultAllLevel,
     selectVisibleToolsFilter,
     selectUIFilter,
+    selectTimestampMode,
   ],
-  (logsState, levelsByTool, defaultAllLevel, visibleToolsFilter, uiFilter) => {
+  (
+    logsState,
+    levelsByTool,
+    defaultAllLevel,
+    visibleToolsFilter,
+    uiFilter,
+    timestampMode,
+  ) => {
     let rawLogs: GpacLogEntry[];
 
     // UI Filter active = force ALL mode (show logs from ALL configured tools)
@@ -59,14 +68,24 @@ export const selectVisibleLogs = createSelector(
       // ALL mode: show logs from all tools
       const toolsToInclude = Object.keys(logsState.buffers);
 
-      // Get logs from all tools
+      // Get logs from all tools and sort by chosen timestamp mode
       rawLogs = toolsToInclude
         .map(
           (tool) =>
             logsState.buffers[tool as keyof typeof logsState.buffers] || [],
         )
         .flat()
-        .sort((a, b) => a.timestamp - b.timestamp);
+        .sort((a, b) => {
+          const timeA =
+            timestampMode === 'absolute' && a.timestampMs
+              ? a.timestampMs
+              : a.timestamp;
+          const timeB =
+            timestampMode === 'absolute' && b.timestampMs
+              ? b.timestampMs
+              : b.timestamp;
+          return timeA - timeB;
+        });
     } else {
       // Single tool selected - get only logs from that tool
       rawLogs = logsState.buffers[logsState.currentTool] || [];
@@ -78,6 +97,19 @@ export const selectVisibleLogs = createSelector(
 
       // Filter by effective level (preserving history in buffers)
       rawLogs = filterLogsByLevel(rawLogs, effectiveLevel);
+
+      // Sort by chosen timestamp mode (create copy to avoid mutation)
+      rawLogs = [...rawLogs].sort((a, b) => {
+        const timeA =
+          timestampMode === 'absolute' && a.timestampMs
+            ? a.timestampMs
+            : a.timestamp;
+        const timeB =
+          timestampMode === 'absolute' && b.timestampMs
+            ? b.timestampMs
+            : b.timestamp;
+        return timeA - timeB;
+      });
     }
 
     // Apply UI filter (Layer 2: view layer) if present

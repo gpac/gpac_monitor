@@ -8,6 +8,9 @@ import { LogId } from '@/components/views/logs/utils/logIdentifier';
 /** View mode for LogMonitor UI */
 export type LogViewMode = 'perTool' | 'globalFilter';
 
+/** Timestamp mode for log sorting */
+export type TimestampMode = 'relative' | 'absolute';
+
 /** UI-only filter supporting levels and filter keys */
 export type LogsUIFilter = {
   levels?: GpacLogLevel[];
@@ -33,6 +36,7 @@ export interface LogsState {
   highlightedLogId: LogId | null; // ID of the currently highlighted log (session only)
   uiFilter: LogsUIFilter | null; // UI-only filter (levels and/or filter keys)
   viewMode: LogViewMode; // Current view mode (perTool or globalFilter)
+  timestampMode: TimestampMode; // Timestamp mode for log sorting (session only)
   lastSentConfig: {
     levelsByTool: Record<GpacLogTool, GpacLogLevel>;
     defaultAllLevel: GpacLogLevel | null; // null means no config sent yet

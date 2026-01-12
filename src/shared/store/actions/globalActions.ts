@@ -8,7 +8,6 @@ import type { AppDispatch } from '../index';
 export const clearAllSessionData = () => (dispatch: AppDispatch) => {
   // Clear graph data (nodes, edges, filters)
   dispatch(clearGraph());
-
   // TODO: Add other slices as needed:
   // dispatch(clearLogs());
   // dispatch(clearSessionStats());

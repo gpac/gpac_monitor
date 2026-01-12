@@ -79,6 +79,7 @@ export class SessionStatsHandler {
 
   public handleSessionStats(stats: SessionFilterStatistics[]): void {
     this.sessionStatsSubscribable.updateDataAndNotify(stats);
+  
   }
 
   public subscribeToSessionStats(

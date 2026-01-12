@@ -6,7 +6,12 @@ import { uiReducers } from './logs.reducers.ui';
 import { alertsReducers } from './logs.reducers.alerts';
 
 // Re-export types for backward compatibility
-export type { LogViewMode, LogsUIFilter, FilterAlerts } from './logs.types';
+export type {
+  LogViewMode,
+  LogsUIFilter,
+  FilterAlerts,
+  TimestampMode,
+} from './logs.types';
 
 const logsSlice = createSlice({
   name: 'logs',
@@ -35,6 +40,7 @@ export const {
   setHighlightedLog,
   setUIFilter,
   clearUIFilter,
+  toggleTimestampMode,
   clearAllAlerts,
   clearFilterAlerts,
 } = logsSlice.actions;

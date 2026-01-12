@@ -25,6 +25,7 @@ export const getInitialLogsState = (): LogsState => {
       highlightedLogId: null,
       uiFilter: null,
       viewMode: 'perTool' as const,
+      timestampMode: 'relative' as const,
       lastSentConfig: {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
         defaultAllLevel: null, // Indicates no config has been sent yet
@@ -43,6 +44,7 @@ export const getInitialLogsState = (): LogsState => {
       highlightedLogId: null,
       uiFilter: null,
       viewMode: 'perTool' as const,
+      timestampMode: 'relative' as const,
       lastSentConfig: {
         levelsByTool: {} as Record<GpacLogTool, GpacLogLevel>,
         defaultAllLevel: null,

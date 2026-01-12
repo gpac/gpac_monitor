@@ -108,3 +108,4 @@ export const formatCompactTime = (microseconds?: number): string => {
   const mmFormatted = minutes.toString().padStart(2, '0');
   return `${hours}:${mmFormatted}h`;
 };
+

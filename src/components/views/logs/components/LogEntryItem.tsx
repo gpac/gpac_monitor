@@ -3,16 +3,21 @@ import { MdPushPin, MdOutlinePushPin } from 'react-icons/md';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import { LogId } from '../utils/logIdentifier';
 import { LOG_ENTRY_CONFIG } from '../utils/constants';
+import {
+  formatLogTimestampRelative,
+  formatLogTimestampAbsolute,
+} from '../utils/timestampFormatters';
 
 interface LogEntryItemProps {
   log: GpacLogEntry;
   logId: LogId;
   isHighlighted: boolean;
   onToggleHighlight: (logId: LogId | null) => void;
+  timestampMode: 'relative' | 'absolute';
 }
 
 export const LogEntryItem = React.memo<LogEntryItemProps>(
-  ({ log, logId, isHighlighted, onToggleHighlight }) => {
+  ({ log, logId, isHighlighted, onToggleHighlight, timestampMode }) => {
     const logData = useMemo(() => {
       const level = log.level;
       const IconComponent =
@@ -24,8 +29,14 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
           level as keyof typeof LOG_ENTRY_CONFIG.iconClasses
         ] || LOG_ENTRY_CONFIG.iconClasses[0];
 
+      // Format timestamp based on mode
+      const time =
+        timestampMode === 'absolute' && log.timestampMs
+          ? formatLogTimestampAbsolute(log.timestampMs)
+          : formatLogTimestampRelative(log.timestamp);
+
       return {
-        time: new Date(log.timestamp).toLocaleTimeString(),
+        time,
         IconComponent,
         iconClass,
         style:
@@ -37,7 +48,7 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
             level as keyof typeof LOG_ENTRY_CONFIG.names
           ] || 'UNKNOWN',
       };
-    }, [log.timestamp, log.level]);
+    }, [log.timestamp, log.timestampMs, log.level, timestampMode]);
 
     const [isHovered, setIsHovered] = useState(false);
 
@@ -118,7 +129,8 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
       prevProps.log.level === nextProps.log.level &&
       prevProps.log.caller === nextProps.log.caller &&
       prevProps.isHighlighted === nextProps.isHighlighted &&
-      prevProps.logId === nextProps.logId
+      prevProps.logId === nextProps.logId &&
+      prevProps.timestampMode === nextProps.timestampMode
     );
   },
 );
