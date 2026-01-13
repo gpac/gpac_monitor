@@ -22,7 +22,7 @@ export const PacketsCard = memo(
         <div className="flex justify-between text-xs">
           <span className="text-muted-foreground">Done</span>
           <span className="font-medium text-info tabular-nums">
-            m{formatNumber(pck_done || 0)}
+            {formatNumber(pck_done || 0)}
           </span>
         </div>
         <div className="flex justify-between text-xs">
