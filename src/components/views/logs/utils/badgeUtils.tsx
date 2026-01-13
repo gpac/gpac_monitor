@@ -1,14 +1,10 @@
 import { RiGlobalFill } from 'react-icons/ri';
 import { LogsUIFilter } from '@/shared/store/slices/logs/logs.types';
-import { StableNumber } from '@/utils/performance/StableNumber';
 
 /**
  * Render the global filter badge (pure function returning JSX)
  */
-export const renderGlobalFilterBadge = (
-  uiFilter: LogsUIFilter | null,
-  visibleLogsCount: number,
-) => {
+export const renderGlobalFilterBadge = (uiFilter: LogsUIFilter | null) => {
   const levelStr =
     uiFilter?.levels && uiFilter.levels.length === 1
       ? uiFilter.levels[0].toLowerCase()
@@ -35,7 +31,7 @@ export const renderGlobalFilterBadge = (
         <RiGlobalFill className="w-4 h-4" />
       </span>
       <span
-        className={`text-sm font-medium ${
+        className={`text-xs font-cond ${
           levelStr
             ? colorClasses[levelStr as keyof typeof colorClasses]
             : 'text-info'
@@ -44,11 +40,11 @@ export const renderGlobalFilterBadge = (
         {levelStr ? `all@${levelStr}` : 'filtered'}
       </span>
       {threadId !== null && (
-        <span className="text-sm font-medium text-blue-400">T{threadId}</span>
+        <span className="text-xs font-cond text-blue-400">T{threadId}</span>
       )}
-      <span className="text-xs text-muted">
+      {/*   <span className="text-xs text-muted">
         (<StableNumber value={visibleLogsCount} />)
-      </span>
+      </span> */}
     </div>
   );
 };

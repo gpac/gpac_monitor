@@ -1,6 +1,8 @@
 import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { RiScrollToBottomLine } from 'react-icons/ri';
+import { MdFilterList } from 'react-icons/md';
+import { MdOutlineTimer } from 'react-icons/md';
 import WidgetWrapper from '../../Widget/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
@@ -116,7 +118,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   const statusBadge = useMemo(() => {
     // Global Filter mode: show "all@level" badge
     if (viewMode === 'globalFilter' && isUIFilterActive) {
-      return renderGlobalFilterBadge(uiFilter, visibleLogs.length);
+      return renderGlobalFilterBadge(uiFilter);
     }
 
     // Per-tool mode: show normal ToolSwitcher
@@ -163,17 +165,17 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
             <CustomTooltip content="Clear UI filter" side="bottom">
               <button
                 onClick={() => dispatch(clearUIFilter())}
-                className="px-2 py-1 text-xs rounded bg-red-900/30 border border-red-800/50 text-red-200 hover:bg-red-900/50 "
+                className="px-2 py-1 text-xs rounded bg-red-900/30 border border-red-800/50 text-red-200 hover:bg-red-900/50"
               >
-                Clear Filter
+                <MdFilterList className="w-4 h-4" />
               </button>
             </CustomTooltip>
           )}
           <CustomTooltip
             content={
               timestampMode === 'relative'
-                ? 'Sort by relative time'
-                : 'Sort by absolute time'
+                ? 'Switch to absolute time'
+                : 'Switch to relative time'
             }
             side="bottom"
           >
@@ -181,7 +183,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
               onClick={() => dispatch(toggleTimestampMode())}
               className="px-2 py-1 text-xs rounded bg-gray-700/50 border border-gray-600/50 text-gray-200 hover:bg-gray-700/80"
             >
-              {timestampMode === 'relative' ? '⏱️ Relative' : '🕐 Absolute'}
+              <MdOutlineTimer className="w-4 h-4" />
             </button>
           </CustomTooltip>
           <CustomTooltip
