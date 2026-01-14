@@ -6,9 +6,11 @@ package-lock.json
 # Production build
 dist
 dist-ssr
+
+# Doc & other features 
+doc
 tasks
 test
-
 # Debug logs
 npm-debug.log*
 pnpm-debug.log*
