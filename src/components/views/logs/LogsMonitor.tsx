@@ -1,7 +1,6 @@
 import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { RiScrollToBottomLine } from 'react-icons/ri';
-import { MdFilterList } from 'react-icons/md';
+import { RiScrollToBottomLine, RiFilterOffLine } from 'react-icons/ri';
 import { MdOutlineTimer } from 'react-icons/md';
 import WidgetWrapper from '../../Widget/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
@@ -200,9 +199,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
             <CustomTooltip content="Clear UI filter" side="bottom">
               <button
                 onClick={() => dispatch(clearUIFilter())}
-                className="px-2 py-1 text-xs rounded bg-red-900/30 border border-red-800/50 text-red-200 hover:bg-red-900/50"
+                className="px-2 py-1 text-xs rounded bg-red-900/50 border border-red-800/50 text-red-200 hover:bg-red-900/50"
               >
-                <MdFilterList className="w-4 h-4" />
+                <RiFilterOffLine className="w-4 h-4" />
               </button>
             </CustomTooltip>
           )}
