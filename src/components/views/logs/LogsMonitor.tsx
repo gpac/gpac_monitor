@@ -115,6 +115,42 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
     }
   }, [highlightedLogId, visibleLogs]);
 
+  // Memoized scroll handler to prevent re-renders
+  const handleScrollToggle = useCallback(() => {
+    if (atBottom) {
+      virtuosoRef.current?.scrollToIndex({ index: 0, behavior: 'smooth' });
+    } else {
+      virtuosoRef.current?.scrollToIndex({
+        index: visibleLogs.length - 1,
+        behavior: 'smooth',
+      });
+    }
+  }, [atBottom, visibleLogs.length]);
+
+  const renderLogItem = useCallback(
+    (_: number, log: (typeof visibleLogs)[0]) => {
+      const logId = generateLogId(log);
+      return (
+        <LogEntryItem
+          log={log}
+          logId={logId}
+          isHighlighted={logId === highlightedLogId}
+          onToggleHighlight={handleToggleHighlight}
+          timestampMode={timestampMode}
+        />
+      );
+    },
+    [highlightedLogId, handleToggleHighlight, timestampMode],
+  );
+
+  // Memoized Virtuoso components to prevent layout shifts
+  const virtuosoComponents = useMemo(
+    () => ({
+      Footer: () => <LogsFooter count={visibleLogs.length} />,
+    }),
+    [visibleLogs.length],
+  );
+
   const statusBadge = useMemo(() => {
     // Global Filter mode: show "all@level" badge
     if (viewMode === 'globalFilter' && isUIFilterActive) {
@@ -141,7 +177,6 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
     viewMode,
     uiFilter,
     isUIFilterActive,
-    visibleLogs.length,
     currentTool,
     levelsByTool,
     defaultAllLevel,
@@ -207,37 +242,24 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
         <div className="flex-1 relative">
           <div className="absolute bottom-4 right-4 z-20 flex flex-col items-center gap-3 pointer-events-auto">
             {/* Scroll to highlighted log button */}
-            {highlightedLogId && (
-              <button
-                onClick={scrollToHighlightedLog}
-                className="px-2 py-1 text-xs rounded border bg-gray-800 border-yellow-600 text-white hover:opacity-80"
-                title="Scroll to highlighted log"
-              >
-                📌
-              </button>
-            )}
+            <button
+              onClick={scrollToHighlightedLog}
+              className={`px-2 py-1 text-xs rounded border bg-gray-800 border-yellow-600 text-white hover:opacity-80 ${
+                highlightedLogId ? 'visible' : 'invisible'
+              }`}
+              title="Scroll to highlighted log"
+            >
+              📌
+            </button>
 
             {/* Auto-scroll toggle */}
             <Button
-              onClick={() => {
-                if (atBottom) {
-                  virtuosoRef.current?.scrollToIndex({
-                    index: 0,
-                    behavior: 'smooth',
-                  });
-                } else {
-                  virtuosoRef.current?.scrollToIndex({
-                    index: visibleLogs.length - 1,
-                    behavior: 'smooth',
-                  });
-                }
-              }}
-              className={`p-2 rounded-sm shadow-md border-2  hover:scale-105
-  `}
+              onClick={handleScrollToggle}
+              className="p-2 rounded-sm shadow-md border-2 hover:scale-105"
               title={atBottom ? 'Scroll to top' : 'Scroll to bottom'}
             >
               <RiScrollToBottomLine
-                className={`w-5 h-5 transform  duration-200 ${
+                className={`w-5 h-5 transition-transform duration-200 ${
                   atBottom ? 'rotate-180' : ''
                 }`}
               />
@@ -252,31 +274,15 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
               height: '100%',
               fontFamily: "'Roboto Mono', 'Courier New', monospace",
               willChange: 'transform',
-              contain: 'layout paint',
+              contain: 'strict',
             }}
             className="rounded px-2 py-1 text-sm bg-stat stat"
-            itemContent={(_, log) => {
-              const logId = generateLogId(log);
-              return (
-                <LogEntryItem
-                  log={log}
-                  logId={logId}
-                  isHighlighted={logId === highlightedLogId}
-                  onToggleHighlight={handleToggleHighlight}
-                  timestampMode={timestampMode}
-                />
-              );
-            }}
+            itemContent={renderLogItem}
             atBottomStateChange={setAtBottom}
             atTopStateChange={setAtTop}
             overscan={20}
             increaseViewportBy={200}
-            components={{
-              Footer:
-                visibleLogs.length > 100
-                  ? () => <LogsFooter count={visibleLogs.length} />
-                  : undefined,
-            }}
+            components={virtuosoComponents}
           />
         </div>
       </div>
