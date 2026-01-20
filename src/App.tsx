@@ -8,7 +8,7 @@ import './index.css';
 const App = () => {
   return (
     <Provider store={store}>
-      <div className="min-h-screen bg-gray-950 text-white">
+      <div className=" bg-gray-950 text-white">
         <DashboardLayout />
         <Toaster />
       </div>

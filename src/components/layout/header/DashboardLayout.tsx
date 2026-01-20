@@ -25,6 +25,14 @@ const DashboardLayout = () => {
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const isDraggingRef = useRef(false);
 
+  // Calculate rowHeight once based on available height
+  // No state, no listeners, just initial calculation
+  const rowHeight = useMemo(() => {
+    const availableHeight = window.innerHeight - 64; // minus header
+    // Divide by fewer rows to make widgets larger and fill space
+    return Math.floor(availableHeight / 14.8);
+  }, []);
+
   // Memoize layouts object - only recreate if widget positions/sizes change
   const layouts: RGLLayouts = useMemo(
     () => ({
@@ -73,11 +81,11 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-950">
+    <div className="h-screen bg-gray-950">
       <div className="fixed top-0 left-0 right-0 h-16 z-20">
         <Header />
       </div>
-      <div className="flex pt-16 min-h-screen">
+      <div className="flex pt-16 h-[calc(100vh-4rem)]">
         <div
           id="app-sidebar"
           className="fixed top-16 bottom-0 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
@@ -92,7 +100,7 @@ const DashboardLayout = () => {
         )}
 
         <main
-          className="flex-1 pb-4 pt-4 pl-0 transition-transform duration-300 will-change-transform"
+          className="flex-1 h-full pb-4 pt-4 pl-0 transition-transform duration-300 will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(256px)' : 'translateX(0)',
             paddingRight: isSidebarOpen ? '272px' : '16px',
@@ -100,11 +108,11 @@ const DashboardLayout = () => {
           }}
         >
           <ResponsiveGridLayout
-            className="layout"
+            className="layout h-full"
             layouts={layouts}
             breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
             cols={{ lg: 24, md: 24, sm: 12, xs: 6, xxs: 2 }}
-            rowHeight={60}
+            rowHeight={rowHeight}
             onDragStart={() => {
               isDraggingRef.current = true;
             }}

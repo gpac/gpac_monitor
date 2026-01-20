@@ -118,6 +118,11 @@ html {
   }
 }
 
+/* Force react-grid-layout to fill full height on large screens */
+.react-grid-layout.layout {
+  min-height: 100% !important;
+}
+
 @layer utilities {
   .stat {
     @apply text-gray-300;
