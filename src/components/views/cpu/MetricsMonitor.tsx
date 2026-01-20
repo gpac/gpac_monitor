@@ -13,8 +13,7 @@ import {
   CPU_HISTORY_STORAGE_KEY,
 } from './constants';
 
-
-const BASE_CONTAINER_CLASS = 'container mx-auto space-y-2 p-2';
+const BASE_CONTAINER_CLASS = 'container mx-auto flex flex-col gap-2 p-2 h-full';
 const RESIZING_CLASS = 'contain-layout contain-style';
 
 interface MetricsMonitorProps {
@@ -69,7 +68,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   return (
     <WidgetWrapper id={id} statusBadge={statusBadge}>
       <div ref={containerRef} className={containerClassName}>
-        <div className="w-full">
+        <div className="w-full flex-shrink-0">
           <CpuMemoryOverview
             cpuUsage={metricsValues.currentCPUPercent}
             memoryBytes={metricsValues.currentMemoryProcess}
@@ -78,7 +77,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
           />
         </div>
 
-        <div className="w-full">
+        <div className="w-full flex-1 min-h-0">
           <CpuMemoryChartUplot
             currentCPUPercent={metricsValues.currentCPUPercent}
             currentMemoryBytes={metricsValues.currentMemoryProcess}

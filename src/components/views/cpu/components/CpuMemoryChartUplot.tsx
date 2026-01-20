@@ -53,8 +53,8 @@ export const CpuMemoryChartUplot = memo(
     }, [dataPoints]);
 
     return (
-      <Card className="bg-stat border-transparent">
-        <CardHeader className="pb-2">
+      <Card className="bg-stat border-transparent h-full flex flex-col">
+        <CardHeader className="pb-2 flex-shrink-0">
           <CardTitle className="flex justify-center items-center gap-2 text-sm stat stat-label">
             <span className="flex items-center gap-1.5">
               <span
@@ -73,8 +73,8 @@ export const CpuMemoryChartUplot = memo(
             </span>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-2">
-          <div style={{ width: '100%', height: 300, minHeight: 200 }}>
+        <CardContent className="p-2 flex-1 min-h-0">
+          <div className="w-full h-full">
             <UplotChart
               data={data}
               options={options}
