@@ -11,6 +11,7 @@ dist-ssr
 doc
 tasks
 test
+dash
 # Debug logs
 npm-debug.log*
 pnpm-debug.log*

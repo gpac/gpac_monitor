@@ -81,7 +81,7 @@ const Header = () => {
               <LuPanelLeft className="w-4 h-4" />
             )}
             <span className="hidden sm:inline">
-              {isSidebarOpen ? 'Hide' : 'Show'} Properties
+              {isSidebarOpen ? 'Hide' : 'Show'} Sidebar
             </span>
           </button>
 
