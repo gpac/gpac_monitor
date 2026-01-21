@@ -5,6 +5,7 @@ import { useAppDispatch } from '@/shared/hooks/redux';
 import {
   requestFilterOpen,
   clearSelectedNode,
+  InitialTabType,
 } from '@/shared/store/slices/graphSlice';
 
 interface NodeToolbarActionsProps {
@@ -18,12 +19,23 @@ const NodeToolbarActions: React.FC<NodeToolbarActionsProps> = ({
   const dispatch = useAppDispatch();
   const { setNodes } = useReactFlow();
 
-  const handleOpenInputs = useCallback(() => {
-    dispatch(requestFilterOpen({ filterIdx, initialTab: 'inputs' }));
-    dispatch(clearSelectedNode());
-    // Deselect all nodes in React Flow to hide the toolbar
-    setNodes((nodes) => nodes.map((node) => ({ ...node, selected: false })));
-  }, [dispatch, filterIdx, setNodes]);
+  const handleOpenTab = useCallback(
+    (tab: InitialTabType) => {
+      dispatch(requestFilterOpen({ filterIdx, initialTab: tab }));
+      dispatch(clearSelectedNode());
+      // Deselect all nodes in React Flow to hide the toolbar
+      setNodes((nodes) => nodes.map((node) => ({ ...node, selected: false })));
+    },
+    [dispatch, filterIdx, setNodes],
+  );
+
+  const handleOpenInputs = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation(); // Prevent event from bubbling to node
+      handleOpenTab('inputs');
+    },
+    [handleOpenTab],
+  );
 
   return (
     <NodeToolbar position={Position.Bottom} align="start" offset={8}>

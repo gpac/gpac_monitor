@@ -12,7 +12,10 @@ import {
   useToast,
   useSubscribedFilters,
 } from '@/shared/hooks/index';
-import { setSelectedNode } from '@/shared/store/slices/graphSlice';
+import {
+  setSelectedNode,
+  requestFilterOpen,
+} from '@/shared/store/slices/graphSlice';
 
 // Modularized hooks
 import { useGraphLayout } from '../layout/useGraphLayout';
@@ -66,10 +69,11 @@ const useGraphMonitor = () => {
 
   const { getFilterArgs, hasFilterArgs } = useFilterArgs();
 
-  // Handle node click to select filter (toolbar will appear)
+  // Handle node click to select filter and open overview
   const handleNodeSelect = useCallback(
     (filterIdx: number) => {
       dispatch(setSelectedNode(String(filterIdx)));
+      dispatch(requestFilterOpen({ filterIdx, initialTab: 'overview' }));
     },
     [dispatch],
   );

@@ -66,25 +66,24 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
 
   // Track initialTab - capture synchronously when tab becomes active
   const initialTabRef = useRef<InitialTabType | null>(null);
-  const hasCapturedRef = useRef(false);
+  const lastAppliedTabRef = useRef<InitialTabType | null>(null);
   const currentInitialTab = store.getState().graph.initialTab;
 
-  // Capture initialTab synchronously during render
-  // Reset capture when initialTab changes (even if already active)
-  if (isActive) {
-    if (
-      !hasCapturedRef.current ||
-      currentInitialTab !== initialTabRef.current
-    ) {
-      hasCapturedRef.current = true;
-      initialTabRef.current = currentInitialTab;
-    }
+  // Capture new initialTab when it's different from last applied (ignore null)
+  if (
+    isActive &&
+    currentInitialTab !== null &&
+    currentInitialTab !== lastAppliedTabRef.current
+  ) {
+    initialTabRef.current = currentInitialTab;
+    lastAppliedTabRef.current = currentInitialTab;
   }
 
-  // Clear initialTab in effect (after render)
+  // Clear initialTab in effect (after render) - ref mutation doesn't cause re-render
   useEffect(() => {
     if (initialTabRef.current) {
       dispatch(clearInitialTab());
+      lastAppliedTabRef.current = null; // Reset to allow next capture
     }
   }, [dispatch]);
 
