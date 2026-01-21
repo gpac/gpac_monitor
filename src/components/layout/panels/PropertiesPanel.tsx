@@ -5,7 +5,7 @@ import { useSidebar } from '@/shared/hooks/useSidebar';
 import FilterArgumentsContent from '@/components/filtersArgs/FilterArgumentsContent';
 import IPIDPropertiesContent from '../../IPIDProperties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';
-import { useFetchIPIDProperties } from './hooks/useFetchIPIDProperties';
+import { useFetchIPIDProperties } from '../../IPIDProperties/hooks/useFetchIPIDProperties';
 import { useFilterArgsSubscription } from '../../filtersArgs/hooks/useFilterArgsSubscription';
 
 const PropertiesPanel = () => {

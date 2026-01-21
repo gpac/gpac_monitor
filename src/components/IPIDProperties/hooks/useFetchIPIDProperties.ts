@@ -5,7 +5,10 @@ import { PidProperty } from '@/types';
 /**
  * Custom hook to fetch PID properties
  */
-export const useFetchIPIDProperties = (filterIdx: number | undefined, ipidIdx: number | undefined) => {
+export const useFetchIPIDProperties = (
+  filterIdx: number | undefined,
+  ipidIdx: number | undefined,
+) => {
   const gpacService = useGpacService();
   const [properties, setProperties] = useState<PidProperty[]>([]);
 
