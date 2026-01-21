@@ -35,7 +35,7 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
     >
       <TabsTrigger
         value="main"
-        className="flex items-center gap-1 "
+        className="flex items-center gap-1 data-[state=active]:text-monitor-active-filter data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-filter"
         data-value="main"
         onClick={() => onValueChange('main')}
       >
@@ -52,7 +52,7 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
           <TabsTrigger
             key={`tab-${filterIdx}`}
             value={`filter-${filterIdx}`}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 data-[state=active]:text-monitor-active-filter data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-filter"
             data-value={`filter-${filterIdx}`}
             onClick={() => onValueChange(`filter-${filterIdx}`)}
           >

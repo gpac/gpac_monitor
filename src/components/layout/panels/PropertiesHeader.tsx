@@ -28,10 +28,10 @@ const PropertiesHeader = ({
       {/* Title and Close Button */}
       <div className="px-3 pt-3 pb-2 flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-ui text-monitor-text-primary truncate">
+          <h3 className="text-sm font-semibold text-ui text-monitor-text-primary truncate border-b-2 border-monitor-active-filter pb-1 inline-block">
             {filterName}
           </h3>
-          <p className="text-xs text-monitor-text-muted">
+          <p className="text-xs text-monitor-text-muted mt-1">
             {mode === 'ipid' ? 'IPID Properties' : 'Filter Options'}
           </p>
         </div>

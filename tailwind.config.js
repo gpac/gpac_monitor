@@ -25,6 +25,10 @@ export default {
 
           divider: "#ffffff1a",
 
+          /** Active states */
+          "active-filter": "#4CC9F0", // Cyan - for filter tabs and filter names
+          "active-tab": "#3B82F6", // Blue 500 - for content tabs
+
           /** Texte */
           text: {
             primary: "#f2f2f2",

@@ -94,7 +94,7 @@ const DetailedStatsView = memo(
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 pb-2 space-y-2">
             <div className="flex justify-stretch items-center gap-4">
-              <h2 className="text-lg font-semibold text-red-600/90">
+              <h2 className="text-lg font-semibold text-monitor-active-filter">
                 {overviewData.name}
               </h2>
 
@@ -154,25 +154,25 @@ const DetailedStatsView = memo(
             <TabsList className="h-8 justify-start  w-full">
               <TabsTrigger
                 value="overview"
-                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
               >
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="network"
-                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
               >
                 Network
               </TabsTrigger>
               <TabsTrigger
                 value="inputs"
-                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
               >
                 Inputs ({counts.inputs})
               </TabsTrigger>
               <TabsTrigger
                 value="outputs"
-                className="h-7 px-3 font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
               >
                 Outputs ({counts.outputs})
               </TabsTrigger>
