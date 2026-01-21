@@ -125,3 +125,26 @@ const determineFilterType = (filter: GraphFilterData): FilterType => {
 };
 
 export { determineFilterType };
+
+/**
+ * Get filter info by idx from filters array
+ */
+export const getFilterInfoByIdx = (
+  filters: GraphFilterData[],
+  filterIdx: number,
+): { name: string; streamTypeColor: string; streamTypeLabel: string } => {
+  const filter = filters.find((f) => f.idx === filterIdx);
+  if (!filter) {
+    return {
+      name: `Filter ${filterIdx}`,
+      streamTypeColor: '#4CC9F0',
+      streamTypeLabel: 'Unknown',
+    };
+  }
+  const filterType = determineFilterType(filter);
+  return {
+    name: filter.name,
+    streamTypeColor: FILTER_COLORS[filterType],
+    streamTypeLabel: FILTER_LABELS[filterType],
+  };
+};

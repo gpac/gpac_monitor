@@ -7,7 +7,6 @@ import type { MessageHandlerDependencies } from './types';
  * Uses request-response pattern (not subscription)
  */
 export class PidPropsHandler {
-  private cache = new Map<string, PidPropsMap>();
   private dependencies: MessageHandlerDependencies;
   private pendingRequests = new Map<
     string,
@@ -50,7 +49,6 @@ export class PidPropsHandler {
     }
 
     // Cache and resolve
-    this.cache.set(cacheKey, data.properties);
     pending.resolve(data.properties);
   }
 
@@ -65,11 +63,6 @@ export class PidPropsHandler {
     ipidIdx: number,
   ): Promise<PidPropsMap> {
     const cacheKey = `${filterIdx}-${ipidIdx}`;
-
-    // Check cache first
-    if (this.cache.has(cacheKey)) {
-      return this.cache.get(cacheKey)!;
-    }
 
     // Check if request already pending
     const existing = this.pendingRequests.get(cacheKey);
@@ -108,28 +101,6 @@ export class PidPropsHandler {
         ipidIdx,
       });
     });
-  }
-
-  /**
-   * Clear the properties cache
-   * Useful when graph changes
-   */
-  clearCache(): void {
-    this.cache.clear();
-  }
-
-  /**
-   * Clear cache for a specific filter
-   * @param filterIdx - Filter index to clear cache for
-   */
-  clearFilterCache(filterIdx: number): void {
-    const keysToDelete: string[] = [];
-    this.cache.forEach((_, key) => {
-      if (key.startsWith(`${filterIdx}-`)) {
-        keysToDelete.push(key);
-      }
-    });
-    keysToDelete.forEach((key) => this.cache.delete(key));
   }
 
   /**

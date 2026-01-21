@@ -4,6 +4,8 @@ import { SearchBar } from '../../ui/search-bar';
 
 interface PropertiesHeaderProps {
   filterName: string;
+  filterIdx: number;
+  streamType?: string;
   onClose: () => void;
   showExpert?: boolean;
   showAdvanced?: boolean;
@@ -15,6 +17,7 @@ interface PropertiesHeaderProps {
 
 const PropertiesHeader = ({
   filterName,
+  streamType,
   onClose,
   showExpert = false,
   showAdvanced = false,
@@ -31,9 +34,13 @@ const PropertiesHeader = ({
           <h3 className="text-sm font-semibold text-monitor-active-filter truncate border-b-2 border-monitor-active-filter pb-1 inline-block">
             {filterName}
           </h3>
-          <p className="text-xs text-monitor-text-muted mt-1">
-            {mode === 'ipid' ? 'IPID Properties' : 'Filter Options'}
-          </p>
+
+          <div className="flex gap-2 mt-1 text-xs text-monitor-text-muted">
+            {streamType && (
+              <span className="text-monitor-text-muted">{streamType}</span>
+            )}
+            <p>{mode === 'ipid' ? 'IPID Properties' : 'Filter Options'}</p>
+          </div>
         </div>
         <button
           onClick={onClose}

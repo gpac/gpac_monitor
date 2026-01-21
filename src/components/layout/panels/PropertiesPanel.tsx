@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { useSidebar } from '@/shared/hooks/useSidebar';
@@ -7,15 +7,16 @@ import IPIDPropertiesContent from '../../IPIDProperties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';
 import { useFetchIPIDProperties } from '../../IPIDProperties/hooks/useFetchIPIDProperties';
 import { useFilterArgsSubscription } from '../../filtersArgs/hooks/useFilterArgsSubscription';
+import { getFilterInfoByIdx } from '@/utils/filters/streamType';
 
 const PropertiesPanel = () => {
   const { sidebarContent, closeSidebar } = useSidebar();
   const filters = useAppSelector((state) => state.graph.filters);
 
-  const getFilterName = (filterIdx: number): string => {
-    const filter = filters.find((f) => f.idx === filterIdx);
-    return filter?.name || `Filter ${filterIdx}`;
-  };
+  const filterInfo = useMemo(() => {
+    if (!sidebarContent) return null;
+    return getFilterInfoByIdx(filters, sidebarContent.filterIdx);
+  }, [filters, sidebarContent]);
 
   // Local state for filter args visibility options
   const [showExpert, setShowExpert] = useState(false);
@@ -66,7 +67,9 @@ const PropertiesPanel = () => {
       <div className="sticky top-0 z-20 bg-monitor-surface border-b border-monitor-line">
         {sidebarContent.type === 'pid-props' ? (
           <PropertiesHeader
-            filterName={`${getFilterName(sidebarContent.filterIdx)} IPIDs`}
+            filterName={`${filterInfo?.name || 'Filter'} IPIDs`}
+            filterIdx={sidebarContent.filterIdx}
+            streamType={filterInfo?.streamTypeLabel}
             mode="ipid"
             onClose={closeSidebar}
             onSearchChange={handleSearchChange}
@@ -74,6 +77,8 @@ const PropertiesPanel = () => {
         ) : sidebarContent.type === 'filter-args' ? (
           <PropertiesHeader
             filterName={sidebarContent.filterName}
+            filterIdx={sidebarContent.filterIdx}
+            streamType={filterInfo?.streamTypeLabel}
             mode="filter"
             showExpert={showExpert}
             showAdvanced={showAdvanced}
