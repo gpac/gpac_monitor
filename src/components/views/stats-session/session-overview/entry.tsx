@@ -11,6 +11,7 @@ import { useStatsCalculations } from '../hooks/stats';
 import { useEnrichedStats } from '../hooks/stats';
 import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
+import { useSidebar } from '@/shared/hooks/useSidebar';
 import { clearPendingFilterOpen } from '@/shared/store/slices/graphSlice';
 import WidgetWrapper from '@/components/Widget/WidgetWrapper';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
@@ -23,17 +24,20 @@ import {
   MonitoredFilterContent,
 } from '../tabs/MonitoredFilterTabs';
 import { enrichFiltersWithStats } from '../utils/filterEnrichment';
+import { getFilterIdxFromTab } from '../utils/filterMonitoringUtils';
 import { Widget } from '@/types/ui/widget';
 
 const EMPTY_ACTIVE_WIDGETS: Widget[] = [];
 
 const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
   ({ id, isDetached, detachedFilterIdx }) => {
+    // State & Refs
     const dispatch = useAppDispatch();
     const [activeTab, setActiveTab] = useState('main');
     const [isResizing, setIsResizing] = useState(false);
     const tabsRef = useRef<HTMLDivElement>(null);
 
+    // Resize Handling
     const { ref } = useOptimizedResize({
       onResizeStart: () => setIsResizing(true),
       onResizeEnd: () => setIsResizing(false),
@@ -42,31 +46,28 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     }) as { ref: React.RefObject<HTMLElement> };
     const containerRef = ref as React.RefObject<HTMLDivElement>;
 
+    // Data Hooks (Stats & Filters)
     const isDashboardActive = useMemo(() => activeTab === 'main', [activeTab]);
-
     const { isLoading, sessionStats, staticFilters } =
       useMultiFilterMonitor(isDashboardActive);
 
-    // Merge static graph data with dynamic session stats
     const filtersWithSessionStats = useMemo(() => {
       if (staticFilters.length === 0 || isResizing) return [];
       return enrichFiltersWithStats(staticFilters, sessionStats);
     }, [staticFilters, sessionStats, isResizing]);
 
-    // Add computed metrics via worker (activityLevel, sessionType, formatted values)
     const filtersWithComputedMetrics = useEnrichedStats(
       filtersWithSessionStats,
     );
-
     const { statsCounters, systemStats } = useStatsCalculations(
       filtersWithComputedMetrics,
       sessionStats,
     );
-
     const { monitoredFilterMap, inlineFilterMap } = useMonitoredFilters(
       filtersWithComputedMetrics,
     );
 
+    // User Actions
     const {
       handleCardClick,
       handleDetachTab,
@@ -74,6 +75,10 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       handleOpenProperties,
     } = useFilterHandlers(setActiveTab);
 
+    // Sidebar Management
+    const { closeSidebar, sidebarContent } = useSidebar();
+
+    // Effects
     // Listen for pending filter open requests from NodeToolbar
     const pendingFilterOpen = useAppSelector(
       (state) => state.graph.pendingFilterOpen,
@@ -86,15 +91,25 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       }
     }, [pendingFilterOpen, handleCardClick, dispatch]);
 
+    // Auto-close sidebar when switching to a different filter
+    useEffect(() => {
+      if (sidebarContent) {
+        const currentFilterIdx = getFilterIdxFromTab(activeTab);
+        if (currentFilterIdx !== sidebarContent.filterIdx) {
+          closeSidebar();
+        }
+      }
+    }, [activeTab, sidebarContent, closeSidebar]);
+    // Resize Optimization
+    // Disable callbacks during resize to avoid expensive re-renders
     const noopTabChange = useCallback(() => {}, []);
     const noopCardClick = useCallback(() => {}, []);
-
-    //safe callbacks to prevent actions during resizing
     const safeOnTabChange = isResizing ? noopTabChange : setActiveTab;
     const safeOnCardClick = isResizing ? noopCardClick : handleCardClick;
 
+    // Detached Mode (Overlay Widget)
+
     if (isDetached && detachedFilterIdx !== undefined) {
-      // Skip loading check for detached widgets - show data immediately
       const filter = filtersWithComputedMetrics.find(
         (f) => f.idx === detachedFilterIdx,
       );
@@ -126,12 +141,11 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       );
     }
 
-    // NORMAL MODE: multiple tabs
-
+    // Loading State
     if (isLoading && staticFilters.length === 0) {
       return <ConnectionErrorState id={id} isLoading={true} />;
     }
-
+    // Empty State
     if (!isLoading && staticFilters.length === 0) {
       return (
         <WidgetWrapper id={id}>
@@ -144,7 +158,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
         </WidgetWrapper>
       );
     }
-
+    // Main UI (
     return (
       <WidgetWrapper id={id}>
         <div

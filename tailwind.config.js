@@ -26,8 +26,8 @@ export default {
           divider: "#ffffff1a",
 
           /** Active states */
-          "active-filter": "#4CC9F0", // Cyan - for filter tabs and filter names
-          "active-tab": "#3B82F6", // Blue 500 - for content tabs
+          "active-filter": "#4CC9F0",
+          "active-tab": "#2389AD",
 
           /** Texte */
           text: {
@@ -120,7 +120,8 @@ export default {
     },
   },
   plugins: [
-    // Plugin pour ajouter la pseudo-classe before avec l'indicateur de drag
+    // Plugin to add the before pseudo-class with the drag indicator
+
     function ({ addUtilities }) {
       const newUtilities = {
         ".drag-indicator": {

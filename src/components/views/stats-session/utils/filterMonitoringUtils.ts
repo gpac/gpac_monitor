@@ -25,3 +25,10 @@ export const isFilterMonitored = (
 ): boolean => {
   return monitoredFilters.has(filterIdx);
 };
+
+/** Extract filterIdx from activeTab (e.g., "filter-0" → 0, "main" → null) */
+export const getFilterIdxFromTab = (activeTab: string): number | null => {
+  return activeTab.startsWith('filter-')
+    ? parseInt(activeTab.replace('filter-', ''), 10)
+    : null;
+};
