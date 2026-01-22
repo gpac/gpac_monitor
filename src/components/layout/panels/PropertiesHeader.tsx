@@ -1,11 +1,13 @@
 import { IoClose } from 'react-icons/io5';
 import { Checkbox } from '../../ui/checkbox';
 import { SearchBar } from '../../ui/search-bar';
+import { getColorForMediaType } from '@/utils/filters/streamType';
+import { FilterType } from '@/types';
 
 interface PropertiesHeaderProps {
   filterName: string;
   filterIdx: number;
-  streamType?: string;
+  streamType?: FilterType;
   onClose: () => void;
   showExpert?: boolean;
   showAdvanced?: boolean;
@@ -26,19 +28,26 @@ const PropertiesHeader = ({
   mode = 'filter',
   onSearchChange,
 }: PropertiesHeaderProps) => {
+  const borderColor = streamType ? getColorForMediaType(streamType) : '#4CC9F0';
+
   return (
     <div className="bg-monitor-surface border-b border-monitor-line">
       {/* Title and Close Button */}
       <div className="px-3 pt-3 pb-2 flex items-center justify-between">
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-monitor-active-filter truncate border-b-2 border-monitor-active-filter pb-1 inline-block">
+          <h3
+            className="text-sm font-semibold text-monitor-active-filter truncate pb-1 border-b-2 inline-block"
+            style={{ borderBottomColor: borderColor }}
+          >
             {filterName}
           </h3>
+          {streamType && (
+            <p className="text-xs text-monitor-text-muted mt-0.5">
+              ({streamType})
+            </p>
+          )}
 
           <div className="flex gap-2 mt-1 text-xs text-monitor-text-muted">
-            {streamType && (
-              <span className="text-monitor-text-muted">{streamType}</span>
-            )}
             <p>{mode === 'ipid' ? 'IPID Properties' : 'Filter Options'}</p>
           </div>
         </div>

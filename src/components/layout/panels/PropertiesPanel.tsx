@@ -69,7 +69,7 @@ const PropertiesPanel = () => {
           <PropertiesHeader
             filterName={`${filterInfo?.name || 'Filter'} IPIDs`}
             filterIdx={sidebarContent.filterIdx}
-            streamType={filterInfo?.streamTypeLabel}
+            streamType={filterInfo?.streamType}
             mode="ipid"
             onClose={closeSidebar}
             onSearchChange={handleSearchChange}
@@ -78,7 +78,7 @@ const PropertiesPanel = () => {
           <PropertiesHeader
             filterName={sidebarContent.filterName}
             filterIdx={sidebarContent.filterIdx}
-            streamType={filterInfo?.streamTypeLabel}
+            streamType={filterInfo?.streamType}
             mode="filter"
             showExpert={showExpert}
             showAdvanced={showAdvanced}

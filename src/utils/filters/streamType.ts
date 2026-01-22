@@ -1,17 +1,4 @@
 import { FilterType, GraphFilterData } from '@/types/domain/gpac';
-import { IconType } from 'react-icons';
-import { LuVideo, LuMusic, LuFileText, LuFile } from 'react-icons/lu';
-
-/**
- * Stream type information including colors, CSS classes, and icons
- */
-export interface StreamTypeInfo {
-  type: FilterType;
-  color: string;
-  colorClass: string;
-  label: string;
-  icon: IconType;
-}
 
 /**
  * Color constants for filter types (synchronized with GraphOperations)
@@ -21,26 +8,6 @@ export const FILTER_COLORS: Record<FilterType, string> = {
   audio: '#10b981',
   text: '#f59e0b',
   file: '#E11D48',
-};
-
-/**
- * CSS color classes for filter types (from index.css)
- */
-export const FILTER_COLOR_CLASSES: Record<FilterType, string> = {
-  video: 'text-debug',
-  audio: 'text-info',
-  text: 'text-warning',
-  file: 'text-danger',
-};
-
-/**
- * Icons for filter types
- */
-export const FILTER_ICONS: Record<FilterType, IconType> = {
-  video: LuVideo,
-  audio: LuMusic,
-  text: LuFileText,
-  file: LuFile,
 };
 
 /**
@@ -71,27 +38,30 @@ export const getFilterColor = (filterType: FilterType): string => {
 };
 
 /**
- * Get border color class for media type (from GPAC stream_type)
+ * Map string stream type to FilterType (case-insensitive, handles 'Visual', 'Video', etc.)
  */
-export const getBorderColorForMediaType = (type: string): string => {
+const mapStreamTypeToFilterType = (type: string): FilterType => {
   const t = type.toLowerCase();
-  if (t === 'visual' || t === 'video') return MEDIA_BORDER_COLORS.video;
-  if (t === 'audio') return MEDIA_BORDER_COLORS.audio;
-  if (t === 'text') return MEDIA_BORDER_COLORS.text;
-  return MEDIA_BORDER_COLORS.file;
+  if (t === 'visual' || t === 'video') return 'video';
+  if (t === 'audio') return 'audio';
+  if (t === 'text') return 'text';
+  return 'file';
 };
 
 /**
- * Get complete stream type information
+ * Get border color class for media type (from GPAC stream_type)
  */
-export const getStreamTypeInfo = (filterType: FilterType): StreamTypeInfo => {
-  return {
-    type: filterType,
-    color: FILTER_COLORS[filterType],
-    colorClass: FILTER_COLOR_CLASSES[filterType],
-    label: FILTER_LABELS[filterType],
-    icon: FILTER_ICONS[filterType],
-  };
+export const getBorderColorForMediaType = (type: string): string => {
+  const filterType = mapStreamTypeToFilterType(type);
+  return MEDIA_BORDER_COLORS[filterType];
+};
+
+/**
+ * Get hex color for media type (case-insensitive, handles 'Visual', 'Video', etc.)
+ */
+export const getColorForMediaType = (type: string): string => {
+  const filterType = mapStreamTypeToFilterType(type);
+  return FILTER_COLORS[filterType];
 };
 
 /**
@@ -132,12 +102,18 @@ export { determineFilterType };
 export const getFilterInfoByIdx = (
   filters: GraphFilterData[],
   filterIdx: number,
-): { name: string; streamTypeColor: string; streamTypeLabel: string } => {
+): {
+  name: string;
+  streamTypeColor: string;
+  streamType: FilterType;
+  streamTypeLabel: string;
+} => {
   const filter = filters.find((f) => f.idx === filterIdx);
   if (!filter) {
     return {
       name: `Filter ${filterIdx}`,
       streamTypeColor: '#4CC9F0',
+      streamType: 'file',
       streamTypeLabel: 'Unknown',
     };
   }
@@ -145,6 +121,7 @@ export const getFilterInfoByIdx = (
   return {
     name: filter.name,
     streamTypeColor: FILTER_COLORS[filterType],
+    streamType: filterType,
     streamTypeLabel: FILTER_LABELS[filterType],
   };
 };
