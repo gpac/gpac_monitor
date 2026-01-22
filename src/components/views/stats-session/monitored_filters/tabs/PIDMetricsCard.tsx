@@ -2,7 +2,10 @@ import { memo, useMemo } from 'react';
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
 import { formatBytes, formatBitrate } from '@/utils/formatting';
 import { getMediaTypeInfo } from '@/utils/gpac';
-import { getBorderColorForMediaType } from '@/utils/filters/streamType';
+import {
+  getBorderColorForMediaType,
+  getIconColorForMediaType,
+} from '@/utils/filters/streamType';
 import { FaCircleInfo } from 'react-icons/fa6';
 import type { PIDWithIndex } from '../../types';
 import PIDMetadataBadges from './PIDMetadataBadges';
@@ -37,6 +40,7 @@ const PIDMetricsCard = memo(
     const mediaInfo = useMemo(() => getMediaTypeInfo(type), [type]);
     const MediaIcon = mediaInfo.icon;
     const borderColor = useMemo(() => getBorderColorForMediaType(type), [type]);
+    const iconColor = useMemo(() => getIconColorForMediaType(type), [type]);
 
     // Format detection
     const t = type.toLowerCase();
@@ -58,9 +62,7 @@ const PIDMetricsCard = memo(
         {/* Header */}
         <div className="flex items-center justify-between px-3 py-2 border-b border-white/5">
           <div className="flex items-center gap-2 min-w-0 flex-1">
-            <MediaIcon
-              className={`h-3.5 w-3.5 flex-shrink-0 ${mediaInfo.color}`}
-            />
+            <MediaIcon className={`h-3.5 w-3.5 flex-shrink-0 ${iconColor}`} />
             <span
               className={`${formatIdentifierFont} text-muted-foreground`}
             ></span>

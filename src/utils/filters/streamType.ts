@@ -21,6 +21,16 @@ export const FILTER_LABELS: Record<FilterType, string> = {
 };
 
 /**
+ * Icon color classes for filter types (Tailwind CSS classes for text color)
+ */
+export const FILTER_ICON_COLORS: Record<FilterType, string> = {
+  video: 'text-debug',
+  audio: 'text-info',
+  text: 'text-warning',
+  file: 'text-danger',
+};
+
+/**
  * Border color classes for media types (used in PID cards)
  */
 export const MEDIA_BORDER_COLORS: Record<FilterType, string> = {
@@ -62,6 +72,14 @@ export const getBorderColorForMediaType = (type: string): string => {
 export const getColorForMediaType = (type: string): string => {
   const filterType = mapStreamTypeToFilterType(type);
   return FILTER_COLORS[filterType];
+};
+
+/**
+ * Get icon color class for media type (case-insensitive, handles 'Visual', 'Video', etc.)
+ */
+export const getIconColorForMediaType = (type: string): string => {
+  const filterType = mapStreamTypeToFilterType(type);
+  return FILTER_ICON_COLORS[filterType];
 };
 
 /**
