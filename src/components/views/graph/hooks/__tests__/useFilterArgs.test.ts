@@ -69,7 +69,7 @@ describe('useFilterArgs', () => {
       });
     });
 
-    // Vérifier que les données sont stockées
+    // Verify data is stored
     expect(result.current.hasFilterArgs(42)).toBe(true);
     expect(result.current.getFilterArgs(42)).toEqual(mockFilterArgs);
     expect(result.current.filterArgs.size).toBe(1);
@@ -85,17 +85,17 @@ describe('useFilterArgs', () => {
 
     const { result } = renderHook(() => useFilterArgs());
 
-    // Requête pour le filtre 1
+    // Request for filter 1
     act(() => {
       result.current.requestFilterArgs(1);
     });
 
-    // Requête pour le filtre 2
+    // Request for filter 2
     act(() => {
       result.current.requestFilterArgs(2);
     });
 
-    // Simuler réception pour filtre 1
+    // Simulate reception for filter 1
     const args1 = [{ name: 'input', type: 'str', value: 'file1.mp4' }];
     act(() => {
       subscriptionCallbacks.get(1)?.({
@@ -105,7 +105,7 @@ describe('useFilterArgs', () => {
       });
     });
 
-    // Simuler réception pour filtre 2
+    // Simulate reception for filter 2
     const args2 = [{ name: 'codec', type: 'str', value: 'h264' }];
     act(() => {
       subscriptionCallbacks.get(2)?.({
@@ -115,7 +115,7 @@ describe('useFilterArgs', () => {
       });
     });
 
-    // Vérifier que les deux sont stockés correctement
+    // Verify both are stored correctly
     expect(result.current.hasFilterArgs(1)).toBe(true);
     expect(result.current.hasFilterArgs(2)).toBe(true);
     expect(result.current.getFilterArgs(1)).toEqual(args1);

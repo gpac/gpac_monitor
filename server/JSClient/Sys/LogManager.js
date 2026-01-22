@@ -107,7 +107,7 @@ function LogManager(client) {
             return null;
         }
 
-        // idx is the unique identifier for GPAC filters
+    
         // Fallback to name for non-filter system objects
         return caller.idx !== undefined ? caller.idx : (caller.name || null);
     };

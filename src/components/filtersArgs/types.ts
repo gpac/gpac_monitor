@@ -1,7 +1,7 @@
 // Re-export GPACTypes from the canonical source
 export type { GPACTypes } from '@/types/domain/gpac/gpac_args';
 
-// Utils for validating GPAC complexes types
+// Utils for validating GPAC  types
 export const gpacValidators = {
   isFraction: (value: string): boolean => {
     const parts = value.split('/');

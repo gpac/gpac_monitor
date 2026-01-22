@@ -1089,7 +1089,6 @@ function JSClient(id, client, all_clients2, draned_once_ref) {
 }
 
 // server/server.js
-var all_filters = [];
 var all_clients = [];
 var cid = 0;
 var filter_uid = 0;

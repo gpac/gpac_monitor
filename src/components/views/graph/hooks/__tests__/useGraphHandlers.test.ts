@@ -118,10 +118,10 @@ describe('useGraphHandlers', () => {
       data: { label: 'Test Node' },
     } as Node;
 
-    // Appeler handleNodeClick
+    // Call handleNodeClick
     result.current.handleNodeClick(mockEvent, mockNode);
 
-    // Vérifier que onNodeClick est appelé avec l'idx correct
+    // Verify onNodeClick is called with correct idx
     expect(mockOnNodeClick).toHaveBeenCalledWith(42);
   });
 
@@ -135,10 +135,10 @@ describe('useGraphHandlers', () => {
       data: { label: 'Test Node' },
     } as Node;
 
-    // Appeler handleNodeClick avec un ID invalide
+    // Call handleNodeClick with invalid ID
     result.current.handleNodeClick(mockEvent, mockNode);
 
-    // Vérifier que onNodeClick n'est pas appelé
+    // Verify onNodeClick is not called
     expect(mockOnNodeClick).not.toHaveBeenCalled();
   });
 
@@ -157,7 +157,7 @@ describe('useGraphHandlers', () => {
       data: { label: 'Test Node' },
     } as Node;
 
-    // Appeler handleNodeClick sans callback - ne devrait pas planter
+    // Call handleNodeClick without callback - should not crash
     expect(() => {
       result.current.handleNodeClick(mockEvent, mockNode);
     }).not.toThrow();

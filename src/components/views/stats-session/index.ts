@@ -1,2 +1,2 @@
-// Export pour faciliter l'importation des types de monitoring
+// Export monitoring types for easier imports
 export * from './types';

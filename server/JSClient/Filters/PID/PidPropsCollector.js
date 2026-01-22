@@ -33,7 +33,7 @@ function PidPropsCollector(client) {
         };
       }
 
-      // Enumerate properties via callback (GPAC API signature)
+      // Enumerate properties 
       filter.ipid_props(ipidIdx, collectProperty);
 
       session.lock_filters(false);

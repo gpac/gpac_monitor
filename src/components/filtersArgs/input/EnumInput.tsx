@@ -48,7 +48,7 @@ export const EnumInput = ({
 
     onChange(selectedValue);
 
-    // Log pour débogage
+    // Debug log
     console.log('EnumInput selected:', {
       selectedValue,
       optionType: typeof selectedValue,

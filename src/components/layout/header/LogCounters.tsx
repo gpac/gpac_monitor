@@ -62,10 +62,10 @@ const LogCounters = memo(() => {
         />
       ))}
 
-      {/* Séparateur visuel */}
+      {/* Visual separator */}
       <div className="h-4 w-px bg-gray-700" />
 
-      {/* Filtre par thread */}
+      {/* Thread filter */}
       <ThreadFilterDropdown />
     </div>
   );
