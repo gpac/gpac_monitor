@@ -186,7 +186,7 @@ export function createEdgesFromFilters(
       );
     }
   });
-  console.log('New edges created:', newEdges);
+
   return newEdges;
 }
 
