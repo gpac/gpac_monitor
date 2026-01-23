@@ -8,6 +8,7 @@ let all_clients = [];
 let cid = 0;
 let filter_uid = 0;
 let draned_once = false;
+let all_filters = [];
 
 
 // SESSION CONFIGURATION
