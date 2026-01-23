@@ -33,7 +33,6 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   initialTab,
   isLoading = false,
 }) => {
-  // Don't pass filterData if undefined, let DetailedStatsView use its default
   const props = {
     overviewData,
     networkData,

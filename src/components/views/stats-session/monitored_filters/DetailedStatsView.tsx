@@ -52,7 +52,7 @@ const DetailedStatsView = memo(
     networkData,
     inputPids,
     outputPids,
-    filterData = EMPTY_FILTER_DATA, // Use constant fallback
+    filterData = EMPTY_FILTER_DATA, // constant fallback
     onOpenProperties,
     initialTab,
     isLoading = false,
