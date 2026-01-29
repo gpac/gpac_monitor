@@ -57,7 +57,13 @@ export const selectStalledFilters = createSelector(
       const packetProgress =
         hasPacketMetrics && curr.pck_done !== prev.pck_done;
 
-      const noProgress = !mediaProgress && !packetProgress;
+      // for filters writing data (file output, network sinks)
+      const hasBytesMetrics =
+        typeof curr.bytes_done === 'number' &&
+        typeof prev.bytes_done === 'number';
+      const bytesProgress = hasBytesMetrics && curr.bytes_done !== prev.bytes_done;
+
+      const noProgress = !mediaProgress && !packetProgress && !bytesProgress;
       stalled[id] = !curr.is_eos && noProgress;
     });
 

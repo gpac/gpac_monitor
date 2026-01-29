@@ -347,6 +347,10 @@ function SessionManager(client) {
     session.post_task(() => {
       const now = sys.clock_us();
       if (session.last_task) {
+        this.client.cpuStatsManager.tick(now);
+        this.client.logManager.tick(now);
+        this.client.filterManager.tick(now);
+        this.client.sessionStatsManager.tick(now);
         try {
           this.client.client.send(JSON.stringify({
             message: "session_end",
@@ -1093,6 +1097,7 @@ var all_clients = [];
 var cid = 0;
 var filter_uid = 0;
 var draned_once = false;
+var all_filters = [];
 session.reporting(true);
 var remove_client = function(client_id) {
   for (let i = 0; i < all_clients.length; i++) {

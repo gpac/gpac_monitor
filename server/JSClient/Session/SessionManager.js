@@ -33,6 +33,12 @@ if (processError) {
             const now = sys.clock_us();
 
             if (session.last_task) {
+                // Capture final stats before cleanup
+                this.client.cpuStatsManager.tick(now);
+                this.client.logManager.tick(now);
+                this.client.filterManager.tick(now);
+                this.client.sessionStatsManager.tick(now);
+
                 // Send session_end message to frontend before cleanup
                 try {
                     this.client.client.send(JSON.stringify({
