@@ -14,6 +14,7 @@ export default {
           wine: "#8E1E2D",
         },
         monitor: {
+          main: "#0E1420",
           app: "#0c1117",
 
           surface: "#0b1016",

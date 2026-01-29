@@ -81,11 +81,11 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div className="h-screen bg-gray-950">
+    <div className="h-screen bg-main">
       <div className="fixed top-0 left-0 right-0 h-16 z-20">
         <Header />
       </div>
-      <div className="flex pt-16 h-[calc(100vh-4rem)]">
+      <div className="flex pt-8 h-[calc(100vh-4rem)]">
         <div
           id="app-sidebar"
           className="fixed top-16 bottom-0 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
