@@ -1,7 +1,7 @@
 import { createWidgetInstance } from '@/components/Widget/registry';
 import { widgetRegistry } from '@/components/Widget/registry';
 import { WidgetConfig, Widget } from '@/types';
-import { WidgetsState } from './widgetsSlice';
+import { WidgetsState } from './types';
 import { loadLayoutFromStorage, loadLastUsedLayout } from './layoutStorage';
 
 const defaultConfig: WidgetConfig = {

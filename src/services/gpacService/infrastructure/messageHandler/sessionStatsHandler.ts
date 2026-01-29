@@ -1,6 +1,6 @@
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { WSMessageType } from '@/services/ws/types';
-import { SessionFilterStatistics } from '../../../../types/domain/gpac/model';
+import { SessionFilterStatistics } from '@/types/domain/gpac/index';
 import { generateID } from '@/utils/core';
 import { MessageHandlerDependencies } from './types';
 
@@ -79,7 +79,6 @@ export class SessionStatsHandler {
 
   public handleSessionStats(stats: SessionFilterStatistics[]): void {
     this.sessionStatsSubscribable.updateDataAndNotify(stats);
-  
   }
 
   public subscribeToSessionStats(

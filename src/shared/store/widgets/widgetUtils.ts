@@ -1,7 +1,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { Widget, WidgetConfig, WidgetType } from '@/types/ui/widget';
 import { createWidgetInstance } from '@/components/Widget/registry';
-import { WidgetsState } from './widgetsSlice';
+import { WidgetsState } from './types';
 
 // Basic widget management
 export const addWidgetReducer = (

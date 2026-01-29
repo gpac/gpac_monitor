@@ -3,19 +3,6 @@ import { GpacArgument } from '../../../components/filtersArgs/types';
 import type { PIDproperties } from './filter-stats';
 
 // MONITORING
-
-export interface SessionFilterStatistics extends Record<string, unknown> {
-  idx: number;
-  status: string;
-  bytes_done: number;
-  bytes_sent: number;
-  pck_sent: number;
-  pck_done: number;
-  time: number;
-  nb_ipid: number;
-  nb_opid: number;
-  is_eos?: boolean;
-}
 export interface MonitoredFilterStats {
   idx: number;
   status: string;

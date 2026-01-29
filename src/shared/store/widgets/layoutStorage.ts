@@ -1,4 +1,4 @@
-import type { LayoutState } from './widgetsSlice';
+import type { LayoutState } from './types';
 
 const STORAGE_KEY = 'gpac_monitor_layout_v1';
 const LAST_LAYOUT_KEY = 'gpac_monitor_last_layout_v1';

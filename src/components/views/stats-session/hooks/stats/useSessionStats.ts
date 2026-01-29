@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
-import { SessionFilterStatistics } from '@/types/domain/gpac/model';
+import { SessionFilterStatistics } from '../../../../../types/domain/gpac/filter-stats';
 import { useServiceReady } from '@/shared/hooks/useServiceReady';
 
 export function useSessionStats(enabled = true, interval = 1000) {

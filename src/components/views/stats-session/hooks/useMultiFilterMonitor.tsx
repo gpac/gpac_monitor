@@ -6,7 +6,7 @@ import { RootState } from '@/shared/store';
 import {
   GraphFilterData,
   SessionFilterStatistics,
-} from '@/types/domain/gpac/model';
+} from '@/types/domain/gpac/index';
 import { useSessionStats } from './stats/useSessionStats';
 
 interface MultiFilterMonitorState {
