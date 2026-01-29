@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { formatBytes } from '@/utils/formatting';
 import { getPIDStatusBadge, getMediaTypeInfo } from '@/utils/gpac';
-import { FaCircleInfo } from 'react-icons/fa6';
+import { LuEye } from 'react-icons/lu';
 import type { PIDWithIndex } from '../../types';
 import {
   metricValueFont,
@@ -122,8 +122,8 @@ const PIDTableRow = memo(
         </td>
         {!isOutput && (
           <td className="px-2 py-1.5 text-center">
-            <FaCircleInfo
-              className="h-3 w-3 text-muted-foreground/50 hover:text-primary inline-block"
+            <LuEye
+              className="h-3.5 w-3.5 text-muted-foreground/50 hover:text-primary inline-block"
               title="View properties"
             />
           </td>

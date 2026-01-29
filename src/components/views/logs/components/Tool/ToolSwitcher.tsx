@@ -67,6 +67,7 @@ const EmptyToolFallback = React.memo(
             variant="status"
             className={`text-xs ${textColor} ml-1`}
             style={{ backgroundColor: bgColor }}
+            title="Active log(s)"
           >
             {effectiveLevel.toUpperCase()}
             {isCritical && `(${logCount})`}
@@ -157,7 +158,12 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="px-0 py-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="px-0 py-0"
+            title="Active logs"
+          >
             <WidgetStatusBadge className="cursor-pointer hover:opacity-80 ">
               <span className="text-sm font-medium text-info">
                 {currentDisplayInfo.label}

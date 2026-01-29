@@ -7,6 +7,15 @@ import type { RootState } from '../index';
 const STORAGE_KEY = 'gpac-connections';
 const ACTIVE_CONNECTION_KEY = 'gpac-active-connection';
 
+/** Default connection */
+const DEFAULT_CONNECTION: GpacConnectionConfig = {
+  id: 'default',
+  name: 'Default',
+  address: 'ws://localhost:6363',
+  type: 'local',
+  status: ConnectionStatus.DISCONNECTED,
+};
+
 /** Convert array to normalized state by ID */
 const connectionsArrayToById = (
   connections: GpacConnectionConfig[],
@@ -31,18 +40,20 @@ const connectionsByIdToArray = (
 const loadConnections = (): Record<string, GpacConnectionConfig> => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    return stored ? connectionsArrayToById(JSON.parse(stored)) : {};
+    return stored
+      ? connectionsArrayToById(JSON.parse(stored))
+      : { [DEFAULT_CONNECTION.id]: DEFAULT_CONNECTION };
   } catch {
-    return {};
+    return { [DEFAULT_CONNECTION.id]: DEFAULT_CONNECTION };
   }
 };
 
 /** Load active connection ID from localStorage */
 const loadActiveConnectionId = (): string | null => {
   try {
-    return localStorage.getItem(ACTIVE_CONNECTION_KEY);
+    return localStorage.getItem(ACTIVE_CONNECTION_KEY) || DEFAULT_CONNECTION.id;
   } catch {
-    return null;
+    return DEFAULT_CONNECTION.id;
   }
 };
 

@@ -149,7 +149,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
         </div>
 
         {/* Node content */}
-        <div className="node-drag-handle cursor-move">
+        <div className="node-drag-handle ">
           <div className="flex justify-between items-start mb-2">
             {/* INPUTS on the left */}
             <div className="flex-1 text-xs text-gray-600 pr-2">
