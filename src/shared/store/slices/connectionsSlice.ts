@@ -2,7 +2,6 @@ import { createSlice, PayloadAction, isAnyOf } from '@reduxjs/toolkit';
 import { createListenerMiddleware } from '@reduxjs/toolkit';
 import { GpacConnectionConfig } from '@/types/connection';
 import { ConnectionStatus } from '@/types/communication/shared';
-import type { RootState } from '../index';
 
 const STORAGE_KEY = 'gpac-connections';
 const ACTIVE_CONNECTION_KEY = 'gpac-active-connection';
@@ -159,7 +158,7 @@ connectionsListenerMiddleware.startListening({
     clearConnections,
   ),
   effect: (_, api) => {
-    const state = api.getState() as RootState;
+    const state = api.getState() as { connections: ConnectionsState };
     saveConnections(state.connections.connectionsById);
   },
 });

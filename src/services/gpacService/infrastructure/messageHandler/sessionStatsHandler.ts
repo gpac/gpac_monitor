@@ -20,7 +20,6 @@ export class SessionStatsHandler {
     SessionFilterStatistics[]
   >([]);
 
-  // logic for subscribing and unsubscribing to session
   private ensureLoaded(): boolean {
     if (!this.isLoaded()) {
       const error = new Error('Service not loaded');
@@ -32,7 +31,6 @@ export class SessionStatsHandler {
   public async subscribeToSession(): Promise<void> {
     this.ensureLoaded();
 
-    // Check if there's already a pending subscribe request
     if (this.pendingSessionSubscribe) {
       return this.pendingSessionSubscribe;
     }
@@ -45,7 +43,7 @@ export class SessionStatsHandler {
           id: generateID(),
         });
       } finally {
-        // Clear the pending request when done (success or failure)
+        // Clear the pending request when done
         this.pendingSessionSubscribe = null;
       }
     })();

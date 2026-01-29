@@ -6,7 +6,6 @@ import {
 import { initialState } from './widgetsInitialState';
 import * as reducers from './widgetUtils';
 import { saveLayoutsToStorage, saveLastUsedLayout } from './layoutStorage';
-import type { RootState as AppRootState } from '../index';
 
 export type {
   RootState,
@@ -15,6 +14,8 @@ export type {
   FilterView,
   WidgetsState,
 } from './types';
+
+import type { WidgetsState } from './types';
 
 const widgetsSlice = createSlice({
   name: 'widgets',
@@ -67,7 +68,7 @@ export const widgetsListenerMiddleware = createListenerMiddleware();
 widgetsListenerMiddleware.startListening({
   matcher: isAnyOf(saveLayout, deleteLayout),
   effect: (_, api) => {
-    const state = api.getState() as AppRootState;
+    const state = api.getState() as { widgets: WidgetsState };
     saveLayoutsToStorage(state.widgets.savedLayouts);
   },
 });
@@ -76,7 +77,7 @@ widgetsListenerMiddleware.startListening({
 widgetsListenerMiddleware.startListening({
   matcher: isAnyOf(saveLayout, loadLayout),
   effect: (_, api) => {
-    const state = api.getState() as AppRootState;
+    const state = api.getState() as { widgets: WidgetsState };
     saveLastUsedLayout(state.widgets.currentLayout);
   },
 });

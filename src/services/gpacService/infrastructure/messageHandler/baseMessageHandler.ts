@@ -255,8 +255,6 @@ export class BaseMessageHandler {
   }
 
   private handleSessionEnd(data: any): void {
-    console.log('[BaseMessageHandler] Session end received:', data.reason);
-
     // Mark as normal end of session (to avoid showing error message)
     this.dependencies.markEndOfSession();
 
