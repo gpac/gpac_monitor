@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
-import { getWidgetDefinition } from './registry';
+import { widgetIcons } from './widgetIcons';
 
 import { LuX, LuRotateCcw } from 'react-icons/lu';
 import {
@@ -46,11 +46,10 @@ const WidgetWrapper = ({
     state.widgets.activeWidgets.find((w) => w.id === id),
   );
 
-  // Get icon from registry
+  // Get icon
   const iconDef = useMemo(() => {
     if (!widget?.type) return null;
-    const def = getWidgetDefinition(widget.type);
-    return def ? def.icon : null;
+    return widgetIcons[widget.type] || null;
   }, [widget?.type]);
 
   // Optimized resize hook
