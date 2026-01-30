@@ -1,12 +1,11 @@
 import { Widget, WidgetType } from '@/types';
-import { LuFileText, LuGauge, LuShare2 } from 'react-icons/lu';
-import { TbFilterCog } from 'react-icons/tb';
 import { IconType } from 'react-icons';
 import LogsMonitor from '../views/logs/LogsMonitor';
 import MetricsMonitor from '../views/cpu/MetricsMonitor';
 import GraphMonitor from '../views/graph/GraphMonitor';
 import MultiFilterMonitor from '../views/stats-session/session-overview/entry';
 import { generateID } from '@/utils/core';
+import { widgetIcons } from './widgetIcons';
 
 export interface WidgetDefinition {
   type: WidgetType;
@@ -25,7 +24,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   [WidgetType.FILTERSESSION]: {
     type: WidgetType.FILTERSESSION,
     title: 'Session Filters',
-    icon: TbFilterCog,
+    icon: widgetIcons[WidgetType.FILTERSESSION],
     component: MultiFilterMonitor,
     defaultSize: { w: 18, h: 5 },
     defaultPosition: { x: 6, y: 0 },
@@ -36,7 +35,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   [WidgetType.GRAPH]: {
     type: WidgetType.GRAPH,
     title: 'Pipeline Graph',
-    icon: LuShare2,
+    icon: widgetIcons[WidgetType.GRAPH],
     component: GraphMonitor,
     defaultSize: { w: 16, h: 7 },
     defaultPosition: { x: 0, y: 6 },
@@ -47,7 +46,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   [WidgetType.METRICS]: {
     type: WidgetType.METRICS,
     title: 'System Metrics',
-    icon: LuGauge,
+    icon: widgetIcons[WidgetType.METRICS],
     component: MetricsMonitor,
     defaultSize: { w: 6, h: 5 },
     defaultPosition: { x: 0, y: 0 },
@@ -58,7 +57,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
   [WidgetType.LOGS]: {
     type: WidgetType.LOGS,
     title: 'System Logs',
-    icon: LuFileText,
+    icon: widgetIcons[WidgetType.LOGS],
     component: LogsMonitor,
     defaultSize: { w: 8, h: 7 },
     defaultPosition: { x: 16, y: 6 },

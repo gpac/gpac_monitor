@@ -1,4 +1,4 @@
-import { afterEach } from 'vitest';
+import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 
@@ -6,6 +6,34 @@ import '@testing-library/jest-dom/vitest';
 afterEach(() => {
   cleanup();
 });
+
+// Mock widget icons to prevent module evaluation issues
+vi.mock('@/components/Widget/widgetIcons', () => ({
+  widgetIcons: {},
+}));
+
+// Mock widget registry to prevent WidgetType enum evaluation issues
+vi.mock('@/components/Widget/registry', () => ({
+  widgetRegistry: {},
+  createWidgetInstance: vi.fn(() => null),
+  getAllWidgets: vi.fn(() => []),
+  getWidgetDefinition: vi.fn(() => null),
+}));
+
+// Mock GPAC service to prevent ConnectionStatus enum evaluation issues
+vi.mock('@/services/gpacService', () => ({
+  gpacService: {
+    logs: {
+      updateLogLevel: vi.fn(),
+      subscribe: vi.fn(),
+      unsubscribe: vi.fn(),
+      getSnapshot: vi.fn(() => ({ isSubscribed: false })),
+    },
+    connect: vi.fn(),
+    disconnect: vi.fn(),
+    getStatus: vi.fn(() => 'DISCONNECTED'),
+  },
+}));
 
 // Mock WebSocket globally
 global.WebSocket = class MockWebSocket {
@@ -16,7 +44,7 @@ global.WebSocket = class MockWebSocket {
 
 // Mock ResizeObserver globally
 global.ResizeObserver = class MockResizeObserver {
-  constructor(callback: ResizeObserverCallback) {}
+  constructor(_callback: ResizeObserverCallback) {}
   observe() {}
   unobserve() {}
   disconnect() {}
