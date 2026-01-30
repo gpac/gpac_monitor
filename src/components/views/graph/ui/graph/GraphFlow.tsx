@@ -8,6 +8,7 @@ import {
   NodeChange,
   EdgeChange,
   NodeMouseHandler,
+  Controls,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import CustomNode from '../nodes/CustomNode';
@@ -81,7 +82,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           nodeStrokeWidth={2}
           nodeStrokeColor="#374151"
           maskColor="rgba(0, 0, 0, 0.5)"
-          className="bg-gray-900 border border-gray-900 rounded-md w-52 h-24"
+          className="bg-gray-900 border border-gray-900 rounded-md w-52 h-36"
           style={{
             backgroundColor: '#1f2937',
             border: '1px solid #374151',
@@ -92,6 +93,11 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           zoomable={!isResizing}
           ariaLabel="Minimap for graph navigation"
         />
+        <Controls
+          showInteractive={false}
+          className="[&_button]:bg-gray-800 [&_button]:border-gray-700 [&_button]:text-white [&_button:hover]:bg-gray-700"
+        />
+
         <GraphLegend />
       </ReactFlow>
     </div>
