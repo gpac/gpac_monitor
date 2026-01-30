@@ -52,7 +52,15 @@ const sessionStatsSlice = createSlice({
 
       const newStats: Record<string, SessionFilterStats> = {};
       action.payload.forEach((filter) => {
-        newStats[filter.idx.toString()] = filter;
+        const prevFilter = state.sessionStats[filter.idx.toString()];
+
+        // Preserve is_eos once it's been set to true
+        const preservedEOS = filter.is_eos || prevFilter?.is_eos || false;
+
+        newStats[filter.idx.toString()] = {
+          ...filter,
+          is_eos: preservedEOS,
+        };
       });
       state.sessionStats = newStats;
       state.lastUpdate = Date.now();

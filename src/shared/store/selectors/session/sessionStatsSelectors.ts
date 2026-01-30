@@ -25,11 +25,11 @@ export const selectPreviousSessionStats = createSelector(
 );
 
 /**
- * A filter is stalled if:
- * - It's not EOS
- * - No media progress detected:
- *   - For source/process filters: last_ts_sent unchanged
- *   - For sink filters (vout/aout): pck_done unchanged
+ * A filter is stalled if it's not EOS and shows no activity.
+ * Activity is detected through ANY of these metrics:
+ * - Timestamp progression (last_ts_sent)
+ * - Packet activity (pck_sent OR pck_done)
+ * - Bytes activity (bytes_sent OR bytes_done)
  */
 export const selectStalledFilters = createSelector(
   [selectSessionStats, selectPreviousSessionStats],
@@ -40,31 +40,39 @@ export const selectStalledFilters = createSelector(
       const curr = current[id];
       const prev = previous[id];
 
+      // If filter is EOS, it's not stalled
       if (!prev || curr.is_eos) {
         stalled[id] = false;
         return;
       }
-      const hasTimeStampMetrics =
-        curr.last_ts_sent !== undefined && prev.last_ts_sent !== undefined;
 
-      const mediaProgress = hasTimeStampMetrics
-        ? timeFractionChanged(curr.last_ts_sent, prev.last_ts_sent)
-        : false;
+      // Check timestamp progression
+      const timestampProgress =
+        curr.last_ts_sent &&
+        prev.last_ts_sent &&
+        timeFractionChanged(curr.last_ts_sent, prev.last_ts_sent);
 
-      // for filters consuming packets (sinks)
-      const hasPacketMetrics =
-        typeof curr.pck_done === 'number' && typeof prev.pck_done === 'number';
-      const packetProgress =
-        hasPacketMetrics && curr.pck_done !== prev.pck_done;
+      // Check packet activity (sent OR done)
+      const packetActivity =
+        (typeof curr.pck_sent === 'number' &&
+          typeof prev.pck_sent === 'number' &&
+          curr.pck_sent !== prev.pck_sent) ||
+        (typeof curr.pck_done === 'number' &&
+          typeof prev.pck_done === 'number' &&
+          curr.pck_done !== prev.pck_done);
 
-      // for filters writing data (file output, network sinks)
-      const hasBytesMetrics =
-        typeof curr.bytes_done === 'number' &&
-        typeof prev.bytes_done === 'number';
-      const bytesProgress = hasBytesMetrics && curr.bytes_done !== prev.bytes_done;
+      // Check bytes activity (sent OR done)
+      const bytesActivity =
+        (typeof curr.bytes_sent === 'number' &&
+          typeof prev.bytes_sent === 'number' &&
+          curr.bytes_sent !== prev.bytes_sent) ||
+        (typeof curr.bytes_done === 'number' &&
+          typeof prev.bytes_done === 'number' &&
+          curr.bytes_done !== prev.bytes_done);
 
-      const noProgress = !mediaProgress && !packetProgress && !bytesProgress;
-      stalled[id] = !curr.is_eos && noProgress;
+      // Filter is active if ANY metric shows progress
+      const hasActivity = timestampProgress || packetActivity || bytesActivity;
+      stalled[id] = !hasActivity;
     });
 
     return stalled;
