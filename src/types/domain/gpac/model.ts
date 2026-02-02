@@ -61,46 +61,6 @@ export interface EnrichedFilterOverview extends Record<string, unknown> {
 export interface GpacNodeData extends EnrichedFilterOverview {}
 
 export type GpacNode = Node<GpacNodeData>;
-export interface CompleteFilterData extends Record<string, unknown> {
-  name: string;
-  type: string;
-  idx: number;
-  ID: string | null;
-  itag: string | null;
-  nb_ipid: number;
-  nb_opid: number;
-  status: string;
-  bytes_done: number;
-  bytes_sent: number;
-  pck_sent: number;
-  pck_done: number;
-  time: number;
-  tasks?: number;
-  errors?: number;
-  current_errors?: number;
-  ipid: Record<string, PIDData>;
-  opid: Record<string, PIDData>;
-  gpac_args: GpacArgument[];
-  class?: string;
-  codec?: string;
-  streamtype?: string;
-  last_ts_sent?: TimeFraction;
-}
-export interface FilterMetadata {
-  CodecID?: string;
-  AvgFrameSize?: number;
-  Bitrate?: number;
-  ClockID?: number;
-  Duration?: number;
-  Extension?: string;
-  Height?: number;
-  Width?: number;
-  ISOBrand?: string;
-  Language?: string;
-  MIMEType?: string;
-  MovieTime?: number;
-  MaxFrameSize?: number;
-}
 
 export interface PIDPropertyValue {
   type: string;

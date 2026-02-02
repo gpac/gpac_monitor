@@ -5,4 +5,3 @@ export * from './gpac_args';
 export * from './log-types';
 export * from './pid_props';
 export * from './valueFormatter';
-export * from './pid-tab-data';
