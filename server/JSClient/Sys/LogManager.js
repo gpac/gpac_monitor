@@ -36,7 +36,6 @@ function LogManager(client) {
         try {
             this.originalLogConfig = sys.get_logs(true);
 
-            // Enable extended log API
             sys.use_logx = true;
 
             sys.on_log = (tool, level, message, thread_id, caller) => {
@@ -45,7 +44,6 @@ function LogManager(client) {
 
             sys.set_logs(this.logLevel);
 
-            // Start SessionManager loop if not running
             this.client.sessionManager.startMonitoringLoop();
 
         } catch (error) {
@@ -107,8 +105,6 @@ function LogManager(client) {
             return null;
         }
 
-    
-        // Fallback to name for non-filter system objects
         return caller.idx !== undefined ? caller.idx : (caller.name || null);
     };
 
@@ -130,34 +126,26 @@ function LogManager(client) {
             return;
         }
 
-
-        // Move all logs from incoming buffer
         const logsToProcess = this.incomingBuffer.splice(0);
 
-        // Process each log
         for (const log of logsToProcess) {
-            // Smart cleanup when buffer is full
             if (this.logs.length >= this.maxHistorySize) {
                 this.logs = cleanupLogs(this.logs, this.maxHistorySize);
             }
             this.logs.push(log);
-
-            // Add to pending batch
             this.pendingLogs.push(log);
         }
 
-        // Determine batching strategy based on processed logs
+        // Adaptive batch size and delay based on log verbosity
         const hasDebugLogs = logsToProcess.some(log => log.level === 'debug' || log.level === 'info');
-        const maxPending = hasDebugLogs ? 20 : 50; // Slightly larger batches
-        const delay = hasDebugLogs ? 100 : 250; // More conservative delays
-        
-        // Flush if batch is full
+        const maxPending = hasDebugLogs ? 20 : 50;
+        const delay = hasDebugLogs ? 100 : 250;
+
         if (this.pendingLogs.length >= maxPending) {
             this.flushPendingLogs();
             return;
         }
-        
-        // Schedule delayed flush
+
         if (!this.batchTimer) {
             this.batchTimer = true;
             session.post_task(() => {
@@ -175,7 +163,7 @@ function LogManager(client) {
     this.updateLogLevel = function(logLevel) {
         if (!this.isSubscribed) return;
 
-        // Adaptive buffer sizing based on log verbosity
+        // Verbose logs (debug/info) need larger buffer to prevent data loss
         const isVerbose = logLevel.includes('debug') || logLevel.includes('info');
         this.maxHistorySize = isVerbose ? LOG_RETENTION.maxHistorySizeVerbose : LOG_RETENTION.maxHistorySize;
 
@@ -241,10 +229,7 @@ function LogManager(client) {
      */
     this.sendToClient = function(data) {
         if (this.client.client && typeof this.client.client.send === 'function') {
-
             this.client.client.send(JSON.stringify(data));
-        } else {
-           /*  console.log(`[LogManager] sendToClient: Client not ready, cannot send ${data.message}`); */
         }
     };
 
@@ -256,24 +241,18 @@ function LogManager(client) {
         console.log(`LogManager: Force cleanup for client ${this.client.id}`);
 
         try {
-            // Flush any pending logs before cleanup
             this.flushPendingLogs();
 
-            // Force reset of sys.on_log regardless of subscription status
             sys.on_log = undefined;
 
-            // Restore original GPAC config if we had one
             if (this.originalLogConfig) {
                 sys.set_logs(this.originalLogConfig);
             }
 
-            // Reset all internal state
             this.isSubscribed = false;
             this.logs = [];
             this.pendingLogs = [];
             this.incomingBuffer = [];
-
-            // Clear timers
             this.batchTimer = null;
 
             console.log(`LogManager: Client ${this.client.id} force cleanup completed`);

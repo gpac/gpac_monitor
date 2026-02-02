@@ -21,7 +21,7 @@ function FilterManager(client, draned_once_ref) {
         on_all_connected((all_js_filters) => {
             print("----- all connected -----");
 
-            // Use cache to avoid redundant serialization for multiple clients
+            // Cache serialized data (100ms TTL) to avoid redundant JSON.stringify for concurrent clients
             const serialized = cacheManager.getOrSet('all_filters', 100, () => {
                 const minimalFiltersList = all_js_filters.map((f) => {
                     return gpac_filter_to_minimal_object(f);
@@ -35,7 +35,6 @@ function FilterManager(client, draned_once_ref) {
                 });
             });
 
-            // Display the graph structure
             if (this.client.client) {
                 this.client.client.send(serialized);
             }
@@ -67,9 +66,8 @@ function FilterManager(client, draned_once_ref) {
             interval: interval || UPDATE_INTERVALS.FILTER_STATS,
             fields: FILTER_SUBSCRIPTION_FIELDS,pidScope: pidScope || 'both'
         };
-        this.lastSentByFilter[idx] = 0; // Force first send
+        this.lastSentByFilter[idx] = 0;
 
-        // Start SessionManager loop if not running
         this.client.sessionManager.startMonitoringLoop();
     };
 
@@ -79,7 +77,6 @@ function FilterManager(client, draned_once_ref) {
     };
 
     this.tick = function(now) {
-        // Iterate through all subscribed filters
         for (const idxStr in this.filterSubscriptions) {
             const idx = parseInt(idxStr);
             const sub = this.filterSubscriptions[idxStr];
@@ -87,7 +84,7 @@ function FilterManager(client, draned_once_ref) {
 
             if (now - lastSent < sub.interval) continue;
 
-            // Use cache to avoid redundant serialization for multiple clients
+            // Cache serialized data (50ms TTL) to avoid redundant JSON.stringify for concurrent clients
             const cacheKey = `filter_stats_${idx}`;
             const serialized = cacheManager.getOrSet(cacheKey, 50, () => {
                 session.lock_filters(true);
@@ -122,7 +119,6 @@ function FilterManager(client, draned_once_ref) {
                         payload.opids = this.pidDataCollector.collectOutputPids(fObj);
                         break;
                     default:
-                        // No PIDs, just filter stats
                         break;
                 }
 
@@ -146,11 +142,6 @@ function FilterManager(client, draned_once_ref) {
 
     this.updateArgument = function(idx, name, argName, newValue) {
         this.argumentHandler.updateArgument(idx, name, argName, newValue);
-    };
-
-    this.addPngProbe = function(idx, name) {
-        // Implementation for PNG probe functionality
-        // This would need to be implemented based on existing add_png_probe logic
     };
 }
 

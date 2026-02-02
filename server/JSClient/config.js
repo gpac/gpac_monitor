@@ -19,23 +19,22 @@ const PID_PROPS_LITE = [];
 const FILTER_SUBSCRIPTION_FIELDS = [
     'status', 'bytes_done', 'bytes_sent', 'pck_done', 'pck_sent', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors'
 ];
-// Update intervals for subscriptions (in milliseconds)
+
 const UPDATE_INTERVALS = {
     SESSION_STATS: 1000,
     FILTER_STATS: 1000,
     CPU_STATS: 250,
 };
 
-// Log retention configuration
+// Log retention strategy: preserve errors (100%), prioritize warnings (80%), sample info/debug (20%/5%)
 const LOG_RETENTION = {
     maxHistorySize: 500,
     maxHistorySizeVerbose: 2000,
-    // Retention ratio by level (percentage to keep when cleaning)
     keepRatio: {
-        error: 1.0,   // Keep 100%
-        warning: 0.8, // 80% 
-        info: 0.2,    //  20% 
-        debug: 0.05   // 5% 
+        error: 1.0,
+        warning: 0.8,
+        info: 0.2,
+        debug: 0.05
     }
 };
 
