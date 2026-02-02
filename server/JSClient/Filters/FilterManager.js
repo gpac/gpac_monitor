@@ -148,10 +148,7 @@ function FilterManager(client, draned_once_ref) {
         this.argumentHandler.updateArgument(idx, name, argName, newValue);
     };
 
-    this.addPngProbe = function(idx, name) {
-        // Implementation for PNG probe functionality
-        // This would need to be implemented based on existing add_png_probe logic
-    };
+   
 }
 
 export { FilterManager };

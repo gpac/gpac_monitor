@@ -73,12 +73,8 @@ function MessageHandler(client) {
                         print(JSON.stringify(jtext));
                         this.client.filterManager.updateArgument(jtext['idx'], jtext['name'], jtext['argName'], jtext['newValue']);
                     },
+             
                     
-                    'get_png': () => {
-                        print("request png of ")
-                        print(JSON.stringify(jtext));
-                        this.client.filterManager.addPngProbe(jtext['idx'], jtext['name']);
-                    },
                     
                     'subscribe_cpu_stats': () => {
                         const interval = jtext['interval'] || UPDATE_INTERVALS.CPU_STATS;

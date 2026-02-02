@@ -25,8 +25,9 @@ function SessionManager(client) {
         const processError = session.last_process_error; 
         //error handling
 if (processError) {
-    sys.print("Erreur de processus détectée sur la session !");
-
+    print('[SessionManager] Process error detected on session:', processError);
+    this.isMonitoringLoopRunning = false;
+    return;
 }
 
         session.post_task(() => {

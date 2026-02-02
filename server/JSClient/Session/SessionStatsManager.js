@@ -33,10 +33,10 @@ function SessionStatsManager(client) {
         if (filters.length === 0) return false;
 
         for (const f of filters) {
-            // Check if filter has input PIDs
+        
             if (f.nb_ipid === 0) continue;
 
-            // Check all input PIDs for EOS
+           
             for (let i = 0; i < f.nb_ipid; i++) {
                 const eos = f.ipid_props(i, 'eos');
                 if (!eos) {

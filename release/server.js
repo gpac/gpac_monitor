@@ -183,11 +183,6 @@ function MessageHandler(client) {
             print(JSON.stringify(jtext));
             this.client.filterManager.updateArgument(jtext["idx"], jtext["name"], jtext["argName"], jtext["newValue"]);
           },
-          "get_png": () => {
-            print("request png of ");
-            print(JSON.stringify(jtext));
-            this.client.filterManager.addPngProbe(jtext["idx"], jtext["name"]);
-          },
           "subscribe_cpu_stats": () => {
             const interval = jtext["interval"] || UPDATE_INTERVALS.CPU_STATS;
             const fields = jtext["fields"] || [];
@@ -342,7 +337,9 @@ function SessionManager(client) {
     this.isMonitoringLoopRunning = true;
     const processError = session.last_process_error;
     if (processError) {
-      sys.print("Erreur de processus d\xE9tect\xE9e sur la session !");
+      print("[SessionManager] Process error detected on session:", processError);
+      this.isMonitoringLoopRunning = false;
+      return;
     }
     session.post_task(() => {
       const now = sys.clock_us();
@@ -728,8 +725,6 @@ function FilterManager(client, draned_once_ref) {
   };
   this.updateArgument = function(idx, name, argName, newValue) {
     this.argumentHandler.updateArgument(idx, name, argName, newValue);
-  };
-  this.addPngProbe = function(idx, name) {
   };
 }
 

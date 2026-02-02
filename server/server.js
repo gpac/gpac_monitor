@@ -54,12 +54,6 @@ session.set_del_filter_fun((f) => {
         sys.sleep(100);
     } 
 });
-/* 
-session.set_event_fun((evt) => {
-    // print("Event: " + JSON.stringify(evt, null, 2));
-    // if (evt.type != GF_FEVT_USER) return 0;
-    // print("evt " + evt.name);
-}); */
 
 
 // WEBSOCKET CLIENT HANDLER
