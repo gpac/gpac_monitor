@@ -1,6 +1,6 @@
 import { LuFilm, LuMusic, LuSettings } from 'react-icons/lu';
 import { IconType } from 'react-icons';
-import { TabPIDData } from '@/types/domain/gpac/filter-stats';
+import { TabPIDData } from '@/types/ui';
 
 /**
  * Get resolution string from PID data

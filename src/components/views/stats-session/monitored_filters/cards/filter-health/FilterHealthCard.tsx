@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
+import { OverviewTabData } from '@/types/ui';
 import { formatTime } from '@/utils/formatting';
 import { getFilterHealthInfo } from '../shared/statusHelpers';
 

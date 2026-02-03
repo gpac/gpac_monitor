@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { NetworkTabData } from '@/types/domain/gpac/filter-stats';
+import { NetworkTabData } from '@/types/ui';
 import {
   formatBytes,
   formatBitrate,

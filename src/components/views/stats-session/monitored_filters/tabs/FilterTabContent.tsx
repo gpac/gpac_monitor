@@ -4,8 +4,8 @@ import {
   BuffersTabData,
   TabPIDData,
   NetworkTabData,
-  FilterStatsResponse,
-} from '@/types/domain/gpac/filter-stats';
+} from '@/types/ui';
+import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import DetailedStatsView from '../DetailedStatsView';
 
