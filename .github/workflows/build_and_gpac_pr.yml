@@ -1,0 +1,88 @@
+name: build and copy to gpac
+run-name: build and copy to gpac
+
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install and Build
+        run: |
+          pnpm install
+          pnpm build
+
+      - name: Checkout GPAC Repo
+        uses: actions/checkout@v4
+        with:
+          repository: gpac/gpac
+          token: ${{ secrets.GPAC_MONITOR_BUILDBOT }}
+          path: gpac
+
+      - name: Create PR
+        env:
+          GH_TOKEN: ${{ secrets.GPAC_MONITOR_BUILDBOT }}
+        run: |
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          COMMIT_MSG=$(git log -1 --pretty=%s)
+
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          BRANCH_NAME="gpac-monitor-$SHORT_SHA"
+          TARGET_DIR="share/scripts/rmt"
+
+          # PR body
+          cat <<EOF > pr_description.md
+          ## 🚀 GPAC Monitor release
+
+          This PR was automatically generated.
+
+          **Details:**
+          - **Triggered by commit:** [\`$SHORT_SHA\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+          - **Commit message:** $COMMIT_MSG
+          - **Worflow logs:** [run ${{ github.run_id }}]($RUN_URL)
+
+          EOF
+
+          # Move to target, configure git
+          cd gpac
+          mkdir -p "$TARGET_DIR"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b $BRANCH_NAME
+
+          # Replace old files with new build
+          cp -r ../release/* "$TARGET_DIR"/
+
+          # Commit if changes exist
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add "$TARGET_DIR"/*
+            git commit -m "gpac_monitor: update to gpac_monitor@$SHORT_SHA"
+            git push origin $BRANCH_NAME
+
+            # Create the PR
+            gh pr create \
+              --title "gpac_monitor: update $SHORT_SHA" \
+              --body-file ../pr_description.md \
+              --base master \
+              --head $BRANCH_NAME \
+              --repo gpac/gpac
+          else
+            echo "No changes detected, skipping PR."
+          fi
