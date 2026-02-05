@@ -60,16 +60,11 @@ var UPDATE_INTERVALS = {
 var LOG_RETENTION = {
   maxHistorySize: 500,
   maxHistorySizeVerbose: 2e3,
-  // Retention ratio by level (percentage to keep when cleaning)
   keepRatio: {
     error: 1,
-    // Keep 100%
     warning: 0.8,
-    // 80% 
     info: 0.2,
-    //  20% 
     debug: 0.05
-    // 5% 
   }
 };
 
@@ -342,7 +337,7 @@ function SessionManager(client) {
     this.isMonitoringLoopRunning = true;
     const processError = session.last_process_error;
     if (processError) {
-      sys.print("Erreur de processus d\xE9tect\xE9e sur la session !");
+      sys.print("Process error detected on session");
     }
     session.post_task(() => {
       const now = sys.clock_us();
@@ -729,8 +724,6 @@ function FilterManager(client, draned_once_ref) {
   this.updateArgument = function(idx, name, argName, newValue) {
     this.argumentHandler.updateArgument(idx, name, argName, newValue);
   };
-  this.addPngProbe = function(idx, name) {
-  };
 }
 
 // server/JSClient/Sys/CpuStatsManager.js
@@ -964,7 +957,6 @@ function LogManager(client) {
   this.sendToClient = function(data) {
     if (this.client.client && typeof this.client.client.send === "function") {
       this.client.client.send(JSON.stringify(data));
-    } else {
     }
   };
   this.forceUnsubscribe = function() {
