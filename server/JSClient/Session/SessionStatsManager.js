@@ -33,8 +33,10 @@ function SessionStatsManager(client) {
         if (filters.length === 0) return false;
 
         for (const f of filters) {
+        
             if (f.nb_ipid === 0) continue;
 
+           
             for (let i = 0; i < f.nb_ipid; i++) {
                 const eos = f.ipid_props(i, 'eos');
                 if (!eos) {
@@ -53,7 +55,7 @@ function SessionStatsManager(client) {
     this.tick = function(now) {
         if (!this.isSubscribed) return;
 
-        // Cache serialized data (50ms TTL) to avoid redundant JSON.stringify for concurrent clients
+        // Use cache to avoid redundant serialization for multiple clients
         const serialized = cacheManager.getOrSet('session_stats', 50, () => {
             const stats = [];
             const filters = [];
@@ -66,10 +68,12 @@ function SessionStatsManager(client) {
                 filters.push(f);
                 const obj = {};
 
+                // Collect standard fields
                 for (const field of this.fields) {
                     obj[field] = f[field];
                 }
 
+                // Calculate is_eos (all input PIDs are EOS)
                 let allInputsEos = f.nb_ipid > 0;
                 for (let j = 0; j < f.nb_ipid; j++) {
                     if (!f.ipid_props(j, 'eos')) {
@@ -85,6 +89,7 @@ function SessionStatsManager(client) {
                 stats.push(obj);
             }
 
+            // Compute global all_packets_done
             const allFiltersEos = this.computeAllPacketsDone(filters);
             const all_packets_done = session.last_task && allFiltersEos;
 

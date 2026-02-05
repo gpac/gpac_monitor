@@ -22,20 +22,25 @@ function SessionManager(client) {
     this.startMonitoringLoop = function() {
         if (this.isMonitoringLoopRunning) return;
         this.isMonitoringLoopRunning = true;
-        const processError = session.last_process_error;
-        if (processError) {
-            sys.print("Process error detected on session");
-        }
+        const processError = session.last_process_error; 
+        //error handling
+if (processError) {
+    print('[SessionManager] Process error detected on session:', processError);
+    this.isMonitoringLoopRunning = false;
+    return;
+}
 
         session.post_task(() => {
             const now = sys.clock_us();
 
             if (session.last_task) {
+                // Capture final stats before cleanup
                 this.client.cpuStatsManager.tick(now);
                 this.client.logManager.tick(now);
                 this.client.filterManager.tick(now);
                 this.client.sessionStatsManager.tick(now);
 
+                // Send session_end message to frontend before cleanup
                 try {
                     this.client.client.send(JSON.stringify({
                         message: 'session_end',
@@ -47,6 +52,7 @@ function SessionManager(client) {
                     print('[SessionManager] Failed to send session_end message:', e);
                 }
 
+                // Cleanup all managers on session end
                 this.client.cpuStatsManager.handleSessionEnd();
                 this.client.logManager.handleSessionEnd();
                 this.client.filterManager.handleSessionEnd();
@@ -55,11 +61,13 @@ function SessionManager(client) {
                 return false;
             }
 
+            // Tick all monitoring managers (single post_task for all managers)
             this.client.cpuStatsManager.tick(now);
             this.client.logManager.tick(now);
             this.client.filterManager.tick(now);
             this.client.sessionStatsManager.tick(now);
 
+            // Continue loop if any manager is active
             const shouldContinue = this.hasActiveSubscriptions();
             if (!shouldContinue) this.isMonitoringLoopRunning = false;
 

@@ -1,6 +1,8 @@
 import { Sys as sys } from 'gpaccore';
 import { JSClient } from './JSClient/index.js';
 
+// GLOBAL STATE
+
 let all_connected = false;
 let all_clients = [];
 let cid = 0;
@@ -8,8 +10,11 @@ let filter_uid = 0;
 let draned_once = false;
 let all_filters = [];
 
+
+// SESSION CONFIGURATION
 session.reporting(true);
 
+// CLIENT MANAGEMENT
 let remove_client = function(client_id) {
     for (let i = 0; i < all_clients.length; i++) {
         if (all_clients[i].id == client_id) {
@@ -19,6 +24,7 @@ let remove_client = function(client_id) {
     }
 };
 
+// FILTER EVENT HANDLERS
 session.set_new_filter_fun((f) => {
     print("new filter " + f.name);
     f.idx = filter_uid++;
@@ -46,8 +52,11 @@ session.set_del_filter_fun((f) => {
 
      if (draned_once) {
         sys.sleep(100);
-    }
+    } 
 });
+
+
+// WEBSOCKET CLIENT HANDLER
 
 sys.rmt_on_new_client = function(client) {
     console.log("rmt on client");
@@ -77,5 +86,6 @@ sys.rmt_on_new_client = function(client) {
         js_client.client = null;
     }
 
+    // Update draned_once from the reference
     draned_once = draned_once_ref.value;
 };
