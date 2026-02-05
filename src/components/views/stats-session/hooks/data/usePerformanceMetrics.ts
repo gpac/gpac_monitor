@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TabPIDData } from '@/types/domain/gpac/filter-stats';
+import { TabPIDData } from '@/types/ui';
 import {
   formatBitrate,
   formatPacketRate,

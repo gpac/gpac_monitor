@@ -11,16 +11,14 @@ interface PropertyItemProps {
 const PropertyItem = memo(({ property }: PropertyItemProps) => {
   return (
     <div className="px-3 py-2 hover:bg-monitor-hover transition-colors">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <div className="text-xs font-cond text-monitor-text-primary truncate">
+      <div className="flex flex-col gap-1">
+        <div className="flex items-center justify-between gap-2">
+          <div className="text-xs font-cond text-monitor-text-primary">
             {property.name}
           </div>
-          <div className="text-xs text-monitor-text-muted mt-0.5">
-            {property.type}
-          </div>
+          <div className="text-xs text-monitor-text-muted">{property.type}</div>
         </div>
-        <div className="text-xs text-info font-cond text-right break-all">
+        <div className="text-xs text-info font-cond break-all max-h-32 overflow-y-auto">
           {formatGpacValue(property.value, property.type)}
         </div>
       </div>

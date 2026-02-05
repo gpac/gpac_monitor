@@ -13,9 +13,8 @@ function CpuStatsManager(client) {
         this.isSubscribed = true;
         this.interval = interval || UPDATE_INTERVALS.CPU_STATS;
         this.fields = fields || CPU_STATS_FIELDS;
-        this.lastSent = 0; // Force first send on next tick
+        this.lastSent = 0;
 
-        // Start SessionManager loop if not running
         this.client.sessionManager.startMonitoringLoop();
     };
 
@@ -27,7 +26,7 @@ function CpuStatsManager(client) {
         if (!this.isSubscribed) return;
         if (now - this.lastSent < this.interval) return;
 
-        // Use cache to avoid redundant serialization for multiple clients
+        // Cache serialized data (50ms TTL) to avoid redundant JSON.stringify for concurrent clients
         const serialized = cacheManager.getOrSet('cpu_stats', 50, () => {
             const cpuStats = {
                 timestamp: now,

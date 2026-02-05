@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { LuUpload, LuDownload } from 'react-icons/lu';
-import { NetworkTabData } from '@/types/domain/gpac/filter-stats';
+import { NetworkTabData } from '@/types/ui';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';

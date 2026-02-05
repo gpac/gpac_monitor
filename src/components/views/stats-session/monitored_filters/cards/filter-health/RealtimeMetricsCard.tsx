@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
+import { OverviewTabData } from '@/types/ui';
 import {
   formatBytes,
   formatPacketRate,

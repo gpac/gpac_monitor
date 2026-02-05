@@ -3,7 +3,7 @@ import { LuFilm, LuMusic, LuSettings } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
-import { TabPIDData } from '@/types/domain/gpac/filter-stats';
+import { TabPIDData } from '@/types/ui';
 import { formatMultimediaValue, getCodecBadgeVariant } from './formatters';
 import { getMediaIcon, groupParameters, hasValidData } from './helpers';
 

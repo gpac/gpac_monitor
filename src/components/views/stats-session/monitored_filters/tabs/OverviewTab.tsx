@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
-import { OverviewTabData } from '@/types/domain/gpac/filter-stats';
+import { OverviewTabData } from '@/types/ui';
 import { PacketsCard, DataCard, RealtimeMetricsCard } from '../cards';
 import { Badge } from '@/components/ui/badge';
 import { formatTime } from '@/utils/formatting';

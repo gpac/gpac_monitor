@@ -100,6 +100,18 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
         }
       }
     }, [activeTab, sidebarContent, closeSidebar]);
+
+    // Auto-scroll to bottom when widget is detached
+    useEffect(() => {
+      if (isDetached) {
+        requestAnimationFrame(() => {
+          window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth',
+          });
+        });
+      }
+    }, [isDetached]);
     // Resize Optimization
     // Disable callbacks during resize to avoid expensive re-renders
     const noopTabChange = useCallback(() => {}, []);

@@ -6,7 +6,7 @@ import {
   getBorderColorForMediaType,
   getIconColorForMediaType,
 } from '@/utils/filters/streamType';
-import { FaCircleInfo } from 'react-icons/fa6';
+import { LuEye } from 'react-icons/lu';
 import type { PIDWithIndex } from '../../types';
 import PIDMetadataBadges from './PIDMetadataBadges';
 import {
@@ -99,13 +99,15 @@ const PIDMetricsCard = memo(
           </div>
           <div className="flex items-center gap-1.5">
             {showPropsButton && variant === 'input' && (
-              <FaCircleInfo
-                className="h-3.5 w-3.5 cursor-pointer text-muted-foreground hover:text-primary "
+              <button
+                className="px-0.5 py-0.5 text-xs rounded bg-gray-700/50 border border-gray-600/50 text-gray-200 hover:bg-gray-700/80 flex items-center gap-1.5"
                 onClick={() => onOpenProps(filterIdx, pid.ipidIdx)}
                 title="View input properties"
-              />
+              >
+                <LuEye className="h-3.5 w-3.5" />
+                <span className="font-cond">Props</span>
+              </button>
             )}
-            <span className="font-cond">Props</span>
           </div>
         </div>
 

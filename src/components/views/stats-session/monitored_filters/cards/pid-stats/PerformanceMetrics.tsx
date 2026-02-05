@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { LuActivity } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { TabPIDData } from '@/types/domain/gpac/filter-stats';
+import { TabPIDData } from '@/types/ui';
 import { usePerformanceMetrics } from '../../../hooks/data/usePerformanceMetrics';
 
 interface PerformanceMetricsProps {

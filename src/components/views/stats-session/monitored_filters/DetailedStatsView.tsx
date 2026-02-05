@@ -1,11 +1,7 @@
 import { memo, useMemo, useState, useEffect } from 'react';
 import { LuSettings } from 'react-icons/lu';
-import {
-  OverviewTabData,
-  TabPIDData,
-  NetworkTabData,
-  FilterStatsResponse,
-} from '@/types/domain/gpac/filter-stats';
+import { OverviewTabData, TabPIDData, NetworkTabData } from '@/types/ui';
+import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -56,7 +52,7 @@ const DetailedStatsView = memo(
     networkData,
     inputPids,
     outputPids,
-    filterData = EMPTY_FILTER_DATA, // Use constant fallback
+    filterData = EMPTY_FILTER_DATA, // constant fallback
     onOpenProperties,
     initialTab,
     isLoading = false,

@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TabPIDData } from '@/types/domain/gpac/filter-stats';
+import { TabPIDData } from '@/types/ui';
 import { formatBytes } from '@/utils/formatting';
 import { getPIDStatusInfo, getPIDType } from '../shared/statusHelpers';
 

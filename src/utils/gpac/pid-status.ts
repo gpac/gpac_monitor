@@ -1,5 +1,5 @@
 import { LuCircleAlert, LuCheck } from 'react-icons/lu';
-import { TabPIDData } from '@/types/domain/gpac/filter-stats';
+import { TabPIDData } from '@/types/ui';
 
 export interface StatusInfo {
   status: string;

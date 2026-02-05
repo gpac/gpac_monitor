@@ -60,16 +60,11 @@ var UPDATE_INTERVALS = {
 var LOG_RETENTION = {
   maxHistorySize: 500,
   maxHistorySizeVerbose: 2e3,
-  // Retention ratio by level (percentage to keep when cleaning)
   keepRatio: {
     error: 1,
-    // Keep 100%
     warning: 0.8,
-    // 80% 
     info: 0.2,
-    //  20% 
     debug: 0.05
-    // 5% 
   }
 };
 
@@ -959,7 +954,6 @@ function LogManager(client) {
   this.sendToClient = function(data) {
     if (this.client.client && typeof this.client.client.send === "function") {
       this.client.client.send(JSON.stringify(data));
-    } else {
     }
   };
   this.forceUnsubscribe = function() {

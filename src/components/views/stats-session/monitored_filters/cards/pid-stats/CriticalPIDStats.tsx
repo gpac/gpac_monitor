@@ -3,7 +3,7 @@ import { LuTriangle, LuInfo, LuCheck } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { TabPIDData } from '@/types/domain/gpac/filter-stats';
+import { TabPIDData } from '@/types/ui';
 import { formatBufferTime } from '@/utils/formatting';
 import { useCriticalPIDStats } from '../../../hooks/data/useCriticalPIDStats';
 

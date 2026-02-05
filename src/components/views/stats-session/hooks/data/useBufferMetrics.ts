@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { BuffersTabData } from '@/types/domain/gpac/filter-stats';
+import { BuffersTabData } from '@/types/ui';
 import { formatBytes, formatBufferTime } from '@/utils/formatting';
 import { getBufferHealthColor } from '@/utils/metrics';
 
