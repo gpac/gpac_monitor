@@ -71,7 +71,7 @@ export function createNodeFromFilter(
 
   return {
     id: filter.idx.toString(),
-    type: 'gpacer',
+    type: 'gpac',
     data: {
       label: filter.name,
       filterType,

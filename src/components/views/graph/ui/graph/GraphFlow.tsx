@@ -34,7 +34,7 @@ const flowStyles = {
   height: '100%',
 };
 const nodeTypes = {
-  gpacer: CustomNode,
+  gpac: CustomNode,
 };
 
 const GraphFlow: React.FC<GraphFlowProps> = ({

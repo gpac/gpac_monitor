@@ -17,7 +17,7 @@ export interface OverviewTabData {
   // Packet metrics
   pck_done: number;
   pck_sent: number;
-  pck_ifce_sent?: number; // Interface-specific packets
+  pck_ifce_sent?: number;
 
   // Data metrics
   bytes_done: number;
@@ -41,7 +41,7 @@ export interface PIDBufferInfo {
   bufferTotal: number;
   usage: number; // percentage
   sourceIdx?: number;
-  color: string; // UI helper for progress bar color
+  color: string;
 }
 
 /**
