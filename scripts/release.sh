@@ -7,4 +7,4 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-echo "Release created at release/index.html"
+echo "Release created at release/"
