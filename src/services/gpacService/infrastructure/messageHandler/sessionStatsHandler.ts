@@ -1,8 +1,11 @@
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
+import { MessageThrottler } from '@/services/utils/MessageThrottler';
 import { WSMessageType } from '@/services/ws/types';
 import { SessionFilterStatistics } from '@/types/domain/gpac/index';
 import { generateID } from '@/utils/core';
 import { MessageHandlerDependencies } from './types';
+
+const SESSION_STATS_THROTTLE_MS = 500;
 
 export class SessionStatsHandler {
   constructor(
@@ -15,6 +18,7 @@ export class SessionStatsHandler {
 
   // Timeouts for delayed auto-unsubscription to avoid premature cleanup during React re-renders
   private sessionAutoUnsubscribeTimeout: NodeJS.Timeout | null = null;
+  private messageThrottler = new MessageThrottler();
 
   private sessionStatsSubscribable = new UpdatableSubscribable<
     SessionFilterStatistics[]
@@ -76,7 +80,14 @@ export class SessionStatsHandler {
   }
 
   public handleSessionStats(stats: SessionFilterStatistics[]): void {
-    this.sessionStatsSubscribable.updateDataAndNotify(stats);
+    this.messageThrottler.throttle(
+      'session_stats',
+      (data: SessionFilterStatistics[]) => {
+        this.sessionStatsSubscribable.updateDataAndNotify(data);
+      },
+      SESSION_STATS_THROTTLE_MS,
+      stats,
+    );
   }
 
   public subscribeToSessionStats(
@@ -127,6 +138,7 @@ export class SessionStatsHandler {
   }
 
   public cleanup(): void {
+    this.messageThrottler.clear();
     if (this.sessionAutoUnsubscribeTimeout) {
       clearTimeout(this.sessionAutoUnsubscribeTimeout);
       this.sessionAutoUnsubscribeTimeout = null;

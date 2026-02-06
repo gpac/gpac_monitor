@@ -1,10 +1,13 @@
 import type { CPUStats } from '@/types/domain/system/index';
 
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
+import { MessageThrottler } from '@/services/utils/MessageThrottler';
 import { WSMessageType } from '@/services/ws/types';
 import { MessageHandlerDependencies } from './types';
 
 import { generateID } from '@/utils/core';
+
+const CPU_STATS_THROTTLE_MS = 500;
 
 export class CPUStatsHandler {
   constructor(
@@ -17,6 +20,7 @@ export class CPUStatsHandler {
 
   // Timeouts for delayed auto-unsubscription to avoid premature cleanup during React re-renders
   private cpuAutoUnsubscribeTimeout: NodeJS.Timeout | null = null;
+  private messageThrottler = new MessageThrottler();
 
   private cpuStatsSubscribable = new UpdatableSubscribable<CPUStats[]>([]);
   private ensureLoaded(): boolean {
@@ -79,7 +83,14 @@ export class CPUStatsHandler {
       return;
     }
 
-    this.cpuStatsSubscribable.updateDataAndNotify([stats]);
+    this.messageThrottler.throttle(
+      'cpu_stats',
+      (data: CPUStats[]) => {
+        this.cpuStatsSubscribable.updateDataAndNotify(data);
+      },
+      CPU_STATS_THROTTLE_MS,
+      [stats],
+    );
   }
   public subscribeToCPUStatsUpdates(
     callback: (stats: CPUStats) => void,
@@ -129,6 +140,7 @@ export class CPUStatsHandler {
   }
 
   public cleanup(): void {
+    this.messageThrottler.clear();
     if (this.cpuAutoUnsubscribeTimeout) {
       clearTimeout(this.cpuAutoUnsubscribeTimeout);
       this.cpuAutoUnsubscribeTimeout = null;
