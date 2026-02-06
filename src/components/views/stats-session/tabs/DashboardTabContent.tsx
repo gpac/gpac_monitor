@@ -1,4 +1,5 @@
 import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
+import type { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
 import React from 'react';
 import {
   LuActivity,
@@ -23,8 +24,8 @@ import { CommandLineInfo } from '@/components/CommandLineDialog';
 interface DashboardTabContentProps {
   systemStats: SystemStats;
   statsCounters: StatsCounters;
-  filtersWithLiveStats: EnrichedFilterOverview[];
-  filtersMatchingCriteria: EnrichedFilterOverview[];
+  filtersWithLiveStats: EnrichedFilterData[];
+  filtersMatchingCriteria: EnrichedFilterData[];
   loading: boolean;
   monitoredFilters: Map<number, EnrichedFilterOverview>;
   onCardClick: (idx: number) => void;

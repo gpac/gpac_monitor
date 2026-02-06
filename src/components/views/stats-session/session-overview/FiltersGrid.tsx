@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FilterStatCard from './FilterStatCard';
 import { Widget } from '@/types/ui/widget';
-import { useEnrichedStats } from '../hooks/stats';
+import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
 import {
   isFilterDetached,
   isFilterMonitored,
@@ -13,8 +13,8 @@ import {
 import { selectStalledFilters } from '@/shared/store/selectors';
 
 interface FiltersGridProps {
-  filtersWithLiveStats: EnrichedFilterOverview[];
-  filtersMatchingCriteria: EnrichedFilterOverview[];
+  filtersWithLiveStats: EnrichedFilterData[];
+  filtersMatchingCriteria: EnrichedFilterData[];
   loading: boolean;
   monitoredFilters: Map<number, EnrichedFilterOverview>;
   onCardClick: (filterIndex: number) => void;
@@ -29,7 +29,6 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
     onCardClick,
     activeWidgets = [],
   }) => {
-    const enrichedFilters = useEnrichedStats(filtersWithLiveStats);
     const stalledFilters = useSelector(selectStalledFilters);
 
     const filtersCount = useMemo(
@@ -39,7 +38,7 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
 
     const sortedFilters = useMemo(() => {
       // Filter out detached filters to avoid duplicate rendering
-      const list = enrichedFilters.filter(
+      const list = filtersWithLiveStats.filter(
         (f) => !isFilterDetached(f.idx || -1, activeWidgets),
       );
 
@@ -51,7 +50,7 @@ export const FiltersGrid: React.FC<FiltersGridProps> = memo(
 
         return (b.bytes_done || 0) - (a.bytes_done || 0);
       });
-    }, [enrichedFilters, monitoredFilters, activeWidgets]);
+    }, [filtersWithLiveStats, monitoredFilters, activeWidgets]);
 
     return (
       <div className="flex flex-col h-full">
