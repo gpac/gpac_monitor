@@ -22,13 +22,6 @@ function SessionManager(client) {
     this.startMonitoringLoop = function() {
         if (this.isMonitoringLoopRunning) return;
         this.isMonitoringLoopRunning = true;
-        const processError = session.last_process_error; 
-        //error handling
-if (processError) {
-    print('[SessionManager] Process error detected on session:', processError);
-    this.isMonitoringLoopRunning = false;
-    return;
-}
 
         session.post_task(() => {
             const now = sys.clock_us();
@@ -47,9 +40,8 @@ if (processError) {
                         reason: 'completed',
                         timestamp: now
                     }));
-                    print('[SessionManager] Session end message sent');
                 } catch (e) {
-                    print('[SessionManager] Failed to send session_end message:', e);
+                    print('[SessionManager] Error sending session_end message:', e);
                 }
 
                 // Cleanup all managers on session end

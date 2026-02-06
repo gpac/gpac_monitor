@@ -61,19 +61,18 @@ function LogManager(client) {
 
         try {
             this.flushPendingLogs();
-            
+
             sys.on_log = undefined;
-            
+
             if (this.originalLogConfig) {
                 sys.set_logs(this.originalLogConfig);
             }
-            
+
             this.isSubscribed = false;
             this.logs = [];
             this.pendingLogs = [];
             this.batchTimer = null;
-            
-            console.log(`LogManager: Client ${this.client.id} unsubscribed from logs`);
+
         } catch (error) {
             console.error("LogManager: Failed to stop log capturing:", error);
         }
@@ -175,14 +174,14 @@ function LogManager(client) {
             sys.set_logs(logLevel);
 
 
-        
+
 
             this.sendToClient({
                 message: 'log_config_changed',
                 logLevel: logLevel
             });
 
- 
+
         } catch (error) {
             console.error("LogManager: Failed to update log level:", error);
         }
@@ -238,8 +237,6 @@ function LogManager(client) {
      * Ensures sys.on_log is properly cleaned even if subscriptions exist
      */
     this.forceUnsubscribe = function() {
-        console.log(`LogManager: Force cleanup for client ${this.client.id}`);
-
         try {
             this.flushPendingLogs();
 
@@ -255,7 +252,6 @@ function LogManager(client) {
             this.incomingBuffer = [];
             this.batchTimer = null;
 
-            console.log(`LogManager: Client ${this.client.id} force cleanup completed`);
         } catch (error) {
             console.error("LogManager: Error during force cleanup:", error);
         }

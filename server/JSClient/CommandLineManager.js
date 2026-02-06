@@ -35,7 +35,6 @@ function CommandLineManager(client) {
                 commandLine: commandLine,
                 timestamp: Date.now()
             }));
-            print("[CommandLineManager] Sent command line to client: " + commandLine);
         } else {
             this.client.client.send(JSON.stringify({
                 message: 'command_line_response',
@@ -43,7 +42,6 @@ function CommandLineManager(client) {
                 error: 'Could not retrieve command line',
                 timestamp: Date.now()
             }));
-            print("[CommandLineManager] Could not retrieve command line");
         }
     };
 }

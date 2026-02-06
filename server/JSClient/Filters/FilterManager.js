@@ -19,15 +19,14 @@ function FilterManager(client, draned_once_ref) {
 
     this.sendAllFilters = function() {
         on_all_connected((all_js_filters) => {
-            print("----- all connected -----");
+           
 
             // Use cache to avoid redundant serialization for multiple clients
+            // Cache serialized data (100ms TTL) to avoid redundant JSON.stringify for concurrent clients
             const serialized = cacheManager.getOrSet('all_filters', 100, () => {
                 const minimalFiltersList = all_js_filters.map((f) => {
                     return gpac_filter_to_minimal_object(f);
                 });
-                print("-------------------------");
-                print(JSON.stringify(minimalFiltersList, null, 1));
 
                 return JSON.stringify({
                     'message': 'filters',

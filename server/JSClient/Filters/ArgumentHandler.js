@@ -39,20 +39,8 @@ function ArgumentHandler(client) {
             return;
         }
 
-        if (filter.name != name) {
-            print("Warning: Discrepancy in filter names for idx " + idx +
-                  ". Expected '" + name + "', found '" + filter.name +
-                  "'. Proceeding with update.");
-        }
-
         try {
-            print("Updating filter " + idx + " (" + filter.name +
-                  "), argument '" + argName + "' to '" + newValue + "'");
-
             filter.update(argName, newValue);
-
-            print("Successfully updated argument '" + argName +
-                  "' for filter " + filter.name + " (idx=" + idx + ")");
         } catch (e) {
             print("Error: Failed to update argument: " + e.toString());
         }

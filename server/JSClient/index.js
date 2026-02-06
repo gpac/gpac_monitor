@@ -25,8 +25,6 @@ function JSClient(id, client, all_clients, draned_once_ref) {
     };
 
     this.cleanup = function() {
-        console.log(`JSClient ${this.id}: Starting cleanup`);
-
         try {
             // (releases sys.on_log)
             if (this.logManager) {
@@ -39,8 +37,6 @@ function JSClient(id, client, all_clients, draned_once_ref) {
             if (this.cpuStatsManager && typeof this.cpuStatsManager.cleanup === 'function') {
                 this.cpuStatsManager.cleanup();
             }
-
-            console.log(`JSClient ${this.id}: Cleanup completed`);
         } catch (error) {
             console.error(`JSClient ${this.id}: Error during cleanup:`, error);
         }
