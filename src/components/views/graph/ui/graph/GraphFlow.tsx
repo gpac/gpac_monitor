@@ -59,6 +59,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
+        nodesConnectable={false}
         onNodesChange={isResizing ? () => {} : onNodesChange}
         onEdgesChange={isResizing ? () => {} : onEdgesChange}
         onNodeClick={isResizing ? undefined : onNodeClick}
@@ -68,7 +69,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         maxZoom={2}
         defaultEdgeOptions={{
           type: 'simplebezier',
-          animated: !isResizing,
+          animated: false,
           style: { stroke: '#6b7280', strokeWidth: 3 },
           ariaLabel: 'Clickable edge to see IPID properties',
         }}

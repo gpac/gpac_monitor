@@ -23,7 +23,7 @@ const FILTER_SUBSCRIPTION_FIELDS = [
 const UPDATE_INTERVALS = {
     SESSION_STATS: 1000,
     FILTER_STATS: 1000,
-    CPU_STATS: 250,
+    CPU_STATS: 500,
 };
 
 // Log retention strategy: preserve errors (100%), prioritize warnings (80%), sample info/debug (20%/5%)
