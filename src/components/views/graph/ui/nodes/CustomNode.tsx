@@ -3,6 +3,7 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
+import { getBasename, truncateMiddle } from '../../utils/labelUtils';
 import NodeToolbarActions from './NodeToolbarActions';
 
 interface CustomNodeProps extends NodeProps {
@@ -28,6 +29,20 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
     }),
     [data, nodeProps],
   );
+
+  // Compute display label (basename + truncate)
+  const { fullLabel, displayLabel } = useMemo(() => {
+    const full = label;
+    const base = getBasename(full);
+    const display = truncateMiddle(base, 26);
+    return { fullLabel: full, displayLabel: display };
+  }, [label]);
+
+  // Helper to format PID labels
+  const formatPidLabel = (pidId: string): string => {
+    const base = getBasename(pidId);
+    return truncateMiddle(base, 18);
+  };
 
   const [textColor, backgroundColor] = useGraphColors(node);
   const isMonitored = data.isMonitored;
@@ -128,8 +143,12 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <h3 className="font-bold text-sm truncate" style={textStyle}>
-                {label}
+              <h3
+                className="font-bold text-sm truncate"
+                style={textStyle}
+                title={fullLabel}
+              >
+                {displayLabel}
               </h3>
             </div>
             <div
@@ -163,8 +182,9 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
                       <div
                         key={pidId}
                         className="text-xs text-gray-100 truncate"
+                        title={pidId}
                       >
-                        {pidId}
+                        {formatPidLabel(pidId)}
                       </div>
                     ))}
                   </div>
@@ -184,8 +204,9 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
                       <div
                         key={pidId}
                         className="text-xs text-gray-100 text-right truncate"
+                        title={pidId}
                       >
-                        {pidId}
+                        {formatPidLabel(pidId)}
                       </div>
                     ))}
                   </div>
