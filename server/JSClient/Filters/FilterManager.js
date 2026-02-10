@@ -92,6 +92,11 @@ function FilterManager(client, draned_once_ref) {
         session.lock_filters(false);
 
         const newSnapshot = snapshot.join('|');
+           if (this.graphSnapshot === '') {                                                                                                                                                                               
+                   // First tick: just store snapshot (initial sendAllFilters already sent)                                                                                                                                   
+                   this.graphSnapshot = newSnapshot;                                                                                                                                                                          
+                   return;                                                                                                                                                                                                    
+              }   
         if (this.graphSnapshot !== newSnapshot) {
             this.graphSnapshot = newSnapshot;
             this.sendAllFilters();
