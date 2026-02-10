@@ -115,6 +115,7 @@ const useGraphMonitor = () => {
 
   const [hasLayoutRun, setHasLayoutRun] = useState(false);
   const nodesInitialized = useNodesInitialized();
+  const graphFingerprint = useRef('');
 
   // Annotate nodes with isMonitored property
   const annotatedNodes = useMemo(
@@ -135,12 +136,15 @@ const useGraphMonitor = () => {
     [localNodes, subscribedSet],
   );
 
-  // Reset layout flag when nodes change (new graph data)
+  // Reset layout flag when graph structure changes (new/removed filters)
   useEffect(() => {
-    if (nodes.length > 0 && nodes.length !== nodesRef.current.length) {
+    if (nodes.length === 0) return;
+    const fingerprint = nodes.map((n) => n.id).sort().join(',');
+    if (fingerprint !== graphFingerprint.current) {
+      graphFingerprint.current = fingerprint;
       setHasLayoutRun(false);
     }
-  }, [nodes.length]);
+  }, [nodes]);
 
   // Auto-layout hook using useNodesInitialized with boolean guard
   useEffect(() => {

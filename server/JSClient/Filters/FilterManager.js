@@ -16,6 +16,7 @@ function FilterManager(client, draned_once_ref) {
     this.lastSentByFilter = {};
     this.pidDataCollector = new PidDataCollector();
     this.argumentHandler = new ArgumentHandler(client);
+    this.graphSnapshot = '';
 
     this.sendAllFilters = function() {
         on_all_connected((all_js_filters) => {
@@ -27,6 +28,8 @@ function FilterManager(client, draned_once_ref) {
                 const minimalFiltersList = all_js_filters.map((f) => {
                     return gpac_filter_to_minimal_object(f);
                 });
+
+
 
                 return JSON.stringify({
                     'message': 'filters',
@@ -77,7 +80,28 @@ function FilterManager(client, draned_once_ref) {
         delete this.lastSentByFilter[idx];
     };
 
+    this.checkGraphChanges = function() {
+        session.lock_filters(true);
+        const snapshot = [];
+        for (let i = 0; i < session.nb_filters; i++) {
+            const f = session.get_filter(i);
+            if (!f.is_destroyed()) {
+                snapshot.push(`${f.idx}:${f.type}:${f.nb_ipid}:${f.nb_opid}`);
+            }
+        }
+        session.lock_filters(false);
+
+        const newSnapshot = snapshot.join('|');
+        if (this.graphSnapshot !== newSnapshot) {
+            this.graphSnapshot = newSnapshot;
+            this.sendAllFilters();
+        }
+    };
+
     this.tick = function(now) {
+        // Check for graph changes (filter add/remove/change)
+        this.checkGraphChanges();
+
         // Iterate through all subscribed filters
         for (const idxStr in this.filterSubscriptions) {
             const idx = parseInt(idxStr);
