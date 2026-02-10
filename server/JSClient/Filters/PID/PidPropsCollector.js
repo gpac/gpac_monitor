@@ -16,7 +16,15 @@ function PidPropsCollector(client) {
     session.lock_filters(true);
 
     try {
-      const filter = session.get_filter(filterIdx);
+      // Find filter by idx property (not position — session.get_filter takes position)
+      let filter = null;
+      for (let i = 0; i < session.nb_filters; i++) {
+        const f = session.get_filter(i);
+        if (!f.is_destroyed() && f.idx === filterIdx) {
+          filter = f;
+          break;
+        }
+      }
       if (!filter) {
         session.lock_filters(false);
         return { error: `Filter ${filterIdx} not found` };

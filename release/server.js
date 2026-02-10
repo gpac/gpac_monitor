@@ -583,6 +583,7 @@ function FilterManager(client, draned_once_ref) {
   this.lastSentByFilter = {};
   this.pidDataCollector = new PidDataCollector();
   this.argumentHandler = new ArgumentHandler(client);
+  this.graphSnapshot = "";
   this.sendAllFilters = function() {
     on_all_connected((all_js_filters) => {
       const serialized = cacheManager.getOrSet("all_filters", 100, () => {
@@ -629,7 +630,28 @@ function FilterManager(client, draned_once_ref) {
     delete this.filterSubscriptions[idx];
     delete this.lastSentByFilter[idx];
   };
+  this.checkGraphChanges = function() {
+    session.lock_filters(true);
+    const snapshot = [];
+    for (let i = 0; i < session.nb_filters; i++) {
+      const f = session.get_filter(i);
+      if (!f.is_destroyed()) {
+        snapshot.push(`${f.idx}:${f.type}:${f.nb_ipid}:${f.nb_opid}`);
+      }
+    }
+    session.lock_filters(false);
+    const newSnapshot = snapshot.join("|");
+    if (this.graphSnapshot === "") {
+      this.graphSnapshot = newSnapshot;
+      return;
+    }
+    if (this.graphSnapshot !== newSnapshot) {
+      this.graphSnapshot = newSnapshot;
+      this.sendAllFilters();
+    }
+  };
   this.tick = function(now) {
+    this.checkGraphChanges();
     for (const idxStr in this.filterSubscriptions) {
       const idx = parseInt(idxStr);
       const sub = this.filterSubscriptions[idxStr];
@@ -954,7 +976,14 @@ function PidPropsCollector(client) {
         };
       };
       var collectProperty = collectProperty2;
-      const filter = session.get_filter(filterIdx);
+      let filter = null;
+      for (let i = 0; i < session.nb_filters; i++) {
+        const f = session.get_filter(i);
+        if (!f.is_destroyed() && f.idx === filterIdx) {
+          filter = f;
+          break;
+        }
+      }
       if (!filter) {
         session.lock_filters(false);
         return { error: `Filter ${filterIdx} not found` };
