@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Node, Edge } from '@xyflow/react';
+import { Node, Edge, NodeChange, EdgeChange } from '@xyflow/react';
 import { GraphFilterData } from '@/types/index';
 import { isValidFilterData } from '@/utils/gpac';
 
@@ -7,7 +7,7 @@ import { isValidFilterData } from '@/utils/gpac';
 //       NODES HANDLER
 // =========================
 interface NodesHandlerParams {
-  onNodesChange: (changes: any[]) => void;
+  onNodesChange: (changes: NodeChange[]) => void;
   localNodes: Node[];
   setLocalNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   nodesRef: React.MutableRefObject<Node[]>;
@@ -20,14 +20,16 @@ export function useHandleNodesChange({
   nodesRef,
 }: NodesHandlerParams) {
   return useCallback(
-    (changes: any[]) => {
+    (changes: NodeChange[]) => {
       onNodesChange(changes);
 
       // Update local nodes with new positions
       setLocalNodes((prevNodes) =>
         prevNodes.map((node) => {
-          const change = changes.find((c) => c.id === node.id);
-          return change && change.position
+          const change = changes.find(
+            (c) => c.type === 'position' && c.id === node.id,
+          );
+          return change?.type === 'position' && change.position
             ? { ...node, position: change.position }
             : node;
         }),
@@ -43,7 +45,7 @@ export function useHandleNodesChange({
 //       EDGES HANDLER
 // =========================
 interface EdgesHandlerParams {
-  onEdgesChange: (changes: any[]) => void;
+  onEdgesChange: (changes: EdgeChange[]) => void;
   localEdges: Edge[];
   edgesRef: React.MutableRefObject<Edge[]>;
 }
@@ -54,7 +56,7 @@ export function useHandleEdgesChange({
   edgesRef,
 }: EdgesHandlerParams) {
   return useCallback(
-    (changes: any[]) => {
+    (changes: EdgeChange[]) => {
       onEdgesChange(changes);
       // Update localEdges ref
       edgesRef.current = localEdges.map((edge) => ({ ...edge }));
