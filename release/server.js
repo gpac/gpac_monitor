@@ -480,6 +480,11 @@ function PidDataCollector() {
         pid.stats.max_process_time = stats.max_process_time;
         pid.stats.total_process_time = stats.total_process_time;
       }
+      const allProps = {};
+      filter.ipid_props(i, function(pname, ptype, pval) {
+        allProps[pname] = { name: pname, type: ptype, value: pval };
+      });
+      pid.properties = allProps;
       const key = pid.name || `ipid_${i}`;
       ipids[key] = pid;
     }

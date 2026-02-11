@@ -1,49 +1,33 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useGpacService } from '@/shared/hooks/useGpacService';
-import { useAppSelector } from '@/shared/hooks/redux';
+import { useMemo, useRef } from 'react';
+import { useFilterStats } from '@/components/views/stats-session/hooks/stats/useFilterStats';
 import { PidProperty } from '@/types';
 
+const EMPTY: PidProperty[] = [];
+
 /**
- * Custom hook to fetch PID properties
- * Re-fetches when the filter's IPID keys change 
+ * Custom hook to get PID properties from periodic filter stats.
+ * Properties auto-update on source switch (no on-demand fetch needed).
  */
 export const useFetchIPIDProperties = (
   filterIdx: number | undefined,
   ipidIdx: number | undefined,
 ) => {
-  const gpacService = useGpacService();
-  const [properties, setProperties] = useState<PidProperty[]>([]);
-  const filters = useAppSelector((state) => state.graph.filters);
+  const { stats } = useFilterStats(filterIdx, filterIdx !== undefined);
+  const prevRef = useRef<PidProperty[]>(EMPTY);
 
-  // Fingerprint of the filter's IPID keys — changes on source switch
-  const ipidFingerprint = useMemo(() => {
-    if (filterIdx === undefined) return '';
-    const filter = filters.find((f) => f.idx === filterIdx);
-    if (!filter) return '';
-    return Object.keys(filter.ipid).join(',');
-  }, [filters, filterIdx]);
-
-  useEffect(() => {
-    if (filterIdx === undefined || ipidIdx === undefined) {
-      setProperties([]);
-      return;
+  return useMemo(() => {
+    if (!stats?.ipids || ipidIdx === undefined) return EMPTY;
+    const entry = Object.values(stats.ipids)[ipidIdx];
+    if (!entry?.properties) return prevRef.current;
+    const next = Object.values(entry.properties) as PidProperty[];
+    // Stabilize reference: only update if a value actually changed
+    if (
+      next.length === prevRef.current.length &&
+      next.every((p, i) => p.value === prevRef.current[i]?.value)
+    ) {
+      return prevRef.current;
     }
-
-    let cancelled = false;
-    const fetchWithRetry = async () => {
-      for (const delay of [0, 800]) {
-        if (delay > 0) await new Promise((r) => setTimeout(r, delay));
-        if (cancelled) return;
-
-        const props = await gpacService.getPidProps(filterIdx, ipidIdx);
-        if (cancelled) return;
-        setProperties(props);
-      }
-    };
-
-    fetchWithRetry();
-    return () => { cancelled = true; };
-  }, [filterIdx, ipidIdx, gpacService, ipidFingerprint]);
-
-  return properties;
+    prevRef.current = next;
+    return next;
+  }, [stats?.ipids, ipidIdx]);
 };

@@ -1,3 +1,5 @@
+import type { PidPropsMap } from './pid_props';
+
 // =======================================
 // SERVER RESPONSE TYPES
 // =======================================
@@ -92,4 +94,5 @@ export interface PIDproperties {
   serviceID?: string;
   language?: string;
   role?: string;
+  properties?: PidPropsMap;
 }

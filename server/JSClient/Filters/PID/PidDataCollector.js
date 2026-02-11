@@ -43,6 +43,13 @@ function PidDataCollector() {
                 pid.stats.total_process_time = stats.total_process_time;
             }
 
+            // Enumerate ALL properties for PropertiesPanel live updates
+            const allProps = {};
+            filter.ipid_props(i, function(pname, ptype, pval) {
+                allProps[pname] = { name: pname, type: ptype, value: pval };
+            });
+            pid.properties = allProps;
+
             const key = pid.name || `ipid_${i}`;
             ipids[key] = pid;
         }
