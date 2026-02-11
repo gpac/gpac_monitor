@@ -1,7 +1,6 @@
 import { useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { useAppSelector } from '@/shared/hooks/redux';
 import { gpacService } from '@/services/gpacService';
-import { setFilterDetails } from '@/shared/store/slices/graphSlice';
 import { RootState } from '@/shared/store';
 import {
   GraphFilterData,
@@ -21,8 +20,6 @@ interface MultiFilterMonitorState {
 export const useMultiFilterMonitor = (
   isDashboardActive: boolean = true,
 ): MultiFilterMonitorState => {
-  const dispatch = useAppDispatch();
-
   const { stats: sessionStatsData } = useSessionStats(isDashboardActive, 1000);
 
   const isLoading = useAppSelector((state) => state.graph.isLoading);
@@ -33,17 +30,13 @@ export const useMultiFilterMonitor = (
     (state: RootState) => state.graph.filters,
   );
 
-  const handleCloseMonitor = useCallback(
-    (filterIdx: string) => {
-      gpacService.unsubscribeFromFilter(filterIdx);
+  const handleCloseMonitor = useCallback((filterIdx: string) => {
+    gpacService.unsubscribeFromFilter(filterIdx);
 
-      if (gpacService.getCurrentFilterId()?.toString() === filterIdx) {
-        dispatch(setFilterDetails(null));
-        gpacService.setCurrentFilterId(null);
-      }
-    },
-    [dispatch],
-  );
+    if (gpacService.getCurrentFilterId()?.toString() === filterIdx) {
+      gpacService.setCurrentFilterId(null);
+    }
+  }, []);
 
   return {
     isLoading,

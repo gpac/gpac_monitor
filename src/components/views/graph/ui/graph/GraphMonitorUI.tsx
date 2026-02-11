@@ -5,18 +5,23 @@ import LoadingState from '@/components/common/LoadingState';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import GraphFlow from './GraphFlow';
 import { WidgetProps } from '@/types/ui/widget';
-import { Node, Edge, NodeMouseHandler } from '@xyflow/react';
+import {
+  Node,
+  Edge,
+  NodeChange,
+  EdgeChange,
+  NodeMouseHandler,
+} from '@xyflow/react';
 import { LayoutOptions } from '../../utils/GraphLayout';
 
 interface GraphMonitorUIProps extends Omit<WidgetProps, 'config'> {
-  config?: any;
   isLoading: boolean;
   connectionError: string | null;
   retryConnection: () => void;
   nodes: Node[];
   edges: Edge[];
-  onNodesChange: (changes: any[]) => void;
-  onEdgesChange: (changes: any[]) => void;
+  onNodesChange: (changes: NodeChange[]) => void;
+  onEdgesChange: (changes: EdgeChange[]) => void;
   onNodeClick?: NodeMouseHandler;
   layoutOptions: LayoutOptions;
   onLayoutChange: (options: LayoutOptions) => void;

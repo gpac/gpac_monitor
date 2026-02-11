@@ -1,27 +1,4 @@
 import { LuFile, LuFileText, LuFilm, LuMusic } from 'react-icons/lu';
-import { GraphFilterData } from '../../types/domain/gpac/model';
-
-/**
- * Verify if the data is valid GraphFilterData
- */
-export const isValidFilterData = (data: unknown): data is GraphFilterData => {
-  if (!data || typeof data !== 'object') return false;
-
-  const obj = data as Record<string, unknown>;
-
-  return (
-    typeof obj.idx === 'number' &&
-    typeof obj.name === 'string' &&
-    typeof obj.type === 'string' &&
-    typeof obj.status === 'string' &&
-    typeof obj.nb_ipid === 'number' &&
-    typeof obj.nb_opid === 'number' &&
-    typeof obj.ipid === 'object' &&
-    typeof obj.opid === 'object' &&
-    obj.ipid !== null &&
-    obj.opid !== null
-  );
-};
 
 // Get icon and label for media type
 export const getMediaTypeInfo = (type: string) => {

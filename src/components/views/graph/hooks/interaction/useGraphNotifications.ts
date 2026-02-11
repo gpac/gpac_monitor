@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { Node } from '@xyflow/react';
+import type { ToasterToast } from '@/shared/hooks/useToast';
 
 interface UseGraphNotificationsProps {
   nodes: Node[];
   error: string | null;
   isLoading: boolean;
-  toast: any; // Type should match your toast implementation
+  toast: (props: Omit<ToasterToast, 'id'>) => void;
 }
 
 /**

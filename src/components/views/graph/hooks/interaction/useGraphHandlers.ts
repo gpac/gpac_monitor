@@ -1,17 +1,20 @@
 import { useCallback, MutableRefObject } from 'react';
-import { Node, Edge, NodeMouseHandler } from '@xyflow/react';
-import { Dispatch } from '@reduxjs/toolkit';
+import {
+  Node,
+  Edge,
+  NodeChange,
+  EdgeChange,
+  NodeMouseHandler,
+} from '@xyflow/react';
 
 interface UseGraphHandlersProps {
-  onNodesChange: (changes: any[]) => void;
-  onEdgesChange: (changes: any[]) => void;
+  onNodesChange: (changes: NodeChange[]) => void;
+  onEdgesChange: (changes: EdgeChange[]) => void;
   localNodes: Node[];
   localEdges: Edge[];
   nodesRef: MutableRefObject<Node[]>;
   edgesRef: MutableRefObject<Edge[]>;
   setLocalNodes: (nodes: Node[]) => void;
-  service: any;
-  dispatch: Dispatch;
   onNodeClick?: (filterIdx: number) => void;
 }
 
@@ -30,7 +33,7 @@ export const useGraphHandlers = ({
 }: UseGraphHandlersProps) => {
   // Handle node changes (position, selection, etc)
   const handleNodesChange = useCallback(
-    (changes: any[]) => {
+    (changes: NodeChange[]) => {
       onNodesChange(changes);
 
       changes.forEach((change) => {
@@ -51,7 +54,7 @@ export const useGraphHandlers = ({
   );
   // Handle edge changes
   const handleEdgesChange = useCallback(
-    (changes: any[]) => {
+    (changes: EdgeChange[]) => {
       onEdgesChange(changes);
       // Update edgesRef
       edgesRef.current = localEdges;

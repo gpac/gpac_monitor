@@ -1,6 +1,5 @@
 import { GpacServiceState, GpacServiceCallbacks } from './service.types';
 import { ConnectionStatus } from '../../../types/communication/IgpacCommunication';
-import { clearStoreFilters } from '../integration/storeIntegration';
 
 export const initializationMethods = {
   /**
@@ -85,6 +84,5 @@ export const initializationMethods = {
     initializationMethods.cleanup(state);
     state.messageHandler.cleanup();
     state.connectionManager.disconnect();
-    clearStoreFilters();
   },
 };

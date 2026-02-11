@@ -1,9 +1,5 @@
 import { store } from '@/shared/store';
-import {
-  setFilterDetails,
-  updateGraphData,
-  setLoading,
-} from '@/shared/store/slices/graphSlice';
+import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
 import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
 import {
   appendLogsForAllTools,
@@ -22,7 +18,3 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onLogSubscriptionChange: (isSubscribed: boolean) =>
     store.dispatch(setSubscriptionStatus(isSubscribed)),
 });
-
-export const clearStoreFilters = (): void => {
-  store.dispatch(setFilterDetails(null));
-};

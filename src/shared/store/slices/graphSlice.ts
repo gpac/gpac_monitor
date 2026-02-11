@@ -26,7 +26,6 @@ export interface GraphState {
   initialTab: InitialTabType | null;
   pendingFilterOpen: PendingFilterOpen | null;
   lastUpdate: number;
-  selectedFilterDetails: GraphFilterData | null;
 }
 
 const initialState: GraphState = {
@@ -40,7 +39,6 @@ const initialState: GraphState = {
   initialTab: null,
   pendingFilterOpen: null,
   lastUpdate: Date.now(),
-  selectedFilterDetails: null,
 };
 
 const THROTTLE_INTERVAL = 500;
@@ -105,29 +103,10 @@ const graphSlice = createSlice({
       state.nodes = [];
       state.edges = [];
       state.selectedNodeId = null;
-      state.selectedFilterDetails = null;
       state.error = null;
       state.isLoading = false;
       state.pendingFilterOpen = null;
       state.initialTab = null;
-    },
-    setFilterDetails: (
-      state,
-      action: PayloadAction<GraphFilterData | null>,
-    ) => {
-      console.log('[GraphSlice] Updating filter details:', action.payload);
-      state.selectedFilterDetails = action.payload;
-    },
-
-    clearFilterDetails: (state) => {
-      state.selectedFilterDetails = null;
-    },
-    setSelectedFilterDetails: (
-      state,
-      action: PayloadAction<GraphFilterData>,
-    ) => {
-      state.selectedFilterDetails = action.payload;
-      console.log('DETAILS DU FILTRE SÉLECTIONNÉ :', action.payload);
     },
     setInitialTab: (state, action: PayloadAction<InitialTabType | null>) => {
       state.initialTab = action.payload;
@@ -154,9 +133,6 @@ export const {
   setSelectedNode,
   clearSelectedNode,
   clearGraph,
-  setFilterDetails,
-  clearFilterDetails,
-  setSelectedFilterDetails,
   setInitialTab,
   clearInitialTab,
   requestFilterOpen,

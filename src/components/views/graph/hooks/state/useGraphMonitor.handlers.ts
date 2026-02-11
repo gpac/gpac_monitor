@@ -1,7 +1,5 @@
 import { useCallback } from 'react';
 import { Node, Edge, NodeChange, EdgeChange } from '@xyflow/react';
-import { GraphFilterData } from '@/types/index';
-import { isValidFilterData } from '@/utils/gpac';
 
 // =========================
 //       NODES HANDLER
@@ -62,44 +60,5 @@ export function useHandleEdgesChange({
       edgesRef.current = localEdges.map((edge) => ({ ...edge }));
     },
     [onEdgesChange, localEdges, edgesRef],
-  );
-}
-
-// =========================
-//    ON NODE CLICK HANDLER
-// =========================
-interface OnNodeClickParams {
-  dispatch: Function;
-  service: any;
-  setSelectedNode: (nodeId: string) => { payload: string; type: string };
-  setSelectedFilterDetails: (data: GraphFilterData) => {
-    payload: GraphFilterData;
-    type: string;
-  };
-}
-
-export function useOnNodeClick({
-  dispatch,
-  service,
-  setSelectedNode,
-  setSelectedFilterDetails,
-}: OnNodeClickParams) {
-  return useCallback(
-    (_event: React.MouseEvent, node: Node) => {
-      const nodeId = node.id;
-      const nodeData = node.data;
-
-      // Type guard to ensure nodeData is valid GraphFilterData
-      if (isValidFilterData(nodeData)) {
-        dispatch(setSelectedFilterDetails(nodeData));
-        service.setCurrentFilterId(parseInt(nodeId));
-        service.getFilterDetails(parseInt(nodeId));
-      } else {
-        console.warn('Invalid node data:', nodeData);
-      }
-
-      dispatch(setSelectedNode(nodeId));
-    },
-    [dispatch, service, setSelectedFilterDetails, setSelectedNode],
   );
 }

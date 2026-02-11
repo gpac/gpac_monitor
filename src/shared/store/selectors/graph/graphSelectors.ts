@@ -47,13 +47,3 @@ export const selectError = createSelector(
   [selectGraphState],
   (graph) => graph.error,
 );
-
-export const selectSelectedFilterDetails = createSelector(
-  [selectGraphState],
-  (graph) => graph.selectedFilterDetails,
-  {
-    memoizeOptions: {
-      resultEqualityCheck: isEqual,
-    },
-  },
-);

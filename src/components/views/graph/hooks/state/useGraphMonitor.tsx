@@ -7,7 +7,6 @@ import {
   useNodesInitialized,
 } from '@xyflow/react';
 import {
-  useGpacService,
   useAppDispatch,
   useToast,
   useSubscribedFilters,
@@ -28,7 +27,6 @@ import { useFilterArgs } from '../interaction/useFilterArgs';
 const useGraphMonitor = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
-  const service = useGpacService();
 
   // Refs to track component state
   const nodesRef = useRef<Node[]>([]);
@@ -87,8 +85,6 @@ const useGraphMonitor = () => {
       nodesRef,
       edgesRef,
       setLocalNodes,
-      service,
-      dispatch,
       onNodeClick: handleNodeSelect,
     });
 
@@ -139,7 +135,10 @@ const useGraphMonitor = () => {
   // Reset layout flag when graph structure changes (new/removed filters)
   useEffect(() => {
     if (nodes.length === 0) return;
-    const fingerprint = nodes.map((n) => n.id).sort().join(',');
+    const fingerprint = nodes
+      .map((n) => n.id)
+      .sort()
+      .join(',');
     if (fingerprint !== graphFingerprint.current) {
       graphFingerprint.current = fingerprint;
       setHasLayoutRun(false);
