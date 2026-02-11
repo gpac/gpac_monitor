@@ -1,0 +1,17 @@
+export enum GpacStreamType {
+  Visual = 'Visual',
+  Audio = 'Audio',
+  SceneDescription = 'SceneDescription',
+  Text = 'Text',
+  Metadata = 'Metadata',
+  File = 'File',
+  Encrypted = 'Encrypted',
+  ObjectDescriptor = 'ObjectDescriptor',
+  ClockReference = 'ClockReference',
+  MPEG7 = 'MPEG7',
+  IPMP = 'IPMP',
+  OCI = 'OCI',
+  MPEGJ = 'MPEGJ',
+  Interaction = 'Interaction',
+  Font = 'Font',
+}

@@ -1,4 +1,5 @@
 import type { PidPropsMap } from './pid_props';
+import { GpacStreamType } from './stream-types';
 
 // =======================================
 // SERVER RESPONSE TYPES
@@ -79,7 +80,7 @@ export interface PIDproperties {
   playing: boolean | null;
   timescale: number;
   codec: string;
-  type: string;
+  type: GpacStreamType;
   width: number | null;
   height: number | null;
   pixelformat: string | null;

@@ -152,7 +152,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
               </h3>
             </div>
             <div
-              className="text-xs font-medium px-2 py-1 bg-white/20 rounded-full flex-shrink-0"
+              className="text-xs font-medium px-2 py-1 bg-white/60 rounded-full flex-shrink-0"
               style={textStyle}
               title={
                 sessionType === 'source'

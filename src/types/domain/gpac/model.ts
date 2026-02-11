@@ -1,6 +1,7 @@
 import { Node, Edge, EdgeProps } from '@xyflow/react';
 import { GpacArgument } from '../../../components/filtersArgs/types';
 import type { PIDproperties } from './filter-stats';
+import { GpacStreamType } from './stream-types';
 
 // MONITORING
 export interface MonitoredFilterStats {
@@ -101,8 +102,8 @@ export interface GraphFilterData {
   ID: string | null;
   nb_ipid: number;
   nb_opid: number;
-  ipid: Record<string, { source_idx: number; stream_type: string }>;
-  opid: Record<string, { stream_type: string }>;
+  ipid: Record<string, { source_idx: number; stream_type: GpacStreamType }>;
+  opid: Record<string, { stream_type: GpacStreamType }>;
 }
 export type FilterType = 'video' | 'audio' | 'text' | 'file';
 

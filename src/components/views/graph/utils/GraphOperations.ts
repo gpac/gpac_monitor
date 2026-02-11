@@ -4,6 +4,7 @@ import { isSource } from './filterType';
 import {
   determineFilterType,
   getFilterColor,
+  STREAM_TYPE_TO_FILTER,
 } from '@/utils/filters/streamType';
 
 // Create a node from a filter object
@@ -36,7 +37,7 @@ export function createNodeFromFilter(
       // Find maximum depth among all source dependencies
       let maxDepth = 0;
       if (currentFilter.ipid) {
-        Object.values(currentFilter.ipid).forEach((pid: any) => {
+        Object.values(currentFilter.ipid).forEach((pid) => {
           if (pid.source_idx !== undefined && pid.source_idx !== null) {
             const sourceFilter = allFilters.find(
               (f) => f.idx === pid.source_idx,
@@ -108,24 +109,14 @@ export function createEdgesFromFilters(
   filters.forEach((filter) => {
     if (filter.ipid) {
       Object.entries(filter.ipid).forEach(
-        ([pidName, pid]: [string, any], ipidIndex: number) => {
+        ([pidName, pid], ipidIndex: number) => {
           if (pid.source_idx !== undefined && pid.source_idx !== null) {
             // Use numeric ipidIndex for stable edge ID (not pidName which may change)
             const edgeId = `${pid.source_idx}-${filter.idx}-${ipidIndex}`;
             const existingEdge = existingEdges.find((e) => e.id === edgeId);
 
-            // Use stream_type from PID for edge color
-            const streamType = pid.stream_type?.toLowerCase() || '';
             const filterType: FilterType =
-              streamType === 'visual'
-                ? 'video'
-                : streamType === 'audio'
-                  ? 'audio'
-                  : streamType === 'text'
-                    ? 'text'
-                    : streamType === 'file'
-                      ? 'file'
-                      : 'file';
+              STREAM_TYPE_TO_FILTER[pid.stream_type] ?? 'file';
 
             const filterColor = getFilterColor(filterType);
 
@@ -134,16 +125,9 @@ export function createEdgesFromFilters(
             let sourceHandle: string | undefined;
 
             if (sourceFilter?.opid) {
-              // If the PID has an explicit source_pid
-              if (pid.source_pid) {
-                sourceHandle = pid.source_pid;
-              }
-              // If only one output PID, use it
-              else if (Object.keys(sourceFilter.opid).length === 1) {
+              if (Object.keys(sourceFilter.opid).length === 1) {
                 sourceHandle = Object.keys(sourceFilter.opid)[0];
-              }
-              // Search by similar name
-              else {
+              } else {
                 const matchingOutputPid = Object.keys(sourceFilter.opid).find(
                   (opid) =>
                     opid === pidName ||
@@ -154,10 +138,6 @@ export function createEdgesFromFilters(
                   matchingOutputPid || Object.keys(sourceFilter.opid)[0];
               }
             }
-
-            // Skip virtual connections
-            const isVirtual = pid.virtual || false;
-            if (isVirtual) return;
 
             newEdges.push({
               id: edgeId,

@@ -1,4 +1,8 @@
-import { FilterType, GraphFilterData } from '@/types/domain/gpac';
+import {
+  FilterType,
+  GraphFilterData,
+  GpacStreamType,
+} from '@/types/domain/gpac';
 
 /**
  * Color constants for filter types (synchronized with GraphOperations)
@@ -50,12 +54,17 @@ export const getFilterColor = (filterType: FilterType): string => {
 /**
  * Map string stream type to FilterType (case-insensitive, handles 'Visual', 'Video', etc.)
  */
+export const STREAM_TYPE_TO_FILTER: Partial<
+  Record<GpacStreamType, FilterType>
+> = {
+  [GpacStreamType.Visual]: 'video',
+  [GpacStreamType.Audio]: 'audio',
+  [GpacStreamType.Text]: 'text',
+  [GpacStreamType.File]: 'file',
+};
+
 const mapStreamTypeToFilterType = (type: string): FilterType => {
-  const t = type.toLowerCase();
-  if (t === 'visual' || t === 'video') return 'video';
-  if (t === 'audio') return 'audio';
-  if (t === 'text') return 'text';
-  return 'file';
+  return STREAM_TYPE_TO_FILTER[type as GpacStreamType] ?? 'file';
 };
 
 /**
@@ -87,28 +96,18 @@ export const getIconColorForMediaType = (type: string): string => {
  * Extracted from GraphOperations for reusability
  */
 const determineFilterType = (filter: GraphFilterData): FilterType => {
-  // Use server-provided stream_type from PIDs for robust typing
-  const streamTypes = new Set<string>();
+  // Collect stream types from output PIDs, fallback to input PIDs
+  const pids =
+    filter.opid && Object.keys(filter.opid).length > 0
+      ? Object.values(filter.opid)
+      : Object.values(filter.ipid ?? {});
 
-  // Collect stream types from output PIDs
-  if (filter.opid) {
-    Object.values(filter.opid).forEach((pid) => {
-      if (pid.stream_type) streamTypes.add(pid.stream_type.toLowerCase());
-    });
+  for (const pid of pids) {
+    if (pid.stream_type) {
+      const mapped = STREAM_TYPE_TO_FILTER[pid.stream_type];
+      if (mapped) return mapped;
+    }
   }
-
-  // Fallback to input PIDs if no output
-  if (streamTypes.size === 0 && filter.ipid) {
-    Object.values(filter.ipid).forEach((pid) => {
-      if (pid.stream_type) streamTypes.add(pid.stream_type.toLowerCase());
-    });
-  }
-
-  // Map GPAC stream types to UI filter types
-  if (streamTypes.has('visual')) return 'video';
-  if (streamTypes.has('audio')) return 'audio';
-  if (streamTypes.has('text')) return 'text';
-  if (streamTypes.has('file')) return 'file';
   return 'file';
 };
 
