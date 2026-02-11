@@ -589,6 +589,7 @@ function FilterManager(client, draned_once_ref) {
   this.pidDataCollector = new PidDataCollector();
   this.argumentHandler = new ArgumentHandler(client);
   this.graphSnapshot = "";
+  this.graphInitialized = false;
   this.sendAllFilters = function() {
     on_all_connected((all_js_filters) => {
       const serialized = cacheManager.getOrSet("all_filters", 100, () => {
@@ -653,6 +654,10 @@ function FilterManager(client, draned_once_ref) {
     if (this.graphSnapshot !== newSnapshot) {
       this.graphSnapshot = newSnapshot;
       this.sendAllFilters();
+      if (this.graphInitialized && this.client.client) {
+        this.client.client.send(JSON.stringify({ message: "notification", type: "graph_changed" }));
+      }
+      this.graphInitialized = true;
     }
   };
   this.tick = function(now) {
