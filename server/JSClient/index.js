@@ -6,14 +6,14 @@ import { CpuStatsManager } from './Sys/CpuStatsManager.js';
 import { LogManager } from './Sys/LogManager.js';
 import { CommandLineManager } from './CommandLineManager.js';
 
-function JSClient(id, client, all_clients, draned_once_ref) {
+function JSClient(id, client, all_clients) {
     this.id = id;
     this.client = client;
-    
+
     this.messageHandler = new MessageHandler(this);
     this.sessionStatsManager = new SessionStatsManager(this);
     this.sessionManager = new SessionManager(this);
-    this.filterManager = new FilterManager(this, draned_once_ref);
+    this.filterManager = new FilterManager(this);
     this.cpuStatsManager = new CpuStatsManager(this);
     this.logManager = new LogManager(this);
     this.commandLineManager = new CommandLineManager(this);

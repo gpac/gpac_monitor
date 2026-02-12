@@ -109,26 +109,19 @@ function filter_pid_stats_object(f) {
     return pidsFilters;
 }
 
-function on_all_connected(cb, draned_once_ref) {
+function on_all_connected(cb) {
     session.post_task(() => {
-        let local_connected = true;
         let all_filters_instances = [];
 
         session.lock_filters(true);
         for (let i = 0; i < session.nb_filters; i++) {
             const f = session.get_filter(i);
-            if (f.is_destroyed()) continue;
-
-            all_filters_instances.push(f);
+            if (!f.is_destroyed()) all_filters_instances.push(f);
         }
         session.lock_filters(false);
 
-        if (local_connected) {
-            cb(all_filters_instances);
-            if (draned_once_ref) draned_once_ref.value = true;
-            return false;
-        }
-        return 2000;
+        cb(all_filters_instances);
+        return false;
     });
 }
 

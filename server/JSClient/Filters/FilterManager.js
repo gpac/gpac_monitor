@@ -1,6 +1,5 @@
 import { FILTER_SUBSCRIPTION_FIELDS, UPDATE_INTERVALS } from '../config.js';
 import {
-    gpac_filter_to_object,
     gpac_filter_to_minimal_object,
     on_all_connected
 } from '../filterUtils.js';
@@ -8,52 +7,30 @@ import { PidDataCollector } from './PID/PidDataCollector.js';
 import { ArgumentHandler } from './ArgumentHandler.js';
 import { cacheManager } from '../Cache/CacheManager.js';
 
-function FilterManager(client, draned_once_ref) {
+function FilterManager(client) {
     this.client = client;
-    this.draned_once_ref = draned_once_ref;
     this.details_needed = {};
     this.filterSubscriptions = {};
     this.lastSentByFilter = {};
     this.pidDataCollector = new PidDataCollector();
     this.argumentHandler = new ArgumentHandler(client);
-    this.graphSnapshot = '';
-    this.graphInitialized = false;
 
     this.sendAllFilters = function() {
         on_all_connected((all_js_filters) => {
-           
-
-            // Use cache to avoid redundant serialization for multiple clients
-            // Cache serialized data (100ms TTL) to avoid redundant JSON.stringify for concurrent clients
-            const serialized = cacheManager.getOrSet(`all_filters_${this.graphSnapshot}`, 100, () => {
+            const serialized = cacheManager.getOrSet('all_filters', 100, () => {
                 const minimalFiltersList = all_js_filters.map((f) => {
                     return gpac_filter_to_minimal_object(f);
                 });
-
-
-
                 return JSON.stringify({
                     'message': 'filters',
                     'filters': minimalFiltersList
                 });
             });
 
-            // Display the graph structure
             if (this.client.client) {
                 this.client.client.send(serialized);
             }
-
-            session.post_task(() => {
-                let js_filters = [];
-                session.lock_filters(true);
-                for (let i = 0; i < session.nb_filters; i++) {
-                    let f = session.get_filter(i);
-                    js_filters.push(gpac_filter_to_object(f));
-                }
-                session.lock_filters(false);
-                return false;
-            });
-        }, this.draned_once_ref);
+        });
     };
 
     this.requestDetails = function(idx) {
@@ -81,37 +58,7 @@ function FilterManager(client, draned_once_ref) {
         delete this.lastSentByFilter[idx];
     };
 
-    this.checkGraphChanges = function() {
-        session.lock_filters(true);
-        const snapshot = [];
-        for (let i = 0; i < session.nb_filters; i++) {
-            const f = session.get_filter(i);
-            if (!f.is_destroyed()) {
-                snapshot.push(`${f.idx}:${f.type}:${f.nb_ipid}:${f.nb_opid}`);
-            }
-        }
-        session.lock_filters(false);
-
-        const newSnapshot = snapshot.join('|');
-           if (this.graphSnapshot === '') {                                                                                                                                                                               
-                   // First tick: just store snapshot (initial sendAllFilters already sent)                                                                                                                                   
-                   this.graphSnapshot = newSnapshot;                                                                                                                                                                          
-                   return;                                                                                                                                                                                                    
-              }   
-        if (this.graphSnapshot !== newSnapshot) {
-            this.graphSnapshot = newSnapshot;
-            this.sendAllFilters();
-            if (this.graphInitialized && this.client.client) {
-                this.client.client.send(JSON.stringify({ message: 'notification', type: 'graph_changed' }));
-            }
-            this.graphInitialized = true;
-        }
-    };
-
     this.tick = function(now) {
-        // Check for graph changes (filter add/remove/change)
-        this.checkGraphChanges();
-
         // Iterate through all subscribed filters
         for (const idxStr in this.filterSubscriptions) {
             const idx = parseInt(idxStr);
@@ -155,7 +102,6 @@ function FilterManager(client, draned_once_ref) {
                         payload.opids = this.pidDataCollector.collectOutputPids(fObj);
                         break;
                     default:
-                        // No PIDs, just filter stats
                         break;
                 }
 
