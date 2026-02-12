@@ -130,7 +130,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
                 {alerts.warnings} WARN
               </Badge>
             )}
-            {filter.is_eos && (
+            {(filter.is_eos || filter.status?.includes('EOS')) && (
               <Badge
                 variant="outline"
                 className="h-5 px-1.5 text-[10px] uppercase tracking-wide

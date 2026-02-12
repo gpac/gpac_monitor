@@ -1,5 +1,5 @@
 const DEFAULT_FILTER_FIELDS = [
-    "idx", "bytes_done", "bytes_sent", "pck_sent", "pck_done", "time", "nb_ipid", "nb_opid", "errors", "current_errors"
+    "idx", "status", "bytes_done", "bytes_sent", "pck_sent", "pck_done", "time", "nb_ipid", "nb_opid", "errors", "current_errors"
 ];
 
 const CPU_STATS_FIELDS = [

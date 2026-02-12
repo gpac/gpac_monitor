@@ -40,8 +40,8 @@ export const selectStalledFilters = createSelector(
       const curr = current[id];
       const prev = previous[id];
 
-      // If filter is EOS, it's not stalled
-      if (!prev || curr.is_eos) {
+      // If filter is EOS (from PIDs or GPAC status), it's not stalled
+      if (!prev || curr.is_eos || curr.status?.includes('EOS')) {
         stalled[id] = false;
         return;
       }
