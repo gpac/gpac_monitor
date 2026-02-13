@@ -1,6 +1,7 @@
 import { PayloadAction } from '@reduxjs/toolkit';
 import { GpacLogTool, GpacLogEntry } from '@/types/domain/gpac/log-types';
 import { LogsState } from './logs.types';
+import { getAlertKeysForLog, trimBuffer } from './logs.helpers';
 
 export const buffersReducers = {
   appendLogs: (
@@ -84,12 +85,23 @@ export const buffersReducers = {
       }
     }
 
-    // 2) trim only modified tools
+    // 2) smart trim (respects BUFFER_TRIM_PRIORITY) + sync alert counters
     for (const tool of modifiedTools) {
       const buffer = buffers[tool]!;
       const overflow = buffer.length - maxEntriesPerTool;
-      if (overflow > 0) {
-        buffer.splice(0, overflow);
+      if (overflow <= 0) continue;
+      const removed = trimBuffer(buffer, overflow);
+      for (const log of removed) {
+        if (log.level < 1 || log.level > 3) continue;
+        for (const key of getAlertKeysForLog(log)) {
+          const a = alertsByFilterKey[key];
+          if (!a) continue;
+          if (log.level === 1) a.errors--;
+          else if (log.level === 2) a.warnings--;
+          else a.info--;
+          if (a.errors + a.warnings + a.info <= 0)
+            delete alertsByFilterKey[key];
+        }
       }
     }
   },
