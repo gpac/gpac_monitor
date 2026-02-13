@@ -1,5 +1,6 @@
 function PidDataCollector() {
-    
+    this._lastProps = {};
+
     this.collectInputPids = function(filter) {
         const ipids = {};
 
@@ -43,12 +44,17 @@ function PidDataCollector() {
                 pid.stats.total_process_time = stats.total_process_time;
             }
 
-            // Enumerate ALL properties for PropertiesPanel live updates
+            // Enumerate properties - only include if changed since last send
             const allProps = {};
             filter.ipid_props(i, function(pname, ptype, pval) {
                 allProps[pname] = { name: pname, type: ptype, value: pval };
             });
-            pid.properties = allProps;
+            const propsKey = `${filter.idx}_${i}`;
+            const propsJson = JSON.stringify(allProps);
+            if (propsJson !== this._lastProps[propsKey]) {
+                pid.properties = allProps;
+                this._lastProps[propsKey] = propsJson;
+            }
 
             const key = pid.name || `ipid_${i}`;
             ipids[key] = pid;

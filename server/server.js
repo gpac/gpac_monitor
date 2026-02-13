@@ -86,7 +86,7 @@ let remove_client = function(client_id) {
 
 // FILTER EVENT HANDLERS
 session.set_new_filter_fun((f) => {
-    print("new filter " + f.name);
+
     f.idx = filter_uid++;
     f.iname = '' + f.idx;
     all_filters.push(f);
@@ -95,7 +95,7 @@ session.set_new_filter_fun((f) => {
 });
 
 session.set_del_filter_fun((f) => {
-    print("delete filter " + f.iname + " " + f.name);
+  
     let idx = all_filters.indexOf(f);
     if (idx >= 0) all_filters.splice(idx, 1);
     if (f.itag == "NODISPLAY") return;

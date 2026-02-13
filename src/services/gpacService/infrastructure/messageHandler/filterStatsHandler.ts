@@ -102,6 +102,16 @@ export class FilterStatsHandler {
     const subscribable = this.filterStatsSubscribableMap.get(idx);
     if (!subscribable) return;
 
+    // Preserve properties from previous stats when server omits them (diff optimization)
+    const prev = subscribable.getSnapshot();
+    if (prev?.ipids && filter.ipids) {
+      for (const k of Object.keys(filter.ipids)) {
+        if (!filter.ipids[k].properties && prev.ipids[k]?.properties) {
+          filter.ipids[k].properties = prev.ipids[k].properties;
+        }
+      }
+    }
+
     // Throttle updates to reduce UI repaints
     this.messageThrottler.throttle(
       `filter_stats_${idx}`,
