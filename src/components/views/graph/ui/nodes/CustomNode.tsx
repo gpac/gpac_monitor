@@ -20,6 +20,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   ...nodeProps
 }) => {
   const { label, ipid, opid, nb_ipid, nb_opid } = data;
+  const alerts = data.alerts as { errors: number; warnings: number } | null;
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -151,18 +152,36 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
                 {displayLabel}
               </h3>
             </div>
-            <div
-              className="text-xs font-medium px-2 py-1 bg-white/60 rounded-full flex-shrink-0"
-              style={textStyle}
-              title={
-                sessionType === 'source'
-                  ? 'Source Filter'
-                  : sessionType === 'sink'
-                    ? 'Sink Filter'
-                    : 'Processing Filter'
-              }
-            >
-              {sessionType.toUpperCase()}
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <span
+                className="text-xs font-medium px-2 py-1 bg-white/60 rounded-full"
+                style={textStyle}
+                title={
+                  sessionType === 'source'
+                    ? 'Source Filter'
+                    : sessionType === 'sink'
+                      ? 'Sink Filter'
+                      : 'Processing Filter'
+                }
+              >
+                {sessionType.toUpperCase()}
+              </span>
+              {alerts?.errors ? (
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 bg-red-600 text-white rounded-full"
+                  title={`${alerts.errors} error(s)`}
+                >
+                  {alerts.errors} ERR
+                </span>
+              ) : null}
+              {alerts?.warnings ? (
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 bg-amber-500 text-white rounded-full"
+                  title={`${alerts.warnings} warning(s)`}
+                >
+                  {alerts.warnings} WARN
+                </span>
+              ) : null}
             </div>
           </div>
         </div>
@@ -248,6 +267,7 @@ const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
     prevProps.selected === nextProps.selected &&
     prevProps.data.isMonitored === nextProps.data.isMonitored &&
     prevProps.data.isStalled === nextProps.data.isStalled &&
+    prevProps.data.alerts === nextProps.data.alerts &&
     JSON.stringify(prevProps.data.ipid) ===
       JSON.stringify(nextProps.data.ipid) &&
     JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)

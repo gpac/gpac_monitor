@@ -8,6 +8,7 @@ import {
 } from '@xyflow/react';
 import {
   useAppDispatch,
+  useAppSelector,
   useToast,
   useSubscribedFilters,
 } from '@/shared/hooks/index';
@@ -15,6 +16,7 @@ import {
   setSelectedNode,
   requestFilterOpen,
 } from '@/shared/store/slices/graphSlice';
+import { selectAllFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 
 // Modularized hooks
 import { useGraphLayout } from '../layout/useGraphLayout';
@@ -46,6 +48,7 @@ const useGraphMonitor = () => {
     setConnectionError,
   } = useGraphState(nodesRef, edgesRef);
   const subscribedFilterIdxs = useSubscribedFilters();
+  const allAlerts = useAppSelector(selectAllFilterAlerts);
 
   const subscribedSet = useMemo(
     () => new Set(subscribedFilterIdxs),
@@ -113,23 +116,26 @@ const useGraphMonitor = () => {
   const nodesInitialized = useNodesInitialized();
   const graphFingerprint = useRef('');
 
-  // Annotate nodes with isMonitored property
+  // Annotate nodes with isMonitored + alerts properties
   const annotatedNodes = useMemo(
     () =>
       localNodes.map((node) => {
         const filterIdx = node.data?.idx as number | undefined;
         const isMonitored =
           typeof filterIdx === 'number' && subscribedSet.has(filterIdx);
+        const alerts =
+          filterIdx !== undefined ? allAlerts[String(filterIdx)] || null : null;
 
         return {
           ...node,
           data: {
             ...node.data,
             isMonitored,
+            alerts,
           },
         };
       }),
-    [localNodes, subscribedSet],
+    [localNodes, subscribedSet, allAlerts],
   );
 
   // Reset layout flag when graph structure changes (new/removed filters)
