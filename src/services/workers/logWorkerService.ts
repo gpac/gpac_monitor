@@ -26,11 +26,6 @@ class LogWorkerService extends BaseWorkerService<
   protected validateInput(logs: GpacLogEntry[]): boolean {
     return logs.length > 0;
   }
-
-  // Alias for backward compatibility
-  processLogs(logs: GpacLogEntry[]): void {
-    this.process(logs);
-  }
 }
 
 export const logWorkerService = new LogWorkerService();

@@ -124,15 +124,6 @@ export class LogHandler {
     });
   }
 
-  public async getLogStatus(): Promise<void> {
-    this.ensureLoaded();
-
-    await this.dependencies.send({
-      type: WSMessageType.GET_LOG_STATUS,
-      id: generateID(),
-    });
-  }
-
   public handleLogBatch(logs: GpacLogEntry[]): void {
     if (this.callbacks?.onLogsUpdate) {
       this.callbacks.onLogsUpdate(logs);
@@ -226,14 +217,6 @@ export class LogHandler {
         }, 100); // 100ms delay to handle React re-renders
       }
     };
-  }
-
-  public subscribeToLogStatus(
-    callback: (status: LogManagerStatus | null) => void,
-  ): () => void {
-    return this.logStatusSubscribable.subscribe((data) => callback(data), {
-      immediate: true,
-    });
   }
 
   public cleanup(): void {

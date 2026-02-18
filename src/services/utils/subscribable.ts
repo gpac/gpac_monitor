@@ -1,6 +1,6 @@
 import { generateID } from '@/utils/core';
 
-export type SubscriberFn<D, N = undefined, E extends object = ExtraData> = (
+type SubscriberFn<D, N = undefined, E extends object = ExtraData> = (
   data: D,
   type?: N[],
   extraData?: Partial<E>[],
@@ -30,11 +30,6 @@ interface ExtraData {
 
 export class Subscribable<D, N = undefined, E extends object = ExtraData> {
   protected data: D = {} as D;
-
-  /**
-   * Whether to block notifications from being sent.
-   */
-  public blockNotifications = false;
 
   /**
    * A list of channels grouped by their debounce time.
@@ -102,8 +97,6 @@ export class Subscribable<D, N = undefined, E extends object = ExtraData> {
    * @note Depending on `debounce` option, the notifications will be batched and extraData will follow the same order as the types.
    */
   protected notify(type?: N, extraData?: Partial<E>) {
-    if (this.blockNotifications) return;
-
     // Add the notification to the list
     if (type)
       Object.values(this.#channels).forEach((channel) => {

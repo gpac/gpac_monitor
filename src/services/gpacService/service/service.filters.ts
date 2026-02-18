@@ -54,7 +54,6 @@ export const filterMethods = {
    * Unsubscribe from filter updates
    */
   unsubscribeFromFilter(
-    _state: GpacServiceState,
     filterIdx: string,
     sendMessage: (message: any) => void,
   ): void {

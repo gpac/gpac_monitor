@@ -40,12 +40,6 @@ export class GpacService implements IGpacCommunication {
   private state: GpacServiceState;
   private callbacks: GpacServiceCallbacks = {};
 
-  // ============================================================================
-  // PUBLIC PROPERTIES
-  // ============================================================================
-  public onMessage?: (message: any) => void;
-  public onError?: (error: Error) => void;
-  public onDisconnect?: () => void;
   public onConnectionStatusChange?: (status: ConnectionStatus) => void;
 
   // ============================================================================
@@ -67,12 +61,10 @@ export class GpacService implements IGpacCommunication {
     };
 
     const messageHandler = new BaseMessageHandler(
-      () => false,
       {} as GpacNotificationHandlers,
       storeCallbacks,
       dependencies,
       (message: any) => {
-        this.onMessage?.(message);
         coreService.notifyHandlers(message);
       },
     );
@@ -187,7 +179,7 @@ export class GpacService implements IGpacCommunication {
   }
 
   public unsubscribeFromFilter(filterIdx: string): void {
-    filterMethods.unsubscribeFromFilter(this.state, filterIdx, (msg) =>
+    filterMethods.unsubscribeFromFilter(filterIdx, (msg) =>
       this.sendMessage(msg),
     );
   }
