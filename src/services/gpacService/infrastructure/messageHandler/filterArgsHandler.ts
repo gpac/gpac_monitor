@@ -10,10 +10,6 @@ export class FilterArgsHandler {
     private isLoaded: () => boolean,
   ) {}
   private pendingFilterArgsSubscribeRequests = new Map<number, Promise<void>>();
-  private pendingFilterArgsUnsubscribeRequests = new Map<
-    number,
-    Promise<void>
-  >();
 
   private filterArgsSubscribables = new Map<
     number,
@@ -54,36 +50,6 @@ export class FilterArgsHandler {
     })();
 
     this.pendingFilterArgsSubscribeRequests.set(idx, promise);
-    return promise;
-  }
-
-  /**
-   * Unsubscribes from filter arguments updates
-   */
-  public async unsubscribeFromFilterArgs(idx: number): Promise<void> {
-    this.ensureLoaded();
-
-    // Check if there's already a pending unsubscribe request for this filter
-    const existingRequest = this.pendingFilterArgsUnsubscribeRequests.get(idx);
-    if (existingRequest) {
-      return existingRequest;
-    }
-
-    // Create and store the promise
-    const promise = (async () => {
-      try {
-        await this.dependencies.send({
-          type: WSMessageType.STOP_FILTER_ARGS,
-          id: generateID(),
-          idx,
-        });
-      } finally {
-        // Clear the pending request when done (success or failure)
-        this.pendingFilterArgsUnsubscribeRequests.delete(idx);
-      }
-    })();
-
-    this.pendingFilterArgsUnsubscribeRequests.set(idx, promise);
     return promise;
   }
 
@@ -142,13 +108,6 @@ export class FilterArgsHandler {
     }
   }
 
-  /**
-   * Handle update_arg_response from server (no longer used with fire-and-forget)
-   */
-  public handleUpdateArgResponse(_data: any): void {
-    // No-op: we use fire-and-forget approach now
-  }
-
   private log(message: string, type: 'stdout' | 'stderr' = 'stdout'): void {
     if (type === 'stderr') {
       console.error(message);
@@ -164,7 +123,6 @@ export class FilterArgsHandler {
   public subscribeToFilterArgsDetails(
     filterIdx: number,
     callback: (args: FilterArgument[]) => void,
-    _interval = 1000, // Pas utilisé car on ne reçoit qu'une fois
   ): () => void {
     this.ensureLoaded();
 

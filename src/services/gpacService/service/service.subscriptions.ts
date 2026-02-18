@@ -96,17 +96,13 @@ export const subscriptionMethods = {
         }
         return state.messageHandler
           .getFilterArgsHandler()
-          .subscribeToFilterArgsDetails(
-            config.filterIdx,
-            (data) => {
-              callback({
-                data: data as T,
-                timestamp: Date.now(),
-                subscriptionId,
-              });
-            },
-            config.interval || 1000,
-          );
+          .subscribeToFilterArgsDetails(config.filterIdx, (data) => {
+            callback({
+              data: data as T,
+              timestamp: Date.now(),
+              subscriptionId,
+            });
+          });
 
       default:
         throw new Error(`Unsupported subscription type: ${config.type}`);

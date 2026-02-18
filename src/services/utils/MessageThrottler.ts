@@ -53,16 +53,4 @@ export class MessageThrottler {
     this.pendingCallbacks.clear();
     this.lastUpdateTimes.clear();
   }
-
-  /**
-   * Clears timeouts for a specific message type
-   */
-  public clearMessageType(messageType: string): void {
-    const timeout = this.pendingCallbacks.get(messageType);
-    if (timeout) {
-      clearTimeout(timeout);
-      this.pendingCallbacks.delete(messageType);
-    }
-    this.lastUpdateTimes.delete(messageType);
-  }
 }

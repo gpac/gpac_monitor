@@ -34,14 +34,10 @@ export class BaseMessageHandler {
   private messageBatcher: WSMessageBatcher;
 
   constructor(
-    /*   private currentFilterId: () => number | null, */
-    _hasSubscription: (idx: string) => boolean,
     private notificationHandlers: GpacNotificationHandlers,
     private callbacks: MessageHandlerCallbacks,
     private dependencies: MessageHandlerDependencies,
     private onMessage?: (message: any) => void,
-    // @ts-expect-error used by sessionStatsHandlerfv
-    private isLoaded?: () => boolean,
   ) {
     // Initialize message batcher (RAF-based batching for logs only)
     this.messageBatcher = new WSMessageBatcher();
@@ -49,25 +45,12 @@ export class BaseMessageHandler {
     // Initialize specialized handlers
     this.sessionStatsHandler = new SessionStatsHandler(
       dependencies,
-      isLoaded || (() => true),
+      () => true,
     );
-    this.filterStatsHandler = new FilterStatsHandler(
-      dependencies,
-      isLoaded || (() => true),
-    );
-    this.cpuStatsHandler = new CPUStatsHandler(
-      dependencies,
-      isLoaded || (() => true),
-    );
-    this.filterArgsHandler = new FilterArgsHandler(
-      dependencies,
-      isLoaded || (() => true),
-    );
-    this.logHandler = new LogHandler(
-      dependencies,
-      isLoaded || (() => true),
-      callbacks,
-    );
+    this.filterStatsHandler = new FilterStatsHandler(dependencies, () => true);
+    this.cpuStatsHandler = new CPUStatsHandler(dependencies, () => true);
+    this.filterArgsHandler = new FilterArgsHandler(dependencies, () => true);
+    this.logHandler = new LogHandler(dependencies, () => true, callbacks);
     this.pidPropsHandler = new PidPropsHandler(dependencies);
     this.commandLineHandler = new CommandLineHandler(dependencies);
 
@@ -158,9 +141,6 @@ export class BaseMessageHandler {
       case 'log_config_changed':
         this.handleLogConfigChangedMessage(data);
         break;
-      case 'update_arg_response':
-        this.handleUpdateArgResponseMessage(data);
-        break;
       case 'ipid_props_response':
         this.handleIpidPropsResponseMessage(data);
         break;
@@ -171,7 +151,10 @@ export class BaseMessageHandler {
         this.handleSessionEnd(data);
         break;
       case 'notification':
-        toastService.show({ title: data.type, description: data.description ?? '' });
+        toastService.show({
+          title: data.type,
+          description: data.description ?? '',
+        });
         break;
       default:
       // Unknown message type
@@ -248,10 +231,6 @@ export class BaseMessageHandler {
     if (data.logLevel) {
       this.logHandler.handleLogConfigChanged(data.logLevel);
     }
-  }
-
-  private handleUpdateArgResponseMessage(data: any): void {
-    this.filterArgsHandler.handleUpdateArgResponse(data);
   }
 
   private handleIpidPropsResponseMessage(data: any): void {

@@ -11,14 +11,6 @@ export class UpdatableSubscribable<
   E extends object = UpdatableExtraData,
 > extends Subscribable<D, N, E> {
   /**
-   * Updates the internal data of the Subscribable instance.
-   * @param newData The new data to store.
-   */
-  public updateData(newData: D): void {
-    this.data = newData;
-  }
-
-  /**
    * Updates the internal data and notifies subscribers immediately.
    * @param newData The new data to store.
    * @param type The type of notification (optional).
@@ -29,7 +21,7 @@ export class UpdatableSubscribable<
     type?: N,
     extraData?: Partial<E>,
   ): void {
-    this.updateData(newData);
+    this.data = newData;
     this.notify(type, extraData);
   }
 }
