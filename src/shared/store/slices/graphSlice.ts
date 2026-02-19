@@ -5,7 +5,7 @@ import { GraphFilterData } from '@/types/domain/gpac';
 import {
   createEdgesFromFilters,
   createNodesFromFilters,
-} from '@/components/views/graph/utils/GraphOperations';
+} from '@/utils/graph/GraphOperations';
 import { RootState } from '@/shared/store/types';
 
 export type InitialTabType = 'overview' | 'network' | 'inputs' | 'outputs';
