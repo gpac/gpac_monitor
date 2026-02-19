@@ -44,7 +44,7 @@ export const formatTimescale = (value: number): string => {
 export const formatMultimediaValue = (key: string, value: unknown): string => {
   if (value === undefined || value === null) return 'N/A';
 
-  const formatters: Record<string, (val: any) => string> = {
+  const formatters: Record<string, (val: unknown) => string> = {
     fps: (val) => formatFPS(val as TimeFraction),
     bitrate: (val) =>
       typeof val === 'number' ? formatBitrate(val) : String(val),

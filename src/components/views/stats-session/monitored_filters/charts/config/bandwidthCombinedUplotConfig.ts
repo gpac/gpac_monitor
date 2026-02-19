@@ -2,6 +2,8 @@ import uPlot from 'uplot';
 import React from 'react';
 import { formatBitrate } from '@/utils/formatting/numbers';
 
+const tooltipIdxMap = new WeakMap<uPlot, number | null>();
+
 export interface BandwidthCombinedConfigParams {
   timeLabelsRef: React.MutableRefObject<string[]>;
   width?: number;
@@ -63,7 +65,7 @@ export const createBandwidthCombinedConfig = ({
             return;
           }
 
-          const lastIdx = (u as any)._lastTooltipIdx as number | null;
+          const lastIdx = tooltipIdxMap.get(u) ?? null;
 
           // If we're on the same point, just update the position, not the content
           if (lastIdx === idx) {
@@ -73,7 +75,7 @@ export const createBandwidthCombinedConfig = ({
           }
 
           // Store the new index
-          (u as any)._lastTooltipIdx = idx;
+          tooltipIdxMap.set(u, idx);
 
           const time = timeLabelsRef.current[idx] || '--';
           const upload = u.data[1][idx]

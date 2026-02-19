@@ -3,13 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatBytes } from '@/utils/formatting';
 
+type PIDExtraField = string | number | boolean | undefined;
+
 interface PIDDetailsProps {
   name: string;
   buffer: number;
   buffer_total: number;
   source_idx?: number;
   codec?: string;
-  [key: string]: any;
+  [key: string]: PIDExtraField | Record<string, unknown>;
 }
 
 export const PIDDetails = memo(

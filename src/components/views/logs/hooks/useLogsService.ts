@@ -10,8 +10,9 @@ import { markConfigAsSent } from '@/shared/store/slices/logsSlice';
 import { gpacService } from '@/services/gpacService';
 import { parseConfigChanges } from '../utils/configParser';
 import { analyzeConfigChanges } from '../utils/configAnalyzer';
+import type { RootState } from '@/shared/store';
 
-const selectLogsState = (state: any) => state.logs;
+const selectLogsState = (state: RootState) => state.logs;
 
 /**
  * Hook to sync per-tool log configuration with backend

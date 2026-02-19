@@ -48,6 +48,8 @@ export const groupParameters = (pidData: TabPIDData) => {
 /**
  * Check if parameter group has any meaningful data
  */
-export const hasValidData = (params: Record<string, any>): boolean => {
+export const hasValidData = (
+  params: Record<string, string | number | null | undefined>,
+): boolean => {
   return Object.values(params).some((val) => val !== undefined && val !== null);
 };

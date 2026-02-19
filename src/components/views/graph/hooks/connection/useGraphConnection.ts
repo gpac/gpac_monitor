@@ -111,12 +111,7 @@ export const useGraphConnection = ({
         }
       }
     };
-  }, [
-    service,
-    setConnectionError,
-    connectionId,
-    connectionAddress,
-  ]);
+  }, [service, setConnectionError, connectionId, connectionAddress]);
 
   // Function to retry connection
   const retryConnection = useCallback(() => {
@@ -126,7 +121,7 @@ export const useGraphConnection = ({
     }
 
     // Clear previous session data before reconnecting
-    dispatch(clearAllSessionData() as any);
+    dispatch(clearAllSessionData());
     setConnectionError(null);
 
     try {

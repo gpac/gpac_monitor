@@ -29,7 +29,7 @@ export const MultimediaParams = memo(({ pidData }: MultimediaParamsProps) => {
   const renderParam = (
     label: string,
     key: string,
-    value: any,
+    value: string | number | null | undefined,
     showBadge: boolean = false,
   ) => {
     if (value === undefined || value === null) return null;

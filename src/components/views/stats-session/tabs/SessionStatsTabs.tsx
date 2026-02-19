@@ -8,8 +8,12 @@ interface StatsTabsProps {
   activeTab: string;
   onValueChange: (value: string) => void;
   allFilters: EnrichedFilterOverview[]; // All available filters
-  onCloseTab: (idx: number, e: React.MouseEvent) => void;
-  onDetachTab?: (idx: number, filterName: string, e: React.MouseEvent) => void;
+  onCloseTab: (idx: number, e: React.SyntheticEvent) => void;
+  onDetachTab?: (
+    idx: number,
+    filterName: string,
+    e: React.SyntheticEvent,
+  ) => void;
   tabsRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -70,7 +74,7 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.stopPropagation();
-                    onDetachTab(filterIdx, filter.name, e as any);
+                    onDetachTab(filterIdx, filter.name, e);
                   }
                 }}
               >
@@ -88,7 +92,7 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.stopPropagation();
-                  onCloseTab(filterIdx, e as any);
+                  onCloseTab(filterIdx, e);
                 }
               }}
             >

@@ -24,7 +24,7 @@ export const useFilterHandlers = (onTabChange?: (tab: string) => void) => {
   );
 
   const handleDetachTab = useCallback(
-    (filterIdx: number, filterName: string, e: React.MouseEvent) => {
+    (filterIdx: number, filterName: string, e: React.SyntheticEvent) => {
       e.stopPropagation();
       dispatch(detachFilter({ idx: filterIdx, name: filterName }));
       onTabChange?.('main');
@@ -33,7 +33,7 @@ export const useFilterHandlers = (onTabChange?: (tab: string) => void) => {
   );
 
   const handleCloseTab = useCallback(
-    (filterIdx: number, e: React.MouseEvent) => {
+    (filterIdx: number, e: React.SyntheticEvent) => {
       e.stopPropagation();
       dispatch(closeFilter(filterIdx));
       onTabChange?.('main');

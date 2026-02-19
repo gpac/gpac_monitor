@@ -87,5 +87,7 @@ export const createWidgetInstance = (type: WidgetType): Widget | null => {
   };
 };
 
-export const getAllWidgets = () => Object.values(widgetRegistry);
-export const getWidgetDefinition = (type: WidgetType) => widgetRegistry[type];
+export const getAllWidgets = (): WidgetDefinition[] =>
+  Object.values(widgetRegistry);
+export const getWidgetDefinition = (type: WidgetType): WidgetDefinition =>
+  widgetRegistry[type];
