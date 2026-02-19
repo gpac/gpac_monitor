@@ -1,3 +1,6 @@
+/** Unique identifier for a log entry */
+export type LogId = string;
+
 /**
  * GPAC log levels enumeration
  */

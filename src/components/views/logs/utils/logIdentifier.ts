@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
-import { GpacLogEntry } from '@/types/domain/gpac/log-types';
+import type { GpacLogEntry, LogId } from '@/types/domain/gpac/log-types';
 
-export type LogId = string;
+export type { LogId } from '@/types/domain/gpac/log-types';
 
 // External cache: key = log object, value = ID
 const logIdCache = new WeakMap<GpacLogEntry, LogId>();

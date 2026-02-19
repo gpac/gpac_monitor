@@ -1,5 +1,5 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { LogId } from '@/components/views/logs/utils/logIdentifier';
+import type { LogId } from '@/types/domain/gpac/log-types';
 import { LogsState, LogsUIFilter } from './logs.types';
 
 export const uiReducers = {

@@ -3,7 +3,7 @@ import {
   GpacLogTool,
   GpacLogEntry,
 } from '@/types/domain/gpac/log-types';
-import { LogId } from '@/components/views/logs/utils/logIdentifier';
+import type { LogId } from '@/types/domain/gpac/log-types';
 
 /** View mode for LogMonitor UI */
 export type LogViewMode = 'perTool' | 'globalFilter';
