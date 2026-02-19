@@ -5,7 +5,7 @@ import { GpacLogEntry } from '@/types/domain/gpac/log-types';
  * Batches log messages with throttled dispatch (max 2x/second)
  */
 export class WSMessageBatcher {
-  private pendingLogs: LogBatchResponse[] = [];
+  private pendingLogs: GpacLogEntry[] = [];
   private flushScheduled = false;
   private timeoutId: ReturnType<typeof setTimeout> | null = null;
   private handler: ((logs: GpacLogEntry[]) => void) | null = null;
@@ -16,7 +16,8 @@ export class WSMessageBatcher {
    * @param message Log batch response
    */
   addLogBatch(message: LogBatchResponse): void {
-    this.pendingLogs.push(message);
+    const logs = message.logs;
+    if (logs && logs.length) this.pendingLogs.push(...logs);
 
     // Schedule flush with throttle
     if (!this.flushScheduled) {
@@ -29,25 +30,17 @@ export class WSMessageBatcher {
    * Process all pending log messages in a single batch
    */
   private flush(): void {
+    this.timeoutId = null;
     if (this.pendingLogs.length === 0 || !this.handler) {
       this.flushScheduled = false;
       return;
     }
 
-    // Aggregate all logs efficiently (avoid flatMap)
-    const allLogs: GpacLogEntry[] = [];
-    for (const msg of this.pendingLogs) {
-      if (msg.logs) {
-        allLogs.push(...msg.logs);
-      }
-    }
+    const logsToSend = this.pendingLogs;
     this.pendingLogs = [];
     this.flushScheduled = false;
 
-    // Process aggregated logs once
-    if (allLogs.length > 0) {
-      this.handler(allLogs);
-    }
+    this.handler(logsToSend);
   }
 
   /**
