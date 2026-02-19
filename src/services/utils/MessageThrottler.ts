@@ -7,7 +7,7 @@ export class MessageThrottler {
 
   /**
    * Throttles a callback for a given message type
-   * @param messageType Message type (e.g., 'cpu_stats', 'filter_stats')
+   * @param messageType
    * @param callback Function to call
    * @param minInterval Minimum interval between calls (ms)
    * @param data Data to pass to the callback
@@ -22,7 +22,6 @@ export class MessageThrottler {
     const lastUpdate = this.lastUpdateTimes.get(messageType) || 0;
     const timeSinceLastUpdate = now - lastUpdate;
 
-    // If enough time has passed, execute immediately
     if (timeSinceLastUpdate >= minInterval) {
       this.lastUpdateTimes.set(messageType, now);
       callback(data);

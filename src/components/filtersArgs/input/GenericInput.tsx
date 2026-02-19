@@ -4,10 +4,12 @@ import { Input } from '../../ui/input';
 import { Switch } from '../../ui/switch';
 import { Spinner } from '../../ui/spinner';
 
+export type GenericInputValue = string | number | boolean | null;
+
 interface GenericInputProps {
   type: 'string' | 'number' | 'boolean';
-  value?: string | number | boolean | null;
-  onChange: (value: any) => void;
+  value?: GenericInputValue;
+  onChange: (value: GenericInputValue) => void;
   rules?: {
     disabled?: boolean;
     min?: number;
@@ -54,7 +56,7 @@ export const GenericInput = ({
     );
   }, [value, type, debounce]);
 
-  const handleChange = (newValue: any) => {
+  const handleChange = (newValue: GenericInputValue) => {
     setLocalValue(newValue);
     if (!debounce) {
       onChange(newValue);

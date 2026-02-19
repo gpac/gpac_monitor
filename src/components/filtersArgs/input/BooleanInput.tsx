@@ -1,4 +1,4 @@
-import { GenericInput } from './GenericInput';
+import { GenericInput, type GenericInputValue } from './GenericInput';
 
 interface BooleanInputProps {
   value?: boolean;
@@ -19,7 +19,7 @@ export const BooleanInput = ({
     <GenericInput
       type="boolean"
       value={value}
-      onChange={onChange}
+      onChange={onChange as (v: GenericInputValue) => void}
       rules={rules}
       argName={argName}
       isPending={isPending}

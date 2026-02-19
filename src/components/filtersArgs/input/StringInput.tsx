@@ -1,12 +1,17 @@
-import { GenericInput } from './GenericInput';
+import { GenericInput, type GenericInputValue } from './GenericInput';
 import { Spinner } from '../../ui/spinner';
-import type { FilterArgumentInputProps } from '../types';
+import type { ArgumentInputRules } from '../types';
 import { cn } from '@/utils/core';
 import { useMemo } from 'react';
 
-interface StringInputProps extends FilterArgumentInputProps<'str'> {
+interface StringInputProps {
+  argument?: { type: 'str'; name: string };
+  value?: string | string[];
+  onChange: (value: string | string[] | null) => void;
+  rules?: ArgumentInputRules;
   enumOptions?: string;
   isPending?: boolean;
+  standalone?: boolean;
 }
 
 export const StringInput = ({
@@ -64,8 +69,8 @@ export const StringInput = ({
   return (
     <GenericInput
       type="string"
-      value={value}
-      onChange={onChange}
+      value={Array.isArray(value) ? value.join(',') : value}
+      onChange={onChange as (v: GenericInputValue) => void}
       rules={rules}
       debounce
       isPending={isPending}

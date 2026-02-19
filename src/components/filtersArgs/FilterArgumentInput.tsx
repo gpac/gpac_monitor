@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useDebounce, useFirstMountState } from 'react-use';
-import { GPACTypes, GPACArgumentType, InputValue } from './types';
+import {
+  GPACArgumentType,
+  InputValue,
+  FilterArgumentBase,
+  ArgumentInputRules,
+} from './types';
+import type { GPACTypes } from './types';
 import {
   BooleanInput,
   NumberInput,
@@ -10,7 +16,6 @@ import {
 import { convertArgumentValue } from '@/utils/gpac';
 import { updateFilterArgument } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch } from '@/shared/hooks/redux';
-import { FilterArgumentBase } from './types';
 
 interface FilterArgumentInputProps<
   T extends keyof GPACTypes = keyof GPACTypes,
@@ -20,7 +25,7 @@ interface FilterArgumentInputProps<
   };
   value?: InputValue<T>;
   onChange: (value: InputValue<T> | null) => void;
-  rules?: Record<string, any>;
+  rules?: ArgumentInputRules;
   standalone?: boolean;
   filterId?: string;
   isPending?: boolean;
@@ -87,12 +92,12 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
     setLocalValue(value);
   }, [value]);
 
-  const handleLocalChange = (newValue: any) => {
-    setLocalValue(newValue);
+  const handleLocalChange = (newValue: InputValue<T> | null) => {
+    setLocalValue(newValue ?? undefined);
   };
 
   // Handle immediate updates for boolean arguments when filterId is provided
-  const handleImmediateUpdate = (newValue: any) => {
+  const handleImmediateUpdate = (newValue: InputValue<T> | null) => {
     const isEnum =
       argument.min_max_enum &&
       (argument.min_max_enum.includes('|') ||
@@ -182,8 +187,8 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
                 ? Object.values(localValue).join('x')
                 : String(localValue || '')
             }
-            onChange={(val: string | undefined) => {
-              if (!val) {
+            onChange={(val) => {
+              if (!val || Array.isArray(val)) {
                 handleLocalChange(null);
                 return;
               }
@@ -194,7 +199,7 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
                 (acc, val, i) => ({ ...acc, [keys[i]]: val }),
                 {},
               );
-              handleLocalChange(vector);
+              handleLocalChange(vector as InputValue<T>);
             }}
           />
         );
@@ -208,9 +213,12 @@ export const FilterArgumentInput = <T extends keyof GPACTypes>({
           <StringInput
             {...(inputProps as FilterArgumentInputProps<'str'>)}
             value={Array.isArray(localValue) ? localValue.join(',') : undefined}
-            onChange={(val: string | undefined) =>
-              handleLocalChange(val ? val.split(',').filter(Boolean) : null)
-            }
+            onChange={(val) => {
+              const str = Array.isArray(val) ? val.join(',') : val;
+              handleLocalChange(
+                str ? (str.split(',').filter(Boolean) as InputValue<T>) : null,
+              );
+            }}
           />
         );
 

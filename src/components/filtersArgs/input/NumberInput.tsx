@@ -1,4 +1,4 @@
-import { GenericInput } from './GenericInput';
+import { GenericInput, type GenericInputValue } from './GenericInput';
 
 interface NumberInputProps {
   value?: number;
@@ -22,7 +22,7 @@ export const NumberInput = ({
     <GenericInput
       type="number"
       value={value}
-      onChange={onChange}
+      onChange={onChange as (v: GenericInputValue) => void}
       rules={rules}
       isPending={isPending}
     />

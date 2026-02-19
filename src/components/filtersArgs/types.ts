@@ -1,5 +1,6 @@
 // Re-export GPACTypes from the canonical source
-export type { GPACTypes } from '@/types/domain/gpac/gpac_args';
+import type { GPACTypes } from '@/types/domain/gpac/gpac_args';
+export type { GPACTypes };
 
 // Utils for validating GPAC  types
 export const gpacValidators = {
@@ -47,11 +48,19 @@ export interface FilterArgumentBase {
   hint?: string;
   description?: string;
   level?: 'normal' | 'advanced' | 'expert';
-  default?: any;
+  default?: GpacArgumentValue;
   min_max_enum?: string;
   update?: boolean;
   update_sync?: boolean;
   enums?: string[];
+}
+
+export interface ArgumentInputRules {
+  disabled?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  placeholder?: string;
 }
 
 export interface FilterArgumentInputProps<
@@ -60,9 +69,9 @@ export interface FilterArgumentInputProps<
   argument: FilterArgumentBase & {
     type: T;
   };
-  value?: any;
-  onChange: (value: any | null) => void;
-  rules?: Record<string, any>;
+  value?: InputValue<T>;
+  onChange: (value: InputValue<T> | null) => void;
+  rules?: ArgumentInputRules;
   standalone?: boolean;
 }
 
@@ -74,32 +83,11 @@ export type InputValue<T> = T extends 'bool'
       ? string
       : string | string[];
 
-export type GPACArgumentType =
-  | 'bool'
-  | 'uint'
-  | 'sint'
-  | 'luint'
-  | 'lsint'
-  | 'flt'
-  | 'dbl'
-  | 'frac'
-  | 'lfrac'
-  | 'str'
-  | 'cstr'
-  | 'strl'
-  | 'uintl'
-  | 'sintl'
-  | '4ccl'
-  | '4cc'
-  | 'v2di'
-  | 'v2d'
-  | 'v3di'
-  | 'v4di'
-  | 'v2il'
-  | 'pfmt'
-  | 'afmt'
-  | 'cprm'
-  | 'ctfc';
+/** Union of all possible GPAC argument values (matches GPACTypes value range) */
+export type GpacArgumentValue = GPACTypes[keyof GPACTypes] | null;
+
+/** Derived from GPACTypes to stay in sync with the canonical GPAC type map */
+export type GPACArgumentType = keyof GPACTypes;
 
 export interface GpacArgument {
   /** The name of the argument, used as the identifier when updating */
@@ -109,13 +97,13 @@ export interface GpacArgument {
   desc?: string;
 
   /** The current value of the argument */
-  value?: any;
+  value?: GpacArgumentValue;
 
   /** The data type of the argument (e.g., 'bool', 'uint', 'str', etc.) */
-  type?: string;
+  type?: GPACArgumentType;
 
   /** Default value for the argument when not explicitly set */
-  default?: any;
+  default?: GpacArgumentValue;
 
   /** Additional information about the argument's usage or purpose */
   hint?: string;
