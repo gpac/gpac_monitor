@@ -40,3 +40,26 @@ export interface FilterArgument<T extends keyof GPACTypes = keyof GPACTypes> {
   range?: { min: number; max: number };
   enums?: string[];
 }
+
+/** Derived from GPACTypes to stay in sync with the canonical GPAC type map */
+export type GPACArgumentType = keyof GPACTypes;
+
+/** Union of all possible GPAC argument values (matches GPACTypes value range) */
+export type GpacArgumentValue = GPACTypes[keyof GPACTypes] | null;
+
+/** Runtime GPAC argument as received from the server */
+export interface GpacArgument {
+  name: string;
+  desc?: string;
+  value?: GpacArgumentValue;
+  type?: GPACArgumentType;
+  default?: GpacArgumentValue;
+  hint?: string;
+  min_max_enum?: string;
+  update?: boolean;
+  update_sync?: boolean;
+  min?: number;
+  max?: number;
+  step?: number;
+  enum_values?: string[];
+}

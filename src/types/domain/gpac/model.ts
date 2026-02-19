@@ -1,5 +1,5 @@
 import { Node, Edge, EdgeProps } from '@xyflow/react';
-import { GpacArgument } from '../../../components/filtersArgs/types';
+import type { GpacArgument } from './gpac_args';
 import type { PIDproperties } from './filter-stats';
 import { GpacStreamType } from './stream-types';
 
