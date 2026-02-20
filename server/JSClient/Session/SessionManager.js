@@ -33,7 +33,13 @@ function SessionManager(client) {
                 this.client.filterManager.tick(now);
                 this.client.sessionStatsManager.tick(now);
 
-                // Send session_end message to frontend before cleanup
+                // Cleanup all managers first (flushes pending logs before session_end)
+                this.client.cpuStatsManager.handleSessionEnd();
+                this.client.logManager.handleSessionEnd();
+                this.client.filterManager.handleSessionEnd();
+                this.client.sessionStatsManager.handleSessionEnd();
+
+                // Send session_end after all final data has been flushed
                 try {
                     this.client.client.send(JSON.stringify({
                         message: 'session_end',
@@ -43,12 +49,6 @@ function SessionManager(client) {
                 } catch (e) {
                     print('[SessionManager] Error sending session_end message:', e);
                 }
-
-                // Cleanup all managers on session end
-                this.client.cpuStatsManager.handleSessionEnd();
-                this.client.logManager.handleSessionEnd();
-                this.client.filterManager.handleSessionEnd();
-                this.client.sessionStatsManager.handleSessionEnd();
                 this.isMonitoringLoopRunning = false;
                 return false;
             }
