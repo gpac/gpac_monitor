@@ -2,6 +2,7 @@ import type { MonitoredFilterStats } from '@/types/domain/gpac';
 import { WSMessageType } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { MessageThrottler } from '@/services/utils/MessageThrottler';
+import { hydrateIpidFields } from '@/services/utils/hydrateIpidFields';
 import { generateID } from '@/utils/core';
 import { MessageHandlerDependencies } from './types';
 
@@ -110,6 +111,11 @@ export class FilterStatsHandler {
           filter.ipids[k].properties = prev.ipids[k].properties;
         }
       }
+    }
+
+    // Hydrate named format fields from properties (server sends them only via delta)
+    if (filter.ipids) {
+      hydrateIpidFields(filter.ipids);
     }
 
     // Throttle updates to reduce UI repaints
