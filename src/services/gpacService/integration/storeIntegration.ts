@@ -5,11 +5,17 @@ import {
   appendLogsForAllTools,
   setSubscriptionStatus,
 } from '@/shared/store/slices/logsSlice';
+import { cleanupStaleFilters } from '@/shared/store/slices/widgetsSlice';
 import { MessageHandlerCallbacks } from '../infrastructure/messageHandler/baseMessageHandler';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
-  onUpdateGraphData: (data) => store.dispatch(updateGraphData(data)),
+  onUpdateGraphData: (data) => {
+    store.dispatch(updateGraphData(data));
+    store.dispatch(
+      cleanupStaleFilters(data.map((f: { idx: number }) => f.idx)),
+    );
+  },
   onSetLoading: (loading) => store.dispatch(setLoading(loading)),
   onUpdateSessionStats: (stats) => store.dispatch(updateSessionStats(stats)),
   onLogsUpdate: (logs: GpacLogEntry[]) => {

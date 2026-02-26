@@ -260,3 +260,24 @@ export const closeFilterReducer = (
 
   delete state.viewByFilter[filterIdx];
 };
+
+/** Remove viewByFilter entries whose idx no longer exists in the graph */
+export const cleanupStaleFiltersReducer = (
+  state: WidgetsState,
+  action: PayloadAction<number[]>,
+) => {
+  const validIdxs = new Set(action.payload);
+  for (const idxStr of Object.keys(state.viewByFilter)) {
+    const idx = Number(idxStr);
+    if (validIdxs.has(idx)) continue;
+
+    const view = state.viewByFilter[idx];
+    if (view?.mode === 'detached' && view.widgetId) {
+      state.activeWidgets = state.activeWidgets.filter(
+        (w) => w.id !== view.widgetId,
+      );
+      delete state.configs[view.widgetId];
+    }
+    delete state.viewByFilter[idx];
+  }
+};

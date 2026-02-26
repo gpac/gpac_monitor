@@ -91,6 +91,14 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       }
     }, [pendingFilterOpen, handleCardClick, dispatch]);
 
+    // Return to dashboard when monitored filter no longer exists in graph
+    useEffect(() => {
+      const currentIdx = getFilterIdxFromTab(activeTab);
+      if (currentIdx !== null && !inlineFilterMap.has(currentIdx)) {
+        setActiveTab('main');
+      }
+    }, [activeTab, inlineFilterMap]);
+
     // Auto-close sidebar when switching to a different filter
     useEffect(() => {
       if (sidebarContent) {
