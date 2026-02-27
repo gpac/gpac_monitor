@@ -71,6 +71,37 @@ function stabilizeGraph() {
     }
 }
 
+// SHARED MONITORING LOOP (single post_task for all clients)
+let monitoringRunning = false;
+
+function ensureMonitoringLoop() {
+    if (monitoringRunning) return;
+    monitoringRunning = true;
+
+    session.post_task(() => {
+        const now = sys.clock_us();
+
+        if (session.last_task) {
+            for (const client of all_clients) client.sessionManager.handleSessionEnd(now);
+            monitoringRunning = false;
+            return false;
+        }
+
+        let active = false;
+        let interval = 1000;
+        for (const client of all_clients) {
+            client.sessionManager.tick(now);
+            if (client.sessionManager.hasActiveSubscriptions()) {
+                active = true;
+                interval = Math.min(interval, client.sessionManager.getMinInterval());
+            }
+        }
+
+        if (!active) monitoringRunning = false;
+        return active ? interval : false;
+    });
+}
+
 // SESSION CONFIGURATION
 session.reporting(true);
 
@@ -106,7 +137,7 @@ session.set_del_filter_fun((f) => {
 // WEBSOCKET CLIENT HANDLER
 
 sys.rmt_on_new_client = function(client) {
-    let js_client = new JSClient(++cid, client, all_clients);
+    let js_client = new JSClient(++cid, client, all_clients, ensureMonitoringLoop);
     all_clients.push(js_client);
 
     js_client.client.on_data = (msg) => {

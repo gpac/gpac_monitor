@@ -28,7 +28,7 @@ function LogManager(client) {
                 this.handleLog(tool, level, message, thread_id, caller);
             };
             sys.set_logs(this.logLevel);
-            this.client.sessionManager.startMonitoringLoop();
+            this.client.ensureMonitoringLoop();
         } catch (error) {
             console.error("LogManager: Failed to start log capturing:", error);
             this.isSubscribed = false;

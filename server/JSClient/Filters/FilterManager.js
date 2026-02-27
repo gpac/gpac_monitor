@@ -50,7 +50,7 @@ function FilterManager(client) {
         this.lastSentByFilter[idx] = 0; // Force first send
 
         // Start SessionManager loop if not running
-        this.client.sessionManager.startMonitoringLoop();
+        this.client.ensureMonitoringLoop();
     };
 
     this.unsubscribeFromFilter = function(idx) {

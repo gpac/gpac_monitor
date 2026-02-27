@@ -15,7 +15,7 @@ function CpuStatsManager(client) {
         this.fields = fields || CPU_STATS_FIELDS;
         this.lastSent = 0;
 
-        this.client.sessionManager.startMonitoringLoop();
+        this.client.ensureMonitoringLoop();
     };
 
     this.unsubscribe = function() {

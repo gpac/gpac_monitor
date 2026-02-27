@@ -30,7 +30,7 @@ function MessageHandler(client) {
                         const interval = jtext['interval'] || UPDATE_INTERVALS.SESSION_STATS;
                         const fields = jtext['fields'] || DEFAULT_FILTER_FIELDS;
                         this.client.sessionStatsManager.subscribe(interval, fields);
-                        this.client.sessionManager.startMonitoringLoop();
+                        this.client.ensureMonitoringLoop();
                     },
 
                     'unsubscribe_session': () => {
@@ -45,7 +45,7 @@ function MessageHandler(client) {
                             pidScope = 'both';
                         }
                         this.client.filterManager.subscribeToFilter(idx, interval, pidScope);
-                        this.client.sessionManager.startMonitoringLoop();
+                        this.client.ensureMonitoringLoop();
                     },
                     
                     'unsubscribe_filter': () => {
@@ -68,7 +68,7 @@ function MessageHandler(client) {
                         const interval = jtext['interval'] || UPDATE_INTERVALS.CPU_STATS;
                         const fields = jtext['fields'] || [];
                         this.client.cpuStatsManager.subscribe(interval, fields);
-                        this.client.sessionManager.startMonitoringLoop();
+                        this.client.ensureMonitoringLoop();
                     },
 
                     'unsubscribe_cpu_stats': () => {
@@ -78,7 +78,7 @@ function MessageHandler(client) {
                     'subscribe_logs': () => {
                         const logLevel = jtext['logLevel'] || "all@warning";
                         this.client.logManager.subscribe(logLevel);
-                        this.client.sessionManager.startMonitoringLoop();
+                        this.client.ensureMonitoringLoop();
                     },
 
                     'unsubscribe_logs': () => {
