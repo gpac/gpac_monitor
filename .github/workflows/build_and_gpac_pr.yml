@@ -40,7 +40,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GPAC_MONITOR_BUILDBOT }}
         run: |
           SHORT_SHA=$(git rev-parse --short HEAD)
-          COMMIT_MSG=$(git log -1 --pretty=%s)
+          COMMIT_MSG=$(git log -1 --pretty=%B)
 
           RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 
@@ -55,16 +55,28 @@ jobs:
 
           **Details:**
           - **Triggered by commit:** [\`$SHORT_SHA\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
-          - **Commit message:** $COMMIT_MSG
-          - **Worflow logs:** [run ${{ github.run_id }}]($RUN_URL)
+          - **Workflow logs:** [run ${{ github.run_id }}]($RUN_URL)
 
+          **Merge commit message (full):**
+
+          \`\`\`
+          $COMMIT_MSG
+          \`\`\`
           EOF
-
+          
           # Move to target, configure git
           cd gpac
           mkdir -p "$TARGET_DIR"
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          AUTHOR_NAME="${{ github.event.head_commit.author.name }}"
+          AUTHOR_EMAIL="${{ github.event.head_commit.author.email }}"
+
+          if [ -z "$AUTHOR_NAME" ]; then AUTHOR_NAME="${{ github.actor }}"; fi
+          if [ -z "$AUTHOR_EMAIL" ]; then
+            AUTHOR_EMAIL="${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          fi
+
+          git config user.name "$AUTHOR_NAME"
+          git config user.email "$AUTHOR_EMAIL"
           git checkout -b $BRANCH_NAME
 
           # Replace old files with new build
@@ -73,7 +85,9 @@ jobs:
           # Commit if changes exist
           if [[ -n "$(git status --porcelain)" ]]; then
             git add "$TARGET_DIR"/*
-            git commit -m "gpac_monitor: update to gpac_monitor@$SHORT_SHA"
+            git commit -m "gpac_monitor: update to gpac_monitor@$SHORT_SHA" \
+            -m "$COMMIT_MSG" \
+            -m "[noCI]"
             git push origin $BRANCH_NAME
 
             # Create the PR
