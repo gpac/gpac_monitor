@@ -1,4 +1,5 @@
 import { Sys as sys } from 'gpaccore';
+import { logHub } from './Utils/LogHub.js';
 
 /**
  * LogManager - Manages log subscription and batching for GPAC system logs
@@ -8,7 +9,6 @@ function LogManager(client) {
     this.client = client;
     this.isSubscribed = false;
     this.logLevel = "all@quiet";
-    this.originalLogConfig = null;
     this.pendingLogs = [];
     this.batchTimer = null;
 
@@ -22,12 +22,8 @@ function LogManager(client) {
         this.isSubscribed = true;
 
         try {
-            this.originalLogConfig = sys.get_logs(true);
-            sys.use_logx = true;
-            sys.on_log = (tool, level, message, thread_id, caller) => {
-                this.handleLog(tool, level, message, thread_id, caller);
-            };
-            sys.set_logs(this.logLevel);
+            logHub.add(this.client.id, this);
+            if (logHub.subscribers.size <= 1) sys.set_logs(this.logLevel);
             this.client.ensureMonitoringLoop();
         } catch (error) {
             console.error("LogManager: Failed to start log capturing:", error);
@@ -40,9 +36,8 @@ function LogManager(client) {
 
         try {
             this.flushPendingLogs();
-            sys.on_log = undefined;
-            if (this.originalLogConfig) sys.set_logs(this.originalLogConfig);
             this.isSubscribed = false;
+            logHub.remove(this.client.id);
             this.pendingLogs = [];
             this.batchTimer = null;
         } catch (error) {
@@ -113,9 +108,8 @@ function LogManager(client) {
     this.forceUnsubscribe = function() {
         try {
             this.flushPendingLogs();
-            sys.on_log = undefined;
-            if (this.originalLogConfig) sys.set_logs(this.originalLogConfig);
             this.isSubscribed = false;
+            logHub.remove(this.client.id);
             this.pendingLogs = [];
             this.batchTimer = null;
         } catch (error) {
@@ -124,7 +118,10 @@ function LogManager(client) {
     };
 
     this.handleSessionEnd = function() {
-        this.forceUnsubscribe();
+        logHub.shutdown();
+        this.isSubscribed = false;
+        this.pendingLogs = [];
+        this.batchTimer = null;
     };
 }
 
