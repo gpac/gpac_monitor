@@ -4,6 +4,7 @@ import { Sys as sys } from 'gpaccore';
 const logHub = {
     subscribers: new Map(),
     originalLogConfig: null,
+    activeLogLevel: null,
 
     add(id, manager) {
         const wasEmpty = this.subscribers.size === 0;
@@ -28,10 +29,20 @@ const logHub = {
         this._teardown();
     },
 
+    setLogLevel(logLevel) {
+        this.activeLogLevel = logLevel;
+        sys.set_logs(logLevel);
+        for (const manager of this.subscribers.values()) {
+            manager.logLevel = logLevel;
+            manager.sendToClient({ message: 'log_config_changed', logLevel });
+        }
+    },
+
     _teardown() {
         sys.on_log = undefined;
         if (this.originalLogConfig) sys.set_logs(this.originalLogConfig);
         this.originalLogConfig = null;
+        this.activeLogLevel = null;
     }
 };
 

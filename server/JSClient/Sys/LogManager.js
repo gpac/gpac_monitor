@@ -23,7 +23,12 @@ function LogManager(client) {
 
         try {
             logHub.add(this.client.id, this);
-            if (logHub.subscribers.size <= 1) sys.set_logs(this.logLevel);
+            if (logHub.activeLogLevel) {
+                this.logLevel = logHub.activeLogLevel;
+                this.sendToClient({ message: 'log_config_changed', logLevel: this.logLevel });
+            } else {
+                logHub.setLogLevel(this.logLevel);
+            }
             this.client.ensureMonitoringLoop();
         } catch (error) {
             console.error("LogManager: Failed to start log capturing:", error);
@@ -73,9 +78,7 @@ function LogManager(client) {
         if (!this.isSubscribed) return;
         try {
             this.pendingLogs = [];
-            this.logLevel = logLevel;
-            sys.set_logs(logLevel);
-            this.sendToClient({ message: 'log_config_changed', logLevel });
+            logHub.setLogLevel(logLevel);
         } catch (error) {
             console.error("LogManager: Failed to update log level:", error);
         }
