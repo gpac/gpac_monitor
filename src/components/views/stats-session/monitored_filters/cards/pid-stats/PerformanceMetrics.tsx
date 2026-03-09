@@ -105,6 +105,26 @@ export const PerformanceMetrics = memo(
                     </span>
                   </div>
                 )}
+
+                {performanceData.processing.firstProcessTime && (
+                  <div className="flex items-center justify-between py-2 border-t border-border/20">
+                    <span className="text-sm stat-label">
+                      First Packet Init
+                    </span>
+                    <span className="text-lg font-bold stat text-info tabular-nums">
+                      {performanceData.processing.firstProcessTime}
+                    </span>
+                  </div>
+                )}
+
+                {performanceData.processing.lastTsSent && (
+                  <div className="flex items-center justify-between py-2 border-t border-border/20">
+                    <span className="text-sm stat-label">Last TS Sent</span>
+                    <span className="text-lg font-bold stat text-info tabular-nums">
+                      {performanceData.processing.lastTsSent}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

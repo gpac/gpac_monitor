@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
-import { formatBytes, formatBitrate } from '@/utils/formatting';
+import { formatBytes, formatBitrate, formatTime } from '@/utils/formatting';
 import { getMediaTypeInfo } from '@/utils/gpac';
 import {
   getBorderColorForMediaType,
@@ -53,7 +53,9 @@ const PIDMetricsCard = memo(
       (pid.id ||
         pid.trackNumber ||
         pid.timescale ||
-        pid.stats?.max_process_time);
+        pid.stats?.max_process_time ||
+        pid.stats?.first_process_time !== undefined ||
+        pid.stats?.last_ts_sent !== undefined);
 
     return (
       <div
@@ -227,6 +229,22 @@ const PIDMetricsCard = memo(
                     <div className="flex justify-between">
                       <span>Timescale:</span>
                       <span className="text-info">{pid.timescale}</span>
+                    </div>
+                  )}
+                  {pid.stats?.first_process_time !== undefined && (
+                    <div className="flex justify-between">
+                      <span>First Pck Init:</span>
+                      <span className="text-info">
+                        {formatTime(pid.stats.first_process_time)}
+                      </span>
+                    </div>
+                  )}
+                  {pid.stats?.last_ts_sent !== undefined && (
+                    <div className="flex justify-between">
+                      <span>Last TS Sent:</span>
+                      <span className="text-info tabular-nums">
+                        {pid.stats.last_ts_sent.toLocaleString()}
+                      </span>
                     </div>
                   )}
                 </div>

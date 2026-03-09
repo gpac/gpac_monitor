@@ -22,6 +22,8 @@ export interface PerformanceData {
     totalProcessed: string;
     totalTime: string;
     averagePerItem?: string;
+    firstProcessTime?: string;
+    lastTsSent?: string;
   };
 }
 
@@ -54,6 +56,14 @@ export const usePerformanceMetrics = (pidData: TabPIDData): PerformanceData => {
         totalProcessed: formatNumber(pidData.stats.nb_processed || 0),
         totalTime: formatTime(pidData.stats.total_process_time),
         averagePerItem,
+        firstProcessTime:
+          pidData.stats.first_process_time !== undefined
+            ? formatTime(pidData.stats.first_process_time)
+            : undefined,
+        lastTsSent:
+          pidData.stats.last_ts_sent !== undefined
+            ? formatNumber(pidData.stats.last_ts_sent)
+            : undefined,
       },
     };
   }, [pidData.stats]);
