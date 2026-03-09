@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && esbuild server/server.js --bundle --outfile=release/server.js --format=esm --external:gpaccore",
+    "build": "tsc && vite build && esbuild server/server.js --bundle --outfile=release/server.js --format=esm --external:gpaccore && cp -f dist/index.html release/index.html",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "typecheck": "tsc --noEmit",
