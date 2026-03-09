@@ -26,7 +26,13 @@ export const PerformanceMetrics = memo(
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Primary Throughput Metrics - Hero Section */}
+          {pidData.stats.disconnected && (
+            <div className="flex items-center gap-2 text-xs text-destructive bg-destructive/10 rounded px-3 py-2">
+              <span className="h-2 w-2 rounded-full bg-destructive inline-block" />
+              PID disconnected
+            </div>
+          )}
+
           <div className="space-y-4">
             <h3 className="text-xs font-semibold uppercase tracking-wide stat-label border-b border-border/50 pb-2">
               Throughput Performance
@@ -73,7 +79,7 @@ export const PerformanceMetrics = memo(
             </div>
           </div>
 
-          {/* Processing Statistics - Secondary Section */}
+          {/* Processing Statistics */}
           <div className="space-y-4">
             <h3 className="text-xs font-semibold uppercase tracking-wide stat-label border-b border-border/50 pb-2">
               Processing Statistics
@@ -102,6 +108,15 @@ export const PerformanceMetrics = memo(
                     <span className="text-sm stat-label">Average per Item</span>
                     <span className="text-lg font-bold stat text-info tabular-nums">
                       {performanceData.processing.averagePerItem}
+                    </span>
+                  </div>
+                )}
+
+                {performanceData.processing.maxProcessTime && (
+                  <div className="flex items-center justify-between py-2 border-t border-border/20">
+                    <span className="text-sm stat-label">Max Process Time</span>
+                    <span className="text-lg font-bold stat text-info tabular-nums">
+                      {performanceData.processing.maxProcessTime}
                     </span>
                   </div>
                 )}
