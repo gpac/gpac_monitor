@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { RiScrollToBottomLine, RiFilterOffLine } from 'react-icons/ri';
 import { MdOutlineTimer } from 'react-icons/md';
-import WidgetWrapper from '../../Widget/WidgetWrapper';
+import WidgetWrapper from '../../widget/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';

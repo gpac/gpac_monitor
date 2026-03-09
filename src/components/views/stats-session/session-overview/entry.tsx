@@ -13,7 +13,7 @@ import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { useSidebar } from '@/shared/hooks/useSidebar';
 import { clearPendingFilterOpen } from '@/shared/store/slices/graphSlice';
-import WidgetWrapper from '@/components/Widget/WidgetWrapper';
+import WidgetWrapper from '@/components/widget/WidgetWrapper';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import { WidgetProps } from '@/types/ui/widget';
 import { Tabs, TabsContent } from '@/components/ui/tabs';

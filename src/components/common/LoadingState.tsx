@@ -1,4 +1,4 @@
-import WidgetWrapper from '../Widget/WidgetWrapper';
+import WidgetWrapper from '../widget/WidgetWrapper';
 
 interface LoadingStateProps {
   id: string;

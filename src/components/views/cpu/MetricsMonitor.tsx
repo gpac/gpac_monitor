@@ -4,7 +4,7 @@ import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { CpuMemoryChartUplot } from './components/CpuMemoryChartUplot';
 import { CpuMemoryOverview } from './components/CpuMemoryOverview';
 import { useCPUStats } from './hooks/useCPUStats';
-import WidgetWrapper from '@/components/Widget/WidgetWrapper';
+import WidgetWrapper from '@/components/widget/WidgetWrapper';
 import { CPUHistoryBadge } from './components/CPUHistoryBadge';
 import { useChartDuration } from './hooks/useChartDuration';
 import {

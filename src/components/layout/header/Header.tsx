@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { FiLayout } from 'react-icons/fi';
 import { LuPanelLeft, LuPanelLeftClose, LuRotateCw } from 'react-icons/lu';
 import { LayoutManager } from '../header/LayoutManager';
-import WidgetSelector from '../../Widget/WidgetSelector';
+import WidgetSelector from '../../widget/WidgetSelector';
 import ConnectionSelector from '../connection/ConnectionSelector';
 import LogCounters from './LogCounters';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';

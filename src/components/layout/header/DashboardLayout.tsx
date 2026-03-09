@@ -11,10 +11,10 @@ import 'react-resizable/css/styles.css';
 import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
 import { closeSidebar } from '@/shared/store/slices/layoutSlice';
 import Header from './Header';
-import Sidebar from '../Sidebar/Sidebar';
+import Sidebar from '../sidebar/Sidebar';
 import { Widget } from '@/types/ui/widget';
-import { getWidgetDefinition } from '../../Widget/registry';
-import SidebarCloseButton from '../Sidebar/SidebarCloseButton';
+import { getWidgetDefinition } from '../../widget/registry';
+import SidebarCloseButton from '../sidebar/SidebarCloseButton';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
