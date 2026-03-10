@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiLayout } from 'react-icons/fi';
-import { LuPanelLeft, LuPanelLeftClose, LuRotateCw } from 'react-icons/lu';
+import { LuPanelLeft, LuPanelLeftClose, LuRotateCw, LuHistory } from 'react-icons/lu';
 import { LayoutManager } from '../header/LayoutManager';
 import WidgetSelector from '../../widget/WidgetSelector';
 import ConnectionSelector from '../connection/ConnectionSelector';
@@ -8,12 +8,17 @@ import LogCounters from './LogCounters';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
 
-const Header = () => {
+interface HeaderProps {
+  onHistoryLoad?: (file: File) => void;
+}
+
+const Header = ({ onHistoryLoad }: HeaderProps) => {
   const dispatch = useAppDispatch();
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const [showLayoutManager, setShowLayoutManager] = useState(false);
   const [showWidgetSelector, setShowWidgetSelector] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -50,6 +55,25 @@ const Header = () => {
           >
             <LuRotateCw className="w-4 h-4" />
           </button>
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800"
+            title="Load history file"
+            aria-label="Load history file"
+          >
+            <LuHistory className="w-4 h-4" />
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".jsonl"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file && onHistoryLoad) onHistoryLoad(file);
+              e.target.value = '';
+            }}
+          />
           <span aria-label="Connection selector" title="Connection selector">
             <ConnectionSelector />
           </span>

@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && esbuild server/server.js --bundle --outfile=release/server.js --format=esm --external:gpaccore && cp -f dist/index.html release/index.html",
+    "build": "tsc && vite build && esbuild server/server.js --bundle --outfile=release/server.js --format=esm --external:gpaccore --external:std --external:os && cp -f dist/index.html release/index.html",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "typecheck": "tsc --noEmit",
@@ -61,6 +61,7 @@
     "react-use": "^17.6.0",
     "react-virtuoso": "^4.14.0",
     "redux": "^5.0.1",
+    "sql.js": "^1.14.1",
     "tailwind-merge": "^2.5.5",
     "uplot": "^1.6.32"
   },
@@ -77,6 +78,7 @@
     "@types/react": "^18.3.17",
     "@types/react-dom": "^18.3.5",
     "@types/react-grid-layout": "^1.3.5",
+    "@types/sql.js": "^1.4.9",
     "@vitejs/plugin-react": "^4.3.3",
     "@vitest/coverage-v8": "^1.3.1",
     "@vitest/ui": "^1.3.1",

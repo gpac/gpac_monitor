@@ -1,6 +1,10 @@
 import { Sys as sys } from 'gpaccore';
 import { JSClient } from './JSClient/index.js';
 import { gpac_filter_to_minimal_object } from './JSClient/filterUtils.js';
+import { HistoryCollector } from './history/HistoryCollector.js';
+
+// HISTORY - autonomous collection, grafted into the shared monitoring loop
+const historyCollector = new HistoryCollector();
 
 // GLOBAL STATE
 
@@ -63,6 +67,9 @@ function stabilizeGraph() {
         message: 'notification', type: 'graph_changed', graphVersion
     });
 
+    // History: record graph topology snapshot
+    historyCollector.recordGraph(filtersMsg);
+
     for (const client of all_clients) {
         if (client.client) {
             client.client.send(filtersMsg);
@@ -83,6 +90,7 @@ function ensureMonitoringLoop() {
 
         if (session.last_task) {
             for (const client of all_clients) client.sessionManager.handleSessionEnd(now);
+            historyCollector.close();
             monitoringRunning = false;
             return false;
         }
@@ -96,6 +104,9 @@ function ensureMonitoringLoop() {
                 interval = Math.min(interval, client.sessionManager.getMinInterval());
             }
         }
+
+        // History: collect ALL filters stats, independent of subscriptions
+        historyCollector.recordStats();
 
         if (!active) monitoringRunning = false;
         return active ? interval : false;
