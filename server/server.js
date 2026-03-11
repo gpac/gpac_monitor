@@ -24,11 +24,12 @@ let firstGraphEventTime = 0;
 let debounceRunning = false;
 
 function onGraphEvent() {
-    if (!all_clients.length) return;
     const now = sys.clock_us();
     graphDirty = true;
     lastGraphEventTime = now;
     if (!firstGraphEventTime) firstGraphEventTime = now;
+
+    ensureMonitoringLoop();
 
     if (!debounceRunning) {
         debounceRunning = true;
@@ -68,7 +69,7 @@ function stabilizeGraph() {
     });
 
     // History: record graph topology snapshot
-    historyCollector.recordGraph(filtersMsg);
+    historyCollector.recordGraph(filters, graphVersion);
 
     for (const client of all_clients) {
         if (client.client) {
@@ -106,10 +107,10 @@ function ensureMonitoringLoop() {
         }
 
         // History: collect ALL filters stats, independent of subscriptions
-        historyCollector.recordStats();
+        historyCollector.recordStats(graphVersion);
 
-        if (!active) monitoringRunning = false;
-        return active ? interval : false;
+        // Keep loop alive for history even without active client subscriptions
+        return active ? interval : 1000;
     });
 }
 

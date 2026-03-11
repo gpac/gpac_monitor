@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { LuX } from 'react-icons/lu';
 import { UplotChart } from '@/components/common/UplotChart';
-import * as historyService from '@/services/historyService';
+import * as historyService from '@/services/historyService/index';
 import { createHistoryChartOptions } from './historyChartConfig';
 
 interface HistoryViewerProps {
@@ -10,6 +10,7 @@ interface HistoryViewerProps {
 
 export const HistoryViewer = ({ onClose }: HistoryViewerProps) => {
   const filterIds = useMemo(() => historyService.getFilterIds(), []);
+  const filterTypes = useMemo(() => historyService.getFilterTypes(), []);
   const [selectedIdx, setSelectedIdx] = useState<number>(filterIds[0] ?? 0);
 
   const data = useMemo(
@@ -38,7 +39,7 @@ export const HistoryViewer = ({ onClose }: HistoryViewerProps) => {
           >
             {filterIds.map((idx) => (
               <option key={idx} value={idx}>
-                Filter {idx}
+                [{idx}] {filterTypes.get(idx) ?? '?'}
               </option>
             ))}
           </select>
