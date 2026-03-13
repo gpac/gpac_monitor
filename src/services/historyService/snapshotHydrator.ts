@@ -1,6 +1,8 @@
 import type { AppDispatch } from '@/shared/store';
 import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
 import { setCommandLine } from '@/shared/store/slices/sessionDetailsSlice';
+import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
+import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 import type { GraphFilterData } from '@/types/domain/gpac/model';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { HistorySnapshot, HistorySnapshotFilter } from './types';
@@ -40,6 +42,20 @@ function toGraphFilterData(f: HistorySnapshotFilter): GraphFilterData {
   };
 }
 
+function toSessionFilterStats(f: HistorySnapshotFilter): SessionFilterStats {
+  return {
+    idx: f.idx,
+    status: f.status,
+    bytes_done: (f.bytes_done as number) ?? 0,
+    bytes_sent: (f.bytes_sent as number) ?? 0,
+    pck_sent: (f.pck_sent as number) ?? 0,
+    pck_done: (f.pck_done as number) ?? 0,
+    time: (f.time as number) ?? 0,
+    nb_ipid: f.nb_ipid,
+    nb_opid: f.nb_opid,
+  };
+}
+
 export function hydrateFromSnapshot(
   snapshot: HistorySnapshot,
   dispatch: AppDispatch,
@@ -47,6 +63,7 @@ export function hydrateFromSnapshot(
   const graphData = snapshot.filters.map(toGraphFilterData);
   dispatch(updateGraphData(graphData));
   dispatch(setCommandLine(snapshot.command_line));
+  dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
   dispatch(setLoading(false));
 
   return new Map(snapshot.filters.map((f) => [f.idx, f]));
