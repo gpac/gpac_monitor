@@ -1,65 +1,55 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useMemo, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { SessionFilterStatistics } from '../../../../../types/domain/gpac/filter-stats';
 import { useServiceReady } from '@/shared/hooks/useServiceReady';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { selectSessionStats } from '@/shared/store/selectors/session/sessionStatsSelectors';
 
 export function useSessionStats(enabled = true, interval = 1000) {
-  const [stats, setStats] = useState<SessionFilterStatistics[]>([]);
-  const { isReady } = useServiceReady({ enabled });
+  const { mode } = useDataSource();
+  const isHistory = mode === 'history';
 
-  const handleSessionStatsUpdate = useCallback(
-    (newStats: SessionFilterStatistics[]) => {
-      setStats(newStats);
-    },
-    [],
+  // Read from Redux (live: populated via storeIntegration; history: via snapshotHydrator)
+  const sessionStatsMap = useSelector(selectSessionStats);
+  const stats = useMemo(
+    () => Object.values(sessionStatsMap) as SessionFilterStatistics[],
+    [sessionStatsMap],
   );
 
-  useEffect(() => {
-    if (!enabled || !isReady) {
-      setStats([]);
-      return;
-    }
+  const { isReady } = useServiceReady({ enabled });
+  const unsubscribeRef = useRef<(() => void) | null>(null);
 
-    let unsubscribe: (() => void) | null = null;
+  // In live mode: subscribe to trigger server subscription
+  // Data flows to Redux via storeIntegration (onUpdateSessionStats callback)
+  useEffect(() => {
+    if (isHistory || !enabled || !isReady) return;
+
     let isMounted = true;
 
-    const setupSubscription = async () => {
+    const setup = async () => {
       try {
-        const unsubscribeFunc = await gpacService.subscribe(
-          {
-            type: SubscriptionType.SESSION_STATS,
-            interval,
-          },
-          (result) => {
-            if (result.data) {
-              handleSessionStatsUpdate(
-                result.data as SessionFilterStatistics[],
-              );
-            }
-          },
+        const unsub = await gpacService.subscribe(
+          { type: SubscriptionType.SESSION_STATS, interval },
+          () => {},
         );
         if (isMounted) {
-          unsubscribe = unsubscribeFunc;
+          unsubscribeRef.current = unsub;
         } else {
-          unsubscribeFunc();
+          unsub();
         }
-      } catch (error) {
-        if (isMounted) {
-          setStats([]);
-        }
-      }
+      } catch {}
     };
 
-    setupSubscription();
+    setup();
 
     return () => {
       isMounted = false;
-      if (unsubscribe) {
-        unsubscribe();
-      }
+      unsubscribeRef.current?.();
+      unsubscribeRef.current = null;
     };
-  }, [enabled, isReady, interval, handleSessionStatsUpdate]);
+  }, [isHistory, enabled, isReady, interval]);
 
   return {
     stats,
