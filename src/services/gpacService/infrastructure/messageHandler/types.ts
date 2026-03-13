@@ -1,4 +1,5 @@
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
+import type { CPUStats } from '@/types/domain/system';
 
 export interface MessageHandlerCallbacks {
   onUpdateGraphData: (data: any) => void;
@@ -7,6 +8,8 @@ export interface MessageHandlerCallbacks {
   onLogsUpdate: (logs: GpacLogEntry[]) => void;
   onLogSubscriptionChange: (isSubscribed: boolean) => void;
   onSessionEnd?: (data: any) => void;
+  onUpdateCpuStats?: (stats: CPUStats) => void;
+  onUpdateCommandLine?: (commandLine: string | null) => void;
 }
 
 export interface MessageHandlerDependencies {

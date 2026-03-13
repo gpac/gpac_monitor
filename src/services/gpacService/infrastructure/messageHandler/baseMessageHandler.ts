@@ -146,6 +146,7 @@ export class BaseMessageHandler {
         break;
       case 'command_line_response':
         this.commandLineHandler.handleCommandLineResponse(data);
+        this.callbacks.onUpdateCommandLine?.(data.commandLine ?? null);
         break;
       case 'session_end':
         this.handleSessionEnd(data);
@@ -198,6 +199,7 @@ export class BaseMessageHandler {
     if (data.stats) {
       // Process immediately (low frequency: ~6 msgs/sec)
       this.cpuStatsHandler.handleCPUStats(data.stats);
+      this.callbacks.onUpdateCpuStats?.(data.stats);
     }
   }
 

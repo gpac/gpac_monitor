@@ -6,6 +6,10 @@ import {
   setSubscriptionStatus,
 } from '@/shared/store/slices/logsSlice';
 import { cleanupStaleFilters } from '@/shared/store/slices/widgetsSlice';
+import {
+  setSystemStats,
+  setCommandLine,
+} from '@/shared/store/slices/sessionDetailsSlice';
 import { MessageHandlerCallbacks } from '../infrastructure/messageHandler/baseMessageHandler';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
@@ -23,4 +27,7 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   },
   onLogSubscriptionChange: (isSubscribed: boolean) =>
     store.dispatch(setSubscriptionStatus(isSubscribed)),
+  onUpdateCpuStats: (stats) => store.dispatch(setSystemStats(stats)),
+  onUpdateCommandLine: (commandLine) =>
+    store.dispatch(setCommandLine(commandLine)),
 });
