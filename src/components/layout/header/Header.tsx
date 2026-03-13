@@ -1,6 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiLayout } from 'react-icons/fi';
-import { LuPanelLeft, LuPanelLeftClose, LuRotateCw, LuHistory } from 'react-icons/lu';
+import {
+  LuPanelLeft,
+  LuPanelLeftClose,
+  LuRotateCw,
+  LuHistory,
+} from 'react-icons/lu';
 import { LayoutManager } from '../header/LayoutManager';
 import WidgetSelector from '../../widget/WidgetSelector';
 import ConnectionSelector from '../connection/ConnectionSelector';
@@ -66,7 +71,7 @@ const Header = ({ onHistoryLoad }: HeaderProps) => {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".jsonl"
+            accept=".json"
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];
