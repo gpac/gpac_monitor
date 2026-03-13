@@ -128,5 +128,5 @@ function on_all_connected(cb) {
 export {
     gpac_filter_to_object,
     gpac_filter_to_minimal_object,
-    on_all_connected
+    on_all_connected,
 };

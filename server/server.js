@@ -1,83 +1,24 @@
 import { Sys as sys } from 'gpaccore';
 import { JSClient } from './JSClient/index.js';
-import { gpac_filter_to_minimal_object } from './JSClient/filterUtils.js';
 import { HistoryCollector } from './history/HistoryCollector.js';
+import { GraphManager } from './GraphManager.js';
+import { DEFAULT_FILTER_FIELDS } from './JSClient/config.js';
 
-// HISTORY - autonomous collection, grafted into the shared monitoring loop
+// HISTORY
 const historyCollector = new HistoryCollector();
 
 // GLOBAL STATE
-
-let all_connected = false;
 let all_clients = [];
 let cid = 0;
 let filter_uid = 0;
 let all_filters = [];
 
-// GRAPH CHANGE DETECTION (event-driven with debounce)
-const GRAPH_DEBOUNCE_US = 500 * 1000;  // 500ms stabilization
-const GRAPH_MAX_WAIT_US = 3000 * 1000; // 2s max cap
-let graphDirty = false;
-let graphVersion = 0;
-let lastGraphEventTime = 0;
-let firstGraphEventTime = 0;
-let debounceRunning = false;
-
-function onGraphEvent() {
-    const now = sys.clock_us();
-    graphDirty = true;
-    lastGraphEventTime = now;
-    if (!firstGraphEventTime) firstGraphEventTime = now;
-
-    ensureMonitoringLoop();
-
-    if (!debounceRunning) {
-        debounceRunning = true;
-        session.post_task(() => {
-            const now = sys.clock_us();
-            const sinceLast = now - lastGraphEventTime;
-            const sinceFirst = now - firstGraphEventTime;
-
-            if (sinceLast >= GRAPH_DEBOUNCE_US || sinceFirst >= GRAPH_MAX_WAIT_US) {
-                stabilizeGraph();
-                debounceRunning = false;
-                firstGraphEventTime = 0;
-                return false;
-            }
-            return 100; // check again in 100ms
-        });
-    }
-}
-
-function stabilizeGraph() {
-    graphDirty = false;
-    graphVersion++;
-
-    session.lock_filters(true);
-    const filters = [];
-    for (let i = 0; i < session.nb_filters; i++) {
-        const f = session.get_filter(i);
-        if (!f.is_destroyed()) {
-            filters.push(gpac_filter_to_minimal_object(f));
-        }
-    }
-    session.lock_filters(false);
-
-    const filtersMsg = JSON.stringify({ message: 'filters', filters });
-    const notifMsg = JSON.stringify({
-        message: 'notification', type: 'graph_changed', graphVersion
-    });
-
-    // History: record graph topology snapshot
-    historyCollector.recordGraph(filters, graphVersion);
-
-    for (const client of all_clients) {
-        if (client.client) {
-            client.client.send(filtersMsg);
-            client.client.send(notifMsg);
-        }
-    }
-}
+// GRAPH MANAGER
+const graphManager = new GraphManager({
+    getClients: () => all_clients,
+    historyCollector,
+    ensureMonitoringLoop,
+});
 
 // SHARED MONITORING LOOP (single post_task for all clients)
 let monitoringRunning = false;
@@ -106,12 +47,64 @@ function ensureMonitoringLoop() {
             }
         }
 
-        // History: collect ALL filters stats, independent of subscriptions
-        historyCollector.recordStats(graphVersion);
+        // History: record session stats and cpu stats
+        historyCollector.recordSessionStats(collectSessionStatsPayload());
+        historyCollector.recordCpuStats(collectCpuStatsPayload());
 
         // Keep loop alive for history even without active client subscriptions
         return active ? interval : 1000;
     });
+}
+
+function collectSessionStatsPayload() {
+    const stats = [];
+    const filters = [];
+
+    session.lock_filters(true);
+    for (let i = 0; i < session.nb_filters; i++) {
+        const f = session.get_filter(i);
+        if (f.is_destroyed()) continue;
+        filters.push(f);
+
+        const obj = {};
+        for (const field of DEFAULT_FILTER_FIELDS) obj[field] = f[field];
+
+        let allInputsEos = f.nb_ipid > 0;
+        for (let j = 0; j < f.nb_ipid; j++) {
+            if (!f.ipid_props(j, 'eos')) { allInputsEos = false; break; }
+        }
+        obj.is_eos = allInputsEos;
+        obj.last_ts_sent = f.last_ts_sent || null;
+
+        stats.push(obj);
+    }
+
+    let allFiltersEos = filters.length > 0;
+    for (const f of filters) {
+        if (f.nb_ipid === 0) continue;
+        for (let i = 0; i < f.nb_ipid; i++) {
+            if (!f.ipid_props(i, 'eos')) { allFiltersEos = false; break; }
+        }
+    }
+    const all_packets_done = session.last_task && allFiltersEos;
+    session.lock_filters(false);
+
+    return { all_packets_done, stats };
+}
+
+function collectCpuStatsPayload() {
+    return {
+        stats: {
+            total_cpu_usage: sys.total_cpu_usage,
+            process_cpu_usage: sys.process_cpu_usage,
+            process_memory: sys.process_memory,
+            physical_memory: sys.physical_memory,
+            physical_memory_avail: sys.physical_memory_avail,
+            gpac_memory: sys.gpac_memory,
+            nb_cores: sys.nb_cores,
+            thread_count: sys.thread_count,
+        }
+    };
 }
 
 // SESSION CONFIGURATION
@@ -129,25 +122,21 @@ let remove_client = function(client_id) {
 
 // FILTER EVENT HANDLERS
 session.set_new_filter_fun((f) => {
-
     f.idx = filter_uid++;
     f.iname = '' + f.idx;
     all_filters.push(f);
     if (f.itag == "NODISPLAY") return;
-    onGraphEvent();
+    graphManager.onGraphEvent();
 });
 
 session.set_del_filter_fun((f) => {
-  
     let idx = all_filters.indexOf(f);
     if (idx >= 0) all_filters.splice(idx, 1);
     if (f.itag == "NODISPLAY") return;
-    onGraphEvent();
+    graphManager.onGraphEvent();
 });
 
-
 // WEBSOCKET CLIENT HANDLER
-
 sys.rmt_on_new_client = function(client) {
     let js_client = new JSClient(++cid, client, all_clients, ensureMonitoringLoop);
     all_clients.push(js_client);
@@ -155,11 +144,11 @@ sys.rmt_on_new_client = function(client) {
     js_client.client.on_data = (msg) => {
         if (typeof(msg) == "string")
             js_client.on_client_data(msg);
-    }
+    };
 
     js_client.client.on_close = function() {
         js_client.cleanup();
         remove_client(js_client.id);
         js_client.client = null;
-    }
+    };
 };

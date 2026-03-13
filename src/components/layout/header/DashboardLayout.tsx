@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useRef, useState } from 'react';
+import { useMemo, useCallback, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import {
   Responsive,
@@ -15,8 +15,8 @@ import Sidebar from '../sidebar/Sidebar';
 import { Widget } from '@/types/ui/widget';
 import { getWidgetDefinition } from '../../widget/registry';
 import SidebarCloseButton from '../sidebar/SidebarCloseButton';
-import { HistoryViewer } from '../../history/HistoryViewer';
-import * as historyService from '@/services/historyService';
+
+
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
@@ -26,14 +26,8 @@ const DashboardLayout = () => {
   const configs = useAppSelector((state) => state.widgets.configs);
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const isDraggingRef = useRef(false);
-  const [historyActive, setHistoryActive] = useState(false);
 
-  const handleHistoryLoad = useCallback(async (file: File) => {
-    console.log('[DashboardLayout] handleHistoryLoad called with', file.name);
-    await historyService.loadFile(file);
-    console.log('[DashboardLayout] loadFile done, activating history view');
-    setHistoryActive(true);
-  }, []);
+
 
   // Calculate rowHeight once based on available height
   // No state, no listeners, just initial calculation
@@ -93,7 +87,7 @@ const DashboardLayout = () => {
   return (
     <div className="h-screen bg-main">
       <div className="fixed top-0 left-0 right-0 h-16 z-20">
-        <Header onHistoryLoad={handleHistoryLoad} />
+        <Header  />
       </div>
       <div className="flex pt-8 h-[calc(100vh-4rem)]">
         <div
@@ -117,11 +111,7 @@ const DashboardLayout = () => {
             opacity: isDraggingRef.current ? 0.2 : 1,
           }}
         >
-          {historyActive ? (
-            <div className="p-4 h-full">
-              <HistoryViewer onClose={() => setHistoryActive(false)} />
-            </div>
-          ) : (
+   
           <ResponsiveGridLayout
             className="layout h-full"
             layouts={layouts}
@@ -175,7 +165,7 @@ const DashboardLayout = () => {
           >
             {activeWidgets.map(renderWidget)}
           </ResponsiveGridLayout>
-          )}
+          
         </main>
       </div>
     </div>
