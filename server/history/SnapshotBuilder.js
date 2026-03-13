@@ -4,7 +4,6 @@ import { PidDataCollector } from '../JSClient/Filters/PID/PidDataCollector.js';
 
 /**
  * SnapshotBuilder - Builds enriched filter snapshots for history capture.
- * Must be called inside session.lock_filters().
  */
 function SnapshotBuilder() {
     this.pidCollector = new PidDataCollector();
@@ -12,7 +11,7 @@ function SnapshotBuilder() {
     /**
      * Build enriched entry for one filter.
      * Collects: all filter fields, gpac_args, enriched ipids/opids.
-     * @param {object} f - GPAC filter instance (inside lock)
+     * @param {object} f 
      */
     this.buildFilterEntry = function(f) {
      
