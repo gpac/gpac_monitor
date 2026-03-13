@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { FilterArgument } from '@/types';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 
 /**
- * Subscribe to filter arguments updates via UpdatableSubscribable
- * Returns live filter arguments when they arrive from server
+ * Subscribe to filter arguments updates via UpdatableSubscribable (live)
+ * or read from snapshot cache (history).
  */
 export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
   const gpacService = useGpacService();
+  const { mode, snapshotCache } = useDataSource();
   const [args, setArgs] = useState<FilterArgument[]>([]);
 
   useEffect(() => {
@@ -16,7 +18,12 @@ export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
       return;
     }
 
-    // Subscribe to filter args updates via UpdatableSubscribable
+    if (mode === 'history') {
+      const cached = snapshotCache?.get(filterIdx);
+      setArgs((cached?.gpac_args as unknown as FilterArgument[]) ?? []);
+      return;
+    }
+
     const unsubscribe = gpacService
       .getFilterArgsHandler()
       .subscribeToFilterArgsDetails(filterIdx, (newArgs) => {
@@ -24,7 +31,7 @@ export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
       });
 
     return unsubscribe;
-  }, [filterIdx, gpacService]);
+  }, [filterIdx, gpacService, mode, snapshotCache]);
 
   return args;
 };
