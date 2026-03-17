@@ -2,6 +2,7 @@ import { Sys as sys } from 'gpaccore';
 import { HistoryWriter } from './HistoryWriter.js';
 
 const RATE_LIMIT_US = 1000 * 1000; // 1s
+const EVENT_VERSION = 1;
 
 /**
  * HistoryCollector - Records session history into snapshot.json + events.jsonl
@@ -31,6 +32,7 @@ function HistoryCollector(historyDir) {
     this.recordGraph = function(filters, graphVersion) {
         const ts_us = sys.clock_us();
         this.writer.writeEvent(JSON.stringify({
+            version: EVENT_VERSION,
             message: 'filters',
             ts_us,
             graph_v: graphVersion,
@@ -44,6 +46,7 @@ function HistoryCollector(historyDir) {
         if (ts_us - this.lastRecordUs < RATE_LIMIT_US) return;
         this.lastRecordUs = ts_us;
         this.writer.writeEvent(JSON.stringify({
+            version: EVENT_VERSION,
             message: 'session_stats',
             ts_us,
             ...payload,
@@ -53,6 +56,7 @@ function HistoryCollector(historyDir) {
     /** Record cpu_stats as WS-format event */
     this.recordCpuStats = function(payload) {
         this.writer.writeEvent(JSON.stringify({
+            version: EVENT_VERSION,
             message: 'cpu_stats',
             ts_us: sys.clock_us(),
             ...payload,
@@ -62,6 +66,7 @@ function HistoryCollector(historyDir) {
     /** Record a filter argument update */
     this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
         this.writer.writeEvent(JSON.stringify({
+            version: EVENT_VERSION,
             message: 'filter_args_update',
             ts_us: sys.clock_us(),
             payload: { filter_idx: filterIdx, arg_name: argName, value: newValue },

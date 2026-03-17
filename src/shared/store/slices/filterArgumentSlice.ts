@@ -1,7 +1,10 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
-import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
+import type {
+  GpacArgument,
+  GpacArgumentValue,
+} from '@/types/domain/gpac/gpac_args';
 
 export interface ArgumentUpdate {
   filterId: string;
@@ -49,6 +52,25 @@ export const filterArgumentSlice = createSlice({
     clearFilterArgs: (state) => {
       state.argsByFilter = {};
     },
+    /** Apply a single arg value change from replay (filter_args_update event) */
+    applyArgUpdate: (
+      state,
+      action: PayloadAction<{
+        filterIdx: string;
+        argName: string;
+        value: GpacArgumentValue;
+      }>,
+    ) => {
+      const { filterIdx, argName, value } = action.payload;
+      const args = state.argsByFilter[filterIdx];
+      if (!args) return;
+      const arg = args.find((a) => a.name === argName);
+      if (!arg) {
+        console.warn(`[Replay] Arg not found: ${filterIdx}.${argName}`);
+        return;
+      }
+      arg.value = value;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(updateFilterArgument.pending, (state, action) => {
@@ -70,6 +92,7 @@ export const {
   clearArgumentUpdate,
   hydrateFilterArgs,
   clearFilterArgs,
+  applyArgUpdate,
 } = filterArgumentSlice.actions;
 
 // Thunk
@@ -98,7 +121,6 @@ export const updateFilterArgument = createAsyncThunk(
       argValue,
     );
 
-    // Mark as success immediately after sending
     dispatch(
       setArgumentUpdateStatus({
         filterId,
@@ -108,7 +130,6 @@ export const updateFilterArgument = createAsyncThunk(
       }),
     );
 
-    // Clear success status immediately (optimistic update)
     setTimeout(() => {
       dispatch(
         setArgumentUpdateStatus({
@@ -122,7 +143,6 @@ export const updateFilterArgument = createAsyncThunk(
   },
 );
 
-// Selectors are exported from selectors/gpacArgs/filterArgumentSelectors.ts
 export {
   selectArgumentUpdate,
   makeSelectArgumentUpdatesForFilter,
