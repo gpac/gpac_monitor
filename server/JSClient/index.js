@@ -6,10 +6,11 @@ import { CpuStatsManager } from './Sys/CpuStatsManager.js';
 import { LogManager } from './Sys/LogManager.js';
 import { CommandLineManager } from './CommandLineManager.js';
 
-function JSClient(id, client, all_clients, ensureMonitoringLoop) {
+function JSClient(id, client, all_clients, ensureMonitoringLoop, historyCollector) {
     this.id = id;
     this.client = client;
     this.ensureMonitoringLoop = ensureMonitoringLoop;
+    this.historyCollector = historyCollector;
 
     this.messageHandler = new MessageHandler(this);
     this.sessionStatsManager = new SessionStatsManager(this);

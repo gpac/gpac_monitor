@@ -59,6 +59,15 @@ function HistoryCollector(historyDir) {
         }));
     };
 
+    /** Record a filter argument update */
+    this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
+        this.writer.writeEvent(JSON.stringify({
+            message: 'filter_args_update',
+            ts_us: sys.clock_us(),
+            payload: { filter_idx: filterIdx, arg_name: argName, value: newValue },
+        }));
+    };
+
     /** Close the history file (call on session end) */
     this.close = function() {
         this.writer.close();
