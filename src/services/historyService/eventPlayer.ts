@@ -1,0 +1,122 @@
+import type { AppDispatch } from '@/shared/store';
+import type { HistoryEvent } from './types';
+import { dispatchEvent } from './eventDispatcher';
+
+export type PlayerState = 'idle' | 'playing' | 'paused' | 'done';
+export type PlayerListener = (state: PlayerState, timeUs: number) => void;
+
+/**
+ * EventPlayer — replays HistoryEvent[] into Redux via rAF + batch.
+ *
+ * Processes all events whose ts_us <= current playback time each frame.
+ * No drift: playback time is based on wall-clock delta from play start.
+ */
+export class EventPlayer {
+  private events: HistoryEvent[] = [];
+  private dispatch: AppDispatch | null = null;
+  private cursor = 0;
+  private state: PlayerState = 'idle';
+  private rafId: number | null = null;
+  private listener?: PlayerListener;
+
+  // Timing
+  private startWallMs = 0;
+  private startEventUs = 0;
+  private pausedElapsedUs = 0;
+
+  setListener(listener: PlayerListener) {
+    this.listener = listener;
+  }
+
+  load(events: HistoryEvent[], dispatch: AppDispatch) {
+    this.stop();
+    this.events = events;
+    this.dispatch = dispatch;
+    this.cursor = 0;
+    this.setState('idle');
+  }
+
+  play() {
+    if (!this.events.length || !this.dispatch) return;
+
+    if (this.state === 'paused') {
+      this.startWallMs = performance.now();
+      this.startEventUs = this.pausedElapsedUs;
+    } else {
+      this.startWallMs = performance.now();
+      this.startEventUs = this.events[0]?.ts_us ?? 0;
+      this.pausedElapsedUs = this.startEventUs;
+      this.cursor = 0;
+    }
+
+    this.setState('playing');
+    this.scheduleFrame();
+  }
+
+  pause() {
+    if (this.state !== 'playing') return;
+    this.pausedElapsedUs = this.currentTimeUs();
+    this.cancelFrame();
+    this.setState('paused');
+  }
+
+  stop() {
+    this.cancelFrame();
+    this.cursor = 0;
+    this.pausedElapsedUs = 0;
+    this.setState('idle');
+  }
+
+  getState(): PlayerState {
+    return this.state;
+  }
+
+  currentTimeUs(): number {
+    if (this.state === 'playing') {
+      const elapsedMs = performance.now() - this.startWallMs;
+      return this.startEventUs + elapsedMs * 1000;
+    }
+    return this.pausedElapsedUs;
+  }
+
+  durationUs(): number {
+    if (!this.events.length) return 0;
+    return this.events[this.events.length - 1].ts_us - this.events[0].ts_us;
+  }
+
+  private setState(state: PlayerState) {
+    this.state = state;
+    if (this.listener) this.listener(state, this.currentTimeUs());
+  }
+
+  private scheduleFrame() {
+    this.rafId = requestAnimationFrame(() => this.tick());
+  }
+
+  private cancelFrame() {
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
+    }
+  }
+
+  private tick() {
+    if (this.state !== 'playing' || !this.dispatch) return;
+
+    const now = this.currentTimeUs();
+
+    while (this.cursor < this.events.length) {
+      const event = this.events[this.cursor];
+      if (event.ts_us > now) break;
+      dispatchEvent(event, this.dispatch);
+      this.cursor++;
+    }
+
+    if (this.cursor >= this.events.length) {
+      this.setState('done');
+      return;
+    }
+
+    this.scheduleFrame();
+  }
+}

@@ -1,0 +1,54 @@
+import type { AppDispatch } from '@/shared/store';
+import { updateGraphData } from '@/shared/store/slices/graphSlice';
+import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
+import { applyArgUpdate } from '@/shared/store/slices/filterArgumentSlice';
+import type {
+  HistoryEvent,
+  FiltersEvent,
+  SessionStatsEvent,
+  FilterArgsUpdateEvent,
+} from './types';
+import type { GraphFilterData } from '@/types/domain/gpac/model';
+
+type EventHandler = (event: HistoryEvent, dispatch: AppDispatch) => void;
+
+const handleFilters: EventHandler = (event, dispatch) => {
+  const e = event as FiltersEvent;
+  dispatch(updateGraphData(e.filters as unknown as GraphFilterData[]));
+};
+
+const handleSessionStats: EventHandler = (event, dispatch) => {
+  const e = event as SessionStatsEvent;
+  dispatch(updateSessionStats(e.stats as any));
+};
+
+const handleFilterArgsUpdate: EventHandler = (event, dispatch) => {
+  const e = event as FilterArgsUpdateEvent;
+  dispatch(
+    applyArgUpdate({
+      filterIdx: e.payload.filter_idx.toString(),
+      argName: e.payload.arg_name,
+      value: e.payload.value,
+    }),
+  );
+};
+
+const handlers: Record<string, EventHandler> = {
+  filters: handleFilters,
+  session_stats: handleSessionStats,
+  filter_args_update: handleFilterArgsUpdate,
+  // cpu_stats: skipped in V2 (not stored in Redux yet)
+};
+
+/**
+ * Dispatch a single history event to the appropriate Redux reducer.
+ */
+export function dispatchEvent(
+  event: HistoryEvent,
+  dispatch: AppDispatch,
+): void {
+  const handler = handlers[event.message];
+  if (handler) {
+    handler(event, dispatch);
+  }
+}
