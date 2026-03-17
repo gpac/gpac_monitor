@@ -23,7 +23,7 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const DashboardLayout = () => {
   const dispatch = useAppDispatch();
-  const { switchToHistory } = useDataSource();
+  const { switchToHistory, loadHistory } = useDataSource();
   const activeWidgets = useAppSelector((state) => state.widgets.activeWidgets);
   const configs = useAppSelector((state) => state.widgets.configs);
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
@@ -42,6 +42,20 @@ const DashboardLayout = () => {
       }
     },
     [switchToHistory],
+  );
+
+  const handleHistoryLoadFull = useCallback(
+    async (snapshotFile: File, eventsFile: File) => {
+      try {
+        await loadHistory(snapshotFile, eventsFile);
+      } catch {
+        toastService.show({
+          title: 'Invalid history',
+          description: 'Could not load history files',
+        });
+      }
+    },
+    [loadHistory],
   );
 
   // Calculate rowHeight once based on available height
@@ -102,7 +116,10 @@ const DashboardLayout = () => {
   return (
     <div className="h-screen bg-main">
       <div className="fixed top-0 left-0 right-0 h-16 z-20">
-        <Header onHistoryLoad={handleHistoryLoad} />
+        <Header
+          onHistoryLoad={handleHistoryLoad}
+          onHistoryLoadFull={handleHistoryLoadFull}
+        />
       </div>
       <div className="flex pt-8 h-[calc(100vh-4rem)]">
         <div

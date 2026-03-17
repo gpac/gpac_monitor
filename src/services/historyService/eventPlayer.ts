@@ -16,11 +16,11 @@ export class EventPlayer {
   private dispatch: AppDispatch | null = null;
   private cursor = 0;
   private state: PlayerState = 'idle';
-  private rafId: number | null = null;
+  private animationFrameId: number | null = null;
   private listener?: PlayerListener;
 
   // Timing
-  private startWallMs = 0;
+  private playbackStartTimeMs = 0;
   private startEventUs = 0;
   private pausedElapsedUs = 0;
 
@@ -40,10 +40,10 @@ export class EventPlayer {
     if (!this.events.length || !this.dispatch) return;
 
     if (this.state === 'paused') {
-      this.startWallMs = performance.now();
+      this.playbackStartTimeMs = performance.now();
       this.startEventUs = this.pausedElapsedUs;
     } else {
-      this.startWallMs = performance.now();
+      this.playbackStartTimeMs = performance.now();
       this.startEventUs = this.events[0]?.ts_us ?? 0;
       this.pausedElapsedUs = this.startEventUs;
       this.cursor = 0;
@@ -73,7 +73,7 @@ export class EventPlayer {
 
   currentTimeUs(): number {
     if (this.state === 'playing') {
-      const elapsedMs = performance.now() - this.startWallMs;
+      const elapsedMs = performance.now() - this.playbackStartTimeMs;
       return this.startEventUs + elapsedMs * 1000;
     }
     return this.pausedElapsedUs;
@@ -90,13 +90,13 @@ export class EventPlayer {
   }
 
   private scheduleFrame() {
-    this.rafId = requestAnimationFrame(() => this.tick());
+    this.animationFrameId = requestAnimationFrame(() => this.tick());
   }
 
   private cancelFrame() {
-    if (this.rafId !== null) {
-      cancelAnimationFrame(this.rafId);
-      this.rafId = null;
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
     }
   }
 

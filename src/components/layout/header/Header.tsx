@@ -15,9 +15,10 @@ import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
 
 interface HeaderProps {
   onHistoryLoad?: (file: File) => void;
+  onHistoryLoadFull?: (snapshotFile: File, eventsFile: File) => void;
 }
 
-const Header = ({ onHistoryLoad }: HeaderProps) => {
+const Header = ({ onHistoryLoad, onHistoryLoadFull }: HeaderProps) => {
   const dispatch = useAppDispatch();
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const [showLayoutManager, setShowLayoutManager] = useState(false);
@@ -71,11 +72,19 @@ const Header = ({ onHistoryLoad }: HeaderProps) => {
           <input
             ref={fileInputRef}
             type="file"
-            accept=".json"
+            accept=".json,.jsonl"
+            multiple
             className="hidden"
             onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file && onHistoryLoad) onHistoryLoad(file);
+              const files = Array.from(e.target.files ?? []);
+              const snapshot = files.find((f) => f.name === 'snapshot.json');
+              const events = files.find((f) => f.name.endsWith('.jsonl'));
+
+              if (snapshot && events && onHistoryLoadFull) {
+                onHistoryLoadFull(snapshot, events);
+              } else if (files[0] && onHistoryLoad) {
+                onHistoryLoad(files[0]);
+              }
               e.target.value = '';
             }}
           />
