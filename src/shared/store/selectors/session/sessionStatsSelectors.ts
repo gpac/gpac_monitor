@@ -14,6 +14,9 @@ const timeFractionChanged = (
 // Base selector
 export const selectSessionStatsState = (state: RootState) => state.sessionStats;
 
+export const selectFilterPids = (state: RootState, filterIdx: string) =>
+  state.sessionStats.pidsByFilter[filterIdx];
+
 export const selectSessionStats = createSelector(
   [selectSessionStatsState],
   (sessionStatsState) => sessionStatsState.sessionStats,

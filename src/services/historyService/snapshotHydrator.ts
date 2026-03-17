@@ -1,10 +1,18 @@
 import type { AppDispatch } from '@/shared/store';
 import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
 import { setCommandLine } from '@/shared/store/slices/sessionDetailsSlice';
-import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
-import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
+import {
+  updateSessionStats,
+  hydrateFilterPids,
+} from '@/shared/store/slices/sessionStatsSlice';
+import { hydrateFilterArgs } from '@/shared/store/slices/filterArgumentSlice';
+import type {
+  SessionFilterStats,
+  FilterPids,
+} from '@/shared/store/slices/sessionStatsSlice';
 import type { GraphFilterData } from '@/types/domain/gpac/model';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
+import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
 import type { HistorySnapshot, HistorySnapshotFilter } from './types';
 
 function toGraphFilterData(f: HistorySnapshotFilter): GraphFilterData {
@@ -56,15 +64,38 @@ function toSessionFilterStats(f: HistorySnapshotFilter): SessionFilterStats {
   };
 }
 
+function buildPidsByFilter(
+  filters: HistorySnapshotFilter[],
+): Record<string, FilterPids> {
+  const result: Record<string, FilterPids> = {};
+  for (const f of filters) {
+    if (f.ipids || f.opids) {
+      result[f.idx.toString()] = { ipids: f.ipids, opids: f.opids };
+    }
+  }
+  return result;
+}
+
+function buildArgsByFilter(
+  filters: HistorySnapshotFilter[],
+): Record<string, GpacArgument[]> {
+  const result: Record<string, GpacArgument[]> = {};
+  for (const f of filters) {
+    if (f.gpac_args) {
+      result[f.idx.toString()] = f.gpac_args;
+    }
+  }
+  return result;
+}
+
 export function hydrateFromSnapshot(
   snapshot: HistorySnapshot,
   dispatch: AppDispatch,
-): Map<number, HistorySnapshotFilter> {
-  const graphData = snapshot.filters.map(toGraphFilterData);
-  dispatch(updateGraphData(graphData));
+): void {
+  dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
   dispatch(setCommandLine(snapshot.command_line));
   dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
+  dispatch(hydrateFilterPids(buildPidsByFilter(snapshot.filters)));
+  dispatch(hydrateFilterArgs(buildArgsByFilter(snapshot.filters)));
   dispatch(setLoading(false));
-
-  return new Map(snapshot.filters.map((f) => [f.idx, f]));
 }

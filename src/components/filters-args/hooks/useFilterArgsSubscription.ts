@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useGpacService } from '@/shared/hooks/useGpacService';
+import { useAppSelector } from '@/shared/hooks/redux';
 import { FilterArgument } from '@/types';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { selectFilterArgs } from '@/shared/store/selectors/session';
 
 /**
  * Subscribe to filter arguments updates via UpdatableSubscribable (live)
- * or read from snapshot cache (history).
+ * or read from Redux (history).
  */
 export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
   const gpacService = useGpacService();
-  const { mode, snapshotCache } = useDataSource();
+  const { mode } = useDataSource();
+  const cachedArgs = useAppSelector((state) =>
+    filterIdx !== undefined
+      ? selectFilterArgs(state, filterIdx.toString())
+      : undefined,
+  );
   const [args, setArgs] = useState<FilterArgument[]>([]);
 
   useEffect(() => {
@@ -19,8 +26,7 @@ export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
     }
 
     if (mode === 'history') {
-      const cached = snapshotCache?.get(filterIdx);
-      setArgs((cached?.gpac_args as unknown as FilterArgument[]) ?? []);
+      setArgs((cachedArgs as unknown as FilterArgument[]) ?? []);
       return;
     }
 
@@ -31,7 +37,7 @@ export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
       });
 
     return unsubscribe;
-  }, [filterIdx, gpacService, mode, snapshotCache]);
+  }, [filterIdx, gpacService, mode, cachedArgs]);
 
   return args;
 };

@@ -4,23 +4,27 @@ import { useSelector } from 'react-redux';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
-import { selectSessionStats } from '@/shared/store/selectors/session/sessionStatsSelectors';
+import {
+  selectSessionStats,
+  selectFilterPids,
+} from '@/shared/store/selectors/session/sessionStatsSelectors';
 
 export function useFilterStats(
   filterId: number | undefined,
   enabled = true,
   interval = 1000,
 ) {
-  const { mode, snapshotCache } = useDataSource();
+  const { mode } = useDataSource();
   const isHistory = mode === 'history';
 
-  // History mode: dynamic stats from Redux, static ipids/opids from snapshot cache
+  // History mode: dynamic stats from Redux, ipids/opids from Redux pidsByFilter
   const sessionStatsMap = useSelector(selectSessionStats);
+  const filterKey = filterId?.toString() ?? '';
+  const pids = useSelector((state: any) => selectFilterPids(state, filterKey));
   const historyStats = useMemo((): MonitoredFilterStats | null => {
     if (!isHistory || filterId === undefined) return null;
-    const reduxStats = sessionStatsMap[filterId.toString()];
-    const cached = snapshotCache?.get(filterId);
-    if (!reduxStats && !cached) return null;
+    const reduxStats = sessionStatsMap[filterKey];
+    if (!reduxStats && !pids) return null;
     return {
       idx: filterId,
       status: reduxStats?.status ?? '',
@@ -29,12 +33,12 @@ export function useFilterStats(
       pck_sent: reduxStats?.pck_sent ?? 0,
       pck_done: reduxStats?.pck_done ?? 0,
       time: reduxStats?.time ?? 0,
-      nb_ipid: reduxStats?.nb_ipid ?? cached?.nb_ipid ?? 0,
-      nb_opid: reduxStats?.nb_opid ?? cached?.nb_opid ?? 0,
-      ipids: cached?.ipids,
-      opids: cached?.opids,
+      nb_ipid: reduxStats?.nb_ipid ?? 0,
+      nb_opid: reduxStats?.nb_opid ?? 0,
+      ipids: pids?.ipids,
+      opids: pids?.opids,
     };
-  }, [isHistory, filterId, sessionStatsMap, snapshotCache]);
+  }, [isHistory, filterId, filterKey, sessionStatsMap, pids]);
 
   const [liveStats, setLiveStats] = useState<MonitoredFilterStats | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +52,12 @@ export function useFilterStats(
   );
 
   useEffect(() => {
-    if (isHistory || filterId === undefined || !enabled || !gpacService.isConnected()) {
+    if (
+      isHistory ||
+      filterId === undefined ||
+      !enabled ||
+      !gpacService.isConnected()
+    ) {
       setLiveStats(null);
       setIsLoading(false);
       return;

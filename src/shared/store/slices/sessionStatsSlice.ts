@@ -1,5 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TimeFraction } from '../../../types/domain/gpac/model';
+import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
+
+export interface FilterPids {
+  ipids?: Record<string, PIDproperties>;
+  opids?: Record<string, PIDproperties>;
+}
 
 export interface SessionFilterStats {
   status: string;
@@ -21,6 +27,7 @@ export interface SessionStatsState {
   mode: StatsMode;
   sessionStats: Record<string, SessionFilterStats>;
   previousSessionStats: Record<string, SessionFilterStats>;
+  pidsByFilter: Record<string, FilterPids>;
   selectedFilterId: string | null;
   lastUpdate: number | null;
   isLoading: boolean;
@@ -32,6 +39,7 @@ const initialState: SessionStatsState = {
   mode: 'session',
   sessionStats: {},
   previousSessionStats: {},
+  pidsByFilter: {},
   selectedFilterId: null,
   lastUpdate: null,
   isLoading: false,
@@ -113,6 +121,17 @@ const sessionStatsSlice = createSlice({
       state.lastUpdate = null;
       state.isLoading = false;
     },
+
+    hydrateFilterPids: (
+      state,
+      action: PayloadAction<Record<string, FilterPids>>,
+    ) => {
+      state.pidsByFilter = action.payload;
+    },
+
+    clearFilterPids: (state) => {
+      state.pidsByFilter = {};
+    },
   },
 });
 
@@ -125,6 +144,8 @@ export const {
   subscribeToSessionStats,
   unsubscribeFromSessionStats,
   resetSessionStats,
+  hydrateFilterPids,
+  clearFilterPids,
 } = sessionStatsSlice.actions;
 
 export default sessionStatsSlice.reducer;
