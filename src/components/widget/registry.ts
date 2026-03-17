@@ -1,4 +1,4 @@
-import { Widget, WidgetType } from '@/types';
+import { Widget, WidgetType } from '@/types/ui/widget';
 import { IconType } from 'react-icons';
 import LogsMonitor from '../views/logs/LogsMonitor';
 import MetricsMonitor from '../views/cpu/MetricsMonitor';

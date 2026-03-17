@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
+import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
 
 export interface ArgumentUpdate {
   filterId: string;
@@ -12,10 +13,12 @@ export interface ArgumentUpdate {
 
 export interface FilterArgumentState {
   updates: Record<string, ArgumentUpdate>;
+  argsByFilter: Record<string, GpacArgument[]>;
 }
 
 const initialState: FilterArgumentState = {
   updates: {},
+  argsByFilter: {},
 };
 
 // Slice
@@ -37,6 +40,15 @@ export const filterArgumentSlice = createSlice({
       const key = `${action.payload.filterId}_${action.payload.name}`;
       delete state.updates[key];
     },
+    hydrateFilterArgs: (
+      state,
+      action: PayloadAction<Record<string, GpacArgument[]>>,
+    ) => {
+      state.argsByFilter = action.payload;
+    },
+    clearFilterArgs: (state) => {
+      state.argsByFilter = {};
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(updateFilterArgument.pending, (state, action) => {
@@ -53,8 +65,12 @@ export const filterArgumentSlice = createSlice({
 });
 
 // Actions
-export const { setArgumentUpdateStatus, clearArgumentUpdate } =
-  filterArgumentSlice.actions;
+export const {
+  setArgumentUpdateStatus,
+  clearArgumentUpdate,
+  hydrateFilterArgs,
+  clearFilterArgs,
+} = filterArgumentSlice.actions;
 
 // Thunk
 

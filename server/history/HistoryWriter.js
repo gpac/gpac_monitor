@@ -57,7 +57,7 @@ function HistoryWriter(historyDir, sessionId) {
         if (this._eventsFile) {
             this._eventsFile.close();
             this._eventsFile = null;
-m        }
+       }
     };
 }
 
