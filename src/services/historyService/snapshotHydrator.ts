@@ -14,24 +14,27 @@ import type { GraphFilterData } from '@/types/domain/gpac/model';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
 import type { HistorySnapshot, HistorySnapshotFilter } from './types';
+import { GpacStreamType } from '@/types';
 
-function toGraphFilterData(f: HistorySnapshotFilter): GraphFilterData {
+export function toGraphFilterData(f: HistorySnapshotFilter): GraphFilterData {
   const ipid: GraphFilterData['ipid'] = {};
   const opid: GraphFilterData['opid'] = {};
 
   if (f.ipids) {
     for (const [name, pid] of Object.entries(f.ipids)) {
+      const p = pid as PIDproperties & { stream_type?: GpacStreamType };
       ipid[name] = {
-        source_idx: (pid as PIDproperties).source_idx ?? 0,
-        stream_type: (pid as PIDproperties).type,
+        source_idx: p.source_idx ?? 0,
+        stream_type: p.stream_type ?? p.type,
       };
     }
   }
 
   if (f.opids) {
     for (const [name, pid] of Object.entries(f.opids)) {
+      const p = pid as PIDproperties & { stream_type?: GpacStreamType };
       opid[name] = {
-        stream_type: (pid as PIDproperties).type,
+        stream_type: p.stream_type ?? p.type,
       };
     }
   }
@@ -64,7 +67,7 @@ function toSessionFilterStats(f: HistorySnapshotFilter): SessionFilterStats {
   };
 }
 
-function buildPidsByFilter(
+export function buildPidsByFilter(
   filters: HistorySnapshotFilter[],
 ): Record<string, FilterPids> {
   const result: Record<string, FilterPids> = {};

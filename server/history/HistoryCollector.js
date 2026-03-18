@@ -28,15 +28,21 @@ function HistoryCollector(historyDir) {
         this.snapshotWritten = true;
     };
 
-    /** Record graph topology change as WS-format event */
+    /** Record graph topology change as WS-format event.
+     *  Normalizes ipid/opid (singular, from gpac_filter_to_minimal_object)
+     *  to ipids/opids (plural) — consistent with snapshot.json format. */
     this.recordGraph = function(filters, graphVersion) {
         const ts_us = sys.clock_us();
+        const normalizedFilters = filters.map((f) => {
+            const { ipid, opid, ...rest } = f;
+            return { ...rest, ipids: ipid ?? {}, opids: opid ?? {} };
+        });
         this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filters',
             ts_us,
             graph_v: graphVersion,
-            filters,
+            filters: normalizedFilters,
         }));
     };
 

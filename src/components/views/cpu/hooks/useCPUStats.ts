@@ -4,12 +4,14 @@ import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { useServiceReady } from '@/shared/hooks/useServiceReady';
 
+
 export function useCPUStats(enabled = true, interval = 150) {
   const [stats, setStats] = useState<CPUStats[]>([]);
   const [currentCPU, setCurrentCPU] = useState(0);
   const [currentMemory, setCurrentMemory] = useState(0);
   const [totalCores, setTotalCores] = useState(0);
   const { isReady } = useServiceReady({ enabled });
+
 
   const statsRef = useRef<CPUStats[]>([]);
   statsRef.current = stats;
@@ -35,7 +37,7 @@ export function useCPUStats(enabled = true, interval = 150) {
   }, []);
 
   useEffect(() => {
-    if (!enabled || !isReady) {
+    if ( !enabled || !isReady) {
       if (stats.length > 0) {
         setStats([]);
       }

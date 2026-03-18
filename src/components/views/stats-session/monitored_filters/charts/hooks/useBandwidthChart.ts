@@ -12,6 +12,7 @@ import {
 } from '@/shared/store/selectors';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 
+
 export interface DataPoint {
   time: string;
   timestamp: number;
@@ -33,6 +34,9 @@ export const useBandwidthChart = ({
 }: UseBandwidthChartOptions) => {
   const dispatch = useDispatch();
   const gpacService = useGpacService();
+
+   
+  
 
   // Select data from Redux store based on type
   const dataPoints = useSelector((state: RootState) =>

@@ -8,13 +8,13 @@ import type {
   SessionStatsEvent,
   FilterArgsUpdateEvent,
 } from './types';
-import type { GraphFilterData } from '@/types/domain/gpac/model';
+import { toGraphFilterData } from './snapshotHydrator';
 
 type EventHandler = (event: HistoryEvent, dispatch: AppDispatch) => void;
 
 const handleFilters: EventHandler = (event, dispatch) => {
   const e = event as FiltersEvent;
-  dispatch(updateGraphData(e.filters as unknown as GraphFilterData[]));
+  dispatch(updateGraphData(e.filters.map(toGraphFilterData)));
 };
 
 const handleSessionStats: EventHandler = (event, dispatch) => {
