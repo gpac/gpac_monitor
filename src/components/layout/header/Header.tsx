@@ -1,30 +1,27 @@
 import { useState, useRef, useEffect } from 'react';
 import { FiLayout } from 'react-icons/fi';
-import {
-  LuPanelLeft,
-  LuPanelLeftClose,
-  LuRotateCw,
-  LuHistory,
-} from 'react-icons/lu';
+import { LuPanelLeft, LuPanelLeftClose, LuRotateCw } from 'react-icons/lu';
 import { LayoutManager } from '../header/LayoutManager';
 import WidgetSelector from '../../widget/WidgetSelector';
 import ConnectionSelector from '../connection/ConnectionSelector';
 import LogCounters from './LogCounters';
+import HistoryLoader from '@/components/history/HistoryLoader';
+import HistoryControls from '@/components/history/HistoryControls';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
 
 interface HeaderProps {
-  onHistoryLoad?: (file: File) => void;
   onHistoryLoadFull?: (snapshotFile: File, eventsFile: File) => void;
 }
 
-const Header = ({ onHistoryLoad, onHistoryLoadFull }: HeaderProps) => {
+const Header = ({ onHistoryLoadFull }: HeaderProps) => {
   const dispatch = useAppDispatch();
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
+  const { mode } = useDataSource();
   const [showLayoutManager, setShowLayoutManager] = useState(false);
   const [showWidgetSelector, setShowWidgetSelector] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -55,46 +52,20 @@ const Header = ({ onHistoryLoad, onHistoryLoadFull }: HeaderProps) => {
           <div className="h-6 w-px bg-gray-700" />
           <button
             onClick={() => window.location.reload()}
-            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 "
+            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800"
             title="Reload page"
             aria-label="Reload page"
           >
             <LuRotateCw className="w-4 h-4" />
           </button>
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800"
-            title="Load history file"
-            aria-label="Load history file"
-          >
-            <LuHistory className="w-4 h-4" />
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".json,.jsonl"
-            multiple
-            className="hidden"
-            onChange={(e) => {
-              const files = Array.from(e.target.files ?? []);
-              const snapshot = files.find((f) => f.name === 'snapshot.json');
-              const events = files.find((f) => f.name.endsWith('.jsonl'));
-
-              if (snapshot && events && onHistoryLoadFull) {
-                onHistoryLoadFull(snapshot, events);
-              } else if (files[0] && onHistoryLoad) {
-                onHistoryLoad(files[0]);
-              }
-              e.target.value = '';
-            }}
-          />
-          <span aria-label="Connection selector" title="Connection selector">
-            <ConnectionSelector />
-          </span>
-          <span
-            aria-label="Connection selector"
-            title="Connection selector"
-          ></span>
+          {onHistoryLoadFull && (
+            <HistoryLoader onHistoryLoadFull={onHistoryLoadFull} />
+          )}
+          {mode !== 'history' && (
+            <span aria-label="Connection selector" title="Connection selector">
+              <ConnectionSelector />
+            </span>
+          )}
           <span aria-label="Widget selector" title="Widget selector">
             <WidgetSelector
               isOpen={showWidgetSelector}
@@ -106,11 +77,12 @@ const Header = ({ onHistoryLoad, onHistoryLoadFull }: HeaderProps) => {
           <span aria-label="Log counters" title="Log counters">
             <LogCounters />
           </span>
+          <HistoryControls />
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={() => dispatch(toggleSidebar())}
-            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800 "
+            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800"
             title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
           >
             {isSidebarOpen ? (
@@ -127,7 +99,7 @@ const Header = ({ onHistoryLoad, onHistoryLoadFull }: HeaderProps) => {
 
           <button
             onClick={() => setShowLayoutManager(!showLayoutManager)}
-            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800 "
+            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800"
           >
             <FiLayout className="w-4 h-4" />
             Layouts
@@ -135,11 +107,10 @@ const Header = ({ onHistoryLoad, onHistoryLoadFull }: HeaderProps) => {
         </div>
       </div>
 
-      {/* Layout Manager Dropdown */}
       {showLayoutManager && (
         <div
           ref={dropdownRef}
-          className="absolute top-14 right-4  border border-gray-700 rounded-lg shadow-lg z-50 min-w-80"
+          className="absolute top-14 right-4 border border-gray-700 rounded-lg shadow-lg z-50 min-w-80"
         >
           <LayoutManager />
         </div>

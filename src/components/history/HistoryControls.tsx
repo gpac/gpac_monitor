@@ -1,0 +1,34 @@
+import { LuClapperboard } from 'react-icons/lu';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { usePlayerState } from '@/services/historyService/usePlayerState';
+import Timeline from './Timeline';
+
+/**
+ * Bridges usePlayerState + useDataSource → Timeline.
+ * Only renders in history mode.
+ */
+const HistoryControls = () => {
+  const { mode } = useDataSource();
+  const { state, currentTimeUs, durationUs, play, pause } = usePlayerState();
+
+  if (mode !== 'history') return null;
+
+  return (
+    <div className="flex items-center gap-2 px-2 py-1 rounded-lg ring-1 ring-red-500/70">
+      <span className="flex items-center gap-1 text-xs text-red-400 font-ui whitespace-nowrap">
+        <LuClapperboard className="w-3.5 h-3.5" />
+        Timeline
+      </span>
+      <div className="w-px h-4 bg-red-500/40" />
+      <Timeline
+        state={state}
+        currentTimeUs={currentTimeUs}
+        durationUs={durationUs}
+        onPlay={play}
+        onPause={pause}
+      />
+    </div>
+  );
+};
+
+export default HistoryControls;

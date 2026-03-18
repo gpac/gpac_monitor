@@ -1,7 +1,6 @@
 import { useMemo, useCallback, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
-import { loadSnapshotFile } from '@/services/historyService/snapshotLoader';
 import { toastService } from '@/shared/hooks/useToast';
 import {
   Responsive,
@@ -23,26 +22,11 @@ const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const DashboardLayout = () => {
   const dispatch = useAppDispatch();
-  const { switchToHistory, loadHistory } = useDataSource();
+  const { loadHistory } = useDataSource();
   const activeWidgets = useAppSelector((state) => state.widgets.activeWidgets);
   const configs = useAppSelector((state) => state.widgets.configs);
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const isDraggingRef = useRef(false);
-
-  const handleHistoryLoad = useCallback(
-    async (file: File) => {
-      try {
-        const snapshot = await loadSnapshotFile(file);
-        switchToHistory(snapshot);
-      } catch {
-        toastService.show({
-          title: 'Invalid snapshot',
-          description: 'Could not load snapshot.json',
-        });
-      }
-    },
-    [switchToHistory],
-  );
 
   const handleHistoryLoadFull = useCallback(
     async (snapshotFile: File, eventsFile: File) => {
@@ -116,10 +100,7 @@ const DashboardLayout = () => {
   return (
     <div className="h-screen bg-main">
       <div className="fixed top-0 left-0 right-0 h-16 z-20">
-        <Header
-          onHistoryLoad={handleHistoryLoad}
-          onHistoryLoadFull={handleHistoryLoadFull}
-        />
+        <Header onHistoryLoadFull={handleHistoryLoadFull} />
       </div>
       <div className="flex pt-8 h-[calc(100vh-4rem)]">
         <div
