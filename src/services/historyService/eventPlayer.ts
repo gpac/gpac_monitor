@@ -14,7 +14,7 @@ export type PlayerListener = (state: PlayerState, timeUs: number) => void;
 export class EventPlayer {
   private events: HistoryEvent[] = [];
   private dispatch: AppDispatch | null = null;
-  private cursor = 0;
+  private nextEventIndex = 0;
   private state: PlayerState = 'idle';
   private animationFrameId: number | null = null;
   private listener?: PlayerListener;
@@ -32,7 +32,7 @@ export class EventPlayer {
     this.stop();
     this.events = events;
     this.dispatch = dispatch;
-    this.cursor = 0;
+    this.nextEventIndex = 0;
     this.setState('idle');
   }
 
@@ -46,7 +46,7 @@ export class EventPlayer {
       this.playbackStartTimeMs = performance.now();
       this.startEventUs = this.events[0]?.ts_us ?? 0;
       this.pausedElapsedUs = this.startEventUs;
-      this.cursor = 0;
+      this.nextEventIndex = 0;
     }
 
     this.setState('playing');
@@ -62,10 +62,26 @@ export class EventPlayer {
 
   stop() {
     this.cancelFrame();
-    this.cursor = 0;
+    this.nextEventIndex = 0;
     this.pausedElapsedUs = 0;
     this.setState('idle');
   }
+
+  // TODO (V3): seek is not yet usable.
+  //
+  // seek(timeUs) repositions the playhead to an absolute event timestamp
+  // (same space as event.ts_us — not a relative offset from 0).
+  //
+  // The cursor and timing vars are updated correctly, but Redux state is NOT
+  // reconstructed. After a backward seek, Redux would reflect the future state
+  // (e.g. filter A = blue) instead of the correct state at targetTimeUs
+  // (e.g. filter A = red).
+  //
+  // A correct implementation requires one of:
+  //   - re-hydrating from snapshot + replaying all events up to targetTimeUs
+  //   - using intermediate checkpoints
+  //
+  // seek(timeUs: number) { ... }
 
   getState(): PlayerState {
     return this.state;
@@ -105,14 +121,14 @@ export class EventPlayer {
 
     const now = this.currentTimeUs();
 
-    while (this.cursor < this.events.length) {
-      const event = this.events[this.cursor];
+    while (this.nextEventIndex < this.events.length) {
+      const event = this.events[this.nextEventIndex];
       if (event.ts_us > now) break;
       dispatchEvent(event, this.dispatch);
-      this.cursor++;
+      this.nextEventIndex++;
     }
 
-    if (this.cursor >= this.events.length) {
+    if (this.nextEventIndex >= this.events.length) {
       this.setState('done');
       return;
     }
