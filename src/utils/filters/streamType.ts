@@ -5,13 +5,18 @@ import {
 } from '@/types/domain/gpac';
 
 /**
- * Color constants for filter types (synchronized with GraphOperations)
+ * Default color when stream type is unknown
+ */
+export const DEFAULT_STREAM_COLOR = '#E11D48';
+
+/**
+ * Color constants for filter types — single source of truth for all stream type colors
  */
 export const FILTER_COLORS: Record<FilterType, string> = {
   video: '#3b82f6',
   audio: '#10b981',
   text: '#f59e0b',
-  file: '#E11D48',
+  file: DEFAULT_STREAM_COLOR,
 };
 
 /**
@@ -41,7 +46,7 @@ export const MEDIA_BORDER_COLORS: Record<FilterType, string> = {
   video: 'border-l-blue-500/60',
   audio: 'border-l-emerald-500/60',
   text: 'border-l-amber-500/60',
-  file: 'border-l-slate-500/60',
+  file: 'border-l-rose-500/60',
 };
 
 /**
@@ -73,14 +78,6 @@ const mapStreamTypeToFilterType = (type: string): FilterType => {
 export const getBorderColorForMediaType = (type: string): string => {
   const filterType = mapStreamTypeToFilterType(type);
   return MEDIA_BORDER_COLORS[filterType];
-};
-
-/**
- * Get hex color for media type (case-insensitive, handles 'Visual', 'Video', etc.)
- */
-export const getColorForMediaType = (type: string): string => {
-  const filterType = mapStreamTypeToFilterType(type);
-  return FILTER_COLORS[filterType];
 };
 
 /**
@@ -129,7 +126,7 @@ export const getFilterInfoByIdx = (
   if (!filter) {
     return {
       name: `Filter ${filterIdx}`,
-      streamTypeColor: '#4CC9F0',
+      streamTypeColor: DEFAULT_STREAM_COLOR,
       streamType: 'file',
       streamTypeLabel: 'Unknown',
     };

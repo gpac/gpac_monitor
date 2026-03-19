@@ -1,19 +1,15 @@
 import { memo } from 'react';
 import { Panel } from '@xyflow/react';
 import { FilterType } from '@/types/domain/gpac';
+import { FILTER_COLORS, FILTER_LABELS } from '@/utils/filters/streamType';
 
-interface LegendItem {
-  type: FilterType;
-  label: string;
-  color: string;
-}
-
-const LEGEND_ITEMS: LegendItem[] = [
-  { type: 'video', label: 'Video', color: '#3b82f6' },
-  { type: 'audio', label: 'Audio', color: '#10b981' },
-  { type: 'text', label: 'Text', color: '#f59e0b' },
-  { type: 'file', label: 'File', color: '#E11D48' },
-];
+const LEGEND_ITEMS = (Object.keys(FILTER_COLORS) as FilterType[]).map(
+  (type) => ({
+    type,
+    label: FILTER_LABELS[type],
+    color: FILTER_COLORS[type],
+  }),
+);
 
 const GraphLegend = memo(() => {
   return (
