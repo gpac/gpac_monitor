@@ -122,34 +122,7 @@ const sessionStatsSlice = createSlice({
       state.isLoading = false;
     },
 
-    /** Merge explicit PID fields from a state_patch event */
-    applyPidsPatch: (
-      state,
-      action: PayloadAction<Record<string, FilterPids>>,
-    ) => {
-      for (const [filterIdx, patch] of Object.entries(action.payload)) {
-        const existing = state.pidsByFilter[filterIdx] ?? {};
-
-        if (patch.ipids) {
-          existing.ipids = existing.ipids ?? {};
-          for (const [pidKey, pidPatch] of Object.entries(patch.ipids)) {
-            existing.ipids[pidKey] = { ...existing.ipids[pidKey], ...pidPatch };
-          }
-        }
-
-        if (patch.opids) {
-          existing.opids = existing.opids ?? {};
-          for (const [pidKey, pidPatch] of Object.entries(patch.opids)) {
-            existing.opids[pidKey] = { ...existing.opids[pidKey], ...pidPatch };
-          }
-        }
-
-        state.pidsByFilter[filterIdx] = existing;
-      }
-    },
-
-    /** Full replace — snapshot init only, never use for replay events */
-    setFilterPidsFromSnapshot: (
+    setFilterPids: (
       state,
       action: PayloadAction<Record<string, FilterPids>>,
     ) => {
@@ -171,9 +144,8 @@ export const {
   subscribeToSessionStats,
   unsubscribeFromSessionStats,
   resetSessionStats,
-  setFilterPidsFromSnapshot,
+  setFilterPids,
   clearFilterPids,
-  applyPidsPatch,
 } = sessionStatsSlice.actions;
 
 export default sessionStatsSlice.reducer;

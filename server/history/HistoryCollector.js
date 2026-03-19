@@ -43,6 +43,7 @@ function HistoryCollector(historyDir) {
                     ipids: pidCollector.collectInputPids(inst),
                     opids: pidCollector.collectOutputPids(inst),
                 };
+                entry.gpac_args = inst.all_args(true).filter(Boolean);
             }
             return entry;
         });

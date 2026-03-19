@@ -2,16 +2,23 @@ import type { AppDispatch } from '@/shared/store';
 import { updateGraphData } from '@/shared/store/slices/graphSlice';
 import {
   updateSessionStats,
-  applyPidsPatch,
+  setFilterPids,
 } from '@/shared/store/slices/sessionStatsSlice';
-import { applyArgUpdate } from '@/shared/store/slices/filterArgumentSlice';
+import {
+  applyArgUpdate,
+  hydrateFilterArgs,
+} from '@/shared/store/slices/filterArgumentSlice';
 import type {
   HistoryEvent,
   FiltersEvent,
   SessionStatsEvent,
   FilterArgsUpdateEvent,
 } from './types';
-import { toGraphFilterData, buildPidsByFilter } from './snapshotHydrator';
+import {
+  toGraphFilterData,
+  buildPidsByFilter,
+  buildArgsByFilter,
+} from './snapshotHydrator';
 
 type EventHandler = (event: HistoryEvent, dispatch: AppDispatch) => void;
 
@@ -26,7 +33,12 @@ const handleFilters: EventHandler = (event, dispatch) => {
       ipids: f.properties!.ipids,
       opids: f.properties!.opids,
     }));
-    dispatch(applyPidsPatch(buildPidsByFilter(pidsFromProps)));
+    dispatch(setFilterPids(buildPidsByFilter(pidsFromProps)));
+  }
+
+  const argsByFilter = buildArgsByFilter(e.filters);
+  if (Object.keys(argsByFilter).length) {
+    dispatch(hydrateFilterArgs(argsByFilter));
   }
 };
 

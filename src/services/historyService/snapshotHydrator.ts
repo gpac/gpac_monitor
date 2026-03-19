@@ -3,7 +3,7 @@ import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
 import { setCommandLine } from '@/shared/store/slices/sessionDetailsSlice';
 import {
   updateSessionStats,
-  setFilterPidsFromSnapshot,
+  setFilterPids,
 } from '@/shared/store/slices/sessionStatsSlice';
 import { hydrateFilterArgs } from '@/shared/store/slices/filterArgumentSlice';
 import type {
@@ -79,7 +79,7 @@ export function buildPidsByFilter(
   return result;
 }
 
-function buildArgsByFilter(
+export function buildArgsByFilter(
   filters: HistoryFilter[],
 ): Record<string, GpacArgument[]> {
   const result: Record<string, GpacArgument[]> = {};
@@ -98,7 +98,7 @@ export function hydrateFromSnapshot(
   dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
   dispatch(setCommandLine(snapshot.command_line));
   dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
-  dispatch(setFilterPidsFromSnapshot(buildPidsByFilter(snapshot.filters)));
+  dispatch(setFilterPids(buildPidsByFilter(snapshot.filters)));
   dispatch(hydrateFilterArgs(buildArgsByFilter(snapshot.filters)));
   dispatch(setLoading(false));
 }
