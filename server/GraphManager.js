@@ -1,8 +1,8 @@
 import { Sys as sys } from 'gpaccore';
-import { gpac_filter_to_minimal_object } from './JSClient/filterUtils.js';
+import { gpac_filter_to_minimal_object, on_all_connected } from './JSClient/filterUtils.js';
 import { SnapshotBuilder } from './history/SnapshotBuilder.js';
 
-const GRAPH_DEBOUNCE_US = 500 * 1000;  // 500ms stabilization
+/* const GRAPH_DEBOUNCE_US = 500 * 1000;  // 500ms stabilization */
 const GRAPH_MAX_WAIT_US = 3000 * 1000; // 3s max cap
 
 /**
@@ -44,7 +44,7 @@ function GraphManager(deps) {
                 const sinceLast = now - lastGraphEventTime;
                 const sinceFirst = now - firstGraphEventTime;
 
-                if (sinceLast >= GRAPH_DEBOUNCE_US || sinceFirst >= GRAPH_MAX_WAIT_US) {
+                if ( sinceFirst >= GRAPH_MAX_WAIT_US) {
                     this._stabilize();
                     debounceRunning = false;
                     firstGraphEventTime = 0;
@@ -58,37 +58,36 @@ function GraphManager(deps) {
     this._stabilize = function() {
         graphDirty = false;
         graphVersion++;
+     
 
-        session.lock_filters(true);
-        const filters = [];
-        for (let i = 0; i < session.nb_filters; i++) {
-            const f = session.get_filter(i);
-            if (!f.is_destroyed()) filters.push(gpac_filter_to_minimal_object(f));
-        }
-        session.lock_filters(false);
+        on_all_connected((allFilterInstances) => {
 
-        const filtersMsg = JSON.stringify({ message: 'filters', filters });
-        const notifMsg = JSON.stringify({
-            message: 'notification', type: 'graph_changed', graphVersion
-        });
+            session.lock_filters(true);
+            const filters = allFilterInstances.map(f => gpac_filter_to_minimal_object(f));
+            session.lock_filters(false);
 
-        // History: write enriched snapshot once on first stabilization
-        if (!historyCollector.snapshotWritten) {
-            let commandLine = null;
-            try { commandLine = sys.args ? sys.args.join(' ') : null; } catch (_e) {}
-            const snapshot = snapshotBuilder.build(graphVersion, commandLine);
-            historyCollector.writeSnapshot(snapshot);
-        }
-
-        // History: record topology change
-        historyCollector.recordGraph(filters, graphVersion);
-
-        for (const client of getClients()) {
-            if (client.client) {
-                client.client.send(filtersMsg);
-                client.client.send(notifMsg);
+            // History: write enriched snapshot once on first stabilization
+            if (!historyCollector.snapshotWritten) {
+                let commandLine = null;
+                try { commandLine = sys.args ? sys.args.join(' ') : null; } catch (_e) {}
+                const snapshot = snapshotBuilder.build(graphVersion, commandLine);
+                historyCollector.writeSnapshot(snapshot);
             }
-        }
+
+            historyCollector.recordGraph(filters, allFilterInstances, graphVersion);
+            const filtersMsg = JSON.stringify({ message: 'filters', filters });
+            const notifMsg = JSON.stringify({
+                message: 'notification', type: 'graph_changed',
+                graphVersion: graphVersion
+            });
+
+            for (const client of getClients()) {
+                if (client.client) {
+                    client.client.send(filtersMsg);
+                    client.client.send(notifMsg);
+                }
+            }
+        });
     };
 }
 

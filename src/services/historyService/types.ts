@@ -15,7 +15,7 @@ interface BaseEvent {
 export interface FiltersEvent extends BaseEvent {
   message: 'filters';
   graph_v: number;
-  filters: HistorySnapshotFilter[];
+  filters: HistoryFilter[];
 }
 
 export interface SessionStatsEvent extends BaseEvent {
@@ -55,7 +55,7 @@ export type HistoryEvent =
   | CpuStatsEvent
   | FilterArgsUpdateEvent;
 
-export interface HistorySnapshotFilter {
+export interface HistoryFilter {
   idx: number;
   name: string;
   type: string;
@@ -67,6 +67,10 @@ export interface HistorySnapshotFilter {
   ipids?: Record<string, PIDproperties>;
   opids?: Record<string, PIDproperties>;
   gpac_args?: GpacArgument[];
+  properties?: {
+    ipids: Record<string, PIDproperties>;
+    opids: Record<string, PIDproperties>;
+  };
   [key: string]: unknown;
 }
 
@@ -75,5 +79,5 @@ export interface HistorySnapshot {
   ts_us: number;
   command_line: string | null;
   graph_v: number;
-  filters: HistorySnapshotFilter[];
+  filters: HistoryFilter[];
 }

@@ -1,5 +1,6 @@
 import { Sys as sys } from 'gpaccore';
 import { HistoryWriter } from './HistoryWriter.js';
+import { PidDataCollector } from '../JSClient/Filters/PID/PidDataCollector.js';
 
 const RATE_LIMIT_US = 1000 * 1000; // 1s
 const EVENT_VERSION = 1;
@@ -31,16 +32,24 @@ function HistoryCollector(historyDir) {
     /** Record graph topology change as WS-format event.
      *  Normalizes ipid/opid (singular, from gpac_filter_to_minimal_object)
      *  to ipids/opids (plural) — consistent with snapshot.json format. */
-    this.recordGraph = function(filters, graphVersion) {
-        const ts_us = sys.clock_us();
-        const normalizedFilters = filters.map((f) => {
+    this.recordGraph = function(filters, filterInstances, graphVersion) {
+        const pidCollector = graphVersion > 1 ? new PidDataCollector() : null;
+        const normalizedFilters = filters.map((f, i) => {
             const { ipid, opid, ...rest } = f;
-            return { ...rest, ipids: ipid ?? {}, opids: opid ?? {} };
+            const entry = { ...rest, ipids: ipid ?? {}, opids: opid ?? {} };
+            if (pidCollector) {
+                const inst = filterInstances[i];
+                entry.properties = {
+                    ipids: pidCollector.collectInputPids(inst),
+                    opids: pidCollector.collectOutputPids(inst),
+                };
+            }
+            return entry;
         });
         this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filters',
-            ts_us,
+            ts_us: sys.clock_us(),
             graph_v: graphVersion,
             filters: normalizedFilters,
         }));

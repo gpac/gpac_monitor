@@ -13,10 +13,10 @@ import type {
 import type { GraphFilterData } from '@/types/domain/gpac/model';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
-import type { HistorySnapshot, HistorySnapshotFilter } from './types';
+import type { HistorySnapshot, HistoryFilter } from './types';
 import { GpacStreamType } from '@/types';
 
-export function toGraphFilterData(f: HistorySnapshotFilter): GraphFilterData {
+export function toGraphFilterData(f: HistoryFilter): GraphFilterData {
   const ipid: GraphFilterData['ipid'] = {};
   const opid: GraphFilterData['opid'] = {};
 
@@ -53,7 +53,7 @@ export function toGraphFilterData(f: HistorySnapshotFilter): GraphFilterData {
   };
 }
 
-function toSessionFilterStats(f: HistorySnapshotFilter): SessionFilterStats {
+function toSessionFilterStats(f: HistoryFilter): SessionFilterStats {
   return {
     idx: f.idx,
     status: f.status,
@@ -68,7 +68,7 @@ function toSessionFilterStats(f: HistorySnapshotFilter): SessionFilterStats {
 }
 
 export function buildPidsByFilter(
-  filters: HistorySnapshotFilter[],
+  filters: HistoryFilter[],
 ): Record<string, FilterPids> {
   const result: Record<string, FilterPids> = {};
   for (const f of filters) {
@@ -80,7 +80,7 @@ export function buildPidsByFilter(
 }
 
 function buildArgsByFilter(
-  filters: HistorySnapshotFilter[],
+  filters: HistoryFilter[],
 ): Record<string, GpacArgument[]> {
   const result: Record<string, GpacArgument[]> = {};
   for (const f of filters) {

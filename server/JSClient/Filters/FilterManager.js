@@ -30,7 +30,9 @@ function FilterManager(client) {
             if (this.client.client) {
                 this.client.client.send(serialized);
             }
+           
         });
+        
     };
 
     this.requestDetails = function(idx) {
