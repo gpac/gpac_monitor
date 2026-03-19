@@ -1,7 +1,10 @@
 import { IoClose } from 'react-icons/io5';
 import { Checkbox } from '../../ui/checkbox';
 import { SearchBar } from '../../ui/search-bar';
-import { getColorForMediaType } from '@/utils/filters/streamType';
+import {
+  getFilterColor,
+  DEFAULT_STREAM_COLOR,
+} from '@/utils/filters/streamType';
 import { FilterType } from '@/types';
 
 interface PropertiesHeaderProps {
@@ -28,7 +31,9 @@ const PropertiesHeader = ({
   mode = 'filter',
   onSearchChange,
 }: PropertiesHeaderProps) => {
-  const borderColor = streamType ? getColorForMediaType(streamType) : '#4CC9F0';
+  const borderColor = streamType
+    ? getFilterColor(streamType)
+    : DEFAULT_STREAM_COLOR;
 
   return (
     <div className="bg-monitor-surface border-b border-monitor-line">
