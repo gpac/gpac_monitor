@@ -3,7 +3,7 @@ import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
 import { setCommandLine } from '@/shared/store/slices/sessionDetailsSlice';
 import {
   updateSessionStats,
-  hydrateFilterPids,
+  setFilterPidsFromSnapshot,
 } from '@/shared/store/slices/sessionStatsSlice';
 import { hydrateFilterArgs } from '@/shared/store/slices/filterArgumentSlice';
 import type {
@@ -98,7 +98,7 @@ export function hydrateFromSnapshot(
   dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
   dispatch(setCommandLine(snapshot.command_line));
   dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
-  dispatch(hydrateFilterPids(buildPidsByFilter(snapshot.filters)));
+  dispatch(setFilterPidsFromSnapshot(buildPidsByFilter(snapshot.filters)));
   dispatch(hydrateFilterArgs(buildArgsByFilter(snapshot.filters)));
   dispatch(setLoading(false));
 }

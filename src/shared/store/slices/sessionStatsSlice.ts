@@ -148,7 +148,8 @@ const sessionStatsSlice = createSlice({
       }
     },
 
-    hydrateFilterPids: (
+    /** Full replace — snapshot init only, never use for replay events */
+    setFilterPidsFromSnapshot: (
       state,
       action: PayloadAction<Record<string, FilterPids>>,
     ) => {
@@ -170,7 +171,7 @@ export const {
   subscribeToSessionStats,
   unsubscribeFromSessionStats,
   resetSessionStats,
-  hydrateFilterPids,
+  setFilterPidsFromSnapshot,
   clearFilterPids,
   applyPidsPatch,
 } = sessionStatsSlice.actions;

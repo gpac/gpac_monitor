@@ -2,7 +2,7 @@ import type { AppDispatch } from '@/shared/store';
 import { updateGraphData } from '@/shared/store/slices/graphSlice';
 import {
   updateSessionStats,
-  hydrateFilterPids,
+  applyPidsPatch,
 } from '@/shared/store/slices/sessionStatsSlice';
 import { applyArgUpdate } from '@/shared/store/slices/filterArgumentSlice';
 import type {
@@ -26,7 +26,7 @@ const handleFilters: EventHandler = (event, dispatch) => {
       ipids: f.properties!.ipids,
       opids: f.properties!.opids,
     }));
-    dispatch(hydrateFilterPids(buildPidsByFilter(pidsFromProps)));
+    dispatch(applyPidsPatch(buildPidsByFilter(pidsFromProps)));
   }
 };
 
