@@ -1,93 +1,17 @@
-import type { CPUStats } from '@/types/domain/system';
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { gpacService } from '@/services/gpacService';
-import { SubscriptionType } from '@/types/communication/subscription';
-import { useServiceReady } from '@/shared/hooks/useServiceReady';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { useCPUStatsHistory } from './useCPUStatsHistory';
+import { useCPUStatsLive } from './useCPUStatsLive';
+import type { CPUStatsResult } from './useCPUStatsHistory';
 
+export function useCPUStats(
+  enabled = true,
+  interval = 150,
+): CPUStatsResult {
+  const { mode } = useDataSource();
+  const isHistory = mode === 'history';
 
-export function useCPUStats(enabled = true, interval = 150) {
-  const [stats, setStats] = useState<CPUStats[]>([]);
-  const [currentCPU, setCurrentCPU] = useState(0);
-  const [currentMemory, setCurrentMemory] = useState(0);
-  const [totalCores, setTotalCores] = useState(0);
-  const { isReady } = useServiceReady({ enabled });
+  const history = useCPUStatsHistory();
+  const live = useCPUStatsLive(!isHistory && enabled, interval);
 
-
-  const statsRef = useRef<CPUStats[]>([]);
-  statsRef.current = stats;
-
-  const stableCallback = useRef((newStats: CPUStats) => {
-    setStats((prev) => {
-      const newStatsArray = [...prev.slice(-299), newStats];
-      return newStatsArray;
-    });
-
-    // Extract primitive values to avoid object reference issues
-    const cpu = newStats.process_cpu_usage || 0;
-    const memory = newStats.process_memory || 0;
-    const cores = newStats.nb_cores || 0;
-
-    setCurrentCPU((prev) => (prev !== cpu ? cpu : prev));
-    setCurrentMemory((prev) => (prev !== memory ? memory : prev));
-    setTotalCores((prev) => (prev !== cores ? cores : prev));
-  });
-
-  const handleStatsUpdate = useCallback((newStats: CPUStats) => {
-    stableCallback.current(newStats);
-  }, []);
-
-  useEffect(() => {
-    if ( !enabled || !isReady) {
-      if (stats.length > 0) {
-        setStats([]);
-      }
-      return;
-    }
-
-    let unsubscribe: (() => void) | null = null;
-    let isMounted = true;
-
-    const setupSubscription = async () => {
-      try {
-        const unsubscribeFunc = await gpacService.subscribe(
-          {
-            type: SubscriptionType.CPU_STATS,
-            interval,
-          },
-          (result) => {
-            if (result.data && isMounted) {
-              handleStatsUpdate(result.data as CPUStats);
-            }
-          },
-        );
-
-        if (isMounted) {
-          unsubscribe = unsubscribeFunc;
-        } else {
-          unsubscribeFunc();
-        }
-      } catch (error) {
-        if (isMounted) {
-          setStats([]);
-        }
-      }
-    };
-
-    setupSubscription();
-
-    return () => {
-      isMounted = false;
-      if (unsubscribe) {
-        unsubscribe();
-      }
-    };
-  }, [enabled, isReady, interval, handleStatsUpdate]);
-
-  return {
-    stats,
-    isSubscribed: stats.length > 0,
-    currentCPU,
-    currentMemory,
-    totalCores,
-  };
+  return isHistory ? history : live;
 }
