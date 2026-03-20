@@ -11,7 +11,6 @@ import { useStatsCalculations } from '../hooks/stats';
 import { useEnrichedStats } from '../hooks/stats';
 import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
-import { useSidebar } from '@/shared/hooks/useSidebar';
 import { clearPendingFilterOpen } from '@/shared/store/slices/graphSlice';
 import WidgetWrapper from '@/components/widget/WidgetWrapper';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
@@ -75,9 +74,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       handleOpenProperties,
     } = useFilterHandlers(setActiveTab);
 
-    // Sidebar Management
-    const { closeSidebar, sidebarContent } = useSidebar();
-
     // Effects
     // Listen for pending filter open requests from NodeToolbar
     const pendingFilterOpen = useAppSelector(
@@ -98,19 +94,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
         setActiveTab('main');
       }
     }, [activeTab, inlineFilterMap]);
-
-    // Auto-close sidebar when switching to a different filter
-    useEffect(() => {
-      if (sidebarContent) {
-        const currentFilterIdx = getFilterIdxFromTab(activeTab);
-        if (
-          currentFilterIdx !== null &&
-          currentFilterIdx !== sidebarContent.filterIdx
-        ) {
-          closeSidebar();
-        }
-      }
-    }, [activeTab, sidebarContent, closeSidebar]);
 
     // Auto-scroll to bottom when widget is detached
     useEffect(() => {
