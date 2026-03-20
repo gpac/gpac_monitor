@@ -24,20 +24,30 @@ export interface SessionStatsEvent extends BaseEvent {
   stats: SessionFilterStatistics[];
 }
 
+/** Direct GPAC sys fields — source of truth */
 export interface CpuStatsRawPayload {
-  total_cpu_usage: number;
-  process_cpu_usage: number;
-  process_memory: number;
-  physical_memory: number;
-  physical_memory_avail: number;
-  gpac_memory: number;
+  total_cpu_usage: number; // percent [0..100]
+  process_cpu_usage: number; // percent [0..100]
+  process_memory: number; // bytes
+  physical_memory: number; // bytes
+  physical_memory_avail: number; // bytes
+  gpac_memory: number; // bytes
   nb_cores: number;
   thread_count: number;
 }
 
+/** Derived fields computed server-side in buildCpuStatsPayload.
+ *  Always present in current recordings (default 0), optional for older files. */
+export interface CpuStatsComputed {
+  memory_usage_percent?: number; // percent [0..100]
+  process_memory_percent?: number;
+  gpac_memory_percent?: number;
+  cpu_efficiency?: number; // process_cpu / total_cpu * 100
+}
+
 export interface CpuStatsEvent extends BaseEvent {
   message: 'cpu_stats';
-  stats: CpuStatsRawPayload;
+  stats: CpuStatsRawPayload & CpuStatsComputed;
 }
 
 export interface FilterArgsUpdateEvent extends BaseEvent {

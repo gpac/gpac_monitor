@@ -8,10 +8,12 @@ import {
   applyArgUpdate,
   hydrateFilterArgs,
 } from '@/shared/store/slices/filterArgumentSlice';
+import { setSystemStats } from '@/shared/store/slices/sessionDetailsSlice';
 import type {
   HistoryEvent,
   FiltersEvent,
   SessionStatsEvent,
+  CpuStatsEvent,
   FilterArgsUpdateEvent,
 } from './types';
 import {
@@ -47,6 +49,20 @@ const handleSessionStats: EventHandler = (event, dispatch) => {
   dispatch(updateSessionStats({ stats: evt.stats as any, ts_us: evt.ts_us }));
 };
 
+const handleCpuStats: EventHandler = (event, dispatch) => {
+  const evt = event as CpuStatsEvent;
+  dispatch(
+    setSystemStats({
+      ...evt.stats,
+      timestamp: evt.ts_us,
+      memory_usage_percent: evt.stats.memory_usage_percent ?? 0,
+      process_memory_percent: evt.stats.process_memory_percent ?? 0,
+      gpac_memory_percent: evt.stats.gpac_memory_percent ?? 0,
+      cpu_efficiency: evt.stats.cpu_efficiency ?? 0,
+    }),
+  );
+};
+
 const handleFilterArgsUpdate: EventHandler = (event, dispatch) => {
   const evt = event as FilterArgsUpdateEvent;
   dispatch(
@@ -61,8 +77,8 @@ const handleFilterArgsUpdate: EventHandler = (event, dispatch) => {
 const handlers: Record<string, EventHandler> = {
   filters: handleFilters,
   session_stats: handleSessionStats,
+  cpu_stats: handleCpuStats,
   filter_args_update: handleFilterArgsUpdate,
-  // cpu_stats: skipped in V2 (not stored in Redux yet)
 };
 
 /**
