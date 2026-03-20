@@ -30,6 +30,7 @@ export interface SessionStatsState {
   pidsByFilter: Record<string, FilterPids>;
   selectedFilterId: string | null;
   lastUpdate: number | null;
+  lastUpdateUs: number | null;
   isLoading: boolean;
   subscribedComponents: string[];
   isSubscribed: boolean;
@@ -42,6 +43,7 @@ const initialState: SessionStatsState = {
   pidsByFilter: {},
   selectedFilterId: null,
   lastUpdate: null,
+  lastUpdateUs: null,
   isLoading: false,
   subscribedComponents: [],
   isSubscribed: false,
@@ -53,13 +55,25 @@ const sessionStatsSlice = createSlice({
   reducers: {
     updateSessionStats: (
       state,
-      action: PayloadAction<SessionFilterStats[]>,
+      action: PayloadAction<
+        SessionFilterStats[] | { stats: SessionFilterStats[]; ts_us?: number }
+      >,
     ) => {
+      const isArray = Array.isArray(action.payload);
+      const stats = isArray
+        ? (action.payload as SessionFilterStats[])
+        : (action.payload as { stats: SessionFilterStats[]; ts_us?: number })
+            .stats;
+      const ts_us = isArray
+        ? undefined
+        : (action.payload as { stats: SessionFilterStats[]; ts_us?: number })
+            .ts_us;
+
       // Save previous stats for stall detection
       state.previousSessionStats = state.sessionStats;
 
       const newStats: Record<string, SessionFilterStats> = {};
-      action.payload.forEach((filter) => {
+      stats.forEach((filter) => {
         const prevFilter = state.sessionStats[filter.idx.toString()];
 
         // Preserve is_eos once it's been set to true
@@ -72,6 +86,7 @@ const sessionStatsSlice = createSlice({
       });
       state.sessionStats = newStats;
       state.lastUpdate = Date.now();
+      state.lastUpdateUs = ts_us ?? null;
       state.isLoading = false;
     },
 

@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react';
 import { LuUpload, LuDownload } from 'react-icons/lu';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { NetworkTabData } from '@/types/ui';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +24,7 @@ const NetworkTab = memo(
     filterName,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
   }: NetworkTabProps) => {
+    const { mode } = useDataSource();
     const { currentStats, instantRates, formattedStats, getActivityLevel } =
       useNetworkMetrics(data, filterName);
 
@@ -44,7 +46,12 @@ const NetworkTab = memo(
           <span className={TAB_STYLES.STATUS_SEPARATOR}>·</span>
           <span className={TAB_STYLES.STATUS_LABEL}>Filter: {filterName}</span>
           <span className="ml-auto text-muted-foreground/70 text-xs">
-            Live <span className="text-error ">⏺</span>
+            {mode === 'history' ? 'History' : 'Live'}{' '}
+            <span
+              className={mode === 'history' ? 'text-warning' : 'text-error'}
+            >
+              ⏺
+            </span>
           </span>
         </div>
 

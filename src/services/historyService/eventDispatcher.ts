@@ -23,10 +23,10 @@ import {
 type EventHandler = (event: HistoryEvent, dispatch: AppDispatch) => void;
 
 const handleFilters: EventHandler = (event, dispatch) => {
-  const e = event as FiltersEvent;
-  dispatch(updateGraphData(e.filters.map(toGraphFilterData)));
+  const evt = event as FiltersEvent;
+  dispatch(updateGraphData(evt.filters.map(toGraphFilterData)));
 
-  const filtersWithProps = e.filters.filter((f) => f.properties);
+  const filtersWithProps = evt.filters.filter((f) => f.properties);
   if (filtersWithProps.length) {
     const pidsFromProps = filtersWithProps.map((f) => ({
       ...f,
@@ -36,24 +36,24 @@ const handleFilters: EventHandler = (event, dispatch) => {
     dispatch(setFilterPids(buildPidsByFilter(pidsFromProps)));
   }
 
-  const argsByFilter = buildArgsByFilter(e.filters);
+  const argsByFilter = buildArgsByFilter(evt.filters);
   if (Object.keys(argsByFilter).length) {
     dispatch(hydrateFilterArgs(argsByFilter));
   }
 };
 
 const handleSessionStats: EventHandler = (event, dispatch) => {
-  const e = event as SessionStatsEvent;
-  dispatch(updateSessionStats(e.stats as any));
+  const evt = event as SessionStatsEvent;
+  dispatch(updateSessionStats({ stats: evt.stats as any, ts_us: evt.ts_us }));
 };
 
 const handleFilterArgsUpdate: EventHandler = (event, dispatch) => {
-  const e = event as FilterArgsUpdateEvent;
+  const evt = event as FilterArgsUpdateEvent;
   dispatch(
     applyArgUpdate({
-      filterIdx: e.payload.filter_idx.toString(),
-      argName: e.payload.arg_name,
-      value: e.payload.value,
+      filterIdx: evt.payload.filter_idx.toString(),
+      argName: evt.payload.arg_name,
+      value: evt.payload.value,
     }),
   );
 };

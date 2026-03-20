@@ -27,6 +27,9 @@ export const selectPreviousSessionStats = createSelector(
   (sessionStatsState) => sessionStatsState.previousSessionStats,
 );
 
+export const selectLastUpdateUs = (state: RootState): number | null =>
+  state.sessionStats.lastUpdateUs;
+
 /**
  * A filter is stalled if it's not EOS and shows no activity.
  * Activity is detected through ANY of these metrics:
