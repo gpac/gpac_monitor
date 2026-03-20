@@ -9,6 +9,7 @@ import {
   hydrateFilterArgs,
 } from '@/shared/store/slices/filterArgumentSlice';
 import { setSystemStats } from '@/shared/store/slices/sessionDetailsSlice';
+import { dispatchBandwidthPoints } from './bandwidthReplay';
 import type {
   HistoryEvent,
   FiltersEvent,
@@ -47,6 +48,7 @@ const handleFilters: EventHandler = (event, dispatch) => {
 const handleSessionStats: EventHandler = (event, dispatch) => {
   const evt = event as SessionStatsEvent;
   dispatch(updateSessionStats({ stats: evt.stats as any, ts_us: evt.ts_us }));
+  dispatchBandwidthPoints(evt, dispatch);
 };
 
 const handleCpuStats: EventHandler = (event, dispatch) => {

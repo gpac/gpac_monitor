@@ -1,5 +1,7 @@
 import type { AppDispatch } from '@/shared/store';
 import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
+import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
+import { resetBandwidthReplay } from './bandwidthReplay';
 import { setCommandLine } from '@/shared/store/slices/sessionDetailsSlice';
 import {
   updateSessionStats,
@@ -95,6 +97,10 @@ export function hydrateFromSnapshot(
   snapshot: HistorySnapshot,
   dispatch: AppDispatch,
 ): void {
+  // Reset per-session state before replaying a new history session
+  resetBandwidthReplay();
+  dispatch(resetAllData());
+
   dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
   dispatch(setCommandLine(snapshot.command_line));
   dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
