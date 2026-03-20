@@ -103,7 +103,10 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     useEffect(() => {
       if (sidebarContent) {
         const currentFilterIdx = getFilterIdxFromTab(activeTab);
-        if (currentFilterIdx !== sidebarContent.filterIdx) {
+        if (
+          currentFilterIdx !== null &&
+          currentFilterIdx !== sidebarContent.filterIdx
+        ) {
           closeSidebar();
         }
       }
