@@ -18,9 +18,11 @@ export class HistoryController {
 
   async load(snapshotFile: File, eventsFile: File, dispatch: AppDispatch) {
     const snapshot: HistorySnapshot = JSON.parse(await snapshotFile.text());
-    hydrateFromSnapshot(snapshot, dispatch);
-
     const events = await loadEventsFile(eventsFile);
+
+    const sessionStartUs = events[0]?.ts_us ?? 0;
+    hydrateFromSnapshot(snapshot, dispatch, sessionStartUs);
+
     this.player.load(events, dispatch);
   }
 

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 
 import { CpuMemoryChartUplot } from './components/CpuMemoryChartUplot';
 import { CpuMemoryOverview } from './components/CpuMemoryOverview';
@@ -39,10 +40,11 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   }) as { ref: React.RefObject<HTMLElement> };
   const containerRef = ref as React.RefObject<HTMLDivElement>;
 
-  const { isSubscribed, currentCPU, currentMemory, totalCores } = useCPUStats(
-    true,
-    CHART_CPU_UPDATE_INTERVAL,
-  );
+  const { mode } = useDataSource();
+  const isHistory = mode === 'history';
+
+  const { isSubscribed, currentCPU, currentMemory, totalCores, stats } =
+    useCPUStats(true, CHART_CPU_UPDATE_INTERVAL);
 
   const metricsValues = useMemo(
     () => ({
@@ -84,6 +86,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
             isLive={!isResizing}
             maxPoints={maxPoints}
             windowDuration={windowDuration}
+            historyStats={isHistory ? stats : undefined}
           />
         </div>
       </div>

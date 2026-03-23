@@ -19,7 +19,11 @@ export function useCPUStatsHistory(): CPUStatsResult {
   const prevTimestampRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!systemStats) return;
+    if (!systemStats) {
+      setStats([]);
+      prevTimestampRef.current = null;
+      return;
+    }
     // Guard: skip if same timestamp (snapshot hydration re-renders)
     if (systemStats.timestamp === prevTimestampRef.current) return;
     prevTimestampRef.current = systemStats.timestamp;

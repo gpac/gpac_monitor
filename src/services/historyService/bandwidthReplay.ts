@@ -1,15 +1,17 @@
 import type { AppDispatch } from '@/shared/store';
 import { addNetworkDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
-import { formatChartTime } from '@/utils/formatting';
+import { formatCompactTime } from '@/utils/formatting';
 import type { SessionStatsEvent } from './types';
 
 // Per-session state — reset when a new history session loads
 type BandwidthRef = { bytes_sent: number; bytes_done: number; ts_us: number };
 let prevBandwidth: Record<string, BandwidthRef> = {};
+let sessionStartUs = 0;
 
 /** Reset state. Call from snapshotHydrator when loading a new history session. */
-export function resetBandwidthReplay() {
+export function resetBandwidthReplay(startUs = 0) {
   prevBandwidth = {};
+  sessionStartUs = startUs;
 }
 
 /**
@@ -21,7 +23,7 @@ export function dispatchBandwidthPoints(
   evt: SessionStatsEvent,
   dispatch: AppDispatch,
 ): void {
-  const time = formatChartTime();
+  const time = formatCompactTime(evt.ts_us - sessionStartUs);
 
   for (const filter of evt.stats) {
     const filterId = filter.idx.toString();

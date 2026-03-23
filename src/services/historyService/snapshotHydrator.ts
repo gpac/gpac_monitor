@@ -2,7 +2,10 @@ import type { AppDispatch } from '@/shared/store';
 import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
 import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
 import { resetBandwidthReplay } from './bandwidthReplay';
-import { setCommandLine } from '@/shared/store/slices/sessionDetailsSlice';
+import {
+  setCommandLine,
+  clearSessionDetails,
+} from '@/shared/store/slices/sessionDetailsSlice';
 import {
   updateSessionStats,
   setFilterPids,
@@ -96,10 +99,12 @@ export function buildArgsByFilter(
 export function hydrateFromSnapshot(
   snapshot: HistorySnapshot,
   dispatch: AppDispatch,
+  sessionStartUs = 0,
 ): void {
   // Reset per-session state before replaying a new history session
-  resetBandwidthReplay();
+  resetBandwidthReplay(sessionStartUs);
   dispatch(resetAllData());
+  dispatch(clearSessionDetails());
 
   dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
   dispatch(setCommandLine(snapshot.command_line));

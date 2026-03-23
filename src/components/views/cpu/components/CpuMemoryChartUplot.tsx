@@ -6,7 +6,9 @@ import { createCpuMemoryUplotConfig } from './uplotConfig';
 import {
   prepareCpuMemoryData,
   calculateMemoryYMax,
+  type CpuMemoryDataPoint,
 } from '@/utils/charts/cpuMemory';
+import type { CPUStats } from '@/types/domain/system';
 
 interface CpuMemoryChartUplotProps {
   currentCPUPercent: number;
@@ -14,6 +16,7 @@ interface CpuMemoryChartUplotProps {
   isLive: boolean;
   maxPoints?: number;
   windowDuration?: number;
+  historyStats?: CPUStats[];
 }
 
 export const CpuMemoryChartUplot = memo(
@@ -23,6 +26,7 @@ export const CpuMemoryChartUplot = memo(
     isLive,
     maxPoints = 400,
     windowDuration,
+    historyStats,
   }: CpuMemoryChartUplotProps) => {
     const currentMemoryMB = useMemo(
       () => currentMemoryBytes / (1024 * 1024),
@@ -34,14 +38,26 @@ export const CpuMemoryChartUplot = memo(
       [currentMemoryMB],
     );
 
-    const { dataPoints } = useChartData(
+    // In history mode, bypass live accumulation and use GPAC timestamps directly
+    const { dataPoints: liveDataPoints } = useChartData(
       currentCPUPercent,
       currentMemoryMB,
-      isLive,
+      historyStats ? false : isLive,
       maxPoints,
       windowDuration,
       150,
     );
+
+    const historyDataPoints = useMemo((): CpuMemoryDataPoint[] => {
+      if (!historyStats) return [];
+      return historyStats.map((s) => ({
+        timestamp: s.timestamp / 1000, // µs → ms
+        cpu_percent: s.process_cpu_usage,
+        memory_mb: s.process_memory / (1024 * 1024),
+      }));
+    }, [historyStats]);
+
+    const dataPoints = historyStats ? historyDataPoints : liveDataPoints;
 
     const options = useMemo(() => {
       return createCpuMemoryUplotConfig({ memoryYAxisMax });
