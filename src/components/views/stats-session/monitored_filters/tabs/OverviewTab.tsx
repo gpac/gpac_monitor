@@ -10,6 +10,7 @@ import {
   type FilterAlerts,
 } from '../cards/shared/statusHelpers';
 import { TAB_STYLES } from './styles';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
@@ -22,6 +23,8 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
   const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
   const healthInfo = getFilterHealthInfo(status, isStalled, alerts);
   const formattedUptime = formatTime(time);
+  const { mode } = useDataSource();
+  const isHistory = mode === 'history';
 
   return (
     <div className="flex flex-col h-full gap-2 p-2">
@@ -42,7 +45,13 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
           <span className="font-medium tabular-nums">{formattedUptime}</span>
         </span>
         <span className="ml-auto text-muted-foreground/70 text-xs">
-          Live <span className="text-error ">⏺</span>
+          {isHistory ? (
+            <span className="text-amber-400">◼ History</span>
+          ) : (
+            <>
+              Live <span className="text-error">⏺</span>
+            </>
+          )}
         </span>
       </div>
 

@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { LuHistory, LuX } from 'react-icons/lu';
+import { LuClapperboard, LuX } from 'react-icons/lu';
 
 interface HistoryLoaderProps {
   onHistoryLoadFull: (snapshotFile: File, eventsFile: File) => void;
@@ -46,7 +46,7 @@ const HistoryLoader = ({ onHistoryLoadFull }: HistoryLoaderProps) => {
         title="Load history"
         aria-label="Load history"
       >
-        <LuHistory className="w-4 h-4" />
+        <LuClapperboard className="w-4 h-4" />
       </button>
 
       {isOpen && (
