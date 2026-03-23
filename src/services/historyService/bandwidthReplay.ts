@@ -29,7 +29,23 @@ export function dispatchBandwidthPoints(
     const filterId = filter.idx.toString();
     const prev = prevBandwidth[filterId];
 
-    if (prev) {
+    if (!prev) {
+      // Anchor point at first observed event for this filter (value=0, rate not yet computable)
+      dispatch(
+        addNetworkDataPoint({
+          filterId,
+          type: 'upload',
+          point: { time, timestamp: evt.ts_us, value: 0 },
+        }),
+      );
+      dispatch(
+        addNetworkDataPoint({
+          filterId,
+          type: 'download',
+          point: { time, timestamp: evt.ts_us, value: 0 },
+        }),
+      );
+    } else {
       const deltaTimeSec = (evt.ts_us - prev.ts_us) / 1_000_000;
       if (deltaTimeSec > 0) {
         const uploadRate = Math.max(

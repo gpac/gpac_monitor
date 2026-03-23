@@ -69,12 +69,7 @@ export const formatChartSeconds = (seconds: number): string => {
 /**
  * Format time in compact form for dashboard display
  * Input: microseconds from GPAC (f.time)
- * Output: Compact readable format
- * - < 1ms: "123μs"
- * - < 1s: "45ms"
- * - < 1min: "12.3s"
- * - < 1h: "22:59" (mm:ss format)
- * - >= 1h: "1:23h" (h:mm format)
+
  */
 export const formatCompactTime = (microseconds?: number): string => {
   if (microseconds === undefined || microseconds === 0) return '0ms';
@@ -108,4 +103,3 @@ export const formatCompactTime = (microseconds?: number): string => {
   const mmFormatted = minutes.toString().padStart(2, '0');
   return `${hours}:${mmFormatted}h`;
 };
-
