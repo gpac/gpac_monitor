@@ -22,9 +22,7 @@ export const formatTime = (microseconds?: number): string => {
 };
 
 export const microsecondsToSeconds = (microseconds: number): number => {
-  if (microseconds === 0) return 1; // Avoid division by zero
-  const milliseconds = microseconds / 1000;
-  return milliseconds / 1000;
+  return microseconds / 1_000_000;
 };
 
 /**

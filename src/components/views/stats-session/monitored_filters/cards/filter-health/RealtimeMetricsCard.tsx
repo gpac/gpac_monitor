@@ -23,8 +23,8 @@ const calculateMetrics = (filter: OverviewTabData): CalculatedMetrics => {
 
   const timeInSeconds = microsecondsToSeconds(time);
 
-  const throughput = bytes_done / timeInSeconds;
-  const packetRate = pck_done / timeInSeconds;
+  const throughput = timeInSeconds > 0 ? bytes_done / timeInSeconds : 0;
+  const packetRate = timeInSeconds > 0 ? pck_done / timeInSeconds : 0;
   const efficiencyValue = bytes_sent > 0 ? (bytes_done / bytes_sent) * 100 : 0;
 
   return {

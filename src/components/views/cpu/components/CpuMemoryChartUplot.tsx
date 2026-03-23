@@ -13,7 +13,7 @@ import type { CPUStats } from '@/types/domain/system';
 interface CpuMemoryChartUplotProps {
   currentCPUPercent: number;
   currentMemoryBytes: number;
-  isLive: boolean;
+  animating: boolean;
   maxPoints?: number;
   windowDuration?: number;
   historyStats?: CPUStats[];
@@ -23,7 +23,7 @@ export const CpuMemoryChartUplot = memo(
   ({
     currentCPUPercent,
     currentMemoryBytes,
-    isLive,
+    animating,
     maxPoints = 400,
     windowDuration,
     historyStats,
@@ -42,7 +42,7 @@ export const CpuMemoryChartUplot = memo(
     const { dataPoints: liveDataPoints } = useChartData(
       currentCPUPercent,
       currentMemoryMB,
-      historyStats ? false : isLive,
+      historyStats ? false : animating,
       maxPoints,
       windowDuration,
       150,
