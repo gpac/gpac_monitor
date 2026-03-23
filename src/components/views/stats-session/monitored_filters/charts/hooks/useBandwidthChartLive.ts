@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { formatBytes, formatChartTime } from '@/utils/formatting';
+import { formatBytes, formatCompactTime } from '@/utils/formatting';
 import {
   addNetworkDataPoint,
   ChartDataPoint,
@@ -36,6 +36,7 @@ export const useBandwidthChartLive = ({
 
   const lastBytesRef = useRef<number>(currentBytes);
   const lastTimestampRef = useRef<number>(Date.now());
+  const sessionStartMsRef = useRef<number | null>(null);
   const currentBytesRef = useRef<number>(currentBytes);
   const isInitializedRef = useRef<boolean>(false);
 
@@ -50,8 +51,12 @@ export const useBandwidthChartLive = ({
 
   const addSamplePoint = useCallback(
     (bytesPerSecond: number, sampleTimestamp: number) => {
+      if (sessionStartMsRef.current === null) {
+        sessionStartMsRef.current = sampleTimestamp;
+      }
+      const elapsedUs = (sampleTimestamp - sessionStartMsRef.current) * 1000;
       const newPoint: ChartDataPoint = {
-        time: formatChartTime(),
+        time: formatCompactTime(elapsedUs),
         timestamp: sampleTimestamp,
         value: bytesPerSecond,
       };

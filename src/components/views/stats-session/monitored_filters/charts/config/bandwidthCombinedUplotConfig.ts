@@ -86,7 +86,7 @@ export const createBandwidthCombinedConfig = ({
             : '--';
 
           tooltip.innerHTML = `
-      <div style="margin-bottom: 4px; color: #6ee7b7;">Time: ${time}</div>
+      <div style="margin-bottom: 4px; color: #6ee7b7;">Elapsed: ${time}</div>
       <div style="color: #10b981;">Upload: ${upload}</div>
       <div style="color: #3b82f6;">Download: ${download}</div>
     `;
@@ -120,6 +120,7 @@ export const createBandwidthCombinedConfig = ({
     },
     axes: [
       {
+        label: 'Session time',
         stroke: '#6ee7b7',
         grid: { show: true, stroke: 'rgba(110, 231, 183, 0.1)', width: 1 },
         ticks: { stroke: '#6ee7b7', size: 5, width: 1 },
