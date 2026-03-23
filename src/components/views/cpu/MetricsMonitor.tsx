@@ -43,8 +43,10 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   const { mode } = useDataSource();
   const isHistory = mode === 'history';
 
+  // In history mode: unlimited buffer to show full session; live mode: respect user-selected duration
+  const bufferMaxPoints = isHistory ? Infinity : maxPoints;
   const { isSubscribed, currentCPU, currentMemory, totalCores, stats } =
-    useCPUStats(true, CHART_CPU_UPDATE_INTERVAL);
+    useCPUStats(true, CHART_CPU_UPDATE_INTERVAL, bufferMaxPoints);
 
   const metricsValues = useMemo(
     () => ({
