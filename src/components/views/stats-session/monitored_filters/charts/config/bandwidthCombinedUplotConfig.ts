@@ -62,6 +62,7 @@ export const createBandwidthCombinedConfig = ({
 
           //  if idx is null during a refresh, don't change anything
           if (idx == null) {
+            tooltip.style.display = 'none';
             return;
           }
 
