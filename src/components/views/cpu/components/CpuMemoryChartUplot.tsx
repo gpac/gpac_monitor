@@ -41,7 +41,7 @@ export const CpuMemoryChartUplot = memo(
     const { dataPoints: liveDataPoints } = useChartData(
       currentCPUPercent,
       currentMemoryMB,
-      historyStats ? false : animating,
+      animating,
       maxPoints,
       windowDuration,
       150,
