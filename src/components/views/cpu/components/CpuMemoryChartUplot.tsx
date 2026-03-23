@@ -38,7 +38,6 @@ export const CpuMemoryChartUplot = memo(
       [currentMemoryMB],
     );
 
-    // In history mode, bypass live accumulation and use GPAC timestamps directly
     const { dataPoints: liveDataPoints } = useChartData(
       currentCPUPercent,
       currentMemoryMB,

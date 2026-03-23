@@ -11,9 +11,11 @@ export interface CPUStatsResult {
   totalCores: number;
 }
 
-const MAX_POINTS = 300;
+const DEFAULT_MAX_POINTS = 300;
 
-export function useCPUStatsHistory(): CPUStatsResult {
+export function useCPUStatsHistory(
+  maxPoints = DEFAULT_MAX_POINTS,
+): CPUStatsResult {
   const systemStats = useSelector(selectSystemStats);
   const [stats, setStats] = useState<CPUStats[]>([]);
   const prevTimestampRef = useRef<number | null>(null);
@@ -30,7 +32,7 @@ export function useCPUStatsHistory(): CPUStatsResult {
 
     setStats((prev) => {
       const next = [...prev, systemStats];
-      return next.length > MAX_POINTS ? next.slice(-MAX_POINTS) : next;
+      return next.length > maxPoints ? next.slice(-maxPoints) : next;
     });
   }, [systemStats]);
 

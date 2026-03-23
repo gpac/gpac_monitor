@@ -24,7 +24,7 @@ interface MetricsMonitorProps {
 const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   const [isResizing, setIsResizing] = useState(false);
 
-  // Chart duration management (encapsulated logic)
+  // Chart duration management
   const { duration, setDuration, windowDuration, maxPoints } = useChartDuration(
     CPU_HISTORY_STORAGE_KEY,
     DEFAULT_CPU_HISTORY,
@@ -51,7 +51,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   const metricsValues = useMemo(
     () => ({
       currentCPUPercent: currentCPU,
-      currentMemoryPercent: 0, // Not used, keeping for compatibility
+      currentMemoryPercent: 0,
       currentMemoryProcess: currentMemory,
       totalCores,
       isLoading: !isSubscribed,
