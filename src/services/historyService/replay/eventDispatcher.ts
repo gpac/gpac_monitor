@@ -16,12 +16,12 @@ import type {
   SessionStatsEvent,
   CpuStatsEvent,
   FilterArgsUpdateEvent,
-} from './types';
+} from '../types';
 import {
   toGraphFilterData,
   buildPidsByFilter,
   buildArgsByFilter,
-} from './snapshotHydrator';
+} from '../loader/snapshotHydrator';
 
 type EventHandler = (event: HistoryEvent, dispatch: AppDispatch) => void;
 

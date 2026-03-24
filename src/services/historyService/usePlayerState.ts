@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import type { PlayerState } from './eventPlayer';
+import type { PlayerState } from './replay/eventPlayer';
 import { historyController } from './historyController';
 
 export interface PlayerSnapshot {

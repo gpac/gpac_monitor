@@ -1,4 +1,4 @@
-import type { HistorySnapshot } from './types';
+import type { HistorySnapshot } from '../types';
 
 export class SnapshotLoadError extends Error {
   constructor(message: string) {
@@ -20,7 +20,11 @@ export function loadSnapshotFile(file: File): Promise<HistorySnapshot> {
         }
         resolve(data as HistorySnapshot);
       } catch (err) {
-        reject(err instanceof SnapshotLoadError ? err : new SnapshotLoadError('Failed to parse snapshot.json'));
+        reject(
+          err instanceof SnapshotLoadError
+            ? err
+            : new SnapshotLoadError('Failed to parse snapshot.json'),
+        );
       }
     };
 

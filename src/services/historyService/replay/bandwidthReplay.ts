@@ -1,7 +1,7 @@
 import type { AppDispatch } from '@/shared/store';
 import { addNetworkDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
 import { formatCompactTime } from '@/utils/formatting';
-import type { SessionStatsEvent } from './types';
+import type { SessionStatsEvent } from '../types';
 
 // Per-session state — reset when a new history session loads
 type BandwidthRef = { bytes_sent: number; bytes_done: number; ts_us: number };

@@ -6,7 +6,7 @@ import { clearFilterPids } from '@/shared/store/slices/sessionStatsSlice';
 import { clearFilterArgs } from '@/shared/store/slices/filterArgumentSlice';
 import { historyController } from '@/services/historyService/historyController';
 import type { HistorySnapshot } from '@/services/historyService/types';
-import { hydrateFromSnapshot } from '@/services/historyService/snapshotHydrator';
+import { hydrateFromSnapshot } from '@/services/historyService/loader/snapshotHydrator';
 import type { AppDispatch } from '@/shared/store';
 
 export type DataSourceMode = 'live' | 'history';

@@ -1,5 +1,5 @@
 import type { AppDispatch } from '@/shared/store';
-import type { HistoryEvent } from './types';
+import type { HistoryEvent } from '../types';
 import { dispatchEvent } from './eventDispatcher';
 
 export type PlayerState = 'idle' | 'playing' | 'paused' | 'done';

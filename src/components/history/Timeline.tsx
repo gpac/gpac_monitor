@@ -1,7 +1,7 @@
 import { LuPause, LuPlay } from 'react-icons/lu';
 import { Progress } from '@/components/ui/progress';
 import { formatCompactTime } from '@/utils/formatting/time';
-import type { PlayerState } from '@/services/historyService/eventPlayer';
+import type { PlayerState } from '@/services/historyService/replay/eventPlayer';
 
 interface TimelineProps {
   state: PlayerState;

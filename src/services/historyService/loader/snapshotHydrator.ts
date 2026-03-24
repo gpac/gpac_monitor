@@ -1,7 +1,7 @@
 import type { AppDispatch } from '@/shared/store';
 import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
 import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
-import { resetBandwidthReplay } from './bandwidthReplay';
+import { resetBandwidthReplay } from '../replay/bandwidthReplay';
 import {
   setCommandLine,
   clearSessionDetails,
@@ -18,7 +18,7 @@ import type {
 import type { GraphFilterData } from '@/types/domain/gpac/model';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
-import type { HistorySnapshot, HistoryFilter } from './types';
+import type { HistorySnapshot, HistoryFilter } from '../types';
 import { GpacStreamType } from '@/types';
 
 export function toGraphFilterData(f: HistoryFilter): GraphFilterData {
