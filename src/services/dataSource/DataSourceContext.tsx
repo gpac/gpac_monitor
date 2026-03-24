@@ -9,7 +9,12 @@ import type { HistorySnapshot } from '@/services/historyService/types';
 import { hydrateFromSnapshot } from '@/services/historyService/snapshotHydrator';
 import type { AppDispatch } from '@/shared/store';
 
-type DataSourceMode = 'live' | 'history';
+export type DataSourceMode = 'live' | 'history';
+
+const getInitialMode = (): DataSourceMode => {
+  const params = new URLSearchParams(window.location.search);
+  return params.get('mode') === 'history' ? 'history' : 'live';
+};
 
 interface DataSourceContextValue {
   mode: DataSourceMode;
@@ -31,7 +36,7 @@ export function DataSourceProvider({
   children: React.ReactNode;
 }) {
   const dispatch = useDispatch<AppDispatch>();
-  const [mode, setMode] = useState<DataSourceMode>('live');
+  const [mode, setMode] = useState<DataSourceMode>(getInitialMode);
 
   const switchToHistory = useCallback(
     (snapshot: HistorySnapshot) => {

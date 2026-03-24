@@ -1,24 +1,29 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { FiLayout } from 'react-icons/fi';
-import { LuPanelLeft, LuPanelLeftClose, LuRotateCw } from 'react-icons/lu';
+import {
+  LuClapperboard,
+  LuPanelLeft,
+  LuPanelLeftClose,
+  LuRotateCw,
+} from 'react-icons/lu';
 import { LayoutManager } from '../header/LayoutManager';
 import WidgetSelector from '../../widget/WidgetSelector';
 import ConnectionSelector from '../connection/ConnectionSelector';
 import LogCounters from './LogCounters';
-import HistoryLoader from '@/components/history/HistoryLoader';
 import HistoryControls from '@/components/history/HistoryControls';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
 
-interface HeaderProps {
-  onHistoryLoadFull?: (snapshotFile: File, eventsFile: File) => void;
-}
-
-const Header = ({ onHistoryLoadFull }: HeaderProps) => {
+const Header = () => {
   const dispatch = useAppDispatch();
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const { mode } = useDataSource();
+  const openHistoryTab = useCallback(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('mode', 'history');
+    window.open(url.toString(), '_blank');
+  }, []);
   const [showLayoutManager, setShowLayoutManager] = useState(false);
   const [showWidgetSelector, setShowWidgetSelector] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -58,8 +63,15 @@ const Header = ({ onHistoryLoadFull }: HeaderProps) => {
           >
             <LuRotateCw className="w-4 h-4" />
           </button>
-          {onHistoryLoadFull && (
-            <HistoryLoader onHistoryLoadFull={onHistoryLoadFull} />
+          {mode === 'live' && (
+            <button
+              onClick={openHistoryTab}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800"
+              title="Open history in new tab"
+            >
+              <LuClapperboard className="w-4 h-4" />
+              History
+            </button>
           )}
           {mode !== 'history' && (
             <span aria-label="Connection selector" title="Connection selector">
