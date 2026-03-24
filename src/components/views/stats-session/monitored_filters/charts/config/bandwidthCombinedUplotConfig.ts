@@ -8,13 +8,16 @@ export interface BandwidthCombinedConfigParams {
   timeLabelsRef: React.MutableRefObject<string[]>;
   width?: number;
   height?: number;
+  isHistory?: boolean;
 }
 
 export const createBandwidthCombinedConfig = ({
   timeLabelsRef,
   width = 400,
   height = 180,
+  isHistory = false,
 }: BandwidthCombinedConfigParams): uPlot.Options => {
+  const timeLabel = isHistory ? 'Session time' : 'Time';
   return {
     width,
     height,
@@ -87,7 +90,7 @@ export const createBandwidthCombinedConfig = ({
             : '--';
 
           tooltip.innerHTML = `
-      <div style="margin-bottom: 4px; color: #6ee7b7;">Elapsed: ${time}</div>
+      <div style="margin-bottom: 4px; color: #6ee7b7;">${timeLabel}: ${time}</div>
       <div style="color: #10b981;">Upload: ${upload}</div>
       <div style="color: #3b82f6;">Download: ${download}</div>
     `;
@@ -121,7 +124,7 @@ export const createBandwidthCombinedConfig = ({
     },
     axes: [
       {
-        label: 'Session time',
+        label: timeLabel,
         stroke: '#6ee7b7',
         grid: { show: true, stroke: 'rgba(110, 231, 183, 0.1)', width: 1 },
         ticks: { stroke: '#6ee7b7', size: 5, width: 1 },
@@ -129,8 +132,11 @@ export const createBandwidthCombinedConfig = ({
         size: 50,
         values: (_u, vals) =>
           vals.map((v) => {
-            const idx = v as number;
-            return timeLabelsRef.current[idx] || '';
+            const label = timeLabelsRef.current[v as number] || '';
+            // In live mode, strip hours prefix (HH:MM:SS → MM:SS)
+            return !isHistory && label.includes(':')
+              ? label.slice(label.indexOf(':') + 1)
+              : label;
           }),
       },
       {
