@@ -1,5 +1,8 @@
 import { DEFAULT_FILTER_FIELDS, UPDATE_INTERVALS } from '../config.js';
 import { cacheManager } from '../Cache/CacheManager.js';
+import { HistoryFileReader } from '../../history/HistoryFileReader.js';
+
+const historyReader = new HistoryFileReader('history');
 
 function MessageHandler(client) {
     this.client = client;
@@ -121,6 +124,36 @@ function MessageHandler(client) {
                             message: 'cache_stats',
                             stats: stats
                         }));
+                    },
+
+                    'list_sessions': () => {
+                        const sessions = historyReader.listSessions();
+                        this.client.client.send(JSON.stringify({
+                            command: 'list_sessions',
+                            status: 'ok',
+                            sessions
+                        }));
+                    },
+
+                    'read_file': () => {
+                        const { sessionId, file } = jtext;
+                        const result = historyReader.readFile(sessionId, file);
+                        if (result.ok) {
+                            this.client.client.send(JSON.stringify({
+                                command: 'read_file',
+                                status: 'ok',
+                                sessionId,
+                                file,
+                                content: result.content
+                            }));
+                        } else {
+                            this.client.client.send(JSON.stringify({
+                                command: 'read_file',
+                                status: 'error',
+                                error: result.error,
+                                detail: result.detail
+                            }));
+                        }
                     }
                 };
 
