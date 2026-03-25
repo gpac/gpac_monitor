@@ -26,7 +26,8 @@ function HistoryFileReader(historyDir) {
             const hasEvents = fileExists(`${dir}/events.jsonl`);
             if (!hasSnapshot && !hasEvents) continue;
             const sizeBytes = fileSize(`${dir}/events.jsonl`);
-            sessions.push({ sessionId: entry, hasSnapshot, hasEvents, sizeBytes });
+            const isComplete = fileExists(`${dir}/done`);
+            sessions.push({ sessionId: entry, hasSnapshot, hasEvents, sizeBytes, isComplete });
         }
         sessions.sort((a, b) => Number(b.sessionId) - Number(a.sessionId));
         return sessions;

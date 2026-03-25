@@ -1,5 +1,5 @@
 import { useState, useCallback, memo } from 'react';
-import { LuClapperboard, LuRefreshCw, LuLoaderCircle } from 'react-icons/lu';
+import { LuClapperboard, LuRefreshCw, LuLoaderCircle, LuTriangleAlert } from 'react-icons/lu';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
@@ -36,10 +36,17 @@ const SessionRow = memo(({ session, onSelect, disabled }: SessionRowProps) => {
           {!session.hasEvents && (
             <span className="text-red-400">missing events · </span>
           )}
+          {!session.isComplete && (
+            <span className="text-amber-400">incomplete · </span>
+          )}
           {formatBytes(session.sizeBytes)}
         </div>
       </div>
-      <LuClapperboard className="w-4 h-4 text-gray-500 shrink-0" />
+      {session.isComplete ? (
+        <LuClapperboard className="w-4 h-4 text-gray-500 shrink-0" />
+      ) : (
+        <LuTriangleAlert className="w-4 h-4 text-amber-400 shrink-0" />
+      )}
     </button>
   );
 });

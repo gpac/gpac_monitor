@@ -57,7 +57,10 @@ function HistoryWriter(historyDir, sessionId) {
         if (this._eventsFile) {
             this._eventsFile.close();
             this._eventsFile = null;
-       }
+        }
+        // Write completion marker so session picker can distinguish in-progress from complete
+        const doneFile = std.open(`${dir}/done`, 'w');
+        if (doneFile) doneFile.close();
     };
 }
 

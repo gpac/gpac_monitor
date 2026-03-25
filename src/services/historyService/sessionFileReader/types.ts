@@ -5,6 +5,7 @@ export interface SessionInfo {
   hasSnapshot: boolean;
   hasEvents: boolean;
   sizeBytes: number;
+  isComplete: boolean;
 }
 
 export interface SessionFileReader {
