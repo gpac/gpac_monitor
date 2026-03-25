@@ -30,8 +30,12 @@ const SessionRow = memo(({ session, onSelect, disabled }: SessionRowProps) => {
           {formatTimestamp(session.sessionId)}
         </div>
         <div className="text-xs text-gray-500 mt-0.5">
-          {!session.hasSnapshot && <span className="text-red-400">missing snapshot · </span>}
-          {!session.hasEvents && <span className="text-red-400">missing events · </span>}
+          {!session.hasSnapshot && (
+            <span className="text-red-400">missing snapshot · </span>
+          )}
+          {!session.hasEvents && (
+            <span className="text-red-400">missing events · </span>
+          )}
           {formatBytes(session.sizeBytes)}
         </div>
       </div>
@@ -49,26 +53,31 @@ const SessionPicker = () => {
   const [loadingSession, setLoadingSession] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  if (mode !== 'history' || sessionLoaded) return null;
+  const handleSelect = useCallback(
+    async (sessionId: string) => {
+      if (!reader) return;
+      setLoadingSession(true);
+      setLoadError(null);
+      try {
+        await loadFromReader(reader, sessionId);
+      } catch (err) {
+        setLoadError(err instanceof Error ? err.message : 'Load failed');
+        setLoadingSession(false);
+      }
+    },
+    [reader, loadFromReader],
+  );
 
-  const handleSelect = useCallback(async (sessionId: string) => {
-    if (!reader) return;
-    setLoadingSession(true);
-    setLoadError(null);
-    try {
-      await loadFromReader(reader, sessionId);
-    } catch (err) {
-      setLoadError(err instanceof Error ? err.message : 'Load failed');
-      setLoadingSession(false);
-    }
-  }, [reader, loadFromReader]);
+  if (mode !== 'history' || sessionLoaded) return null;
 
   return (
     <div className="fixed inset-0 top-16 z-30 flex items-center justify-center bg-gray-950/80">
       <div className="bg-monitor-surface border border-monitor-line rounded-xl shadow-xl w-full max-w-md mx-4">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-monitor-line">
           <LuClapperboard className="w-4 h-4 text-red-400" />
-          <span className="text-sm font-semibold text-white">Select a session</span>
+          <span className="text-sm font-semibold text-white">
+            Select a session
+          </span>
         </div>
 
         <div className="px-3 py-3 min-h-32">
@@ -98,14 +107,16 @@ const SessionPicker = () => {
             </div>
           )}
 
-          {!loading && !error && sessions.map((session) => (
-            <SessionRow
-              key={session.sessionId}
-              session={session}
-              onSelect={handleSelect}
-              disabled={loadingSession}
-            />
-          ))}
+          {!loading &&
+            !error &&
+            sessions.map((session) => (
+              <SessionRow
+                key={session.sessionId}
+                session={session}
+                onSelect={handleSelect}
+                disabled={loadingSession}
+              />
+            ))}
 
           {loadError && (
             <p className="text-xs text-red-400 text-center mt-2">{loadError}</p>
