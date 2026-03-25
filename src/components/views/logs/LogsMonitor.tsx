@@ -19,6 +19,7 @@ import {
 } from '@/shared/store/slices/logsSlice';
 import { selectTimestampMode } from '@/shared/store/selectors/logs/logsSelectors';
 import { useLogsService } from './hooks/useLogsService';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/Tool/ToolSettingsDropdown';
 import { ToolSwitcher } from './components/Tool/ToolSwitcher';
@@ -42,6 +43,7 @@ const LogsFooter = React.memo(({ count }: { count: number }) => (
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const dispatch = useAppDispatch();
+  const { mode } = useDataSource();
 
   const {
     currentTool,
@@ -82,9 +84,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
     ((uiFilter.levels && uiFilter.levels.length > 0) ||
       (uiFilter.filterKeys && uiFilter.filterKeys.length > 0));
 
-  // Initialize logs subscription (uses config from Redux store via useLogsService)
+  // Initialize logs subscription — disabled in history mode
   useLogs({
-    enabled: true,
+    enabled: mode === 'live',
   });
 
   // Auto-sync per-tool configuration with backend
