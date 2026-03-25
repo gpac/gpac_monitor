@@ -2,6 +2,9 @@
  * Time formatting utilities
  */
 
+export const formatTimestamp = (timestampMs: number | string): string =>
+  new Date(Number(timestampMs)).toLocaleString();
+
 export const formatTime = (microseconds?: number): string => {
   if (microseconds === undefined) return '0 ms';
   if (microseconds < 1000) return `${microseconds.toFixed(0)} μs`;

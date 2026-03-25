@@ -12,6 +12,7 @@ import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
 import { closeSidebar } from '@/shared/store/slices/layoutSlice';
 import Header from './Header';
 import Sidebar from '../sidebar/Sidebar';
+import SessionPicker from '@/components/history/SessionPicker';
 import { Widget } from '@/types/ui/widget';
 import { getWidgetDefinition } from '../../widget/registry';
 import SidebarCloseButton from '../sidebar/SidebarCloseButton';
@@ -85,6 +86,7 @@ const DashboardLayout = () => {
       <div className="fixed top-0 left-0 right-0 h-16 z-20">
         <Header />
       </div>
+      <SessionPicker />
       <div className="flex pt-8 h-[calc(100vh-4rem)]">
         <div
           id="app-sidebar"

@@ -63,16 +63,7 @@ const Header = () => {
           >
             <LuRotateCw className="w-4 h-4" />
           </button>
-          {mode === 'live' && (
-            <button
-              onClick={openHistoryTab}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800"
-              title="Open history in new tab"
-            >
-              <LuClapperboard className="w-4 h-4" />
-              History
-            </button>
-          )}
+        
           {mode !== 'history' && (
             <span aria-label="Connection selector" title="Connection selector">
               <ConnectionSelector />
@@ -89,6 +80,16 @@ const Header = () => {
           <span aria-label="Log counters" title="Log counters">
             <LogCounters />
           </span>
+            {mode === 'live' && (
+            <button
+              onClick={openHistoryTab}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800"
+              title="Open history in new tab"
+            >
+              <LuClapperboard className="w-4 h-4" />
+              History
+            </button>
+          )}
           <HistoryControls />
         </div>
         <div className="flex items-center gap-4">
