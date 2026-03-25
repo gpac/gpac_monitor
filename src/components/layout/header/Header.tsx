@@ -55,15 +55,18 @@ const Header = () => {
           <h1 className="text-xl font-semibold text-gray-200 font-ui">
             GPAC Monitor
           </h1>
+
           <div className="h-6 w-px bg-gray-700" />
-          <button
-            onClick={() => window.location.reload()}
-            className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800"
-            title="Reload page"
-            aria-label="Reload page"
-          >
-            <LuRotateCw className="w-4 h-4" />
-          </button>
+          {mode !== 'history' && (
+            <button
+              onClick={() => window.location.reload()}
+              className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800"
+              title="Reload page"
+              aria-label="Reload page"
+            >
+              <LuRotateCw className="w-4 h-4" />
+            </button>
+          )}
 
           {mode !== 'history' && (
             <span aria-label="Connection selector" title="Connection selector">

@@ -85,7 +85,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
           <CpuMemoryChartUplot
             currentCPUPercent={metricsValues.currentCPUPercent}
             currentMemoryBytes={metricsValues.currentMemoryProcess}
-            animating={!isResizing}
+            animating={!isResizing && !isHistory}
             maxPoints={maxPoints}
             windowDuration={windowDuration}
             historyStats={isHistory ? stats : undefined}
