@@ -3,10 +3,11 @@
  */
 
 /**
- * CPU chart update interval in milliseconds
- * Used for chart data collection frequency
+ * CPU stats server interval in milliseconds.
+ * Must match UPDATE_INTERVALS.CPU_STATS in server/JSClient/config.js.
+ * Used to compute maxPoints for the chart buffer.
  */
-export const CHART_CPU_UPDATE_INTERVAL = 250;
+export const CPU_SERVER_INTERVAL = 500;
 
 /**
  * Default chart history duration

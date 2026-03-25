@@ -9,7 +9,7 @@ import WidgetWrapper from '@/components/widget/WidgetWrapper';
 import { CPUHistoryBadge } from './components/CPUHistoryBadge';
 import { useChartDuration } from './hooks/useChartDuration';
 import {
-  CHART_CPU_UPDATE_INTERVAL,
+  CPU_SERVER_INTERVAL,
   DEFAULT_CPU_HISTORY,
   CPU_HISTORY_STORAGE_KEY,
 } from './constants';
@@ -28,7 +28,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   const { duration, setDuration, windowDuration, maxPoints } = useChartDuration(
     CPU_HISTORY_STORAGE_KEY,
     DEFAULT_CPU_HISTORY,
-    CHART_CPU_UPDATE_INTERVAL,
+    CPU_SERVER_INTERVAL,
   );
 
   // Optimize resize performance
@@ -46,7 +46,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   // In history mode: unlimited buffer to show full session; live mode: respect user-selected duration
   const bufferMaxPoints = isHistory ? Infinity : maxPoints;
   const { isSubscribed, currentCPU, currentMemory, totalCores, stats } =
-    useCPUStats(true, CHART_CPU_UPDATE_INTERVAL, bufferMaxPoints);
+    useCPUStats(true, bufferMaxPoints);
 
   const metricsValues = useMemo(
     () => ({
@@ -65,8 +65,11 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   );
 
   const statusBadge = useMemo(
-    () => <CPUHistoryBadge value={duration} onChange={setDuration} />,
-    [duration, setDuration],
+    () =>
+      isHistory ? null : (
+        <CPUHistoryBadge value={duration} onChange={setDuration} />
+      ),
+    [isHistory, duration, setDuration],
   );
 
   return (

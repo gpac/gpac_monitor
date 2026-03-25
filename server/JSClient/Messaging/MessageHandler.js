@@ -68,9 +68,8 @@ function MessageHandler(client) {
                     },
 
                     'subscribe_cpu_stats': () => {
-                        const interval = jtext['interval'] || UPDATE_INTERVALS.CPU_STATS;
                         const fields = jtext['fields'] || [];
-                        this.client.cpuStatsManager.subscribe(interval, fields);
+                        this.client.cpuStatsManager.subscribe(UPDATE_INTERVALS.CPU_STATS, fields);
                         this.client.ensureMonitoringLoop();
                     },
 
