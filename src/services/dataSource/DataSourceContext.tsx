@@ -9,6 +9,7 @@ import type { HistorySnapshot } from '@/services/historyService/types';
 import { hydrateFromSnapshot } from '@/services/historyService/loader/snapshotHydrator';
 import type { AppDispatch } from '@/shared/store';
 import type { SessionFileReader } from '@/services/historyService/sessionFileReader';
+import { formatTimestamp } from '@/utils/formatting';
 
 export type DataSourceMode = 'live' | 'history';
 
@@ -20,15 +21,20 @@ const getInitialMode = (): DataSourceMode => {
 interface DataSourceContextValue {
   mode: DataSourceMode;
   sessionLoaded: boolean;
+  sessionName: string | null;
   switchToLive: () => void;
   switchToHistory: (snapshot: HistorySnapshot) => void;
   loadHistory: (snapshotFile: File, eventsFile: File) => Promise<void>;
-  loadFromReader: (reader: SessionFileReader, sessionId: string) => Promise<void>;
+  loadFromReader: (
+    reader: SessionFileReader,
+    sessionId: string,
+  ) => Promise<void>;
 }
 
 const DataSourceContext = createContext<DataSourceContextValue>({
   mode: 'live',
   sessionLoaded: false,
+  sessionName: null,
   switchToLive: () => {},
   switchToHistory: () => {},
   loadHistory: async () => {},
@@ -43,6 +49,7 @@ export function DataSourceProvider({
   const dispatch = useDispatch<AppDispatch>();
   const [mode, setMode] = useState<DataSourceMode>(getInitialMode);
   const [sessionLoaded, setSessionLoaded] = useState(false);
+  const [sessionName, setSessionName] = useState<string | null>(null);
 
   const switchToHistory = useCallback(
     (snapshot: HistorySnapshot) => {
@@ -64,6 +71,7 @@ export function DataSourceProvider({
   const loadFromReader = useCallback(
     async (reader: SessionFileReader, sessionId: string) => {
       await historyController.loadFromReader(reader, sessionId, dispatch);
+      setSessionName(formatTimestamp(sessionId));
       setSessionLoaded(true);
       setMode('history');
     },
@@ -77,12 +85,21 @@ export function DataSourceProvider({
     dispatch(clearFilterPids());
     dispatch(clearFilterArgs());
     setSessionLoaded(false);
+    setSessionName(null);
     setMode('live');
   }, [dispatch]);
 
   return (
     <DataSourceContext.Provider
-      value={{ mode, sessionLoaded, switchToLive, switchToHistory, loadHistory, loadFromReader }}
+      value={{
+        mode,
+        sessionLoaded,
+        sessionName,
+        switchToLive,
+        switchToHistory,
+        loadHistory,
+        loadFromReader,
+      }}
     >
       {children}
     </DataSourceContext.Provider>

@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { RiScrollToBottomLine, RiFilterOffLine } from 'react-icons/ri';
-import { MdOutlineTimer } from 'react-icons/md';
+import { LuClock } from 'react-icons/lu';
 import WidgetWrapper from '../../widget/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
@@ -219,7 +219,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
               onClick={() => dispatch(toggleTimestampMode())}
               className="px-2 py-1 text-xs rounded bg-gray-700/50 border border-gray-600/50 text-gray-200 hover:bg-gray-700/80"
             >
-              <MdOutlineTimer className="w-4 h-4" />
+              <LuClock className="w-4 h-4" />
             </button>
           </CustomTooltip>
           <CustomTooltip

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { FiLayout } from 'react-icons/fi';
 import {
   LuClapperboard,
+  LuClock,
   LuPanelLeft,
   LuPanelLeftClose,
   LuRotateCw,
@@ -18,7 +19,7 @@ import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
 const Header = () => {
   const dispatch = useAppDispatch();
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
-  const { mode } = useDataSource();
+  const { mode, sessionName } = useDataSource();
   const openHistoryTab = useCallback(() => {
     const url = new URL(window.location.href);
     url.searchParams.set('mode', 'history');
@@ -63,7 +64,7 @@ const Header = () => {
           >
             <LuRotateCw className="w-4 h-4" />
           </button>
-        
+
           {mode !== 'history' && (
             <span aria-label="Connection selector" title="Connection selector">
               <ConnectionSelector />
@@ -80,7 +81,7 @@ const Header = () => {
           <span aria-label="Log counters" title="Log counters">
             <LogCounters />
           </span>
-            {mode === 'live' && (
+          {mode === 'live' && (
             <button
               onClick={openHistoryTab}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800"
@@ -92,6 +93,13 @@ const Header = () => {
           )}
           <HistoryControls />
         </div>
+
+        {sessionName && (
+          <span className="flex items-center gap-1.5 text-xs text-gray-400 font-ui">
+            <LuClock className="w-4 h-4 text-red-400 shrink-0" />
+            {sessionName}
+          </span>
+        )}
         <div className="flex items-center gap-4">
           <button
             onClick={() => dispatch(toggleSidebar())}
