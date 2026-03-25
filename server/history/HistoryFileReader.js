@@ -28,6 +28,7 @@ function HistoryFileReader(historyDir) {
             const sizeBytes = fileSize(`${dir}/events.jsonl`);
             sessions.push({ sessionId: entry, hasSnapshot, hasEvents, sizeBytes });
         }
+        sessions.sort((a, b) => Number(b.sessionId) - Number(a.sessionId));
         return sessions;
     };
 
@@ -40,25 +41,25 @@ function HistoryFileReader(historyDir) {
             return { ok: false, error: 'file_not_allowed', detail: `File not allowed: ${fileName}` };
         }
         const path = `${baseDir}/${sessionId}/${fileName}`;
-        const f = std.open(path, 'r');
-        if (!f) {
+        const file = std.open(path, 'r');
+        if (!file) {
             return { ok: false, error: 'file_not_found', detail: `${fileName} not found in session ${sessionId}` };
         }
         try {
-            const content = f.readAsString();
+            const content = file.readAsString();
             return { ok: true, content };
         } catch (e) {
             return { ok: false, error: 'read_error', detail: String(e) };
         } finally {
-            f.close();
+            file.close();
         }
     };
 }
 
 function fileExists(path) {
-    const f = std.open(path, 'r');
-    if (!f) return false;
-    f.close();
+    const file = std.open(path, 'r');
+    if (!file) return false;
+    file.close();
     return true;
 }
 

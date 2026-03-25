@@ -3,7 +3,7 @@ import type { SessionFileReader, SessionInfo } from './types';
 import { parseEventsJsonl } from '../loader/eventLoader';
 
 /**
- * WsSessionFileReader — V3 implementation using the GPAC WS as file picker.
+ * WsSessionFileReader
  * Opens its own WS connection, sends list_sessions/read_file commands.
  */
 export class WsSessionFileReader implements SessionFileReader {
