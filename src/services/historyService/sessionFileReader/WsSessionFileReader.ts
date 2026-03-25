@@ -82,7 +82,10 @@ export class WsSessionFileReader implements SessionFileReader {
   private handleMessage(event: MessageEvent): void {
     try {
       const data = JSON.parse(event.data);
-      const key = data.command as string;
+      const key =
+        data.command === 'read_file'
+          ? `read_file:${data.sessionId}:${data.file}`
+          : (data.command as string);
       const entry = this.pending.get(key);
       if (!entry) return;
       this.pending.delete(key);
@@ -97,8 +100,10 @@ export class WsSessionFileReader implements SessionFileReader {
     }
   }
 
-  /** Map a command to the key the server responds with */
+  /** Unique key per request — composite for read_file to avoid collision */
   private commandKey(cmd: Record<string, string>): string {
-    return cmd.message === 'read_file' ? `read_file` : cmd.message;
+    return cmd.message === 'read_file'
+      ? `read_file:${cmd.sessionId}:${cmd.file}`
+      : cmd.message;
   }
 }
