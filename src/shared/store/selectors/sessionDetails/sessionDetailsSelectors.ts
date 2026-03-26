@@ -5,3 +5,6 @@ export const selectCommandLine = (state: RootState) =>
 
 export const selectSystemStats = (state: RootState) =>
   state.sessionDetails.systemStats;
+
+export const selectSystemStatsHistory = (state: RootState) =>
+  state.sessionDetails.systemStatsHistory;

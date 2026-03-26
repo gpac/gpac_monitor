@@ -1,9 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { clearGraph } from '@/shared/store/slices/graphSlice';
-import { clearSessionDetails } from '@/shared/store/slices/sessionDetailsSlice';
-import { clearFilterPids } from '@/shared/store/slices/sessionStatsSlice';
-import { clearFilterArgs } from '@/shared/store/slices/filterArgumentSlice';
+import { clearAllSessionData } from '@/shared/store/actions/globalActions';
 import { historyController } from '@/services/historyService/historyController';
 import type { HistorySnapshot } from '@/services/historyService/types';
 import { hydrateFromSnapshot } from '@/services/historyService/loader/snapshotHydrator';
@@ -80,10 +77,7 @@ export function DataSourceProvider({
 
   const switchToLive = useCallback(() => {
     historyController.stop();
-    dispatch(clearGraph());
-    dispatch(clearSessionDetails());
-    dispatch(clearFilterPids());
-    dispatch(clearFilterArgs());
+    dispatch(clearAllSessionData());
     setSessionLoaded(false);
     setSessionName(null);
     setMode('live');

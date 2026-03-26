@@ -12,6 +12,9 @@ import type { SessionFileReader } from './sessionFileReader';
  */
 export class HistoryController {
   private player = new EventPlayer();
+  private snapshot: HistorySnapshot | null = null;
+  private sessionStartUs = 0;
+  private dispatch: AppDispatch | null = null;
 
   setListener(listener: PlayerListener) {
     this.player.setListener(listener);
@@ -22,9 +25,8 @@ export class HistoryController {
     const snapshot: HistorySnapshot = JSON.parse(await snapshotFile.text());
     const events = await loadEventsFile(eventsFile);
 
-    const sessionStartUs = events[0]?.ts_us ?? 0;
-    hydrateFromSnapshot(snapshot, dispatch, sessionStartUs);
-
+    this.storeSession(snapshot, dispatch, events[0]?.ts_us ?? 0);
+    hydrateFromSnapshot(snapshot, dispatch, this.sessionStartUs);
     this.player.load(events, dispatch);
   }
 
@@ -37,10 +39,27 @@ export class HistoryController {
     const snapshot = await reader.readSnapshot(sessionId);
     const events = await reader.readEvents(sessionId);
 
-    const sessionStartUs = events[0]?.ts_us ?? 0;
-    hydrateFromSnapshot(snapshot, dispatch, sessionStartUs);
-
+    this.storeSession(snapshot, dispatch, events[0]?.ts_us ?? 0);
+    hydrateFromSnapshot(snapshot, dispatch, this.sessionStartUs);
     this.player.load(events, dispatch);
+  }
+
+  seek(targetTimestampUs: number) {
+    if (!this.snapshot || !this.dispatch) return;
+    const { snapshot, dispatch, sessionStartUs } = this;
+    this.player.seek(targetTimestampUs, () => {
+      hydrateFromSnapshot(snapshot, dispatch, sessionStartUs);
+    });
+  }
+
+  private storeSession(
+    snapshot: HistorySnapshot,
+    dispatch: AppDispatch,
+    sessionStartUs: number,
+  ) {
+    this.snapshot = snapshot;
+    this.dispatch = dispatch;
+    this.sessionStartUs = sessionStartUs;
   }
 
   play() {
@@ -65,6 +84,10 @@ export class HistoryController {
 
   durationUs(): number {
     return this.player.durationUs();
+  }
+
+  getSessionStartUs(): number {
+    return this.sessionStartUs;
   }
 }
 

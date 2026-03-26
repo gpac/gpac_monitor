@@ -2,7 +2,7 @@ import type { AppDispatch } from '@/shared/store';
 import type { HistoryEvent } from '../types';
 import { dispatchEvent } from './eventDispatcher';
 
-export type PlayerState = 'idle' | 'playing' | 'paused' | 'done';
+export type PlayerState = 'idle' | 'playing' | 'paused' | 'done' | 'seeking';
 export type PlayerListener = (state: PlayerState, timeUs: number) => void;
 
 /**
@@ -12,7 +12,7 @@ export type PlayerListener = (state: PlayerState, timeUs: number) => void;
  * No drift: playback time is based on wall-clock delta from play start.
  */
 export class EventPlayer {
-  private events: HistoryEvent[] = [];
+  private timelineEvents: HistoryEvent[] = [];
   private dispatch: AppDispatch | null = null;
   private nextEventIndex = 0;
   private state: PlayerState = 'idle';
@@ -22,30 +22,30 @@ export class EventPlayer {
   // Timing
   private playbackStartTimeMs = 0;
   private startEventUs = 0;
-  private pausedElapsedUs = 0;
+  private currentPlaybackTimeUs = 0;
 
   setListener(listener: PlayerListener) {
     this.listener = listener;
   }
 
-  load(events: HistoryEvent[], dispatch: AppDispatch) {
+  load(timelineEvents: HistoryEvent[], dispatch: AppDispatch) {
     this.stop();
-    this.events = events;
+    this.timelineEvents = timelineEvents;
     this.dispatch = dispatch;
     this.nextEventIndex = 0;
     this.setState('idle');
   }
 
   play() {
-    if (!this.events.length || !this.dispatch) return;
+    if (!this.timelineEvents.length || !this.dispatch) return;
 
     if (this.state === 'paused') {
       this.playbackStartTimeMs = performance.now();
-      this.startEventUs = this.pausedElapsedUs;
+      this.startEventUs = this.currentPlaybackTimeUs;
     } else {
       this.playbackStartTimeMs = performance.now();
-      this.startEventUs = this.events[0]?.ts_us ?? 0;
-      this.pausedElapsedUs = this.startEventUs;
+      this.startEventUs = this.timelineEvents[0]?.ts_us ?? 0;
+      this.currentPlaybackTimeUs = this.startEventUs;
       this.nextEventIndex = 0;
     }
 
@@ -55,7 +55,7 @@ export class EventPlayer {
 
   pause() {
     if (this.state !== 'playing') return;
-    this.pausedElapsedUs = this.currentTimeUs();
+    this.currentPlaybackTimeUs = this.currentTimeUs();
     this.cancelFrame();
     this.setState('paused');
   }
@@ -63,25 +63,35 @@ export class EventPlayer {
   stop() {
     this.cancelFrame();
     this.nextEventIndex = 0;
-    this.pausedElapsedUs = 0;
+    this.currentPlaybackTimeUs = 0;
     this.setState('idle');
   }
 
-  // TODO (V3): seek is not yet usable.
-  //
-  // seek(timeUs) repositions the playhead to an absolute event timestamp
-  // (same space as event.ts_us — not a relative offset from 0).
-  //
-  // The cursor and timing vars are updated correctly, but Redux state is NOT
-  // reconstructed. After a backward seek, Redux would reflect the future state
-  // (e.g. filter A = blue) instead of the correct state at targetTimeUs
-  // (e.g. filter A = red).
-  //
-  // A correct implementation requires one of:
-  //   - re-hydrating from snapshot + replaying all events up to targetTimeUs
-  //   - using intermediate checkpoints
-  //
-  // seek(timeUs: number) { ... }
+  /**
+   * Seek to a target timestamp (absolute, same space as event.ts_us).
+   * Rehydrates Redux from snapshot then fast-forwards all events up to target.
+   */
+  seek(targetTimestampUs: number, resetStateFromSnapshot: () => void) {
+    if (!this.timelineEvents.length || !this.dispatch) return;
+
+    this.cancelFrame();
+    this.setState('seeking');
+
+    resetStateFromSnapshot();
+
+    let i = 0;
+    while (
+      i < this.timelineEvents.length &&
+      this.timelineEvents[i].ts_us <= targetTimestampUs
+    ) {
+      dispatchEvent(this.timelineEvents[i], this.dispatch);
+      i++;
+    }
+    // start of next event after seek target
+    this.nextEventIndex = i;
+    this.currentPlaybackTimeUs = targetTimestampUs;
+    this.setState('paused');
+  }
 
   getState(): PlayerState {
     return this.state;
@@ -92,12 +102,15 @@ export class EventPlayer {
       const elapsedMs = performance.now() - this.playbackStartTimeMs;
       return this.startEventUs + elapsedMs * 1000;
     }
-    return this.pausedElapsedUs;
+    return this.currentPlaybackTimeUs;
   }
 
   durationUs(): number {
-    if (!this.events.length) return 0;
-    return this.events[this.events.length - 1].ts_us - this.events[0].ts_us;
+    if (!this.timelineEvents.length) return 0;
+    return (
+      this.timelineEvents[this.timelineEvents.length - 1].ts_us -
+      this.timelineEvents[0].ts_us
+    );
   }
 
   private setState(state: PlayerState) {
@@ -121,14 +134,14 @@ export class EventPlayer {
 
     const now = this.currentTimeUs();
 
-    while (this.nextEventIndex < this.events.length) {
-      const event = this.events[this.nextEventIndex];
+    while (this.nextEventIndex < this.timelineEvents.length) {
+      const event = this.timelineEvents[this.nextEventIndex];
       if (event.ts_us > now) break;
       dispatchEvent(event, this.dispatch);
       this.nextEventIndex++;
     }
 
-    if (this.nextEventIndex >= this.events.length) {
+    if (this.nextEventIndex >= this.timelineEvents.length) {
       this.setState('done');
       return;
     }

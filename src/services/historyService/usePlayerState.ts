@@ -6,6 +6,7 @@ export interface PlayerSnapshot {
   state: PlayerState;
   currentTimeUs: number;
   durationUs: number;
+  sessionStartUs: number;
 }
 
 function getSnapshot(): PlayerSnapshot {
@@ -13,6 +14,7 @@ function getSnapshot(): PlayerSnapshot {
     state: historyController.getState(),
     currentTimeUs: historyController.currentTimeUs(),
     durationUs: historyController.durationUs(),
+    sessionStartUs: historyController.getSessionStartUs(),
   };
 }
 
@@ -60,5 +62,7 @@ export function usePlayerState() {
     ...snap,
     play: () => historyController.play(),
     pause: () => historyController.pause(),
+    seek: (targetTimestampUs: number) =>
+      historyController.seek(targetTimestampUs),
   };
 }

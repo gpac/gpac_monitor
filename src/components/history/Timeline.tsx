@@ -1,5 +1,6 @@
+import { useCallback } from 'react';
 import { LuPause, LuPlay } from 'react-icons/lu';
-import { Progress } from '@/components/ui/progress';
+import SeekBar from './SeekBar';
 import { formatCompactTime } from '@/utils/formatting/time';
 import type { PlayerState } from '@/services/historyService/replay/eventPlayer';
 
@@ -7,20 +8,33 @@ interface TimelineProps {
   state: PlayerState;
   currentTimeUs: number;
   durationUs: number;
+  sessionStartUs: number;
   onPlay: () => void;
   onPause: () => void;
+  onSeek: (targetTimestampUs: number) => void;
 }
 
 const Timeline = ({
   state,
   currentTimeUs,
   durationUs,
+  sessionStartUs,
   onPlay,
   onPause,
+  onSeek,
 }: TimelineProps) => {
   const isPlaying = state === 'playing';
   const elapsedUs = Math.min(currentTimeUs, durationUs);
   const progressPercent = durationUs > 0 ? (elapsedUs / durationUs) * 100 : 0;
+
+  const handleSeekPositionChange = useCallback(
+    (positionPercent: number) => {
+      const targetTimestampUs =
+        sessionStartUs + (positionPercent / 100) * durationUs;
+      onSeek(targetTimestampUs);
+    },
+    [sessionStartUs, durationUs, onSeek],
+  );
 
   return (
     <div className="flex items-center gap-3 min-w-64">
@@ -37,10 +51,10 @@ const Timeline = ({
         )}
       </button>
 
-      <Progress
-        value={progressPercent}
-        className="h-1.5 flex-1"
-        color="bg-blue-500"
+      <SeekBar
+        progressPercent={progressPercent}
+        onSeekPositionChange={handleSeekPositionChange}
+        disabled={durationUs === 0}
       />
 
       <span className="text-xs text-gray-400 font-mono tabular-nums whitespace-nowrap">

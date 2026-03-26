@@ -4,11 +4,13 @@ import type { CPUStats } from '@/types/domain/system';
 export interface SessionDetailsState {
   commandLine: string | null;
   systemStats: CPUStats | null;
+  systemStatsHistory: CPUStats[];
 }
 
 const initialState: SessionDetailsState = {
   commandLine: null,
   systemStats: null,
+  systemStatsHistory: [],
 };
 
 const sessionDetailsSlice = createSlice({
@@ -20,10 +22,17 @@ const sessionDetailsSlice = createSlice({
     },
     setSystemStats(state, action: PayloadAction<CPUStats>) {
       state.systemStats = action.payload;
+      state.systemStatsHistory.push(action.payload);
+    },
+    resetSystemStatsHistory(state) {
+      state.systemStatsHistory = [];
     },
     hydrateSessionDetails(
       state,
-      action: PayloadAction<{ commandLine?: string | null; systemStats?: CPUStats }>
+      action: PayloadAction<{
+        commandLine?: string | null;
+        systemStats?: CPUStats;
+      }>,
     ) {
       const { commandLine, systemStats } = action.payload;
       if (commandLine !== undefined) state.commandLine = commandLine;
@@ -38,6 +47,7 @@ const sessionDetailsSlice = createSlice({
 export const {
   setCommandLine,
   setSystemStats,
+  resetSystemStatsHistory,
   hydrateSessionDetails,
   clearSessionDetails,
 } = sessionDetailsSlice.actions;

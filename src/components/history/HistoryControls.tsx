@@ -9,7 +9,15 @@ import Timeline from './Timeline';
  */
 const HistoryControls = () => {
   const { mode } = useDataSource();
-  const { state, currentTimeUs, durationUs, play, pause } = usePlayerState();
+  const {
+    state,
+    currentTimeUs,
+    durationUs,
+    sessionStartUs,
+    play,
+    pause,
+    seek,
+  } = usePlayerState();
 
   if (mode !== 'history') return null;
 
@@ -24,8 +32,10 @@ const HistoryControls = () => {
         state={state}
         currentTimeUs={currentTimeUs}
         durationUs={durationUs}
+        sessionStartUs={sessionStartUs}
         onPlay={play}
         onPause={pause}
+        onSeek={seek}
       />
     </div>
   );
