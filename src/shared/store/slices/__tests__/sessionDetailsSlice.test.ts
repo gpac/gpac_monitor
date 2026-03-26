@@ -11,6 +11,7 @@ import type { CPUStats } from '@/types/domain/system';
 const initialState: SessionDetailsState = {
   commandLine: null,
   systemStats: null,
+  systemStatsHistory: [],
 };
 
 const mockStats: CPUStats = {
@@ -65,14 +66,22 @@ describe('sessionDetailsSlice', () => {
   });
 
   it('hydrateSessionDetails is partial — omitted fields unchanged', () => {
-    const base = { commandLine: 'existing', systemStats: mockStats };
+    const base: SessionDetailsState = {
+      commandLine: 'existing',
+      systemStats: mockStats,
+      systemStatsHistory: [],
+    };
     const state = reducer(base, hydrateSessionDetails({ commandLine: 'new' }));
     expect(state.commandLine).toBe('new');
     expect(state.systemStats).toEqual(mockStats);
   });
 
   it('clearSessionDetails resets to initial state', () => {
-    const populated = { commandLine: 'gpac', systemStats: mockStats };
+    const populated: SessionDetailsState = {
+      commandLine: 'gpac',
+      systemStats: mockStats,
+      systemStatsHistory: [],
+    };
     const state = reducer(populated, clearSessionDetails());
     expect(state).toEqual(initialState);
   });
