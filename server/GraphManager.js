@@ -2,7 +2,7 @@ import { Sys as sys } from 'gpaccore';
 import { gpac_filter_to_minimal_object, on_all_connected } from './JSClient/filterUtils.js';
 import { SnapshotBuilder } from './history/SnapshotBuilder.js';
 
-/* const GRAPH_DEBOUNCE_US = 500 * 1000;  // 500ms stabilization */
+const GRAPH_DEBOUNCE_US = 500 * 1000;  
 const GRAPH_MAX_WAIT_US = 3000 * 1000; // 3s max cap
 
 /**
@@ -22,7 +22,7 @@ function GraphManager(deps) {
     let graphVersion = 0;
     let graphDirty = false;
     let lastGraphEventTime = 0;
-    let firstGraphEventTime = 0;
+    let graphBuildStartTime = 0;
     let debounceRunning = false;
 
     const snapshotBuilder = new SnapshotBuilder();
@@ -33,26 +33,28 @@ function GraphManager(deps) {
         const now = sys.clock_us();
         graphDirty = true;
         lastGraphEventTime = now;
-        if (!firstGraphEventTime) firstGraphEventTime = now;
+        if (!graphBuildStartTime) graphBuildStartTime = now;
 
         ensureMonitoringLoop();
 
-        if (!debounceRunning) {
-            debounceRunning = true;
-            session.post_task(() => {
-                const now = sys.clock_us();
-                const sinceLast = now - lastGraphEventTime;
-                const sinceFirst = now - firstGraphEventTime;
+        if (debounceRunning) return;
 
-                if ( sinceFirst >= GRAPH_MAX_WAIT_US) {
-                    this._stabilize();
-                    debounceRunning = false;
-                    firstGraphEventTime = 0;
-                    return false;
-                }
-                return 100;
-            });
-        }
+        debounceRunning = true;
+        session.post_task(() => {
+            const now = sys.clock_us();
+            const sinceLast = now - lastGraphEventTime;
+            const sinceBuildStart = now - graphBuildStartTime;
+            const graphStable = sinceLast >= GRAPH_DEBOUNCE_US;
+            const maxBuildWaitReached = sinceBuildStart >= GRAPH_MAX_WAIT_US;
+
+            if (graphStable || maxBuildWaitReached) {
+                this._stabilize();
+                debounceRunning = false;
+                graphBuildStartTime = 0;
+                return false;
+            }
+            return 100;
+        });
     };
 
     this._stabilize = function() {
