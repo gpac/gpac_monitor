@@ -9,7 +9,7 @@ import { setError, setLoading } from '@/shared/store/slices/graphSlice';
 import { clearAllSessionData } from '@/shared/store/actions/globalActions';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { selectActiveConnection } from '@/shared/store/selectors';
-import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 
 interface UseGraphConnectionProps {
   setConnectionError: (error: string | null) => void;
@@ -25,7 +25,7 @@ export const useGraphConnection = ({
   const dispatch = useAppDispatch();
   const service = useGpacService();
   const activeConnection = useAppSelector(selectActiveConnection);
-  const { mode } = useDataSource();
+  const { isLive } = useDataMode();
   // Track connection state internally
   const [isConnected, setIsConnected] = useState(false);
 
@@ -65,7 +65,7 @@ export const useGraphConnection = ({
 
   // Separate effect for establishing connection
   useEffect(() => {
-    if (mode !== 'live') {
+    if (!isLive) {
       return;
     }
 
@@ -117,7 +117,7 @@ export const useGraphConnection = ({
         }
       }
     };
-  }, [service, setConnectionError, connectionId, connectionAddress, mode]);
+  }, [service, setConnectionError, connectionId, connectionAddress, isLive]);
 
   // Function to retry connection
   const retryConnection = useCallback(() => {

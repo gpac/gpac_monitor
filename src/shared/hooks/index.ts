@@ -1,6 +1,7 @@
 export { useAppDispatch, useAppSelector } from './redux';
 export type { HookLifecycle, HookFunction } from './types';
 export { useCommandLine } from './useCommandLine';
+export { useDataMode } from './useDataMode';
 export { useGpacService } from './useGpacService';
 export { useLayoutManager } from './useLayoutManager';
 export { useOpenLogsWidget } from './useOpenLogsWidget';

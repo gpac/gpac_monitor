@@ -70,7 +70,7 @@ const sessionStatsSlice = createSlice({
             .ts_us;
 
       // Save previous stats for stall detection
-      state.previousSessionStats = state.sessionStats;
+      state.previousSessionStats = { ...state.sessionStats };
 
       const newStats: Record<string, SessionFilterStats> = {};
       stats.forEach((filter) => {

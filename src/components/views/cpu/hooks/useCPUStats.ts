@@ -1,11 +1,10 @@
-import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 import { useCPUStatsHistory } from './useCPUStatsHistory';
 import { useCPUStatsLive } from './useCPUStatsLive';
 import type { CPUStatsResult } from './useCPUStatsHistory';
 
 export function useCPUStats(enabled = true, maxPoints = 300): CPUStatsResult {
-  const { mode } = useDataSource();
-  const isHistory = mode === 'history';
+  const { isHistory } = useDataMode();
 
   const history = useCPUStatsHistory(maxPoints);
   const live = useCPUStatsLive(!isHistory && enabled);

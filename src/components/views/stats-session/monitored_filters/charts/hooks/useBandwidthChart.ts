@@ -1,4 +1,4 @@
-import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 import { useBandwidthChartLive } from './useBandwidthChartLive';
 import { useBandwidthChartHistory } from './useBandwidthChartHistory';
 import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
@@ -11,8 +11,7 @@ export interface UseBandwidthChartOptions {
 }
 
 export const useBandwidthChart = (options: UseBandwidthChartOptions) => {
-  const { mode } = useDataSource();
-  const isHistory = mode === 'history';
+  const { isHistory } = useDataMode();
 
   const history = useBandwidthChartHistory({
     filterId: options.filterId,

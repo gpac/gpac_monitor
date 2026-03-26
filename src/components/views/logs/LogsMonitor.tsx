@@ -19,7 +19,7 @@ import {
 } from '@/shared/store/slices/logsSlice';
 import { selectTimestampMode } from '@/shared/store/selectors/logs/logsSelectors';
 import { useLogsService } from './hooks/useLogsService';
-import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/Tool/ToolSettingsDropdown';
 import { ToolSwitcher } from './components/Tool/ToolSwitcher';
@@ -43,7 +43,7 @@ const LogsFooter = React.memo(({ count }: { count: number }) => (
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const dispatch = useAppDispatch();
-  const { mode } = useDataSource();
+  const { isLive } = useDataMode();
 
   const {
     currentTool,
@@ -86,7 +86,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
 
   // Initialize logs subscription — disabled in history mode
   useLogs({
-    enabled: mode === 'live',
+    enabled: isLive,
   });
 
   // Auto-sync per-tool configuration with backend

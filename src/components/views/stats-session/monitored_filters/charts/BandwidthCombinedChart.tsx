@@ -6,7 +6,7 @@ import uPlot from 'uplot';
 import { useBandwidthChart } from './hooks/useBandwidthChart';
 import { createBandwidthCombinedConfig } from './config/bandwidthCombinedUplotConfig';
 import { DEFAULT_REFRESH_INTERVAL } from './config/bandwidthChartConfig';
-import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 
 interface BandwidthCombinedChartProps {
   filterId: string;
@@ -22,7 +22,7 @@ export const BandwidthCombinedChart = memo(
     bytesReceived,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
   }: BandwidthCombinedChartProps) => {
-    const { mode } = useDataSource();
+    const { isHistory } = useDataMode();
     const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 400, height: 230 });
     const timeLabelsRef = useRef<string[]>([]);
@@ -69,9 +69,9 @@ export const BandwidthCombinedChart = memo(
         timeLabelsRef,
         width: dimensions.width,
         height: dimensions.height,
-        isHistory: mode === 'history',
+        isHistory,
       });
-    }, [dimensions, mode]);
+    }, [dimensions, isHistory]);
 
     const data = useMemo(() => {
       const maxLength = Math.max(uploadPoints.length, downloadPoints.length);

@@ -12,6 +12,7 @@ import WidgetSelector from '../../widget/WidgetSelector';
 import ConnectionSelector from '../connection/ConnectionSelector';
 import LogCounters from './LogCounters';
 import HistoryControls from '@/components/history/HistoryControls';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
@@ -19,7 +20,8 @@ import { toggleSidebar } from '@/shared/store/slices/layoutSlice';
 const Header = () => {
   const dispatch = useAppDispatch();
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
-  const { mode, sessionName } = useDataSource();
+  const { isLive, isHistory } = useDataMode();
+  const { sessionName } = useDataSource();
   const openHistoryTab = useCallback(() => {
     const url = new URL(window.location.href);
     url.searchParams.set('mode', 'history');
@@ -57,7 +59,7 @@ const Header = () => {
           </h1>
 
           <div className="h-6 w-px bg-gray-700" />
-          {mode !== 'history' && (
+          {!isHistory && (
             <button
               onClick={() => window.location.reload()}
               className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800"
@@ -68,7 +70,7 @@ const Header = () => {
             </button>
           )}
 
-          {mode !== 'history' && (
+          {!isHistory && (
             <span aria-label="Connection selector" title="Connection selector">
               <ConnectionSelector />
             </span>
@@ -84,7 +86,7 @@ const Header = () => {
           <span aria-label="Log counters" title="Log counters">
             <LogCounters />
           </span>
-          {mode === 'live' && (
+          {isLive && (
             <button
               onClick={openHistoryTab}
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800"

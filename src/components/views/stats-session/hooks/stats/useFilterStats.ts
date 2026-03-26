@@ -1,4 +1,4 @@
-import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 import { useFilterStatsHistory } from './useFilterStatsHistory';
 import { useFilterStatsLive } from './useFilterStatsLive';
 import type { FilterStatsResult } from './types';
@@ -8,8 +8,7 @@ export function useFilterStats(
   enabled = true,
   interval = 1000,
 ): FilterStatsResult {
-  const { mode } = useDataSource();
-  const isHistory = mode === 'history';
+  const { isHistory } = useDataMode();
 
   const history = useFilterStatsHistory(filterId);
   const live = useFilterStatsLive(filterId, !isHistory && enabled, interval);

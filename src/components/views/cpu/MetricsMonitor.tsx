@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
-import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 
 import { CpuMemoryChartUplot } from './components/CpuMemoryChartUplot';
 import { CpuMemoryOverview } from './components/CpuMemoryOverview';
@@ -40,8 +40,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   }) as { ref: React.RefObject<HTMLElement> };
   const containerRef = ref as React.RefObject<HTMLDivElement>;
 
-  const { mode } = useDataSource();
-  const isHistory = mode === 'history';
+  const { isHistory } = useDataMode();
 
   // In history mode: unlimited buffer to show full session; live mode: respect user-selected duration
   const bufferMaxPoints = isHistory ? Infinity : maxPoints;

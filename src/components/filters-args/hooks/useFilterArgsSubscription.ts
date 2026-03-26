@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { FilterArgument } from '@/types';
-import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 import { selectFilterArgs } from '@/shared/store/selectors/session';
 
 /**
@@ -11,7 +11,7 @@ import { selectFilterArgs } from '@/shared/store/selectors/session';
  */
 export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
   const gpacService = useGpacService();
-  const { mode } = useDataSource();
+  const { isHistory } = useDataMode();
   const cachedArgs = useAppSelector((state) =>
     filterIdx !== undefined
       ? selectFilterArgs(state, filterIdx.toString())
@@ -25,7 +25,7 @@ export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
       return;
     }
 
-    if (mode === 'history') {
+    if (isHistory) {
       setArgs((cachedArgs as unknown as FilterArgument[]) ?? []);
       return;
     }
@@ -37,7 +37,7 @@ export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
       });
 
     return unsubscribe;
-  }, [filterIdx, gpacService, mode, cachedArgs]);
+  }, [filterIdx, gpacService, isHistory, cachedArgs]);
 
   return args;
 };
