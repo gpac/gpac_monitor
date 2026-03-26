@@ -1,5 +1,10 @@
 import { useState, useCallback, memo } from 'react';
-import { LuClapperboard, LuRefreshCw, LuLoaderCircle, LuTriangleAlert } from 'react-icons/lu';
+import {
+  LuClapperboard,
+  LuRefreshCw,
+  LuLoaderCircle,
+  LuTriangleAlert,
+} from 'react-icons/lu';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
@@ -79,7 +84,7 @@ const SessionPicker = () => {
 
   return (
     <div className="fixed inset-0 top-16 z-30 flex items-center justify-center bg-gray-950/80">
-      <div className="bg-monitor-surface border border-monitor-line rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div className="bg-monitor-surface border border-red-400 rounded-xl shadow-xl w-full max-w-md mx-4">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-monitor-line">
           <LuClapperboard className="w-4 h-4 text-red-400" />
           <span className="text-sm font-semibold text-white">
