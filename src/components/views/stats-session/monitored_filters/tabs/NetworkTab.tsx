@@ -76,16 +76,29 @@ const NetworkTab = memo(
                 </div>
 
                 {/* Main rate - HERO */}
-                <div className="text-xl font-bold text-monitor-download tabular-nums leading-none">
-                  {formattedStats.bytesReceivedRate}
+                <div className="flex items-baseline gap-1.5 leading-none">
+                  <span className="text-xl font-bold text-monitor-download tabular-nums">
+                    {isHistory
+                      ? formattedStats.bytesReceived
+                      : formattedStats.bytesReceivedRate}
+                  </span>
+                  {isHistory && (
+                    <span className="text-[10px] text-muted-foreground font-normal">
+                      cumulative
+                    </span>
+                  )}
                 </div>
 
                 {/* Secondary stats - single line */}
                 <div className="text-[11px] text-muted-foreground">
-                  <span className="font-medium">
-                    {formattedStats.bytesReceived}
-                  </span>
-                  <span className="mx-1.5">·</span>
+                  {!isHistory && (
+                    <>
+                      <span className="font-medium">
+                        {formattedStats.bytesReceived}
+                      </span>
+                      <span className="mx-1.5">·</span>
+                    </>
+                  )}
                   <span className="font-medium">
                     {formattedStats.packetsReceived} packets
                   </span>
@@ -114,16 +127,29 @@ const NetworkTab = memo(
                 </div>
 
                 {/* Main rate - HERO */}
-                <div className="text-xl font-bold text-emerald-500 tabular-nums leading-none">
-                  {formattedStats.bytesSentRate}
+                <div className="flex items-baseline gap-1.5 leading-none">
+                  <span className="text-xl font-bold text-emerald-500 tabular-nums">
+                    {isHistory
+                      ? formattedStats.bytesSent
+                      : formattedStats.bytesSentRate}
+                  </span>
+                  {isHistory && (
+                    <span className="text-[10px] text-muted-foreground font-normal">
+                      cumulative
+                    </span>
+                  )}
                 </div>
 
                 {/* Secondary stats - single line */}
                 <div className="text-[11px] text-muted-foreground">
-                  <span className="font-medium">
-                    {formattedStats.bytesSent}
-                  </span>
-                  <span className="mx-1.5">·</span>
+                  {!isHistory && (
+                    <>
+                      <span className="font-medium">
+                        {formattedStats.bytesSent}
+                      </span>
+                      <span className="mx-1.5">·</span>
+                    </>
+                  )}
                   <span className="font-medium">
                     {formattedStats.packetsSent} packets
                   </span>

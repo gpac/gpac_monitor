@@ -36,13 +36,15 @@ export class EventPlayer {
     this.setState('idle');
   }
 
-  play() {
+  play(resetStateFromSnapshot?: () => void) {
     if (!this.timelineEvents.length || !this.dispatch) return;
 
     if (this.state === 'paused') {
       this.playbackStartTimeMs = performance.now();
       this.startEventUs = this.currentPlaybackTimeUs;
     } else {
+      // Restarting from idle/done — reset Redux state before replaying
+      resetStateFromSnapshot?.();
       this.playbackStartTimeMs = performance.now();
       this.startEventUs = this.timelineEvents[0]?.ts_us ?? 0;
       this.currentPlaybackTimeUs = this.startEventUs;
@@ -142,6 +144,9 @@ export class EventPlayer {
     }
 
     if (this.nextEventIndex >= this.timelineEvents.length) {
+      // Freeze position at last event so currentTimeUs() reflects actual end
+      this.currentPlaybackTimeUs =
+        this.timelineEvents[this.timelineEvents.length - 1].ts_us;
       this.setState('done');
       return;
     }

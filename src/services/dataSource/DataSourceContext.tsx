@@ -2,8 +2,6 @@ import React, { createContext, useContext, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { clearAllSessionData } from '@/shared/store/actions/globalActions';
 import { historyController } from '@/services/historyService/historyController';
-import type { HistorySnapshot } from '@/services/historyService/types';
-import { hydrateFromSnapshot } from '@/services/historyService/loader/snapshotHydrator';
 import type { AppDispatch } from '@/shared/store';
 import type { SessionFileReader } from '@/services/historyService/sessionFileReader';
 import { formatTimestamp } from '@/utils/formatting';
@@ -20,8 +18,6 @@ interface DataSourceContextValue {
   sessionLoaded: boolean;
   sessionName: string | null;
   switchToLive: () => void;
-  switchToHistory: (snapshot: HistorySnapshot) => void;
-  loadHistory: (snapshotFile: File, eventsFile: File) => Promise<void>;
   loadFromReader: (
     reader: SessionFileReader,
     sessionId: string,
@@ -33,8 +29,6 @@ const DataSourceContext = createContext<DataSourceContextValue>({
   sessionLoaded: false,
   sessionName: null,
   switchToLive: () => {},
-  switchToHistory: () => {},
-  loadHistory: async () => {},
   loadFromReader: async () => {},
 });
 
@@ -47,23 +41,6 @@ export function DataSourceProvider({
   const [mode, setMode] = useState<DataSourceMode>(getInitialMode);
   const [sessionLoaded, setSessionLoaded] = useState(false);
   const [sessionName, setSessionName] = useState<string | null>(null);
-
-  const switchToHistory = useCallback(
-    (snapshot: HistorySnapshot) => {
-      hydrateFromSnapshot(snapshot, dispatch);
-      setMode('history');
-    },
-    [dispatch],
-  );
-
-  const loadHistory = useCallback(
-    async (snapshotFile: File, eventsFile: File) => {
-      await historyController.load(snapshotFile, eventsFile, dispatch);
-      setSessionLoaded(true);
-      setMode('history');
-    },
-    [dispatch],
-  );
 
   const loadFromReader = useCallback(
     async (reader: SessionFileReader, sessionId: string) => {
@@ -85,15 +62,7 @@ export function DataSourceProvider({
 
   return (
     <DataSourceContext.Provider
-      value={{
-        mode,
-        sessionLoaded,
-        sessionName,
-        switchToLive,
-        switchToHistory,
-        loadHistory,
-        loadFromReader,
-      }}
+      value={{ mode, sessionLoaded, sessionName, switchToLive, loadFromReader }}
     >
       {children}
     </DataSourceContext.Provider>

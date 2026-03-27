@@ -13,7 +13,6 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      // sécurité explicite
       external: [/\.test\./, /\.spec\./],
     },
   },

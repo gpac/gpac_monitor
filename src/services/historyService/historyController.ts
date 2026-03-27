@@ -1,6 +1,5 @@
 import type { AppDispatch } from '@/shared/store';
 import type { HistorySnapshot } from './types';
-import { loadEventsFile } from './loader/eventLoader';
 import { hydrateFromSnapshot } from './loader/snapshotHydrator';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
@@ -20,17 +19,7 @@ export class HistoryController {
     this.player.setListener(listener);
   }
 
-  /** Load from File objects (V2 compat) */
-  async load(snapshotFile: File, eventsFile: File, dispatch: AppDispatch) {
-    const snapshot: HistorySnapshot = JSON.parse(await snapshotFile.text());
-    const events = await loadEventsFile(eventsFile);
-
-    this.storeSession(snapshot, dispatch, events[0]?.ts_us ?? 0);
-    hydrateFromSnapshot(snapshot, dispatch, this.sessionStartUs);
-    this.player.load(events, dispatch);
-  }
-
-  /** Load from SessionFileReader (V3 WS, V4/V5 File API) */
+  /** Load from SessionFileReader (WS or local File API) */
   async loadFromReader(
     reader: SessionFileReader,
     sessionId: string,
@@ -63,7 +52,14 @@ export class HistoryController {
   }
 
   play() {
-    this.player.play();
+    if (!this.snapshot || !this.dispatch) {
+      this.player.play();
+      return;
+    }
+    const { snapshot, dispatch, sessionStartUs } = this;
+    this.player.play(() =>
+      hydrateFromSnapshot(snapshot, dispatch, sessionStartUs),
+    );
   }
 
   pause() {
