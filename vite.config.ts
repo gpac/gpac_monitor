@@ -11,4 +11,10 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      // sécurité explicite
+      external: [/\.test\./, /\.spec\./],
+    },
+  },
 });
