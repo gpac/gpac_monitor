@@ -1,6 +1,6 @@
 import type { HistoryEvent } from '../types';
 
-const MAX_EVENTS = 50_000;
+export const MAX_EVENTS = 50_000;
 
 /** Parse JSONL text into HistoryEvent array. */
 export function parseEventsJsonl(text: string): HistoryEvent[] {
