@@ -1,9 +1,11 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 
 interface SeekBarProps {
   progressPercent: number;
   onSeekPositionChange: (positionPercent: number) => void;
+  formatTooltip: (positionPercent: number) => string;
   disabled?: boolean;
+  isSeeking?: boolean;
 }
 
 function pointerXToPercent(trackRect: DOMRect, clientX: number): number {
@@ -14,9 +16,12 @@ function pointerXToPercent(trackRect: DOMRect, clientX: number): number {
 const SeekBar = ({
   progressPercent,
   onSeekPositionChange,
+  formatTooltip,
   disabled,
+  isSeeking,
 }: SeekBarProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
+  const [hoverPercent, setHoverPercent] = useState<number | null>(null);
 
   const handlePointerDown = useCallback(
     (e: React.PointerEvent<HTMLDivElement>) => {
@@ -41,22 +46,46 @@ const SeekBar = ({
     [disabled, onSeekPositionChange],
   );
 
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      if (!trackRef.current) return;
+      setHoverPercent(
+        pointerXToPercent(trackRef.current.getBoundingClientRect(), e.clientX),
+      );
+    },
+    [],
+  );
+
   return (
-    <div
-      ref={trackRef}
-      onPointerDown={handlePointerDown}
-      className={`relative h-2 flex-1 rounded-full bg-secondary overflow-hidden ${
-        disabled ? 'opacity-40' : 'cursor-pointer'
-      }`}
-      role="slider"
-      aria-valuemin={0}
-      aria-valuemax={100}
-      aria-valuenow={Math.round(progressPercent)}
-    >
+    <div className="relative flex-1">
+      {hoverPercent !== null && (
+        <div
+          className="absolute -top-5 -translate-x-1/2 bg-gray-800 text-gray-200 text-[10px] px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap z-10"
+          style={{ left: `${hoverPercent}%` }}
+        >
+          {formatTooltip(hoverPercent)}
+        </div>
+      )}
       <div
-        className="h-full bg-blue-500 transition-[width] duration-75"
-        style={{ width: `${progressPercent}%` }}
-      />
+        ref={trackRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={() => setHoverPercent(null)}
+        className={`relative h-2 w-full rounded-full bg-secondary overflow-hidden ${
+          disabled ? 'opacity-40' : 'cursor-pointer'
+        }`}
+        role="slider"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(progressPercent)}
+      >
+        <div
+          className={`h-full transition-[width] duration-75 ${
+            isSeeking ? 'bg-amber-400 animate-pulse' : 'bg-blue-500'
+          }`}
+          style={{ width: `${progressPercent}%` }}
+        />
+      </div>
     </div>
   );
 };

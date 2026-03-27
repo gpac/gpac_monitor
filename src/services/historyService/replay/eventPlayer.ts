@@ -15,6 +15,7 @@ export class EventPlayer {
   private nextEventIndex = 0;
   private state: PlayerState = 'idle';
   private animationFrameId: number | null = null;
+  private seekRequestAnimationFrameId: number | null = null;
   private listener?: PlayerListener;
 
   // Timing
@@ -61,6 +62,10 @@ export class EventPlayer {
   }
 
   stop() {
+    if (this.seekRequestAnimationFrameId !== null) {
+      cancelAnimationFrame(this.seekRequestAnimationFrameId);
+      this.seekRequestAnimationFrameId = null;
+    }
     this.cancelFrame();
     this.nextEventIndex = 0;
     this.currentPlaybackTimeUs = 0;
@@ -69,28 +74,46 @@ export class EventPlayer {
 
   /**
    * Seek to a target timestamp (absolute, same space as event.ts_us).
-   * Rehydrates Redux from snapshot then fast-forwards all events up to target.
+   * Processes events in 8ms chunks via rAF to avoid blocking the main thread.
    */
   seek(targetTimestampUs: number, resetStateFromSnapshot: () => void) {
     if (!this.timelineEvents.length || !this.onEvent) return;
 
+    if (this.seekRequestAnimationFrameId !== null) {
+      cancelAnimationFrame(this.seekRequestAnimationFrameId);
+      this.seekRequestAnimationFrameId = null;
+    }
     this.cancelFrame();
+    this.currentPlaybackTimeUs = targetTimestampUs; // jump immediately for UI
     this.setState('seeking');
-
     resetStateFromSnapshot();
 
     let i = 0;
-    while (
-      i < this.timelineEvents.length &&
-      this.timelineEvents[i].ts_us <= targetTimestampUs
-    ) {
-      this.onEvent!(this.timelineEvents[i]);
-      i++;
-    }
-    // start of next event after seek target
-    this.nextEventIndex = i;
-    this.currentPlaybackTimeUs = targetTimestampUs;
-    this.setState('paused');
+    const processChunk = () => {
+      const deadline = performance.now() + 8;
+      while (
+        i < this.timelineEvents.length &&
+        this.timelineEvents[i].ts_us <= targetTimestampUs &&
+        performance.now() < deadline
+      ) {
+        this.onEvent!(this.timelineEvents[i]);
+        i++;
+      }
+
+      if (
+        i < this.timelineEvents.length &&
+        this.timelineEvents[i].ts_us <= targetTimestampUs
+      ) {
+        this.seekRequestAnimationFrameId = requestAnimationFrame(processChunk);
+      } else {
+        this.seekRequestAnimationFrameId = null;
+        this.nextEventIndex = i;
+        this.currentPlaybackTimeUs = targetTimestampUs;
+        this.setState('paused');
+      }
+    };
+
+    this.seekRequestAnimationFrameId = requestAnimationFrame(processChunk);
   }
 
   getState(): PlayerState {
