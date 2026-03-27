@@ -1,24 +1,11 @@
-import type { AppDispatch } from '@/shared/store';
-import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
-import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
-import { resetBandwidthReplay } from '../replay/bandwidthReplay';
-import {
-  setCommandLine,
-  clearSessionDetails,
-} from '@/shared/store/slices/sessionDetailsSlice';
-import {
-  updateSessionStats,
-  setFilterPids,
-} from '@/shared/store/slices/sessionStatsSlice';
-import { hydrateFilterArgs } from '@/shared/store/slices/filterArgumentSlice';
+import type { GraphFilterData } from '@/types/domain/gpac/model';
+import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
+import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
 import type {
   SessionFilterStats,
   FilterPids,
 } from '@/shared/store/slices/sessionStatsSlice';
-import type { GraphFilterData } from '@/types/domain/gpac/model';
-import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
-import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
-import type { HistorySnapshot, HistoryFilter } from '../types';
+import type { HistoryFilter } from '../types';
 import { GpacStreamType } from '@/types';
 
 export function toGraphFilterData(f: HistoryFilter): GraphFilterData {
@@ -58,7 +45,7 @@ export function toGraphFilterData(f: HistoryFilter): GraphFilterData {
   };
 }
 
-function toSessionFilterStats(f: HistoryFilter): SessionFilterStats {
+export function toSessionFilterStats(f: HistoryFilter): SessionFilterStats {
   return {
     idx: f.idx,
     status: f.status,
@@ -94,22 +81,4 @@ export function buildArgsByFilter(
     }
   }
   return result;
-}
-
-export function hydrateFromSnapshot(
-  snapshot: HistorySnapshot,
-  dispatch: AppDispatch,
-  sessionStartUs = 0,
-): void {
-  // Reset per-session state before replaying a new history session
-  resetBandwidthReplay(sessionStartUs);
-  dispatch(resetAllData());
-  dispatch(clearSessionDetails());
-
-  dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
-  dispatch(setCommandLine(snapshot.command_line));
-  dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
-  dispatch(setFilterPids(buildPidsByFilter(snapshot.filters)));
-  dispatch(hydrateFilterArgs(buildArgsByFilter(snapshot.filters)));
-  dispatch(setLoading(false));
 }

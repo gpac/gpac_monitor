@@ -2,12 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { EventPlayer } from '../eventPlayer';
 import type { HistoryEvent } from '../../types';
 
-vi.mock('../eventDispatcher', () => ({
-  dispatchEvent: vi.fn(),
-}));
-
-const mockDispatch = vi.fn() as any;
-
 function makeEvents(timestamps: number[]): HistoryEvent[] {
   return timestamps.map((ts) => ({
     version: 1,
@@ -19,12 +13,14 @@ function makeEvents(timestamps: number[]): HistoryEvent[] {
 
 describe('EventPlayer.play', () => {
   let player: EventPlayer;
+  let onEvent: ReturnType<typeof vi.fn>;
   const events = makeEvents([100, 200, 300, 400, 500]);
 
   beforeEach(() => {
     player = new EventPlayer();
+    onEvent = vi.fn();
     vi.clearAllMocks();
-    player.load(events, mockDispatch);
+    player.load(events, onEvent);
   });
 
   it('calls resetStateFromSnapshot when starting from idle', () => {
@@ -46,9 +42,7 @@ describe('EventPlayer.play', () => {
 
   it('calls resetStateFromSnapshot when restarting after done', () => {
     const reset = vi.fn();
-    // Simulate done state by seeking past all events then re-playing
     player.seek(999, vi.fn());
-    // Manually set state to done to simulate end of playback
     (player as any).state = 'done';
 
     reset.mockClear();
@@ -60,11 +54,6 @@ describe('EventPlayer.play', () => {
   it('resets nextEventIndex to 0 when restarting', () => {
     player.play();
     player.pause();
-    // Advance index manually
-    (player as any).nextEventIndex = 3;
-
-    player.play(vi.fn()); // restart (not from paused — need to set state)
-    // From paused, index is NOT reset; set done state to test restart
     (player as any).state = 'done';
     (player as any).nextEventIndex = 3;
 
@@ -78,16 +67,14 @@ describe('EventPlayer — done state', () => {
   it('freezes currentPlaybackTimeUs at last event ts_us when done', () => {
     const player = new EventPlayer();
     const events = makeEvents([100, 200, 300]);
-    player.load(events, mockDispatch);
+    player.load(events, vi.fn());
 
-    // Seek past all events to trigger done indirectly
     player.seek(999, vi.fn());
-    // After seek, state is paused at 999 — simulate tick reaching end
     (player as any).nextEventIndex = events.length;
     (player as any).state = 'playing';
     (player as any).tick();
 
     expect(player.getState()).toBe('done');
-    expect(player.currentTimeUs()).toBe(300); // last event ts_us
+    expect(player.currentTimeUs()).toBe(300);
   });
 });

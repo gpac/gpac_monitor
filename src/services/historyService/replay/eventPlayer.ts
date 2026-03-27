@@ -1,6 +1,4 @@
-import type { AppDispatch } from '@/shared/store';
 import type { HistoryEvent } from '../types';
-import { dispatchEvent } from './eventDispatcher';
 
 export type PlayerState = 'idle' | 'playing' | 'paused' | 'done' | 'seeking';
 export type PlayerListener = (state: PlayerState, timeUs: number) => void;
@@ -13,7 +11,7 @@ export type PlayerListener = (state: PlayerState, timeUs: number) => void;
  */
 export class EventPlayer {
   private timelineEvents: HistoryEvent[] = [];
-  private dispatch: AppDispatch | null = null;
+  private onEvent: ((event: HistoryEvent) => void) | null = null;
   private nextEventIndex = 0;
   private state: PlayerState = 'idle';
   private animationFrameId: number | null = null;
@@ -28,16 +26,16 @@ export class EventPlayer {
     this.listener = listener;
   }
 
-  load(timelineEvents: HistoryEvent[], dispatch: AppDispatch) {
+  load(timelineEvents: HistoryEvent[], onEvent: (event: HistoryEvent) => void) {
     this.stop();
     this.timelineEvents = timelineEvents;
-    this.dispatch = dispatch;
+    this.onEvent = onEvent;
     this.nextEventIndex = 0;
     this.setState('idle');
   }
 
   play(resetStateFromSnapshot?: () => void) {
-    if (!this.timelineEvents.length || !this.dispatch) return;
+    if (!this.timelineEvents.length || !this.onEvent) return;
 
     if (this.state === 'paused') {
       this.playbackStartTimeMs = performance.now();
@@ -74,7 +72,7 @@ export class EventPlayer {
    * Rehydrates Redux from snapshot then fast-forwards all events up to target.
    */
   seek(targetTimestampUs: number, resetStateFromSnapshot: () => void) {
-    if (!this.timelineEvents.length || !this.dispatch) return;
+    if (!this.timelineEvents.length || !this.onEvent) return;
 
     this.cancelFrame();
     this.setState('seeking');
@@ -86,7 +84,7 @@ export class EventPlayer {
       i < this.timelineEvents.length &&
       this.timelineEvents[i].ts_us <= targetTimestampUs
     ) {
-      dispatchEvent(this.timelineEvents[i], this.dispatch);
+      this.onEvent!(this.timelineEvents[i]);
       i++;
     }
     // start of next event after seek target
@@ -132,14 +130,14 @@ export class EventPlayer {
   }
 
   private tick() {
-    if (this.state !== 'playing' || !this.dispatch) return;
+    if (this.state !== 'playing' || !this.onEvent) return;
 
     const now = this.currentTimeUs();
 
     while (this.nextEventIndex < this.timelineEvents.length) {
       const event = this.timelineEvents[this.nextEventIndex];
       if (event.ts_us > now) break;
-      dispatchEvent(event, this.dispatch);
+      this.onEvent!(event);
       this.nextEventIndex++;
     }
 

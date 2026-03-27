@@ -75,7 +75,7 @@ const NetworkTab = memo(
                   </Badge>
                 </div>
 
-                {/* Main rate - HERO */}
+                {/* Main rate  */}
                 <div className="flex items-baseline gap-1.5 leading-none">
                   <span className="text-xl font-bold text-monitor-download tabular-nums">
                     {isHistory
@@ -89,7 +89,7 @@ const NetworkTab = memo(
                   )}
                 </div>
 
-                {/* Secondary stats - single line */}
+                {/* Secondary stats */}
                 <div className="text-[11px] text-muted-foreground">
                   {!isHistory && (
                     <>
@@ -109,7 +109,6 @@ const NetworkTab = memo(
           <Card className="bg-monitor-panel border-transparent">
             <CardContent className="p-2">
               <div className="space-y-2">
-                {/* Header: title + badge */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-0.5 h-5 rounded-full bg-emerald-500" />
@@ -126,7 +125,7 @@ const NetworkTab = memo(
                   </Badge>
                 </div>
 
-                {/* Main rate - HERO */}
+                {/* Main rate*/}
                 <div className="flex items-baseline gap-1.5 leading-none">
                   <span className="text-xl font-bold text-emerald-500 tabular-nums">
                     {isHistory
@@ -140,7 +139,7 @@ const NetworkTab = memo(
                   )}
                 </div>
 
-                {/* Secondary stats - single line */}
+                {/* Secondary stats */}
                 <div className="text-[11px] text-muted-foreground">
                   {!isHistory && (
                     <>
@@ -159,7 +158,7 @@ const NetworkTab = memo(
           </Card>
         </div>
 
-        {/* ROW 3: Combined chart */}
+        {/* Combined chart */}
         <BandwidthCombinedChart
           filterId={filterId}
           bytesSent={currentStats.bytesSent}
