@@ -26,7 +26,10 @@ export class CommandLineHandler {
     return new Promise((resolve) => {
       this.callbacks.push(resolve);
       if (this.callbacks.length === 1) {
-        this.dependencies.send({ message: 'get_command_line' });
+        this.dependencies.send({
+          type: 'get_command_line',
+          message: 'get_command_line',
+        });
       }
     });
   }
