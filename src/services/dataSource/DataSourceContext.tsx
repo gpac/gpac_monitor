@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { clearAllSessionData } from '@/shared/store/actions/globalActions';
 import { historyController } from '@/services/historyService/historyController';
 import type { AppDispatch } from '@/shared/store';
-import type { SessionFileReader } from '@/services/historyService/sessionFileReader';
+import type { HistorySource } from '@/services/historyService/source/types';
 import { formatTimestamp } from '@/utils/formatting';
 
 export type DataSourceMode = 'live' | 'history';
@@ -18,10 +18,7 @@ interface DataSourceContextValue {
   sessionLoaded: boolean;
   sessionName: string | null;
   switchToLive: () => void;
-  loadFromReader: (
-    reader: SessionFileReader,
-    sessionId: string,
-  ) => Promise<void>;
+  loadFromSource: (source: HistorySource) => Promise<void>;
 }
 
 const DataSourceContext = createContext<DataSourceContextValue>({
@@ -29,7 +26,7 @@ const DataSourceContext = createContext<DataSourceContextValue>({
   sessionLoaded: false,
   sessionName: null,
   switchToLive: () => {},
-  loadFromReader: async () => {},
+  loadFromSource: async () => {},
 });
 
 export function DataSourceProvider({
@@ -42,10 +39,10 @@ export function DataSourceProvider({
   const [sessionLoaded, setSessionLoaded] = useState(false);
   const [sessionName, setSessionName] = useState<string | null>(null);
 
-  const loadFromReader = useCallback(
-    async (reader: SessionFileReader, sessionId: string) => {
-      await historyController.loadFromReader(reader, sessionId, dispatch);
-      setSessionName(formatTimestamp(sessionId));
+  const loadFromSource = useCallback(
+    async (source: HistorySource) => {
+      await historyController.load(source, dispatch);
+      setSessionName(formatTimestamp(source.sessionId));
       setSessionLoaded(true);
       setMode('history');
     },
@@ -62,7 +59,7 @@ export function DataSourceProvider({
 
   return (
     <DataSourceContext.Provider
-      value={{ mode, sessionLoaded, sessionName, switchToLive, loadFromReader }}
+      value={{ mode, sessionLoaded, sessionName, switchToLive, loadFromSource }}
     >
       {children}
     </DataSourceContext.Provider>

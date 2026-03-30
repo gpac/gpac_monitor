@@ -5,6 +5,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useDataMode } from '@/shared/hooks/useDataMode';
 import { useSessionList } from '@/services/historyService/sessionFileReader/useSessionList';
+import { RemoteHistorySource } from '@/services/historyService/source/RemoteHistorySource';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectActiveConnection } from '@/shared/store/selectors';
 import SessionRow from './SessionRow';
@@ -12,9 +13,9 @@ import LocalFilePicker from './LocalFilePicker';
 
 const SessionPicker = () => {
   const { isHistory } = useDataMode();
-  const { sessionLoaded, loadFromReader } = useDataSource();
+  const { sessionLoaded, loadFromSource } = useDataSource();
   const activeConnection = useAppSelector(selectActiveConnection);
-  const { sessions, loading, error, reader, retry } = useSessionList(
+  const { sessions, loading, error, browser, retry } = useSessionList(
     activeConnection?.address,
   );
   const [loadingSession, setLoadingSession] = useState(false);
@@ -22,17 +23,18 @@ const SessionPicker = () => {
 
   const handleSelect = useCallback(
     async (sessionId: string) => {
-      if (!reader) return;
+      if (!browser) return;
       setLoadingSession(true);
       setLoadError(null);
       try {
-        await loadFromReader(reader, sessionId);
+        const source = new RemoteHistorySource(browser, sessionId);
+        await loadFromSource(source);
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : 'Load failed');
         setLoadingSession(false);
       }
     },
-    [reader, loadFromReader],
+    [browser, loadFromSource],
   );
 
   if (!isHistory || sessionLoaded) return null;

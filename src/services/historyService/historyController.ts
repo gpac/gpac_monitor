@@ -3,7 +3,7 @@ import type { HistorySnapshot } from './types';
 import { HistoryAdapter } from './integration/historyAdapter';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
-import type { SessionFileReader } from './sessionFileReader';
+import type { HistorySource } from './source/types';
 
 /**
  * HistoryController — orchestrates snapshot loading + event replay.
@@ -19,14 +19,10 @@ export class HistoryController {
     this.player.setListener(listener);
   }
 
-  /** Load from SessionFileReader (WS or local File API) */
-  async loadFromReader(
-    reader: SessionFileReader,
-    sessionId: string,
-    dispatch: AppDispatch,
-  ) {
-    const snapshot = await reader.readSnapshot(sessionId);
-    const events = await reader.readEvents(sessionId);
+  /** Load from a HistorySource (FileHistorySource or ActiveSessionHistorySource). */
+  async load(source: HistorySource, dispatch: AppDispatch) {
+    const snapshot = await source.loadSnapshot();
+    const events = await source.loadEventsRange();
 
     const sessionStartUs = events[0]?.ts_us ?? 0;
     this.snapshot = snapshot;

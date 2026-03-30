@@ -4,13 +4,16 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { LocalFileSessionFileReader } from '@/services/historyService/sessionFileReader';
+import { FileHistorySource } from '@/services/historyService/source/FileHistorySource';
 import { toast } from '@/shared/hooks/useToast';
 import SessionRow from './SessionRow';
 import type { SessionInfo } from '@/services/historyService/sessionFileReader/types';
 
 const LocalFilePicker = () => {
-  const { loadFromReader } = useDataSource();
-  const [reader, setReader] = useState<LocalFileSessionFileReader | null>(null);
+  const { loadFromSource } = useDataSource();
+  const [browser, setBrowser] = useState<LocalFileSessionFileReader | null>(
+    null,
+  );
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [loadingSession, setLoadingSession] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -23,20 +26,21 @@ const LocalFilePicker = () => {
   }, []);
 
   const handleFiles = useCallback(async (files: FileList) => {
-    const r = new LocalFileSessionFileReader(Array.from(files));
-    setSessions(await r.listSessions());
-    setReader(r);
+    const fileBrowser = new LocalFileSessionFileReader(Array.from(files));
+    setSessions(await fileBrowser.listSessions());
+    setBrowser(fileBrowser);
     setLoadError(null);
   }, []);
 
   const handleSelect = useCallback(
     async (sessionId: string) => {
-      if (!reader) return;
+      if (!browser) return;
       setLoadingSession(true);
       setLoadError(null);
       try {
-        await loadFromReader(reader, sessionId);
-        if (reader.wasTruncated) {
+        const source = new FileHistorySource(browser, sessionId);
+        await loadFromSource(source);
+        if (source.wasTruncated) {
           toast({
             title: 'Session truncated',
             description: 'Only the first 50,000 events were loaded.',
@@ -47,7 +51,7 @@ const LocalFilePicker = () => {
         setLoadingSession(false);
       }
     },
-    [reader, loadFromReader],
+    [browser, loadFromSource],
   );
 
   return (
