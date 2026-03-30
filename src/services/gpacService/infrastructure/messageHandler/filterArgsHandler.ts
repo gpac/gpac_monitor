@@ -1,4 +1,5 @@
 import { WSMessageType } from '@/services/ws/types';
+import type { DetailsMessage } from '@/services/ws/types';
 import { generateID } from '@/utils/core';
 import { MessageHandlerDependencies } from './types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
@@ -56,7 +57,7 @@ export class FilterArgsHandler {
   /**
    * Handles filter args details received from server
    */
-  public handleFilterArgs(data: any): void {
+  public handleFilterArgs(data: DetailsMessage): void {
     if (!data.filter || data.filter.idx === undefined) {
       return;
     }

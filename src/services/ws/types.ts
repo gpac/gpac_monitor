@@ -3,6 +3,14 @@ import {
   LogManagerStatus,
   GpacLogConfig,
 } from '@/types/domain/gpac/log-types';
+import type {
+  GraphFilterData,
+  MonitoredFilterStats,
+} from '@/types/domain/gpac/model';
+import type { SessionFilterStatistics } from '@/types/domain/gpac/filter-stats';
+import type { CPUStats } from '@/types/domain/system';
+import type { FilterArgument } from '@/types/domain/gpac/gpac_args';
+import type { PidPropsMap } from '@/types/domain/gpac/pid_props';
 
 // Base interface for all responses
 interface BaseWSResponse {
@@ -49,6 +57,65 @@ enum WSResponseType {
   SESSION_END = 'session_end',
 }
 
+// --- Incoming message types ---
+
+export interface FiltersMessage {
+  message: 'filters';
+  graph_v?: number;
+  filters: GraphFilterData[];
+}
+
+export interface UpdateMessage {
+  message: 'update';
+  filters: GraphFilterData[];
+}
+
+export interface DetailsMessage {
+  message: 'details';
+  filter: {
+    idx: number;
+    gpac_args?: FilterArgument[];
+    [key: string]: unknown;
+  };
+}
+
+export interface SessionStatsMessage {
+  message: 'session_stats';
+  stats: SessionFilterStatistics[];
+  all_packets_done?: boolean;
+}
+
+export interface CpuStatsMessage {
+  message: 'cpu_stats';
+  stats: CPUStats;
+}
+
+export interface FilterStatsMessage extends MonitoredFilterStats {
+  message: 'filter_stats';
+}
+
+export interface IpidPropsResponseMessage {
+  message: 'ipid_props_response';
+  filterIdx: number;
+  ipidIdx: number;
+  properties: PidPropsMap;
+}
+
+export interface CommandLineResponseMessage {
+  message: 'command_line_response';
+  commandLine: string | null;
+}
+
+export interface SessionEndMessage {
+  message: 'session_end';
+}
+
+export interface NotificationMessage {
+  message: 'notification';
+  type: string;
+  description?: string;
+}
+
 export interface LogBatchResponse extends BaseWSResponse {
   message: 'log_batch';
   logs: GpacLogEntry[];
@@ -68,3 +135,19 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
   message: 'log_config_changed';
   logLevel: GpacLogConfig;
 }
+
+export type IncomingWsMessage =
+  | FiltersMessage
+  | UpdateMessage
+  | DetailsMessage
+  | SessionStatsMessage
+  | CpuStatsMessage
+  | FilterStatsMessage
+  | LogBatchResponse
+  | LogHistoryResponse
+  | LogStatusResponse
+  | LogConfigChangedResponse
+  | IpidPropsResponseMessage
+  | CommandLineResponseMessage
+  | SessionEndMessage
+  | NotificationMessage;

@@ -1,7 +1,7 @@
 import type { MessageHandlerDependencies } from './types';
 
 /**
- * CommandLineHandler - Simple request-response handler for command line
+ * CommandLineHandler
  */
 export class CommandLineHandler {
   private dependencies: MessageHandlerDependencies;
