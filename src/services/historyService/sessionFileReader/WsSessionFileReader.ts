@@ -1,12 +1,12 @@
 import type { HistorySnapshot } from '../types';
-import type { SessionFileReader, SessionInfo } from './types';
+import type { SessionInfo } from './types';
 import { parseEventsJsonl } from '../loader/eventLoader';
 
 /**
  * WsSessionFileReader
  * Opens its own WS connection, sends list_sessions/read_file commands.
  */
-export class WsSessionFileReader implements SessionFileReader {
+export class WsSessionFileReader {
   private ws: WebSocket | null = null;
   private pending = new Map<
     string,

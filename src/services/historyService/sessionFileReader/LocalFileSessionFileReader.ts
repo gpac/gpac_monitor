@@ -1,5 +1,5 @@
 import type { HistorySnapshot } from '../types';
-import type { SessionFileReader, SessionInfo } from './types';
+import type { SessionInfo } from './types';
 import { parseEventsJsonl, MAX_EVENTS } from '../loader/eventLoader';
 
 interface SessionEntry {
@@ -14,7 +14,7 @@ interface SessionEntry {
  * Accepts a FileList from <input webkitdirectory> and parses it into sessions
  * using webkitRelativePath .
  */
-export class LocalFileSessionFileReader implements SessionFileReader {
+export class LocalFileSessionFileReader {
   wasTruncated = false;
   private sessionMap = new Map<string, SessionEntry>();
 
