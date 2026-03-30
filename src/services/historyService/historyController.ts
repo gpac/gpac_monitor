@@ -1,6 +1,6 @@
 import type { AppDispatch } from '@/shared/store';
 import type { HistorySnapshot } from './types';
-import { HistoryAdapter } from './historyAdapter';
+import { HistoryAdapter } from './integration/historyAdapter';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
 import type { SessionFileReader } from './sessionFileReader';

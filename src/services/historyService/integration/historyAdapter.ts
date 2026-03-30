@@ -26,13 +26,13 @@ import type {
   SessionStatsEvent,
   CpuStatsEvent,
   FilterArgsUpdateEvent,
-} from './types';
+} from '../types';
 import {
   toGraphFilterData,
   buildPidsByFilter,
   buildArgsByFilter,
   toSessionFilterStats,
-} from './loader/snapshotHydrator';
+} from '../loader/snapshotHydrator';
 
 type BandwidthRef = { bytes_sent: number; bytes_done: number; ts_us: number };
 
