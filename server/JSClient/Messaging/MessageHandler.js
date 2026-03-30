@@ -134,6 +134,17 @@ function MessageHandler(client) {
                         }));
                     },
 
+                    'read_events_range': () => {
+                        const { sessionId, fromUs, toUs } = jtext;
+                        const events = historyReader.readEventsRange(sessionId, fromUs, toUs);
+                        this.client.client.send(JSON.stringify({
+                            command: 'events_range',
+                            status: 'ok',
+                            sessionId,
+                            events,
+                        }));
+                    },
+
                     'read_file': () => {
                         const { sessionId, file } = jtext;
                         const result = historyReader.readFile(sessionId, file);

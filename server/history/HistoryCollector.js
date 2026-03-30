@@ -47,13 +47,14 @@ function HistoryCollector(historyDir) {
             }
             return entry;
         });
+        const filtersTsUs = sys.clock_us();
         this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filters',
-            ts_us: sys.clock_us(),
+            ts_us: filtersTsUs,
             graph_v: graphVersion,
             filters: normalizedFilters,
-        }));
+        }), filtersTsUs);
     };
 
     /** Record session_stats as WS-format event (rate-limited to 1s) */
