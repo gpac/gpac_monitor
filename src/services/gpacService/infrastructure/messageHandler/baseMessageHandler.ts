@@ -45,7 +45,7 @@ export class BaseMessageHandler {
     private notificationHandlers: GpacNotificationHandlers,
     private callbacks: MessageHandlerCallbacks,
     private dependencies: MessageHandlerDependencies,
-    private onMessage?: (message: any) => void,
+    private onMessage?: (message: IncomingWsMessage) => void,
   ) {
     // Initialize message batcher (RAF-based batching for logs only)
     this.messageBatcher = new WSMessageBatcher();
