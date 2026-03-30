@@ -10,7 +10,8 @@ interface SessionRowProps {
 }
 
 const SessionRow = memo(({ session, onSelect, disabled }: SessionRowProps) => {
-  const isValid = session.hasSnapshot && session.hasEvents;
+  const isValid =
+    session.hasSnapshot && (session.hasEvents || session.hasManifest);
   return (
     <button
       onClick={() => onSelect(session.sessionId)}
@@ -27,7 +28,7 @@ const SessionRow = memo(({ session, onSelect, disabled }: SessionRowProps) => {
           {!session.hasSnapshot && (
             <span className="text-red-400">missing snapshot · </span>
           )}
-          {!session.hasEvents && (
+          {!session.hasEvents && !session.hasManifest && (
             <span className="text-red-400">missing events · </span>
           )}
           {!session.isComplete && (
