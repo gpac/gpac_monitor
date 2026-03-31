@@ -92,9 +92,29 @@ const monitoredFilterSlice = createSlice({
       state.dataByFilter = {};
     },
 
-    /**
-     * Set max points for sliding window
-     */
+    /** Bulk-add network data (used by seek flush). */
+    bulkAddNetworkData: (
+      state,
+      action: PayloadAction<
+        Record<string, { upload: ChartDataPoint[]; download: ChartDataPoint[] }>
+      >,
+    ) => {
+      for (const [filterId, data] of Object.entries(action.payload)) {
+        if (!state.dataByFilter[filterId]) state.dataByFilter[filterId] = {};
+        if (!state.dataByFilter[filterId].network)
+          state.dataByFilter[filterId].network = { upload: [], download: [] };
+        const network = state.dataByFilter[filterId].network!;
+        for (const direction of ['upload', 'download'] as const) {
+          network[direction].push(...data[direction]);
+          if (network[direction].length > state.maxPoints)
+            network[direction].splice(
+              0,
+              network[direction].length - state.maxPoints,
+            );
+        }
+      }
+    },
+
     setMaxPoints: (state, action: PayloadAction<number>) => {
       state.maxPoints = action.payload;
     },
@@ -103,6 +123,7 @@ const monitoredFilterSlice = createSlice({
 
 export const {
   addNetworkDataPoint,
+  bulkAddNetworkData,
   clearFilterData,
   resetAllData,
   setMaxPoints,

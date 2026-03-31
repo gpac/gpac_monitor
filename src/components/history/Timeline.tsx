@@ -63,7 +63,6 @@ const Timeline = ({
         onSeekPositionChange={handleSeekPositionChange}
         formatTooltip={formatTooltip}
         disabled={durationUs === 0}
-        isSeeking={isSeeking}
       />
 
       <span className="text-xs font-mono tabular-nums whitespace-nowrap">

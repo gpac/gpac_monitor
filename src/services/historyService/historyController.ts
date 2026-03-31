@@ -35,9 +35,12 @@ export class HistoryController {
   seek(targetTimestampUs: number) {
     if (!this.snapshot || !this.adapter) return;
     const { snapshot, adapter, sessionStartUs } = this;
-    this.player.seek(targetTimestampUs, () => {
-      adapter.hydrate(snapshot, sessionStartUs);
-    });
+    adapter.setSilent(true);
+    this.player.seek(
+      targetTimestampUs,
+      () => adapter.hydrate(snapshot, sessionStartUs),
+      () => adapter.flush(),
+    );
   }
 
   play() {

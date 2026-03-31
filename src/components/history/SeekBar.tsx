@@ -5,7 +5,6 @@ interface SeekBarProps {
   onSeekPositionChange: (positionPercent: number) => void;
   formatTooltip: (positionPercent: number) => string;
   disabled?: boolean;
-  isSeeking?: boolean;
 }
 
 function pointerXToPercent(trackRect: DOMRect, clientX: number): number {
@@ -18,7 +17,6 @@ const SeekBar = ({
   onSeekPositionChange,
   formatTooltip,
   disabled,
-  isSeeking,
 }: SeekBarProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const [hoverPercent, setHoverPercent] = useState<number | null>(null);
@@ -80,9 +78,7 @@ const SeekBar = ({
         aria-valuenow={Math.round(progressPercent)}
       >
         <div
-          className={`h-full transition-[width] duration-75 ${
-            isSeeking ? 'bg-amber-400 animate-pulse' : 'bg-blue-500'
-          }`}
+          className="h-full transition-[width] duration-75 bg-red-400"
           style={{ width: `${progressPercent}%` }}
         />
       </div>

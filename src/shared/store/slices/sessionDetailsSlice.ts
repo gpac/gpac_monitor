@@ -38,6 +38,12 @@ const sessionDetailsSlice = createSlice({
       if (commandLine !== undefined) state.commandLine = commandLine;
       if (systemStats !== undefined) state.systemStats = systemStats;
     },
+    /** Bulk-push CPU stats (used by seek flush). */
+    bulkAddSystemStats(state, action: PayloadAction<CPUStats[]>) {
+      state.systemStatsHistory.push(...action.payload);
+      const last = action.payload[action.payload.length - 1];
+      if (last) state.systemStats = last;
+    },
     clearSessionDetails() {
       return initialState;
     },
@@ -47,6 +53,7 @@ const sessionDetailsSlice = createSlice({
 export const {
   setCommandLine,
   setSystemStats,
+  bulkAddSystemStats,
   resetSystemStatsHistory,
   hydrateSessionDetails,
   clearSessionDetails,

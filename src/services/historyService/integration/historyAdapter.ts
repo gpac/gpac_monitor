@@ -1,13 +1,17 @@
 import type { AppDispatch } from '@/shared/store';
+import type { CPUStats } from '@/types/domain/system';
 import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
 import {
   resetAllData,
   addNetworkDataPoint,
+  bulkAddNetworkData,
 } from '@/shared/store/slices/monitoredFilterSlice';
+import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
 import {
   setCommandLine,
   clearSessionDetails,
   setSystemStats,
+  bulkAddSystemStats,
 } from '@/shared/store/slices/sessionDetailsSlice';
 import {
   updateSessionStats,
@@ -18,7 +22,6 @@ import {
   applyArgUpdate,
   hydrateFilterArgs,
 } from '@/shared/store/slices/filterArgumentSlice';
-import { formatCompactTime } from '@/utils/formatting';
 import type {
   HistoryEvent,
   HistorySnapshot,
@@ -33,23 +36,48 @@ import {
   buildArgsByFilter,
   toSessionFilterStats,
 } from '../loader/snapshotHydrator';
+import { computeBandwidthPoints } from './computeBandwidth';
 
-type BandwidthRef = { bytes_sent: number; bytes_done: number; ts_us: number };
+type BandwidthBuffer = Record<
+  string,
+  { upload: ChartDataPoint[]; download: ChartDataPoint[] }
+>;
 
-/**
- * HistoryAdapter — unique boundary Redux pour historyService.
- * Miroir de storeIntegration.ts côté gpacService.
- * Absorbe : eventDispatcher, bandwidthReplay, hydrateFromSnapshot.
- */
 export class HistoryAdapter {
-  private prevBandwidth: Record<string, BandwidthRef> = {};
+  private prevBandwidth: Record<
+    string,
+    { bytes_sent: number; bytes_done: number; ts_us: number }
+  > = {};
   private sessionStartUs = 0;
+  private silent = false;
+  private pendingBandwidth: BandwidthBuffer = {};
+  private pendingCpuStats: CPUStats[] = [];
 
   constructor(private dispatch: AppDispatch) {}
+
+  setSilent(on: boolean): void {
+    this.silent = on;
+    if (on) {
+      this.pendingBandwidth = {};
+      this.pendingCpuStats = [];
+    }
+  }
+
+  flush(): void {
+    if (Object.keys(this.pendingBandwidth).length)
+      this.dispatch(bulkAddNetworkData(this.pendingBandwidth));
+    if (this.pendingCpuStats.length)
+      this.dispatch(bulkAddSystemStats(this.pendingCpuStats));
+    this.pendingBandwidth = {};
+    this.pendingCpuStats = [];
+    this.silent = false;
+  }
 
   hydrate(snapshot: HistorySnapshot, sessionStartUs: number): void {
     this.sessionStartUs = sessionStartUs;
     this.prevBandwidth = {};
+    this.pendingBandwidth = {};
+    this.pendingCpuStats = [];
     const { dispatch } = this;
     dispatch(resetAllData());
     dispatch(clearSessionDetails());
@@ -81,12 +109,12 @@ export class HistoryAdapter {
   private handleFilters(event: FiltersEvent): void {
     const { dispatch } = this;
     dispatch(updateGraphData(event.filters.map(toGraphFilterData)));
-    const withProps = event.filters.filter((f) => f.properties);
+    const withProps = event.filters.filter((filter) => filter.properties);
     if (withProps.length) {
-      const pids = withProps.map((f) => ({
-        ...f,
-        ipids: f.properties!.ipids,
-        opids: f.properties!.opids,
+      const pids = withProps.map((filter) => ({
+        ...filter,
+        ipids: filter.properties!.ipids,
+        opids: filter.properties!.opids,
       }));
       dispatch(setFilterPids(buildPidsByFilter(pids)));
     }
@@ -101,20 +129,52 @@ export class HistoryAdapter {
         ts_us: event.ts_us,
       }),
     );
-    this.dispatchBandwidthPoints(event);
+    const points = computeBandwidthPoints(
+      event,
+      this.sessionStartUs,
+      this.prevBandwidth,
+    );
+    if (this.silent) {
+      for (const point of points) {
+        if (!this.pendingBandwidth[point.filterId])
+          this.pendingBandwidth[point.filterId] = { upload: [], download: [] };
+        this.pendingBandwidth[point.filterId].upload.push(point.upload);
+        this.pendingBandwidth[point.filterId].download.push(point.download);
+      }
+    } else {
+      for (const point of points) {
+        this.dispatch(
+          addNetworkDataPoint({
+            filterId: point.filterId,
+            type: 'upload',
+            point: point.upload,
+          }),
+        );
+        this.dispatch(
+          addNetworkDataPoint({
+            filterId: point.filterId,
+            type: 'download',
+            point: point.download,
+          }),
+        );
+      }
+    }
   }
 
   private handleCpuStats(event: CpuStatsEvent): void {
-    this.dispatch(
-      setSystemStats({
-        ...event.stats,
-        timestamp: event.ts_us,
-        memory_usage_percent: event.stats.memory_usage_percent ?? 0,
-        process_memory_percent: event.stats.process_memory_percent ?? 0,
-        gpac_memory_percent: event.stats.gpac_memory_percent ?? 0,
-        cpu_efficiency: event.stats.cpu_efficiency ?? 0,
-      }),
-    );
+    const stats: CPUStats = {
+      ...event.stats,
+      timestamp: event.ts_us,
+      memory_usage_percent: event.stats.memory_usage_percent ?? 0,
+      process_memory_percent: event.stats.process_memory_percent ?? 0,
+      gpac_memory_percent: event.stats.gpac_memory_percent ?? 0,
+      cpu_efficiency: event.stats.cpu_efficiency ?? 0,
+    };
+    if (this.silent) {
+      this.pendingCpuStats.push(stats);
+    } else {
+      this.dispatch(setSystemStats(stats));
+    }
   }
 
   private handleFilterArgsUpdate(event: FilterArgsUpdateEvent): void {
@@ -125,60 +185,5 @@ export class HistoryAdapter {
         value: event.payload.value,
       }),
     );
-  }
-
-  private dispatchBandwidthPoints(evt: SessionStatsEvent): void {
-    const time = formatCompactTime(evt.ts_us - this.sessionStartUs);
-    for (const filter of evt.stats) {
-      const filterId = filter.idx.toString();
-      const prev = this.prevBandwidth[filterId];
-      if (!prev) {
-        this.dispatch(
-          addNetworkDataPoint({
-            filterId,
-            type: 'upload',
-            point: { time, timestamp: evt.ts_us, value: 0 },
-          }),
-        );
-        this.dispatch(
-          addNetworkDataPoint({
-            filterId,
-            type: 'download',
-            point: { time, timestamp: evt.ts_us, value: 0 },
-          }),
-        );
-      } else {
-        const dt = (evt.ts_us - prev.ts_us) / 1_000_000;
-        if (dt > 0) {
-          const up = Math.max(
-            0,
-            ((filter.bytes_sent ?? 0) - prev.bytes_sent) / dt,
-          );
-          const down = Math.max(
-            0,
-            ((filter.bytes_done ?? 0) - prev.bytes_done) / dt,
-          );
-          this.dispatch(
-            addNetworkDataPoint({
-              filterId,
-              type: 'upload',
-              point: { time, timestamp: evt.ts_us, value: up },
-            }),
-          );
-          this.dispatch(
-            addNetworkDataPoint({
-              filterId,
-              type: 'download',
-              point: { time, timestamp: evt.ts_us, value: down },
-            }),
-          );
-        }
-      }
-      this.prevBandwidth[filterId] = {
-        bytes_sent: filter.bytes_sent ?? 0,
-        bytes_done: filter.bytes_done ?? 0,
-        ts_us: evt.ts_us,
-      };
-    }
   }
 }

@@ -76,7 +76,11 @@ export class EventPlayer {
    * Seek to a target timestamp (absolute, same space as event.ts_us).
    * Processes events in 8ms chunks via rAF to avoid blocking the main thread.
    */
-  seek(targetTimestampUs: number, resetStateFromSnapshot: () => void) {
+  seek(
+    targetTimestampUs: number,
+    resetStateFromSnapshot: () => void,
+    onComplete?: () => void,
+  ) {
     if (!this.timelineEvents.length || !this.onEvent) return;
 
     if (this.seekRequestAnimationFrameId !== null) {
@@ -109,6 +113,7 @@ export class EventPlayer {
         this.seekRequestAnimationFrameId = null;
         this.nextEventIndex = i;
         this.currentPlaybackTimeUs = targetTimestampUs;
+        onComplete?.();
         this.setState('paused');
       }
     };
