@@ -98,15 +98,15 @@ const Header = () => {
               History
             </button>
           )}
+          {sessionName && (
+            <span className="flex items-center gap-1.5 text-xs text-gray-400 font-ui">
+              <LuClock className="w-4 h-4 text-red-400 shrink-0" />
+              {sessionName}
+            </span>
+          )}
           <HistoryControls />
         </div>
 
-        {sessionName && (
-          <span className="flex items-center gap-1.5 text-xs text-gray-400 font-ui">
-            <LuClock className="w-4 h-4 text-red-400 shrink-0" />
-            {sessionName}
-          </span>
-        )}
         <div className="flex items-center gap-4">
           <button
             onClick={() => dispatch(toggleSidebar())}
