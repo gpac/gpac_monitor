@@ -45,7 +45,11 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
         </span>
         <span className="ml-auto text-muted-foreground/70 text-xs">
           {isHistory ? (
-            <span className="text-amber-400">◼ History</span>
+            <>
+              <span className="text-muted-foreground">[</span>
+              <span className="text-red-400"> ⏺ History </span>
+              <span className="text-muted-foreground">]</span>
+            </>
           ) : (
             <>
               Live <span className="text-error">⏺</span>
@@ -106,9 +110,7 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        {/* Space for collapsible sections in the future */}
-      </div>
+      <div className="flex-1 overflow-hidden"></div>
     </div>
   );
 });

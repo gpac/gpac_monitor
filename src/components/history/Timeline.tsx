@@ -1,8 +1,9 @@
 import { useCallback } from 'react';
-import { LuPause, LuPlay } from 'react-icons/lu';
+import { LuPause } from 'react-icons/lu';
 import SeekBar from './SeekBar';
 import { formatCompactTime } from '@/utils/formatting/time';
 import type { PlayerState } from '@/services/historyService/replay/eventPlayer';
+import { FaCirclePlay } from 'react-icons/fa6';
 
 interface TimelineProps {
   state: PlayerState;
@@ -54,7 +55,7 @@ const Timeline = ({
         {isPlaying ? (
           <LuPause className="w-4 h-4" />
         ) : (
-          <LuPlay className="w-4 h-4" />
+          <FaCirclePlay className="w-5 h-5" />
         )}
       </button>
 
