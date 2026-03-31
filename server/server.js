@@ -33,6 +33,9 @@ function ensureMonitoringLoop() {
 
         if (session.last_task) {
             for (const client of all_clients) client.sessionManager.handleSessionEnd(now);
+            // Record final state before closing so history captures all EOS flags
+            historyCollector.recordSessionStats(buildSessionStatsPayload(session), true);
+            historyCollector.recordCpuStats(buildCpuStatsPayload());
             historyCollector.close();
             monitoringRunning = false;
             return false;

@@ -56,6 +56,7 @@ export function toSessionFilterStats(f: HistoryFilter): SessionFilterStats {
     time: (f.time as number) ?? 0,
     nb_ipid: f.nb_ipid,
     nb_opid: f.nb_opid,
+    is_eos: false,
   };
 }
 
