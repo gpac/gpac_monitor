@@ -1,0 +1,97 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`computeBandwidthPoints > computes correct bandwidth deltas between two real events 1`] = `
+[
+  {
+    "download": {
+      "time": "2.2s",
+      "timestamp": 2238647,
+      "value": 466543.17065031244,
+    },
+    "filterId": "0",
+    "upload": {
+      "time": "2.2s",
+      "timestamp": 2238647,
+      "value": 466543.17065031244,
+    },
+  },
+  {
+    "download": {
+      "time": "2.2s",
+      "timestamp": 2238647,
+      "value": 42818346.95186653,
+    },
+    "filterId": "1",
+    "upload": {
+      "time": "2.2s",
+      "timestamp": 2238647,
+      "value": 0,
+    },
+  },
+  {
+    "download": {
+      "time": "2.2s",
+      "timestamp": 2238647,
+      "value": 0,
+    },
+    "filterId": "4",
+    "upload": {
+      "time": "2.2s",
+      "timestamp": 2238647,
+      "value": 471648.87165007065,
+    },
+  },
+]
+`;
+
+exports[`computeBandwidthPoints > returns zero values on first event (no previous reference) 1`] = `
+[
+  {
+    "download": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
+    "filterId": "0",
+    "upload": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
+  },
+  {
+    "download": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
+    "filterId": "1",
+    "upload": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
+  },
+  {
+    "download": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
+    "filterId": "4",
+    "upload": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
+  },
+]
+`;
+
+exports[`computeBandwidthPoints > updates prevBandwidth references after each call 1`] = `
+{
+  "bytes_done": 727528,
+  "bytes_sent": 727528,
+  "ts_us": 1237805,
+}
+`;
