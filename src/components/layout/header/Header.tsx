@@ -51,10 +51,12 @@ const Header = () => {
   }, [showLayoutManager]);
 
   return (
-    <header className="h-14 bg-monitor-app border-b border-white/10 px-4 text-white/80">
+    <header
+      className={`h-14 bg-monitor-app px-4 text-white/80 border-b ${isHistory ? 'border-red-400' : 'border-white/10'}`}
+    >
       <div className="h-full flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <h1 className="text-xl font-semibold text-gray-200 font-ui">
+          <h1 className="text-xl font-semibold font-ui text-gray-200">
             GPAC Monitor
           </h1>
 
