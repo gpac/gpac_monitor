@@ -57,9 +57,9 @@ function HistoryCollector(historyDir) {
     };
 
     /** Record session_stats as WS-format event (rate-limited to 1s) */
-    this.recordSessionStats = function(payload) {
+    this.recordSessionStats = function(payload, force) {
         const ts_us = sys.clock_us();
-        if (ts_us - this.lastRecordUs < RATE_LIMIT_US) return;
+        if (!force && ts_us - this.lastRecordUs < RATE_LIMIT_US) return;
         this.lastRecordUs = ts_us;
         this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
