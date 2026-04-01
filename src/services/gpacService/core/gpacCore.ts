@@ -3,6 +3,7 @@ import {
   ConnectionStatus,
   IGpacMessageHandler,
 } from '@/types';
+import type { IncomingWsMessage } from '@/services/ws/types';
 
 export class GpacCoreService implements IGpacCommunication {
   private currentFilterId: number | null = null;
@@ -58,7 +59,7 @@ export class GpacCoreService implements IGpacCommunication {
     });
   }
 
-  public notifyHandlers(message: any): void {
+  public notifyHandlers(message: IncomingWsMessage): void {
     this.messageHandlers.forEach((handler) => {
       try {
         handler.onMessage?.(message);

@@ -1,6 +1,20 @@
 import type { HistorySnapshot, HistoryEvent } from '../types';
 import type { SessionInfo } from '../sessionFileReader/types';
 
+export interface HistoryManifestChunk {
+  file: string;
+  fromUs: number;
+  toUs: number;
+  count: number;
+}
+
+export interface HistoryManifest {
+  version: number;
+  startUs: number;
+  endUs: number;
+  chunks: HistoryManifestChunk[];
+}
+
 /** Session metadata — available without loading all events. */
 export interface HistoryMetadata {
   sessionId: string;

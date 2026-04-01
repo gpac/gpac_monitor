@@ -64,7 +64,7 @@ export class GpacService implements IGpacCommunication {
       {} as GpacNotificationHandlers,
       storeCallbacks,
       dependencies,
-      (message: any) => {
+      (message) => {
         coreService.notifyHandlers(message);
       },
     );

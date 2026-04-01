@@ -47,13 +47,14 @@ function HistoryCollector(historyDir) {
             }
             return entry;
         });
+        const filtersTsUs = sys.clock_us();
         this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filters',
-            ts_us: sys.clock_us(),
+            ts_us: filtersTsUs,
             graph_v: graphVersion,
             filters: normalizedFilters,
-        }));
+        }), filtersTsUs);
     };
 
     /** Record session_stats as WS-format event (rate-limited to 1s) */
@@ -66,27 +67,29 @@ function HistoryCollector(historyDir) {
             message: 'session_stats',
             ts_us,
             ...payload,
-        }));
+        }), ts_us);
     };
 
     /** Record cpu_stats as WS-format event */
     this.recordCpuStats = function(payload) {
+        const cpuTsUs = sys.clock_us();
         this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'cpu_stats',
-            ts_us: sys.clock_us(),
+            ts_us: cpuTsUs,
             ...payload,
-        }));
+        }), cpuTsUs);
     };
 
     /** Record a filter argument update */
     this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
+        const argsTsUs = sys.clock_us();
         this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filter_args_update',
-            ts_us: sys.clock_us(),
+            ts_us: argsTsUs,
             payload: { filter_idx: filterIdx, arg_name: argName, value: newValue },
-        }));
+        }), argsTsUs);
     };
 
     /** Close the history file (call on session end) */
