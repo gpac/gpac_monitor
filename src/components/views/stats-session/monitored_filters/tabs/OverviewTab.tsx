@@ -46,9 +46,7 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
         <span className="ml-auto text-muted-foreground/70 text-xs">
           {isHistory ? (
             <>
-              <span className="text-muted-foreground">[</span>
-              <span className="text-red-400"> ⏺ History </span>
-              <span className="text-muted-foreground">]</span>
+              <span className="text-purple-400"> ⏺ </span> History
             </>
           ) : (
             <>

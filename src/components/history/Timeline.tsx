@@ -25,7 +25,6 @@ const Timeline = ({
   onSeek,
 }: TimelineProps) => {
   const isPlaying = state === 'playing';
-  const isSeeking = state === 'seeking';
   const elapsedUs = Math.min(currentTimeUs, durationUs);
   const progressPercent = durationUs > 0 ? (elapsedUs / durationUs) * 100 : 0;
 
@@ -48,7 +47,7 @@ const Timeline = ({
     <div className="flex items-center gap-3 min-w-64">
       <button
         onClick={isPlaying ? onPause : onPlay}
-        disabled={durationUs === 0 || isSeeking}
+        disabled={durationUs === 0}
         className="p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
         aria-label={isPlaying ? 'Pause' : 'Play'}
       >
@@ -67,13 +66,9 @@ const Timeline = ({
       />
 
       <span className="text-xs font-mono tabular-nums whitespace-nowrap">
-        {isSeeking ? (
-          <span className="text-amber-400 animate-pulse">Seeking…</span>
-        ) : (
-          <span className="text-gray-400">
-            {formatCompactTime(elapsedUs)} / {formatCompactTime(durationUs)}
-          </span>
-        )}
+        <span className="text-gray-400">
+          {formatCompactTime(elapsedUs)} / {formatCompactTime(durationUs)}
+        </span>
       </span>
     </div>
   );

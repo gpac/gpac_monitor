@@ -148,7 +148,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
 
   const handleBack = () => {
     // Navigate back to the main dashboard view
-    onCardClick(-1); // Special value to indicate going back to dashboard
+    onCardClick(-1);
   };
 
   const handleOpenProperties = () => {

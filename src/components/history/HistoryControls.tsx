@@ -22,12 +22,12 @@ const HistoryControls = () => {
   if (mode !== 'history') return null;
 
   return (
-    <div className="flex items-center gap-2 px-2 py-1 rounded-lg ring-1 ring-red-500/70">
-      <span className="flex items-center gap-1 text-xs text-red-400 font-ui whitespace-nowrap">
+    <div className="flex items-center gap-2 px-2 py-1 rounded-lg ring-1 ring-purple-500/70">
+      <span className="flex items-center gap-1 text-xs text-purple-400 font-ui whitespace-nowrap">
         <LuClapperboard className="w-3.5 h-3.5" />
         Timeline
       </span>
-      <div className="w-px h-4 bg-red-500/40" />
+      <div className="w-px h-4 bg-purple-500/40" />
       <Timeline
         state={state}
         currentTimeUs={currentTimeUs}

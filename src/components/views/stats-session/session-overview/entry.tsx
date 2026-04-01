@@ -106,7 +106,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
         });
       }
     }, [isDetached]);
-    // Resize Optimization
+
     // Disable callbacks during resize to avoid expensive re-renders
     const noopTabChange = useCallback(() => {}, []);
     const noopCardClick = useCallback(() => {}, []);

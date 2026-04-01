@@ -78,11 +78,11 @@ const SeekBar = ({
         aria-valuenow={Math.round(progressPercent)}
       >
         <div
-          className="h-full transition-[width] duration-75 bg-red-400"
+          className="h-full transition-[width] duration-75 bg-purple-400"
           style={{ width: `${progressPercent}%` }}
         />
         <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1 h-6 rounded-full bg-white shadow border border-red-400 transition-[left] duration-75 pointer-events-none"
+          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1 h-6 rounded-full bg-white shadow border border-purple-400/70 transition-[left] duration-75 pointer-events-none"
           style={{ left: `${progressPercent}%` }}
         />
       </div>

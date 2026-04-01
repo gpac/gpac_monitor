@@ -47,7 +47,7 @@ const NetworkTab = memo(
           <span className={TAB_STYLES.STATUS_LABEL}>Filter: {filterName}</span>
           <span className="ml-auto text-muted-foreground/70 text-xs">
             {isHistory ? 'History' : 'Live'}{' '}
-            <span className={isHistory ? 'text-warning' : 'text-error'}>
+            <span className={isHistory ? 'text-purple-400' : 'text-error'}>
               ⏺
             </span>
           </span>

@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
 import OverviewTab from './tabs/OverviewTab';
@@ -82,7 +83,11 @@ const DetailedStatsView = memo(
       }),
       [inputPids.length, outputPids.length],
     );
+    const { isHistory } = useDataMode();
     const openLogsWidget = useOpenLogsWidget();
+    const activeTabClass = isHistory
+      ? 'h-7 px-3 font-medium data-[state=active]:text-purple-400 data-[state=active]:border-b-2 data-[state=active]:border-purple-400'
+      : 'h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab';
     const filterKey =
       overviewData.idx !== undefined ? String(overviewData.idx) : null;
     return (
@@ -90,7 +95,9 @@ const DetailedStatsView = memo(
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 pb-2 space-y-2">
             <div className="flex justify-stretch items-center gap-4">
-              <h2 className="text-lg font-semibold text-monitor-active-filter">
+              <h2
+                className={`text-lg font-semibold ${isHistory ? 'text-purple-400' : 'text-monitor-active-filter'}`}
+              >
                 {overviewData.name}
               </h2>
 
@@ -148,28 +155,16 @@ const DetailedStatsView = memo(
             </div>
 
             <TabsList className="h-8 justify-start  w-full">
-              <TabsTrigger
-                value="overview"
-                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
-              >
+              <TabsTrigger value="overview" className={activeTabClass}>
                 Overview
               </TabsTrigger>
-              <TabsTrigger
-                value="network"
-                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
-              >
+              <TabsTrigger value="network" className={activeTabClass}>
                 Network
               </TabsTrigger>
-              <TabsTrigger
-                value="inputs"
-                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
-              >
+              <TabsTrigger value="inputs" className={activeTabClass}>
                 Inputs ({counts.inputs})
               </TabsTrigger>
-              <TabsTrigger
-                value="outputs"
-                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
-              >
+              <TabsTrigger value="outputs" className={activeTabClass}>
                 Outputs ({counts.outputs})
               </TabsTrigger>
             </TabsList>

@@ -6,6 +6,7 @@ import {
   DEFAULT_STREAM_COLOR,
 } from '@/utils/filters/streamType';
 import { FilterType } from '@/types';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 
 interface PropertiesHeaderProps {
   filterName: string;
@@ -31,6 +32,7 @@ const PropertiesHeader = ({
   mode = 'filter',
   onSearchChange,
 }: PropertiesHeaderProps) => {
+  const { isHistory } = useDataMode();
   const borderColor = streamType
     ? getFilterColor(streamType)
     : DEFAULT_STREAM_COLOR;
@@ -41,7 +43,7 @@ const PropertiesHeader = ({
       <div className="px-3 pt-3 pb-2 flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <h3
-            className="text-sm font-semibold text-monitor-active-filter truncate pb-1 border-b-2 inline-block"
+            className={`text-sm font-semibold truncate pb-1 border-b-2 inline-block ${isHistory ? 'text-purple-400' : 'text-monitor-active-filter'}`}
             style={{ borderBottomColor: borderColor }}
           >
             {filterName}
