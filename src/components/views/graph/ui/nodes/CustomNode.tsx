@@ -53,10 +53,27 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
       ? 'ring-2 ring-sky-400'
       : 'ring-1 ring-monitor-line';
 
+  const STREAM_TYPE_ORDER: Record<string, number> = {
+    Visual: 0,
+    Audio: 1,
+    Text: 2,
+    File: 3,
+  };
+
+  const sortByStreamType = (
+    keys: string[],
+    pids: Record<string, { stream_type: string }>,
+  ) =>
+    [...keys].sort(
+      (a, b) =>
+        (STREAM_TYPE_ORDER[pids[a]?.stream_type] ?? 99) -
+        (STREAM_TYPE_ORDER[pids[b]?.stream_type] ?? 99),
+    );
+
   // Create input handles only if nb_ipid > 0
   const inputHandles =
     nb_ipid > 0
-      ? Object.keys(ipid).map((pidId, index) => ({
+      ? sortByStreamType(Object.keys(ipid), ipid).map((pidId, index) => ({
           id: pidId,
           type: 'target' as const,
           position: Position.Left,
@@ -67,7 +84,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   // Create output handles only if nb_opid > 0
   const outputHandles =
     nb_opid > 0
-      ? Object.keys(opid).map((pidId, index) => ({
+      ? sortByStreamType(Object.keys(opid), opid).map((pidId, index) => ({
           id: pidId,
           type: 'source' as const,
           position: Position.Right,
