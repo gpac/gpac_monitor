@@ -52,6 +52,12 @@ export class HistoryAdapter {
   private silent = false;
   private pendingBandwidth: BandwidthBuffer = {};
   private pendingCpuStats: CPUStats[] = [];
+  private pendingLastFilters: FiltersEvent | null = null;
+  private pendingLastStats: {
+    stats: SessionFilterStats[];
+    ts_us: number;
+  } | null = null;
+  private pendingFilterArgs: FilterArgsUpdateEvent[] = [];
 
   constructor(private dispatch: AppDispatch) {}
 
@@ -60,17 +66,27 @@ export class HistoryAdapter {
     if (on) {
       this.pendingBandwidth = {};
       this.pendingCpuStats = [];
+      this.pendingLastFilters = null;
+      this.pendingLastStats = null;
+      this.pendingFilterArgs = [];
     }
   }
 
   flush(): void {
+    this.silent = false;
+    if (this.pendingLastFilters) this.handleFilters(this.pendingLastFilters);
+    if (this.pendingLastStats)
+      this.dispatch(updateSessionStats(this.pendingLastStats));
+    for (const arg of this.pendingFilterArgs) this.handleFilterArgsUpdate(arg);
     if (Object.keys(this.pendingBandwidth).length)
       this.dispatch(bulkAddNetworkData(this.pendingBandwidth));
     if (this.pendingCpuStats.length)
       this.dispatch(bulkAddSystemStats(this.pendingCpuStats));
     this.pendingBandwidth = {};
     this.pendingCpuStats = [];
-    this.silent = false;
+    this.pendingLastFilters = null;
+    this.pendingLastStats = null;
+    this.pendingFilterArgs = [];
   }
 
   hydrate(snapshot: HistorySnapshot, sessionStartUs: number): void {
@@ -107,6 +123,10 @@ export class HistoryAdapter {
   }
 
   private handleFilters(event: FiltersEvent): void {
+    if (this.silent) {
+      this.pendingLastFilters = event;
+      return;
+    }
     const { dispatch } = this;
     dispatch(updateGraphData(event.filters.map(toGraphFilterData)));
     const withProps = event.filters.filter((filter) => filter.properties);
@@ -123,12 +143,19 @@ export class HistoryAdapter {
   }
 
   private handleSessionStats(event: SessionStatsEvent): void {
-    this.dispatch(
-      updateSessionStats({
+    if (this.silent) {
+      this.pendingLastStats = {
         stats: event.stats as SessionFilterStats[],
         ts_us: event.ts_us,
-      }),
-    );
+      };
+    } else {
+      this.dispatch(
+        updateSessionStats({
+          stats: event.stats as SessionFilterStats[],
+          ts_us: event.ts_us,
+        }),
+      );
+    }
     const points = computeBandwidthPoints(
       event,
       this.sessionStartUs,
@@ -178,6 +205,10 @@ export class HistoryAdapter {
   }
 
   private handleFilterArgsUpdate(event: FilterArgsUpdateEvent): void {
+    if (this.silent) {
+      this.pendingFilterArgs.push(event);
+      return;
+    }
     this.dispatch(
       applyArgUpdate({
         filterIdx: event.payload.filter_idx.toString(),
