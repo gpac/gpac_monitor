@@ -118,6 +118,11 @@ function FilterManager(client) {
         }
     };
 
+    this.cleanup = function() {
+        this.filterSubscriptions = {};
+        this.lastSentByFilter = {};
+    };
+
     this.handleSessionEnd = function() {
         this.filterSubscriptions = {};
         this.lastSentByFilter = {};
