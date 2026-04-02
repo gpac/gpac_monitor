@@ -14,9 +14,8 @@ function HistoryCollector(historyDir) {
     this.pendingLogs = [];
     this.logBatchTimer = null;
 
-    this.startLogCapture = function(logLevel) {
+    this.startLogCapture = function() {
         logHub.add(LOG_ID, this);
-        if (!logHub.activeLogLevel) logHub.setLogLevel(logLevel || 'all@warning');
     };
 
     this.writeSnapshot = function(data) {
@@ -102,10 +101,7 @@ function HistoryCollector(historyDir) {
         });
         if (!this.logBatchTimer) {
             this.logBatchTimer = true;
-            session.post_task(() => {
-                this.flushLogs();
-                return false;
-            }, 50);
+            session.post_task(() => { this.flushLogs(); return false; });
         }
     };
 
