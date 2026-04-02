@@ -86,12 +86,25 @@ function HistoryWriter(historyDir, sessionId) {
         manifestFile.close();
     };
 
+    this._logsFile = null;
+    this._logsPath = `${dir}/logs.jsonl`;
+
     this.writeSnapshot = function(obj) {
         this._init();
         const snapshotFile = std.open(this.snapshotPath, 'w');
         if (!snapshotFile) { print(`[HistoryWriter] Failed to write snapshot`); return; }
         snapshotFile.puts(JSON.stringify(obj) + '\n');
         snapshotFile.close();
+    };
+
+    this.writeLog = function(jsonString) {
+        this._init();
+        if (!this._logsFile) {
+            this._logsFile = std.open(this._logsPath, 'a');
+            if (!this._logsFile) { print('[HistoryWriter] Failed to open logs.jsonl'); return; }
+        }
+        this._logsFile.puts(jsonString + '\n');
+        this._logsFile.flush();
     };
 
     this.writeEvent = function(jsonString, tsUs) {
@@ -119,6 +132,10 @@ function HistoryWriter(historyDir, sessionId) {
         if (this._currentChunkFile) {
             this._currentChunkFile.close();
             this._currentChunkFile = null;
+        }
+        if (this._logsFile) {
+            this._logsFile.close();
+            this._logsFile = null;
         }
         this._writeManifest();
         const doneFile = std.open(`${dir}/done`, 'w');

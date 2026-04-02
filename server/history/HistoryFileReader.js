@@ -1,7 +1,7 @@
 import * as std from 'std';
 import * as os from 'os';
 
-const ALLOWED_EXACT_FILES = ['snapshot.json', 'events.jsonl', 'manifest.json'];
+const ALLOWED_EXACT_FILES = ['snapshot.json', 'events.jsonl', 'manifest.json', 'logs.jsonl'];
 const VALID_SESSION_ID = /^\d+$/;
 const VALID_CHUNK_FILE = /^chunks\/chunk_\d{4}\.jsonl$/;
 

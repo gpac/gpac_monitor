@@ -63,6 +63,7 @@ function ensureMonitoringLoop() {
 
 // SESSION CONFIGURATION
 session.reporting(true);
+historyCollector.startLogCapture('all@warning');
 
 // CLIENT MANAGEMENT
 let remove_client = function(client_id) {

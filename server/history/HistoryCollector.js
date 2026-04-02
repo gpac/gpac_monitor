@@ -1,37 +1,30 @@
 import { Sys as sys } from 'gpaccore';
 import { HistoryWriter } from './HistoryWriter.js';
 import { PidDataCollector } from '../JSClient/Filters/PID/PidDataCollector.js';
+import { logHub } from '../JSClient/Sys/Utils/LogHub.js';
 
-const RATE_LIMIT_US = 1000 * 1000; // 1s
+const RATE_LIMIT_US = 1000 * 1000;
 const EVENT_VERSION = 1;
+const LOG_ID = '_hist_';
 
-/**
- * HistoryCollector - Records session history into snapshot.json + events.jsonl
- *
- * Grafted into the shared monitoring loop (no own post_task).
- *
- * Usage in server.js:
- *   historyCollector.writeSnapshot(data)          — once, on first graph stabilization
- *   historyCollector.recordGraph(filters, gv)     — on each graph change
- *   historyCollector.recordSessionStats(payload)  — on each monitoring tick
- *   historyCollector.recordCpuStats(payload)      — on each monitoring tick
- *   historyCollector.close()                      — on session end
- */
 function HistoryCollector(historyDir) {
     this.writer = new HistoryWriter(historyDir);
     this.snapshotWritten = false;
     this.lastRecordUs = 0;
+    this.pendingLogs = [];
+    this.logBatchTimer = null;
 
-    /** Write enriched snapshot once (call from stabilizeGraph on first stabilization) */
+    this.startLogCapture = function(logLevel) {
+        logHub.add(LOG_ID, this);
+        if (!logHub.activeLogLevel) logHub.setLogLevel(logLevel || 'all@warning');
+    };
+
     this.writeSnapshot = function(data) {
         if (this.snapshotWritten) return;
         this.writer.writeSnapshot(data);
         this.snapshotWritten = true;
     };
 
-    /** Record graph topology change as WS-format event.
-     *  Normalizes ipid/opid (singular, from gpac_filter_to_minimal_object)
-     *  to ipids/opids (plural) — consistent with snapshot.json format. */
     this.recordGraph = function(filters, filterInstances, graphVersion) {
         const pidCollector = graphVersion > 1 ? new PidDataCollector() : null;
         const normalizedFilters = filters.map((f, i) => {
@@ -57,7 +50,6 @@ function HistoryCollector(historyDir) {
         }), filtersTsUs);
     };
 
-    /** Record session_stats as WS-format event (rate-limited to 1s) */
     this.recordSessionStats = function(payload, force) {
         const ts_us = sys.clock_us();
         if (!force && ts_us - this.lastRecordUs < RATE_LIMIT_US) return;
@@ -70,7 +62,6 @@ function HistoryCollector(historyDir) {
         }), ts_us);
     };
 
-    /** Record cpu_stats as WS-format event */
     this.recordCpuStats = function(payload) {
         const cpuTsUs = sys.clock_us();
         this.writer.writeEvent(JSON.stringify({
@@ -81,7 +72,6 @@ function HistoryCollector(historyDir) {
         }), cpuTsUs);
     };
 
-    /** Record a filter argument update */
     this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
         const argsTsUs = sys.clock_us();
         this.writer.writeEvent(JSON.stringify({
@@ -92,8 +82,57 @@ function HistoryCollector(historyDir) {
         }), argsTsUs);
     };
 
-    /** Close the history file (call on session end) */
+    this.recordLogConfigChanged = function(logLevel) {
+        const tsUs = sys.clock_us();
+        this.writer.writeLog(JSON.stringify({
+            version: EVENT_VERSION,
+            message: 'log_config_changed',
+            ts_us: tsUs,
+            logLevel,
+        }));
+    };
+
+    this.handleLog = function(tool, level, message, thread_id, caller) {
+        this.pendingLogs.push({
+            timestamp: sys.clock_us(),
+            tool, level,
+            message: message?.length > 500 ? message.substring(0, 500) + '...' : message,
+            thread_id,
+            caller: caller?.idx !== undefined ? caller.idx : (caller?.name || null),
+        });
+        if (!this.logBatchTimer) {
+            this.logBatchTimer = true;
+            session.post_task(() => {
+                this.flushLogs();
+                return false;
+            }, 50);
+        }
+    };
+
+    this.flushLogs = function() {
+        if (this.pendingLogs.length) {
+            const tsUs = sys.clock_us();
+            this.writer.writeLog(JSON.stringify({
+                version: EVENT_VERSION,
+                message: 'log_batch',
+                ts_us: tsUs,
+                logs: this.pendingLogs,
+            }));
+            this.pendingLogs = [];
+        }
+        this.logBatchTimer = null;
+    };
+
+    /** LogHub subscriber interface — called on config changes */
+    this.sendToClient = function(data) {
+        if (data.message === 'log_config_changed') {
+            this.recordLogConfigChanged(data.logLevel);
+        }
+    };
+
     this.close = function() {
+        logHub.remove(LOG_ID);
+        this.flushLogs();
         this.writer.close();
     };
 }
