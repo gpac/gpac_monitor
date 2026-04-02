@@ -4,6 +4,7 @@ import type {
 } from '@/types/domain/gpac/gpac_args';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { SessionFilterStatistics } from '@/types/domain/gpac/filter-stats';
+import type { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 // --- History Events ---
 
@@ -59,11 +60,25 @@ export interface FilterArgsUpdateEvent extends BaseEvent {
   };
 }
 
+export interface LogBatchEvent extends BaseEvent {
+  message: 'log_batch';
+  logs: GpacLogEntry[];
+}
+
+export interface LogConfigChangedEvent extends BaseEvent {
+  message: 'log_config_changed';
+  logLevel: string;
+}
+
+/** Main history events (stored in chunks/) */
 export type HistoryEvent =
   | FiltersEvent
   | SessionStatsEvent
   | CpuStatsEvent
   | FilterArgsUpdateEvent;
+
+/** Log events (stored separately in logs.jsonl) */
+export type LogEvent = LogBatchEvent | LogConfigChangedEvent;
 
 export interface HistoryFilter {
   idx: number;

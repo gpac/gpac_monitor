@@ -1,4 +1,4 @@
-import type { HistorySnapshot, HistoryEvent } from '../types';
+import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
 import type { SessionInfo } from '../sessionFileReader/types';
 
 export interface HistoryManifestChunk {
@@ -29,6 +29,7 @@ export interface HistorySource {
   readonly sessionId: string;
   loadSnapshot(): Promise<HistorySnapshot>;
   loadEventsRange(fromUs?: number, toUs?: number): Promise<HistoryEvent[]>;
+  loadLogs(): Promise<LogEvent[]>;
   getMetadata(): Promise<HistoryMetadata>;
 }
 

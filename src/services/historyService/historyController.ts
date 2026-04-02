@@ -21,14 +21,18 @@ export class HistoryController {
 
   /** Load from a HistorySource (FileHistorySource or ActiveSessionHistorySource). */
   async load(source: HistorySource, dispatch: AppDispatch) {
-    const snapshot = await source.loadSnapshot();
-    const events = await source.loadEventsRange();
+    const [snapshot, events, logs] = await Promise.all([
+      source.loadSnapshot(),
+      source.loadEventsRange(),
+      source.loadLogs(),
+    ]);
 
     const sessionStartUs = events[0]?.ts_us ?? 0;
     this.snapshot = snapshot;
     this.sessionStartUs = sessionStartUs;
     this.adapter = new HistoryAdapter(dispatch);
     this.adapter.hydrate(snapshot, sessionStartUs);
+    for (const logEvent of logs) this.adapter.handleLogEvent(logEvent);
     this.player.load(events, (event) => this.adapter!.handleEvent(event));
   }
 

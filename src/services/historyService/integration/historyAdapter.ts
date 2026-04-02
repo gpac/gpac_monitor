@@ -1,23 +1,16 @@
 import type { AppDispatch } from '@/shared/store';
 import type { CPUStats } from '@/types/domain/system';
+import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
-import {
-  resetAllData,
-  addNetworkDataPoint,
-  bulkAddNetworkData,
-} from '@/shared/store/slices/monitoredFilterSlice';
-import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
+import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
 import {
   setCommandLine,
   clearSessionDetails,
-  setSystemStats,
-  bulkAddSystemStats,
 } from '@/shared/store/slices/sessionDetailsSlice';
 import {
   updateSessionStats,
   setFilterPids,
 } from '@/shared/store/slices/sessionStatsSlice';
-import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 import {
   applyArgUpdate,
   hydrateFilterArgs,
@@ -26,9 +19,8 @@ import type {
   HistoryEvent,
   HistorySnapshot,
   FiltersEvent,
-  SessionStatsEvent,
-  CpuStatsEvent,
   FilterArgsUpdateEvent,
+  LogEvent,
 } from '../types';
 import {
   toGraphFilterData,
@@ -36,18 +28,19 @@ import {
   buildArgsByFilter,
   toSessionFilterStats,
 } from '../loader/snapshotHydrator';
-import { computeBandwidthPoints } from './computeBandwidth';
-
-type BandwidthBuffer = Record<
-  string,
-  { upload: ChartDataPoint[]; download: ChartDataPoint[] }
->;
+import {
+  dispatchSessionStats,
+  dispatchCpuStats,
+  flushStats,
+} from './handlers/statsHandler';
+import type {
+  BandwidthBuffer,
+  PrevBandwidthState,
+} from './handlers/statsHandler';
+import { dispatchLogEvent } from './handlers/logHandler';
 
 export class HistoryAdapter {
-  private prevBandwidth: Record<
-    string,
-    { bytes_sent: number; bytes_done: number; ts_us: number }
-  > = {};
+  private prevBandwidth: PrevBandwidthState = {};
   private sessionStartUs = 0;
   private silent = false;
   private pendingBandwidth: BandwidthBuffer = {};
@@ -75,13 +68,13 @@ export class HistoryAdapter {
   flush(): void {
     this.silent = false;
     if (this.pendingLastFilters) this.handleFilters(this.pendingLastFilters);
-    if (this.pendingLastStats)
-      this.dispatch(updateSessionStats(this.pendingLastStats));
     for (const arg of this.pendingFilterArgs) this.handleFilterArgsUpdate(arg);
-    if (Object.keys(this.pendingBandwidth).length)
-      this.dispatch(bulkAddNetworkData(this.pendingBandwidth));
-    if (this.pendingCpuStats.length)
-      this.dispatch(bulkAddSystemStats(this.pendingCpuStats));
+    flushStats(
+      this.dispatch,
+      this.pendingLastStats,
+      this.pendingBandwidth,
+      this.pendingCpuStats,
+    );
     this.pendingBandwidth = {};
     this.pendingCpuStats = [];
     this.pendingLastFilters = null;
@@ -110,16 +103,37 @@ export class HistoryAdapter {
       case 'filters':
         this.handleFilters(event);
         break;
-      case 'session_stats':
-        this.handleSessionStats(event);
+      case 'session_stats': {
+        const result = dispatchSessionStats(
+          this.dispatch,
+          event,
+          this.sessionStartUs,
+          this.prevBandwidth,
+          this.silent,
+          this.pendingLastStats,
+          this.pendingBandwidth,
+        );
+        this.pendingLastStats = result.pendingStats;
+        this.pendingBandwidth = result.pendingBandwidth;
         break;
+      }
       case 'cpu_stats':
-        this.handleCpuStats(event);
+        dispatchCpuStats(
+          this.dispatch,
+          event,
+          this.silent,
+          this.pendingCpuStats,
+        );
         break;
       case 'filter_args_update':
         this.handleFilterArgsUpdate(event);
         break;
     }
+  }
+
+  handleLogEvent(event: LogEvent): void {
+    if (this.silent) return;
+    dispatchLogEvent(this.dispatch, event);
   }
 
   private handleFilters(event: FiltersEvent): void {
@@ -140,68 +154,6 @@ export class HistoryAdapter {
     }
     const args = buildArgsByFilter(event.filters);
     if (Object.keys(args).length) dispatch(hydrateFilterArgs(args));
-  }
-
-  private handleSessionStats(event: SessionStatsEvent): void {
-    if (this.silent) {
-      this.pendingLastStats = {
-        stats: event.stats as SessionFilterStats[],
-        ts_us: event.ts_us,
-      };
-    } else {
-      this.dispatch(
-        updateSessionStats({
-          stats: event.stats as SessionFilterStats[],
-          ts_us: event.ts_us,
-        }),
-      );
-    }
-    const points = computeBandwidthPoints(
-      event,
-      this.sessionStartUs,
-      this.prevBandwidth,
-    );
-    if (this.silent) {
-      for (const point of points) {
-        if (!this.pendingBandwidth[point.filterId])
-          this.pendingBandwidth[point.filterId] = { upload: [], download: [] };
-        this.pendingBandwidth[point.filterId].upload.push(point.upload);
-        this.pendingBandwidth[point.filterId].download.push(point.download);
-      }
-    } else {
-      for (const point of points) {
-        this.dispatch(
-          addNetworkDataPoint({
-            filterId: point.filterId,
-            type: 'upload',
-            point: point.upload,
-          }),
-        );
-        this.dispatch(
-          addNetworkDataPoint({
-            filterId: point.filterId,
-            type: 'download',
-            point: point.download,
-          }),
-        );
-      }
-    }
-  }
-
-  private handleCpuStats(event: CpuStatsEvent): void {
-    const stats: CPUStats = {
-      ...event.stats,
-      timestamp: event.ts_us,
-      memory_usage_percent: event.stats.memory_usage_percent ?? 0,
-      process_memory_percent: event.stats.process_memory_percent ?? 0,
-      gpac_memory_percent: event.stats.gpac_memory_percent ?? 0,
-      cpu_efficiency: event.stats.cpu_efficiency ?? 0,
-    };
-    if (this.silent) {
-      this.pendingCpuStats.push(stats);
-    } else {
-      this.dispatch(setSystemStats(stats));
-    }
   }
 
   private handleFilterArgsUpdate(event: FilterArgsUpdateEvent): void {

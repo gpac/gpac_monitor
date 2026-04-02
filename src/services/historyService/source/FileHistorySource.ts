@@ -1,4 +1,4 @@
-import type { HistorySnapshot, HistoryEvent } from '../types';
+import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
 import type { HistorySource, HistoryMetadata, HistoryManifest } from './types';
 import { LocalFileSessionFileReader } from '../sessionFileReader/LocalFileSessionFileReader';
 import { chunkIndexFromPath } from './chunkUtils';
@@ -14,6 +14,10 @@ export class FileHistorySource implements HistorySource {
 
   async loadSnapshot(): Promise<HistorySnapshot> {
     return this.reader.readSnapshot(this.sessionId);
+  }
+
+  async loadLogs(): Promise<LogEvent[]> {
+    return this.reader.readLogs(this.sessionId);
   }
 
   async loadEventsRange(

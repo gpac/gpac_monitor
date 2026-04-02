@@ -62,7 +62,7 @@ export const configReducers = {
     state: LogsState,
     action: PayloadAction<{
       currentTool?: GpacLogTool;
-      levelsByTool?: Record<GpacLogTool, GpacLogLevel>;
+      levelsByTool?: Partial<Record<GpacLogTool, GpacLogLevel>>;
       defaultAllLevel?: GpacLogLevel;
       visibleToolsFilter?: GpacLogTool[];
     }>,

@@ -1,4 +1,4 @@
-import type { HistorySnapshot, HistoryEvent } from '../types';
+import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
 import type { HistoryManifest } from '../source/types';
 import type { SessionInfo } from './types';
 import { parseEventsJsonl } from '../loader/eventLoader';
@@ -75,6 +75,22 @@ export class WsSessionFileReader {
       return JSON.parse(response.content as string) as HistoryManifest;
     } catch {
       return null;
+    }
+  }
+
+  async readLogs(sessionId: string): Promise<LogEvent[]> {
+    await this.ensureConnected();
+    try {
+      const response = await this.sendCommand({
+        message: 'read_file',
+        sessionId,
+        file: 'logs.jsonl',
+      });
+      return parseEventsJsonl(
+        response.content as string,
+      ) as unknown as LogEvent[];
+    } catch {
+      return [];
     }
   }
 

@@ -1,4 +1,4 @@
-import type { HistorySnapshot } from '../types';
+import type { HistorySnapshot, LogEvent } from '../types';
 import type { SessionInfo } from './types';
 import type { HistoryManifest } from '../source/types';
 import { parseEventsJsonl, MAX_EVENTS } from '../loader/eventLoader';
@@ -7,6 +7,7 @@ interface SessionEntry {
   snapshot?: File;
   events?: File;
   manifest?: File;
+  logs?: File;
   chunks: Map<number, File>;
   done: boolean;
 }
@@ -42,6 +43,7 @@ export class LocalFileSessionFileReader {
         if (fileName === 'snapshot.json') entry.snapshot = file;
         else if (fileName === 'events.jsonl') entry.events = file;
         else if (fileName === 'manifest.json') entry.manifest = file;
+        else if (fileName === 'logs.jsonl') entry.logs = file;
         else if (fileName === 'done') entry.done = true;
       }
     }
@@ -76,6 +78,12 @@ export class LocalFileSessionFileReader {
     const file = this.sessionMap.get(sessionId)?.chunks.get(chunkIndex);
     if (!file) return [];
     return parseEventsJsonl(await file.text());
+  }
+
+  async readLogs(sessionId: string): Promise<LogEvent[]> {
+    const file = this.sessionMap.get(sessionId)?.logs;
+    if (!file) return [];
+    return parseEventsJsonl(await file.text()) as unknown as LogEvent[];
   }
 
   async readEvents(sessionId: string) {
