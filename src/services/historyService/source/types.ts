@@ -28,12 +28,11 @@ export interface HistoryMetadata {
 export interface HistorySource {
   readonly sessionId: string;
   loadSnapshot(): Promise<HistorySnapshot>;
-  /** Naive: loads all events, filters locally. Range queries come in later phases. */
   loadEventsRange(fromUs?: number, toUs?: number): Promise<HistoryEvent[]>;
   getMetadata(): Promise<HistoryMetadata>;
 }
 
-/** Session listing (UI picker side) — separate concern from HistorySource. */
+/** Session listing (UI picker side)  */
 export interface SessionBrowser {
   listSessions(): Promise<SessionInfo[]>;
 }

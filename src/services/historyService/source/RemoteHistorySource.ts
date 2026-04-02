@@ -1,12 +1,15 @@
 import type { HistorySnapshot, HistoryEvent } from '../types';
-import type { HistorySource, HistoryMetadata } from './types';
+import type { HistorySource, HistoryMetadata, HistoryManifest } from './types';
 import { WsSessionFileReader } from '../sessionFileReader/WsSessionFileReader';
+import { chunkIndexFromPath } from './chunkUtils';
 
 /**
  * Wraps WsSessionFileReader for a specific session.
- *  Reads persisted history files via WS.
+ * Reads manifest for metadata, loads only relevant chunks individually.
  */
 export class RemoteHistorySource implements HistorySource {
+  private cachedManifest: HistoryManifest | null | undefined = undefined;
+
   constructor(
     private reader: WsSessionFileReader,
     readonly sessionId: string,
@@ -16,31 +19,68 @@ export class RemoteHistorySource implements HistorySource {
     return this.reader.readSnapshot(this.sessionId);
   }
 
-  /** reads all events then filters by range. */
   async loadEventsRange(
     fromUs?: number,
     toUs?: number,
   ): Promise<HistoryEvent[]> {
-    const allEvents = await this.reader.readEvents(this.sessionId);
-    if (fromUs === undefined && toUs === undefined) return allEvents;
-    return allEvents.filter(
-      (event) =>
-        (fromUs === undefined || event.ts_us >= fromUs) &&
-        (toUs === undefined || event.ts_us <= toUs),
-    );
+    const manifest = await this.loadManifest();
+    if (!manifest) return [];
+
+    return this.loadEventsFromChunks(manifest, fromUs, toUs);
   }
 
   async getMetadata(): Promise<HistoryMetadata> {
-    const [snapshot, allEvents] = await Promise.all([
-      this.loadSnapshot(),
-      this.loadEventsRange(),
-    ]);
+    const manifest = await this.loadManifest();
+
+    if (manifest) {
+      return {
+        sessionId: this.sessionId,
+        startUs: manifest.startUs,
+        endUs: manifest.endUs,
+        hasChunks: true,
+        hasCheckpoints: false,
+      };
+    }
+
+    const snapshot = await this.loadSnapshot();
     return {
       sessionId: this.sessionId,
       startUs: snapshot.ts_us,
-      endUs: allEvents.at(-1)?.ts_us ?? snapshot.ts_us,
+      endUs: snapshot.ts_us,
       hasChunks: false,
       hasCheckpoints: false,
     };
+  }
+
+  private async loadManifest(): Promise<HistoryManifest | null> {
+    if (this.cachedManifest !== undefined) return this.cachedManifest;
+    this.cachedManifest = await this.reader.readManifest(this.sessionId);
+    return this.cachedManifest;
+  }
+
+  private async loadEventsFromChunks(
+    manifest: HistoryManifest,
+    fromUs?: number,
+    toUs?: number,
+  ): Promise<HistoryEvent[]> {
+    const relevantChunks = manifest.chunks.filter(
+      (chunk) =>
+        (toUs === undefined || chunk.fromUs <= toUs) &&
+        (fromUs === undefined || chunk.toUs >= fromUs),
+    );
+
+    const chunkResults = await Promise.all(
+      relevantChunks.map((chunk) =>
+        this.reader.readChunk(this.sessionId, chunkIndexFromPath(chunk.file)),
+      ),
+    );
+
+    return chunkResults
+      .flat()
+      .filter(
+        (event) =>
+          (fromUs === undefined || event.ts_us >= fromUs) &&
+          (toUs === undefined || event.ts_us <= toUs),
+      );
   }
 }

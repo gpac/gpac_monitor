@@ -1,6 +1,7 @@
 import type { HistorySnapshot, HistoryEvent } from '../types';
 import type { HistorySource, HistoryMetadata, HistoryManifest } from './types';
 import { LocalFileSessionFileReader } from '../sessionFileReader/LocalFileSessionFileReader';
+import { chunkIndexFromPath } from './chunkUtils';
 
 export class FileHistorySource implements HistorySource {
   private cachedEvents: HistoryEvent[] | null = null;
@@ -15,7 +16,10 @@ export class FileHistorySource implements HistorySource {
     return this.reader.readSnapshot(this.sessionId);
   }
 
-  async loadEventsRange(fromUs?: number, toUs?: number): Promise<HistoryEvent[]> {
+  async loadEventsRange(
+    fromUs?: number,
+    toUs?: number,
+  ): Promise<HistoryEvent[]> {
     const manifest = await this.loadManifest();
 
     if (manifest) {
@@ -79,11 +83,6 @@ export class FileHistorySource implements HistorySource {
         (toUs === undefined || chunk.fromUs <= toUs) &&
         (fromUs === undefined || chunk.toUs >= fromUs),
     );
-
-    const chunkIndexFromPath = (filePath: string) => {
-      const match = filePath.match(/chunk_(\d+)\.jsonl$/);
-      return match ? parseInt(match[1], 10) : -1;
-    };
 
     const chunkResults = await Promise.all(
       relevantChunks.map((chunk) =>

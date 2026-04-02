@@ -1,4 +1,5 @@
-import type { HistorySnapshot } from '../types';
+import type { HistorySnapshot, HistoryEvent } from '../types';
+import type { HistoryManifest } from '../source/types';
 import type { SessionInfo } from './types';
 import { parseEventsJsonl } from '../loader/eventLoader';
 
@@ -63,6 +64,34 @@ export class WsSessionFileReader {
     return parseEventsJsonl(response.content as string);
   }
 
+  async readManifest(sessionId: string): Promise<HistoryManifest | null> {
+    await this.ensureConnected();
+    try {
+      const response = await this.sendCommand({
+        message: 'read_file',
+        sessionId,
+        file: 'manifest.json',
+      });
+      return JSON.parse(response.content as string) as HistoryManifest;
+    } catch {
+      return null;
+    }
+  }
+
+  async readChunk(
+    sessionId: string,
+    chunkIndex: number,
+  ): Promise<HistoryEvent[]> {
+    await this.ensureConnected();
+    const file = `chunks/chunk_${String(chunkIndex).padStart(4, '0')}.jsonl`;
+    const response = await this.sendCommand({
+      message: 'read_file',
+      sessionId,
+      file,
+    });
+    return parseEventsJsonl(response.content as string);
+  }
+
   private async ensureConnected(): Promise<void> {
     if (this.ws?.readyState !== WebSocket.OPEN) {
       await this.connect();
@@ -70,7 +99,7 @@ export class WsSessionFileReader {
   }
 
   private sendCommand(
-    command: Record<string, string>,
+    command: Record<string, unknown>,
   ): Promise<Record<string, unknown>> {
     return new Promise((resolve, reject) => {
       const key = this.commandKey(command);
@@ -82,10 +111,7 @@ export class WsSessionFileReader {
   private handleMessage(event: MessageEvent): void {
     try {
       const data = JSON.parse(event.data);
-      const key =
-        data.command === 'read_file'
-          ? `read_file:${data.sessionId}:${data.file}`
-          : (data.command as string);
+      const key = this.responseKey(data);
       const entry = this.pending.get(key);
       if (!entry) return;
       this.pending.delete(key);
@@ -101,9 +127,16 @@ export class WsSessionFileReader {
   }
 
   /** Unique key per request — composite for read_file to avoid collision */
-  private commandKey(cmd: Record<string, string>): string {
-    return cmd.message === 'read_file'
-      ? `read_file:${cmd.sessionId}:${cmd.file}`
-      : cmd.message;
+  private commandKey(cmd: Record<string, unknown>): string {
+    if (cmd.message === 'read_file')
+      return `read_file:${cmd.sessionId}:${cmd.file}`;
+    return cmd.message as string;
+  }
+
+  /** Maps server response command to the matching pending key */
+  private responseKey(data: Record<string, unknown>): string {
+    if (data.command === 'read_file')
+      return `read_file:${data.sessionId}:${data.file}`;
+    return data.command as string;
   }
 }
