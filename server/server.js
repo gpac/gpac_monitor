@@ -126,13 +126,24 @@ session.set_new_filter_fun((f) => {
 });
 
 session.set_del_filter_fun((f) => {
-  
+
     let idx = all_filters.indexOf(f);
     if (idx >= 0) all_filters.splice(idx, 1);
     if (f.itag == "NODISPLAY") return;
     onGraphEvent();
 });
 
+session.set_filter_pid_modified_fun((filter) => {
+    for (const client of all_clients) {
+        client.filterManager.onPidModified(filter);
+    }
+});
+
+session.set_filter_arg_updated_fun((filter) => {
+    for (const client of all_clients) {
+        client.filterManager.onPidModified(filter);
+    }
+});
 
 // WEBSOCKET CLIENT HANDLER
 

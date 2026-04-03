@@ -1,7 +1,6 @@
 function PidDataCollector() {
-    this._lastProps = {};
 
-    this.collectInputPids = function(filter) {
+    this.collectInputPids = function(filter, includeProperties) {
         const ipids = {};
 
         for (let i = 0; i < filter.nb_ipid; i++) {
@@ -44,23 +43,19 @@ function PidDataCollector() {
                 pid.stats.total_process_time = stats.total_process_time;
             }
 
-            // Enumerate properties - only include if changed since last send
-            const allProps = {};
-            filter.ipid_props(i, function(pname, ptype, pval) {
-                allProps[pname] = { name: pname, type: ptype, value: pval };
-            });
-            const propsKey = `${filter.idx}_${i}`;
-            const propsJson = JSON.stringify(allProps);
-            if (propsJson !== this._lastProps[propsKey]) {
+            if (includeProperties) {
+                const allProps = {};
+                filter.ipid_props(i, function(pname, ptype, pval) {
+                    allProps[pname] = { name: pname, type: ptype, value: pval };
+                });
                 pid.properties = allProps;
-                this._lastProps[propsKey] = propsJson;
             }
 
             const key = pid.name || `ipid_${i}`;
             ipids[key] = pid;
         }
-        
-        return ipids;
+
+      return ipids;
     };
 
     this.collectOutputPids = function(filter) {

@@ -36,6 +36,12 @@ const PropertiesPanel = () => {
   const ipidProperties = useFetchIPIDProperties(filterIdxForPid, ipidIdx);
   const filterArgs = useFilterArgsSubscription(filterIdxForArgs);
 
+  useEffect(() => {
+    if (sidebarContent && !filterInfo) {
+      closeSidebar();
+    }
+  }, [sidebarContent, filterInfo, closeSidebar]);
+
   // Reset search when sidebar content changes
   useEffect(() => {
     setSearchQuery('');
