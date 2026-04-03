@@ -15,6 +15,7 @@ import {
   applyArgUpdate,
   hydrateFilterArgs,
 } from '@/shared/store/slices/filterArgumentSlice';
+import { clearLogs } from '@/shared/store/slices/logsSlice';
 import type {
   HistoryEvent,
   HistorySnapshot,
@@ -90,6 +91,7 @@ export class HistoryAdapter {
     const { dispatch } = this;
     dispatch(resetAllData());
     dispatch(clearSessionDetails());
+    dispatch(clearLogs());
     dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
     dispatch(setCommandLine(snapshot.command_line));
     dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));

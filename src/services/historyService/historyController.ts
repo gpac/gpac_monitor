@@ -1,5 +1,5 @@
 import type { AppDispatch } from '@/shared/store';
-import type { HistorySnapshot } from './types';
+import type { HistorySnapshot, LogEvent } from './types';
 import { HistoryAdapter } from './integration/historyAdapter';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
@@ -14,6 +14,7 @@ export class HistoryController {
   private adapter: HistoryAdapter | null = null;
   private snapshot: HistorySnapshot | null = null;
   private sessionStartUs = 0;
+  private sessionLogs: LogEvent[] = [];
 
   setListener(listener: PlayerListener) {
     this.player.setListener(listener);
@@ -30,20 +31,26 @@ export class HistoryController {
     const sessionStartUs = events[0]?.ts_us ?? 0;
     this.snapshot = snapshot;
     this.sessionStartUs = sessionStartUs;
+    this.sessionLogs = logs;
     this.adapter = new HistoryAdapter(dispatch);
     this.adapter.hydrate(snapshot, sessionStartUs);
-    for (const logEvent of logs) this.adapter.handleLogEvent(logEvent);
     this.player.load(events, (event) => this.adapter!.handleEvent(event));
   }
 
   seek(targetTimestampUs: number) {
     if (!this.snapshot || !this.adapter) return;
-    const { snapshot, adapter, sessionStartUs } = this;
+    const { snapshot, adapter, sessionStartUs, sessionLogs } = this;
     adapter.setSilent(true);
     this.player.seek(
       targetTimestampUs,
       () => adapter.hydrate(snapshot, sessionStartUs),
-      () => adapter.flush(),
+      () => {
+        adapter.flush();
+        for (const logEvent of sessionLogs) {
+          if (logEvent.ts_us > targetTimestampUs) break;
+          adapter.handleLogEvent(logEvent);
+        }
+      },
     );
   }
 
