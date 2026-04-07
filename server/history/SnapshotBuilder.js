@@ -18,7 +18,7 @@ function SnapshotBuilder() {
         const entry = gpac_filter_to_object(f, true);
         delete entry.ipid;
         delete entry.opid;
-        entry.ipids = this.pidCollector.collectInputPids(f);
+        entry.ipids = this.pidCollector.collectInputPids(f, true);
         entry.opids = this.pidCollector.collectOutputPids(f);
 
         return entry;

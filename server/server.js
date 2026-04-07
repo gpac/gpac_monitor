@@ -4,6 +4,7 @@ import { HistoryCollector } from './history/HistoryCollector.js';
 import { GraphManager } from './GraphManager.js';
 import { buildSessionStatsPayload } from './JSClient/Session/buildSessionStatsPayload.js';
 import { buildCpuStatsPayload } from './JSClient/Sys/buildCpuStatsPayload.js';
+import { PidDataCollector } from './JSClient/Filters/PID/PidDataCollector.js';
 
 // HISTORY
 const historyCollector = new HistoryCollector();
@@ -90,6 +91,47 @@ session.set_del_filter_fun((f) => {
     if (f.itag == "NODISPLAY") return;
     graphManager.onGraphEvent();
 });
+
+const pidCollector = new PidDataCollector();
+
+let pidReconfigured = new Set();
+session.set_filter_pid_modified_fun((f) => {
+    pidReconfigured.add(f.idx);
+    if (pidReconfigured.size > 1) return;
+    session.post_task(() => {
+        const indexes = [...pidReconfigured];
+        pidReconfigured.clear();
+        const pidsByFilter = {};
+        for (const idx of indexes) {
+            const filter = all_filters.find(f => f.idx === idx);
+            if (filter) pidsByFilter[idx] = pidCollector.collectInputPids(filter, true);
+        }
+        const msg = JSON.stringify({ message: 'filter_pid_reconfigured', indexes });
+        for (const c of all_clients) if (c.client) c.client.send(msg);
+        historyCollector.recordPidReconfigured(indexes, pidsByFilter);
+        return false;
+    });
+});
+
+let argUpdated = new Set();
+session.set_filter_arg_updated_fun((f) => {
+    argUpdated.add(f.idx);
+    if (argUpdated.size > 1) return;
+    session.post_task(() => {
+        const indexes = [...argUpdated];
+        argUpdated.clear();
+        const argsByFilter = {};
+        for (const idx of indexes) {
+            const filter = all_filters.find(f => f.idx === idx);
+            if (filter) argsByFilter[idx] = filter.all_args(true).filter(Boolean);
+        }
+        const msg = JSON.stringify({ message: 'filter_arg_updated', indexes });
+        for (const c of all_clients) if (c.client) c.client.send(msg);
+        historyCollector.recordArgUpdated(indexes, argsByFilter);
+        return false;
+    });
+});
+
 
 // WEBSOCKET CLIENT HANDLER
 sys.rmt_on_new_client = function(client) {

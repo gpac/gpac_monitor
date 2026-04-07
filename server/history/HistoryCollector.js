@@ -71,6 +71,28 @@ function HistoryCollector(historyDir) {
         }), cpuTsUs);
     };
 
+    this.recordPidReconfigured = function(indexes, pidsByFilter) {
+        const tsUs = sys.clock_us();
+        this.writer.writeEvent(JSON.stringify({
+            version: EVENT_VERSION,
+            message: 'filter_pid_reconfigured',
+            ts_us: tsUs,
+            indexes,
+            pidsByFilter,
+        }), tsUs);
+    };
+
+    this.recordArgUpdated = function(indexes, argsByFilter) {
+        const tsUs = sys.clock_us();
+        this.writer.writeEvent(JSON.stringify({
+            version: EVENT_VERSION,
+            message: 'filter_arg_updated',
+            ts_us: tsUs,
+            indexes,
+            argsByFilter,
+        }), tsUs);
+    };
+
     this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
         const argsTsUs = sys.clock_us();
         this.writer.writeEvent(JSON.stringify({
