@@ -1,7 +1,13 @@
 import type { AppDispatch } from '@/shared/store';
 import type { CPUStats } from '@/types/domain/system';
 import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
-import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
+import {
+  updateGraphData,
+  setLoading,
+  clearGraph,
+  markPidReconfigured,
+  markArgUpdated,
+} from '@/shared/store/slices/graphSlice';
 import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
 import {
   setCommandLine,
@@ -92,6 +98,7 @@ export class HistoryAdapter {
     dispatch(resetAllData());
     dispatch(clearSessionDetails());
     dispatch(clearLogs());
+    dispatch(clearGraph());
     dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
     dispatch(setCommandLine(snapshot.command_line));
     dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
@@ -131,20 +138,26 @@ export class HistoryAdapter {
         this.handleFilterArgsUpdate(event);
         break;
       case 'filter_pid_reconfigured':
-        if (!this.silent && event.pidsByFilter) {
-          const pids: Record<
-            string,
-            { ipids: (typeof event.pidsByFilter)[string] }
-          > = {};
-          for (const [idx, ipids] of Object.entries(event.pidsByFilter)) {
-            pids[idx] = { ipids };
+        if (!this.silent) {
+          this.dispatch(markPidReconfigured(event.indexes));
+          if (event.pidsByFilter) {
+            const pids: Record<
+              string,
+              { ipids: (typeof event.pidsByFilter)[string] }
+            > = {};
+            for (const [idx, ipids] of Object.entries(event.pidsByFilter)) {
+              pids[idx] = { ipids };
+            }
+            this.dispatch(setFilterPids(pids));
           }
-          this.dispatch(setFilterPids(pids));
         }
         break;
       case 'filter_arg_updated':
-        if (!this.silent && event.argsByFilter) {
-          this.dispatch(hydrateFilterArgs(event.argsByFilter));
+        if (!this.silent) {
+          this.dispatch(markArgUpdated(event.indexes));
+          if (event.argsByFilter) {
+            this.dispatch(hydrateFilterArgs(event.argsByFilter));
+          }
         }
         break;
     }

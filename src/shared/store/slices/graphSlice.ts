@@ -26,8 +26,8 @@ export interface GraphState {
   initialTab: InitialTabType | null;
   pendingFilterOpen: PendingFilterOpen | null;
   lastUpdate: number;
-  pidReconfiguredFilters: string[];
-  argUpdatedFilters: string[];
+  pidReconfiguredCounts: Record<string, number>;
+  argUpdatedCounts: Record<string, number>;
 }
 
 const initialState: GraphState = {
@@ -41,8 +41,8 @@ const initialState: GraphState = {
   initialTab: null,
   pendingFilterOpen: null,
   lastUpdate: Date.now(),
-  pidReconfiguredFilters: [],
-  argUpdatedFilters: [],
+  pidReconfiguredCounts: {},
+  argUpdatedCounts: {},
 };
 
 const THROTTLE_INTERVAL = 500;
@@ -111,8 +111,8 @@ const graphSlice = createSlice({
       state.isLoading = false;
       state.pendingFilterOpen = null;
       state.initialTab = null;
-      state.pidReconfiguredFilters = [];
-      state.argUpdatedFilters = [];
+      state.pidReconfiguredCounts = {};
+      state.argUpdatedCounts = {};
     },
     setInitialTab: (state, action: PayloadAction<InitialTabType | null>) => {
       state.initialTab = action.payload;
@@ -129,6 +129,25 @@ const graphSlice = createSlice({
     clearPendingFilterOpen: (state) => {
       state.pendingFilterOpen = null;
     },
+    markPidReconfigured(state, action: PayloadAction<number[]>) {
+      for (const idx of action.payload) {
+        const key = idx.toString();
+        state.pidReconfiguredCounts[key] =
+          (state.pidReconfiguredCounts[key] ?? 0) + 1;
+      }
+    },
+    markArgUpdated(state, action: PayloadAction<number[]>) {
+      for (const idx of action.payload) {
+        const key = idx.toString();
+        state.argUpdatedCounts[key] = (state.argUpdatedCounts[key] ?? 0) + 1;
+      }
+    },
+    clearPidReconfigured(state, action: PayloadAction<number>) {
+      delete state.pidReconfiguredCounts[action.payload.toString()];
+    },
+    clearArgUpdated(state, action: PayloadAction<number>) {
+      delete state.argUpdatedCounts[action.payload.toString()];
+    },
   },
 });
 export const {
@@ -143,6 +162,10 @@ export const {
   clearInitialTab,
   requestFilterOpen,
   clearPendingFilterOpen,
+  markPidReconfigured,
+  markArgUpdated,
+  clearPidReconfigured,
+  clearArgUpdated,
 } = graphSlice.actions;
 
 export const selectFilterNameById = (state: RootState, filterId: string) => {

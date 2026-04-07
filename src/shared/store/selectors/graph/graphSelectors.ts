@@ -47,3 +47,9 @@ export const selectError = createSelector(
   [selectGraphState],
   (graph) => graph.error,
 );
+
+export const selectPidReconfiguredCounts = (state: RootState) =>
+  state.graph.pidReconfiguredCounts;
+
+export const selectArgUpdatedCounts = (state: RootState) =>
+  state.graph.argUpdatedCounts;

@@ -1,5 +1,10 @@
 import { store } from '@/shared/store';
-import { updateGraphData, setLoading } from '@/shared/store/slices/graphSlice';
+import {
+  updateGraphData,
+  setLoading,
+  markPidReconfigured,
+  markArgUpdated,
+} from '@/shared/store/slices/graphSlice';
 import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
 import {
   appendLogsForAllTools,
@@ -30,6 +35,6 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateCpuStats: (stats) => store.dispatch(setSystemStats(stats)),
   onUpdateCommandLine: (commandLine) =>
     store.dispatch(setCommandLine(commandLine)),
-  onPidReconfigured: () => {},
-  onArgUpdated: () => {},
+  onPidReconfigured: (indexes) => store.dispatch(markPidReconfigured(indexes)),
+  onArgUpdated: (indexes) => store.dispatch(markArgUpdated(indexes)),
 });
