@@ -28,47 +28,79 @@ const STATIC_PROPS = {
   StreamType: { type: 'uint', value: 'Visual' },
 };
 
-describe('PidDataCollector properties diff', () => {
+describe('PidDataCollector collectInputPids', () => {
   let collector;
 
   beforeEach(() => {
     collector = new PidDataCollector();
   });
 
-  it('includes properties on first collect', () => {
+  it('includes properties when includeProperties is true', () => {
     const filter = makeFakeFilter(1, STATIC_PROPS);
-    const ipids = collector.collectInputPids(filter);
+    const ipids = collector.collectInputPids(filter, true);
     expect(ipids['V1'].properties).toBeDefined();
     expect(ipids['V1'].properties.Width.value).toBe(640);
   });
 
-  it('omits properties on second collect when unchanged', () => {
+  it('omits properties when includeProperties is false', () => {
     const filter = makeFakeFilter(1, STATIC_PROPS);
-    collector.collectInputPids(filter); // first
-    const ipids = collector.collectInputPids(filter); // second
+    const ipids = collector.collectInputPids(filter, false);
     expect(ipids['V1'].properties).toBeUndefined();
   });
 
-  it('re-includes properties when a value changes', () => {
+  it('omits properties when includeProperties is not passed', () => {
+    const filter = makeFakeFilter(1, STATIC_PROPS);
+    const ipids = collector.collectInputPids(filter);
+    expect(ipids['V1'].properties).toBeUndefined();
+  });
+
+  it('always includes properties on repeated calls with includeProperties true', () => {
+    const filter = makeFakeFilter(1, STATIC_PROPS);
+    collector.collectInputPids(filter, true);
+    const ipids = collector.collectInputPids(filter, true);
+    expect(ipids['V1'].properties).toBeDefined();
+    expect(ipids['V1'].properties.Width.value).toBe(640);
+  });
+
+  it('reflects updated values when includeProperties is true', () => {
     const filter1 = makeFakeFilter(1, STATIC_PROPS);
-    collector.collectInputPids(filter1);
+    collector.collectInputPids(filter1, true);
 
     const changed = { ...STATIC_PROPS, Width: { type: 'uint', value: 1920 } };
     const filter2 = makeFakeFilter(1, changed);
-    const ipids = collector.collectInputPids(filter2);
-    expect(ipids['V1'].properties).toBeDefined();
+    const ipids = collector.collectInputPids(filter2, true);
     expect(ipids['V1'].properties.Width.value).toBe(1920);
   });
 
-  it('omits again after change is sent', () => {
-    const filter1 = makeFakeFilter(1, STATIC_PROPS);
-    collector.collectInputPids(filter1);
+  it('collects basic pid fields regardless of includeProperties', () => {
+    const filter = makeFakeFilter(1, STATIC_PROPS);
+    const ipids = collector.collectInputPids(filter, false);
+    expect(ipids['V1'].name).toBe('V1');
+    expect(ipids['V1'].width).toBe(640);
+    expect(ipids['V1'].codec).toBe('raw');
+    expect(ipids['V1'].type).toBe('Visual');
+  });
 
-    const changed = { ...STATIC_PROPS, Width: { type: 'uint', value: 1920 } };
-    const filter2 = makeFakeFilter(1, changed);
-    collector.collectInputPids(filter2); // sends change
+  it('enumerates all properties only when includeProperties is true', () => {
+    let enumerationCount = 0;
+    const filter = {
+      ...makeFakeFilter(1, STATIC_PROPS),
+      ipid_props(i, nameOrCb) {
+        if (typeof nameOrCb === 'function') {
+          enumerationCount++;
+          for (const [k, v] of Object.entries(STATIC_PROPS)) {
+            nameOrCb(k, v.type, v.value);
+          }
+          return;
+        }
+        return STATIC_PROPS[nameOrCb]?.value ?? null;
+      },
+    };
 
-    const ipids = collector.collectInputPids(filter2); // third
-    expect(ipids['V1'].properties).toBeUndefined();
+    collector.collectInputPids(filter, false);
+    expect(enumerationCount).toBe(0);
+
+    collector.collectInputPids(filter, true);
+    expect(enumerationCount).toBe(1);
   });
 });
