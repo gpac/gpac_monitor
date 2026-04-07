@@ -70,12 +70,26 @@ export interface LogConfigChangedEvent extends BaseEvent {
   logLevel: string;
 }
 
+export interface PidReconfiguredEvent extends BaseEvent {
+  message: 'filter_pid_reconfigured';
+  indexes: number[];
+  pidsByFilter?: Record<string, Record<string, PIDproperties>>;
+}
+
+export interface ArgUpdatedEvent extends BaseEvent {
+  message: 'filter_arg_updated';
+  indexes: number[];
+  argsByFilter?: Record<string, GpacArgument[]>;
+}
+
 /** Main history events (stored in chunks/) */
 export type HistoryEvent =
   | FiltersEvent
   | SessionStatsEvent
   | CpuStatsEvent
-  | FilterArgsUpdateEvent;
+  | FilterArgsUpdateEvent
+  | PidReconfiguredEvent
+  | ArgUpdatedEvent;
 
 /** Log events (stored separately in logs.jsonl) */
 export type LogEvent = LogBatchEvent | LogConfigChangedEvent;

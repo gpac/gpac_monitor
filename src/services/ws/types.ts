@@ -116,6 +116,16 @@ export interface NotificationMessage {
   description?: string;
 }
 
+export interface FilterPidReconfiguredMessage {
+  message: 'filter_pid_reconfigured';
+  indexes: number[];
+}
+
+export interface FilterArgUpdatedMessage {
+  message: 'filter_arg_updated';
+  indexes: number[];
+}
+
 export interface LogBatchResponse extends BaseWSResponse {
   message: 'log_batch';
   logs: GpacLogEntry[];
@@ -150,4 +160,6 @@ export type IncomingWsMessage =
   | IpidPropsResponseMessage
   | CommandLineResponseMessage
   | SessionEndMessage
-  | NotificationMessage;
+  | NotificationMessage
+  | FilterPidReconfiguredMessage
+  | FilterArgUpdatedMessage;
