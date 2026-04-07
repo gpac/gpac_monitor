@@ -1,6 +1,6 @@
 function PidDataCollector() {
 
-    this.collectInputPids = function(filter, includeProperties) {
+    this.collectInputPids = function(filter, withPidProperties) {
         const ipids = {};
 
         for (let i = 0; i < filter.nb_ipid; i++) {
@@ -43,7 +43,7 @@ function PidDataCollector() {
                 pid.stats.total_process_time = stats.total_process_time;
             }
 
-            if (includeProperties) {
+            if (withPidProperties) {
                 const allProps = {};
                 filter.ipid_props(i, function(pname, ptype, pval) {
                     allProps[pname] = { name: pname, type: ptype, value: pval };

@@ -5,6 +5,7 @@ import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
+import { useFilterChangeStatus } from '@/components/views/graph/hooks/state/useFilterChangeStatus';
 
 interface FilterStatCardProps {
   filter: EnrichedFilterData;
@@ -27,6 +28,10 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       filter.idx !== undefined
         ? selectFilterAlerts(String(filter.idx))(state)
         : null,
+    );
+
+    const { showPidBadge, showArgBadge } = useFilterChangeStatus(
+      filter.idx ?? -1,
     );
 
     const handleClick = useCallback(() => {
@@ -105,7 +110,30 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             >
               {sessionTypeLabel}
             </Badge>
-            {/* Log Alerts Badges */}
+            {showPidBadge && (
+              <Badge
+                variant="outline"
+                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
+                  bg-red-900/20 text-red-300
+                  border border-red-700/60
+                  rounded-sm font-semibold transition-opacity duration-300"
+                title="PID reconfigured"
+              >
+                PID
+              </Badge>
+            )}
+            {showArgBadge && (
+              <Badge
+                variant="outline"
+                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
+                  bg-violet-900/20 text-violet-300
+                  border border-violet-700/60
+                  rounded-sm font-semibold transition-opacity duration-300"
+                title="Argument updated"
+              >
+                ARG
+              </Badge>
+            )}
             {alerts && alerts.errors > 0 && (
               <Badge
                 variant="outline"

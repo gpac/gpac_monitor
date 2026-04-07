@@ -35,26 +35,26 @@ describe('PidDataCollector collectInputPids', () => {
     collector = new PidDataCollector();
   });
 
-  it('includes properties when includeProperties is true', () => {
+  it('includes properties when withPidProperties is true', () => {
     const filter = makeFakeFilter(1, STATIC_PROPS);
     const ipids = collector.collectInputPids(filter, true);
     expect(ipids['V1'].properties).toBeDefined();
     expect(ipids['V1'].properties.Width.value).toBe(640);
   });
 
-  it('omits properties when includeProperties is false', () => {
+  it('omits properties when withPidProperties is false', () => {
     const filter = makeFakeFilter(1, STATIC_PROPS);
     const ipids = collector.collectInputPids(filter, false);
     expect(ipids['V1'].properties).toBeUndefined();
   });
 
-  it('omits properties when includeProperties is not passed', () => {
+  it('omits properties when withPidProperties is not passed', () => {
     const filter = makeFakeFilter(1, STATIC_PROPS);
     const ipids = collector.collectInputPids(filter);
     expect(ipids['V1'].properties).toBeUndefined();
   });
 
-  it('always includes properties on repeated calls with includeProperties true', () => {
+  it('always includes properties on repeated calls with withPidProperties true', () => {
     const filter = makeFakeFilter(1, STATIC_PROPS);
     collector.collectInputPids(filter, true);
     const ipids = collector.collectInputPids(filter, true);
@@ -62,7 +62,7 @@ describe('PidDataCollector collectInputPids', () => {
     expect(ipids['V1'].properties.Width.value).toBe(640);
   });
 
-  it('reflects updated values when includeProperties is true', () => {
+  it('reflects updated values when withPidProperties is true', () => {
     const filter1 = makeFakeFilter(1, STATIC_PROPS);
     collector.collectInputPids(filter1, true);
 
@@ -72,7 +72,7 @@ describe('PidDataCollector collectInputPids', () => {
     expect(ipids['V1'].properties.Width.value).toBe(1920);
   });
 
-  it('collects basic pid fields regardless of includeProperties', () => {
+  it('collects basic pid fields regardless of withPidProperties', () => {
     const filter = makeFakeFilter(1, STATIC_PROPS);
     const ipids = collector.collectInputPids(filter, false);
     expect(ipids['V1'].name).toBe('V1');
@@ -81,7 +81,7 @@ describe('PidDataCollector collectInputPids', () => {
     expect(ipids['V1'].type).toBe('Visual');
   });
 
-  it('enumerates all properties only when includeProperties is true', () => {
+  it('enumerates all properties only when withPidProperties is true', () => {
     let enumerationCount = 0;
     const filter = {
       ...makeFakeFilter(1, STATIC_PROPS),
