@@ -30,4 +30,6 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateCpuStats: (stats) => store.dispatch(setSystemStats(stats)),
   onUpdateCommandLine: (commandLine) =>
     store.dispatch(setCommandLine(commandLine)),
+  onPidReconfigured: () => {},
+  onArgUpdated: () => {},
 });

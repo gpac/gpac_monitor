@@ -26,6 +26,8 @@ export interface GraphState {
   initialTab: InitialTabType | null;
   pendingFilterOpen: PendingFilterOpen | null;
   lastUpdate: number;
+  pidReconfiguredFilters: string[];
+  argUpdatedFilters: string[];
 }
 
 const initialState: GraphState = {
@@ -39,6 +41,8 @@ const initialState: GraphState = {
   initialTab: null,
   pendingFilterOpen: null,
   lastUpdate: Date.now(),
+  pidReconfiguredFilters: [],
+  argUpdatedFilters: [],
 };
 
 const THROTTLE_INTERVAL = 500;
@@ -107,6 +111,8 @@ const graphSlice = createSlice({
       state.isLoading = false;
       state.pendingFilterOpen = null;
       state.initialTab = null;
+      state.pidReconfiguredFilters = [];
+      state.argUpdatedFilters = [];
     },
     setInitialTab: (state, action: PayloadAction<InitialTabType | null>) => {
       state.initialTab = action.payload;

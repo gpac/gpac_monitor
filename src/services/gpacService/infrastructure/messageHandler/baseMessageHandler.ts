@@ -156,6 +156,12 @@ export class BaseMessageHandler {
         this.commandLineHandler.handleCommandLineResponse(data);
         this.callbacks.onUpdateCommandLine?.(data.commandLine ?? null);
         break;
+      case 'filter_pid_reconfigured':
+        this.callbacks.onPidReconfigured(data.indexes);
+        break;
+      case 'filter_arg_updated':
+        this.callbacks.onArgUpdated(data.indexes);
+        break;
       case 'session_end':
         this.handleSessionEnd(data);
         break;

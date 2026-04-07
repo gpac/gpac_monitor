@@ -17,6 +17,8 @@ export interface MessageHandlerCallbacks {
   onSessionEnd?: (data: unknown) => void;
   onUpdateCpuStats?: (stats: CPUStats) => void;
   onUpdateCommandLine?: (commandLine: string | null) => void;
+  onPidReconfigured: (indexes: number[]) => void;
+  onArgUpdated: (indexes: number[]) => void;
 }
 
 export interface MessageHandlerDependencies {

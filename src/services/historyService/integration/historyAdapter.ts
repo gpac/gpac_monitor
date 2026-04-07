@@ -130,6 +130,23 @@ export class HistoryAdapter {
       case 'filter_args_update':
         this.handleFilterArgsUpdate(event);
         break;
+      case 'filter_pid_reconfigured':
+        if (!this.silent && event.pidsByFilter) {
+          const pids: Record<
+            string,
+            { ipids: (typeof event.pidsByFilter)[string] }
+          > = {};
+          for (const [idx, ipids] of Object.entries(event.pidsByFilter)) {
+            pids[idx] = { ipids };
+          }
+          this.dispatch(setFilterPids(pids));
+        }
+        break;
+      case 'filter_arg_updated':
+        if (!this.silent && event.argsByFilter) {
+          this.dispatch(hydrateFilterArgs(event.argsByFilter));
+        }
+        break;
     }
   }
 
