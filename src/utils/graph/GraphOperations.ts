@@ -167,17 +167,6 @@ export function createEdgesFromFilters(
     }
   });
 
-  console.table(
-    newEdges.map((edge) => ({
-      id: edge.id,
-      source: edge.source,
-      target: edge.target,
-      sourceHandle: edge.sourceHandle,
-      targetHandle: edge.targetHandle,
-      type: edge.data?.filterType,
-    })),
-  );
-
   return newEdges;
 }
 

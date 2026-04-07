@@ -3,6 +3,7 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
+import { useFilterChangeStatus } from '../../hooks/state/useFilterChangeStatus';
 import { getBasename, truncateMiddle } from '../../utils/labelUtils';
 import NodeToolbarActions from './NodeToolbarActions';
 
@@ -21,6 +22,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
 }) => {
   const { label, ipid, opid, nb_ipid, nb_opid } = data;
   const alerts = data.alerts as { errors: number; warnings: number } | null;
+  const { showPidBadge, showArgBadge } = useFilterChangeStatus(data.idx);
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -183,6 +185,22 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
               >
                 {sessionType.toUpperCase()}
               </span>
+              {showPidBadge && (
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 bg-red-500 text-white rounded-full transition-opacity duration-300"
+                  title="PID reconfigured"
+                >
+                  PID
+                </span>
+              )}
+              {showArgBadge && (
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 bg-violet-500 text-white rounded-full transition-opacity duration-300"
+                  title="Argument updated"
+                >
+                  ARG
+                </span>
+              )}
               {alerts?.errors ? (
                 <span
                   className="text-[9px] font-bold px-1.5 py-0.5 bg-red-600 text-white rounded-full"

@@ -133,16 +133,28 @@ session.set_del_filter_fun((f) => {
     onGraphEvent();
 });
 
-session.set_filter_pid_modified_fun((filter) => {
-    for (const client of all_clients) {
-        client.filterManager.onPidModified(filter);
-    }
+let pidReconfigured = new Set();
+session.set_filter_pid_modified_fun((f) => {
+    pidReconfigured.add(f.idx);
+    if (pidReconfigured.size > 1) return;
+    session.post_task(() => {
+        const msg = JSON.stringify({ message: 'filter_pid_reconfigured', indexes: [...pidReconfigured] });
+        pidReconfigured.clear();
+        for (const c of all_clients) if (c.client) c.client.send(msg);
+        return false;
+    });
 });
 
-session.set_filter_arg_updated_fun((filter) => {
-    for (const client of all_clients) {
-        client.filterManager.onPidModified(filter);
-    }
+let argUpdated = new Set();
+session.set_filter_arg_updated_fun((f) => {
+    argUpdated.add(f.idx);
+    if (argUpdated.size > 1) return;
+    session.post_task(() => {
+        const msg = JSON.stringify({ message: 'filter_arg_updated', indexes: [...argUpdated] });
+        argUpdated.clear();
+        for (const c of all_clients) if (c.client) c.client.send(msg);
+        return false;
+    });
 });
 
 // WEBSOCKET CLIENT HANDLER

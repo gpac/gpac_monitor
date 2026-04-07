@@ -6,6 +6,8 @@ export interface MessageHandlerCallbacks {
   onUpdateSessionStats: (stats: any) => void;
   onLogsUpdate: (logs: GpacLogEntry[]) => void;
   onLogSubscriptionChange: (isSubscribed: boolean) => void;
+  onPidReconfigured: (indexes: number[]) => void;
+  onArgUpdated: (indexes: number[]) => void;
   onSessionEnd?: (data: any) => void;
 }
 
