@@ -78,6 +78,52 @@ describe('useFetchIPIDProperties', () => {
     expect(result.current).not.toBe(firstResult);
   });
 
+  it('updates properties on PID reconfiguration (flist source switch)', () => {
+    const inputMp4Props = {
+      SourcePath: { name: 'SourcePath', type: 'str', value: 'media/input.mp4' },
+      URL: { name: 'URL', type: 'str', value: 'media/input.mp4' },
+      Width: { name: 'Width', type: 'uint', value: 1280 },
+      Height: { name: 'Height', type: 'uint', value: 720 },
+      FPS: { name: 'FPS', type: 'frac', value: '30/1' },
+      Duration: { name: 'Duration', type: 'lfrac', value: '18020/600' },
+      CodecID: { name: 'CodecID', type: 'uint', value: 'avc1' },
+      StreamType: { name: 'StreamType', type: 'uint', value: 'Visual' },
+    };
+    mockUseFilterStats.mockReturnValue({
+      stats: { idx: 5, ipids: makeIpids(inputMp4Props) },
+      isLoading: false,
+    });
+
+    const { result, rerender } = renderHook(() => useFetchIPIDProperties(5, 0));
+    expect(result.current).toMatchSnapshot('input.mp4 properties');
+    expect(result.current.find((p) => p.name === 'SourcePath')?.value).toBe(
+      'media/input.mp4',
+    );
+
+    // PID reconfigured: flist switches to video.mp4
+    const videoMp4Props = {
+      SourcePath: { name: 'SourcePath', type: 'str', value: 'media/video.mp4' },
+      URL: { name: 'URL', type: 'str', value: 'media/video.mp4' },
+      Width: { name: 'Width', type: 'uint', value: 1920 },
+      Height: { name: 'Height', type: 'uint', value: 1080 },
+      FPS: { name: 'FPS', type: 'frac', value: '90000/3003' },
+      Duration: { name: 'Duration', type: 'lfrac', value: '28295/1000' },
+      CodecID: { name: 'CodecID', type: 'uint', value: 'avc1' },
+      StreamType: { name: 'StreamType', type: 'uint', value: 'Visual' },
+    };
+    mockUseFilterStats.mockReturnValue({
+      stats: { idx: 5, ipids: makeIpids(videoMp4Props) },
+      isLoading: false,
+    });
+
+    rerender();
+    expect(result.current).toMatchSnapshot('video.mp4 properties');
+    expect(result.current.find((p) => p.name === 'SourcePath')?.value).toBe(
+      'media/video.mp4',
+    );
+    expect(result.current.find((p) => p.name === 'Width')?.value).toBe(1920);
+  });
+
   it('stabilizes reference when values do not change', () => {
     const props = {
       Width: { name: 'Width', type: 'uint', value: 1920 },
