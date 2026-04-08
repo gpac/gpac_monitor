@@ -7,6 +7,8 @@ import {
   clearGraph,
   markPidReconfigured,
   markArgUpdated,
+  clearPidReconfigured,
+  clearArgUpdated,
 } from '@/shared/store/slices/graphSlice';
 import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
 import {
@@ -166,6 +168,18 @@ export class HistoryAdapter {
   handleLogEvent(event: LogEvent): void {
     if (this.silent) return;
     dispatchLogEvent(this.dispatch, event);
+  }
+
+  clearExpiredBadges(
+    expired: Array<{ filterIdx: number; type: 'pid' | 'arg' }>,
+  ): void {
+    for (const badge of expired) {
+      if (badge.type === 'pid') {
+        this.dispatch(clearPidReconfigured(badge.filterIdx));
+      } else {
+        this.dispatch(clearArgUpdated(badge.filterIdx));
+      }
+    }
   }
 
   private handleFilters(event: FiltersEvent): void {

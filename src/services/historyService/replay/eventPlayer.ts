@@ -12,6 +12,7 @@ export type PlayerListener = (state: PlayerState, timeUs: number) => void;
 export class EventPlayer {
   private timelineEvents: HistoryEvent[] = [];
   private onEvent: ((event: HistoryEvent) => void) | null = null;
+  private onTick: ((currentTimeUs: number) => void) | null = null;
   private nextEventIndex = 0;
   private state: PlayerState = 'idle';
   private animationFrameId: number | null = null;
@@ -27,10 +28,15 @@ export class EventPlayer {
     this.listener = listener;
   }
 
-  load(timelineEvents: HistoryEvent[], onEvent: (event: HistoryEvent) => void) {
+  load(
+    timelineEvents: HistoryEvent[],
+    onEvent: (event: HistoryEvent) => void,
+    onTick?: (currentTimeUs: number) => void,
+  ) {
     this.stop();
     this.timelineEvents = timelineEvents;
     this.onEvent = onEvent;
+    this.onTick = onTick ?? null;
     this.nextEventIndex = 0;
     this.setState('idle');
   }
@@ -169,8 +175,9 @@ export class EventPlayer {
       this.nextEventIndex++;
     }
 
+    this.onTick?.(now);
+
     if (this.nextEventIndex >= this.timelineEvents.length) {
-      // Freeze position at last event so currentTimeUs() reflects actual end
       this.currentPlaybackTimeUs =
         this.timelineEvents[this.timelineEvents.length - 1].ts_us;
       this.setState('done');

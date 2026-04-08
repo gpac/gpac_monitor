@@ -1,8 +1,9 @@
 import type { AppDispatch } from '@/shared/store';
-import type { HistorySnapshot, LogEvent } from './types';
+import type { HistorySnapshot, HistoryEvent, LogEvent } from './types';
 import { HistoryAdapter } from './integration/historyAdapter';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
+import { BadgeExpirationController } from './replay/badgeExpirationController';
 import type { HistorySource } from './source/types';
 
 /**
@@ -12,6 +13,7 @@ import type { HistorySource } from './source/types';
 export class HistoryController {
   private player = new EventPlayer();
   private adapter: HistoryAdapter | null = null;
+  private badgeExpiration = new BadgeExpirationController();
   private snapshot: HistorySnapshot | null = null;
   private sessionStartUs = 0;
   private sessionLogs: LogEvent[] = [];
@@ -34,12 +36,26 @@ export class HistoryController {
     this.sessionLogs = logs;
     this.adapter = new HistoryAdapter(dispatch);
     this.adapter.hydrate(snapshot, sessionStartUs);
-    this.player.load(events, (event) => this.adapter!.handleEvent(event));
+    this.badgeExpiration.reset();
+    this.player.load(
+      events,
+      (event) => {
+        this.adapter!.handleEvent(event);
+        this.scheduleBadgeIfNeeded(event);
+      },
+      (currentTimeUs) => {
+        const expired = this.badgeExpiration.tick(currentTimeUs);
+        if (expired.length > 0) {
+          this.adapter!.clearExpiredBadges(expired);
+        }
+      },
+    );
   }
 
   seek(targetTimestampUs: number) {
     if (!this.snapshot || !this.adapter) return;
     const { snapshot, adapter, sessionStartUs, sessionLogs } = this;
+    this.badgeExpiration.reset();
     adapter.setSilent(true);
     this.player.seek(
       targetTimestampUs,
@@ -85,6 +101,18 @@ export class HistoryController {
 
   getSessionStartUs(): number {
     return this.sessionStartUs;
+  }
+
+  private scheduleBadgeIfNeeded(event: HistoryEvent): void {
+    if (event.message === 'filter_pid_reconfigured') {
+      for (const idx of event.indexes) {
+        this.badgeExpiration.schedule(idx, 'pid', event.ts_us);
+      }
+    } else if (event.message === 'filter_arg_updated') {
+      for (const idx of event.indexes) {
+        this.badgeExpiration.schedule(idx, 'arg', event.ts_us);
+      }
+    }
   }
 }
 
