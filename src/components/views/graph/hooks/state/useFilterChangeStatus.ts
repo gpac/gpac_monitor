@@ -4,8 +4,8 @@ import { useFilterChangeStatusHistory } from './useFilterChangeStatusHistory';
 
 export function useFilterChangeStatus(filterIdx: number) {
   const { isLive } = useDataMode();
-  const live = useFilterChangeStatusLive(filterIdx);
-  const history = useFilterChangeStatusHistory(filterIdx);
+  const live = useFilterChangeStatusLive(filterIdx, isLive);
+  const history = useFilterChangeStatusHistory(filterIdx, !isLive);
 
   return isLive ? live : history;
 }
