@@ -31,6 +31,8 @@ import type {
   FilterArgsUpdateEvent,
   LogEvent,
 } from '../types';
+import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
+import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
 import {
   toGraphFilterData,
   buildPidsByFilter,
@@ -60,6 +62,13 @@ export class HistoryAdapter {
     ts_us: number;
   } | null = null;
   private pendingFilterArgs: FilterArgsUpdateEvent[] = [];
+  private pendingPidIndexes = new Set<number>();
+  private pendingArgIndexes = new Set<number>();
+  private pendingPidsByFilter: Record<
+    string,
+    { ipids: Record<string, PIDproperties> }
+  > = {};
+  private pendingArgsByFilter: Record<string, GpacArgument[]> = {};
 
   constructor(private dispatch: AppDispatch) {}
 
@@ -71,6 +80,10 @@ export class HistoryAdapter {
       this.pendingLastFilters = null;
       this.pendingLastStats = null;
       this.pendingFilterArgs = [];
+      this.pendingPidIndexes = new Set();
+      this.pendingArgIndexes = new Set();
+      this.pendingPidsByFilter = {};
+      this.pendingArgsByFilter = {};
     }
   }
 
@@ -84,11 +97,27 @@ export class HistoryAdapter {
       this.pendingBandwidth,
       this.pendingCpuStats,
     );
+    if (this.pendingPidIndexes.size > 0) {
+      this.dispatch(markPidReconfigured([...this.pendingPidIndexes]));
+      if (Object.keys(this.pendingPidsByFilter).length > 0) {
+        this.dispatch(setFilterPids(this.pendingPidsByFilter));
+      }
+    }
+    if (this.pendingArgIndexes.size > 0) {
+      this.dispatch(markArgUpdated([...this.pendingArgIndexes]));
+      if (Object.keys(this.pendingArgsByFilter).length > 0) {
+        this.dispatch(hydrateFilterArgs(this.pendingArgsByFilter));
+      }
+    }
     this.pendingBandwidth = {};
     this.pendingCpuStats = [];
     this.pendingLastFilters = null;
     this.pendingLastStats = null;
     this.pendingFilterArgs = [];
+    this.pendingPidIndexes = new Set();
+    this.pendingArgIndexes = new Set();
+    this.pendingPidsByFilter = {};
+    this.pendingArgsByFilter = {};
   }
 
   hydrate(snapshot: HistorySnapshot, sessionStartUs: number): void {
@@ -140,7 +169,14 @@ export class HistoryAdapter {
         this.handleFilterArgsUpdate(event);
         break;
       case 'filter_pid_reconfigured':
-        if (!this.silent) {
+        if (this.silent) {
+          for (const idx of event.indexes) this.pendingPidIndexes.add(idx);
+          if (event.pidsByFilter) {
+            for (const [idx, ipids] of Object.entries(event.pidsByFilter)) {
+              this.pendingPidsByFilter[idx] = { ipids };
+            }
+          }
+        } else {
           this.dispatch(markPidReconfigured(event.indexes));
           if (event.pidsByFilter) {
             const pids: Record<
@@ -155,7 +191,14 @@ export class HistoryAdapter {
         }
         break;
       case 'filter_arg_updated':
-        if (!this.silent) {
+        if (this.silent) {
+          for (const idx of event.indexes) this.pendingArgIndexes.add(idx);
+          if (event.argsByFilter) {
+            for (const [idx, args] of Object.entries(event.argsByFilter)) {
+              this.pendingArgsByFilter[idx] = args;
+            }
+          }
+        } else {
           this.dispatch(markArgUpdated(event.indexes));
           if (event.argsByFilter) {
             this.dispatch(hydrateFilterArgs(event.argsByFilter));
