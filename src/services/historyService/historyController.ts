@@ -61,11 +61,11 @@ export class HistoryController {
       targetTimestampUs,
       () => adapter.hydrate(snapshot, sessionStartUs),
       () => {
-        adapter.flush();
         for (const logEvent of sessionLogs) {
           if (logEvent.ts_us > targetTimestampUs) break;
           adapter.handleLogEvent(logEvent);
         }
+        adapter.flush(targetTimestampUs);
       },
     );
   }

@@ -110,7 +110,7 @@ function HistoryCollector(historyDir) {
             message: 'log_config_changed',
             ts_us: tsUs,
             logLevel,
-        }));
+        }), tsUs);
     };
 
     this.handleLog = function(tool, level, message, thread_id, caller) {
@@ -135,7 +135,7 @@ function HistoryCollector(historyDir) {
                 message: 'log_batch',
                 ts_us: tsUs,
                 logs: this.pendingLogs,
-            }));
+            }), tsUs);
             this.pendingLogs = [];
         }
         this.logBatchTimer = null;

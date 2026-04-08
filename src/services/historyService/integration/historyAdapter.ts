@@ -23,7 +23,10 @@ import {
   applyArgUpdate,
   hydrateFilterArgs,
 } from '@/shared/store/slices/filterArgumentSlice';
-import { clearLogs } from '@/shared/store/slices/logsSlice';
+import {
+  clearLogs,
+  appendLogsForAllTools,
+} from '@/shared/store/slices/logsSlice';
 import type {
   HistoryEvent,
   HistorySnapshot,
@@ -33,6 +36,7 @@ import type {
 } from '../types';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
+import type { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import {
   toGraphFilterData,
   buildPidsByFilter,
@@ -49,6 +53,11 @@ import type {
   PrevBandwidthState,
 } from './handlers/statsHandler';
 import { dispatchLogEvent } from './handlers/logHandler';
+import {
+  MAX_LOGS_ON_SEEK,
+  BADGE_WINDOW_US,
+  filterRecentIndexes,
+} from './utils/flushHelpers';
 
 export class HistoryAdapter {
   private prevBandwidth: PrevBandwidthState = {};
@@ -62,13 +71,15 @@ export class HistoryAdapter {
     ts_us: number;
   } | null = null;
   private pendingFilterArgs: FilterArgsUpdateEvent[] = [];
-  private pendingPidIndexes = new Set<number>();
-  private pendingArgIndexes = new Set<number>();
+  private pendingPidTimestamps = new Map<number, number>();
+  private pendingArgTimestamps = new Map<number, number>();
   private pendingPidsByFilter: Record<
     string,
     { ipids: Record<string, PIDproperties> }
   > = {};
   private pendingArgsByFilter: Record<string, GpacArgument[]> = {};
+  private pendingLogEntries: GpacLogEntry[] = [];
+  private pendingLastLogConfig: string | null = null;
 
   constructor(private dispatch: AppDispatch) {}
 
@@ -80,14 +91,16 @@ export class HistoryAdapter {
       this.pendingLastFilters = null;
       this.pendingLastStats = null;
       this.pendingFilterArgs = [];
-      this.pendingPidIndexes = new Set();
-      this.pendingArgIndexes = new Set();
+      this.pendingPidTimestamps = new Map();
+      this.pendingArgTimestamps = new Map();
       this.pendingPidsByFilter = {};
       this.pendingArgsByFilter = {};
+      this.pendingLogEntries = [];
+      this.pendingLastLogConfig = null;
     }
   }
 
-  flush(): void {
+  flush(targetUs?: number): void {
     this.silent = false;
     if (this.pendingLastFilters) this.handleFilters(this.pendingLastFilters);
     for (const arg of this.pendingFilterArgs) this.handleFilterArgsUpdate(arg);
@@ -97,27 +110,44 @@ export class HistoryAdapter {
       this.pendingBandwidth,
       this.pendingCpuStats,
     );
-    if (this.pendingPidIndexes.size > 0) {
-      this.dispatch(markPidReconfigured([...this.pendingPidIndexes]));
-      if (Object.keys(this.pendingPidsByFilter).length > 0) {
-        this.dispatch(setFilterPids(this.pendingPidsByFilter));
-      }
+    const badgeMinUs = targetUs !== undefined ? targetUs - BADGE_WINDOW_US : 0;
+    const recentPidIndexes = filterRecentIndexes(this.pendingPidTimestamps, badgeMinUs);
+    if (recentPidIndexes.length > 0) {
+      this.dispatch(markPidReconfigured(recentPidIndexes));
     }
-    if (this.pendingArgIndexes.size > 0) {
-      this.dispatch(markArgUpdated([...this.pendingArgIndexes]));
-      if (Object.keys(this.pendingArgsByFilter).length > 0) {
-        this.dispatch(hydrateFilterArgs(this.pendingArgsByFilter));
-      }
+    if (Object.keys(this.pendingPidsByFilter).length > 0) {
+      this.dispatch(setFilterPids(this.pendingPidsByFilter));
+    }
+    const recentArgIndexes = filterRecentIndexes(this.pendingArgTimestamps, badgeMinUs);
+    if (recentArgIndexes.length > 0) {
+      this.dispatch(markArgUpdated(recentArgIndexes));
+    }
+    if (Object.keys(this.pendingArgsByFilter).length > 0) {
+      this.dispatch(hydrateFilterArgs(this.pendingArgsByFilter));
+    }
+    if (this.pendingLastLogConfig !== null) {
+      dispatchLogEvent(this.dispatch, {
+        version: 1,
+        ts_us: 0,
+        message: 'log_config_changed',
+        logLevel: this.pendingLastLogConfig,
+      });
+    }
+    if (this.pendingLogEntries.length > 0) {
+      const logs = this.pendingLogEntries.slice(-MAX_LOGS_ON_SEEK);
+      this.dispatch(appendLogsForAllTools(logs));
     }
     this.pendingBandwidth = {};
     this.pendingCpuStats = [];
     this.pendingLastFilters = null;
     this.pendingLastStats = null;
     this.pendingFilterArgs = [];
-    this.pendingPidIndexes = new Set();
-    this.pendingArgIndexes = new Set();
+    this.pendingPidTimestamps = new Map();
+    this.pendingArgTimestamps = new Map();
     this.pendingPidsByFilter = {};
     this.pendingArgsByFilter = {};
+    this.pendingLogEntries = [];
+    this.pendingLastLogConfig = null;
   }
 
   hydrate(snapshot: HistorySnapshot, sessionStartUs: number): void {
@@ -170,7 +200,9 @@ export class HistoryAdapter {
         break;
       case 'filter_pid_reconfigured':
         if (this.silent) {
-          for (const idx of event.indexes) this.pendingPidIndexes.add(idx);
+          for (const idx of event.indexes) {
+            this.pendingPidTimestamps.set(idx, event.ts_us);
+          }
           if (event.pidsByFilter) {
             for (const [idx, ipids] of Object.entries(event.pidsByFilter)) {
               this.pendingPidsByFilter[idx] = { ipids };
@@ -192,7 +224,9 @@ export class HistoryAdapter {
         break;
       case 'filter_arg_updated':
         if (this.silent) {
-          for (const idx of event.indexes) this.pendingArgIndexes.add(idx);
+          for (const idx of event.indexes) {
+            this.pendingArgTimestamps.set(idx, event.ts_us);
+          }
           if (event.argsByFilter) {
             for (const [idx, args] of Object.entries(event.argsByFilter)) {
               this.pendingArgsByFilter[idx] = args;
@@ -209,7 +243,14 @@ export class HistoryAdapter {
   }
 
   handleLogEvent(event: LogEvent): void {
-    if (this.silent) return;
+    if (this.silent) {
+      if (event.message === 'log_batch') {
+        this.pendingLogEntries.push(...event.logs);
+      } else if (event.message === 'log_config_changed') {
+        this.pendingLastLogConfig = event.logLevel;
+      }
+      return;
+    }
     dispatchLogEvent(this.dispatch, event);
   }
 

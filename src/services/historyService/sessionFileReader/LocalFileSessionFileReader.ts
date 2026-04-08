@@ -7,8 +7,8 @@ interface SessionEntry {
   snapshot?: File;
   events?: File;
   manifest?: File;
-  logs?: File;
   chunks: Map<number, File>;
+  logChunks: Map<number, File>;
   done: boolean;
 }
 
@@ -31,19 +31,28 @@ export class LocalFileSessionFileReader {
         if (!chunkMatch) continue;
         const chunkIndex = parseInt(chunkMatch[1], 10);
         if (!this.sessionMap.has(sessionId)) {
-          this.sessionMap.set(sessionId, { done: false, chunks: new Map() });
+          this.sessionMap.set(sessionId, { done: false, chunks: new Map(), logChunks: new Map() });
         }
         this.sessionMap.get(sessionId)!.chunks.set(chunkIndex, file);
+      } else if (parentFolder === 'logs') {
+        if (parts.length < 3) continue;
+        const sessionId = parts[parts.length - 3];
+        const logMatch = fileName.match(/^logs_(\d+)\.jsonl$/);
+        if (!logMatch) continue;
+        const logIndex = parseInt(logMatch[1], 10);
+        if (!this.sessionMap.has(sessionId)) {
+          this.sessionMap.set(sessionId, { done: false, chunks: new Map(), logChunks: new Map() });
+        }
+        this.sessionMap.get(sessionId)!.logChunks.set(logIndex, file);
       } else {
         const sessionId = parentFolder;
         if (!this.sessionMap.has(sessionId)) {
-          this.sessionMap.set(sessionId, { done: false, chunks: new Map() });
+          this.sessionMap.set(sessionId, { done: false, chunks: new Map(), logChunks: new Map() });
         }
         const entry = this.sessionMap.get(sessionId)!;
         if (fileName === 'snapshot.json') entry.snapshot = file;
         else if (fileName === 'events.jsonl') entry.events = file;
         else if (fileName === 'manifest.json') entry.manifest = file;
-        else if (fileName === 'logs.jsonl') entry.logs = file;
         else if (fileName === 'done') entry.done = true;
       }
     }
@@ -80,8 +89,8 @@ export class LocalFileSessionFileReader {
     return parseEventsJsonl(await file.text());
   }
 
-  async readLogs(sessionId: string): Promise<LogEvent[]> {
-    const file = this.sessionMap.get(sessionId)?.logs;
+  async readLogChunk(sessionId: string, chunkIndex: number): Promise<LogEvent[]> {
+    const file = this.sessionMap.get(sessionId)?.logChunks.get(chunkIndex);
     if (!file) return [];
     return parseEventsJsonl(await file.text()) as unknown as LogEvent[];
   }

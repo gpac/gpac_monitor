@@ -13,6 +13,7 @@ export interface HistoryManifest {
   startUs: number;
   endUs: number;
   chunks: HistoryManifestChunk[];
+  logChunks?: HistoryManifestChunk[];
 }
 
 /** Session metadata — available without loading all events. */
@@ -29,7 +30,7 @@ export interface HistorySource {
   readonly sessionId: string;
   loadSnapshot(): Promise<HistorySnapshot>;
   loadEventsRange(fromUs?: number, toUs?: number): Promise<HistoryEvent[]>;
-  loadLogs(): Promise<LogEvent[]>;
+  loadLogs(fromUs?: number, toUs?: number): Promise<LogEvent[]>;
   getMetadata(): Promise<HistoryMetadata>;
 }
 

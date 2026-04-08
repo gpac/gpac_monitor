@@ -78,22 +78,6 @@ export class WsSessionFileReader {
     }
   }
 
-  async readLogs(sessionId: string): Promise<LogEvent[]> {
-    await this.ensureConnected();
-    try {
-      const response = await this.sendCommand({
-        message: 'read_file',
-        sessionId,
-        file: 'logs.jsonl',
-      });
-      return parseEventsJsonl(
-        response.content as string,
-      ) as unknown as LogEvent[];
-    } catch {
-      return [];
-    }
-  }
-
   async readChunk(
     sessionId: string,
     chunkIndex: number,
@@ -106,6 +90,20 @@ export class WsSessionFileReader {
       file,
     });
     return parseEventsJsonl(response.content as string);
+  }
+
+  async readLogChunk(
+    sessionId: string,
+    chunkIndex: number,
+  ): Promise<LogEvent[]> {
+    await this.ensureConnected();
+    const file = `logs/logs_${String(chunkIndex).padStart(4, '0')}.jsonl`;
+    const response = await this.sendCommand({
+      message: 'read_file',
+      sessionId,
+      file,
+    });
+    return parseEventsJsonl(response.content as string) as unknown as LogEvent[];
   }
 
   private async ensureConnected(): Promise<void> {

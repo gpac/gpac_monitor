@@ -16,8 +16,10 @@ export class FileHistorySource implements HistorySource {
     return this.reader.readSnapshot(this.sessionId);
   }
 
-  async loadLogs(): Promise<LogEvent[]> {
-    return this.reader.readLogs(this.sessionId);
+  async loadLogs(fromUs?: number, toUs?: number): Promise<LogEvent[]> {
+    const manifest = await this.loadManifest();
+    if (!manifest?.logChunks?.length) return [];
+    return this.loadLogsFromChunks(manifest, fromUs, toUs);
   }
 
   async loadEventsRange(
@@ -75,6 +77,32 @@ export class FileHistorySource implements HistorySource {
     if (this.cachedManifest !== undefined) return this.cachedManifest;
     this.cachedManifest = await this.reader.readManifest(this.sessionId);
     return this.cachedManifest;
+  }
+
+  private async loadLogsFromChunks(
+    manifest: HistoryManifest,
+    fromUs?: number,
+    toUs?: number,
+  ): Promise<LogEvent[]> {
+    const relevantChunks = manifest.logChunks!.filter(
+      (chunk) =>
+        (toUs === undefined || chunk.fromUs <= toUs) &&
+        (fromUs === undefined || chunk.toUs >= fromUs),
+    );
+
+    const chunkResults = await Promise.all(
+      relevantChunks.map((chunk) =>
+        this.reader.readLogChunk(this.sessionId, chunkIndexFromPath(chunk.file)),
+      ),
+    );
+
+    return chunkResults
+      .flat()
+      .filter(
+        (log) =>
+          (fromUs === undefined || log.ts_us >= fromUs) &&
+          (toUs === undefined || log.ts_us <= toUs),
+      );
   }
 
   private async loadEventsFromChunks(
