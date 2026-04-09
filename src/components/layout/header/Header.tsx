@@ -85,7 +85,11 @@ const Header = () => {
               aria-label="Widget selector"
             />
           </span>
-          <span aria-label="Log counters" title="Log counters">
+          <span
+            aria-label="Log counters"
+            title="Log counters"
+            className="min-w-48"
+          >
             <LogCounters />
           </span>
           {isLive && (
