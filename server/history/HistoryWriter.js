@@ -76,9 +76,9 @@ function HistoryWriter(historyDir, sessionId) {
     };
 
     this.close = function() {
+        this._writeManifest();
         if (this._events) this._events.close();
         if (this._logs) this._logs.close();
-        this._writeManifest();
         const doneFile = std.open(`${dir}/done`, 'w');
         if (doneFile) doneFile.close();
     };

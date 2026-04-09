@@ -100,6 +100,7 @@ export class EventPlayer {
 
     let i = 0;
     const processChunk = () => {
+      // Limit processing time to ~8ms per frame to avoid blocking the main thread
       const deadline = performance.now() + 8;
       while (
         i < this.timelineEvents.length &&

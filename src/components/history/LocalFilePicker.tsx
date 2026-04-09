@@ -9,6 +9,7 @@ import { toast } from '@/shared/hooks/useToast';
 import SessionRow from './SessionRow';
 import type { SessionInfo } from '@/services/historyService/sessionFileReader/types';
 
+
 const LocalFilePicker = () => {
   const { loadFromSource } = useDataSource();
   const [browser, setBrowser] = useState<LocalFileSessionFileReader | null>(
@@ -47,6 +48,7 @@ const LocalFilePicker = () => {
           });
         }
       } catch (err) {
+        console.error('[LocalFilePicker] load error:', err);
         setLoadError(err instanceof Error ? err.message : 'Load failed');
         setLoadingSession(false);
       }

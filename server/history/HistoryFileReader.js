@@ -4,6 +4,7 @@ import * as os from 'os';
 const ALLOWED_EXACT_FILES = ['snapshot.json', 'events.jsonl', 'manifest.json', 'logs.jsonl'];
 const VALID_SESSION_ID = /^\d+$/;
 const VALID_CHUNK_FILE = /^chunks\/chunk_\d{4}\.jsonl$/;
+const VALID_LOG_CHUNK_FILE = /^logs\/logs_\d{4}\.jsonl$/;
 
 /**
  * HistoryFileReader - Read-only access to history sessions
@@ -52,7 +53,7 @@ function HistoryFileReader(historyDir) {
         if (!VALID_SESSION_ID.test(sessionId)) {
             return { ok: false, error: 'session_not_found', detail: `Invalid sessionId: ${sessionId}` };
         }
-        const isAllowed = ALLOWED_EXACT_FILES.includes(fileName) || VALID_CHUNK_FILE.test(fileName);
+        const isAllowed = ALLOWED_EXACT_FILES.includes(fileName) || VALID_CHUNK_FILE.test(fileName) || VALID_LOG_CHUNK_FILE.test(fileName);
         if (!isAllowed) {
             return { ok: false, error: 'file_not_allowed', detail: `File not allowed: ${fileName}` };
         }

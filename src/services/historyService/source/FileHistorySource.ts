@@ -18,6 +18,7 @@ export class FileHistorySource implements HistorySource {
 
   async loadLogs(fromUs?: number, toUs?: number): Promise<LogEvent[]> {
     const manifest = await this.loadManifest();
+    console.log('[FileHistorySource.loadLogs] manifest:', manifest ? `chunks=${manifest.chunks.length} logChunks=${manifest.logChunks?.length ?? 0}` : 'null');
     if (!manifest?.logChunks?.length) return [];
     return this.loadLogsFromChunks(manifest, fromUs, toUs);
   }
@@ -84,16 +85,20 @@ export class FileHistorySource implements HistorySource {
     fromUs?: number,
     toUs?: number,
   ): Promise<LogEvent[]> {
+    console.log('[FileHistorySource.loadLogsFromChunks] logChunks:', manifest.logChunks!.length, 'fromUs:', fromUs, 'toUs:', toUs);
     const relevantChunks = manifest.logChunks!.filter(
       (chunk) =>
         (toUs === undefined || chunk.fromUs <= toUs) &&
         (fromUs === undefined || chunk.toUs >= fromUs),
     );
 
+    console.log('[FileHistorySource.loadLogsFromChunks] relevant chunks:', relevantChunks.length);
     const chunkResults = await Promise.all(
-      relevantChunks.map((chunk) =>
-        this.reader.readLogChunk(this.sessionId, chunkIndexFromPath(chunk.file)),
-      ),
+      relevantChunks.map((chunk) => {
+        const idx = chunkIndexFromPath(chunk.file);
+        console.log('[FileHistorySource.loadLogsFromChunks] reading chunk', chunk.file, '→ idx', idx);
+        return this.reader.readLogChunk(this.sessionId, idx);
+      }),
     );
 
     return chunkResults

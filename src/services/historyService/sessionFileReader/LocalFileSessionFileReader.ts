@@ -59,7 +59,7 @@ export class LocalFileSessionFileReader {
   }
 
   async listSessions(): Promise<SessionInfo[]> {
-    return Array.from(this.sessionMap.entries())
+    const sessions = Array.from(this.sessionMap.entries())
       .sort(([a], [b]) => Number(b) - Number(a))
       .map(([sessionId, entry]) => ({
         sessionId,
@@ -69,6 +69,8 @@ export class LocalFileSessionFileReader {
         sizeBytes: (entry.snapshot?.size ?? 0) + (entry.events?.size ?? 0),
         isComplete: entry.done,
       }));
+    console.log('[LocalFileSessionFileReader.listSessions]', sessions.map(s => `${s.sessionId}: snapshot=${s.hasSnapshot} events=${s.hasEvents} manifest=${s.hasManifest} complete=${s.isComplete}`));
+    return sessions;
   }
 
   async readSnapshot(sessionId: string): Promise<HistorySnapshot> {
@@ -90,7 +92,9 @@ export class LocalFileSessionFileReader {
   }
 
   async readLogChunk(sessionId: string, chunkIndex: number): Promise<LogEvent[]> {
-    const file = this.sessionMap.get(sessionId)?.logChunks.get(chunkIndex);
+    const entry = this.sessionMap.get(sessionId);
+    const file = entry?.logChunks.get(chunkIndex);
+    console.log('[LocalFileSessionFileReader.readLogChunk] session:', sessionId, 'chunkIndex:', chunkIndex, 'file:', file?.name ?? 'NOT FOUND', 'available logChunks:', entry ? [...entry.logChunks.keys()] : 'no entry');
     if (!file) return [];
     return parseEventsJsonl(await file.text()) as unknown as LogEvent[];
   }
