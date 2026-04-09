@@ -54,90 +54,96 @@ const Header = () => {
     <header
       className={`h-14 bg-monitor-app px-4 text-white/80 border-b ${isHistory ? 'border-purple-800/70' : 'border-white/10'}`}
     >
-      <div className="h-full flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <h1 className="text-xl font-semibold font-ui text-gray-200">
-            GPAC Monitor
-          </h1>
+   <div className="h-full flex items-center justify-between gap-4">
+  <div className="flex items-center gap-6 min-w-0 flex-1">
+    <h1 className="text-xl font-semibold font-ui text-gray-200 shrink-0">
+      GPAC Monitor
+    </h1>
 
-          <div className="h-6 w-px bg-gray-700" />
-          {!isHistory && (
-            <button
-              onClick={() => window.location.reload()}
-              className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800"
-              title="Reload page"
-              aria-label="Reload page"
-            >
-              <LuRotateCw className="w-4 h-4" />
-            </button>
-          )}
+    <div className="h-6 w-px bg-gray-700 shrink-0" />
 
-          {!isHistory && (
-            <span aria-label="Connection selector" title="Connection selector">
-              <ConnectionSelector />
-            </span>
-          )}
-          <span aria-label="Widget selector" title="Widget selector">
-            <WidgetSelector
-              isOpen={showWidgetSelector}
-              onToggle={() => setShowWidgetSelector(!showWidgetSelector)}
-              onClose={() => setShowWidgetSelector(false)}
-              aria-label="Widget selector"
-            />
-          </span>
-          <span
-            aria-label="Log counters"
-            title="Log counters"
-            className="min-w-48"
-          >
-            <LogCounters />
-          </span>
-          {isLive && (
-            <button
-              onClick={openHistoryTab}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800"
-              title="Open history in new tab"
-            >
-              <LuClapperboard className="w-4 h-4" />
-              History
-            </button>
-          )}
-          {sessionName && (
-            <span className="flex items-center gap-1.5 text-xs text-gray-400 font-ui">
-              <LuClock className="w-4 h-4 text-purple-400 shrink-0" />
-              {sessionName}
-            </span>
-          )}
-          <HistoryControls />
-        </div>
+    {!isHistory && (
+      <button
+        onClick={() => window.location.reload()}
+        className="p-2 text-gray-400 hover:text-white rounded-lg hover:bg-gray-800 shrink-0"
+        title="Reload page"
+        aria-label="Reload page"
+      >
+        <LuRotateCw className="w-4 h-4" />
+      </button>
+    )}
+    {!isHistory && (
+      <span
+        aria-label="Connection selector"
+        title="Connection selector"
+        className="shrink-0"
+      >
+        <ConnectionSelector />
+      </span>
+    )}
+    <span
+      aria-label="Widget selector"
+      title="Widget selector"
+      className="shrink-0"
+    >
+      <WidgetSelector
+        isOpen={showWidgetSelector}
+        onToggle={() => setShowWidgetSelector(!showWidgetSelector)}
+        onClose={() => setShowWidgetSelector(false)}
+        aria-label="Widget selector"
+      />
+    </span>
+    <div className="shrink-0 w-[340px] overflow-hidden">
+      <LogCounters />
+    </div>
+    {isLive && (
+      <button
+        onClick={openHistoryTab}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-300 hover:text-white rounded-lg hover:bg-gray-800 shrink-0"
+        title="Open history in new tab"
+      >
+        <LuClapperboard className="w-4 h-4" />
+        History
+      </button>
+    )}
+    <div className="min-w-0 flex-1 max-w-[520px]">
+      <HistoryControls />
+    </div>
+    {sessionName && (
+      <span className="flex items-center gap-1.5 text-xs text-gray-400 font-ui shrink-0">
+        <LuClock className="w-4 h-4 text-purple-400 shrink-0" />
+        <span className="truncate max-w-[180px]">{sessionName}</span>
+      </span>
+    )}
+  </div>
+  <div className="flex items-center gap-4 shrink-0">
+    {!isHistory && (
+      <button
+        onClick={() => dispatch(toggleSidebar())}
+        className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800"
+        title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+      >
+        {isSidebarOpen ? (
+          <LuPanelLeftClose className="w-4 h-4" />
+        ) : (
+          <LuPanelLeft className="w-4 h-4" />
+        )}
 
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => dispatch(toggleSidebar())}
-            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800"
-            title={isSidebarOpen ? 'Close sidebar' : 'Open sidebar'}
-          >
-            {isSidebarOpen ? (
-              <LuPanelLeftClose className="w-4 h-4" />
-            ) : (
-              <LuPanelLeft className="w-4 h-4" />
-            )}
-            <span className="hidden sm:inline">
-              {isSidebarOpen ? 'Hide' : 'Show'} Sidebar
-            </span>
-          </button>
-
-          <div className="h-6 w-px bg-gray-700" />
-
-          <button
-            onClick={() => setShowLayoutManager(!showLayoutManager)}
-            className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800"
-          >
-            <FiLayout className="w-4 h-4" />
-            Layouts
-          </button>
-        </div>
-      </div>
+        <span className="hidden sm:inline">
+          {isSidebarOpen ? 'Hide' : 'Show'} Sidebar
+        </span>
+      </button>
+    )}
+    <div className="h-6 w-px bg-gray-700" />
+    <button
+      onClick={() => setShowLayoutManager(!showLayoutManager)}
+      className="flex items-center gap-2 px-3 py-2 text-gray-300 font-ui hover:text-white text-sm rounded-lg hover:bg-gray-800"
+    >
+      <FiLayout className="w-4 h-4" />
+      Layouts
+    </button>
+  </div>
+</div>
 
       {showLayoutManager && (
         <div

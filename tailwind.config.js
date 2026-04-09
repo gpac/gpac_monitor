@@ -7,19 +7,21 @@ export default {
         gray: {
           750: "#2D3748",
         },
-        gpac: {
-          navy: "#151B3A",
-          coral: "#FF5A5F",
-          coralD: "#E64545",
-          wine: "#8E1E2D",
-        },
+  
         monitor: {
+           timeline: {
+          premiumFrom: "#131A2A",
+          premiumTo: "#101624",
+        },
           main: "#0E1420",
           app: "#0c1117",
 
           surface: "#0b1016",
 
           panel: "#0f141b",
+          timeline: {
+          subtle: "#121826",
+        },
 
           line: "#ffffff1a",
           download: "#6081B7",
@@ -38,6 +40,17 @@ export default {
           },
         },
       },
+      boxShadow: {
+      "timeline-premium":
+        "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 1px rgba(139,92,246,0.08), 0 8px 24px rgba(0,0,0,0.28)",
+    },
+    borderColor: {
+      "timeline-premium": "rgba(139,92,246,0.20)",
+    },
+    backgroundImage: {
+      "timeline-premium":
+        "linear-gradient(180deg, #131A2A 0%, #101624 100%)",
+    },
       spacing: {
         "widget-sm": "300px",
         "widget-md": "400px",

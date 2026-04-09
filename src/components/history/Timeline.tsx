@@ -45,7 +45,7 @@ const Timeline = ({
   );
 
   return (
-    <div className="flex items-center gap-3 min-w-64">
+   <div className="flex items-center gap-3 w-full rounded-xl border border-timeline-premium bg-timeline-premium   shadow-timeline-premium">
       <button
         onClick={isPlaying ? onPause : onPlay}
         disabled={durationUs === 0}

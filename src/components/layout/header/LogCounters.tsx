@@ -45,30 +45,30 @@ const LogCounters = memo(() => {
     info: logCounts.info,
   } as const;
 
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-xs font-medium text-muted uppercase tracking-wider">
-        Logs
-      </span>
+return (
+  <div className="flex items-center gap-2 min-w-0 overflow-hidden">
+    <span className="text-xs font-medium text-muted uppercase tracking-wider shrink-0">
+      Logs
+    </span>
 
-      {LOG_SHORTCUTS.map((shortcut) => (
-        <LogShortcutButton
-          key={shortcut.key}
-          icon={shortcut.icon}
-          title={`${countByKey[shortcut.key]} - ${shortcut.title}`}
-          count={countByKey[shortcut.key]}
-          colorClass={shortcut.colorClass}
-          onClick={() => openLogsWidget({ levels: [shortcut.level] })}
-        />
-      ))}
+    {LOG_SHORTCUTS.map((shortcut) => (
+      <LogShortcutButton
+        key={shortcut.key}
+        icon={shortcut.icon}
+        title={`${countByKey[shortcut.key]} - ${shortcut.title}`}
+        count={countByKey[shortcut.key]}
+        colorClass={shortcut.colorClass}
+        onClick={() => openLogsWidget({ levels: [shortcut.level] })}
+      />
+    ))}
 
-      {/* Visual separator */}
-      <div className="h-4 w-px bg-gray-700" />
+    <div className="h-4 w-px bg-gray-700 shrink-0" />
 
-      {/* Thread filter */}
+    <div className="min-w-0 flex-1 overflow-hidden">
       <ThreadFilterDropdown />
     </div>
-  );
+  </div>
+);
 });
 
 LogCounters.displayName = 'LogCounters';
