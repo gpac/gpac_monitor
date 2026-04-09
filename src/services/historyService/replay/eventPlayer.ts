@@ -43,6 +43,7 @@ export class EventPlayer {
 
   play(resetStateFromSnapshot?: () => void) {
     if (!this.timelineEvents.length || !this.onEvent) return;
+    this.cancelPendingSeek();
 
     if (this.state === 'paused') {
       this.playbackStartTimeMs = performance.now();
@@ -68,10 +69,7 @@ export class EventPlayer {
   }
 
   stop() {
-    if (this.seekRequestAnimationFrameId !== null) {
-      cancelAnimationFrame(this.seekRequestAnimationFrameId);
-      this.seekRequestAnimationFrameId = null;
-    }
+    this.cancelPendingSeek();
     this.cancelFrame();
     this.nextEventIndex = 0;
     this.currentPlaybackTimeUs = 0;
@@ -88,11 +86,7 @@ export class EventPlayer {
     onComplete?: () => void,
   ) {
     if (!this.timelineEvents.length || !this.onEvent) return;
-
-    if (this.seekRequestAnimationFrameId !== null) {
-      cancelAnimationFrame(this.seekRequestAnimationFrameId);
-      this.seekRequestAnimationFrameId = null;
-    }
+    this.cancelPendingSeek();
     this.cancelFrame();
     this.currentPlaybackTimeUs = targetTimestampUs; // jump immediately for UI
     this.setState('seeking');
@@ -161,6 +155,13 @@ export class EventPlayer {
     if (this.animationFrameId !== null) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
+    }
+  }
+
+  private cancelPendingSeek() {
+    if (this.seekRequestAnimationFrameId !== null) {
+      cancelAnimationFrame(this.seekRequestAnimationFrameId);
+      this.seekRequestAnimationFrameId = null;
     }
   }
 
