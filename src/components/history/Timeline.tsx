@@ -25,7 +25,8 @@ const Timeline = ({
   onSeek,
 }: TimelineProps) => {
   const isPlaying = state === 'playing';
-  const elapsedUs = Math.min(currentTimeUs, durationUs);
+  const relativeTimeUs = currentTimeUs - sessionStartUs;
+  const elapsedUs = Math.max(0, Math.min(relativeTimeUs, durationUs));
   const progressPercent = durationUs > 0 ? (elapsedUs / durationUs) * 100 : 0;
 
   const handleSeekPositionChange = useCallback(
