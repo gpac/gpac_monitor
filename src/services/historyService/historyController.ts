@@ -17,6 +17,7 @@ export class HistoryController {
   private snapshot: HistorySnapshot | null = null;
   private sessionStartUs = 0;
   private sessionLogs: LogEvent[] = [];
+  private nextLogIndex = 0;
 
   setListener(listener: PlayerListener) {
     this.player.setListener(listener);
@@ -30,12 +31,18 @@ export class HistoryController {
       source.loadEventsRange(),
       source.loadLogs(),
     ]);
-    console.log('[HistoryController.load] snapshot ok, events:', events.length, 'logs:', logs.length);
+    console.log(
+      '[HistoryController.load] snapshot ok, events:',
+      events.length,
+      'logs:',
+      logs.length,
+    );
 
     const sessionStartUs = events[0]?.ts_us ?? 0;
     this.snapshot = snapshot;
     this.sessionStartUs = sessionStartUs;
     this.sessionLogs = logs;
+    this.nextLogIndex = 0;
     this.adapter = new HistoryAdapter(dispatch);
     this.adapter.hydrate(snapshot, sessionStartUs);
     this.badgeExpiration.reset();
@@ -46,6 +53,13 @@ export class HistoryController {
         this.scheduleBadgeIfNeeded(event);
       },
       (currentTimeUs) => {
+        while (
+          this.nextLogIndex < this.sessionLogs.length &&
+          this.sessionLogs[this.nextLogIndex].ts_us <= currentTimeUs
+        ) {
+          this.adapter!.handleLogEvent(this.sessionLogs[this.nextLogIndex]);
+          this.nextLogIndex++;
+        }
         const expired = this.badgeExpiration.tick(currentTimeUs);
         if (expired.length > 0) {
           this.adapter!.clearExpiredBadges(expired);
@@ -63,11 +77,12 @@ export class HistoryController {
       targetTimestampUs,
       () => adapter.hydrate(snapshot, sessionStartUs),
       () => {
-        for (const logEvent of sessionLogs) {
-          if (logEvent.ts_us > targetTimestampUs) break;
-          adapter.handleLogEvent(logEvent);
-        }
         adapter.flush(targetTimestampUs);
+        adapter.hydrateLogsForSeek(sessionLogs, targetTimestampUs);
+        this.nextLogIndex = sessionLogs.findIndex(
+          (l) => l.ts_us > targetTimestampUs,
+        );
+        if (this.nextLogIndex === -1) this.nextLogIndex = sessionLogs.length;
       },
     );
   }
@@ -78,7 +93,10 @@ export class HistoryController {
       return;
     }
     const { snapshot, adapter, sessionStartUs } = this;
-    this.player.play(() => adapter.hydrate(snapshot, sessionStartUs));
+    this.player.play(() => {
+      adapter.hydrate(snapshot, sessionStartUs);
+      this.nextLogIndex = 0;
+    });
   }
 
   pause() {

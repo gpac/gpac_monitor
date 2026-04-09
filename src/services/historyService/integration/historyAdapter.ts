@@ -79,8 +79,6 @@ export class HistoryAdapter {
     { ipids: Record<string, PIDproperties> }
   > = {};
   private pendingArgsByFilter: Record<string, GpacArgument[]> = {};
-  private pendingLogEntries: GpacLogEntry[] = [];
-  private pendingLastLogConfig: string | null = null;
 
   constructor(private dispatch: AppDispatch) {}
 
@@ -96,8 +94,6 @@ export class HistoryAdapter {
       this.pendingArgTimestamps = new Map();
       this.pendingPidsByFilter = {};
       this.pendingArgsByFilter = {};
-      this.pendingLogEntries = [];
-      this.pendingLastLogConfig = null;
     }
   }
 
@@ -132,18 +128,6 @@ export class HistoryAdapter {
     if (Object.keys(this.pendingArgsByFilter).length > 0) {
       this.dispatch(hydrateFilterArgs(this.pendingArgsByFilter));
     }
-    if (this.pendingLastLogConfig !== null) {
-      dispatchLogEvent(this.dispatch, {
-        version: 1,
-        ts_us: 0,
-        message: 'log_config_changed',
-        logLevel: this.pendingLastLogConfig,
-      });
-    }
-    if (this.pendingLogEntries.length > 0) {
-      const logs = this.pendingLogEntries.slice(-MAX_LOGS_ON_SEEK);
-      this.dispatch(appendLogsForAllTools(logs));
-    }
     this.pendingBandwidth = {};
     this.pendingCpuStats = [];
     this.pendingLastFilters = null;
@@ -153,8 +137,6 @@ export class HistoryAdapter {
     this.pendingArgTimestamps = new Map();
     this.pendingPidsByFilter = {};
     this.pendingArgsByFilter = {};
-    this.pendingLogEntries = [];
-    this.pendingLastLogConfig = null;
   }
 
   hydrate(snapshot: HistorySnapshot, sessionStartUs: number): void {
@@ -251,15 +233,30 @@ export class HistoryAdapter {
   }
 
   handleLogEvent(event: LogEvent): void {
-    if (this.silent) {
-      if (event.message === 'log_batch') {
-        this.pendingLogEntries.push(...event.logs);
-      } else if (event.message === 'log_config_changed') {
-        this.pendingLastLogConfig = event.logLevel;
-      }
-      return;
-    }
     dispatchLogEvent(this.dispatch, event);
+  }
+
+  /** Dispatch the last N logs before targetUs (used by seek). */
+  hydrateLogsForSeek(logEvents: LogEvent[], targetUs: number): void {
+    const allEntries: GpacLogEntry[] = [];
+    let lastConfig: string | null = null;
+    for (const event of logEvents) {
+      if (event.ts_us > targetUs) break;
+      if (event.message === 'log_batch') allEntries.push(...event.logs);
+      else if (event.message === 'log_config_changed')
+        lastConfig = event.logLevel;
+    }
+    if (lastConfig !== null) {
+      dispatchLogEvent(this.dispatch, {
+        version: 1,
+        ts_us: 0,
+        message: 'log_config_changed',
+        logLevel: lastConfig,
+      });
+    }
+    if (allEntries.length > 0) {
+      this.dispatch(appendLogsForAllTools(allEntries.slice(-MAX_LOGS_ON_SEEK)));
+    }
   }
 
   clearExpiredBadges(
