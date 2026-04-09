@@ -135,7 +135,9 @@ const sessionStatsSlice = createSlice({
       state,
       action: PayloadAction<Record<string, FilterPids>>,
     ) => {
-      state.pidsByFilter = action.payload;
+      for (const [idx, pids] of Object.entries(action.payload)) {
+        state.pidsByFilter[idx] = { ...state.pidsByFilter[idx], ...pids };
+      }
     },
 
     clearFilterPids: (state) => {

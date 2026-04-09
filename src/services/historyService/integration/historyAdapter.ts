@@ -18,6 +18,7 @@ import {
 import {
   updateSessionStats,
   setFilterPids,
+  clearFilterPids,
 } from '@/shared/store/slices/sessionStatsSlice';
 import {
   applyArgUpdate,
@@ -111,14 +112,20 @@ export class HistoryAdapter {
       this.pendingCpuStats,
     );
     const badgeMinUs = targetUs !== undefined ? targetUs - BADGE_WINDOW_US : 0;
-    const recentPidIndexes = filterRecentIndexes(this.pendingPidTimestamps, badgeMinUs);
+    const recentPidIndexes = filterRecentIndexes(
+      this.pendingPidTimestamps,
+      badgeMinUs,
+    );
     if (recentPidIndexes.length > 0) {
       this.dispatch(markPidReconfigured(recentPidIndexes));
     }
     if (Object.keys(this.pendingPidsByFilter).length > 0) {
       this.dispatch(setFilterPids(this.pendingPidsByFilter));
     }
-    const recentArgIndexes = filterRecentIndexes(this.pendingArgTimestamps, badgeMinUs);
+    const recentArgIndexes = filterRecentIndexes(
+      this.pendingArgTimestamps,
+      badgeMinUs,
+    );
     if (recentArgIndexes.length > 0) {
       this.dispatch(markArgUpdated(recentArgIndexes));
     }
@@ -163,6 +170,7 @@ export class HistoryAdapter {
     dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
     dispatch(setCommandLine(snapshot.command_line));
     dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
+    dispatch(clearFilterPids());
     dispatch(setFilterPids(buildPidsByFilter(snapshot.filters)));
     dispatch(hydrateFilterArgs(buildArgsByFilter(snapshot.filters)));
     dispatch(setLoading(false));
