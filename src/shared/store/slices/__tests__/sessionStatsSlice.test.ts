@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import reducer, {
   updateSessionStats,
+  setFilterPids,
+  clearFilterPids,
   SessionStatsState,
 } from '../sessionStatsSlice';
 import type { SessionFilterStats } from '../sessionStatsSlice';
@@ -107,5 +109,71 @@ describe('sessionStatsSlice — updateSessionStats', () => {
         s2.previousSessionStats['0'].bytes_done) /
       deltaTimeSec;
     expect(rate).toBe(2000);
+  });
+});
+
+describe('sessionStatsSlice — setFilterPids', () => {
+  const pid = (name: string) => ({ name }) as any;
+
+  it('merges per-entry: other filters are preserved', () => {
+    // Regression: setFilterPids used to replace the entire dict
+    const withTwo = reducer(
+      initialState,
+      setFilterPids({
+        '1': { ipids: { a: pid('a') }, opids: { x: pid('x') } },
+        '2': { ipids: { b: pid('b') }, opids: { y: pid('y') } },
+      }),
+    );
+    // Update only filter 1 ipids (simulating filter_pid_reconfigured)
+    const updated = reducer(
+      withTwo,
+      setFilterPids({ '1': { ipids: { a2: pid('a2') } } }),
+    );
+    // Filter 2 must still be there
+    expect(updated.pidsByFilter['2']).toBeDefined();
+    expect(updated.pidsByFilter['2'].ipids?.b).toBeDefined();
+  });
+
+  it('preserves opids when only ipids are updated', () => {
+    // Regression: filter_pid_reconfigured only sends ipids, must not wipe opids
+    const initial = reducer(
+      initialState,
+      setFilterPids({
+        '3': { ipids: { a: pid('a') }, opids: { x: pid('x') } },
+      }),
+    );
+    const updated = reducer(
+      initial,
+      setFilterPids({ '3': { ipids: { a2: pid('a2') } } }),
+    );
+    expect(updated.pidsByFilter['3'].opids?.x).toBeDefined();
+    expect(updated.pidsByFilter['3'].ipids?.a2).toBeDefined();
+    expect(updated.pidsByFilter['3'].ipids?.a).toBeUndefined();
+  });
+
+  it('clearFilterPids empties the dict', () => {
+    const withData = reducer(
+      initialState,
+      setFilterPids({ '1': { ipids: { a: pid('a') } } }),
+    );
+    const cleared = reducer(withData, clearFilterPids());
+    expect(withData.pidsByFilter['1']).toBeDefined();
+    expect(cleared.pidsByFilter).toEqual({});
+  });
+
+  it('clearFilterPids + setFilterPids gives clean state (hydrate pattern)', () => {
+    const stale = reducer(
+      initialState,
+      setFilterPids({ '99': { ipids: { stale: pid('stale') } } }),
+    );
+    const cleared = reducer(stale, clearFilterPids());
+    const fresh = reducer(
+      cleared,
+      setFilterPids({
+        '1': { ipids: { a: pid('a') }, opids: { x: pid('x') } },
+      }),
+    );
+    expect(fresh.pidsByFilter['99']).toBeUndefined();
+    expect(fresh.pidsByFilter['1'].ipids?.a).toBeDefined();
   });
 });
