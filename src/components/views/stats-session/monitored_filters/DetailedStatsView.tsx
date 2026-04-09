@@ -3,13 +3,14 @@ import { LuSettings } from 'react-icons/lu';
 import { OverviewTabData, TabPIDData, NetworkTabData } from '@/types/ui';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
 import { useDataMode } from '@/shared/hooks/useDataMode';
 import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
 import InputsTab from './tabs/InputsTab';
@@ -101,47 +102,38 @@ const DetailedStatsView = memo(
                 {overviewData.name}
               </h2>
 
+              {/* PID/Arg reconfiguration badges */}
+              <FilterChangeBadges filterIdx={overviewData.idx} />
+
               {/* Log Alerts Badges */}
-              {alerts && alerts.errors > 0 && (
-                <Badge
-                  variant="outline"
-                  onClick={() => {
-                    if (filterKey) {
-                      openLogsWidget({
-                        levels: [GpacLogLevel.ERROR],
-                        filterKeys: [filterKey],
-                      });
-                    }
-                  }}
-                  className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                    bg-red-900/20 text-red-300 cursor-pointer
-                    border border-red-700/60
-                    rounded-sm font-semibold"
-                  title={`${alerts.errors} error(s) in logs`}
-                >
-                  {alerts.errors} ERR
-                </Badge>
-              )}
-              {alerts && alerts.warnings > 0 && (
-                <Badge
-                  variant="outline"
-                  onClick={() => {
-                    if (filterKey) {
-                      openLogsWidget({
-                        levels: [GpacLogLevel.WARNING],
-                        filterKeys: [filterKey],
-                      });
-                    }
-                  }}
-                  className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                    bg-amber-900/20 text-amber-300 cursor-pointer
-                    border border-amber-700/60
-                    rounded-sm font-semibold"
-                  title={`${alerts.warnings} warning(s) in logs`}
-                >
-                  {alerts.warnings} WARN
-                </Badge>
-              )}
+              <StatusBadge
+                label={`${alerts?.errors ?? 0} ERR`}
+                colorScheme="red"
+                visible={!!alerts && alerts.errors > 0}
+                title={`${alerts?.errors ?? 0} error(s) in logs`}
+                onClick={() => {
+                  if (filterKey) {
+                    openLogsWidget({
+                      levels: [GpacLogLevel.ERROR],
+                      filterKeys: [filterKey],
+                    });
+                  }
+                }}
+              />
+              <StatusBadge
+                label={`${alerts?.warnings ?? 0} WARN`}
+                colorScheme="amber"
+                visible={!!alerts && alerts.warnings > 0}
+                title={`${alerts?.warnings ?? 0} warning(s) in logs`}
+                onClick={() => {
+                  if (filterKey) {
+                    openLogsWidget({
+                      levels: [GpacLogLevel.WARNING],
+                      filterKeys: [filterKey],
+                    });
+                  }
+                }}
+              />
 
               <Button
                 variant="outline"

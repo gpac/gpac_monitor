@@ -12,3 +12,4 @@ export type { SidebarContentType } from './useSidebar';
 export { useSubscribedFilters } from './useSubscribedFilters';
 export { useToast, toast, toastService } from './useToast';
 export type { ToasterToast } from './useToast';
+export { useFilterChangeStatus } from './filterChangeStatus';

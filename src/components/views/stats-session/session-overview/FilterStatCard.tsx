@@ -5,6 +5,8 @@ import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 
 interface FilterStatCardProps {
   filter: EnrichedFilterData;
@@ -105,42 +107,29 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             >
               {sessionTypeLabel}
             </Badge>
+            {/* PID/Arg reconfiguration badges */}
+            {filter.idx !== undefined && (
+              <FilterChangeBadges filterIdx={filter.idx} />
+            )}
             {/* Log Alerts Badges */}
-            {alerts && alerts.errors > 0 && (
-              <Badge
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                  bg-red-900/20 text-red-300
-                  border border-red-700/60
-                  rounded-sm font-semibold"
-                title={`${alerts.errors} error(s) in logs`}
-              >
-                {alerts.errors} ERR
-              </Badge>
-            )}
-            {alerts && alerts.warnings > 0 && (
-              <Badge
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                  bg-amber-900/20 text-amber-300
-                  border border-amber-700/60
-                  rounded-sm font-semibold"
-                title={`${alerts.warnings} warning(s) in logs`}
-              >
-                {alerts.warnings} WARN
-              </Badge>
-            )}
-            {(filter.is_eos || filter.status?.includes('EOS')) && (
-              <Badge
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-             bg-emerald-900/15 text-emerald-300
-             border border-emerald-700/60
-             rounded-sm"
-              >
-                EOS
-              </Badge>
-            )}
+            <StatusBadge
+              label={`${alerts?.errors ?? 0} ERR`}
+              colorScheme="red"
+              visible={!!alerts && alerts.errors > 0}
+              title={`${alerts?.errors ?? 0} error(s) in logs`}
+            />
+            <StatusBadge
+              label={`${alerts?.warnings ?? 0} WARN`}
+              colorScheme="amber"
+              visible={!!alerts && alerts.warnings > 0}
+              title={`${alerts?.warnings ?? 0} warning(s) in logs`}
+            />
+            <StatusBadge
+              label="EOS"
+              colorScheme="emerald"
+              visible={!!(filter.is_eos || filter.status?.includes('EOS'))}
+              title="End of stream"
+            />
           </div>
         </div>
 
