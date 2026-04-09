@@ -52,7 +52,7 @@ const Timeline = ({
         aria-label={isPlaying ? 'Pause' : 'Play'}
       >
         {isPlaying ? (
-          <LuPause className="w-4 h-4" />
+          <LuPause className="w-5 h-5" />
         ) : (
           <FaCirclePlay className="w-5 h-5" />
         )}
