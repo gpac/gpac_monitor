@@ -1,6 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HistoryAdapter } from '../historyAdapter';
-import type { SessionStatsEvent, CpuStatsEvent } from '../../types';
+import type {
+  SessionStatsEvent,
+  CpuStatsEvent,
+  PidReconfiguredEvent,
+} from '../../types';
 
 /** Real-ish events derived from server/history/1774943115615/events.jsonl */
 const sessionStatsEvent: SessionStatsEvent = {
@@ -122,6 +126,49 @@ describe('HistoryAdapter silent mode', () => {
     );
     expect(bulkDispatches).toHaveLength(1);
     expect(bulkDispatches[0][0].payload).toMatchSnapshot();
+  });
+
+  it('dispatches setFilterPids on filter_pid_reconfigured (non-silent)', () => {
+    const event: PidReconfiguredEvent = {
+      version: 1,
+      message: 'filter_pid_reconfigured',
+      ts_us: 1000,
+      indexes: [3],
+      pidsByFilter: { '3': { pid_a: { name: 'pid_a' } as any } },
+    };
+    adapter.handleEvent(event);
+
+    const calls = dispatch.mock.calls.filter(
+      ([action]: any) => action.type === 'sessionStats/setFilterPids',
+    );
+    expect(calls).toHaveLength(1);
+    expect(calls[0][0].payload['3'].ipids).toBeDefined();
+  });
+
+  it('buffers filter_pid_reconfigured in silent mode, dispatches on flush', () => {
+    adapter.setSilent(true);
+    const event: PidReconfiguredEvent = {
+      version: 1,
+      message: 'filter_pid_reconfigured',
+      ts_us: 1000,
+      indexes: [5],
+      pidsByFilter: { '5': { pid_b: { name: 'pid_b' } as any } },
+    };
+    adapter.handleEvent(event);
+
+    const beforeFlush = dispatch.mock.calls.filter(
+      ([action]: any) => action.type === 'sessionStats/setFilterPids',
+    );
+    expect(beforeFlush).toHaveLength(0);
+
+    dispatch.mockClear();
+    adapter.flush();
+
+    const afterFlush = dispatch.mock.calls.filter(
+      ([action]: any) => action.type === 'sessionStats/setFilterPids',
+    );
+    expect(afterFlush).toHaveLength(1);
+    expect(afterFlush[0][0].payload['5'].ipids).toBeDefined();
   });
 
   it('resets silent mode after flush', () => {
