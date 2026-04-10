@@ -25,6 +25,8 @@ export interface GraphState {
   selectedNodeId: string | null;
   initialTab: InitialTabType | null;
   pendingFilterOpen: PendingFilterOpen | null;
+  pidReconfiguredFilters: string[];
+  argUpdatedFilters: string[];
   lastUpdate: number;
   pidReconfiguredCounts: Record<string, number>;
   argUpdatedCounts: Record<string, number>;
@@ -40,6 +42,8 @@ const initialState: GraphState = {
   selectedNodeId: null,
   initialTab: null,
   pendingFilterOpen: null,
+  pidReconfiguredFilters: [],
+  argUpdatedFilters: [],
   lastUpdate: Date.now(),
   pidReconfiguredCounts: {},
   argUpdatedCounts: {},

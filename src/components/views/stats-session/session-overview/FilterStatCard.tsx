@@ -31,6 +31,8 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
         : null,
     );
 
+
+
     const handleClick = useCallback(() => {
       if (onClick && filter.idx !== undefined) {
         onClick(filter.idx);

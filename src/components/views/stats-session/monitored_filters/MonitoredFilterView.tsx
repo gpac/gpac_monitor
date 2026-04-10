@@ -31,7 +31,7 @@ const EMPTY_FILTER_DATA: FilterStatsResponse = {
   opids: {},
 };
 
-interface DetailedStatsViewProps {
+interface MonitoredFilterViewProps {
   overviewData: OverviewTabData;
   networkData: NetworkTabData;
   inputPids: TabPIDData[];
@@ -48,7 +48,7 @@ const MemoizedNetworkTab = memo(NetworkTab);
 const MemoizedInputsTab = memo(InputsTab);
 const MemoizedOutputsTab = memo(OutputsTab);
 
-const DetailedStatsView = memo(
+const MonitoredFilterView = memo(
   ({
     overviewData,
     networkData,
@@ -58,7 +58,7 @@ const DetailedStatsView = memo(
     onOpenProperties,
     initialTab,
     isLoading = false,
-  }: DetailedStatsViewProps) => {
+  }: MonitoredFilterViewProps) => {
     const [activeTab, setActiveTab] = useState<string>(
       initialTab || 'overview',
     );
@@ -224,6 +224,6 @@ const DetailedStatsView = memo(
   },
 );
 
-DetailedStatsView.displayName = 'DetailedStatsView';
+MonitoredFilterView.displayName = 'MonitoredFilterView';
 
-export default DetailedStatsView;
+export default MonitoredFilterView;

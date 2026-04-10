@@ -7,7 +7,7 @@ import {
 } from '@/types/ui';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
-import DetailedStatsView from '../DetailedStatsView';
+import MonitoredFilterView from '../MonitoredFilterView';
 
 interface FilterTabContentProps {
   overviewData: OverviewTabData;
@@ -45,5 +45,5 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
     ...(filterData && { filterData }), // Only pass if defined
   };
 
-  return <DetailedStatsView {...props} />;
+  return <MonitoredFilterView {...props} />;
 };

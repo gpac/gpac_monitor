@@ -1,0 +1,91 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`useFetchIPIDProperties > updates properties on PID reconfiguration (flist source switch) > input.mp4 properties 1`] = `
+[
+  {
+    "name": "SourcePath",
+    "type": "str",
+    "value": "media/input.mp4",
+  },
+  {
+    "name": "URL",
+    "type": "str",
+    "value": "media/input.mp4",
+  },
+  {
+    "name": "Width",
+    "type": "uint",
+    "value": 1280,
+  },
+  {
+    "name": "Height",
+    "type": "uint",
+    "value": 720,
+  },
+  {
+    "name": "FPS",
+    "type": "frac",
+    "value": "30/1",
+  },
+  {
+    "name": "Duration",
+    "type": "lfrac",
+    "value": "18020/600",
+  },
+  {
+    "name": "CodecID",
+    "type": "uint",
+    "value": "avc1",
+  },
+  {
+    "name": "StreamType",
+    "type": "uint",
+    "value": "Visual",
+  },
+]
+`;
+
+exports[`useFetchIPIDProperties > updates properties on PID reconfiguration (flist source switch) > video.mp4 properties 1`] = `
+[
+  {
+    "name": "SourcePath",
+    "type": "str",
+    "value": "media/video.mp4",
+  },
+  {
+    "name": "URL",
+    "type": "str",
+    "value": "media/video.mp4",
+  },
+  {
+    "name": "Width",
+    "type": "uint",
+    "value": 1920,
+  },
+  {
+    "name": "Height",
+    "type": "uint",
+    "value": 1080,
+  },
+  {
+    "name": "FPS",
+    "type": "frac",
+    "value": "90000/3003",
+  },
+  {
+    "name": "Duration",
+    "type": "lfrac",
+    "value": "28295/1000",
+  },
+  {
+    "name": "CodecID",
+    "type": "uint",
+    "value": "avc1",
+  },
+  {
+    "name": "StreamType",
+    "type": "uint",
+    "value": "Visual",
+  },
+]
+`;

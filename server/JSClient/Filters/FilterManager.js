@@ -44,14 +44,13 @@ function FilterManager(client) {
         this.details_needed[idx] = false;
     };
 
-    this.subscribeToFilter = function(idx, interval,pidScope) {
+    this.subscribeToFilter = function(idx, interval, pidScope) {
         this.filterSubscriptions[idx] = {
             interval: interval || UPDATE_INTERVALS.FILTER_STATS,
-            fields: FILTER_SUBSCRIPTION_FIELDS,pidScope: pidScope || 'both'
+            fields: FILTER_SUBSCRIPTION_FIELDS,
+            pidScope: pidScope || 'both'
         };
-        this.lastSentByFilter[idx] = 0; // Force first send
-
-        // Start SessionManager loop if not running
+        this.lastSentByFilter[idx] = 0;
         this.client.ensureMonitoringLoop();
     };
 
@@ -61,7 +60,6 @@ function FilterManager(client) {
     };
 
     this.tick = function(now) {
-        // Iterate through all subscribed filters
         for (const idxStr in this.filterSubscriptions) {
             const idx = parseInt(idxStr);
             const sub = this.filterSubscriptions[idxStr];
@@ -69,7 +67,6 @@ function FilterManager(client) {
 
             if (now - lastSent < sub.interval) continue;
 
-            // Use cache to avoid redundant serialization for multiple clients
             const cacheKey = `filter_stats_${idx}`;
             const serialized = cacheManager.getOrSet(cacheKey, 50, () => {
                 session.lock_filters(true);
@@ -77,10 +74,7 @@ function FilterManager(client) {
                 for (let i = 0; i < session.nb_filters; i++) {
                     const f = session.get_filter(i);
                     if (f.is_destroyed()) continue;
-                    if (f.idx === idx) {
-                        fObj = f;
-                        break;
-                    }
+                    if (f.idx === idx) { fObj = f; break; }
                 }
                 session.lock_filters(false);
 
@@ -91,26 +85,22 @@ function FilterManager(client) {
                     payload[field] = fObj[field];
                 }
 
-                // Switch based on pidScope
                 switch (sub.pidScope) {
                     case 'ipid':
-                        payload.ipids = this.pidDataCollector.collectInputPids(fObj);
+                        payload.ipids = this.pidDataCollector.collectInputPids(fObj, true);
                         break;
                     case 'opid':
                         payload.opids = this.pidDataCollector.collectOutputPids(fObj);
                         break;
                     case 'both':
-                        payload.ipids = this.pidDataCollector.collectInputPids(fObj);
+                        payload.ipids = this.pidDataCollector.collectInputPids(fObj, true);
                         payload.opids = this.pidDataCollector.collectOutputPids(fObj);
                         break;
                     default:
                         break;
                 }
 
-                return JSON.stringify({
-                    message: 'filter_stats',
-                    ...payload
-                });
+                return JSON.stringify({ message: 'filter_stats', ...payload });
             });
 
             if (serialized && this.client.client) {
@@ -133,8 +123,6 @@ function FilterManager(client) {
     this.updateArgument = function(idx, name, argName, newValue) {
         this.argumentHandler.updateArgument(idx, name, argName, newValue);
     };
-
-   
 }
 
 export { FilterManager };
