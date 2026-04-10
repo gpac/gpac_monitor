@@ -30,12 +30,12 @@ interface FilterChartData {
  */
 export interface MonitoredFilterState {
   dataByFilter: Record<string, FilterChartData>;
-  maxPoints: number; // Default: 300 (5 min at 1Hz)
+  maxPoints: number; // Default: 600 (10 min at 1Hz)
 }
 
 const initialState: MonitoredFilterState = {
   dataByFilter: {},
-  maxPoints: 300,
+  maxPoints: 600,
 };
 
 const monitoredFilterSlice = createSlice({

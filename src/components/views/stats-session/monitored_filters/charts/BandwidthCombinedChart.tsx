@@ -13,6 +13,7 @@ interface BandwidthCombinedChartProps {
   bytesSent: number;
   bytesReceived: number;
   refreshInterval?: number;
+  windowDurationMs?: number;
 }
 
 export const BandwidthCombinedChart = memo(
@@ -21,6 +22,7 @@ export const BandwidthCombinedChart = memo(
     bytesSent,
     bytesReceived,
     refreshInterval = DEFAULT_REFRESH_INTERVAL,
+    windowDurationMs,
   }: BandwidthCombinedChartProps) => {
     const { isHistory } = useDataMode();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -32,6 +34,7 @@ export const BandwidthCombinedChart = memo(
       currentBytes: bytesSent,
       refreshInterval,
       type: 'upload',
+      windowDurationMs,
     });
 
     const { dataPoints: downloadPoints } = useBandwidthChart({
@@ -39,6 +42,7 @@ export const BandwidthCombinedChart = memo(
       currentBytes: bytesReceived,
       refreshInterval,
       type: 'download',
+      windowDurationMs,
     });
 
     // Resize observer to adapt chart to container size

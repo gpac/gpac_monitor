@@ -8,6 +8,7 @@ export interface UseBandwidthChartOptions {
   currentBytes: number;
   refreshInterval: number;
   type: 'upload' | 'download';
+  windowDurationMs?: number;
 }
 
 export const useBandwidthChart = (options: UseBandwidthChartOptions) => {

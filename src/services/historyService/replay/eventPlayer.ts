@@ -166,9 +166,16 @@ export class EventPlayer {
   }
 
   private tick() {
-    if (this.state !== 'playing' || !this.onEvent) return;
+    if (this.state !== 'playing' || !this.onEvent) {
+      console.warn('[tick:STOP]', {
+        state: this.state,
+        hasOnEvent: !!this.onEvent,
+      });
+      return;
+    }
 
     const now = this.currentTimeUs();
+    this.listener?.(this.state, now);
 
     while (this.nextEventIndex < this.timelineEvents.length) {
       const event = this.timelineEvents[this.nextEventIndex];
@@ -176,7 +183,6 @@ export class EventPlayer {
       this.onEvent!(event);
       this.nextEventIndex++;
     }
-
     this.onTick?.(now);
 
     if (this.nextEventIndex >= this.timelineEvents.length) {

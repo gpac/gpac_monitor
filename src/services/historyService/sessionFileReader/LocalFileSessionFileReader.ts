@@ -31,7 +31,11 @@ export class LocalFileSessionFileReader {
         if (!chunkMatch) continue;
         const chunkIndex = parseInt(chunkMatch[1], 10);
         if (!this.sessionMap.has(sessionId)) {
-          this.sessionMap.set(sessionId, { done: false, chunks: new Map(), logChunks: new Map() });
+          this.sessionMap.set(sessionId, {
+            done: false,
+            chunks: new Map(),
+            logChunks: new Map(),
+          });
         }
         this.sessionMap.get(sessionId)!.chunks.set(chunkIndex, file);
       } else if (parentFolder === 'logs') {
@@ -41,13 +45,21 @@ export class LocalFileSessionFileReader {
         if (!logMatch) continue;
         const logIndex = parseInt(logMatch[1], 10);
         if (!this.sessionMap.has(sessionId)) {
-          this.sessionMap.set(sessionId, { done: false, chunks: new Map(), logChunks: new Map() });
+          this.sessionMap.set(sessionId, {
+            done: false,
+            chunks: new Map(),
+            logChunks: new Map(),
+          });
         }
         this.sessionMap.get(sessionId)!.logChunks.set(logIndex, file);
       } else {
         const sessionId = parentFolder;
         if (!this.sessionMap.has(sessionId)) {
-          this.sessionMap.set(sessionId, { done: false, chunks: new Map(), logChunks: new Map() });
+          this.sessionMap.set(sessionId, {
+            done: false,
+            chunks: new Map(),
+            logChunks: new Map(),
+          });
         }
         const entry = this.sessionMap.get(sessionId)!;
         if (fileName === 'snapshot.json') entry.snapshot = file;
@@ -69,7 +81,6 @@ export class LocalFileSessionFileReader {
         sizeBytes: (entry.snapshot?.size ?? 0) + (entry.events?.size ?? 0),
         isComplete: entry.done,
       }));
-    console.log('[LocalFileSessionFileReader.listSessions]', sessions.map(s => `${s.sessionId}: snapshot=${s.hasSnapshot} events=${s.hasEvents} manifest=${s.hasManifest} complete=${s.isComplete}`));
     return sessions;
   }
 
@@ -91,10 +102,12 @@ export class LocalFileSessionFileReader {
     return parseEventsJsonl(await file.text());
   }
 
-  async readLogChunk(sessionId: string, chunkIndex: number): Promise<LogEvent[]> {
+  async readLogChunk(
+    sessionId: string,
+    chunkIndex: number,
+  ): Promise<LogEvent[]> {
     const entry = this.sessionMap.get(sessionId);
     const file = entry?.logChunks.get(chunkIndex);
-    console.log('[LocalFileSessionFileReader.readLogChunk] session:', sessionId, 'chunkIndex:', chunkIndex, 'file:', file?.name ?? 'NOT FOUND', 'available logChunks:', entry ? [...entry.logChunks.keys()] : 'no entry');
     if (!file) return [];
     return parseEventsJsonl(await file.text()) as unknown as LogEvent[];
   }
