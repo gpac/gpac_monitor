@@ -11,6 +11,7 @@ function HistoryCollector(historyDir) {
     this.writer = new HistoryWriter(historyDir);
     this.snapshotWritten = false;
     this.lastRecordUs = 0;
+    this.lastCpuRecordUs = 0;
     this.pendingLogs = [];
     this.logBatchTimer = null;
 
@@ -63,6 +64,8 @@ function HistoryCollector(historyDir) {
 
     this.recordCpuStats = function(payload) {
         const cpuTsUs = sys.clock_us();
+        if (cpuTsUs - this.lastCpuRecordUs < RATE_LIMIT_US) return;
+        this.lastCpuRecordUs = cpuTsUs;
         this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'cpu_stats',

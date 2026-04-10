@@ -64,15 +64,13 @@ function HistoryWriter(historyDir, sessionId) {
     this.writeLog = function(jsonString, tsUs) {
         this._init();
         this._updateTimestamps(tsUs);
-        this._logs.write(jsonString, tsUs);
-        this._writeManifest();
+        if (this._logs.write(jsonString, tsUs)) this._writeManifest();
     };
 
     this.writeEvent = function(jsonString, tsUs) {
         this._init();
         this._updateTimestamps(tsUs);
-        this._events.write(jsonString, tsUs);
-        this._writeManifest();
+        if (this._events.write(jsonString, tsUs)) this._writeManifest();
     };
 
     this.close = function() {

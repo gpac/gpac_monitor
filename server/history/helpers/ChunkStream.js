@@ -31,7 +31,7 @@ function ChunkStream(dir, prefix, maxSize) {
     };
 
     this._rotate = function() {
-        if (this._count < this._maxSize) return;
+        if (this._count < this._maxSize) return false;
         const dirName = this._dir.split('/').pop();
         this._completed.push({
             file: `${dirName}/${this._prefix}_${String(this._index).padStart(4, '0')}.jsonl`,
@@ -41,16 +41,17 @@ function ChunkStream(dir, prefix, maxSize) {
         });
         this._index++;
         this._open();
+        return true;
     };
 
     this.write = function(jsonString, tsUs) {
-        if (!this._file) return;
-        this._rotate();
+        const rotated = this._rotate();
+        if (!this._file) return false;
         if (this._startUs === null) this._startUs = tsUs;
         this._lastUs = tsUs;
         this._file.puts(jsonString + '\n');
-        this._file.flush();
         this._count++;
+        return rotated;
     };
 
     this.getAllChunks = function() {
