@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import WidgetWrapper from '@/components/Widget/WidgetWrapper';
+import WidgetWrapper from '@/components/widget/WidgetWrapper';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import LoadingState from '@/components/common/LoadingState';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';

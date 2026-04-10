@@ -25,17 +25,10 @@ function JSClient(id, client, all_clients, ensureMonitoringLoop) {
 
     this.cleanup = function() {
         try {
-            // (releases sys.on_log)
-            if (this.logManager) {
-                this.logManager.forceUnsubscribe();
-            }
-
-            if (this.sessionManager && typeof this.sessionManager.cleanup === 'function') {
-                this.sessionManager.cleanup();
-            }
-            if (this.cpuStatsManager && typeof this.cpuStatsManager.cleanup === 'function') {
-                this.cpuStatsManager.cleanup();
-            }
+            this.logManager.forceUnsubscribe();
+            this.sessionStatsManager.cleanup();
+            this.cpuStatsManager.cleanup();
+            this.filterManager.cleanup();
         } catch (error) {
             console.error(`JSClient ${this.id}: Error during cleanup:`, error);
         }

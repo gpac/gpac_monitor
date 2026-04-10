@@ -3,6 +3,7 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
+import { useFilterChangeStatus } from '../../hooks/state/useFilterChangeStatus';
 import { getBasename, truncateMiddle } from '../../utils/labelUtils';
 import NodeToolbarActions from './NodeToolbarActions';
 
@@ -21,6 +22,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
 }) => {
   const { label, ipid, opid, nb_ipid, nb_opid } = data;
   const alerts = data.alerts as { errors: number; warnings: number } | null;
+  const { showPidBadge, showArgBadge } = useFilterChangeStatus(data.idx);
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -53,10 +55,27 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
       ? 'ring-2 ring-sky-400'
       : 'ring-1 ring-monitor-line';
 
+  const STREAM_TYPE_ORDER: Record<string, number> = {
+    Visual: 0,
+    Audio: 1,
+    Text: 2,
+    File: 3,
+  };
+
+  const sortByStreamType = (
+    keys: string[],
+    pids: Record<string, { stream_type: string }>,
+  ) =>
+    [...keys].sort(
+      (a, b) =>
+        (STREAM_TYPE_ORDER[pids[a]?.stream_type] ?? 99) -
+        (STREAM_TYPE_ORDER[pids[b]?.stream_type] ?? 99),
+    );
+
   // Create input handles only if nb_ipid > 0
   const inputHandles =
     nb_ipid > 0
-      ? Object.keys(ipid).map((pidId, index) => ({
+      ? sortByStreamType(Object.keys(ipid), ipid).map((pidId, index) => ({
           id: pidId,
           type: 'target' as const,
           position: Position.Left,
@@ -67,7 +86,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   // Create output handles only if nb_opid > 0
   const outputHandles =
     nb_opid > 0
-      ? Object.keys(opid).map((pidId, index) => ({
+      ? sortByStreamType(Object.keys(opid), opid).map((pidId, index) => ({
           id: pidId,
           type: 'source' as const,
           position: Position.Right,
@@ -166,6 +185,22 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
               >
                 {sessionType.toUpperCase()}
               </span>
+              {showPidBadge && (
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 bg-red-500 text-white rounded-full transition-opacity duration-300"
+                  title="PID reconfigured"
+                >
+                  PID
+                </span>
+              )}
+              {showArgBadge && (
+                <span
+                  className="text-[9px] font-bold px-1.5 py-0.5 bg-violet-500 text-white rounded-full transition-opacity duration-300"
+                  title="Argument updated"
+                >
+                  ARG
+                </span>
+              )}
               {alerts?.errors ? (
                 <span
                   className="text-[9px] font-bold px-1.5 py-0.5 bg-red-600 text-white rounded-full"

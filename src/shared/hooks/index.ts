@@ -1,4 +1,5 @@
 export { useAppDispatch, useAppSelector } from './redux';
+export { useChartDuration } from './useChartDuration';
 export type { HookLifecycle, HookFunction } from './types';
 export { useCommandLine } from './useCommandLine';
 export { useGpacService } from './useGpacService';

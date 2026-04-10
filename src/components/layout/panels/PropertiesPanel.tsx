@@ -2,11 +2,11 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { useSidebar } from '@/shared/hooks/useSidebar';
-import FilterArgumentsContent from '@/components/filtersArgs/FilterArgumentsContent';
-import IPIDPropertiesContent from '../../IPIDProperties/IPIDPropertiesContent';
+import FilterArgumentsContent from '@/components/filters-args/FilterArgumentsContent';
+import IPIDPropertiesContent from '../../ipid-properties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';
-import { useFetchIPIDProperties } from '../../IPIDProperties/hooks/useFetchIPIDProperties';
-import { useFilterArgsSubscription } from '../../filtersArgs/hooks/useFilterArgsSubscription';
+import { useFetchIPIDProperties } from '../../ipid-properties/hooks/useFetchIPIDProperties';
+import { useFilterArgsSubscription } from '../../filters-args/hooks/useFilterArgsSubscription';
 import { getFilterInfoByIdx } from '@/utils/filters/streamType';
 
 const PropertiesPanel = () => {
@@ -35,6 +35,12 @@ const PropertiesPanel = () => {
 
   const ipidProperties = useFetchIPIDProperties(filterIdxForPid, ipidIdx);
   const filterArgs = useFilterArgsSubscription(filterIdxForArgs);
+
+  useEffect(() => {
+    if (sidebarContent && !filterInfo) {
+      closeSidebar();
+    }
+  }, [sidebarContent, filterInfo, closeSidebar]);
 
   // Reset search when sidebar content changes
   useEffect(() => {

@@ -107,6 +107,10 @@ function SessionStatsManager(client) {
         }
     };
 
+    this.cleanup = function() {
+        this.isSubscribed = false;
+    };
+
     this.handleSessionEnd = function() {
         this.unsubscribe();
     };

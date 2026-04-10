@@ -126,13 +126,36 @@ session.set_new_filter_fun((f) => {
 });
 
 session.set_del_filter_fun((f) => {
-  
+
     let idx = all_filters.indexOf(f);
     if (idx >= 0) all_filters.splice(idx, 1);
     if (f.itag == "NODISPLAY") return;
     onGraphEvent();
 });
 
+let pidReconfigured = new Set();
+session.set_filter_pid_modified_fun((f) => {
+    pidReconfigured.add(f.idx);
+    if (pidReconfigured.size > 1) return;
+    session.post_task(() => {
+        const msg = JSON.stringify({ message: 'filter_pid_reconfigured', indexes: [...pidReconfigured] });
+        pidReconfigured.clear();
+        for (const c of all_clients) if (c.client) c.client.send(msg);
+        return false;
+    });
+});
+
+let argUpdated = new Set();
+session.set_filter_arg_updated_fun((f) => {
+    argUpdated.add(f.idx);
+    if (argUpdated.size > 1) return;
+    session.post_task(() => {
+        const msg = JSON.stringify({ message: 'filter_arg_updated', indexes: [...argUpdated] });
+        argUpdated.clear();
+        for (const c of all_clients) if (c.client) c.client.send(msg);
+        return false;
+    });
+});
 
 // WEBSOCKET CLIENT HANDLER
 

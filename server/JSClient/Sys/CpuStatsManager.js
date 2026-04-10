@@ -72,6 +72,10 @@ function CpuStatsManager(client) {
         this.lastSent = now;
     };
 
+    this.cleanup = function() {
+        this.isSubscribed = false;
+    };
+
     this.handleSessionEnd = function() {
         this.unsubscribe();
     };

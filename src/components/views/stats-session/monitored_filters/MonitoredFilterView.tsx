@@ -9,6 +9,7 @@ import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
 import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
+import { useFilterChangeStatus } from '@/components/views/graph/hooks/state/useFilterChangeStatus';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
 import InputsTab from './tabs/InputsTab';
@@ -29,7 +30,7 @@ const EMPTY_FILTER_DATA: FilterStatsResponse = {
   opids: {},
 };
 
-interface DetailedStatsViewProps {
+interface MonitoredFilterViewProps {
   overviewData: OverviewTabData;
   networkData: NetworkTabData;
   inputPids: TabPIDData[];
@@ -46,7 +47,7 @@ const MemoizedNetworkTab = memo(NetworkTab);
 const MemoizedInputsTab = memo(InputsTab);
 const MemoizedOutputsTab = memo(OutputsTab);
 
-const DetailedStatsView = memo(
+const MonitoredFilterView = memo(
   ({
     overviewData,
     networkData,
@@ -56,7 +57,7 @@ const DetailedStatsView = memo(
     onOpenProperties,
     initialTab,
     isLoading = false,
-  }: DetailedStatsViewProps) => {
+  }: MonitoredFilterViewProps) => {
     const [activeTab, setActiveTab] = useState<string>(
       initialTab || 'overview',
     );
@@ -66,6 +67,10 @@ const DetailedStatsView = memo(
       overviewData.idx !== undefined
         ? selectFilterAlerts(String(overviewData.idx))(state)
         : null,
+    );
+
+    const { showPidBadge, showArgBadge } = useFilterChangeStatus(
+      overviewData.idx,
     );
 
     // Update active tab when initialTab changes
@@ -93,6 +98,32 @@ const DetailedStatsView = memo(
               <h2 className="text-lg font-semibold text-monitor-active-filter">
                 {overviewData.name}
               </h2>
+
+              {/* PID/Arg reconfiguration badges */}
+              {showPidBadge && (
+                <Badge
+                  variant="outline"
+                  className="h-5 px-1.5 text-[10px] uppercase tracking-wide
+                    bg-red-900/20 text-red-300
+                    border border-red-700/60
+                    rounded-sm font-semibold transition-opacity duration-300"
+                  title="PID reconfigured"
+                >
+                  PID
+                </Badge>
+              )}
+              {showArgBadge && (
+                <Badge
+                  variant="outline"
+                  className="h-5 px-1.5 text-[10px] uppercase tracking-wide
+                    bg-violet-900/20 text-violet-300
+                    border border-violet-700/60
+                    rounded-sm font-semibold transition-opacity duration-300"
+                  title="Argument updated"
+                >
+                  ARG
+                </Badge>
+              )}
 
               {/* Log Alerts Badges */}
               {alerts && alerts.errors > 0 && (
@@ -237,6 +268,6 @@ const DetailedStatsView = memo(
   },
 );
 
-DetailedStatsView.displayName = 'DetailedStatsView';
+MonitoredFilterView.displayName = 'MonitoredFilterView';
 
-export default DetailedStatsView;
+export default MonitoredFilterView;

@@ -7,7 +7,7 @@
  * - Session Stats: 1000ms
  */
 
-export type ChartDuration = '20s' | '1min' | '5min' | 'unlimited';
+export type ChartDuration = '20s' | '1min' | '5min' | '10min' | 'unlimited';
 
 /**
  * Maximum points for unlimited duration
@@ -21,13 +21,14 @@ export const DURATION_LABELS: Record<ChartDuration, string> = {
   '20s': '20s',
   '1min': '1m',
   '5min': '5m',
+  '10min': '10m',
   unlimited: '∞',
 };
 
 /**
  * Convert duration string to milliseconds
  *
- * @param duration - Chart duration ('20s', '1min', '5min', 'unlimited')
+ * @param duration - Chart duration ('20s', '1min', '5min', '10min', 'unlimited')
  * @returns Duration in milliseconds, or Infinity for unlimited
  */
 export const getDurationInMs = (duration: ChartDuration): number => {
@@ -38,6 +39,8 @@ export const getDurationInMs = (duration: ChartDuration): number => {
       return 60000;
     case '5min':
       return 300000;
+    case '10min':
+      return 600000;
     case 'unlimited':
       return Infinity;
     default:
