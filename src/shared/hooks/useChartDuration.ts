@@ -18,18 +18,15 @@ export const useChartDuration = (
   defaultDuration: ChartDuration,
   updateInterval: number,
 ) => {
-  // Restore from localStorage or use default
   const [duration, setDuration] = useState<ChartDuration>(() => {
     const stored = localStorage.getItem(storageKey);
     return (stored as ChartDuration) || defaultDuration;
   });
 
-  // Persist to localStorage on change
   useEffect(() => {
     localStorage.setItem(storageKey, duration);
   }, [duration, storageKey]);
 
-  // Calculate derived values
   const windowDuration = useMemo(() => getDurationInMs(duration), [duration]);
 
   const maxPoints = useMemo(

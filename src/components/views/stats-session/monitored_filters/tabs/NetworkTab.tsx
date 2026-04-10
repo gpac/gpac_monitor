@@ -3,6 +3,9 @@ import { LuUpload, LuDownload } from 'react-icons/lu';
 import { NetworkTabData } from '@/types/ui';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
+import { useChartDuration } from '@/shared/hooks';
+import type { ChartDuration } from '@/utils/charts';
 import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';
 import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 import { TAB_STYLES } from './styles';
@@ -11,20 +14,28 @@ interface NetworkTabProps {
   filterId: string;
   data: NetworkTabData;
   filterName: string;
-  refreshInterval?: number;
+  refreshInterval: number;
 }
 
-const DEFAULT_REFRESH_INTERVAL = 1000;
+const NETWORK_DURATION_OPTIONS: ChartDuration[] = [
+  '20s',
+  '1min',
+  '5min',
+  '10min',
+];
+
+const NETWORK_HISTORY_STORAGE_KEY = 'gpac-network-history';
 
 const NetworkTab = memo(
-  ({
-    filterId,
-    data,
-    filterName,
-    refreshInterval = DEFAULT_REFRESH_INTERVAL,
-  }: NetworkTabProps) => {
+  ({ filterId, data, filterName, refreshInterval }: NetworkTabProps) => {
     const { currentStats, instantRates, formattedStats, getActivityLevel } =
       useNetworkMetrics(data, filterName);
+
+    const { duration, setDuration, windowDuration } = useChartDuration(
+      NETWORK_HISTORY_STORAGE_KEY,
+      '1min',
+      refreshInterval,
+    );
 
     const uploadActivity = useMemo(
       () => getActivityLevel(instantRates.bytesSentRate),
@@ -43,9 +54,16 @@ const NetworkTab = memo(
           <span className="font-medium text-info">Network Activity</span>
           <span className={TAB_STYLES.STATUS_SEPARATOR}>·</span>
           <span className={TAB_STYLES.STATUS_LABEL}>Filter: {filterName}</span>
-          <span className="ml-auto text-muted-foreground/70 text-xs">
-            Live <span className="text-error ">⏺</span>
-          </span>
+          <div className="ml-auto flex items-center gap-2">
+            <WindowDurationBadge
+              value={duration}
+              onChange={setDuration}
+              options={NETWORK_DURATION_OPTIONS}
+            />
+            <span className="text-muted-foreground/70 text-xs">
+              Live <span className="text-error ">⏺</span>
+            </span>
+          </div>
         </div>
 
         {/* ROW 2: Stats cards - 2 columns */}
@@ -134,6 +152,7 @@ const NetworkTab = memo(
           bytesSent={currentStats.bytesSent}
           bytesReceived={currentStats.bytesReceived}
           refreshInterval={refreshInterval}
+          windowDurationMs={windowDuration}
         />
       </div>
     );

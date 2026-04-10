@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { LuClock } from 'react-icons/lu';
 import {
   DropdownMenu,
@@ -11,17 +11,32 @@ import { Button } from '@/components/ui/button';
 import { WidgetStatusBadge } from '@/components/widget/WidgetStatusBadge';
 import { ChartDuration, DURATION_LABELS } from '@/utils/charts';
 
-interface CPUHistoryBadgeProps {
+const ALL_DURATIONS: ChartDuration[] = [
+  '20s',
+  '1min',
+  '5min',
+  '10min',
+  'unlimited',
+];
+
+const ITEM_FULL_LABELS: Record<ChartDuration, string> = {
+  '20s': '20 seconds',
+  '1min': '1 minute',
+  '5min': '5 minutes',
+  '10min': '10 minutes',
+  unlimited: 'Unlimited',
+};
+
+interface WindowDurationBadgeProps {
   value: ChartDuration;
   onChange: (value: ChartDuration) => void;
+  options?: ChartDuration[];
 }
 
-/**
- * CPU History Duration Selector - UI Component
- * Displays and allows selection of chart history duration
- */
-export const CPUHistoryBadge = memo<CPUHistoryBadgeProps>(
-  ({ value, onChange }) => {
+export const WindowDurationBadge = memo<WindowDurationBadgeProps>(
+  ({ value, onChange, options }) => {
+    const items = useMemo(() => options ?? ALL_DURATIONS, [options]);
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -39,18 +54,13 @@ export const CPUHistoryBadge = memo<CPUHistoryBadgeProps>(
         <DropdownMenuContent align="end" className="bg-monitor-surface">
           <DropdownMenuRadioGroup
             value={value}
-            onValueChange={(val) => onChange(val as ChartDuration)}
+            onValueChange={(next) => onChange(next as ChartDuration)}
           >
-            <DropdownMenuRadioItem value="20s">
-              20 seconds
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="1min">1 minute</DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="5min">
-              5 minutes
-            </DropdownMenuRadioItem>
-            <DropdownMenuRadioItem value="unlimited">
-              Unlimited
-            </DropdownMenuRadioItem>
+            {items.map((duration) => (
+              <DropdownMenuRadioItem key={duration} value={duration}>
+                {ITEM_FULL_LABELS[duration]}
+              </DropdownMenuRadioItem>
+            ))}
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -58,4 +68,4 @@ export const CPUHistoryBadge = memo<CPUHistoryBadgeProps>(
   },
 );
 
-CPUHistoryBadge.displayName = 'CPUHistoryBadge';
+WindowDurationBadge.displayName = 'WindowDurationBadge';
