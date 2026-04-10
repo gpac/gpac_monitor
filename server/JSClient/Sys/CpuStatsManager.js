@@ -8,9 +8,9 @@ function CpuStatsManager(client) {
     this.interval = UPDATE_INTERVALS.CPU_STATS;
     this.lastSent = 0;
 
-    this.subscribe = function(interval) {
+    this.subscribe = function() {
         this.isSubscribed = true;
-        this.interval = interval || UPDATE_INTERVALS.CPU_STATS;
+        this.interval = UPDATE_INTERVALS.CPU_STATS;
         this.lastSent = 0;
 
         this.client.ensureMonitoringLoop();

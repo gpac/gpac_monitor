@@ -1,4 +1,4 @@
-import { DEFAULT_FILTER_FIELDS, UPDATE_INTERVALS } from '../config.js';
+import { DEFAULT_FILTER_FIELDS } from '../config.js';
 import { cacheManager } from '../Cache/CacheManager.js';
 import { HistoryFileReader } from '../../history/HistoryFileReader.js';
 
@@ -30,9 +30,8 @@ function MessageHandler(client) {
                     },
 
                     'subscribe_session': () => {
-                        const interval = jtext['interval'] || UPDATE_INTERVALS.SESSION_STATS;
                         const fields = jtext['fields'] || DEFAULT_FILTER_FIELDS;
-                        this.client.sessionStatsManager.subscribe(interval, fields);
+                        this.client.sessionStatsManager.subscribe(fields);
                         this.client.ensureMonitoringLoop();
                     },
 
@@ -42,12 +41,11 @@ function MessageHandler(client) {
 
                     'subscribe_filter': () => {
                         const idx = jtext.idx;
-                        let interval = jtext.interval || UPDATE_INTERVALS.FILTER_STATS;
                         let pidScope = jtext.pidScope || 'both';
                         if(!pidScope) {
                             pidScope = 'both';
                         }
-                        this.client.filterManager.subscribeToFilter(idx, interval, pidScope);
+                        this.client.filterManager.subscribeToFilter(idx, pidScope);
                         this.client.ensureMonitoringLoop();
                     },
                     
@@ -69,7 +67,7 @@ function MessageHandler(client) {
 
                     'subscribe_cpu_stats': () => {
                         const fields = jtext['fields'] || [];
-                        this.client.cpuStatsManager.subscribe(UPDATE_INTERVALS.CPU_STATS, fields);
+                        this.client.cpuStatsManager.subscribe(fields);
                         this.client.ensureMonitoringLoop();
                     },
 

@@ -15,9 +15,9 @@ function SessionStatsManager(client) {
     this.interval = UPDATE_INTERVALS.SESSION_STATS;
     this.fields = [];
 
-    this.subscribe = function(interval, fields) {
+    this.subscribe = function(fields) {
         this.isSubscribed = true;
-        this.interval = interval || UPDATE_INTERVALS.SESSION_STATS;
+        this.interval = UPDATE_INTERVALS.SESSION_STATS;
         this.fields = fields || DEFAULT_FILTER_FIELDS;
     };
 
