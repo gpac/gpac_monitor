@@ -4,6 +4,7 @@ import { configReducers } from './logs.reducers.config';
 import { buffersReducers } from './logs.reducers.buffers';
 import { uiReducers } from './logs.reducers.ui';
 import { alertsReducers } from './logs.reducers.alerts';
+import { filtersUpdated } from '@/shared/store/actions/globalActions';
 
 // Re-export types for backward compatibility
 export type {
@@ -21,6 +22,16 @@ const logsSlice = createSlice({
     ...buffersReducers,
     ...uiReducers,
     ...alertsReducers,
+  },
+  extraReducers: (builder) => {
+    builder.addCase(filtersUpdated, (state, action) => {
+      const validIdxs = action.payload.map((filter) => String(filter.idx));
+      for (const key of Object.keys(state.alertsByFilterKey)) {
+        if (!key.startsWith('t:') && !validIdxs.includes(key)) {
+          delete state.alertsByFilterKey[key];
+        }
+      }
+    });
   },
 });
 

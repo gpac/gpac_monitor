@@ -162,12 +162,14 @@ const graphSlice = createSlice({
   extraReducers: (builder) => {
     builder.addCase(filtersUpdated, (state, action) => {
       state.filters = action.payload;
-      const newNodes = createNodesFromFilters(action.payload, []);
-      const newEdges = createEdgesFromFilters(action.payload, []);
-      state.nodes.length = 0;
-      state.edges.length = 0;
-      newNodes.forEach((node) => state.nodes.push(node as any));
-      newEdges.forEach((edge) => state.edges.push(edge as any));
+      state.nodes = createNodesFromFilters(
+        action.payload,
+        [],
+      ) as typeof state.nodes;
+      state.edges = createEdgesFromFilters(
+        action.payload,
+        [],
+      ) as typeof state.edges;
       state.lastUpdate = Date.now();
     });
   },
