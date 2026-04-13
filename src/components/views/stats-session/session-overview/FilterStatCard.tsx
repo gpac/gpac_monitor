@@ -120,17 +120,11 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
               visible={Boolean(alerts && alerts.warnings > 0)}
               title={`${alerts?.warnings} warning(s) in logs`}
             />
-            {(filter.is_eos || filter.status?.includes('EOS')) && (
-              <Badge
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-             bg-emerald-900/15 text-emerald-300
-             border border-emerald-700/60
-             rounded-sm"
-              >
-                EOS
-              </Badge>
-            )}
+            <StatusBadge
+              label="EOS"
+              colorScheme="emerald"
+              visible={Boolean(filter.is_eos || filter.status?.includes('EOS'))}
+            />
           </div>
         </div>
 
