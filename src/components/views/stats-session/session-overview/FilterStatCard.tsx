@@ -5,7 +5,8 @@ import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
-import { useFilterChangeStatus } from '@/components/views/graph/hooks/state/useFilterChangeStatus';
+import FilterChangeBadges from '@/components/common/FilterChangeBadge';
+import { StatusBadge } from '@/components/common/StatusBadge';
 
 interface FilterStatCardProps {
   filter: EnrichedFilterData;
@@ -28,10 +29,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       filter.idx !== undefined
         ? selectFilterAlerts(String(filter.idx))(state)
         : null,
-    );
-
-    const { showPidBadge, showArgBadge } = useFilterChangeStatus(
-      filter.idx ?? -1,
     );
 
     const handleClick = useCallback(() => {
@@ -110,54 +107,19 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             >
               {sessionTypeLabel}
             </Badge>
-            {showPidBadge && (
-              <Badge
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                  bg-red-900/20 text-red-300
-                  border border-red-700/60
-                  rounded-sm font-semibold transition-opacity duration-300"
-                title="PID reconfigured"
-              >
-                PID
-              </Badge>
-            )}
-            {showArgBadge && (
-              <Badge
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                  bg-violet-900/20 text-violet-300
-                  border border-violet-700/60
-                  rounded-sm font-semibold transition-opacity duration-300"
-                title="Argument updated"
-              >
-                ARG
-              </Badge>
-            )}
-            {alerts && alerts.errors > 0 && (
-              <Badge
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                  bg-red-900/20 text-red-300
-                  border border-red-700/60
-                  rounded-sm font-semibold"
-                title={`${alerts.errors} error(s) in logs`}
-              >
-                {alerts.errors} ERR
-              </Badge>
-            )}
-            {alerts && alerts.warnings > 0 && (
-              <Badge
-                variant="outline"
-                className="h-5 px-1.5 text-[10px] uppercase tracking-wide
-                  bg-amber-900/20 text-amber-300
-                  border border-amber-700/60
-                  rounded-sm font-semibold"
-                title={`${alerts.warnings} warning(s) in logs`}
-              >
-                {alerts.warnings} WARN
-              </Badge>
-            )}
+            <FilterChangeBadges filterIdx={filter.idx ?? -1} />
+            <StatusBadge
+              label={`${alerts?.errors} ERR`}
+              colorScheme="red"
+              visible={Boolean(alerts && alerts.errors > 0)}
+              title={`${alerts?.errors} error(s) in logs`}
+            />
+            <StatusBadge
+              label={`${alerts?.warnings} WARN`}
+              colorScheme="amber"
+              visible={Boolean(alerts && alerts.warnings > 0)}
+              title={`${alerts?.warnings} warning(s) in logs`}
+            />
             {(filter.is_eos || filter.status?.includes('EOS')) && (
               <Badge
                 variant="outline"
