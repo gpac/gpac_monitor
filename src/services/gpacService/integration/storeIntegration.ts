@@ -1,5 +1,10 @@
 import { store } from '@/shared/store';
-import { updateGraphData, setLoading, markPidReconfigured, markArgUpdated } from '@/shared/store/slices/graphSlice';
+import {
+  setLoading,
+  markPidReconfigured,
+  markArgUpdated,
+} from '@/shared/store/slices/graphSlice';
+import { filtersUpdated } from '@/shared/store/actions/globalActions';
 import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
 import {
   appendLogsForAllTools,
@@ -10,7 +15,7 @@ import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateGraphData: (data) => {
-    store.dispatch(updateGraphData(data));
+    store.dispatch(filtersUpdated(data));
   },
   onSetLoading: (loading) => store.dispatch(setLoading(loading)),
   onUpdateSessionStats: (stats) => store.dispatch(updateSessionStats(stats)),
@@ -21,6 +26,5 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
     store.dispatch(setSubscriptionStatus(isSubscribed)),
   onPidReconfigured: (indexes: number[]) =>
     store.dispatch(markPidReconfigured(indexes)),
-  onArgUpdated: (indexes: number[]) =>
-    store.dispatch(markArgUpdated(indexes)),
+  onArgUpdated: (indexes: number[]) => store.dispatch(markArgUpdated(indexes)),
 });

@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Node, Edge } from '@xyflow/react';
-import { throttle } from 'lodash';
 import { GraphFilterData } from '@/types/domain/gpac';
 import {
   createEdgesFromFilters,
@@ -46,8 +45,6 @@ const initialState: GraphState = {
   lastUpdate: Date.now(),
 };
 
-const THROTTLE_INTERVAL = 500;
-
 const graphSlice = createSlice({
   name: 'graph',
   initialState,
@@ -58,30 +55,6 @@ const graphSlice = createSlice({
     setError(state, action: PayloadAction<string | null>) {
       state.error = action.payload;
       state.isLoading = false;
-    },
-    updateGraphData: {
-      reducer(state, action: PayloadAction<GraphFilterData[]>) {
-        state.filters = [];
-        state.nodes = [];
-        state.edges = [];
-
-        state.filters = action.payload;
-        // Use topological ordering for proper graph layout
-        const newNodes = createNodesFromFilters(action.payload, []);
-        const newEdges = createEdgesFromFilters(action.payload, []);
-        state.nodes.length = 0;
-        state.edges.length = 0;
-        newNodes.forEach((node) => state.nodes.push(node as any));
-        newEdges.forEach((edge) => state.edges.push(edge as any));
-        state.lastUpdate = Date.now();
-      },
-      prepare: throttle(
-        (data: GraphFilterData[]) => ({
-          payload: data,
-          meta: { throttle: THROTTLE_INTERVAL },
-        }),
-        THROTTLE_INTERVAL,
-      ),
     },
 
     updateLayout(
@@ -177,7 +150,6 @@ const graphSlice = createSlice({
 export const {
   setLoading,
   setError,
-  updateGraphData,
   updateLayout,
   setSelectedNode,
   clearSelectedNode,
