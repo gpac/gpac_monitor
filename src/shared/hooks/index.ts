@@ -10,5 +10,7 @@ export { useServiceReady } from './useServiceReady';
 export { useSidebar } from './useSidebar';
 export type { SidebarContentType } from './useSidebar';
 export { useSubscribedFilters } from './useSubscribedFilters';
+export { useFilterAlerts } from './useFilterAlerts';
+export type { FilterAlertStatus } from './useFilterAlerts';
 export { useToast, toast, toastService } from './useToast';
 export type { ToasterToast } from './useToast';
