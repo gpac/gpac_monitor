@@ -44,9 +44,9 @@ function FilterManager(client) {
         this.details_needed[idx] = false;
     };
 
-    this.subscribeToFilter = function(idx, interval, pidScope) {
+    this.subscribeToFilter = function(idx, pidScope) {
         this.filterSubscriptions[idx] = {
-            interval: interval || UPDATE_INTERVALS.FILTER_STATS,
+            interval: UPDATE_INTERVALS.FILTER_STATS,
             fields: FILTER_SUBSCRIPTION_FIELDS,
             pidScope: pidScope || 'both'
         };
