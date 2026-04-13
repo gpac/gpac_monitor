@@ -262,7 +262,7 @@ export const closeFilterReducer = (
 };
 
 /** Remove viewByFilter entries whose idx no longer exists in the graph */
-export const cleanupStaleFiltersReducer = (
+export const pr = (
   state: WidgetsState,
   action: PayloadAction<number[]>,
 ) => {

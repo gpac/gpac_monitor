@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 
 const COLOR_SCHEMES = {
-  red: 'bg-red-900/20 text-red-300 border-red-700/60',
+  red: 'bg-red-400/90 text-slate-200 border-red-700/60',
   amber: 'bg-amber-900/20 text-amber-300 border-amber-700/60',
   violet: 'bg-violet-900/20 text-violet-300 border-violet-700/60',
   emerald: 'bg-emerald-900/15 text-emerald-300 border-emerald-700/60',

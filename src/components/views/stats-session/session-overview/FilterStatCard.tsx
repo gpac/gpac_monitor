@@ -186,8 +186,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       </div>
     );
   },
-  // Note: memo comparison removed to allow alerts updates
-  // Alerts come from Redux and need to trigger re-renders
+ 
 );
 
 FilterStatCard.displayName = 'FilterStatCard';

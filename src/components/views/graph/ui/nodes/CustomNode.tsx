@@ -3,7 +3,9 @@ import { Handle, Position, NodeProps } from '@xyflow/react';
 import { GraphFilterData } from '@/types/domain/gpac';
 import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
-import { useFilterChangeStatus } from '../../hooks/state/useFilterChangeStatus';
+import FilterChangeBadges from '@/components/common/FilterChangeBadge';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { useFilterAlerts } from '@/shared/hooks';
 import { getBasename, truncateMiddle } from '../../utils/labelUtils';
 import NodeToolbarActions from './NodeToolbarActions';
 
@@ -21,8 +23,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   ...nodeProps
 }) => {
   const { label, ipid, opid, nb_ipid, nb_opid } = data;
-  const alerts = data.alerts as { errors: number; warnings: number } | null;
-  const { showPidBadge, showArgBadge } = useFilterChangeStatus(data.idx);
+  const { hasError, hasWarning } = useFilterAlerts(data.idx);
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -185,38 +186,19 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
               >
                 {sessionType.toUpperCase()}
               </span>
-              {showPidBadge && (
-                <span
-                  className="text-[9px] font-bold px-1.5 py-0.5 bg-red-500 text-white rounded-full transition-opacity duration-300"
-                  title="PID reconfigured"
-                >
-                  PID
-                </span>
-              )}
-              {showArgBadge && (
-                <span
-                  className="text-[9px] font-bold px-1.5 py-0.5 bg-violet-500 text-white rounded-full transition-opacity duration-300"
-                  title="Argument updated"
-                >
-                  ARG
-                </span>
-              )}
-              {alerts?.errors ? (
-                <span
-                  className="text-[9px] font-bold px-1.5 py-0.5 bg-red-600 text-white rounded-full"
-                  title={`${alerts.errors} error(s)`}
-                >
-                  {alerts.errors} ERR
-                </span>
-              ) : null}
-              {alerts?.warnings ? (
-                <span
-                  className="text-[9px] font-bold px-1.5 py-0.5 bg-amber-500 text-white rounded-full"
-                  title={`${alerts.warnings} warning(s)`}
-                >
-                  {alerts.warnings} WARN
-                </span>
-              ) : null}
+              <FilterChangeBadges filterIdx={data.idx} />
+              <StatusBadge
+                label="ERR"
+                colorScheme="red"
+                visible={hasError}
+                title="Error(s) in logs"
+              />
+              <StatusBadge
+                label="WARN"
+                colorScheme="amber"
+                visible={hasWarning}
+                title="Warning(s) in logs"
+              />
             </div>
           </div>
         </div>
@@ -302,7 +284,6 @@ const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
     prevProps.selected === nextProps.selected &&
     prevProps.data.isMonitored === nextProps.data.isMonitored &&
     prevProps.data.isStalled === nextProps.data.isStalled &&
-    prevProps.data.alerts === nextProps.data.alerts &&
     JSON.stringify(prevProps.data.ipid) ===
       JSON.stringify(nextProps.data.ipid) &&
     JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)

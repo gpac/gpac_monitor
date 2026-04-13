@@ -63,8 +63,6 @@ export const buffersReducers = {
             alertsByFilterKey[callerKey].errors += 1;
           } else if (log.level === 2) {
             alertsByFilterKey[callerKey].warnings += 1;
-          } else {
-            alertsByFilterKey[callerKey].info += 1;
           }
         }
 

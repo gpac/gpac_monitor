@@ -29,7 +29,7 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         // Ignore these action types
-        ignoredActions: ['graph/updateGraphData', 'graph/updateNodeData'],
+        ignoredActions: ['graph/updateNodeData'],
       },
     })
       .prepend(connectionsListenerMiddleware.middleware)

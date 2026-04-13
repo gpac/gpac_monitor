@@ -51,6 +51,7 @@ function LogManager(client) {
     };
 
     this.handleLog = function(tool, level, message, thread_id, caller) {
+
         this.pendingLogs.push({
             timestamp: sys.clock_us(),
             timestampMs: Date.now(),

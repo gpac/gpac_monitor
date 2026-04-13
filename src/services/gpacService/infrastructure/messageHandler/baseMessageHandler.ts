@@ -222,7 +222,6 @@ export class BaseMessageHandler {
 
   private handleLogBatchMessage(data: LogBatchResponse): void {
     if (data.logs && Array.isArray(data.logs)) {
-      // Batch logs (high frequency: bursts possible with multiple filters)
       this.messageBatcher.addLogBatch(data);
     }
   }

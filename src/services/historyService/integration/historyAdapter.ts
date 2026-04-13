@@ -2,7 +2,6 @@ import type { AppDispatch } from '@/shared/store';
 import type { CPUStats } from '@/types/domain/system';
 import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 import {
-  updateGraphData,
   setLoading,
   clearGraph,
   markPidReconfigured,
@@ -10,6 +9,7 @@ import {
   clearPidReconfigured,
   clearArgUpdated,
 } from '@/shared/store/slices/graphSlice';
+import { filtersUpdated } from '@/shared/store/actions/globalActions';
 import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
 import {
   setCommandLine,
@@ -149,7 +149,7 @@ export class HistoryAdapter {
     dispatch(clearSessionDetails());
     dispatch(clearLogs());
     dispatch(clearGraph());
-    dispatch(updateGraphData(snapshot.filters.map(toGraphFilterData)));
+    dispatch(filtersUpdated(snapshot.filters.map(toGraphFilterData)));
     dispatch(setCommandLine(snapshot.command_line));
     dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
     dispatch(clearFilterPids());
@@ -277,7 +277,7 @@ export class HistoryAdapter {
       return;
     }
     const { dispatch } = this;
-    dispatch(updateGraphData(event.filters.map(toGraphFilterData)));
+    dispatch(filtersUpdated(event.filters.map(toGraphFilterData)));
     const withProps = event.filters.filter((filter) => filter.properties);
     if (withProps.length) {
       const pids = withProps.map((filter) => ({

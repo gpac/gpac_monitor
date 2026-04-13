@@ -1,16 +1,15 @@
 import { store } from '@/shared/store';
 import {
-  updateGraphData,
   setLoading,
   markPidReconfigured,
   markArgUpdated,
 } from '@/shared/store/slices/graphSlice';
+import { filtersUpdated } from '@/shared/store/actions/globalActions';
 import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
 import {
   appendLogsForAllTools,
   setSubscriptionStatus,
 } from '@/shared/store/slices/logsSlice';
-import { cleanupStaleFilters } from '@/shared/store/slices/widgetsSlice';
 import {
   setSystemStats,
   setCommandLine,
@@ -20,10 +19,7 @@ import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateGraphData: (data) => {
-    store.dispatch(updateGraphData(data));
-    store.dispatch(
-      cleanupStaleFilters(data.map((f: { idx: number }) => f.idx)),
-    );
+    store.dispatch(filtersUpdated(data));
   },
   onSetLoading: (loading) => store.dispatch(setLoading(loading)),
   onUpdateSessionStats: (stats) => store.dispatch(updateSessionStats(stats)),

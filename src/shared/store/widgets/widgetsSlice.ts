@@ -6,6 +6,7 @@ import {
 import { initialState } from './widgetsInitialState';
 import * as reducers from './widgetUtils';
 import { saveLayoutsToStorage, saveLastUsedLayout } from './layoutStorage';
+import { filtersUpdated } from '@/shared/store/actions/globalActions';
 
 export type {
   RootState,
@@ -39,7 +40,24 @@ const widgetsSlice = createSlice({
     detachFilter: reducers.detachFilterReducer,
     attachFilter: reducers.attachFilterReducer,
     closeFilter: reducers.closeFilterReducer,
-    cleanupStaleFilters: reducers.cleanupStaleFiltersReducer,
+  },
+  extraReducers: (builder) => {
+    builder.addCase(filtersUpdated, (state, action) => {
+      const validIdxs = action.payload.map((filter) => filter.idx);
+      for (const idxStr of Object.keys(state.viewByFilter)) {
+        const idx = Number(idxStr);
+        if (validIdxs.includes(idx)) continue;
+
+        const view = state.viewByFilter[idx];
+        if (view?.mode === 'detached' && view.widgetId) {
+          state.activeWidgets = state.activeWidgets.filter(
+            (widget) => widget.id !== view.widgetId,
+          );
+          delete state.configs[view.widgetId];
+        }
+        delete state.viewByFilter[idx];
+      }
+    });
   },
 });
 
@@ -58,7 +76,6 @@ export const {
   detachFilter,
   attachFilter,
   closeFilter,
-  cleanupStaleFilters,
 } = widgetsSlice.actions;
 
 export default widgetsSlice.reducer;
