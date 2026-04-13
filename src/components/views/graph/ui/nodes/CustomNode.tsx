@@ -5,6 +5,7 @@ import { determineFilterSessionType } from '../../utils/filterType';
 import { useGraphColors } from '../../hooks/layout/useGraphColors';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { useFilterAlerts } from '@/shared/hooks';
 import { getBasename, truncateMiddle } from '../../utils/labelUtils';
 import NodeToolbarActions from './NodeToolbarActions';
 
@@ -22,7 +23,7 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   ...nodeProps
 }) => {
   const { label, ipid, opid, nb_ipid, nb_opid } = data;
-  const alerts = data.alerts as { errors: number; warnings: number } | null;
+  const { hasError, hasWarning } = useFilterAlerts(data.idx);
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
   const node = useMemo(
     () => ({
@@ -187,16 +188,16 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
               </span>
               <FilterChangeBadges filterIdx={data.idx} />
               <StatusBadge
-                label={`${alerts?.errors} ERR`}
+                label="ERR"
                 colorScheme="red"
-                visible={Boolean(alerts?.errors)}
-                title={`${alerts?.errors} error(s)`}
+                visible={hasError}
+                title="Error(s) in logs"
               />
               <StatusBadge
-                label={`${alerts?.warnings} WARN`}
+                label="WARN"
                 colorScheme="amber"
-                visible={Boolean(alerts?.warnings)}
-                title={`${alerts?.warnings} warning(s)`}
+                visible={hasWarning}
+                title="Warning(s) in logs"
               />
             </div>
           </div>
@@ -283,7 +284,6 @@ const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
     prevProps.selected === nextProps.selected &&
     prevProps.data.isMonitored === nextProps.data.isMonitored &&
     prevProps.data.isStalled === nextProps.data.isStalled &&
-    prevProps.data.alerts === nextProps.data.alerts &&
     JSON.stringify(prevProps.data.ipid) ===
       JSON.stringify(nextProps.data.ipid) &&
     JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)
