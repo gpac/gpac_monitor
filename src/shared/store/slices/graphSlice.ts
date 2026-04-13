@@ -7,6 +7,7 @@ import {
   createNodesFromFilters,
 } from '@/utils/graph/GraphOperations';
 import { RootState } from '@/shared/store/types';
+import { filtersUpdated } from '@/shared/store/actions/globalActions';
 
 export type InitialTabType = 'overview' | 'network' | 'inputs' | 'outputs';
 
@@ -147,12 +148,28 @@ const graphSlice = createSlice({
     },
     clearPidReconfigured: (state, action: PayloadAction<number>) => {
       const key = action.payload.toString();
-      state.pidReconfiguredFilters = state.pidReconfiguredFilters.filter((k) => k !== key);
+      state.pidReconfiguredFilters = state.pidReconfiguredFilters.filter(
+        (k) => k !== key,
+      );
     },
     clearArgUpdated: (state, action: PayloadAction<number>) => {
       const key = action.payload.toString();
-      state.argUpdatedFilters = state.argUpdatedFilters.filter((k) => k !== key);
+      state.argUpdatedFilters = state.argUpdatedFilters.filter(
+        (k) => k !== key,
+      );
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(filtersUpdated, (state, action) => {
+      state.filters = action.payload;
+      const newNodes = createNodesFromFilters(action.payload, []);
+      const newEdges = createEdgesFromFilters(action.payload, []);
+      state.nodes.length = 0;
+      state.edges.length = 0;
+      newNodes.forEach((node) => state.nodes.push(node as any));
+      newEdges.forEach((edge) => state.edges.push(edge as any));
+      state.lastUpdate = Date.now();
+    });
   },
 });
 export const {
