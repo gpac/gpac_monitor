@@ -12,7 +12,10 @@ export function parseEventsJsonl(text: string): HistoryEvent[] {
     try {
       events.push(JSON.parse(trimmed) as HistoryEvent);
     } catch {
-      console.warn('[EventLoader] Skipping malformed line');
+      console.warn(
+        '[EventLoader] Skipping malformed line:',
+        trimmed.slice(0, 120),
+      );
     }
     if (events.length >= MAX_EVENTS) break;
   }

@@ -9,6 +9,7 @@ import { chunkIndexFromPath } from './chunkUtils';
  */
 export class RemoteHistorySource implements HistorySource {
   private cachedManifest: HistoryManifest | null | undefined = undefined;
+  private manifestPromise: Promise<HistoryManifest | null> | null = null;
 
   constructor(
     private reader: WsSessionFileReader,
@@ -58,10 +59,18 @@ export class RemoteHistorySource implements HistorySource {
     };
   }
 
-  private async loadManifest(): Promise<HistoryManifest | null> {
-    if (this.cachedManifest !== undefined) return this.cachedManifest;
-    this.cachedManifest = await this.reader.readManifest(this.sessionId);
-    return this.cachedManifest;
+  private loadManifest(): Promise<HistoryManifest | null> {
+    if (this.cachedManifest !== undefined)
+      return Promise.resolve(this.cachedManifest);
+    if (!this.manifestPromise) {
+      this.manifestPromise = this.reader
+        .readManifest(this.sessionId)
+        .then((manifest) => {
+          this.cachedManifest = manifest;
+          return manifest;
+        });
+    }
+    return this.manifestPromise;
   }
 
   private async loadLogsFromChunks(

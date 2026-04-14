@@ -24,11 +24,16 @@ export class WsSessionFileReader {
 
     return new Promise((resolve, reject) => {
       this.ws = new WebSocket(this.address);
+      this.ws.binaryType = 'arraybuffer';
       this.ws.onopen = () => resolve();
       this.ws.onerror = (e) => reject(e);
       this.ws.onmessage = (event) => this.handleMessage(event);
       this.ws.onclose = () => {
         this.ws = null;
+        for (const { reject } of this.pending.values()) {
+          reject(new Error('WebSocket closed'));
+        }
+        this.pending.clear();
       };
     });
   }
@@ -89,7 +94,8 @@ export class WsSessionFileReader {
       sessionId,
       file,
     });
-    return parseEventsJsonl(response.content as string);
+    const content = response.content as string;
+    return parseEventsJsonl(content);
   }
 
   async readLogChunk(
@@ -103,7 +109,9 @@ export class WsSessionFileReader {
       sessionId,
       file,
     });
-    return parseEventsJsonl(response.content as string) as unknown as LogEvent[];
+    return parseEventsJsonl(
+      response.content as string,
+    ) as unknown as LogEvent[];
   }
 
   private async ensureConnected(): Promise<void> {
@@ -124,7 +132,11 @@ export class WsSessionFileReader {
 
   private handleMessage(event: MessageEvent): void {
     try {
-      const data = JSON.parse(event.data);
+      const raw =
+        event.data instanceof ArrayBuffer
+          ? new TextDecoder().decode(event.data)
+          : (event.data as string);
+      const data = JSON.parse(raw);
       const key = this.responseKey(data);
       const entry = this.pending.get(key);
       if (!entry) return;
@@ -135,8 +147,8 @@ export class WsSessionFileReader {
       } else {
         entry.resolve(data);
       }
-    } catch {
-      console.warn('[WsSessionFileReader] Unparseable message');
+    } catch (e) {
+      console.warn('[WsSessionFileReader] Unparseable message', e, event.data);
     }
   }
 
