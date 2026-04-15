@@ -28,6 +28,20 @@ export const microsecondsToSeconds = (microseconds: number): number => {
   return microseconds / 1_000_000;
 };
 
+export const formatMMSS = (microseconds: number): string => {
+  const totalSeconds = Math.floor(microseconds / 1_000_000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+export const parseMMSS = (str: string, maxUs: number): number | null => {
+  const match = str.match(/^(\d{1,3}):(\d{2})$/);
+  if (!match) return null;
+  const us = (parseInt(match[1], 10) * 60 + parseInt(match[2], 10)) * 1_000_000;
+  return us >= 0 && us <= maxUs ? us : null;
+};
+
 /**
  * Formats current time as HH:MM:SS for chart display
  */
