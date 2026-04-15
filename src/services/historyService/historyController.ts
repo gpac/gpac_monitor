@@ -1,5 +1,6 @@
 import type { AppDispatch } from '@/shared/store';
 import type { HistorySnapshot, HistoryEvent, LogEvent } from './types';
+import { isStructuralEvent } from './types';
 import { HistoryAdapter } from './integration/historyAdapter';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
@@ -30,17 +31,14 @@ export class HistoryController {
     fromUs?: number,
     toUs?: number,
   ) {
-    const [snapshot, events, logs] = await Promise.all([
+    const needsBootstrap = fromUs !== undefined && fromUs > 0;
+
+    const [snapshot, events, logs, preWindowEvents] = await Promise.all([
       source.loadSnapshot(),
       source.loadEventsRange(fromUs, toUs),
       source.loadLogs(fromUs, toUs),
+      needsBootstrap ? source.loadEventsRange(0, fromUs) : Promise.resolve([]),
     ]);
-    console.log(
-      '[HistoryController.load] snapshot ok, events:',
-      events.length,
-      'logs:',
-      logs.length,
-    );
 
     const sessionStartUs = events[0]?.ts_us ?? 0;
     this.snapshot = snapshot;
@@ -48,8 +46,30 @@ export class HistoryController {
     this.sessionLogs = logs;
     this.nextLogIndex = 0;
     this.adapter = new HistoryAdapter(dispatch);
+
+    // 1. Hydrate from snapshot (t=0 base state)
     this.adapter.hydrate(snapshot, sessionStartUs);
     this.badgeExpiration.reset();
+
+    // 2. Bootstrap: apply structural events silently before any replay
+    if (needsBootstrap) {
+      const bootstrapEvents = preWindowEvents.filter(isStructuralEvent);
+      if (
+        bootstrapEvents.length > 0 &&
+        bootstrapEvents[0].ts_us < snapshot.ts_us
+      ) {
+        throw new Error(
+          '[HistoryController] bootstrap event precedes snapshot — invalid ordering',
+        );
+      }
+      this.adapter.setSilent(true);
+      for (const event of bootstrapEvents) {
+        this.adapter.handleEvent(event);
+      }
+      this.adapter.flush(fromUs); // sets silent = false internally
+    }
+
+    // 3. Only after bootstrap is complete: load window events
     this.player.load(
       events,
       (event) => {
