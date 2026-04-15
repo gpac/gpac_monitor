@@ -94,9 +94,9 @@ const LocalFilePicker = ({ onLocalFilesLoaded }: LocalFilePickerProps) => {
   }, []);
 
   return (
-    <div className="border-t border-monitor-line">
+    <div className=" border-monitor-line">
       <div className="px-4 py-3">
-        <p className="text-xs text-gray-500 mb-2">Or load from local files</p>
+        <p className="text-xs text-gray-500 mb-2">Load from local files</p>
         <input
           ref={inputRef}
           type="file"

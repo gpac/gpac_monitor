@@ -20,6 +20,7 @@ const SessionPicker = () => {
   const { sessions, loading, error, browser, retry } = useSessionList(
     activeConnection?.address,
   );
+  const [isLocal, setIsLocal] = useState(false);
   const [expandedSession, setExpandedSession] = useState<SessionInfo | null>(
     null,
   );
@@ -79,7 +80,7 @@ const SessionPicker = () => {
           </span>
         </div>
 
-        <div className="px-3 py-3 min-h-32">
+        <div className="px-3 py-3 ">
           {expandedSession ? (
             <TimeWindowExpansion
               session={expandedSession}
@@ -89,13 +90,13 @@ const SessionPicker = () => {
             />
           ) : (
             <>
-              {loading && (
+              {!isLocal && loading && (
                 <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
                   <Spinner className="w-4 h-4" />
                   <span className="text-sm">Loading sessions…</span>
                 </div>
               )}
-              {!loading && error && (
+              {!isLocal && !loading && error && (
                 <div className="flex flex-col items-center gap-3 py-6 text-center">
                   <LuLoaderCircle className="w-6 h-6 text-red-400" />
                   <p className="text-sm text-gray-400">{error}</p>
@@ -104,7 +105,7 @@ const SessionPicker = () => {
                   </Button>
                 </div>
               )}
-              {!loading && !error && sessions.length === 0 && (
+              {!isLocal && !loading && !error && sessions.length === 0 && (
                 <div className="flex flex-col items-center gap-3 py-6 text-center">
                   <p className="text-sm text-gray-400">No sessions found.</p>
                   <Button variant="outline" size="sm" onClick={retry}>
@@ -137,7 +138,7 @@ const SessionPicker = () => {
           )}
         </div>
 
-        <LocalFilePicker />
+        <LocalFilePicker onLocalFilesLoaded={() => setIsLocal(true)} />
       </div>
     </div>
   );

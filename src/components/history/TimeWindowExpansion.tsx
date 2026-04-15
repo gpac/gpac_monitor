@@ -32,22 +32,24 @@ const TimeWindowExpansion = memo(
     } = useTimeWindow(session);
 
     return (
-      <div className="animate-in fade-in slide-in-from-top-2 duration-150 px-4 py-4 space-y-4">
+      <div className="animate-in fade-in slide-in-from-top-2 duration-150 px-4 py-4 flex flex-col gap-5">
         <div className="flex items-center gap-2">
-          <LuTimer className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+          <LuTimer className="w-3.5 h-3.5 text-monitor-text-muted shrink-0" />
           <div>
             <p className="text-sm font-medium text-white">
               {formatTimestamp(session.sessionId)}
             </p>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-monitor-text-muted mt-0.5">
               {formatTime(durationUs)} · Local file
             </p>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <p className="text-xs text-gray-500">Time range selection</p>
-          <div className="flex items-center gap-2 text-xs text-gray-500">
+        <div className="flex flex-col gap-3">
+          <p className="text-xs text-monitor-text-muted">
+            Time range selection
+          </p>
+          <div className="flex items-center gap-2 text-xs text-monitor-text-muted">
             <span className="w-10 shrink-0">{formatMMSS(0)}</span>
             <Slider
               min={0}
@@ -66,24 +68,23 @@ const TimeWindowExpansion = memo(
               value={fromText}
               onChange={(event) => handleFromChange(event.target.value)}
               onBlur={handleFromBlur}
-              className="h-8 text-sm text-center text-gray-300 bg-[#11161C] border-[#1F2A36]"
+              className="h-8 text-sm text-center text-gray-300 bg-monitor-panel border-[#1F2A36] focus-visible:border-violet-600 focus-visible:ring-violet-600/25"
             />
-            <span className="text-gray-500 text-xs shrink-0">→</span>
+            <span className="text-monitor-text-muted text-xs shrink-0">→</span>
             <Input
               value={toText}
               onChange={(event) => handleToChange(event.target.value)}
               onBlur={handleToBlur}
-              className="h-8 text-sm text-center text-gray-300 bg-[#11161C] border-[#1F2A36]"
+              className="h-8 text-sm text-center text-gray-300 bg-monitor-panel border-[#1F2A36] focus-visible:border-violet-600 focus-visible:ring-violet-600/25"
             />
           </div>
         </div>
 
-        <div className="border-t border-[#1F2A36] pt-3 space-y-2">
+        <div className="border-t border-monitor-line pt-4 flex flex-col gap-2">
           <Button
             className="w-full h-9 rounded-md text-white/90 transition-opacity hover:opacity-90"
             style={{
-              background:
-                'linear-gradient(180deg, rgba(124,58,237,0.9) 0%, rgba(109,40,217,0.9) 100%)',
+              background: 'linear-gradient(180deg, #7C3AED 0%, #6D28D9 100%)',
             }}
             onClick={() => onConfirm(absoluteFromUs, absoluteToUs)}
             disabled={loading}
@@ -99,7 +100,7 @@ const TimeWindowExpansion = memo(
           </Button>
           <Button
             variant="ghost"
-            className="w-full h-8 text-gray-500 hover:text-gray-300 hover:bg-white/5"
+            className="w-full h-8 text-monitor-text-muted hover:text-gray-300 hover:bg-white/5"
             onClick={onCancel}
             disabled={loading}
           >
