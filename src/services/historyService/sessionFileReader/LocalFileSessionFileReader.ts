@@ -71,17 +71,33 @@ export class LocalFileSessionFileReader {
   }
 
   async listSessions(): Promise<SessionInfo[]> {
-    const sessions = Array.from(this.sessionMap.entries())
-      .sort(([a], [b]) => Number(b) - Number(a))
-      .map(([sessionId, entry]) => ({
-        sessionId,
-        hasSnapshot: !!entry.snapshot,
-        hasEvents: !!entry.events,
-        hasManifest: !!entry.manifest,
-        sizeBytes: (entry.snapshot?.size ?? 0) + (entry.events?.size ?? 0),
-        isComplete: entry.done,
-      }));
-    return sessions;
+    return Promise.all(
+      Array.from(this.sessionMap.entries())
+        .sort(([a], [b]) => Number(b) - Number(a))
+        .map(async ([sessionId, entry]) => {
+          let startUs: number | undefined;
+          let endUs: number | undefined;
+          if (entry.manifest) {
+            try {
+              const manifest = JSON.parse(await entry.manifest.text());
+              startUs = manifest.startUs;
+              endUs = manifest.endUs;
+            } catch {
+              console.error(`starUs and endUs undefined !`);
+            }
+          }
+          return {
+            sessionId,
+            hasSnapshot: !!entry.snapshot,
+            hasEvents: !!entry.events,
+            hasManifest: !!entry.manifest,
+            sizeBytes: (entry.snapshot?.size ?? 0) + (entry.events?.size ?? 0),
+            isComplete: entry.done,
+            startUs,
+            endUs,
+          };
+        }),
+    );
   }
 
   async readSnapshot(sessionId: string): Promise<HistorySnapshot> {
