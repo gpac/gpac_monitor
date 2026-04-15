@@ -91,6 +91,17 @@ export type HistoryEvent =
   | PidReconfiguredEvent
   | ArgUpdatedEvent;
 
+export const STRUCTURAL_MESSAGES = new Set([
+  'filters',
+  'filter_args_update',
+  'filter_pid_reconfigured',
+  'filter_arg_updated',
+] as const);
+
+export function isStructuralEvent(event: HistoryEvent): boolean {
+  return (STRUCTURAL_MESSAGES as Set<string>).has(event.message);
+}
+
 /** Log events (stored separately in logs.jsonl) */
 export type LogEvent = LogBatchEvent | LogConfigChangedEvent;
 
