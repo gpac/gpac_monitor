@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { LuClapperboard, LuTriangleAlert } from 'react-icons/lu';
-import { formatBytes, formatTimestamp } from '@/utils/formatting';
+import { formatBytes, formatTimestamp, formatTime } from '@/utils/formatting';
 import type { SessionInfo } from '@/services/historyService/sessionFileReader/types';
 
 interface SessionRowProps {
@@ -35,6 +35,12 @@ const SessionRow = memo(({ session, onSelect, disabled }: SessionRowProps) => {
             <span className="text-amber-400">incomplete · </span>
           )}
           {formatBytes(session.sizeBytes)}
+          {session.startUs !== undefined && session.endUs !== undefined && (
+            <span className="text-gray-400">
+              {' '}
+              · {formatTime(session.endUs - session.startUs)}
+            </span>
+          )}
         </div>
       </div>
       {session.isComplete ? (

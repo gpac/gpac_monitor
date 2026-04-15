@@ -24,12 +24,16 @@ export class HistoryController {
   }
 
   /** Load from a HistorySource (FileHistorySource or ActiveSessionHistorySource). */
-  async load(source: HistorySource, dispatch: AppDispatch) {
-    console.log('[HistoryController.load] loading session', source.sessionId);
+  async load(
+    source: HistorySource,
+    dispatch: AppDispatch,
+    fromUs?: number,
+    toUs?: number,
+  ) {
     const [snapshot, events, logs] = await Promise.all([
       source.loadSnapshot(),
-      source.loadEventsRange(),
-      source.loadLogs(),
+      source.loadEventsRange(fromUs, toUs),
+      source.loadLogs(fromUs, toUs),
     ]);
     console.log(
       '[HistoryController.load] snapshot ok, events:',
