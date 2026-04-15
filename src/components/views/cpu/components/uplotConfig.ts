@@ -1,13 +1,13 @@
+import type { MutableRefObject } from 'react';
 import uPlot from 'uplot';
-import { formatChartSeconds } from '@/utils/formatting/time';
-
-export interface UplotConfigParams {
-  memoryYAxisMax: number;
-}
 
 export const createCpuMemoryUplotConfig = ({
   memoryYAxisMax,
-}: UplotConfigParams): uPlot.Options => {
+  timeLabelsRef,
+}: {
+  memoryYAxisMax: number;
+  timeLabelsRef: MutableRefObject<string[]>;
+}): uPlot.Options => {
   return {
     width: 100, // Will be auto-resized by UplotChart
     height: 100, //
@@ -55,7 +55,7 @@ export const createCpuMemoryUplotConfig = ({
             u.root.appendChild(tooltip);
           }
 
-          const time = formatChartSeconds(u.data[0][idx]);
+          const time = timeLabelsRef.current[idx] ?? '--';
           const memory = u.data[1][idx]?.toFixed(2) || '--';
           const cpu = u.data[2][idx]?.toFixed(2) || '--';
 
@@ -102,7 +102,8 @@ export const createCpuMemoryUplotConfig = ({
         ticks: { stroke: '#6ee7b7', size: 5, width: 1 },
         font: '11px monospace',
         size: 50,
-        values: (_u, vals) => vals.map(formatChartSeconds),
+        values: (_u, vals) =>
+          vals.map((i) => timeLabelsRef.current[Math.round(i)] ?? ''),
       },
       {
         scale: 'memory',

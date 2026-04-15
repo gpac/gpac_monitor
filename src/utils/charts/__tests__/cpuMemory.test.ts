@@ -4,12 +4,12 @@ import { prepareCpuMemoryData, calculateMemoryYMax } from '../cpuMemory';
 describe('prepareCpuMemoryData', () => {
   it('returns empty arrays for empty input', () => {
     const result = prepareCpuMemoryData([]);
-    expect(result.relativeSeconds).toEqual([]);
+    expect(result.timeLabels).toEqual([]);
     expect(result.cpuData).toEqual([]);
     expect(result.memoryData).toEqual([]);
   });
 
-  it('computes relative seconds from first timestamp', () => {
+  it('computes integer indices and formatted time labels from timestamps', () => {
     const points = [
       { timestamp: 1000, cpu_percent: 10, memory_mb: 50 },
       { timestamp: 2000, cpu_percent: 20, memory_mb: 60 },
@@ -17,12 +17,13 @@ describe('prepareCpuMemoryData', () => {
     ];
     const result = prepareCpuMemoryData(points);
 
-    expect(result.relativeSeconds).toEqual([0, 1, 2]);
+    expect(result.alignedData[0]).toEqual([0, 1, 2]);
+    expect(result.timeLabels).toHaveLength(3);
     expect(result.cpuData).toEqual([10, 20, 30]);
     expect(result.memoryData).toEqual([50, 60, 70]);
   });
 
-  it('returns alignedData as [time, memory, cpu]', () => {
+  it('returns alignedData as [indices, memory, cpu]', () => {
     const points = [{ timestamp: 0, cpu_percent: 5, memory_mb: 100 }];
     const result = prepareCpuMemoryData(points);
 

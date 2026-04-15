@@ -50,8 +50,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
 
   const { isHistory } = useDataMode();
 
-  const { isSubscribed, currentCPU, currentMemory, totalCores, stats } =
-    useCPUStats();
+  const { isSubscribed, currentCPU, currentMemory, totalCores } = useCPUStats();
 
   const metricsValues = useMemo(
     () => ({
@@ -100,7 +99,6 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
             animating={!isResizing && !isHistory}
             maxPoints={maxPoints}
             windowDuration={windowDuration}
-            historyStats={isHistory ? stats : undefined}
           />
         </div>
       </div>

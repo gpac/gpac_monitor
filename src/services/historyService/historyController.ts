@@ -47,21 +47,13 @@ export class HistoryController {
     this.nextLogIndex = 0;
     this.adapter = new HistoryAdapter(dispatch);
 
-    // 1. Hydrate from snapshot (t=0 base state)
+    // Hydrate from snapshot (t=0 base state)
     this.adapter.hydrate(snapshot, sessionStartUs);
     this.badgeExpiration.reset();
 
-    // 2. Bootstrap: apply structural events silently before any replay
+    // Bootstrap: apply structural events silently before any replay
     if (needsBootstrap) {
       const bootstrapEvents = preWindowEvents.filter(isStructuralEvent);
-      if (
-        bootstrapEvents.length > 0 &&
-        bootstrapEvents[0].ts_us < snapshot.ts_us
-      ) {
-        throw new Error(
-          '[HistoryController] bootstrap event precedes snapshot — invalid ordering',
-        );
-      }
       this.adapter.setSilent(true);
       for (const event of bootstrapEvents) {
         this.adapter.handleEvent(event);
@@ -69,7 +61,7 @@ export class HistoryController {
       this.adapter.flush(fromUs); // sets silent = false internally
     }
 
-    // 3. Only after bootstrap is complete: load window events
+    // Only after bootstrap is complete: load window events
     this.player.load(
       events,
       (event) => {

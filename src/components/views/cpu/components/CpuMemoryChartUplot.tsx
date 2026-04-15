@@ -1,14 +1,16 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/UplotChart';
 import { useChartData } from '../hooks/useChartData';
+import { useDataMode } from '@/shared/hooks/useDataMode';
 import { createCpuMemoryUplotConfig } from './uplotConfig';
 import {
   prepareCpuMemoryData,
   calculateMemoryYMax,
   type CpuMemoryDataPoint,
 } from '@/utils/charts/cpuMemory';
-import type { CPUStats } from '@/types/domain/system';
+import { selectSystemStatsHistory } from '@/shared/store/selectors/sessionDetails/sessionDetailsSelectors';
 
 interface CpuMemoryChartUplotProps {
   currentCPUPercent: number;
@@ -16,7 +18,6 @@ interface CpuMemoryChartUplotProps {
   animating: boolean;
   maxPoints?: number;
   windowDuration?: number;
-  historyStats?: CPUStats[];
 }
 
 export const CpuMemoryChartUplot = memo(
@@ -26,17 +27,28 @@ export const CpuMemoryChartUplot = memo(
     animating,
     maxPoints = 400,
     windowDuration,
-    historyStats,
   }: CpuMemoryChartUplotProps) => {
+    const { isHistory } = useDataMode();
+    const systemStatsHistory = useSelector(selectSystemStatsHistory);
+    const timeLabelsRef = useRef<string[]>([]);
+
     const currentMemoryMB = useMemo(
       () => currentMemoryBytes / (1024 * 1024),
       [currentMemoryBytes],
     );
 
-    const memoryYAxisMax = useMemo(
-      () => calculateMemoryYMax(currentMemoryMB),
-      [currentMemoryMB],
+    const [stableYMax, setStableYMax] = useState(() =>
+      calculateMemoryYMax(currentMemoryMB),
     );
+
+    useEffect(() => {
+      setStableYMax(calculateMemoryYMax(currentMemoryMB));
+    }, [isHistory]);
+
+    useEffect(() => {
+      const next = calculateMemoryYMax(currentMemoryMB);
+      if (next > stableYMax) setStableYMax(next);
+    }, [currentMemoryMB, stableYMax]);
 
     const { dataPoints: liveDataPoints } = useChartData(
       currentCPUPercent,
@@ -48,22 +60,25 @@ export const CpuMemoryChartUplot = memo(
     );
 
     const historyDataPoints = useMemo((): CpuMemoryDataPoint[] => {
-      if (!historyStats) return [];
-      return historyStats.map((s) => ({
-        timestamp: s.timestamp / 1000, // µs → ms
+      return systemStatsHistory.map((s) => ({
+        timestamp: s.timestamp / 1000,
         cpu_percent: s.process_cpu_usage,
         memory_mb: s.process_memory / (1024 * 1024),
       }));
-    }, [historyStats]);
+    }, [systemStatsHistory]);
 
-    const dataPoints = historyStats ? historyDataPoints : liveDataPoints;
+    const dataPoints = isHistory ? historyDataPoints : liveDataPoints;
 
     const options = useMemo(() => {
-      return createCpuMemoryUplotConfig({ memoryYAxisMax });
-    }, [memoryYAxisMax]);
+      return createCpuMemoryUplotConfig({
+        memoryYAxisMax: stableYMax,
+        timeLabelsRef,
+      });
+    }, [stableYMax]);
 
     const data = useMemo(() => {
-      const { alignedData } = prepareCpuMemoryData(dataPoints);
+      const { alignedData, timeLabels } = prepareCpuMemoryData(dataPoints);
+      timeLabelsRef.current = timeLabels;
       return alignedData;
     }, [dataPoints]);
 
