@@ -5,4 +5,6 @@ export interface SessionInfo {
   hasManifest: boolean;
   sizeBytes: number;
   isComplete: boolean;
+  startUs?: number;
+  endUs?: number;
 }
