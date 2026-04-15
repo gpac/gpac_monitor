@@ -10,7 +10,11 @@ import SessionRow from './SessionRow';
 import TimeWindowExpansion from './TimeWindowExpansion';
 import type { SessionInfo } from '@/services/historyService/sessionFileReader/types';
 
-const LocalFilePicker = () => {
+interface LocalFilePickerProps {
+  onLocalFilesLoaded?: () => void;
+}
+
+const LocalFilePicker = ({ onLocalFilesLoaded }: LocalFilePickerProps) => {
   const { loadFromSource } = useDataSource();
   const [browser, setBrowser] = useState<LocalFileSessionFileReader | null>(
     null,
@@ -29,13 +33,17 @@ const LocalFilePicker = () => {
     }
   }, []);
 
-  const handleFiles = useCallback(async (files: FileList) => {
-    const fileBrowser = new LocalFileSessionFileReader(Array.from(files));
-    setSessions(await fileBrowser.listSessions());
-    setBrowser(fileBrowser);
-    setLoadError(null);
-    setExpandedSession(null);
-  }, []);
+  const handleFiles = useCallback(
+    async (files: FileList) => {
+      const fileBrowser = new LocalFileSessionFileReader(Array.from(files));
+      setSessions(await fileBrowser.listSessions());
+      setBrowser(fileBrowser);
+      setLoadError(null);
+      setExpandedSession(null);
+      onLocalFilesLoaded?.();
+    },
+    [onLocalFilesLoaded],
+  );
 
   const loadSession = useCallback(
     async (sessionId: string, fromUs?: number, toUs?: number) => {
@@ -134,9 +142,7 @@ const LocalFilePicker = () => {
               </div>
             )}
             {loadError && (
-              <p className="text-xs text-center mt-2">
-                {loadError}
-              </p>
+              <p className="text-xs text-center mt-2">{loadError}</p>
             )}
           </div>
         )
