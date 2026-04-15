@@ -134,7 +134,7 @@ const LocalFilePicker = () => {
               </div>
             )}
             {loadError && (
-              <p className="text-xs text-red-400 text-center mt-2">
+              <p className="text-xs text-center mt-2">
                 {loadError}
               </p>
             )}
