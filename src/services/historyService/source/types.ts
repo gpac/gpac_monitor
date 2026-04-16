@@ -1,6 +1,7 @@
 import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
 import type { SessionInfo } from '../sessionFileReader/types';
 
+/** Base chunk — shared by event and log chunks. */
 export interface HistoryManifestChunk {
   file: string;
   fromUs: number;
@@ -8,12 +9,28 @@ export interface HistoryManifestChunk {
   count: number;
 }
 
+/** Event chunk — indexed, fixed duration, pilots the player. */
+export interface HistoryManifestEventChunk extends HistoryManifestChunk {
+  index: number;
+  hasCheckpoint: boolean;
+}
+
+/** Checkpoint attached to an event chunk. */
+export interface HistoryManifestCheckpoint {
+  chunkIndex: number; // array position in eventChunks
+  file: string;
+}
+
 export interface HistoryManifest {
   version: number;
   startUs: number;
   endUs: number;
-  chunks: HistoryManifestChunk[];
+  /** Event chunks — indexed, time-based (5–10s). */
+  eventChunks: HistoryManifestEventChunk[];
+  /** Log chunks — non-indexed, rotation by duration or size. */
   logChunks?: HistoryManifestChunk[];
+  /** Checkpoints attached to eventChunks only. */
+  checkpoints?: HistoryManifestCheckpoint[];
 }
 
 /** Session metadata — available without loading all events. */

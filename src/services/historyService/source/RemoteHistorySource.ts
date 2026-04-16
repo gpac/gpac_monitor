@@ -45,7 +45,7 @@ export class RemoteHistorySource implements HistorySource {
         startUs: manifest.startUs,
         endUs: manifest.endUs,
         hasChunks: true,
-        hasCheckpoints: false,
+        hasCheckpoints: (manifest.checkpoints?.length ?? 0) > 0,
       };
     }
 
@@ -107,7 +107,7 @@ export class RemoteHistorySource implements HistorySource {
     fromUs?: number,
     toUs?: number,
   ): Promise<HistoryEvent[]> {
-    const relevantChunks = manifest.chunks.filter(
+    const relevantChunks = manifest.eventChunks.filter(
       (chunk) =>
         (toUs === undefined || chunk.fromUs <= toUs) &&
         (fromUs === undefined || chunk.toUs >= fromUs),
@@ -115,7 +115,7 @@ export class RemoteHistorySource implements HistorySource {
 
     const chunkResults = await Promise.all(
       relevantChunks.map((chunk) =>
-        this.reader.readChunk(this.sessionId, chunkIndexFromPath(chunk.file)),
+        this.reader.readChunk(this.sessionId, chunk.index),
       ),
     );
 
