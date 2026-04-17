@@ -16,3 +16,4 @@ export type { FilterAlertStatus } from './useFilterAlerts';
 export { useToast, toast, toastService } from './useToast';
 export type { ToasterToast } from './useToast';
 export { useFilterChangeStatus } from './filterChangeStatus';
+export { useWebSocketNotifications } from './useWebSocketNotifications';

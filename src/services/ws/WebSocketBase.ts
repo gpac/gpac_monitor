@@ -1,5 +1,4 @@
 import { MessageFormatter } from './formatters/messageFormatters';
-import { WebSocketNotificationService } from './notificationService';
 import WsParserWorker from './workers/wsParserWorker?worker&inline';
 
 interface WorkerResponse {
@@ -88,7 +87,6 @@ export class WebSocketBase {
         this.socket.binaryType = 'arraybuffer';
 
         this.socket.onopen = () => {
-          WebSocketNotificationService.onConnected(address);
           this.callMessageHandlers(
             '__OnConnect__',
             new DataView(new ArrayBuffer(0)),
@@ -108,11 +106,7 @@ export class WebSocketBase {
           this.parseMessageInline(event.data);
         };
 
-        this.socket.onclose = (event) => {
-          WebSocketNotificationService.onDisconnected(
-            event.reason,
-            event.wasClean,
-          );
+        this.socket.onclose = (_event) => {
           this.socket = null;
           this.callMessageHandlers(
             '__OnDisconnect__',
@@ -121,7 +115,6 @@ export class WebSocketBase {
         };
 
         this.socket.onerror = (error) => {
-          WebSocketNotificationService.onError();
           reject(error);
         };
       } catch (error) {

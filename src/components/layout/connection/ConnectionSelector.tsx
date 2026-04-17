@@ -9,6 +9,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { useConnectionStatusSync } from '@/shared/hooks/useConnectionStatusSync';
+import { useWebSocketNotifications } from '@/shared/hooks/useWebSocketNotifications';
+import { useToast } from '@/shared/hooks';
 import {
   selectAllConnections,
   selectActiveConnection,
@@ -25,7 +27,9 @@ const ConnectionSelector = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
 
+  const { toast } = useToast();
   useConnectionStatusSync();
+  useWebSocketNotifications({ toast });
 
   const isConnected = useMemo(
     () => activeConnection?.status === ConnectionStatus.CONNECTED,
