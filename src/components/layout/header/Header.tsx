@@ -12,7 +12,7 @@ import WidgetSelector from '../../widget/WidgetSelector';
 import ConnectionSelector from '../connection/ConnectionSelector';
 import LogCounters from './LogCounters';
 import HistoryControls from '@/components/history/HistoryControls';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { toggleSidebar } from '@/shared/store/slices/layoutSlice';

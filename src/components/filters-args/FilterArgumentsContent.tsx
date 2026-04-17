@@ -4,7 +4,7 @@ import {
   makeSelectArgumentUpdatesForFilter,
 } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { useSearchFilter } from '@/shared/hooks/useSearchFilter';
+import { useSearchFilter } from '@/shared/hooks/filters/useSearchFilter';
 import ArgumentItem from './arguments/ArgumentItem';
 import { GpacArgument, GPACTypes } from './types';
 

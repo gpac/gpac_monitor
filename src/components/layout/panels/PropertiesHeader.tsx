@@ -6,7 +6,7 @@ import {
   DEFAULT_STREAM_COLOR,
 } from '@/utils/filters/streamType';
 import { FilterType } from '@/types';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 interface PropertiesHeaderProps {
   filterName: string;

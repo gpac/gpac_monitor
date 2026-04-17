@@ -1,1 +1,1 @@
-export { useFilterChangeStatusLive } from '@/shared/hooks/filterChangeStatus/useFilterChangeStatusLive';
+export { useFilterChangeStatusLive } from '@/shared/hooks/filters/filterChangeStatus/useFilterChangeStatusLive';

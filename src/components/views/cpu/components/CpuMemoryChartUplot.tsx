@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/UplotChart';
 import { useChartData } from '../hooks/useChartData';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { createCpuMemoryUplotConfig } from './uplotConfig';
 import {
   prepareCpuMemoryData,

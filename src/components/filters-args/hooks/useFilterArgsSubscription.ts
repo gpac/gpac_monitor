@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useGpacService } from '@/shared/hooks/useGpacService';
+import { useGpacService } from '@/shared/hooks/connection/useGpacService';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { FilterArgument } from '@/types';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { selectFilterArgs } from '@/shared/store/selectors/session';
 
 /**

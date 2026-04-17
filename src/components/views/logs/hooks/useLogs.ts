@@ -10,7 +10,7 @@ import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectLogsConfigString } from '@/shared/store/selectors/logs/logsConfigSelectors';
-import { useServiceReady } from '@/shared/hooks/useServiceReady';
+import { useServiceReady } from '@/shared/hooks/connection/useServiceReady';
 
 interface UseLogsOptions {
   enabled?: boolean;

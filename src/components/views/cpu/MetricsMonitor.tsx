@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useOptimizedResize } from '@/shared/hooks/ui/useOptimizedResize';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 import { CpuMemoryChartUplot } from './components/CpuMemoryChartUplot';
 import { CpuMemoryOverview } from './components/CpuMemoryOverview';

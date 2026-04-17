@@ -5,7 +5,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { LocalFileSessionFileReader } from '@/services/historyService/sessionFileReader';
 import { FileHistorySource } from '@/services/historyService/source/FileHistorySource';
-import { toast } from '@/shared/hooks/useToast';
+import { toast } from '@/shared/hooks/ui/useToast';
 import SessionRow from './SessionRow';
 import type { SessionInfo } from '@/services/historyService/sessionFileReader/types';
 

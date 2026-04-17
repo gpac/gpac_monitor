@@ -1,4 +1,4 @@
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { useSessionStatsHistory } from './useSessionStatsHistory';
 import { useSessionStatsLive } from './useSessionStatsLive';
 import type { SessionStatsResult } from './types';

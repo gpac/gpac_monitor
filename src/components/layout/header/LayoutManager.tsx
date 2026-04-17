@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useLayoutManager } from '@/shared/hooks/useLayoutManager';
+import { useLayoutManager } from '@/shared/hooks/ui/useLayoutManager';
 
 export const LayoutManager = () => {
   const [layoutName, setLayoutName] = useState('');

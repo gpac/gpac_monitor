@@ -3,10 +3,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { Provider } from 'react-redux';
 import { configureStore, AnyAction } from '@reduxjs/toolkit';
-import logsReducer from '@/shared/store/slices/logsSlice';
-import { useOpenLogsWidget } from '../useOpenLogsWidget';
-import { Widget, WidgetType } from '@/types/ui/widget';
-import { GpacLogLevel } from '@/types/domain/gpac/log-types';
+import logsReducer from '../../store/slices/logsSlice';
+import { useOpenLogsWidget } from '../ui/useOpenLogsWidget';
+import { Widget, WidgetType } from '../../../types/ui/widget';
+import { GpacLogLevel } from '../../../types/domain/gpac/log-types';
 
 vi.mock('@/shared/store/slices/widgetsSlice', () => ({
   addWidget: (type: WidgetType) => ({

@@ -1,4 +1,4 @@
-import { useAppSelector } from './redux';
+import { useAppSelector } from '../redux';
 import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 
 export interface FilterAlertStatus {

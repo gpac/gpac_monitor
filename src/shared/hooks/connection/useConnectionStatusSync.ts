@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { gpacService } from '@/services/gpacService';
-import { useAppDispatch, useAppSelector } from './redux';
+import { useAppDispatch, useAppSelector } from '../redux';
 import { selectActiveConnection } from '@/shared/store/selectors';
 import { updateConnectionStatus } from '@/shared/store/slices/connectionsSlice';
 import { ConnectionStatus } from '@/types/communication/shared';

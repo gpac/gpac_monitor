@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import type { CPUStats } from '@/types/domain/system';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
-import { useServiceReady } from '@/shared/hooks/useServiceReady';
+import { useServiceReady } from '@/shared/hooks/connection/useServiceReady';
 import type { CPUStatsResult } from './useCPUStatsHistory';
 
 export function useCPUStatsLive(enabled = true): CPUStatsResult {

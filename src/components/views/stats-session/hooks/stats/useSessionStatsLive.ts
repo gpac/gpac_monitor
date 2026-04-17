@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { SessionFilterStatistics } from '@/types/domain/gpac/filter-stats';
-import { useServiceReady } from '@/shared/hooks/useServiceReady';
+import { useServiceReady } from '@/shared/hooks/connection/useServiceReady';
 import { selectSessionStats } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import type { SessionStatsResult } from './types';
 

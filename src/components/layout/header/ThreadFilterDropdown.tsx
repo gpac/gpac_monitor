@@ -7,7 +7,7 @@ import {
 } from '@radix-ui/react-popover';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectThreadAlerts } from '@/shared/store/selectors/header/headerSelectors';
-import { useOpenLogsWidget } from '@/shared/hooks/useOpenLogsWidget';
+import { useOpenLogsWidget } from '@/shared/hooks/ui/useOpenLogsWidget';
 import { getThreadColor } from '@/components/views/logs/utils/logxUtils';
 import { StableNumber } from '@/utils/performance/StableNumber';
 

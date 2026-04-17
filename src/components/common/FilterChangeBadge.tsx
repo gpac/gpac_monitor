@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { useFilterChangeStatus } from '@/shared/hooks/filterChangeStatus';
+import { useFilterChangeStatus } from '@/shared/hooks/filters/filterChangeStatus';
 import { StatusBadge } from './StatusBadge';
 
 interface FilterChangeBadgesProps {

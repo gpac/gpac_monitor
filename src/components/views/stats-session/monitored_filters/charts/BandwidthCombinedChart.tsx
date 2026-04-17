@@ -6,7 +6,7 @@ import uPlot from 'uplot';
 import { useBandwidthChart } from './hooks/useBandwidthChart';
 import { createBandwidthCombinedConfig } from './config/bandwidthCombinedUplotConfig';
 import { DEFAULT_REFRESH_INTERVAL } from './config/bandwidthChartConfig';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 interface BandwidthCombinedChartProps {
   filterId: string;

@@ -1,15 +1,18 @@
 import { useEffect } from 'react';
 import { gpacService } from '@/services/gpacService';
-import type { ToasterToast } from './useToast';
+import type { ToasterToast } from '../ui/useToast';
 
 interface UseWebSocketNotificationsProps {
   toast: (props: Omit<ToasterToast, 'id'>) => void;
+  disabled?: boolean;
 }
 
 export const useWebSocketNotifications = ({
   toast,
+  disabled = false,
 }: UseWebSocketNotificationsProps) => {
   useEffect(() => {
+    if (disabled) return;
     gpacService.setNotificationHandlers({
       onConnectionStatus: (connected: boolean) => {
         toast({
@@ -32,5 +35,5 @@ export const useWebSocketNotifications = ({
     return () => {
       gpacService.setNotificationHandlers({});
     };
-  }, [toast]);
+  }, [toast, disabled]);
 };

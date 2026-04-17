@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useGpacService } from './useGpacService';
+import { useGpacService } from '../connection/useGpacService';
 
 /**
  * Return idx filter list with FILTER_STATS active subscription.

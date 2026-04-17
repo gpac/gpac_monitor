@@ -1,4 +1,4 @@
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { useBandwidthChartLive } from './useBandwidthChartLive';
 import { useBandwidthChartHistory } from './useBandwidthChartHistory';
 import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';

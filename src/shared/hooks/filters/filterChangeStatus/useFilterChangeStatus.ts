@@ -1,4 +1,4 @@
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { useFilterChangeStatusLive } from './useFilterChangeStatusLive';
 import { useFilterChangeStatusHistory } from './useFilterChangeStatusHistory';
 

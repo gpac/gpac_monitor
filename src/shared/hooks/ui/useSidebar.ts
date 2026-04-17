@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from './redux';
+import { useAppDispatch, useAppSelector } from '../redux';
 import {
   setSidebarContent,
   closeSidebar as closeSidebarAction,

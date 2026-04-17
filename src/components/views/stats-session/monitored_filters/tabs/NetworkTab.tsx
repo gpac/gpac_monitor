@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { LuUpload, LuDownload } from 'react-icons/lu';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { NetworkTabData } from '@/types/ui';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

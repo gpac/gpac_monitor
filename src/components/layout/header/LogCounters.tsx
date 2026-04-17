@@ -8,7 +8,7 @@ import {
   FaInfoCircle,
 } from 'react-icons/fa';
 import { LogShortcutButton } from '@/shared/ui/LogShortcutButton';
-import { useOpenLogsWidget } from '@/shared/hooks/useOpenLogsWidget';
+import { useOpenLogsWidget } from '@/shared/hooks/ui/useOpenLogsWidget';
 import { ThreadFilterDropdown } from './ThreadFilterDropdown';
 
 const LOG_SHORTCUTS = [

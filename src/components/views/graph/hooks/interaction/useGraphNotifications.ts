@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Node } from '@xyflow/react';
-import type { ToasterToast } from '@/shared/hooks/useToast';
+import type { ToasterToast } from '@/shared/hooks/ui/useToast';
 
 interface UseGraphNotificationsProps {
   nodes: Node[];

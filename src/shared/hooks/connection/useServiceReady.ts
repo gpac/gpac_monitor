@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { gpacService } from '@/services/gpacService';
-import { useAppSelector } from './redux';
+import { useAppSelector } from '../redux';
 import { selectActiveConnection } from '@/shared/store/selectors';
 
 type UseServiceReadyOptions = { enabled?: boolean; timeoutMs?: number };

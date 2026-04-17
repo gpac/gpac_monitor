@@ -3,7 +3,7 @@ import { LuClapperboard, LuRefreshCw, LuLoaderCircle } from 'react-icons/lu';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { useSessionList } from '@/services/historyService/sessionFileReader/useSessionList';
 import { RemoteHistorySource } from '@/services/historyService/source/RemoteHistorySource';
 import { useAppSelector } from '@/shared/hooks/redux';

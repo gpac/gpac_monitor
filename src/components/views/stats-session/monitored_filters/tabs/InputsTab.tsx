@@ -1,6 +1,6 @@
 import { memo, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { useSidebar } from '@/shared/hooks/useSidebar';
+import { useSidebar } from '@/shared/hooks/ui/useSidebar';
 import type { InputsTabProps, PIDWithIndex } from '../../types';
 import { useInputsTabData } from './hooks/useInputsTabData';
 import PIDMetricsCard from './PIDMetricsCard';

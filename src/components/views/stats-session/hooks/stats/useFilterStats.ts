@@ -1,4 +1,4 @@
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { useFilterStatsHistory } from './useFilterStatsHistory';
 import { useFilterStatsLive } from './useFilterStatsLive';
 import type { FilterStatsResult } from './types';

@@ -3,7 +3,7 @@ import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 interface StatsTabsProps {
   activeTab: string;

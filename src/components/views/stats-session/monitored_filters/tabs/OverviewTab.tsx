@@ -10,7 +10,7 @@ import {
   type FilterAlerts,
 } from '../cards/shared/statusHelpers';
 import { TAB_STYLES } from './styles';
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 interface OverviewTabProps {
   filter: OverviewTabData;

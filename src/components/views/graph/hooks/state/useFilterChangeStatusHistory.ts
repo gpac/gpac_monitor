@@ -1,1 +1,1 @@
-export { useFilterChangeStatusHistory } from '@/shared/hooks/filterChangeStatus/useFilterChangeStatusHistory';
+export { useFilterChangeStatusHistory } from '@/shared/hooks/filters/filterChangeStatus/useFilterChangeStatusHistory';

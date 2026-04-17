@@ -1,4 +1,4 @@
-import { useDataMode } from '@/shared/hooks/useDataMode';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { useCPUStatsHistory } from './useCPUStatsHistory';
 import { useCPUStatsLive } from './useCPUStatsLive';
 import type { CPUStatsResult } from './useCPUStatsHistory';

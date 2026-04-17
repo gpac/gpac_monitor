@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from './redux';
+import { useAppDispatch, useAppSelector } from '../redux';
 import {
   saveLayout,
   loadLayout,
   deleteLayout,
-} from '../store/slices/widgetsSlice';
-import { selectSavedLayouts, selectCurrentLayout } from '../store/selectors';
+} from '../../store/slices/widgetsSlice';
+import { selectSavedLayouts, selectCurrentLayout } from '../../store/selectors';
 import {
   saveLayoutsToStorage,
   saveLastUsedLayout,
-} from '../store/widgets/layoutStorage';
+} from '../../store/widgets/layoutStorage';
 
 export const useLayoutManager = () => {
   const dispatch = useAppDispatch();

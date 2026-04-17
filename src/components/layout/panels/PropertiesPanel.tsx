@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { useSidebar } from '@/shared/hooks/useSidebar';
+import { useSidebar } from '@/shared/hooks/ui/useSidebar';
 import FilterArgumentsContent from '@/components/filters-args/FilterArgumentsContent';
 import IPIDPropertiesContent from '../../ipid-properties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';

@@ -10,7 +10,7 @@ import {
   selectFilterUploadData,
   selectFilterDownloadData,
 } from '@/shared/store/selectors';
-import { useGpacService } from '@/shared/hooks/useGpacService';
+import { useGpacService } from '@/shared/hooks/connection/useGpacService';
 
 interface UseBandwidthChartLiveOptions {
   filterId: string;
