@@ -2,6 +2,7 @@ import type { HistorySnapshot, LogEvent } from '../types';
 import type { SessionInfo } from './types';
 import type { HistoryManifest } from '../source/types';
 import { parseEventsJsonl, MAX_EVENTS } from '../loader/eventLoader';
+import { parseManifest } from '../manifestParser';
 
 interface SessionEntry {
   snapshot?: File;
@@ -109,7 +110,11 @@ export class LocalFileSessionFileReader {
   async readManifest(sessionId: string): Promise<HistoryManifest | null> {
     const file = this.sessionMap.get(sessionId)?.manifest;
     if (!file) return null;
-    return JSON.parse(await file.text()) as HistoryManifest;
+    try {
+      return parseManifest(JSON.parse(await file.text()));
+    } catch {
+      return null;
+    }
   }
 
   async readChunk(sessionId: string, chunkIndex: number) {

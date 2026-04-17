@@ -2,6 +2,7 @@ import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
 import type { HistoryManifest } from '../source/types';
 import type { SessionInfo } from './types';
 import { parseEventsJsonl } from '../loader/eventLoader';
+import { parseManifest } from '../manifestParser';
 
 /**
  * WsSessionFileReader
@@ -77,7 +78,7 @@ export class WsSessionFileReader {
         sessionId,
         file: 'manifest.json',
       });
-      return JSON.parse(response.content as string) as HistoryManifest;
+      return parseManifest(JSON.parse(response.content as string));
     } catch {
       return null;
     }

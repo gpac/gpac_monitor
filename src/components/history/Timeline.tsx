@@ -11,6 +11,7 @@ interface TimelineProps {
   sessionStartUs: number;
   segments: TimeSegment[];
   isPlaying?: boolean;
+  canPlay?: boolean;
   onPlay: () => void;
   onPause: () => void;
   onSeek: (targetTimestampUs: number) => void;
@@ -22,6 +23,7 @@ const Timeline = ({
   sessionStartUs,
   segments: _segments,
   isPlaying = false,
+  canPlay = false,
   onPlay,
   onPause,
   onSeek,
@@ -49,7 +51,7 @@ const Timeline = ({
     <div className="flex items-center gap-3 w-full rounded-xl border border-timeline-premium bg-timeline-premium   shadow-timeline-premium">
       <button
         onClick={isPlaying ? onPause : onPlay}
-        disabled={durationUs === 0}
+        disabled={!canPlay}
         className="p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
         aria-label={isPlaying ? 'Pause' : 'Play'}
       >
@@ -64,7 +66,7 @@ const Timeline = ({
         progressPercent={progressPercent}
         onSeekPositionChange={handleSeekPositionChange}
         formatTooltip={formatTooltip}
-        disabled={durationUs === 0}
+        disabled={!canPlay}
       />
 
       <span className="text-xs font-mono tabular-nums whitespace-nowrap">
