@@ -37,7 +37,6 @@ const LocalFilePicker = ({ onLocalFilesLoaded }: LocalFilePickerProps) => {
     async (files: FileList) => {
       const fileBrowser = new LocalFileSessionFileReader(Array.from(files));
       setSessions(await fileBrowser.listSessions());
-
       setBrowser(fileBrowser);
       setLoadError(null);
       setExpandedSession(null);

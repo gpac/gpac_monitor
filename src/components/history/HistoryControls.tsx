@@ -1,19 +1,21 @@
+import { useMemo } from 'react';
 import { LuClapperboard } from 'react-icons/lu';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { usePlayerState } from '@/services/historyService/usePlayerState';
+import { mapManifestToSegments } from '@/utils/history/mapManifestToSegments';
+import { getDuration } from '@/services/historyService/manifestParser';
 import Timeline from './Timeline';
 
 const HistoryControls = () => {
-  const { mode } = useDataSource();
-  const {
-    state,
-    currentTimeUs,
-    durationUs,
-    sessionStartUs,
-    play,
-    pause,
-    seek,
-  } = usePlayerState();
+  const { mode, manifest } = useDataSource();
+  const { state, currentTimeUs, play, pause, seek } = usePlayerState();
+
+  const segments = useMemo(
+    () => (manifest ? mapManifestToSegments(manifest) : []),
+    [manifest],
+  );
+  const durationUs = manifest ? getDuration(manifest) : 0;
+  const sessionStartUs = manifest?.startUs ?? 0;
 
   if (mode !== 'history') return null;
 
@@ -25,10 +27,11 @@ const HistoryControls = () => {
       </span>
       <div className="w-px h-4 bg-purple-500/40" />
       <Timeline
-        state={state}
         currentTimeUs={currentTimeUs}
         durationUs={durationUs}
         sessionStartUs={sessionStartUs}
+        segments={segments}
+        isPlaying={state === 'playing'}
         onPlay={play}
         onPause={pause}
         onSeek={seek}

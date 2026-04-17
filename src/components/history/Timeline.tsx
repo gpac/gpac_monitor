@@ -2,29 +2,30 @@ import { useCallback } from 'react';
 import { LuPause } from 'react-icons/lu';
 import SeekBar from './SeekBar';
 import { formatCompactTime } from '@/utils/formatting/time';
-import type { PlayerState } from '@/services/historyService/replay/eventPlayer';
 import { FaCirclePlay } from 'react-icons/fa6';
+import type { TimeSegment } from '@/utils/history/mapManifestToSegments';
 
 interface TimelineProps {
-  state: PlayerState;
   currentTimeUs: number;
   durationUs: number;
   sessionStartUs: number;
+  segments: TimeSegment[];
+  isPlaying?: boolean;
   onPlay: () => void;
   onPause: () => void;
   onSeek: (targetTimestampUs: number) => void;
 }
 
 const Timeline = ({
-  state,
   currentTimeUs,
   durationUs,
   sessionStartUs,
+  segments: _segments,
+  isPlaying = false,
   onPlay,
   onPause,
   onSeek,
 }: TimelineProps) => {
-  const isPlaying = state === 'playing';
   const relativeTimeUs = currentTimeUs - sessionStartUs;
   const elapsedUs = Math.max(0, Math.min(relativeTimeUs, durationUs));
   const progressPercent = durationUs > 0 ? (elapsedUs / durationUs) * 100 : 0;
@@ -45,7 +46,7 @@ const Timeline = ({
   );
 
   return (
-   <div className="flex items-center gap-3 w-full rounded-xl border border-timeline-premium bg-timeline-premium   shadow-timeline-premium">
+    <div className="flex items-center gap-3 w-full rounded-xl border border-timeline-premium bg-timeline-premium   shadow-timeline-premium">
       <button
         onClick={isPlaying ? onPause : onPlay}
         disabled={durationUs === 0}
