@@ -3,7 +3,10 @@ import { useDispatch } from 'react-redux';
 import { clearAllSessionData } from '@/shared/store/actions/globalActions';
 import { historyController } from '@/services/historyService/historyController';
 import type { AppDispatch } from '@/shared/store';
-import type { HistorySource } from '@/services/historyService/source/types';
+import type {
+  HistorySource,
+  HistoryManifest,
+} from '@/services/historyService/source/types';
 import { formatTimestamp } from '@/utils/formatting';
 
 export type DataSourceMode = 'live' | 'history';
@@ -17,11 +20,13 @@ interface DataSourceContextValue {
   mode: DataSourceMode;
   sessionLoaded: boolean;
   sessionName: string | null;
+  manifest: HistoryManifest | null;
   switchToLive: () => void;
   loadFromSource: (
     source: HistorySource,
     fromUs?: number,
     toUs?: number,
+    manifest?: HistoryManifest | null,
   ) => Promise<void>;
 }
 
@@ -29,6 +34,7 @@ const DataSourceContext = createContext<DataSourceContextValue>({
   mode: 'live',
   sessionLoaded: false,
   sessionName: null,
+  manifest: null,
   switchToLive: () => {},
   loadFromSource: async () => {},
 });
@@ -42,10 +48,17 @@ export function DataSourceProvider({
   const [mode, setMode] = useState<DataSourceMode>(getInitialMode);
   const [sessionLoaded, setSessionLoaded] = useState(false);
   const [sessionName, setSessionName] = useState<string | null>(null);
+  const [manifest, setManifest] = useState<HistoryManifest | null>(null);
 
   const loadFromSource = useCallback(
-    async (source: HistorySource, fromUs?: number, toUs?: number) => {
+    async (
+      source: HistorySource,
+      fromUs?: number,
+      toUs?: number,
+      loadedManifest?: HistoryManifest | null,
+    ) => {
       await historyController.load(source, dispatch, fromUs, toUs);
+      setManifest(loadedManifest ?? null);
       setSessionName(formatTimestamp(source.sessionId));
       setSessionLoaded(true);
       setMode('history');
@@ -58,12 +71,20 @@ export function DataSourceProvider({
     dispatch(clearAllSessionData());
     setSessionLoaded(false);
     setSessionName(null);
+    setManifest(null);
     setMode('live');
   }, [dispatch]);
 
   return (
     <DataSourceContext.Provider
-      value={{ mode, sessionLoaded, sessionName, switchToLive, loadFromSource }}
+      value={{
+        mode,
+        sessionLoaded,
+        sessionName,
+        manifest,
+        switchToLive,
+        loadFromSource,
+      }}
     >
       {children}
     </DataSourceContext.Provider>

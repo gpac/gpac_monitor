@@ -37,6 +37,7 @@ const LocalFilePicker = ({ onLocalFilesLoaded }: LocalFilePickerProps) => {
     async (files: FileList) => {
       const fileBrowser = new LocalFileSessionFileReader(Array.from(files));
       setSessions(await fileBrowser.listSessions());
+
       setBrowser(fileBrowser);
       setLoadError(null);
       setExpandedSession(null);
@@ -51,8 +52,9 @@ const LocalFilePicker = ({ onLocalFilesLoaded }: LocalFilePickerProps) => {
       setLoadingSession(true);
       setLoadError(null);
       try {
+        const manifest = await browser.readManifest(sessionId);
         const source = new FileHistorySource(browser, sessionId);
-        await loadFromSource(source, fromUs, toUs);
+        await loadFromSource(source, fromUs, toUs, manifest);
         if (source.wasTruncated) {
           toast({
             title: 'Session truncated',
