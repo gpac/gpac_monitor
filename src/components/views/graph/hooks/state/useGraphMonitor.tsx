@@ -24,11 +24,13 @@ import { useGraphState } from './useGraphState';
 import { useGraphConnection } from '../connection/useGraphConnection';
 import { useGraphHandlers } from '../interaction/useGraphHandlers';
 import { useGraphNotifications } from '../interaction/useGraphNotifications';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useFilterArgs } from '../interaction/useFilterArgs';
 
 const useGraphMonitor = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const { mode } = useDataSource();
 
   // Refs to track component state
   const nodesRef = useRef<Node[]>([]);
@@ -97,6 +99,7 @@ const useGraphMonitor = () => {
     error,
     isLoading,
     toast,
+    disabled: mode === 'history',
   });
 
   // Effect to update local nodes and edges from Redux

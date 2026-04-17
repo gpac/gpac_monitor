@@ -7,6 +7,7 @@ interface UseGraphNotificationsProps {
   error: string | null;
   isLoading: boolean;
   toast: (props: Omit<ToasterToast, 'id'>) => void;
+  disabled?: boolean;
 }
 
 /**
@@ -18,9 +19,11 @@ export const useGraphNotifications = ({
   error,
   isLoading,
   toast,
+  disabled = false,
 }: UseGraphNotificationsProps) => {
   // Notification for successful graph loading
   useEffect(() => {
+    if (disabled) return;
     if (nodes.length > 0 && !isLoading) {
       toast({
         title: 'Graph loaded',
@@ -28,10 +31,11 @@ export const useGraphNotifications = ({
         variant: 'default',
       });
     }
-  }, [nodes.length, isLoading, toast]);
+  }, [nodes.length, isLoading, toast, disabled]);
 
   // Notification for errors
   useEffect(() => {
+    if (disabled) return;
     if (error) {
       toast({
         title: 'Error',
@@ -39,7 +43,7 @@ export const useGraphNotifications = ({
         variant: 'destructive',
       });
     }
-  }, [error, toast]);
+  }, [error, toast, disabled]);
 
   return {};
 };
