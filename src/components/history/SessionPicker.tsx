@@ -10,8 +10,6 @@ import { useAppSelector } from '@/shared/hooks/redux';
 import { selectActiveConnection } from '@/shared/store/selectors';
 import SessionRow from './SessionRow';
 import LocalFilePicker from './LocalFilePicker';
-import TimeWindowExpansion from './TimeWindowExpansion';
-import type { SessionInfo } from '@/services/historyService/sessionFileReader/types';
 
 const SessionPicker = () => {
   const { isHistory } = useDataMode();
@@ -21,20 +19,17 @@ const SessionPicker = () => {
     activeConnection?.address,
   );
   const [isLocal, setIsLocal] = useState(false);
-  const [expandedSession, setExpandedSession] = useState<SessionInfo | null>(
-    null,
-  );
   const [loadingSession, setLoadingSession] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadSession = useCallback(
-    async (sessionId: string, fromUs?: number, toUs?: number) => {
+    async (sessionId: string) => {
       if (!browser) return;
       setLoadingSession(true);
       setLoadError(null);
       try {
         const source = new RemoteHistorySource(browser, sessionId);
-        await loadFromSource(source, fromUs, toUs);
+        await loadFromSource(source);
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : 'Load failed');
         setLoadingSession(false);
@@ -44,29 +39,9 @@ const SessionPicker = () => {
   );
 
   const handleSelect = useCallback(
-    (sessionId: string) => {
-      const session = sessions.find((s) => s.sessionId === sessionId);
-      if (!session) return;
-      if (session.startUs !== undefined && session.endUs !== undefined) {
-        setExpandedSession(session);
-      } else {
-        loadSession(sessionId);
-      }
-    },
-    [sessions, loadSession],
+    (sessionId: string) => loadSession(sessionId),
+    [loadSession],
   );
-
-  const handleConfirm = useCallback(
-    (fromUs: number, toUs: number) => {
-      if (!expandedSession) return;
-      loadSession(expandedSession.sessionId, fromUs, toUs);
-    },
-    [expandedSession, loadSession],
-  );
-
-  const handleCancel = useCallback(() => {
-    setExpandedSession(null);
-  }, []);
 
   if (!isHistory || sessionLoaded) return null;
 
@@ -81,61 +56,52 @@ const SessionPicker = () => {
         </div>
 
         <div className="px-3 py-3 ">
-          {expandedSession ? (
-            <TimeWindowExpansion
-              session={expandedSession}
-              loading={loadingSession}
-              onConfirm={handleConfirm}
-              onCancel={handleCancel}
-            />
-          ) : (
-            <>
-              {!isLocal && loading && (
-                <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
-                  <Spinner className="w-4 h-4" />
-                  <span className="text-sm">Loading sessions…</span>
-                </div>
-              )}
-              {!isLocal && !loading && error && (
-                <div className="flex flex-col items-center gap-3 py-6 text-center">
-                  <LuLoaderCircle className="w-6 h-6 text-red-400" />
-                  <p className="text-sm text-gray-400">{error}</p>
-                  <Button variant="outline" size="sm" onClick={retry}>
-                    <LuRefreshCw className="w-3 h-3 mr-1.5" /> Retry
-                  </Button>
-                </div>
-              )}
-              {!isLocal && !loading && !error && sessions.length === 0 && (
-                <div className="flex flex-col items-center gap-3 py-6 text-center">
-                  <p className="text-sm text-gray-400">No sessions found.</p>
-                  <Button variant="outline" size="sm" onClick={retry}>
-                    <LuRefreshCw className="w-3 h-3 mr-1.5" /> Refresh
-                  </Button>
-                </div>
-              )}
-              {!loading &&
-                !error &&
-                sessions.map((session) => (
-                  <SessionRow
-                    key={session.sessionId}
-                    session={session}
-                    onSelect={handleSelect}
-                    disabled={loadingSession}
-                  />
-                ))}
-              {loadError && (
-                <p className="text-xs text-red-400 text-center mt-2">
-                  {loadError}
-                </p>
-              )}
-              {loadingSession && (
-                <div className="flex items-center justify-center py-2 gap-2 text-gray-400">
-                  <Spinner className="w-4 h-4" />
-                  <span className="text-sm">Loading session…</span>
-                </div>
-              )}
-            </>
-          )}
+          <>
+            {!isLocal && loading && (
+              <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
+                <Spinner className="w-4 h-4" />
+                <span className="text-sm">Loading sessions…</span>
+              </div>
+            )}
+            {!isLocal && !loading && error && (
+              <div className="flex flex-col items-center gap-3 py-6 text-center">
+                <LuLoaderCircle className="w-6 h-6 text-red-400" />
+                <p className="text-sm text-gray-400">{error}</p>
+                <Button variant="outline" size="sm" onClick={retry}>
+                  <LuRefreshCw className="w-3 h-3 mr-1.5" /> Retry
+                </Button>
+              </div>
+            )}
+            {!isLocal && !loading && !error && sessions.length === 0 && (
+              <div className="flex flex-col items-center gap-3 py-6 text-center">
+                <p className="text-sm text-gray-400">No sessions found.</p>
+                <Button variant="outline" size="sm" onClick={retry}>
+                  <LuRefreshCw className="w-3 h-3 mr-1.5" /> Refresh
+                </Button>
+              </div>
+            )}
+            {!loading &&
+              !error &&
+              sessions.map((session) => (
+                <SessionRow
+                  key={session.sessionId}
+                  session={session}
+                  onSelect={handleSelect}
+                  disabled={loadingSession}
+                />
+              ))}
+            {loadError && (
+              <p className="text-xs text-red-400 text-center mt-2">
+                {loadError}
+              </p>
+            )}
+            {loadingSession && (
+              <div className="flex items-center justify-center py-2 gap-2 text-gray-400">
+                <Spinner className="w-4 h-4" />
+                <span className="text-sm">Loading session…</span>
+              </div>
+            )}
+          </>
         </div>
 
         <LocalFilePicker onLocalFilesLoaded={() => setIsLocal(true)} />

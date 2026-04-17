@@ -7,7 +7,6 @@ import { LocalFileSessionFileReader } from '@/services/historyService/sessionFil
 import { FileHistorySource } from '@/services/historyService/source/FileHistorySource';
 import { toast } from '@/shared/hooks/useToast';
 import SessionRow from './SessionRow';
-import TimeWindowExpansion from './TimeWindowExpansion';
 import type { SessionInfo } from '@/services/historyService/sessionFileReader/types';
 
 interface LocalFilePickerProps {
@@ -20,9 +19,6 @@ const LocalFilePicker = ({ onLocalFilesLoaded }: LocalFilePickerProps) => {
     null,
   );
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
-  const [expandedSession, setExpandedSession] = useState<SessionInfo | null>(
-    null,
-  );
   const [loadingSession, setLoadingSession] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -39,21 +35,20 @@ const LocalFilePicker = ({ onLocalFilesLoaded }: LocalFilePickerProps) => {
       setSessions(await fileBrowser.listSessions());
       setBrowser(fileBrowser);
       setLoadError(null);
-      setExpandedSession(null);
       onLocalFilesLoaded?.();
     },
     [onLocalFilesLoaded],
   );
 
   const loadSession = useCallback(
-    async (sessionId: string, fromUs?: number, toUs?: number) => {
+    async (sessionId: string) => {
       if (!browser) return;
       setLoadingSession(true);
       setLoadError(null);
       try {
         const manifest = await browser.readManifest(sessionId);
         const source = new FileHistorySource(browser, sessionId);
-        await loadFromSource(source, fromUs, toUs, manifest);
+        await loadFromSource(source, undefined, undefined, manifest);
         if (source.wasTruncated) {
           toast({
             title: 'Session truncated',
@@ -70,29 +65,9 @@ const LocalFilePicker = ({ onLocalFilesLoaded }: LocalFilePickerProps) => {
   );
 
   const handleSelect = useCallback(
-    (sessionId: string) => {
-      const session = sessions.find((s) => s.sessionId === sessionId);
-      if (!session) return;
-      if (session.startUs !== undefined && session.endUs !== undefined) {
-        setExpandedSession(session);
-      } else {
-        loadSession(sessionId);
-      }
-    },
-    [sessions, loadSession],
+    (sessionId: string) => loadSession(sessionId),
+    [loadSession],
   );
-
-  const handleConfirm = useCallback(
-    (fromUs: number, toUs: number) => {
-      if (!expandedSession) return;
-      loadSession(expandedSession.sessionId, fromUs, toUs);
-    },
-    [expandedSession, loadSession],
-  );
-
-  const handleCancel = useCallback(() => {
-    setExpandedSession(null);
-  }, []);
 
   return (
     <div className=" border-monitor-line">
@@ -118,35 +93,24 @@ const LocalFilePicker = ({ onLocalFilesLoaded }: LocalFilePickerProps) => {
         </Button>
       </div>
 
-      {expandedSession ? (
-        <TimeWindowExpansion
-          session={expandedSession}
-          loading={loadingSession}
-          onConfirm={handleConfirm}
-          onCancel={handleCancel}
-        />
-      ) : (
-        sessions.length > 0 && (
-          <div className="px-3 pb-3">
-            {sessions.map((session) => (
-              <SessionRow
-                key={session.sessionId}
-                session={session}
-                onSelect={handleSelect}
-                disabled={loadingSession}
-              />
-            ))}
-            {loadingSession && (
-              <div className="flex items-center justify-center py-2 gap-2 text-gray-400">
-                <Spinner className="w-4 h-4" />
-                <span className="text-sm">Loading session…</span>
-              </div>
-            )}
-            {loadError && (
-              <p className="text-xs text-center mt-2">{loadError}</p>
-            )}
-          </div>
-        )
+      {sessions.length > 0 && (
+        <div className="px-3 pb-3">
+          {sessions.map((session) => (
+            <SessionRow
+              key={session.sessionId}
+              session={session}
+              onSelect={handleSelect}
+              disabled={loadingSession}
+            />
+          ))}
+          {loadingSession && (
+            <div className="flex items-center justify-center py-2 gap-2 text-gray-400">
+              <Spinner className="w-4 h-4" />
+              <span className="text-sm">Loading session…</span>
+            </div>
+          )}
+          {loadError && <p className="text-xs text-center mt-2">{loadError}</p>}
+        </div>
       )}
     </div>
   );
