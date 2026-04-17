@@ -13,7 +13,6 @@ import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
 import { PidPropsHandler } from './pidPropsHandler';
 import { CommandLineHandler } from './commandLineHandler';
-import { toastService } from '@/shared/hooks/useToast';
 import {
   LogBatchResponse,
   LogHistoryResponse,
@@ -157,10 +156,10 @@ export class BaseMessageHandler {
         this.handleSessionEnd(data);
         break;
       case 'notification':
-        toastService.show({
-          title: data.type,
-          description: data.description ?? '',
-        });
+        this.notificationHandlers.onBackendNotification?.(
+          data.type,
+          data.description ?? '',
+        );
         break;
       default:
       // Unknown message type
