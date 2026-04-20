@@ -1,4 +1,5 @@
 import type { HistoryManifest } from '@/services/historyService/source/types';
+import { getEventChunkRange } from '@/services/historyService/manifestParser';
 
 export type TimeSegment = {
   fromUs: number;
@@ -8,8 +9,7 @@ export type TimeSegment = {
 export function mapManifestToSegments(
   manifest: HistoryManifest,
 ): TimeSegment[] {
-  return manifest.eventChunks.map((chunk) => ({
-    fromUs: chunk.fromUs,
-    toUs: chunk.toUs,
-  }));
+  return Array.from({ length: manifest.chunkCount }, (_, index) =>
+    getEventChunkRange(manifest, index),
+  );
 }

@@ -1,41 +1,8 @@
 import type {
   HistoryManifest,
-  HistoryManifestEventChunk,
   HistoryManifestCheckpoint,
   HistoryManifestChunk,
 } from './source/types';
-
-function assertEventChunk(
-  chunk: unknown,
-  position: number,
-): asserts chunk is Record<string, unknown> {
-  if (!chunk || typeof chunk !== 'object') {
-    throw new Error(
-      `[ManifestParser] eventChunks[${position}] must be an object`,
-    );
-  }
-  const chk = chunk as Record<string, unknown>;
-  if (typeof chk['file'] !== 'string') {
-    throw new Error(
-      `[ManifestParser] eventChunks[${position}].file must be a string`,
-    );
-  }
-  if (typeof chk['fromUs'] !== 'number') {
-    throw new Error(
-      `[ManifestParser] eventChunks[${position}].fromUs must be a number`,
-    );
-  }
-  if (typeof chk['toUs'] !== 'number') {
-    throw new Error(
-      `[ManifestParser] eventChunks[${position}].toUs must be a number`,
-    );
-  }
-  if ((chk['fromUs'] as number) >= (chk['toUs'] as number)) {
-    throw new Error(
-      `[ManifestParser] eventChunks[${position}]: fromUs must be < toUs`,
-    );
-  }
-}
 
 export function parseManifest(raw: unknown): HistoryManifest {
   if (!raw || typeof raw !== 'object') {
@@ -52,23 +19,17 @@ export function parseManifest(raw: unknown): HistoryManifest {
   if (typeof data['endUs'] !== 'number') {
     throw new Error('[ManifestParser] endUs must be a number');
   }
-
-  const rawChunks = data['eventChunks'] ?? data['chunks'];
-  if (!Array.isArray(rawChunks) || rawChunks.length === 0) {
-    throw new Error('[ManifestParser] eventChunks must be a non-empty array');
+  if (
+    typeof data['chunkDurationUs'] !== 'number' ||
+    data['chunkDurationUs'] <= 0
+  ) {
+    throw new Error(
+      '[ManifestParser] chunkDurationUs must be a positive number',
+    );
   }
-
-  const eventChunks: HistoryManifestEventChunk[] = rawChunks.map((chunk, i) => {
-    assertEventChunk(chunk, i);
-    return {
-      file: chunk['file'] as string,
-      fromUs: chunk['fromUs'] as number,
-      toUs: chunk['toUs'] as number,
-      count: typeof chunk['count'] === 'number' ? chunk['count'] : 0,
-      index: i,
-      hasCheckpoint: chunk['hasCheckpoint'] === true,
-    };
-  });
+  if (typeof data['chunkCount'] !== 'number' || data['chunkCount'] <= 0) {
+    throw new Error('[ManifestParser] chunkCount must be a positive number');
+  }
 
   const logChunks: HistoryManifestChunk[] = Array.isArray(data['logChunks'])
     ? (data['logChunks'] as unknown[]).filter(
@@ -89,9 +50,9 @@ export function parseManifest(raw: unknown): HistoryManifest {
     data['checkpoints'],
   )
     ? (data['checkpoints'] as unknown[]).filter(
-        (checkpoint): checkpoint is HistoryManifestCheckpoint => {
-          if (!checkpoint || typeof checkpoint !== 'object') return false;
-          const chk = checkpoint as Record<string, unknown>;
+        (cp): cp is HistoryManifestCheckpoint => {
+          if (!cp || typeof cp !== 'object') return false;
+          const chk = cp as Record<string, unknown>;
           return (
             typeof chk['chunkIndex'] === 'number' &&
             typeof chk['file'] === 'string'
@@ -104,7 +65,8 @@ export function parseManifest(raw: unknown): HistoryManifest {
     version: 1,
     startUs: data['startUs'] as number,
     endUs: data['endUs'] as number,
-    eventChunks,
+    chunkDurationUs: data['chunkDurationUs'] as number,
+    chunkCount: data['chunkCount'] as number,
     logChunks,
     checkpoints,
   };
@@ -114,18 +76,25 @@ export function getDuration(manifest: HistoryManifest): number {
   return manifest.endUs - manifest.startUs;
 }
 
+/** Returns the chunk index for a given timestamp. */
 export function findEventChunkIndex(
   manifest: HistoryManifest,
   tsUs: number,
 ): number {
-  const chunks = manifest.eventChunks;
-  if (chunks.length === 0) throw new Error('[ManifestParser] no event chunks');
+  const index = Math.floor(
+    (tsUs - manifest.startUs) / manifest.chunkDurationUs,
+  );
+  return Math.max(0, Math.min(index, manifest.chunkCount - 1));
+}
 
-  for (let i = 0; i < chunks.length; i++) {
-    if (tsUs >= chunks[i].fromUs && tsUs < chunks[i].toUs) return i;
-  }
-
-  return chunks.length - 1;
+/** Returns the [fromUs, toUs] range for a given chunk index. */
+export function getEventChunkRange(
+  manifest: HistoryManifest,
+  index: number,
+): { fromUs: number; toUs: number } {
+  const fromUs = manifest.startUs + index * manifest.chunkDurationUs;
+  const toUs = Math.min(fromUs + manifest.chunkDurationUs, manifest.endUs);
+  return { fromUs, toUs };
 }
 
 /** Returns all logChunks whose [fromUs, toUs] intersects the given range. */

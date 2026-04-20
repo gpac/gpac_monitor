@@ -2,6 +2,7 @@ import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
 import type { HistorySource, HistoryMetadata, HistoryManifest } from './types';
 import { WsSessionFileReader } from '../sessionFileReader/WsSessionFileReader';
 import { chunkIndexFromPath } from './chunkUtils';
+import { findEventChunkIndex } from '../manifestParser';
 
 /**
  * Wraps WsSessionFileReader for a specific session.
@@ -107,16 +108,19 @@ export class RemoteHistorySource implements HistorySource {
     fromUs?: number,
     toUs?: number,
   ): Promise<HistoryEvent[]> {
-    const relevantChunks = manifest.eventChunks.filter(
-      (chunk) =>
-        (toUs === undefined || chunk.fromUs <= toUs) &&
-        (fromUs === undefined || chunk.toUs >= fromUs),
+    const firstIndex =
+      fromUs !== undefined ? findEventChunkIndex(manifest, fromUs) : 0;
+    const lastIndex =
+      toUs !== undefined
+        ? findEventChunkIndex(manifest, toUs)
+        : manifest.chunkCount - 1;
+    const indices = Array.from(
+      { length: lastIndex - firstIndex + 1 },
+      (_, i) => firstIndex + i,
     );
 
     const chunkResults = await Promise.all(
-      relevantChunks.map((chunk) =>
-        this.reader.readChunk(this.sessionId, chunk.index),
-      ),
+      indices.map((index) => this.reader.readChunk(this.sessionId, index)),
     );
 
     return chunkResults
