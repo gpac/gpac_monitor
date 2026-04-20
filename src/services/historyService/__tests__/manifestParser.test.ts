@@ -3,6 +3,8 @@ import {
   parseManifest,
   getDuration,
   findEventChunkIndex,
+  getEventChunkRange,
+  getChunkFile,
   findLogChunksInRange,
   findNearestCheckpoint,
 } from '../manifestParser';
@@ -12,32 +14,8 @@ const manifest: HistoryManifest = {
   version: 1,
   startUs: 0,
   endUs: 30_000_000,
-  eventChunks: [
-    {
-      index: 0,
-      fromUs: 0,
-      toUs: 10_000_000,
-      file: 'chunks/chunk_0000.jsonl',
-      count: 100,
-      hasCheckpoint: false,
-    },
-    {
-      index: 1,
-      fromUs: 10_000_000,
-      toUs: 20_000_000,
-      file: 'chunks/chunk_0001.jsonl',
-      count: 150,
-      hasCheckpoint: true,
-    },
-    {
-      index: 2,
-      fromUs: 20_000_000,
-      toUs: 30_000_000,
-      file: 'chunks/chunk_0002.jsonl',
-      count: 80,
-      hasCheckpoint: false,
-    },
-  ],
+  chunkDurationUs: 10_000_000,
+  chunkCount: 3,
   logChunks: [
     { fromUs: 0, toUs: 5_000_000, file: 'logs/logs_0000.jsonl', count: 50 },
     {
@@ -74,15 +52,50 @@ describe('findEventChunkIndex', () => {
     [10_000_000, 1],
     [19_999_999, 1],
     [20_000_000, 2],
-    [35_000_000, 2], // après la fin → dernier chunk
-  ])('ts=%i → position %i', (tsUs, expected) => {
+    [35_000_000, 2], // après la fin → clamp au dernier chunk
+  ])('ts=%i → index %i', (tsUs, expected) => {
     expect(findEventChunkIndex(manifest, tsUs)).toBe(expected);
   });
 
-  it('throws if eventChunks is empty', () => {
-    expect(() =>
-      findEventChunkIndex({ ...manifest, eventChunks: [] }, 0),
-    ).toThrow();
+  it('clamps negative timestamps to 0', () => {
+    expect(findEventChunkIndex(manifest, -1_000_000)).toBe(0);
+  });
+});
+
+// --- getEventChunkRange ---
+
+describe('getEventChunkRange', () => {
+  it('returns correct range for each index', () => {
+    expect(getEventChunkRange(manifest, 0)).toEqual({
+      fromUs: 0,
+      toUs: 10_000_000,
+    });
+    expect(getEventChunkRange(manifest, 1)).toEqual({
+      fromUs: 10_000_000,
+      toUs: 20_000_000,
+    });
+    expect(getEventChunkRange(manifest, 2)).toEqual({
+      fromUs: 20_000_000,
+      toUs: 30_000_000,
+    });
+  });
+
+  it('clamps toUs to endUs for the last chunk', () => {
+    const m: HistoryManifest = { ...manifest, endUs: 28_000_000 };
+    expect(getEventChunkRange(m, 2).toUs).toBe(28_000_000);
+  });
+});
+
+// --- getChunkFile ---
+
+describe('getChunkFile', () => {
+  it.each([
+    [0, 'chunks/chunk_0000.jsonl'],
+    [3, 'chunks/chunk_0003.jsonl'],
+    [42, 'chunks/chunk_0042.jsonl'],
+    [1000, 'chunks/chunk_1000.jsonl'],
+  ])('index %i → %s', (index, expected) => {
+    expect(getChunkFile(index)).toBe(expected);
   });
 });
 
@@ -90,7 +103,6 @@ describe('findEventChunkIndex', () => {
 
 describe('findLogChunksInRange', () => {
   it('returns chunks intersecting the range', () => {
-    // logs_0000 [0,5M) et logs_0001 [4M,9M) intersectent [0,5M)
     expect(findLogChunksInRange(manifest, 0, 5_000_000)).toHaveLength(2);
   });
 
@@ -111,7 +123,6 @@ describe('findLogChunksInRange', () => {
   });
 
   it('handles multiple chunks covering the same time range', () => {
-    // logs_0000 et logs_0001 couvrent tous deux [4.5M, 5.5M)
     expect(findLogChunksInRange(manifest, 4_500_000, 5_500_000)).toHaveLength(
       2,
     );
@@ -143,49 +154,20 @@ describe('findNearestCheckpoint', () => {
 // --- parseManifest ---
 
 describe('parseManifest', () => {
-  it('parses a valid V7 manifest', () => {
-    const raw = {
-      version: 1,
-      startUs: 0,
-      endUs: 10_000_000,
-      eventChunks: [
-        {
-          fromUs: 0,
-          toUs: 10_000_000,
-          file: 'chunks/chunk_0000.jsonl',
-          count: 10,
-        },
-      ],
-    };
-    const parsed = parseManifest(raw);
-    expect(parsed.eventChunks[0].index).toBe(0);
+  const validRaw = {
+    version: 1,
+    startUs: 0,
+    endUs: 30_000_000,
+    chunkDurationUs: 10_000_000,
+    chunkCount: 3,
+  };
+
+  it('parses a valid manifest', () => {
+    const parsed = parseManifest(validRaw);
+    expect(parsed.chunkDurationUs).toBe(10_000_000);
+    expect(parsed.chunkCount).toBe(3);
     expect(parsed.logChunks).toEqual([]);
     expect(parsed.checkpoints).toEqual([]);
-  });
-
-  it('converts old "chunks" format — index = position', () => {
-    const raw = {
-      version: 1,
-      startUs: 0,
-      endUs: 10_000_000,
-      chunks: [
-        {
-          fromUs: 0,
-          toUs: 5_000_000,
-          file: 'chunks/chunk_0000.jsonl',
-          count: 5,
-        },
-        {
-          fromUs: 5_000_000,
-          toUs: 10_000_000,
-          file: 'chunks/chunk_0001.jsonl',
-          count: 5,
-        },
-      ],
-    };
-    const parsed = parseManifest(raw);
-    expect(parsed.eventChunks[0].index).toBe(0);
-    expect(parsed.eventChunks[1].index).toBe(1);
   });
 
   it('throws if not an object', () => {
@@ -194,45 +176,32 @@ describe('parseManifest', () => {
   });
 
   it('throws on unsupported version', () => {
-    expect(() => parseManifest({ version: 2, startUs: 0, endUs: 0 })).toThrow();
+    expect(() => parseManifest({ ...validRaw, version: 2 })).toThrow();
   });
 
   it('throws if startUs is not a number', () => {
-    expect(() =>
-      parseManifest({ version: 1, startUs: '0', endUs: 0 }),
-    ).toThrow();
+    expect(() => parseManifest({ ...validRaw, startUs: '0' })).toThrow();
   });
 
-  it('throws if eventChunks is missing', () => {
-    expect(() => parseManifest({ version: 1, startUs: 0, endUs: 0 })).toThrow();
+  it('throws if chunkDurationUs is missing', () => {
+    const { chunkDurationUs: _, ...raw } = validRaw;
+    expect(() => parseManifest(raw)).toThrow(/chunkDurationUs/);
   });
 
-  it('throws if a chunk has invalid file', () => {
-    const raw = {
-      version: 1,
-      startUs: 0,
-      endUs: 10_000_000,
-      eventChunks: [{ file: 123, fromUs: 0, toUs: 10_000_000, count: 1 }],
-    };
-    expect(() => parseManifest(raw)).toThrow(/file must be a string/);
+  it('throws if chunkDurationUs <= 0', () => {
+    expect(() => parseManifest({ ...validRaw, chunkDurationUs: 0 })).toThrow(
+      /chunkDurationUs/,
+    );
   });
 
-  it('throws if a chunk has fromUs >= toUs', () => {
-    const raw = {
-      version: 1,
-      startUs: 0,
-      endUs: 10_000_000,
-      eventChunks: [{ file: 'a.jsonl', fromUs: 10_000_000, toUs: 0, count: 1 }],
-    };
-    expect(() => parseManifest(raw)).toThrow(/fromUs must be < toUs/);
+  it('throws if chunkCount is missing', () => {
+    const { chunkCount: _, ...raw } = validRaw;
+    expect(() => parseManifest(raw)).toThrow(/chunkCount/);
   });
 
   it('silently drops invalid logChunks', () => {
     const raw = {
-      version: 1,
-      startUs: 0,
-      endUs: 10_000_000,
-      eventChunks: [{ fromUs: 0, toUs: 10_000_000, file: 'a.jsonl', count: 1 }],
+      ...validRaw,
       logChunks: [
         { fromUs: 0, toUs: 5_000_000, file: 'logs.jsonl', count: 1 },
         { fromUs: 0, toUs: 5_000_000, file: 123, count: 1 }, // file invalide
@@ -244,14 +213,11 @@ describe('parseManifest', () => {
 
   it('silently drops invalid checkpoints', () => {
     const raw = {
-      version: 1,
-      startUs: 0,
-      endUs: 10_000_000,
-      eventChunks: [{ fromUs: 0, toUs: 10_000_000, file: 'a.jsonl', count: 1 }],
+      ...validRaw,
       checkpoints: [
         { chunkIndex: 0, file: 'cp_0000.json' },
-        { chunkIndex: '0', file: 'cp_bad.json' }, // chunkIndex invalide
-        { file: 'cp_noindex.json' }, // chunkIndex absent
+        { chunkIndex: '0', file: 'cp_bad.json' },
+        { file: 'cp_noindex.json' },
       ],
     };
     expect(parseManifest(raw).checkpoints).toHaveLength(1);

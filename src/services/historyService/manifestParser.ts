@@ -87,6 +87,10 @@ export function findEventChunkIndex(
   return Math.max(0, Math.min(index, manifest.chunkCount - 1));
 }
 
+export function getChunkFile(index: number): string {
+  return `chunks/chunk_${String(index).padStart(4, '0')}.jsonl`;
+}
+
 /** Returns the [fromUs, toUs] range for a given chunk index. */
 export function getEventChunkRange(
   manifest: HistoryManifest,

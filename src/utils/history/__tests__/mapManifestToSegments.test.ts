@@ -6,36 +6,12 @@ const baseManifest: HistoryManifest = {
   version: 1,
   startUs: 1000,
   endUs: 31000,
-  eventChunks: [
-    {
-      file: 'chunk-0.jsonl',
-      fromUs: 1000,
-      toUs: 11000,
-      count: 10,
-      index: 0,
-      hasCheckpoint: false,
-    },
-    {
-      file: 'chunk-1.jsonl',
-      fromUs: 11000,
-      toUs: 21000,
-      count: 8,
-      index: 1,
-      hasCheckpoint: true,
-    },
-    {
-      file: 'chunk-2.jsonl',
-      fromUs: 21000,
-      toUs: 31000,
-      count: 12,
-      index: 2,
-      hasCheckpoint: false,
-    },
-  ],
+  chunkDurationUs: 10000,
+  chunkCount: 3,
 };
 
 describe('mapManifestToSegments', () => {
-  it('returns one segment per eventChunk', () => {
+  it('returns one segment per chunk', () => {
     const segments = mapManifestToSegments(baseManifest);
     expect(segments).toHaveLength(3);
   });
@@ -47,8 +23,8 @@ describe('mapManifestToSegments', () => {
     expect(segments[2]).toEqual({ fromUs: 21000, toUs: 31000 });
   });
 
-  it('returns empty array when eventChunks is empty', () => {
-    const manifest: HistoryManifest = { ...baseManifest, eventChunks: [] };
+  it('returns empty array when chunkCount is 0', () => {
+    const manifest: HistoryManifest = { ...baseManifest, chunkCount: 0 };
     expect(mapManifestToSegments(manifest)).toEqual([]);
   });
 
