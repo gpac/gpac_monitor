@@ -1,6 +1,10 @@
 import type { AppDispatch } from '@/shared/store';
 import type { CPUStats } from '@/types/domain/system';
-import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
+import type {
+  SessionFilterStats,
+  FilterPids,
+} from '@/shared/store/slices/sessionStatsSlice';
+import type { GraphFilterData } from '@/types/domain/gpac/model';
 import {
   setLoading,
   clearGraph,
@@ -59,6 +63,13 @@ import {
   BADGE_WINDOW_US,
   filterRecentIndexes,
 } from './utils/flushHelpers';
+
+export type HistoryCheckpoint = {
+  ts_us: number;
+  filters: GraphFilterData[];
+  pidsByFilter: Record<string, FilterPids>;
+  argsByFilter: Record<string, GpacArgument[]>;
+};
 
 export class HistoryAdapter {
   private prevBandwidth: PrevBandwidthState = {};
@@ -137,6 +148,23 @@ export class HistoryAdapter {
     this.pendingArgTimestamps = new Map();
     this.pendingPidsByFilter = {};
     this.pendingArgsByFilter = {};
+  }
+
+  private resetTemporalState(): void {
+    this.prevBandwidth = {};
+    this.pendingBandwidth = {};
+    this.pendingCpuStats = [];
+    this.pendingLastStats = null;
+  }
+
+  hydrateCheckpoint(checkpoint: HistoryCheckpoint): void {
+    this.resetTemporalState();
+    const { dispatch } = this;
+    dispatch(clearGraph());
+    dispatch(filtersUpdated(checkpoint.filters));
+    dispatch(clearFilterPids());
+    dispatch(setFilterPids(checkpoint.pidsByFilter));
+    dispatch(hydrateFilterArgs(checkpoint.argsByFilter));
   }
 
   hydrate(snapshot: HistorySnapshot, sessionStartUs: number): void {

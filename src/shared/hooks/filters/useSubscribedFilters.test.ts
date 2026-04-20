@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useSubscribedFilters } from './useSubscribedFilters';
-import { useGpacService } from './useGpacService';
+import { useGpacService } from '../connection/useGpacService';
 
-vi.mock('./useGpacService');
+vi.mock('../connection/useGpacService');
 
 describe('useSubscribedFilters', () => {
   const mockFilterSubscriptionsStore = {
