@@ -11,7 +11,8 @@ interface SessionRowProps {
 
 const SessionRow = memo(({ session, onSelect, disabled }: SessionRowProps) => {
   const isValid =
-    session.hasSnapshot && (session.hasEvents || session.hasManifest);
+    (session.hasSnapshot && (session.hasEvents || session.hasManifest)) ||
+    (session.hasManifest && session.hasCheckpoints);
   return (
     <button
       onClick={() => onSelect(session.sessionId)}

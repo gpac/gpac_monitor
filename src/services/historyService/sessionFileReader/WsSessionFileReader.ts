@@ -84,6 +84,24 @@ export class WsSessionFileReader {
     }
   }
 
+  async readCheckpoint(
+    sessionId: string,
+    chunkIndex: number,
+  ): Promise<unknown> {
+    await this.ensureConnected();
+    const file = `checkpoints/cp_${String(chunkIndex).padStart(4, '0')}.json`;
+    try {
+      const response = await this.sendCommand({
+        message: 'read_file',
+        sessionId,
+        file,
+      });
+      return JSON.parse(response.content as string);
+    } catch {
+      return null;
+    }
+  }
+
   async readChunk(
     sessionId: string,
     chunkIndex: number,

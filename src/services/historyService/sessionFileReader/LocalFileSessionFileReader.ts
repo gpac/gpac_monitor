@@ -1,8 +1,18 @@
 import type { HistorySnapshot, LogEvent } from '../types';
 import type { SessionInfo } from './types';
-import type { HistoryManifest } from '../source/types';
+import type {
+  HistoryManifest,
+  HistoryManifestCheckpoint,
+} from '../source/types';
 import { parseEventsJsonl, MAX_EVENTS } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
+
+const emptyEntry = (): SessionEntry => ({
+  done: false,
+  chunks: new Map(),
+  logChunks: new Map(),
+  checkpoints: new Map(),
+});
 
 interface SessionEntry {
   snapshot?: File;
@@ -10,6 +20,7 @@ interface SessionEntry {
   manifest?: File;
   chunks: Map<number, File>;
   logChunks: Map<number, File>;
+  checkpoints: Map<number, File>;
   done: boolean;
 }
 
@@ -31,13 +42,8 @@ export class LocalFileSessionFileReader {
         const chunkMatch = fileName.match(/^chunk_(\d+)\.jsonl$/);
         if (!chunkMatch) continue;
         const chunkIndex = parseInt(chunkMatch[1], 10);
-        if (!this.sessionMap.has(sessionId)) {
-          this.sessionMap.set(sessionId, {
-            done: false,
-            chunks: new Map(),
-            logChunks: new Map(),
-          });
-        }
+        if (!this.sessionMap.has(sessionId))
+          this.sessionMap.set(sessionId, emptyEntry());
         this.sessionMap.get(sessionId)!.chunks.set(chunkIndex, file);
       } else if (parentFolder === 'logs') {
         if (parts.length < 3) continue;
@@ -45,23 +51,22 @@ export class LocalFileSessionFileReader {
         const logMatch = fileName.match(/^logs_(\d+)\.jsonl$/);
         if (!logMatch) continue;
         const logIndex = parseInt(logMatch[1], 10);
-        if (!this.sessionMap.has(sessionId)) {
-          this.sessionMap.set(sessionId, {
-            done: false,
-            chunks: new Map(),
-            logChunks: new Map(),
-          });
-        }
+        if (!this.sessionMap.has(sessionId))
+          this.sessionMap.set(sessionId, emptyEntry());
         this.sessionMap.get(sessionId)!.logChunks.set(logIndex, file);
+      } else if (parentFolder === 'checkpoints') {
+        if (parts.length < 3) continue;
+        const sessionId = parts[parts.length - 3];
+        const cpMatch = fileName.match(/^cp_(\d+)\.json$/);
+        if (!cpMatch) continue;
+        const cpIndex = parseInt(cpMatch[1], 10);
+        if (!this.sessionMap.has(sessionId))
+          this.sessionMap.set(sessionId, emptyEntry());
+        this.sessionMap.get(sessionId)!.checkpoints.set(cpIndex, file);
       } else {
         const sessionId = parentFolder;
-        if (!this.sessionMap.has(sessionId)) {
-          this.sessionMap.set(sessionId, {
-            done: false,
-            chunks: new Map(),
-            logChunks: new Map(),
-          });
-        }
+        if (!this.sessionMap.has(sessionId))
+          this.sessionMap.set(sessionId, emptyEntry());
         const entry = this.sessionMap.get(sessionId)!;
         if (fileName === 'snapshot.json') entry.snapshot = file;
         else if (fileName === 'events.jsonl') entry.events = file;
@@ -84,7 +89,7 @@ export class LocalFileSessionFileReader {
               startUs = manifest.startUs;
               endUs = manifest.endUs;
             } catch {
-              console.error(`starUs and endUs undefined !`);
+              console.error(`startUs and endUs undefined`);
             }
           }
           return {
@@ -92,6 +97,7 @@ export class LocalFileSessionFileReader {
             hasSnapshot: !!entry.snapshot,
             hasEvents: !!entry.events,
             hasManifest: !!entry.manifest,
+            hasCheckpoints: entry.checkpoints.size > 0,
             sizeBytes: (entry.snapshot?.size ?? 0) + (entry.events?.size ?? 0),
             isComplete: entry.done,
             startUs,
@@ -117,6 +123,19 @@ export class LocalFileSessionFileReader {
     }
   }
 
+  async readCheckpoint(
+    sessionId: string,
+    chunkIndex: number,
+  ): Promise<(HistoryManifestCheckpoint & { filters: unknown[] }) | null> {
+    const file = this.sessionMap.get(sessionId)?.checkpoints.get(chunkIndex);
+    if (!file) return null;
+    try {
+      return JSON.parse(await file.text());
+    } catch {
+      return null;
+    }
+  }
+
   async readChunk(sessionId: string, chunkIndex: number) {
     const file = this.sessionMap.get(sessionId)?.chunks.get(chunkIndex);
     if (!file) return [];
@@ -127,8 +146,7 @@ export class LocalFileSessionFileReader {
     sessionId: string,
     chunkIndex: number,
   ): Promise<LogEvent[]> {
-    const entry = this.sessionMap.get(sessionId);
-    const file = entry?.logChunks.get(chunkIndex);
+    const file = this.sessionMap.get(sessionId)?.logChunks.get(chunkIndex);
     if (!file) return [];
     return parseEventsJsonl(await file.text()) as unknown as LogEvent[];
   }

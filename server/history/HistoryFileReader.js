@@ -12,7 +12,6 @@ const VALID_CHECKPOINT_FILE = /^checkpoints\/cp_\d{4}\.json$/;
  *
  * Security: whitelist of allowed filenames, sessionId must be numeric,
  * all reads scoped to historyDir.
- * Supports both legacy (events.jsonl) and chunked (chunks/ + manifest.json) formats.
  */
 function HistoryFileReader(historyDir) {
     const baseDir = historyDir || 'history';
@@ -30,9 +29,10 @@ function HistoryFileReader(historyDir) {
             const hasManifest = fileExists(`${dir}/manifest.json`);
             const hasEvents = fileExists(`${dir}/events.jsonl`);
             if (!hasSnapshot && !hasManifest && !hasEvents) continue;
+            const hasCheckpoints = dirHasFiles(`${dir}/checkpoints`, /^cp_\d{4}\.json$/);
             const sizeBytes = hasEvents ? fileSize(`${dir}/events.jsonl`) : 0;
             const isComplete = fileExists(`${dir}/done`);
-            sessions.push({ sessionId: entry, hasSnapshot, hasEvents, hasManifest, sizeBytes, isComplete });
+            sessions.push({ sessionId: entry, hasSnapshot, hasEvents, hasManifest, hasCheckpoints, sizeBytes, isComplete });
         }
         sessions.sort((a, b) => Number(b.sessionId) - Number(a.sessionId));
         return sessions;
@@ -115,6 +115,12 @@ function fileSize(path) {
     const [stat, err] = os.stat(path);
     if (err) return 0;
     return stat.size || 0;
+}
+
+function dirHasFiles(dir, pattern) {
+    const [entries, err] = os.readdir(dir);
+    if (err) return false;
+    return entries.some(entry => pattern.test(entry));
 }
 
 export { HistoryFileReader };

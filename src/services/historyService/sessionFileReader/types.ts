@@ -3,6 +3,7 @@ export interface SessionInfo {
   hasSnapshot: boolean;
   hasEvents: boolean;
   hasManifest: boolean;
+  hasCheckpoints: boolean;
   sizeBytes: number;
   isComplete: boolean;
   startUs?: number;
