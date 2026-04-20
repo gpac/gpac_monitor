@@ -21,7 +21,7 @@ const Timeline = ({
   currentTimeUs,
   durationUs,
   sessionStartUs,
-  segments: _segments,
+  segments,
   isPlaying = false,
   canPlay = false,
   onPlay,
@@ -31,6 +31,12 @@ const Timeline = ({
   const relativeTimeUs = currentTimeUs - sessionStartUs;
   const elapsedUs = Math.max(0, Math.min(relativeTimeUs, durationUs));
   const progressPercent = durationUs > 0 ? (elapsedUs / durationUs) * 100 : 0;
+  const segmentMarkers =
+    durationUs > 0
+      ? segments
+          .slice(1)
+          .map((seg) => ((seg.fromUs - sessionStartUs) / durationUs) * 100)
+      : [];
 
   const handleSeekPositionChange = useCallback(
     (positionPercent: number) => {
@@ -67,6 +73,7 @@ const Timeline = ({
         onSeekPositionChange={handleSeekPositionChange}
         formatTooltip={formatTooltip}
         disabled={!canPlay}
+        segmentMarkers={segmentMarkers}
       />
 
       <span className="text-xs font-mono tabular-nums whitespace-nowrap">
