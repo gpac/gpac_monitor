@@ -2,8 +2,8 @@ import * as std from 'std';
 import * as os from 'os';
 import { ChunkStream } from './helpers/ChunkStream.js';
 
-const CHUNK_SIZE = 500;
-const LOG_SIZE = 1000;
+const CHUNK_DURATION_US = 10 * 1000 * 1000;
+const MAX_LOG_PER_CHUNK = 5000;
 
 function HistoryWriter(historyDir, sessionId) {
     const baseDir = historyDir || 'history';
@@ -11,6 +11,7 @@ function HistoryWriter(historyDir, sessionId) {
     const dir = `${baseDir}/${id}`;
     const chunksDir = `${dir}/chunks`;
     const logsDir = `${dir}/logs`;
+    const checkpointsDir = `${dir}/checkpoints`;
 
     this.sessionId = id;
     this.sessionDir = dir;
@@ -21,6 +22,7 @@ function HistoryWriter(historyDir, sessionId) {
     this._logs = null;
     this._sessionStartUs = null;
     this._lastEventUs = null;
+    this._checkpoints = [];
 
     this._init = function() {
         if (this._initialized) return;
@@ -29,9 +31,10 @@ function HistoryWriter(historyDir, sessionId) {
         try { os.mkdir(dir); } catch (_e) {}
         try { os.mkdir(chunksDir); } catch (_e) {}
         try { os.mkdir(logsDir); } catch (_e) {}
+        try { os.mkdir(checkpointsDir); } catch (_e) {}
         print(`[HistoryWriter] Recording session ${id} to ${dir}/`);
-        this._events = new ChunkStream(chunksDir, 'chunk', CHUNK_SIZE);
-        this._logs = new ChunkStream(logsDir, 'logs', LOG_SIZE);
+        this._events = new ChunkStream(chunksDir, 'chunk', CHUNK_DURATION_US);
+        this._logs = new ChunkStream(logsDir, 'logs', CHUNK_DURATION_US, MAX_LOG_PER_CHUNK);
     };
 
     this._updateTimestamps = function(tsUs) {
@@ -44,7 +47,10 @@ function HistoryWriter(historyDir, sessionId) {
             version: 1,
             startUs: this._sessionStartUs,
             endUs: this._lastEventUs,
-            chunks: this._events ? this._events.getAllChunks() : [],
+            chunkDurationUs: CHUNK_DURATION_US,
+            chunkCount: this._events ? this._events.getChunkCount() : 1,
+            snapshot: 'snapshot.json',
+            checkpoints: this._checkpoints,
             logChunks: this._logs ? this._logs.getAllChunks() : [],
         };
         const manifestFile = std.open(`${dir}/manifest.json`, 'w');
@@ -70,7 +76,24 @@ function HistoryWriter(historyDir, sessionId) {
     this.writeEvent = function(jsonString, tsUs) {
         this._init();
         this._updateTimestamps(tsUs);
-        if (this._events.write(jsonString, tsUs)) this._writeManifest();
+        const rotated = this._events.write(jsonString, tsUs);
+        if (rotated) this._writeManifest();
+        return rotated;
+    };
+
+    this.writeCheckpoint = function(chunkIndex, obj) {
+        const padded = String(chunkIndex).padStart(4, '0');
+        const file = `checkpoints/cp_${padded}.json`;
+        const cpFile = std.open(`${dir}/${file}`, 'w');
+        if (!cpFile) { print(`[HistoryWriter] Failed to write checkpoint ${file}`); return; }
+        cpFile.puts(JSON.stringify(obj) + '\n');
+        cpFile.close();
+        this._checkpoints.push({ chunkIndex, file });
+        this._writeManifest();
+    };
+
+    this.getCurrentChunkIndex = function() {
+        return this._events ? this._events._index : 0;
     };
 
     this.close = function() {

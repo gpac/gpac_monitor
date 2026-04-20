@@ -67,6 +67,7 @@ export function parseManifest(raw: unknown): HistoryManifest {
     endUs: data['endUs'] as number,
     chunkDurationUs: data['chunkDurationUs'] as number,
     chunkCount: data['chunkCount'] as number,
+    snapshot: typeof data['snapshot'] === 'string' ? data['snapshot'] : undefined,
     logChunks,
     checkpoints,
   };

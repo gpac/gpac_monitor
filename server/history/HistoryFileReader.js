@@ -5,6 +5,7 @@ const ALLOWED_EXACT_FILES = ['snapshot.json', 'events.jsonl', 'manifest.json', '
 const VALID_SESSION_ID = /^\d+$/;
 const VALID_CHUNK_FILE = /^chunks\/chunk_\d{4}\.jsonl$/;
 const VALID_LOG_CHUNK_FILE = /^logs\/logs_\d{4}\.jsonl$/;
+const VALID_CHECKPOINT_FILE = /^checkpoints\/cp_\d{4}\.json$/;
 
 /**
  * HistoryFileReader - Read-only access to history sessions
@@ -53,7 +54,7 @@ function HistoryFileReader(historyDir) {
         if (!VALID_SESSION_ID.test(sessionId)) {
             return { ok: false, error: 'session_not_found', detail: `Invalid sessionId: ${sessionId}` };
         }
-        const isAllowed = ALLOWED_EXACT_FILES.includes(fileName) || VALID_CHUNK_FILE.test(fileName) || VALID_LOG_CHUNK_FILE.test(fileName);
+        const isAllowed = ALLOWED_EXACT_FILES.includes(fileName) || VALID_CHUNK_FILE.test(fileName) || VALID_LOG_CHUNK_FILE.test(fileName) || VALID_CHECKPOINT_FILE.test(fileName);
         if (!isAllowed) {
             return { ok: false, error: 'file_not_allowed', detail: `File not allowed: ${fileName}` };
         }
@@ -75,13 +76,17 @@ function HistoryFileReader(historyDir) {
 
 function readEventsFromChunks(reader, sessionId, manifestContent, fromUs, toUs) {
     const manifest = JSON.parse(manifestContent);
-    const relevantChunks = manifest.chunks.filter(chunk =>
-        (toUs === undefined || chunk.fromUs <= toUs) &&
-        (fromUs === undefined || chunk.toUs >= fromUs)
-    );
+    const { startUs, chunkCount, chunkDurationUs } = manifest;
+    const fromChunk = fromUs !== undefined
+        ? Math.max(0, Math.floor((fromUs - startUs) / chunkDurationUs))
+        : 0;
+    const toChunk = toUs !== undefined
+        ? Math.min(chunkCount - 1, Math.floor((toUs - startUs) / chunkDurationUs))
+        : chunkCount - 1;
     let events = [];
-    for (const chunk of relevantChunks) {
-        const chunkResult = reader.readFile(sessionId, chunk.file);
+    for (let i = fromChunk; i <= toChunk; i++) {
+        const file = `chunks/chunk_${String(i).padStart(4, '0')}.jsonl`;
+        const chunkResult = reader.readFile(sessionId, file);
         if (!chunkResult.ok) continue;
         events = events.concat(parseAndFilterEvents(chunkResult.content, fromUs, toUs));
     }

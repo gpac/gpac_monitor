@@ -14,6 +14,18 @@ function HistoryCollector(historyDir) {
     this.lastCpuRecordUs = 0;
     this.pendingLogs = [];
     this.logBatchTimer = null;
+    this._latestStructural = null;
+
+    this._writeCheckpointIfNeeded = function(tsUs) {
+        if (!this._latestStructural) return;
+        const chunkIndex = this.writer.getCurrentChunkIndex();
+        this.writer.writeCheckpoint(chunkIndex, {
+            version: this._latestStructural.version,
+            ts_us: tsUs,
+            graph_v: this._latestStructural.graph_v,
+            filters: this._latestStructural.filters,
+        });
+    };
 
     this.startLogCapture = function() {
         logHub.add(LOG_ID, this);
@@ -41,69 +53,87 @@ function HistoryCollector(historyDir) {
             return entry;
         });
         const filtersTsUs = sys.clock_us();
-        this.writer.writeEvent(JSON.stringify({
+
+        if (!this.snapshotWritten) {
+            this.writeSnapshot({
+                version: EVENT_VERSION,
+                ts_us: filtersTsUs,
+                command_line: null,
+                graph_v: graphVersion,
+                filters: normalizedFilters,
+            });
+        }
+
+        const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filters',
             ts_us: filtersTsUs,
             graph_v: graphVersion,
             filters: normalizedFilters,
         }), filtersTsUs);
+        this._latestStructural = { version: EVENT_VERSION, graph_v: graphVersion, filters: normalizedFilters };
+        if (rotated) this._writeCheckpointIfNeeded(filtersTsUs);
     };
 
     this.recordSessionStats = function(payload, force) {
         const ts_us = sys.clock_us();
         if (!force && ts_us - this.lastRecordUs < RATE_LIMIT_US) return;
         this.lastRecordUs = ts_us;
-        this.writer.writeEvent(JSON.stringify({
+        const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'session_stats',
             ts_us,
             ...payload,
         }), ts_us);
+        if (rotated) this._writeCheckpointIfNeeded(ts_us);
     };
 
     this.recordCpuStats = function(payload) {
         const cpuTsUs = sys.clock_us();
         if (cpuTsUs - this.lastCpuRecordUs < RATE_LIMIT_US) return;
         this.lastCpuRecordUs = cpuTsUs;
-        this.writer.writeEvent(JSON.stringify({
+        const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'cpu_stats',
             ts_us: cpuTsUs,
             ...payload,
         }), cpuTsUs);
+        if (rotated) this._writeCheckpointIfNeeded(cpuTsUs);
     };
 
     this.recordPidReconfigured = function(indexes, pidsByFilter) {
         const tsUs = sys.clock_us();
-        this.writer.writeEvent(JSON.stringify({
+        const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filter_pid_reconfigured',
             ts_us: tsUs,
             indexes,
             pidsByFilter,
         }), tsUs);
+        if (rotated) this._writeCheckpointIfNeeded(tsUs);
     };
 
     this.recordArgUpdated = function(indexes, argsByFilter) {
         const tsUs = sys.clock_us();
-        this.writer.writeEvent(JSON.stringify({
+        const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filter_arg_updated',
             ts_us: tsUs,
             indexes,
             argsByFilter,
         }), tsUs);
+        if (rotated) this._writeCheckpointIfNeeded(tsUs);
     };
 
     this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
         const argsTsUs = sys.clock_us();
-        this.writer.writeEvent(JSON.stringify({
+        const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filter_args_update',
             ts_us: argsTsUs,
             payload: { filter_idx: filterIdx, arg_name: argName, value: newValue },
         }), argsTsUs);
+        if (rotated) this._writeCheckpointIfNeeded(argsTsUs);
     };
 
     this.recordLogConfigChanged = function(logLevel) {
@@ -144,7 +174,6 @@ function HistoryCollector(historyDir) {
         this.logBatchTimer = null;
     };
 
-    /** LogHub subscriber interface — called on config changes */
     this.sendToClient = function(data) {
         if (data.message === 'log_config_changed') {
             this.recordLogConfigChanged(data.logLevel);

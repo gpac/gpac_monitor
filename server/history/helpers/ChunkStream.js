@@ -1,9 +1,10 @@
 import * as std from 'std';
 
-function ChunkStream(dir, prefix, maxSize) {
+function ChunkStream(dir, prefix, maxDuration, maxCount) {
     this._dir = dir;
     this._prefix = prefix;
-    this._maxSize = maxSize;
+    this._maxDuration = maxDuration;
+    this._maxCount = maxCount || Infinity;
     this._file = null;
     this._index = 0;
     this._count = 0;
@@ -30,28 +31,36 @@ function ChunkStream(dir, prefix, maxSize) {
         this._startUs = null;
     };
 
-    this._rotate = function() {
-        if (this._count < this._maxSize) return false;
-        const dirName = this._dir.split('/').pop();
-        this._completed.push({
-            file: `${dirName}/${this._prefix}_${String(this._index).padStart(4, '0')}.jsonl`,
-            fromUs: this._startUs,
-            toUs: this._lastUs,
-            count: this._count,
-        });
-        this._index++;
-        this._open();
-        return true;
+    this.write = function(line, tsUs) {
+        if (!this._file) this._open();
+        if (this._startUs === null) this._startUs = tsUs;
+
+        this._file.puts(line + '\n');
+        this._count++;
+        this._lastUs = tsUs;
+
+        const shouldRotate =
+            (tsUs - this._startUs >= this._maxDuration) ||
+            (this._count >= this._maxCount);
+
+        if (shouldRotate) {
+            const dirName = this._dir.split('/').pop();
+            this._completed.push({
+                file: `${dirName}/${this._prefix}_${String(this._index).padStart(4, '0')}.jsonl`,
+                fromUs: this._startUs,
+                toUs: this._lastUs,
+                count: this._count,
+            });
+            this._index++;
+            this._open();
+            return true;
+        }
+
+        return false;
     };
 
-    this.write = function(jsonString, tsUs) {
-        const rotated = this._rotate();
-        if (!this._file) return false;
-        if (this._startUs === null) this._startUs = tsUs;
-        this._lastUs = tsUs;
-        this._file.puts(jsonString + '\n');
-        this._count++;
-        return rotated;
+    this.getChunkCount = function() {
+        return this._index + 1;
     };
 
     this.getAllChunks = function() {

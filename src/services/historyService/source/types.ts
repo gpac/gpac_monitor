@@ -25,14 +25,11 @@ export interface HistoryManifest {
   version: number;
   startUs: number;
   endUs: number;
-  /** Log chunks — non-indexed, rotation by duration or size. */
-  logChunks?: HistoryManifestChunk[];
-  /** Checkpoints attached to eventChunks only. */
-  checkpoints?: HistoryManifestCheckpoint[];
-  /** Fixed-duration mode: chunk duration in microseconds. */
   chunkDurationUs: number;
-  /** total number of event chunks. */
   chunkCount: number;
+  snapshot?: string;
+  logChunks?: HistoryManifestChunk[];
+  checkpoints?: HistoryManifestCheckpoint[];
 }
 
 /** Session metadata — available without loading all events. */

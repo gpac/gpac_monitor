@@ -1,15 +1,32 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { HistoryAdapter } from '../historyAdapter';
 import type { HistoryCheckpoint } from '../historyAdapter';
-import type { GraphFilterData } from '@/types/domain/gpac/model';
+import {
+  toGraphFilterData,
+  buildPidsByFilter,
+  buildArgsByFilter,
+} from '../../loader/snapshotHydrator';
+import type { HistoryFilter } from '../../types';
+
+const baseFilter: HistoryFilter = {
+  idx: 0,
+  name: 'src',
+  type: 'input',
+  status: 'connected',
+  nb_ipid: 0,
+  nb_opid: 1,
+  ipids: {},
+  opids: {},
+  gpac_args: [{ name: 'src', value: 'file.mp4' } as any],
+};
 
 const makeCheckpoint = (
   overrides?: Partial<HistoryCheckpoint>,
 ): HistoryCheckpoint => ({
+  version: 1,
   ts_us: 5_000_000,
-  filters: [{ idx: 0, name: 'src', links: [] } as unknown as GraphFilterData],
-  pidsByFilter: { '0': { ipids: {}, opids: {} } as any },
-  argsByFilter: { '0': [{ name: 'src', value: 'file.mp4' } as any] },
+  graph_v: 1,
+  filters: [baseFilter],
   ...overrides,
 });
 
@@ -37,55 +54,51 @@ describe('HistoryAdapter.hydrateCheckpoint', () => {
   it('dispatches clearGraph before filtersUpdated', () => {
     adapter.hydrateCheckpoint(makeCheckpoint());
     const types = dispatch.mock.calls.map(([action]: any) => action.type);
-    const clearIdx = types.indexOf('graph/clearGraph');
-    const filtersIdx = types.indexOf('graph/filtersUpdated');
-    expect(clearIdx).toBeLessThan(filtersIdx);
+    expect(types.indexOf('graph/clearGraph')).toBeLessThan(
+      types.indexOf('graph/filtersUpdated'),
+    );
   });
 
   it('dispatches clearFilterPids before setFilterPids', () => {
     adapter.hydrateCheckpoint(makeCheckpoint());
     const types = dispatch.mock.calls.map(([action]: any) => action.type);
-    const clearIdx = types.indexOf('sessionStats/clearFilterPids');
-    const setIdx = types.indexOf('sessionStats/setFilterPids');
-    expect(clearIdx).toBeLessThan(setIdx);
+    expect(types.indexOf('sessionStats/clearFilterPids')).toBeLessThan(
+      types.indexOf('sessionStats/setFilterPids'),
+    );
   });
 
-  it('passes checkpoint filters payload to filtersUpdated', () => {
+  it('passes transformed filters to filtersUpdated', () => {
     const cp = makeCheckpoint();
     adapter.hydrateCheckpoint(cp);
     const call = dispatch.mock.calls.find(
       ([action]: any) => action.type === 'graph/filtersUpdated',
     );
-    expect(call?.[0].payload).toEqual(cp.filters);
+    expect(call?.[0].payload).toEqual(cp.filters.map(toGraphFilterData));
   });
 
-  it('passes pidsByFilter payload to setFilterPids', () => {
+  it('passes pidsByFilter derived from filters to setFilterPids', () => {
     const cp = makeCheckpoint();
     adapter.hydrateCheckpoint(cp);
     const call = dispatch.mock.calls.find(
       ([action]: any) => action.type === 'sessionStats/setFilterPids',
     );
-    expect(call?.[0].payload).toEqual(cp.pidsByFilter);
+    expect(call?.[0].payload).toEqual(buildPidsByFilter(cp.filters));
   });
 
-  it('passes argsByFilter payload to hydrateFilterArgs', () => {
+  it('passes argsByFilter derived from filters to hydrateFilterArgs', () => {
     const cp = makeCheckpoint();
     adapter.hydrateCheckpoint(cp);
     const call = dispatch.mock.calls.find(
       ([action]: any) => action.type === 'filterArgument/hydrateFilterArgs',
     );
-    expect(call?.[0].payload).toEqual(cp.argsByFilter);
+    expect(call?.[0].payload).toEqual(buildArgsByFilter(cp.filters));
   });
 
   it('resets temporal state — no stats dispatched after checkpoint', () => {
-    // Simulate prior silent warmup state
     adapter.setSilent(true);
-    // setSilent(true) calls resetTemporalState — state is clean
-    // Now hydrateCheckpoint should also reset
     adapter.hydrateCheckpoint(makeCheckpoint());
     dispatch.mockClear();
 
-    // flush on a freshly reset adapter must not dispatch stats
     adapter.flush();
     const statsTypes = dispatch.mock.calls
       .map(([action]: any) => action.type)
@@ -96,15 +109,9 @@ describe('HistoryAdapter.hydrateCheckpoint', () => {
     expect(statsTypes).toHaveLength(0);
   });
 
-  it('works with empty pidsByFilter', () => {
+  it('works with empty filters', () => {
     expect(() =>
-      adapter.hydrateCheckpoint(makeCheckpoint({ pidsByFilter: {} })),
-    ).not.toThrow();
-  });
-
-  it('works with empty argsByFilter', () => {
-    expect(() =>
-      adapter.hydrateCheckpoint(makeCheckpoint({ argsByFilter: {} })),
+      adapter.hydrateCheckpoint(makeCheckpoint({ filters: [] })),
     ).not.toThrow();
   });
 
