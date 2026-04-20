@@ -5,8 +5,10 @@ import { parseEventsJsonl } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
 
 /**
- * WsSessionFileReader
- * Opens its own WS connection, sends list_sessions/read_file commands.
+ * WsSessionFileReader — reads history sessions from a remote GPAC server over WebSocket.
+ * Opens its own dedicated WS connection (separate from the live monitoring socket).
+ * Delegates all file I/O to HistoryFileReader.js on the server via list_sessions/read_file commands.
+ * Same interface as LocalFileSessionFileReader so ChunkLoader works with either.
  */
 export class WsSessionFileReader {
   private ws: WebSocket | null = null;

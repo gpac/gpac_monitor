@@ -24,10 +24,17 @@ interface SessionEntry {
   done: boolean;
 }
 
+/**
+ * LocalFileSessionFileReader — reads history sessions from browser File objects .
+ * No server involved: all data comes from the File API (webkitRelativePath).
+ * Same interface as WsSessionFileReader so ChunkLoader works with either.
+ */
 export class LocalFileSessionFileReader {
+  /** true if last readEvents() call hit the MAX_EVENTS cap */
   wasTruncated = false;
   private sessionMap = new Map<string, SessionEntry>();
 
+  /** Indexes all files by session, routing chunks/logs/checkpoints by parent folder name. */
   constructor(files: File[]) {
     for (const file of files) {
       const parts = file.webkitRelativePath.split('/');
