@@ -1,6 +1,6 @@
 import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
 import type { HistorySource, HistoryManifest } from './types';
-import { LocalFileSessionFileReader } from '../sessionFileReader/LocalFileSessionFileReader';
+import type { LocalFileSessionFileReader } from '../sessionFileReader/LocalFileSessionFileReader';
 
 export class FileHistorySource implements HistorySource {
   private cachedManifest: HistoryManifest | null | undefined = undefined;
@@ -26,9 +26,17 @@ export class FileHistorySource implements HistorySource {
     return this.reader.readLogChunk(sessionId, index);
   }
 
+  async readCheckpoint(
+    sessionId: string,
+    chunkIndex: number,
+  ): Promise<unknown> {
+    return this.reader.readCheckpoint(sessionId, chunkIndex);
+  }
+
   private async loadManifest(): Promise<HistoryManifest | null> {
     if (this.cachedManifest !== undefined) return this.cachedManifest;
-    this.cachedManifest = await this.reader.readManifest(this.sessionId);
-    return this.cachedManifest;
+    const manifest = await this.reader.readManifest(this.sessionId);
+    this.cachedManifest = manifest;
+    return manifest;
   }
 }

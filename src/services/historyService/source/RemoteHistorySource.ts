@@ -27,6 +27,13 @@ export class RemoteHistorySource implements HistorySource {
     return this.reader.readLogChunk(sessionId, index);
   }
 
+  async readCheckpoint(
+    sessionId: string,
+    chunkIndex: number,
+  ): Promise<unknown> {
+    return this.reader.readCheckpoint(sessionId, chunkIndex);
+  }
+
   private loadManifest(): Promise<HistoryManifest | null> {
     if (this.cachedManifest !== undefined)
       return Promise.resolve(this.cachedManifest);

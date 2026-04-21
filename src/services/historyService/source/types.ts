@@ -36,6 +36,7 @@ export interface HistoryManifest {
 export interface IChunkReader {
   readChunk(sessionId: string, index: number): Promise<HistoryEvent[]>;
   readLogChunk(sessionId: string, index: number): Promise<LogEvent[]>;
+  readCheckpoint(sessionId: string, chunkIndex: number): Promise<unknown>;
 }
 
 /** Per-session data source (player side). */

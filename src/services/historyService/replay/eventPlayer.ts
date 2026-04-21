@@ -32,13 +32,21 @@ export class EventPlayer {
     timelineEvents: HistoryEvent[],
     onEvent: (event: HistoryEvent) => void,
     onTick?: (currentTimeUs: number) => void,
+    positionUs?: number,
   ) {
-    this.stop();
+    this.cancelPendingSeek();
+    this.cancelFrame();
     this.timelineEvents = timelineEvents;
     this.onEvent = onEvent;
     this.onTick = onTick ?? null;
     this.nextEventIndex = 0;
-    this.setState('idle');
+    if (positionUs !== undefined) {
+      this.currentPlaybackTimeUs = positionUs;
+      this.setState('paused');
+    } else {
+      this.currentPlaybackTimeUs = 0;
+      this.setState('idle');
+    }
   }
 
   play(resetStateFromSnapshot?: () => void) {

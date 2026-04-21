@@ -4,6 +4,7 @@ import type {
   HistoryManifestChunk,
   IChunkReader,
 } from './source/types';
+import type { HistoryCheckpoint } from './integration/historyAdapter';
 import { findLogChunksInRange, getEventChunkRange } from './manifestParser';
 import { chunkIndexFromPath } from './source/chunkUtils';
 
@@ -60,6 +61,13 @@ export class ChunkLoader {
     } catch (error) {
       console.warn('[ChunkLoader] preloadEventChunk failed:', error);
     }
+  }
+
+  async loadCheckpoint(cpFile: string): Promise<HistoryCheckpoint | null> {
+    const chunkIndex = chunkIndexFromPath(cpFile);
+    const raw = await this.reader.readCheckpoint(this.sessionId, chunkIndex);
+    if (!raw || typeof raw !== 'object') return null;
+    return raw as HistoryCheckpoint;
   }
 
   async loadLogChunksInRange(
