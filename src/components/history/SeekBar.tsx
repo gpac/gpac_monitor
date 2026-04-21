@@ -61,7 +61,7 @@ const SeekBar = ({
     <div className="relative flex-1">
       {hoverPercent !== null && (
         <div
-          className="absolute -top-5 -translate-x-1/2 bg-gray-800 text-gray-200 text-[10px] px-1.5 py-0.5 rounded pointer-events-none whitespace-nowrap z-10"
+          className="absolute -top-5 -translate-x-1/2 bg-gray-800 text-gray-200 text-[10px]  py-0.5 rounded pointer-events-none whitespace-nowrap z-10"
           style={{ left: `${hoverPercent}%` }}
         >
           {formatTooltip(hoverPercent)}

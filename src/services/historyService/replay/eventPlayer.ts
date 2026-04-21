@@ -91,6 +91,14 @@ export class EventPlayer {
     }
     return this.currentPlaybackTimeUs;
   }
+  /**
+   * Appends new events to the timeline without interrupting the current playback.
+   * @param events - The events to append.
+   */
+  append(events: HistoryEvent[]): void {
+    if (!events.length) return;
+    this.timelineEvents = this.timelineEvents.concat(events);
+  }
 
   durationUs(): number {
     if (!this.timelineEvents.length) return 0;
