@@ -62,7 +62,8 @@ export function usePlayerState() {
     ...snap,
     play: () => historyController.play(),
     pause: () => historyController.pause(),
-    seek: (targetTimestampUs: number) =>
-      historyController.seek(targetTimestampUs),
+    seek: (targetTimestampUs: number) => {
+      historyController.seek(targetTimestampUs).catch(console.error);
+    },
   };
 }

@@ -42,10 +42,8 @@ describe('EventPlayer.play', () => {
 
   it('calls resetStateFromSnapshot when restarting after done', () => {
     const reset = vi.fn();
-    player.seek(999, vi.fn());
     (player as any).state = 'done';
 
-    reset.mockClear();
     player.play(reset);
 
     expect(reset).toHaveBeenCalledOnce();
@@ -69,7 +67,6 @@ describe('EventPlayer — done state', () => {
     const events = makeEvents([100, 200, 300]);
     player.load(events, vi.fn());
 
-    player.seek(999, vi.fn());
     (player as any).nextEventIndex = events.length;
     (player as any).state = 'playing';
     (player as any).tick();

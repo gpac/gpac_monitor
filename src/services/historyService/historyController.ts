@@ -4,8 +4,9 @@ import { HistoryAdapter } from './integration/historyAdapter';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
 import { BadgeExpirationController } from './replay/badgeExpirationController';
-import type { HistorySource } from './source/types';
+import type { HistoryManifest, HistorySource } from './source/types';
 import { ChunkLoader } from './chunkLoader';
+import { findEventChunkIndex, findNearestCheckpoint } from './manifestParser';
 
 /**
  * HistoryController — orchestrates snapshot loading + event replay.
@@ -20,6 +21,7 @@ export class HistoryController {
   private sessionLogs: LogEvent[] = [];
   private nextLogIndex = 0;
   private loader: ChunkLoader | null = null;
+  private manifest: HistoryManifest | null = null;
 
   setListener(listener: PlayerListener) {
     this.player.setListener(listener);
@@ -30,6 +32,7 @@ export class HistoryController {
     if (!manifest)
       throw new Error('[HistoryController] No manifest for session');
 
+    this.manifest = manifest;
     this.loader = new ChunkLoader(source, source.sessionId, manifest);
 
     const chunk0 = await this.loader.loadEventChunk(0);
@@ -68,22 +71,47 @@ export class HistoryController {
     );
   }
 
-  seek(targetTimestampUs: number) {
-    if (!this.snapshot || !this.adapter) return;
-    const { snapshot, adapter, sessionStartUs, sessionLogs } = this;
+  async seek(tsUs: number): Promise<void> {
+    if (!this.manifest || !this.loader || !this.adapter) return;
+    const { manifest, loader, adapter } = this;
+
+    const chunkIndex = findEventChunkIndex(manifest, tsUs);
+    const cp = findNearestCheckpoint(manifest, chunkIndex);
+    adapter.resetTemporalState();
+    if (cp) {
+      const checkpoint = await loader.loadCheckpoint(cp.file);
+      if (checkpoint) adapter.hydrateCheckpoint(checkpoint);
+    }
     this.badgeExpiration.reset();
-    adapter.setSilent(true);
-    this.player.seek(
-      targetTimestampUs,
-      () => adapter.hydrate(snapshot, sessionStartUs),
-      () => {
-        adapter.flush(targetTimestampUs);
-        adapter.hydrateLogsForSeek(sessionLogs, targetTimestampUs);
-        this.nextLogIndex = sessionLogs.findIndex(
-          (l) => l.ts_us > targetTimestampUs,
-        );
-        if (this.nextLogIndex === -1) this.nextLogIndex = sessionLogs.length;
+
+    const currentChunk = await loader.loadEventChunk(chunkIndex);
+    const logChunks = await loader.loadLogChunksInRange(
+      currentChunk.fromUs,
+      currentChunk.toUs,
+    );
+    this.sessionLogs = logChunks.flatMap((lc) => lc.logs);
+    this.nextLogIndex = this.sessionLogs.findIndex((l) => l.ts_us > tsUs);
+    if (this.nextLogIndex === -1) this.nextLogIndex = this.sessionLogs.length;
+    adapter.hydrateLogsForSeek(this.sessionLogs, tsUs);
+
+    this.player.load(
+      currentChunk.events.filter((e) => e.ts_us >= tsUs),
+      (event) => {
+        this.adapter!.handleEvent(event);
+        this.scheduleBadgeIfNeeded(event);
       },
+      (currentTimeUs) => {
+        while (
+          this.nextLogIndex < this.sessionLogs.length &&
+          this.sessionLogs[this.nextLogIndex].ts_us <= currentTimeUs
+        ) {
+          this.adapter!.handleLogEvent(this.sessionLogs[this.nextLogIndex]);
+          this.nextLogIndex++;
+        }
+        const expired = this.badgeExpiration.tick(currentTimeUs);
+        if (expired.length > 0) this.adapter!.clearExpiredBadges(expired);
+      },
+      tsUs,
     );
   }
 
@@ -116,6 +144,7 @@ export class HistoryController {
   }
 
   durationUs(): number {
+    if (this.manifest) return this.manifest.endUs - this.manifest.startUs;
     return this.player.durationUs();
   }
 

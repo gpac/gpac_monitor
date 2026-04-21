@@ -60,7 +60,10 @@ import {
   filterRecentIndexes,
 } from './utils/flushHelpers';
 
-export type HistoryCheckpoint = Pick<HistorySnapshot, 'version' | 'ts_us' | 'graph_v' | 'filters'>;
+export type HistoryCheckpoint = Pick<
+  HistorySnapshot,
+  'version' | 'ts_us' | 'graph_v' | 'filters'
+>;
 
 export class HistoryAdapter {
   private prevBandwidth: PrevBandwidthState = {};
@@ -141,7 +144,7 @@ export class HistoryAdapter {
     this.pendingArgsByFilter = {};
   }
 
-  private resetTemporalState(): void {
+  resetTemporalState(): void {
     this.prevBandwidth = {};
     this.pendingBandwidth = {};
     this.pendingCpuStats = [];

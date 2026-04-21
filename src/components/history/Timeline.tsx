@@ -23,7 +23,7 @@ const Timeline = ({
   sessionStartUs,
   segments,
   isPlaying = false,
-  canPlay = false,
+  canPlay = true,
   onPlay,
   onPause,
   onSeek,
