@@ -152,6 +152,13 @@ export class HistoryAdapter {
   }
 
   hydrateCheckpoint(checkpoint: HistoryCheckpoint): void {
+    console.debug(
+      '[hydrateCheckpoint] ts_us=%d graph_v=%d filters=%d %o',
+      checkpoint.ts_us,
+      checkpoint.graph_v,
+      checkpoint.filters.length,
+      checkpoint.filters.map((f) => `${f.idx}:${f.name}`),
+    );
     this.resetTemporalState();
     const { dispatch } = this;
     dispatch(clearGraph());
