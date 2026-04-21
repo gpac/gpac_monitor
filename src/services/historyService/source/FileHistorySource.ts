@@ -5,7 +5,6 @@ import { chunkIndexFromPath } from './chunkUtils';
 import { findEventChunkIndex } from '../manifestParser';
 
 export class FileHistorySource implements HistorySource {
-  private cachedEvents: HistoryEvent[] | null = null;
   private cachedManifest: HistoryManifest | null | undefined = undefined;
 
   constructor(
@@ -28,50 +27,24 @@ export class FileHistorySource implements HistorySource {
     toUs?: number,
   ): Promise<HistoryEvent[]> {
     const manifest = await this.loadManifest();
-
-    if (manifest) {
-      return this.loadEventsFromChunks(manifest, fromUs, toUs);
-    }
-
-    if (!this.cachedEvents) {
-      this.cachedEvents = await this.reader.readEvents(this.sessionId);
-    }
-    if (fromUs === undefined && toUs === undefined) return this.cachedEvents;
-    return this.cachedEvents.filter(
-      (event) =>
-        (fromUs === undefined || event.ts_us >= fromUs) &&
-        (toUs === undefined || event.ts_us <= toUs),
-    );
+    if (!manifest) return [];
+    return this.loadEventsFromChunks(manifest, fromUs, toUs);
   }
 
   async getMetadata(): Promise<HistoryMetadata> {
     const manifest = await this.loadManifest();
-
-    if (manifest) {
-      return {
-        sessionId: this.sessionId,
-        startUs: manifest.startUs,
-        endUs: manifest.endUs,
-        hasChunks: true,
-        hasCheckpoints: (manifest.checkpoints?.length ?? 0) > 0,
-      };
-    }
-
-    const [snapshot, allEvents] = await Promise.all([
-      this.loadSnapshot(),
-      this.loadEventsRange(),
-    ]);
+    if (!manifest) throw new Error('No manifest for session');
     return {
       sessionId: this.sessionId,
-      startUs: snapshot.ts_us,
-      endUs: allEvents.at(-1)?.ts_us ?? snapshot.ts_us,
-      hasChunks: false,
-      hasCheckpoints: false,
+      startUs: manifest.startUs,
+      endUs: manifest.endUs,
+      hasChunks: true,
+      hasCheckpoints: (manifest.checkpoints?.length ?? 0) > 0,
     };
   }
 
-  get wasTruncated(): boolean {
-    return this.reader.wasTruncated;
+  async getManifest(): Promise<HistoryManifest | null> {
+    return this.loadManifest();
   }
 
   private async loadManifest(): Promise<HistoryManifest | null> {

@@ -48,6 +48,7 @@ export interface HistorySource {
   loadEventsRange(fromUs?: number, toUs?: number): Promise<HistoryEvent[]>;
   loadLogs(fromUs?: number, toUs?: number): Promise<LogEvent[]>;
   getMetadata(): Promise<HistoryMetadata>;
+  getManifest(): Promise<HistoryManifest | null>;
 }
 
 /** Session listing (UI picker side)  */

@@ -62,16 +62,6 @@ export class WsSessionFileReader {
     return JSON.parse(response.content as string) as HistorySnapshot;
   }
 
-  async readEvents(sessionId: string) {
-    await this.ensureConnected();
-    const response = await this.sendCommand({
-      message: 'read_file',
-      sessionId,
-      file: 'events.jsonl',
-    });
-    return parseEventsJsonl(response.content as string);
-  }
-
   async readManifest(sessionId: string): Promise<HistoryManifest | null> {
     await this.ensureConnected();
     try {

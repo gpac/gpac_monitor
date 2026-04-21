@@ -60,6 +60,10 @@ export class RemoteHistorySource implements HistorySource {
     };
   }
 
+  getManifest(): Promise<HistoryManifest | null> {
+    return this.loadManifest();
+  }
+
   private loadManifest(): Promise<HistoryManifest | null> {
     if (this.cachedManifest !== undefined)
       return Promise.resolve(this.cachedManifest);

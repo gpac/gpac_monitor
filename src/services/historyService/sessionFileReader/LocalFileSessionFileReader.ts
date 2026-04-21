@@ -4,7 +4,7 @@ import type {
   HistoryManifest,
   HistoryManifestCheckpoint,
 } from '../source/types';
-import { parseEventsJsonl, MAX_EVENTS } from '../loader/eventLoader';
+import { parseEventsJsonl } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
 
 const emptyEntry = (): SessionEntry => ({
@@ -30,8 +30,6 @@ interface SessionEntry {
  * Same interface as WsSessionFileReader so ChunkLoader works with either.
  */
 export class LocalFileSessionFileReader {
-  /** true if last readEvents() call hit the MAX_EVENTS cap */
-  wasTruncated = false;
   private sessionMap = new Map<string, SessionEntry>();
 
   /** Indexes all files by session, routing chunks/logs/checkpoints by parent folder name. */
@@ -156,13 +154,5 @@ export class LocalFileSessionFileReader {
     const file = this.sessionMap.get(sessionId)?.logChunks.get(chunkIndex);
     if (!file) return [];
     return parseEventsJsonl(await file.text()) as unknown as LogEvent[];
-  }
-
-  async readEvents(sessionId: string) {
-    const file = this.sessionMap.get(sessionId)?.events;
-    if (!file) throw new Error(`No events for session ${sessionId}`);
-    const events = parseEventsJsonl(await file.text());
-    this.wasTruncated = events.length >= MAX_EVENTS;
-    return events;
   }
 }

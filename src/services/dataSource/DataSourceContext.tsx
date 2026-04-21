@@ -26,7 +26,6 @@ interface DataSourceContextValue {
     source: HistorySource,
     fromUs?: number,
     toUs?: number,
-    manifest?: HistoryManifest | null,
   ) => Promise<void>;
 }
 
@@ -51,14 +50,9 @@ export function DataSourceProvider({
   const [manifest, setManifest] = useState<HistoryManifest | null>(null);
 
   const loadFromSource = useCallback(
-    async (
-      source: HistorySource,
-      fromUs?: number,
-      toUs?: number,
-      loadedManifest?: HistoryManifest | null,
-    ) => {
+    async (source: HistorySource, fromUs?: number, toUs?: number) => {
       await historyController.load(source, dispatch, fromUs, toUs);
-      setManifest(loadedManifest ?? null);
+      setManifest(await source.getManifest());
       setSessionName(formatTimestamp(source.sessionId));
       setSessionLoaded(true);
       setMode('history');

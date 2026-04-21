@@ -1,7 +1,5 @@
 import type { HistoryEvent } from '../types';
 
-export const MAX_EVENTS = 50_000;
-
 /** Parse JSONL text into HistoryEvent array. */
 export function parseEventsJsonl(text: string): HistoryEvent[] {
   const events: HistoryEvent[] = [];
@@ -17,15 +15,9 @@ export function parseEventsJsonl(text: string): HistoryEvent[] {
         trimmed.slice(0, 120),
       );
     }
-    if (events.length >= MAX_EVENTS) break;
   }
 
   return events;
-}
-
-/** Load events from a File object (V2 compat). */
-export async function loadEventsFile(file: File): Promise<HistoryEvent[]> {
-  return parseEventsJsonl(await file.text());
 }
 
 /**
