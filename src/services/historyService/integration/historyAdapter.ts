@@ -260,6 +260,7 @@ export class HistoryAdapter {
 
   /** Dispatch the last N logs before targetUs (used by seek). */
   hydrateLogsForSeek(logEvents: LogEvent[], targetUs: number): void {
+    this.dispatch(clearLogs());
     const allEntries: GpacLogEntry[] = [];
     let lastConfig: string | null = null;
     for (const event of logEvents) {
