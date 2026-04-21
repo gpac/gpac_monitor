@@ -1,11 +1,11 @@
 import type { AppDispatch } from '@/shared/store';
 import type { HistorySnapshot, HistoryEvent, LogEvent } from './types';
-import { isStructuralEvent } from './types';
 import { HistoryAdapter } from './integration/historyAdapter';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
 import { BadgeExpirationController } from './replay/badgeExpirationController';
 import type { HistorySource } from './source/types';
+import { ChunkLoader } from './chunkLoader';
 
 /**
  * HistoryController — orchestrates snapshot loading + event replay.
@@ -19,51 +19,35 @@ export class HistoryController {
   private sessionStartUs = 0;
   private sessionLogs: LogEvent[] = [];
   private nextLogIndex = 0;
+  private loader: ChunkLoader | null = null;
 
   setListener(listener: PlayerListener) {
     this.player.setListener(listener);
   }
 
-  /** Load from a HistorySource (FileHistorySource or ActiveSessionHistorySource). */
-  async load(
-    source: HistorySource,
-    dispatch: AppDispatch,
-    fromUs?: number,
-    toUs?: number,
-  ) {
-    const needsBootstrap = fromUs !== undefined && fromUs > 0;
+  async load(source: HistorySource, dispatch: AppDispatch) {
+    const manifest = await source.getManifest();
+    if (!manifest)
+      throw new Error('[HistoryController] No manifest for session');
 
-    const [snapshot, events, logs, preWindowEvents] = await Promise.all([
-      source.loadSnapshot(),
-      source.loadEventsRange(fromUs, toUs),
-      source.loadLogs(fromUs, toUs),
-      needsBootstrap ? source.loadEventsRange(0, fromUs) : Promise.resolve([]),
-    ]);
+    this.loader = new ChunkLoader(source, source.sessionId, manifest);
 
-    const sessionStartUs = events[0]?.ts_us ?? 0;
+    const chunk0 = await this.loader.loadEventChunk(0);
+    const logChunks = await this.loader.loadLogChunksInRange(
+      chunk0.fromUs,
+      chunk0.toUs,
+    );
+    const snapshot = await source.loadSnapshot();
+
     this.snapshot = snapshot;
-    this.sessionStartUs = sessionStartUs;
-    this.sessionLogs = logs;
+    this.sessionStartUs = manifest.startUs;
+    this.sessionLogs = logChunks.flatMap((logChunk) => logChunk.logs);
     this.nextLogIndex = 0;
     this.adapter = new HistoryAdapter(dispatch);
-
-    // Hydrate from snapshot (t=0 base state)
-    this.adapter.hydrate(snapshot, sessionStartUs);
+    this.adapter.hydrate(snapshot, manifest.startUs);
     this.badgeExpiration.reset();
-
-    // Bootstrap: apply structural events silently before any replay
-    if (needsBootstrap) {
-      const bootstrapEvents = preWindowEvents.filter(isStructuralEvent);
-      this.adapter.setSilent(true);
-      for (const event of bootstrapEvents) {
-        this.adapter.handleEvent(event);
-      }
-      this.adapter.flush(fromUs); // sets silent = false internally
-    }
-
-    // Only after bootstrap is complete: load window events
     this.player.load(
-      events,
+      chunk0.events,
       (event) => {
         this.adapter!.handleEvent(event);
         this.scheduleBadgeIfNeeded(event);

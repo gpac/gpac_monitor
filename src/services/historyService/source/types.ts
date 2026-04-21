@@ -42,8 +42,6 @@ export interface IChunkReader {
 export interface HistorySource extends IChunkReader {
   readonly sessionId: string;
   loadSnapshot(): Promise<HistorySnapshot>;
-  loadEventsRange(fromUs?: number, toUs?: number): Promise<HistoryEvent[]>;
-  loadLogs(fromUs?: number, toUs?: number): Promise<LogEvent[]>;
   getManifest(): Promise<HistoryManifest | null>;
 }
 
