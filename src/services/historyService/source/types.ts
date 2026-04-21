@@ -32,22 +32,18 @@ export interface HistoryManifest {
   checkpoints?: HistoryManifestCheckpoint[];
 }
 
-/** Session metadata — available without loading all events. */
-export interface HistoryMetadata {
-  sessionId: string;
-  startUs: number;
-  endUs: number;
-  hasChunks: boolean;
-  hasCheckpoints: boolean;
+/** Low-level chunk I/O — implemented by both File and Remote sources. */
+export interface IChunkReader {
+  readChunk(sessionId: string, index: number): Promise<HistoryEvent[]>;
+  readLogChunk(sessionId: string, index: number): Promise<LogEvent[]>;
 }
 
 /** Per-session data source (player side). */
-export interface HistorySource {
+export interface HistorySource extends IChunkReader {
   readonly sessionId: string;
   loadSnapshot(): Promise<HistorySnapshot>;
   loadEventsRange(fromUs?: number, toUs?: number): Promise<HistoryEvent[]>;
   loadLogs(fromUs?: number, toUs?: number): Promise<LogEvent[]>;
-  getMetadata(): Promise<HistoryMetadata>;
   getManifest(): Promise<HistoryManifest | null>;
 }
 

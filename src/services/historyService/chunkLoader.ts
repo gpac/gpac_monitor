@@ -1,12 +1,11 @@
 import type { HistoryEvent, LogEvent } from './types';
-import type { HistoryManifest, HistoryManifestChunk } from './source/types';
+import type {
+  HistoryManifest,
+  HistoryManifestChunk,
+  IChunkReader,
+} from './source/types';
 import { findLogChunksInRange, getEventChunkRange } from './manifestParser';
 import { chunkIndexFromPath } from './source/chunkUtils';
-
-export interface IChunkReader {
-  readChunk(sessionId: string, index: number): Promise<HistoryEvent[]>;
-  readLogChunk(sessionId: string, index: number): Promise<LogEvent[]>;
-}
 
 export type EventChunk = {
   index: number;

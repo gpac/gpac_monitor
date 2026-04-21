@@ -1,5 +1,5 @@
 import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
-import type { HistorySource, HistoryMetadata, HistoryManifest } from './types';
+import type { HistorySource, HistoryManifest } from './types';
 import { WsSessionFileReader } from '../sessionFileReader/WsSessionFileReader';
 import { chunkIndexFromPath } from './chunkUtils';
 import { findEventChunkIndex } from '../manifestParser';
@@ -37,31 +37,16 @@ export class RemoteHistorySource implements HistorySource {
     return this.loadEventsFromChunks(manifest, fromUs, toUs);
   }
 
-  async getMetadata(): Promise<HistoryMetadata> {
-    const manifest = await this.loadManifest();
-
-    if (manifest) {
-      return {
-        sessionId: this.sessionId,
-        startUs: manifest.startUs,
-        endUs: manifest.endUs,
-        hasChunks: true,
-        hasCheckpoints: (manifest.checkpoints?.length ?? 0) > 0,
-      };
-    }
-
-    const snapshot = await this.loadSnapshot();
-    return {
-      sessionId: this.sessionId,
-      startUs: snapshot.ts_us,
-      endUs: snapshot.ts_us,
-      hasChunks: false,
-      hasCheckpoints: false,
-    };
-  }
-
   getManifest(): Promise<HistoryManifest | null> {
     return this.loadManifest();
+  }
+
+  async readChunk(sessionId: string, index: number): Promise<HistoryEvent[]> {
+    return this.reader.readChunk(sessionId, index);
+  }
+
+  async readLogChunk(sessionId: string, index: number): Promise<LogEvent[]> {
+    return this.reader.readLogChunk(sessionId, index);
   }
 
   private loadManifest(): Promise<HistoryManifest | null> {

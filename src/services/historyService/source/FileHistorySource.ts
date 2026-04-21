@@ -1,5 +1,5 @@
 import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
-import type { HistorySource, HistoryMetadata, HistoryManifest } from './types';
+import type { HistorySource, HistoryManifest } from './types';
 import { LocalFileSessionFileReader } from '../sessionFileReader/LocalFileSessionFileReader';
 import { chunkIndexFromPath } from './chunkUtils';
 import { findEventChunkIndex } from '../manifestParser';
@@ -31,20 +31,16 @@ export class FileHistorySource implements HistorySource {
     return this.loadEventsFromChunks(manifest, fromUs, toUs);
   }
 
-  async getMetadata(): Promise<HistoryMetadata> {
-    const manifest = await this.loadManifest();
-    if (!manifest) throw new Error('No manifest for session');
-    return {
-      sessionId: this.sessionId,
-      startUs: manifest.startUs,
-      endUs: manifest.endUs,
-      hasChunks: true,
-      hasCheckpoints: (manifest.checkpoints?.length ?? 0) > 0,
-    };
-  }
-
   async getManifest(): Promise<HistoryManifest | null> {
     return this.loadManifest();
+  }
+
+  async readChunk(sessionId: string, index: number): Promise<HistoryEvent[]> {
+    return this.reader.readChunk(sessionId, index);
+  }
+
+  async readLogChunk(sessionId: string, index: number): Promise<LogEvent[]> {
+    return this.reader.readLogChunk(sessionId, index);
   }
 
   private async loadManifest(): Promise<HistoryManifest | null> {

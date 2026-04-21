@@ -87,7 +87,7 @@ const SeekBar = ({
         {segmentMarkers?.map((pct) => (
           <div
             key={pct}
-            className="absolute top-0 bottom-0 w-px bg-white/25 pointer-events-none"
+            className="absolute top-0 bottom-0 w-px bg-white/60 pointer-events-none"
             style={{ left: `${pct}%` }}
           />
         ))}
