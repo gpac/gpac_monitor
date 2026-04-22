@@ -78,7 +78,7 @@ function HistoryCollector(historyDir) {
             filters: normalizedFilters,
         }), filtersTsUs);
         this._latestStructural = { version: EVENT_VERSION, graph_v: graphVersion, filters: normalizedFilters };
-        if (rotated) this._onChunkRotated(tsUs);
+        if (rotated) this._onChunkRotated(filtersTsUs);
     };
 
     this.recordSessionStats = function(payload, force) {
@@ -91,7 +91,7 @@ function HistoryCollector(historyDir) {
             ts_us,
             ...payload,
         }), ts_us);
-    if (rotated) this._onChunkRotated(tsUs);
+    if (rotated) this._onChunkRotated(ts_us);
     };
 
     this.recordCpuStats = function(payload) {
@@ -104,7 +104,7 @@ function HistoryCollector(historyDir) {
             ts_us: cpuTsUs,
             ...payload,
         }), cpuTsUs);
-        if (rotated) this._onChunkRotated(tsUs);
+        if (rotated) this._onChunkRotated(cpuTsUs);
     };
 
     this.recordPidReconfigured = function(indexes, pidsByFilter) {
@@ -139,7 +139,7 @@ function HistoryCollector(historyDir) {
             ts_us: argsTsUs,
             payload: { filter_idx: filterIdx, arg_name: argName, value: newValue },
         }), argsTsUs);
-        if (rotated) this._onChunkRotated(tsUs);
+        if (rotated) this._onChunkRotated(argsTsUs);
     };
 
     this.recordLogConfigChanged = function(logLevel) {
