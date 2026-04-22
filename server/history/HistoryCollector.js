@@ -15,7 +15,7 @@ function HistoryCollector(historyDir) {
     this.pendingLogs = [];
     this.logBatchTimer = null;
     this._latestStructural = null;
-
+  
     this._writeCheckpointIfNeeded = function(tsUs) {
         if (!this._latestStructural) return;
         const chunkIndex = this.writer.getCurrentChunkIndex();
@@ -26,6 +26,10 @@ function HistoryCollector(historyDir) {
             filters: this._latestStructural.filters,
         });
     };
+
+    this._onChunkRotated = function(tsUs) {
+     this._writeCheckpointIfNeeded(tsUs);
+};
 
     this.startLogCapture = function() {
         logHub.add(LOG_ID, this);
@@ -72,7 +76,7 @@ function HistoryCollector(historyDir) {
             filters: normalizedFilters,
         }), filtersTsUs);
         this._latestStructural = { version: EVENT_VERSION, graph_v: graphVersion, filters: normalizedFilters };
-        if (rotated) this._writeCheckpointIfNeeded(filtersTsUs);
+        if (rotated) this._onChunkRotated(tsUs);
     };
 
     this.recordSessionStats = function(payload, force) {
@@ -85,7 +89,7 @@ function HistoryCollector(historyDir) {
             ts_us,
             ...payload,
         }), ts_us);
-        if (rotated) this._writeCheckpointIfNeeded(ts_us);
+    if (rotated) this._onChunkRotated(tsUs);
     };
 
     this.recordCpuStats = function(payload) {
@@ -98,7 +102,7 @@ function HistoryCollector(historyDir) {
             ts_us: cpuTsUs,
             ...payload,
         }), cpuTsUs);
-        if (rotated) this._writeCheckpointIfNeeded(cpuTsUs);
+        if (rotated) this._onChunkRotated(tsUs);
     };
 
     this.recordPidReconfigured = function(indexes, pidsByFilter) {
@@ -110,7 +114,7 @@ function HistoryCollector(historyDir) {
             indexes,
             pidsByFilter,
         }), tsUs);
-        if (rotated) this._writeCheckpointIfNeeded(tsUs);
+       if (rotated) this._onChunkRotated(tsUs);
     };
 
     this.recordArgUpdated = function(indexes, argsByFilter) {
@@ -122,7 +126,7 @@ function HistoryCollector(historyDir) {
             indexes,
             argsByFilter,
         }), tsUs);
-        if (rotated) this._writeCheckpointIfNeeded(tsUs);
+       if (rotated) this._onChunkRotated(tsUs);
     };
 
     this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
@@ -133,7 +137,7 @@ function HistoryCollector(historyDir) {
             ts_us: argsTsUs,
             payload: { filter_idx: filterIdx, arg_name: argName, value: newValue },
         }), argsTsUs);
-        if (rotated) this._writeCheckpointIfNeeded(argsTsUs);
+        if (rotated) this._onChunkRotated(tsUs);
     };
 
     this.recordLogConfigChanged = function(logLevel) {
