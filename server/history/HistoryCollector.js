@@ -116,6 +116,12 @@ function HistoryCollector(historyDir) {
 
     this.recordPidReconfigured = function(indexes, pidsByFilter) {
         const tsUs = sys.clock_us();
+        for (const idx of indexes) {
+            if (pidsByFilter[idx]) {
+                this._currentPidState[idx] = { ipids: pidsByFilter[idx].ipids ?? {} };
+            }
+        }
+        this._chunkNeedsCheckpoint = true;
         const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filter_pid_reconfigured',
