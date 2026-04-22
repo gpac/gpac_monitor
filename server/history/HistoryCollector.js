@@ -20,13 +20,16 @@ function HistoryCollector(historyDir) {
   
     this._writeCheckpointIfNeeded = function(tsUs) {
         if (!this._latestStructural) return;
+        if (!this._chunkNeedsCheckpoint) return;
         const chunkIndex = this.writer.getCurrentChunkIndex();
         this.writer.writeCheckpoint(chunkIndex, {
             version: this._latestStructural.version,
             ts_us: tsUs,
             graph_v: this._latestStructural.graph_v,
             filters: this._latestStructural.filters,
+            pid_state: this._currentPidState,
         });
+        this._chunkNeedsCheckpoint = false;
     };
 
     this._onChunkRotated = function(tsUs) {
@@ -78,9 +81,10 @@ function HistoryCollector(historyDir) {
             filters: normalizedFilters,
         }), filtersTsUs);
         this._latestStructural = { version: EVENT_VERSION, graph_v: graphVersion, filters: normalizedFilters };
-        this._currentPidState = normalizedFilters.reduce((acc, filter) => {
+        const stateCollector = pidCollector ?? new PidDataCollector();
+        this._currentPidState = normalizedFilters.reduce((acc, filter, i) => {
             acc[filter.idx] = {
-                ipids: filter.properties?.ipids ?? filter.ipids ?? {},
+                ipids: filter.properties?.ipids ?? stateCollector.collectInputPids(filterInstances[i], true),
             };
             return acc;
         }, {});
