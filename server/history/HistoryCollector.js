@@ -116,12 +116,7 @@ function HistoryCollector(historyDir) {
 
     this.recordPidReconfigured = function(indexes, pidsByFilter) {
         const tsUs = sys.clock_us();
-        for (const idx of indexes) {
-            if (pidsByFilter[idx]) {
-                this._currentPidState[idx] = { ipids: pidsByFilter[idx].ipids ?? {} };
-            }
-        }
-        this._chunkNeedsCheckpoint = true;
+
         const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filter_pid_reconfigured',
@@ -129,7 +124,22 @@ function HistoryCollector(historyDir) {
             indexes,
             pidsByFilter,
         }), tsUs);
-       if (rotated) this._onChunkRotated(tsUs);
+
+        if (rotated) this._onChunkRotated(tsUs);
+
+        if (!this._currentPidState) {
+            this._currentPidState = {};
+        }
+
+        for (const idx of indexes) {
+            if (pidsByFilter[idx]) {
+                this._currentPidState[idx] = {
+                    ipids: pidsByFilter[idx],
+                };
+            }
+        }
+
+        this._chunkNeedsCheckpoint = true;
     };
 
     this.recordArgUpdated = function(indexes, argsByFilter) {
