@@ -15,6 +15,8 @@ function HistoryCollector(historyDir) {
     this.pendingLogs = [];
     this.logBatchTimer = null;
     this._latestStructural = null;
+    this._currentPidState = null;
+    this._chunkNeedsCheckpoint = false;
   
     this._writeCheckpointIfNeeded = function(tsUs) {
         if (!this._latestStructural) return;
