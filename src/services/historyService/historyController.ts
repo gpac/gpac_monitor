@@ -79,33 +79,16 @@ export class HistoryController {
 
     const chunkIndex = findEventChunkIndex(manifest, tsUs);
     const cp = findNearestCheckpoint(manifest, chunkIndex);
-    console.debug(
-      '[seek] tsUs=%d chunkIndex=%d cp=%o checkpoints=%o',
-      tsUs,
-      chunkIndex,
-      cp,
-      manifest.checkpoints,
-    );
     adapter.resetTemporalState();
+    adapter.clearTimeSeriesData();
     if (cp) {
       const checkpoint = await loader.loadCheckpoint(cp.file);
-      console.debug('[seek] checkpoint loaded:', checkpoint);
       if (checkpoint) adapter.hydrateCheckpoint(checkpoint);
-      else console.warn('[seek] checkpoint file empty or invalid:', cp.file);
-    } else {
-      console.warn('[seek] no checkpoint found for chunkIndex=%d', chunkIndex);
     }
     this.lastSeekUs = tsUs;
     this.badgeExpiration.reset();
 
     const currentChunk = await loader.loadEventChunk(chunkIndex);
-    console.debug(
-      '[seek] currentChunk: index=%d events=%d fromUs=%d toUs=%d',
-      currentChunk.index,
-      currentChunk.events.length,
-      currentChunk.fromUs,
-      currentChunk.toUs,
-    );
     const logChunks = await loader.loadLogChunksInRange(
       currentChunk.fromUs,
       currentChunk.toUs,
@@ -114,6 +97,17 @@ export class HistoryController {
     this.nextLogIndex = this.sessionLogs.findIndex((l) => l.ts_us > tsUs);
     if (this.nextLogIndex === -1) this.nextLogIndex = this.sessionLogs.length;
     adapter.hydrateLogsForSeek(this.sessionLogs, tsUs);
+
+    const eventsBeforeSeek = currentChunk.events.filter(
+      (event) => event.ts_us < tsUs,
+    );
+    if (eventsBeforeSeek.length > 0) {
+      adapter.setSilent(true);
+      for (const event of eventsBeforeSeek) {
+        adapter.handleEvent(event);
+      }
+      adapter.flush(tsUs);
+    }
 
     this.player.load(
       currentChunk.events.filter((e) => e.ts_us >= tsUs),

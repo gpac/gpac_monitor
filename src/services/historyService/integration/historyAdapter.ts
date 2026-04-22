@@ -14,6 +14,7 @@ import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
 import {
   setCommandLine,
   clearSessionDetails,
+  resetSystemStatsHistory,
 } from '@/shared/store/slices/sessionDetailsSlice';
 import {
   updateSessionStats,
@@ -142,6 +143,11 @@ export class HistoryAdapter {
     this.pendingArgTimestamps = new Map();
     this.pendingPidsByFilter = {};
     this.pendingArgsByFilter = {};
+  }
+
+  clearTimeSeriesData(): void {
+    this.dispatch(resetSystemStatsHistory());
+    this.dispatch(resetAllData());
   }
 
   resetTemporalState(): void {
