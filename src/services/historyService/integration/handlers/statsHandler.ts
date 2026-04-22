@@ -13,6 +13,7 @@ import {
   bulkAddSystemStats,
 } from '@/shared/store/slices/sessionDetailsSlice';
 import { computeBandwidthPoints } from '../computeBandwidth';
+import { formatCompactTime } from '@/utils/formatting/time';
 
 export type BandwidthBuffer = Record<
   string,
@@ -91,8 +92,12 @@ export function dispatchCpuStats(
   event: CpuStatsEvent,
   silent: boolean,
   pendingCpuStats: CPUStats[],
+  sessionStartUs = 0,
 ): void {
   const stats = mapCpuStatsEvent(event);
+  if (sessionStartUs > 0) {
+    stats.time = formatCompactTime(event.ts_us - sessionStartUs);
+  }
   if (silent) {
     pendingCpuStats.push(stats);
   } else {

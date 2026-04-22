@@ -26,8 +26,8 @@ export function prepareCpuMemoryData(
   const firstTimestamp = dataPoints.length > 0 ? dataPoints[0].timestamp : 0;
 
   const indices = dataPoints.map((_, i) => i);
-  const timeLabels = dataPoints.map((p) =>
-    formatChartSeconds((p.timestamp - firstTimestamp) / 1000),
+  const timeLabels = dataPoints.map(
+    (p) => p.time ?? formatChartSeconds((p.timestamp - firstTimestamp) / 1000),
   );
   const memoryData = dataPoints.map((p) => p.memory_mb);
   const cpuData = dataPoints.map((p) => p.cpu_percent);

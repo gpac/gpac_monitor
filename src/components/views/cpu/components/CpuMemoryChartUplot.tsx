@@ -62,6 +62,7 @@ export const CpuMemoryChartUplot = memo(
     const historyDataPoints = useMemo((): CpuMemoryDataPoint[] => {
       return systemStatsHistory.map((s) => ({
         timestamp: s.timestamp / 1000,
+        time: s.time,
         cpu_percent: s.process_cpu_usage,
         memory_mb: s.process_memory / (1024 * 1024),
       }));

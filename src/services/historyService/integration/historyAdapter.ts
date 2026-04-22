@@ -218,6 +218,7 @@ export class HistoryAdapter {
           event,
           this.silent,
           this.pendingCpuStats,
+          this.sessionStartUs,
         );
         break;
       case 'filter_args_update':
