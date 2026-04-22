@@ -78,6 +78,13 @@ function HistoryCollector(historyDir) {
             filters: normalizedFilters,
         }), filtersTsUs);
         this._latestStructural = { version: EVENT_VERSION, graph_v: graphVersion, filters: normalizedFilters };
+        this._currentPidState = normalizedFilters.reduce((acc, filter) => {
+            acc[filter.idx] = {
+                ipids: filter.properties?.ipids ?? filter.ipids ?? {},
+            };
+            return acc;
+        }, {});
+        this._chunkNeedsCheckpoint = true;
         if (rotated) this._onChunkRotated(filtersTsUs);
     };
 
