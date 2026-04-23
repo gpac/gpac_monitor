@@ -1,9 +1,6 @@
 import type { HistorySnapshot, LogEvent } from '../types';
 import type { SessionInfo } from './types';
-import type {
-  HistoryManifest,
-  HistoryManifestCheckpoint,
-} from '../source/types';
+import type { HistoryManifest } from '../source/types';
 import { parseEventsJsonl } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
 
@@ -131,7 +128,7 @@ export class LocalFileSessionFileReader {
   async readCheckpoint(
     sessionId: string,
     chunkIndex: number,
-  ): Promise<(HistoryManifestCheckpoint & { filters: unknown[] }) | null> {
+  ): Promise<unknown> {
     const file = this.sessionMap.get(sessionId)?.checkpoints.get(chunkIndex);
     if (!file) return null;
     try {

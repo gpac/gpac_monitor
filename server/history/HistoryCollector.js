@@ -58,69 +58,75 @@ function HistoryCollector(historyDir) {
     };
 
 this.recordGraph = function(filters, filterInstances, graphVersion) {
-    const pidCollector = graphVersion > 1 ? new PidDataCollector() : null;
+    // Builds the full graph payload used by snapshot and "filters" events.
+    const pidCollector = new PidDataCollector();
 
-    const normalizedFilters = filters.map((f, i) => {
-        const { ipid, opid, gpac_args, ...rest } = f;
-        const inst = filterInstances[i];
-        const entry = {
+    const eventFilters = filters.map((filter, index) => {
+        const { ipid, opid, gpac_args, ...rest } = filter;
+        const filterInstance = filterInstances[index];
+
+        return {
             ...rest,
             ipids: ipid ?? {},
             opids: opid ?? {},
-            gpac_args: inst.all_args(true).filter(Boolean),
+            gpac_args: filterInstance.all_args(true).filter(Boolean),
+            properties: {
+                ipids: pidCollector.collectInputPids(filterInstance, true),
+                opids: pidCollector.collectOutputPids(filterInstance),
+            },
         };
+    });
 
-        if (pidCollector) {
-            entry.properties = {
-                ipids: pidCollector.collectInputPids(inst,true),
-                opids: pidCollector.collectOutputPids(inst),
-            };
-        }
-
-        return entry;
+    // Builds the structural-only version stored in checkpoints.
+    const checkpointFilters = eventFilters.map((filter) => {
+        const { gpac_args, ...rest } = filter;
+        return rest;
     });
 
     const filtersTsUs = sys.clock_us();
 
+    // Writes the initial full snapshot once.
     if (!this.snapshotWritten) {
         this.writeSnapshot({
             version: EVENT_VERSION,
             ts_us: filtersTsUs,
             command_line: null,
             graph_v: graphVersion,
-            filters: normalizedFilters,
+            filters: eventFilters,
         });
     }
 
+    // Writes the full "filters" event for history replay.
     const rotated = this.writer.writeEvent(JSON.stringify({
         version: EVENT_VERSION,
         message: 'filters',
         ts_us: filtersTsUs,
         graph_v: graphVersion,
-        filters: normalizedFilters,
+        filters: eventFilters,
     }), filtersTsUs);
 
+    // Stores the structural baseline used by checkpoints.
     this._latestStructural = {
         version: EVENT_VERSION,
         graph_v: graphVersion,
-        filters: normalizedFilters,
+        filters: checkpointFilters,
     };
 
-    const pidStateCollector = pidCollector ?? new PidDataCollector();
-
-    this._currentPidState = normalizedFilters.reduce((acc, filter, i) => {
+    // Rebuilds the full PID baseline for the new graph.
+    this._currentPidState = eventFilters.reduce((acc, filter) => {
         acc[filter.idx] = {
-            ipids:
-                filter.properties?.ipids ??
-                pidStateCollector.collectInputPids(filterInstances[i], true),
+            ipids: filter.properties.ipids,
         };
         return acc;
     }, {});
 
+    // Resets arg checkpoint state: snapshot remains the fallback until an arg update occurs.
     this._currentArgState = null;
 
+    // Marks the current chunk as checkpoint-worthy.
     this._chunkNeedsCheckpoint = true;
 
+    // Flushes checkpoint data if this write rotated to a new chunk.
     if (rotated) this._onChunkRotated(filtersTsUs);
 };
 

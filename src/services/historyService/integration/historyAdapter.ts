@@ -32,6 +32,7 @@ import {
 import type {
   HistoryEvent,
   HistorySnapshot,
+  HistoryCheckpoint,
   FiltersEvent,
   FilterArgsUpdateEvent,
   LogEvent,
@@ -61,13 +62,7 @@ import {
   filterRecentIndexes,
 } from './utils/flushHelpers';
 
-export type HistoryCheckpoint = Pick<
-  HistorySnapshot,
-  'version' | 'ts_us' | 'graph_v' | 'filters'
-> & {
-  pid_state?: Record<string, { ipids: Record<string, PIDproperties> }>;
-  arg_state?: Record<string, GpacArgument[]>;
-};
+export type { HistoryCheckpoint };
 
 export class HistoryAdapter {
   private prevBandwidth: PrevBandwidthState = {};
@@ -171,11 +166,9 @@ export class HistoryAdapter {
         checkpoint.pid_state ?? buildPidsByFilter(checkpoint.filters),
       ),
     );
-    dispatch(
-      hydrateFilterArgs(
-        checkpoint.arg_state ?? buildArgsByFilter(checkpoint.filters),
-      ),
-    );
+    if (checkpoint.arg_state) {
+      dispatch(hydrateFilterArgs(checkpoint.arg_state));
+    }
   }
 
   hydrate(snapshot: HistorySnapshot, sessionStartUs: number): void {

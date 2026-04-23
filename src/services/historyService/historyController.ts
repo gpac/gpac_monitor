@@ -83,6 +83,7 @@ export class HistoryController {
     adapter.clearTimeSeriesData();
     if (cp) {
       const checkpoint = await loader.loadCheckpoint(cp.file);
+      console.log(checkpoint);
       if (checkpoint) adapter.hydrateCheckpoint(checkpoint);
     }
     this.lastSeekUs = tsUs;

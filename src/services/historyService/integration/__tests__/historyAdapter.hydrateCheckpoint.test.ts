@@ -4,7 +4,6 @@ import type { HistoryCheckpoint } from '../historyAdapter';
 import {
   toGraphFilterData,
   buildPidsByFilter,
-  buildArgsByFilter,
 } from '../../loader/snapshotHydrator';
 import type { HistoryFilter } from '../../types';
 
@@ -39,7 +38,7 @@ describe('HistoryAdapter.hydrateCheckpoint', () => {
     adapter = new HistoryAdapter(dispatch as any);
   });
 
-  it('dispatches clearGraph, filtersUpdated, clearFilterPids, setFilterPids, hydrateFilterArgs', () => {
+  it('dispatches clearGraph, filtersUpdated, clearFilterPids, setFilterPids', () => {
     const cp = makeCheckpoint();
     adapter.hydrateCheckpoint(cp);
 
@@ -48,7 +47,6 @@ describe('HistoryAdapter.hydrateCheckpoint', () => {
     expect(types).toContain('graph/filtersUpdated');
     expect(types).toContain('sessionStats/clearFilterPids');
     expect(types).toContain('sessionStats/setFilterPids');
-    expect(types).toContain('filterArgument/hydrateFilterArgs');
   });
 
   it('dispatches clearGraph before filtersUpdated', () => {
@@ -85,13 +83,11 @@ describe('HistoryAdapter.hydrateCheckpoint', () => {
     expect(call?.[0].payload).toEqual(buildPidsByFilter(cp.filters));
   });
 
-  it('falls back to buildArgsByFilter(filters) when no arg_state', () => {
+  it('does not dispatch hydrateFilterArgs when arg_state is absent', () => {
     const cp = makeCheckpoint();
     adapter.hydrateCheckpoint(cp);
-    const call = dispatch.mock.calls.find(
-      ([action]: any) => action.type === 'filterArgument/hydrateFilterArgs',
-    );
-    expect(call?.[0].payload).toEqual(buildArgsByFilter(cp.filters));
+    const types = dispatch.mock.calls.map(([action]: any) => action.type);
+    expect(types).not.toContain('filterArgument/hydrateFilterArgs');
   });
 
   it('uses checkpoint.pid_state directly when present', () => {

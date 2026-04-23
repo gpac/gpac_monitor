@@ -1,10 +1,9 @@
-import type { HistoryEvent, LogEvent } from './types';
+import type { HistoryEvent, LogEvent, HistoryCheckpoint } from './types';
 import type {
   HistoryManifest,
   HistoryManifestChunk,
   IChunkReader,
 } from './source/types';
-import type { HistoryCheckpoint } from './integration/historyAdapter';
 import { findLogChunksInRange, getEventChunkRange } from './manifestParser';
 import { chunkIndexFromPath } from './source/chunkUtils';
 

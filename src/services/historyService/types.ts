@@ -131,3 +131,11 @@ export interface HistorySnapshot {
   graph_v: number;
   filters: HistoryFilter[];
 }
+
+export type HistoryCheckpoint = Pick<
+  HistorySnapshot,
+  'version' | 'ts_us' | 'graph_v' | 'filters'
+> & {
+  pid_state?: Record<string, { ipids: Record<string, PIDproperties> }>;
+  arg_state?: Record<string, GpacArgument[]>;
+};
