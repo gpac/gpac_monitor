@@ -63,7 +63,42 @@ describe('HistoryCollector', () => {
         });
         expect(collector._chunkNeedsCheckpoint).toBe(true);
     });
+    it('recordArgUpdated stores args only for touched filters and keeps others', () => {
+    const collector = new HistoryCollector('history');
 
+    collector._currentArgState = {
+        1: [{ name: 'speed', value: 1 }],
+        2: [{ name: 'fullscreen', value: false }],
+    };
+
+    collector.recordArgUpdated([2], {
+        2: [{ name: 'fullscreen', value: true }],
+    });
+
+    expect(collector._currentArgState).toEqual({
+        1: [{ name: 'speed', value: 1 }],
+        2: [{ name: 'fullscreen', value: true }],
+    });
+
+    expect(collector._chunkNeedsCheckpoint).toBe(true);
+});
+it('writes checkpoint without arg_state when currentArgState is null', () => {
+    const collector = new HistoryCollector('history');
+
+    collector._latestStructural = { version: 1, graph_v: 3, filters: [{ idx: 0 }] };
+    collector._currentPidState = { 0: { ipids: { V1: { name: 'V1' } } } };
+    collector._currentArgState = null;
+    collector._chunkNeedsCheckpoint = true;
+
+    collector._writeCheckpointIfNeeded(2, 12345);
+
+    expect(mockWriter.writeCheckpoint).toHaveBeenCalledWith(
+        2,
+        expect.not.objectContaining({
+            arg_state: expect.anything(),
+        }),
+    );
+});
     it('updates only touched filters on recordPidReconfigured', () => {
         const collector = new HistoryCollector('history');
         collector._currentPidState = {
