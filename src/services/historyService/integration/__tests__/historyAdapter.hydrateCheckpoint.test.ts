@@ -76,7 +76,7 @@ describe('HistoryAdapter.hydrateCheckpoint', () => {
     expect(call?.[0].payload).toEqual(cp.filters.map(toGraphFilterData));
   });
 
-  it('passes pidsByFilter derived from filters to setFilterPids', () => {
+  it('falls back to buildPidsByFilter(filters) when no pid_state', () => {
     const cp = makeCheckpoint();
     adapter.hydrateCheckpoint(cp);
     const call = dispatch.mock.calls.find(
@@ -85,13 +85,37 @@ describe('HistoryAdapter.hydrateCheckpoint', () => {
     expect(call?.[0].payload).toEqual(buildPidsByFilter(cp.filters));
   });
 
-  it('passes argsByFilter derived from filters to hydrateFilterArgs', () => {
+  it('falls back to buildArgsByFilter(filters) when no arg_state', () => {
     const cp = makeCheckpoint();
     adapter.hydrateCheckpoint(cp);
     const call = dispatch.mock.calls.find(
       ([action]: any) => action.type === 'filterArgument/hydrateFilterArgs',
     );
     expect(call?.[0].payload).toEqual(buildArgsByFilter(cp.filters));
+  });
+
+  it('uses checkpoint.pid_state directly when present', () => {
+    const pid_state = {
+      '0': { ipids: { V1: { name: 'V1', codec: 'avc1' } as any } },
+    };
+    const cp = makeCheckpoint({ pid_state });
+    adapter.hydrateCheckpoint(cp);
+    const call = dispatch.mock.calls.find(
+      ([action]: any) => action.type === 'sessionStats/setFilterPids',
+    );
+    expect(call?.[0].payload).toEqual(pid_state);
+  });
+
+  it('uses checkpoint.arg_state directly when present', () => {
+    const arg_state = {
+      '0': [{ name: 'speed', value: '2', type: 'number' } as any],
+    };
+    const cp = makeCheckpoint({ arg_state });
+    adapter.hydrateCheckpoint(cp);
+    const call = dispatch.mock.calls.find(
+      ([action]: any) => action.type === 'filterArgument/hydrateFilterArgs',
+    );
+    expect(call?.[0].payload).toEqual(arg_state);
   });
 
   it('resets temporal state — no stats dispatched after checkpoint', () => {

@@ -64,7 +64,10 @@ import {
 export type HistoryCheckpoint = Pick<
   HistorySnapshot,
   'version' | 'ts_us' | 'graph_v' | 'filters'
->;
+> & {
+  pid_state?: Record<string, { ipids: Record<string, PIDproperties> }>;
+  arg_state?: Record<string, GpacArgument[]>;
+};
 
 export class HistoryAdapter {
   private prevBandwidth: PrevBandwidthState = {};
@@ -158,20 +161,21 @@ export class HistoryAdapter {
   }
 
   hydrateCheckpoint(checkpoint: HistoryCheckpoint): void {
-    console.debug(
-      '[hydrateCheckpoint] ts_us=%d graph_v=%d filters=%d %o',
-      checkpoint.ts_us,
-      checkpoint.graph_v,
-      checkpoint.filters.length,
-      checkpoint.filters.map((f) => `${f.idx}:${f.name}`),
-    );
     this.resetTemporalState();
     const { dispatch } = this;
     dispatch(clearGraph());
     dispatch(filtersUpdated(checkpoint.filters.map(toGraphFilterData)));
     dispatch(clearFilterPids());
-    dispatch(setFilterPids(buildPidsByFilter(checkpoint.filters)));
-    dispatch(hydrateFilterArgs(buildArgsByFilter(checkpoint.filters)));
+    dispatch(
+      setFilterPids(
+        checkpoint.pid_state ?? buildPidsByFilter(checkpoint.filters),
+      ),
+    );
+    dispatch(
+      hydrateFilterArgs(
+        checkpoint.arg_state ?? buildArgsByFilter(checkpoint.filters),
+      ),
+    );
   }
 
   hydrate(snapshot: HistorySnapshot, sessionStartUs: number): void {
