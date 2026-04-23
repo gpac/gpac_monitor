@@ -67,11 +67,12 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
             ...rest,
             ipids: ipid ?? {},
             opids: opid ?? {},
+            gpac_args: inst.all_args(true).filter(Boolean),
         };
 
         if (pidCollector) {
             entry.properties = {
-                ipids: pidCollector.collectInputPids(inst),
+                ipids: pidCollector.collectInputPids(inst,true),
                 opids: pidCollector.collectOutputPids(inst),
             };
         }
