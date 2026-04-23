@@ -16,24 +16,35 @@ function HistoryCollector(historyDir) {
     this.logBatchTimer = null;
     this._latestStructural = null;
     this._currentPidState = null;
+    this._currentArgState = null;
     this._chunkNeedsCheckpoint = false;
   
-    this._writeCheckpointIfNeeded = function(tsUs) {
-        if (!this._latestStructural) return;
-        if (!this._chunkNeedsCheckpoint) return;
-        const chunkIndex = this.writer.getCurrentChunkIndex();
-        this.writer.writeCheckpoint(chunkIndex, {
-            version: this._latestStructural.version,
-            ts_us: tsUs,
-            graph_v: this._latestStructural.graph_v,
-            filters: this._latestStructural.filters,
-            pid_state: this._currentPidState,
-        });
+    this._writeCheckpointIfNeeded = function(chunkIndex, tsUs) {
+    if (!this._latestStructural) return;
+    if (!this._chunkNeedsCheckpoint) return;
+    if (chunkIndex <= 0) {
         this._chunkNeedsCheckpoint = false;
+        return;
+    }
+
+    const checkpoint = {
+        version: this._latestStructural.version,
+        ts_us: tsUs,
+        graph_v: this._latestStructural.graph_v,
+        filters: this._latestStructural.filters,
+        pid_state: this._currentPidState,
     };
 
-    this._onChunkRotated = function(tsUs) {
-     this._writeCheckpointIfNeeded(tsUs);
+    if (this._currentArgState !== null) {
+        checkpoint.arg_state = this._currentArgState;
+    }
+
+    this.writer.writeCheckpoint(chunkIndex, checkpoint);
+    this._chunkNeedsCheckpoint = false;
+};
+
+    this._onChunkRotated = function(tsUs,) {
+     this._writeCheckpointIfNeeded(this.writer.getCurrentChunkIndex(),tsUs);
 };
 
     this.startLogCapture = function() {
@@ -46,51 +57,71 @@ function HistoryCollector(historyDir) {
         this.snapshotWritten = true;
     };
 
-    this.recordGraph = function(filters, filterInstances, graphVersion) {
-        const pidCollector = graphVersion > 1 ? new PidDataCollector() : null;
-        const normalizedFilters = filters.map((f, i) => {
-            const { ipid, opid, ...rest } = f;
-            const entry = { ...rest, ipids: ipid ?? {}, opids: opid ?? {} };
-            if (pidCollector) {
-                const inst = filterInstances[i];
-                entry.properties = {
-                    ipids: pidCollector.collectInputPids(inst),
-                    opids: pidCollector.collectOutputPids(inst),
-                };
-                entry.gpac_args = inst.all_args(true).filter(Boolean);
-            }
-            return entry;
-        });
-        const filtersTsUs = sys.clock_us();
+this.recordGraph = function(filters, filterInstances, graphVersion) {
+    const pidCollector = graphVersion > 1 ? new PidDataCollector() : null;
 
-        if (!this.snapshotWritten) {
-            this.writeSnapshot({
-                version: EVENT_VERSION,
-                ts_us: filtersTsUs,
-                command_line: null,
-                graph_v: graphVersion,
-                filters: normalizedFilters,
-            });
+    const normalizedFilters = filters.map((f, i) => {
+        const { ipid, opid, gpac_args, ...rest } = f;
+        const inst = filterInstances[i];
+        const entry = {
+            ...rest,
+            ipids: ipid ?? {},
+            opids: opid ?? {},
+        };
+
+        if (pidCollector) {
+            entry.properties = {
+                ipids: pidCollector.collectInputPids(inst),
+                opids: pidCollector.collectOutputPids(inst),
+            };
         }
 
-        const rotated = this.writer.writeEvent(JSON.stringify({
+        return entry;
+    });
+
+    const filtersTsUs = sys.clock_us();
+
+    if (!this.snapshotWritten) {
+        this.writeSnapshot({
             version: EVENT_VERSION,
-            message: 'filters',
             ts_us: filtersTsUs,
+            command_line: null,
             graph_v: graphVersion,
             filters: normalizedFilters,
-        }), filtersTsUs);
-        this._latestStructural = { version: EVENT_VERSION, graph_v: graphVersion, filters: normalizedFilters };
-        const stateCollector = pidCollector ?? new PidDataCollector();
-        this._currentPidState = normalizedFilters.reduce((acc, filter, i) => {
-            acc[filter.idx] = {
-                ipids: filter.properties?.ipids ?? stateCollector.collectInputPids(filterInstances[i], true),
-            };
-            return acc;
-        }, {});
-        this._chunkNeedsCheckpoint = true;
-        if (rotated) this._onChunkRotated(filtersTsUs);
+        });
+    }
+
+    const rotated = this.writer.writeEvent(JSON.stringify({
+        version: EVENT_VERSION,
+        message: 'filters',
+        ts_us: filtersTsUs,
+        graph_v: graphVersion,
+        filters: normalizedFilters,
+    }), filtersTsUs);
+
+    this._latestStructural = {
+        version: EVENT_VERSION,
+        graph_v: graphVersion,
+        filters: normalizedFilters,
     };
+
+    const pidStateCollector = pidCollector ?? new PidDataCollector();
+
+    this._currentPidState = normalizedFilters.reduce((acc, filter, i) => {
+        acc[filter.idx] = {
+            ipids:
+                filter.properties?.ipids ??
+                pidStateCollector.collectInputPids(filterInstances[i], true),
+        };
+        return acc;
+    }, {});
+
+    this._currentArgState = null;
+
+    this._chunkNeedsCheckpoint = true;
+
+    if (rotated) this._onChunkRotated(filtersTsUs);
+};
 
     this.recordSessionStats = function(payload, force) {
         const ts_us = sys.clock_us();
@@ -121,16 +152,7 @@ function HistoryCollector(historyDir) {
     this.recordPidReconfigured = function(indexes, pidsByFilter) {
         const tsUs = sys.clock_us();
 
-        const rotated = this.writer.writeEvent(JSON.stringify({
-            version: EVENT_VERSION,
-            message: 'filter_pid_reconfigured',
-            ts_us: tsUs,
-            indexes,
-            pidsByFilter,
-        }), tsUs);
-
-        if (rotated) this._onChunkRotated(tsUs);
-
+ 
         if (!this._currentPidState) {
             this._currentPidState = {};
         }
@@ -142,21 +164,48 @@ function HistoryCollector(historyDir) {
                 };
             }
         }
-
+ if (indexes.length > 0) {
         this._chunkNeedsCheckpoint = true;
+    }
+       const rotated = this.writer.writeEvent(JSON.stringify({
+        version: EVENT_VERSION,
+        message: 'filter_pid_reconfigured',
+        ts_us: tsUs,
+        indexes,
+        pidsByFilter,
+    }), tsUs);
+
+    if (rotated) this._onChunkRotated(tsUs);
+
     };
 
-    this.recordArgUpdated = function(indexes, argsByFilter) {
-        const tsUs = sys.clock_us();
-        const rotated = this.writer.writeEvent(JSON.stringify({
-            version: EVENT_VERSION,
-            message: 'filter_arg_updated',
-            ts_us: tsUs,
-            indexes,
-            argsByFilter,
-        }), tsUs);
-       if (rotated) this._onChunkRotated(tsUs);
-    };
+this.recordArgUpdated = function(indexes, argsByFilter) {
+    const tsUs = sys.clock_us();
+
+    if (!this._currentArgState) {
+        this._currentArgState = {};
+    }
+
+    for (const idx of indexes) {
+        if (argsByFilter[idx]) {
+            this._currentArgState[idx] = argsByFilter[idx];
+        }
+    }
+
+    if (indexes.length > 0) {
+        this._chunkNeedsCheckpoint = true;
+    }
+
+    const rotated = this.writer.writeEvent(JSON.stringify({
+        version: EVENT_VERSION,
+        message: 'filter_arg_updated',
+        ts_us: tsUs,
+        indexes,
+        argsByFilter,
+    }), tsUs);
+
+    if (rotated) this._onChunkRotated(tsUs);
+};
 
     this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
         const argsTsUs = sys.clock_us();
@@ -216,6 +265,7 @@ function HistoryCollector(historyDir) {
     this.close = function() {
         logHub.remove(LOG_ID);
         this.flushLogs();
+        this._writeCheckpointIfNeeded(this.writer.getCurrentChunkIndex(), sys.clock_us());
         this.writer.close();
     };
 }
