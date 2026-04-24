@@ -16,7 +16,7 @@ function HistoryCollector(historyDir) {
     this.logBatchTimer = null;
     this._latestStructural = null;
     this._currentPidState = null;
-    this._currentArgState = null;
+    this._currentArgState = {};
     this._chunkNeedsCheckpoint = false;
     this._lastEventTsUs = 0;
   
@@ -36,8 +36,9 @@ function HistoryCollector(historyDir) {
         pid_state: this._currentPidState,
     };
 
-    if (this._currentArgState !== null) {
+    if (Object.keys(this._currentArgState).length > 0) {
         checkpoint.arg_state = this._currentArgState;
+        this._currentArgState = {};
     }
 
     this.writer.writeCheckpoint(chunkIndex, checkpoint);
@@ -131,8 +132,7 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
         return acc;
     }, {});
 
-    // Resets arg checkpoint state: snapshot remains the fallback until an arg update occurs.
-    this._currentArgState = null;
+    this._currentArgState = {};
 
     // Marks the current chunk as checkpoint-worthy.
     this._chunkNeedsCheckpoint = true;
@@ -204,10 +204,6 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
 
 this.recordArgUpdated = function(indexes, argsByFilter) {
     const tsUs = sys.clock_us();
-
-    if (!this._currentArgState) {
-        this._currentArgState = {};
-    }
 
     for (const idx of indexes) {
         if (argsByFilter[idx]) {

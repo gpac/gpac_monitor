@@ -196,6 +196,7 @@ export class HistoryAdapter {
     dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
     dispatch(clearFilterPids());
     dispatch(setFilterPids(buildPidsByFilter(snapshot.filters)));
+    dispatch(clearFilterArgs());
     dispatch(hydrateFilterArgs(this.baseArgs));
     dispatch(setLoading(false));
   }
@@ -312,6 +313,7 @@ export class HistoryAdapter {
   }
 
   private handleFilters(event: FiltersEvent): void {
+    this.baseArgs = buildArgsByFilter(event.filters);
     if (this.silent) {
       this.pendingLastFilters = event;
       return;
@@ -322,6 +324,7 @@ export class HistoryAdapter {
     if (withProps.length) {
       dispatch(setFilterPids(buildPidsByFilter(withProps)));
     }
+    dispatch(clearFilterArgs());
     const args = buildArgsByFilter(event.filters);
     if (Object.keys(args).length) dispatch(hydrateFilterArgs(args));
   }

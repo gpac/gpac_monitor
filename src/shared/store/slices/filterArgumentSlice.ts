@@ -47,7 +47,7 @@ export const filterArgumentSlice = createSlice({
       state,
       action: PayloadAction<Record<string, GpacArgument[]>>,
     ) => {
-      state.argsByFilter = action.payload;
+      state.argsByFilter = { ...state.argsByFilter, ...action.payload };
     },
     clearFilterArgs: (state) => {
       state.argsByFilter = {};
