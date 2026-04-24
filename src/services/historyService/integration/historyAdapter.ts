@@ -24,6 +24,7 @@ import {
 import {
   applyArgUpdate,
   hydrateFilterArgs,
+  clearFilterArgs,
 } from '@/shared/store/slices/filterArgumentSlice';
 import {
   clearLogs,
@@ -66,6 +67,7 @@ export type { HistoryCheckpoint };
 
 export class HistoryAdapter {
   private prevBandwidth: PrevBandwidthState = {};
+  private baseArgs: Record<string, GpacArgument[]> = {};
   private sessionStartUs = 0;
   private silent = false;
   private pendingBandwidth: BandwidthBuffer = {};
@@ -166,6 +168,8 @@ export class HistoryAdapter {
         checkpoint.pid_state ?? buildPidsByFilter(checkpoint.filters),
       ),
     );
+    dispatch(clearFilterArgs());
+    dispatch(hydrateFilterArgs(this.baseArgs));
     if (checkpoint.arg_state) {
       dispatch(hydrateFilterArgs(checkpoint.arg_state));
     }
@@ -176,6 +180,7 @@ export class HistoryAdapter {
     this.prevBandwidth = {};
     this.pendingBandwidth = {};
     this.pendingCpuStats = [];
+    this.baseArgs = buildArgsByFilter(snapshot.filters);
     const { dispatch } = this;
     dispatch(resetAllData());
     dispatch(clearSessionDetails());
@@ -186,7 +191,7 @@ export class HistoryAdapter {
     dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
     dispatch(clearFilterPids());
     dispatch(setFilterPids(buildPidsByFilter(snapshot.filters)));
-    dispatch(hydrateFilterArgs(buildArgsByFilter(snapshot.filters)));
+    dispatch(hydrateFilterArgs(this.baseArgs));
     dispatch(setLoading(false));
   }
 

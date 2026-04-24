@@ -18,6 +18,7 @@ function HistoryCollector(historyDir) {
     this._currentPidState = null;
     this._currentArgState = null;
     this._chunkNeedsCheckpoint = false;
+    this._lastEventTsUs = 0;
   
     this._writeCheckpointIfNeeded = function(chunkIndex, tsUs) {
     if (!this._latestStructural) return;
@@ -43,10 +44,10 @@ function HistoryCollector(historyDir) {
     this._chunkNeedsCheckpoint = false;
 };
 
-    this._onChunkRotated = function(tsUs,) {
-     this._writeCheckpointIfNeeded(this.writer.getCurrentChunkIndex(),tsUs);
+this._onChunkRotated = function() {
+  const newChunkIndex = this.writer.getCurrentChunkIndex();
+  this._writeCheckpointIfNeeded(newChunkIndex, this._lastEventTsUs);
 };
-
     this.startLogCapture = function() {
         logHub.add(LOG_ID, this);
     };
@@ -77,10 +78,18 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
         };
     });
 
-    // Builds the structural-only version stored in checkpoints.
     const checkpointFilters = eventFilters.map((filter) => {
         const { gpac_args, ...rest } = filter;
-        return rest;
+        const strippedIpids = Object.fromEntries(
+            Object.entries(filter.properties.ipids).map(([k, v]) => {
+                const { properties, ...pidRest } = v;
+                return [k, pidRest];
+            })
+        );
+        return {
+            ...rest,
+            properties: { ...filter.properties, ipids: strippedIpids },
+        };
     });
 
     const filtersTsUs = sys.clock_us();
@@ -104,6 +113,7 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
         graph_v: graphVersion,
         filters: eventFilters,
     }), filtersTsUs);
+    this._lastEventTsUs = filtersTsUs;
 
     // Stores the structural baseline used by checkpoints.
     this._latestStructural = {
@@ -140,6 +150,7 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
             ts_us,
             ...payload,
         }), ts_us);
+        this._lastEventTsUs = ts_us;
     if (rotated) this._onChunkRotated(ts_us);
     };
 
@@ -153,6 +164,7 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
             ts_us: cpuTsUs,
             ...payload,
         }), cpuTsUs);
+        this._lastEventTsUs = cpuTsUs;
         if (rotated) this._onChunkRotated(cpuTsUs);
     };
 
@@ -181,6 +193,7 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
         indexes,
         pidsByFilter,
     }), tsUs);
+    this._lastEventTsUs = tsUs;
 
     if (rotated) this._onChunkRotated(tsUs);
 
@@ -210,7 +223,7 @@ this.recordArgUpdated = function(indexes, argsByFilter) {
         indexes,
         argsByFilter,
     }), tsUs);
-
+    this._lastEventTsUs = tsUs;
     if (rotated) this._onChunkRotated(tsUs);
 };
 
@@ -222,6 +235,7 @@ this.recordArgUpdated = function(indexes, argsByFilter) {
             ts_us: argsTsUs,
             payload: { filter_idx: filterIdx, arg_name: argName, value: newValue },
         }), argsTsUs);
+        this._lastEventTsUs = argsTsUs;
         if (rotated) this._onChunkRotated(argsTsUs);
     };
 
@@ -233,6 +247,7 @@ this.recordArgUpdated = function(indexes, argsByFilter) {
             ts_us: tsUs,
             logLevel,
         }), tsUs);
+        
     };
 
     this.handleLog = function(tool, level, message, thread_id, caller) {
@@ -272,7 +287,6 @@ this.recordArgUpdated = function(indexes, argsByFilter) {
     this.close = function() {
         logHub.remove(LOG_ID);
         this.flushLogs();
-        this._writeCheckpointIfNeeded(this.writer.getCurrentChunkIndex(), sys.clock_us());
         this.writer.close();
     };
 }
