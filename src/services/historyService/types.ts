@@ -136,6 +136,6 @@ export type HistoryCheckpoint = Pick<
   HistorySnapshot,
   'version' | 'ts_us' | 'graph_v' | 'filters'
 > & {
-  pid_state?: Record<string, { ipids: Record<string, PIDproperties> }>;
+  pid_state?: Record<string, Record<string, PIDproperties>>;
   arg_state?: Record<string, GpacArgument[]>;
 };

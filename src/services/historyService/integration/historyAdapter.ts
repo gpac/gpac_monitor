@@ -1,6 +1,6 @@
 import type { AppDispatch } from '@/shared/store';
 import type { CPUStats } from '@/types/domain/system';
-import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
+import type { SessionFilterStats, FilterPids } from '@/shared/store/slices/sessionStatsSlice';
 import {
   setLoading,
   clearGraph,
@@ -38,7 +38,6 @@ import type {
   FilterArgsUpdateEvent,
   LogEvent,
 } from '../types';
-import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
 import type { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import {
@@ -80,10 +79,7 @@ export class HistoryAdapter {
   private pendingFilterArgs: FilterArgsUpdateEvent[] = [];
   private pendingPidTimestamps = new Map<number, number>();
   private pendingArgTimestamps = new Map<number, number>();
-  private pendingPidsByFilter: Record<
-    string,
-    { ipids: Record<string, PIDproperties> }
-  > = {};
+  private pendingPidsByFilter: Record<string, FilterPids> = {};
   private pendingArgsByFilter: Record<string, GpacArgument[]> = {};
 
   constructor(private dispatch: AppDispatch) {}
@@ -163,11 +159,13 @@ export class HistoryAdapter {
     dispatch(clearGraph());
     dispatch(filtersUpdated(checkpoint.filters.map(toGraphFilterData)));
     dispatch(clearFilterPids());
-    dispatch(
-      setFilterPids(
-        checkpoint.pid_state ?? buildPidsByFilter(checkpoint.filters),
-      ),
-    );
+    const pidsByFilter = buildPidsByFilter(checkpoint.filters);
+    if (checkpoint.pid_state) {
+      for (const [idx, ipids] of Object.entries(checkpoint.pid_state)) {
+        pidsByFilter[idx] = { ...pidsByFilter[idx], ipids };
+      }
+    }
+    dispatch(setFilterPids(pidsByFilter));
     dispatch(clearFilterArgs());
     dispatch(hydrateFilterArgs(this.baseArgs));
     if (checkpoint.arg_state) {
@@ -239,14 +237,10 @@ export class HistoryAdapter {
         } else {
           this.dispatch(markPidReconfigured(event.indexes));
           if (event.pidsByFilter) {
-            const pids: Record<
-              string,
-              { ipids: (typeof event.pidsByFilter)[string] }
-            > = {};
-            for (const [idx, ipids] of Object.entries(event.pidsByFilter)) {
-              pids[idx] = { ipids };
-            }
-            this.dispatch(setFilterPids(pids));
+            const pidsForStore = Object.fromEntries(
+              Object.entries(event.pidsByFilter).map(([idx, ipids]) => [idx, { ipids }]),
+            );
+            this.dispatch(setFilterPids(pidsForStore));
           }
         }
         break;
@@ -319,12 +313,7 @@ export class HistoryAdapter {
     dispatch(filtersUpdated(event.filters.map(toGraphFilterData)));
     const withProps = event.filters.filter((filter) => filter.properties);
     if (withProps.length) {
-      const pids = withProps.map((filter) => ({
-        ...filter,
-        ipids: filter.properties!.ipids,
-        opids: filter.properties!.opids,
-      }));
-      dispatch(setFilterPids(buildPidsByFilter(pids)));
+      dispatch(setFilterPids(buildPidsByFilter(withProps)));
     }
     const args = buildArgsByFilter(event.filters);
     if (Object.keys(args).length) dispatch(hydrateFilterArgs(args));

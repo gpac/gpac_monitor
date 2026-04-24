@@ -65,8 +65,10 @@ export function buildPidsByFilter(
 ): Record<string, FilterPids> {
   const result: Record<string, FilterPids> = {};
   for (const f of filters) {
-    if (f.ipids || f.opids) {
-      result[f.idx.toString()] = { ipids: f.ipids, opids: f.opids };
+    const ipids = f.properties?.ipids ?? f.ipids;
+    const opids = f.properties?.opids;
+    if (ipids || opids) {
+      result[f.idx.toString()] = { ipids, opids };
     }
   }
   return result;

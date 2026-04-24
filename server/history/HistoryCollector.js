@@ -122,11 +122,8 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
         filters: checkpointFilters,
     };
 
-    // Rebuilds the full PID baseline for the new graph.
     this._currentPidState = eventFilters.reduce((acc, filter) => {
-        acc[filter.idx] = {
-            ipids: filter.properties.ipids,
-        };
+        acc[filter.idx] = filter.properties.ipids;
         return acc;
     }, {});
 
@@ -178,9 +175,7 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
 
         for (const idx of indexes) {
             if (pidsByFilter[idx]) {
-                this._currentPidState[idx] = {
-                    ipids: pidsByFilter[idx],
-                };
+                this._currentPidState[idx] = pidsByFilter[idx];
             }
         }
  if (indexes.length > 0) {
