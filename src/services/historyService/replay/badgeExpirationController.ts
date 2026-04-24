@@ -1,4 +1,4 @@
-const BADGE_DURATION_US = 3_000_000;
+export const BADGE_DURATION_US = 3_000_000;
 
 type BadgeType = 'pid' | 'arg';
 

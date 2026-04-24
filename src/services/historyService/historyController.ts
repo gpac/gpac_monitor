@@ -3,7 +3,10 @@ import type { HistorySnapshot, HistoryEvent, LogEvent } from './types';
 import { HistoryAdapter } from './integration/historyAdapter';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
-import { BadgeExpirationController } from './replay/badgeExpirationController';
+import {
+  BadgeExpirationController,
+  BADGE_DURATION_US,
+} from './replay/badgeExpirationController';
 import type { HistoryManifest, HistorySource } from './source/types';
 import { ChunkLoader } from './chunkLoader';
 import { findEventChunkIndex, findNearestCheckpoint } from './manifestParser';
@@ -108,6 +111,13 @@ export class HistoryController {
         adapter.handleEvent(event);
       }
       adapter.flush(tsUs);
+      // Re-schedule expiry for events inside the badge window so ticks can clear them.
+      const badgeWindowStart = tsUs - BADGE_DURATION_US;
+      for (const event of eventsBeforeSeek) {
+        if (event.ts_us >= badgeWindowStart) {
+          this.scheduleBadgeIfNeeded(event);
+        }
+      }
     }
 
     this.player.load(
@@ -174,6 +184,7 @@ export class HistoryController {
     return this.sessionStartUs;
   }
 
+  // Registers badge expiry for structural events; ticks call clearExpiredBadges when due.
   private scheduleBadgeIfNeeded(event: HistoryEvent): void {
     if (event.message === 'filter_pid_reconfigured') {
       for (const idx of event.indexes) {
