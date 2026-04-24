@@ -161,8 +161,15 @@ export class HistoryAdapter {
     dispatch(clearFilterPids());
     const pidsByFilter = buildPidsByFilter(checkpoint.filters);
     if (checkpoint.pid_state) {
-      for (const [idx, ipids] of Object.entries(checkpoint.pid_state)) {
-        pidsByFilter[idx] = { ...pidsByFilter[idx], ipids };
+      for (const [idx, allPidProperties] of Object.entries(checkpoint.pid_state)) {
+        const filterIpids = pidsByFilter[idx]?.ipids;
+        if (filterIpids) {
+          for (const [pidKey, propsMap] of Object.entries(allPidProperties)) {
+            if (filterIpids[pidKey]) {
+              filterIpids[pidKey] = { ...filterIpids[pidKey], properties: propsMap };
+            }
+          }
+        }
       }
     }
     dispatch(setFilterPids(pidsByFilter));

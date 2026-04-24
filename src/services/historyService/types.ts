@@ -4,6 +4,7 @@ import type {
 } from '@/types/domain/gpac/gpac_args';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { SessionFilterStatistics } from '@/types/domain/gpac/filter-stats';
+import type { PidPropsMap } from '@/types/domain/gpac/pid_props';
 import type { GpacLogEntry } from '@/types/domain/gpac/log-types';
 
 // --- History Events ---
@@ -136,6 +137,6 @@ export type HistoryCheckpoint = Pick<
   HistorySnapshot,
   'version' | 'ts_us' | 'graph_v' | 'filters'
 > & {
-  pid_state?: Record<string, Record<string, PIDproperties>>;
+  pid_state?: Record<string, Record<string, PidPropsMap>>;
   arg_state?: Record<string, GpacArgument[]>;
 };

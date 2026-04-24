@@ -123,7 +123,11 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
     };
 
     this._currentPidState = eventFilters.reduce((acc, filter) => {
-        acc[filter.idx] = filter.properties.ipids;
+        const allPidProperties = {};
+        for (const [key, pid] of Object.entries(filter.properties.ipids)) {
+            if (pid.properties) allPidProperties[key] = pid.properties;
+        }
+        if (Object.keys(allPidProperties).length > 0) acc[filter.idx] = allPidProperties;
         return acc;
     }, {});
 
@@ -175,7 +179,11 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
 
         for (const idx of indexes) {
             if (pidsByFilter[idx]) {
-                this._currentPidState[idx] = pidsByFilter[idx];
+                const allPidProperties = {};
+                for (const [key, pid] of Object.entries(pidsByFilter[idx])) {
+                    if (pid.properties) allPidProperties[key] = pid.properties;
+                }
+                if (Object.keys(allPidProperties).length > 0) this._currentPidState[idx] = allPidProperties;
             }
         }
  if (indexes.length > 0) {
