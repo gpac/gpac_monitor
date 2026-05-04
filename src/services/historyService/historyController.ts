@@ -7,6 +7,8 @@ import {
   BadgeExpirationController,
   BADGE_DURATION_US,
 } from './replay/badgeExpirationController';
+import { ChunkPreloadController } from './replay/chunkPreloadController';
+import type { AppendLogsCallback } from './replay/chunkPreloadController';
 import type { HistoryManifest, HistorySource } from './source/types';
 import { ChunkLoader } from './chunkLoader';
 import type { EventChunk } from './chunkLoader';
@@ -27,11 +29,7 @@ export class HistoryController {
   private loader: ChunkLoader | null = null;
   private manifest: HistoryManifest | null = null;
   private loadedChunkIndex: number | null = null;
-  private playingChunkIndex = 0;
-  private lastAppendedChunkIndex = 0;
-  private isPreloadingNextChunk = false;
-  // Incremented on every seek() to invalidate stale async preload results
-  private playbackVersion = 0;
+  private preloader: ChunkPreloadController | null = null;
 
   setListener(listener: PlayerListener) {
     this.player.setListener(listener);
@@ -59,77 +57,23 @@ export class HistoryController {
     if (expired.length > 0) {
       this.adapter!.clearExpiredBadges(expired);
     }
-    if (this.manifest) {
-      this.playingChunkIndex = findEventChunkIndex(
-        this.manifest,
-        currentTimeUs,
-      );
+    if (this.manifest && this.preloader) {
+      this.preloader.updatePlayingChunkIndex(currentTimeUs);
     }
-    this.ensureOneChunkAhead();
+    this.preloader?.ensureOneChunkAhead();
   };
 
-  private ensureOneChunkAhead(): void {
-    if (!this.manifest || this.isPreloadingNextChunk) return;
-    const nextIndex = this.lastAppendedChunkIndex + 1;
-    if (nextIndex >= this.manifest.chunkCount) {
-      this.player.setAwaitingMoreEvents(false);
-      return;
-    }
-    const chunksAhead = this.lastAppendedChunkIndex - this.playingChunkIndex;
-    if (chunksAhead >= 1) return;
-    this.isPreloadingNextChunk = true;
-    this.player.setAwaitingMoreEvents(true);
-    void this.preloadNextChunk(nextIndex).catch((error) => {
-      console.warn('[HistoryController] preload failed', error);
-      this.isPreloadingNextChunk = false;
-      this.player.setAwaitingMoreEvents(false);
-    });
-  }
-
-  private async preloadNextChunk(nextIndex: number): Promise<void> {
-    if (!this.loader || !this.manifest) return;
-    const version = this.playbackVersion;
-    const startMs = performance.now();
-    console.debug('[HistoryController] preload start', {
-      nextIndex,
-      version,
-      lastAppendedChunkIndex: this.lastAppendedChunkIndex,
-    });
-    const nextChunk = await this.loader.loadEventChunk(nextIndex);
-    console.debug('[HistoryController] event chunk loaded', {
-      nextIndex,
-      stale: version !== this.playbackVersion,
-      durationMs: performance.now() - startMs,
-      eventsCount: nextChunk.events.length,
-      fromUs: nextChunk.fromUs,
-      toUs: nextChunk.toUs,
-      firstEventTsUs: nextChunk.events[0]?.ts_us,
-      lastEventTsUs: nextChunk.events[nextChunk.events.length - 1]?.ts_us,
-    });
-    if (version !== this.playbackVersion) return;
-    this.player.append(nextChunk.events);
-    console.debug('[HistoryController] events appended', {
-      nextIndex,
-      eventsCount: nextChunk.events.length,
-    });
-    this.lastAppendedChunkIndex = nextIndex;
-    this.isPreloadingNextChunk = false;
-    const hasNextChunk = nextIndex + 1 < this.manifest.chunkCount;
-    this.player.setAwaitingMoreEvents(hasNextChunk);
-    void this.appendLogsForChunk(nextChunk, version);
-  }
-
-  private async appendLogsForChunk(
+  private appendLogs: AppendLogsCallback = async (
     chunk: EventChunk,
-    version: number,
-  ): Promise<void> {
+    isStale: () => boolean,
+  ): Promise<void> => {
     if (!this.loader) return;
     try {
       const logChunks = await this.loader.loadLogChunksInRange(
         chunk.fromUs,
         chunk.toUs,
       );
-      if (version !== this.playbackVersion) return;
+      if (isStale()) return;
       const lastTs =
         this.sessionLogs.length > 0
           ? this.sessionLogs[this.sessionLogs.length - 1].ts_us
@@ -142,7 +86,7 @@ export class HistoryController {
     } catch (error) {
       console.warn('[HistoryController] log preload failed', error);
     }
-  }
+  };
 
   private async loadLogsForChunk(chunk: EventChunk): Promise<void> {
     if (!this.loader)
@@ -174,10 +118,9 @@ export class HistoryController {
       this.handlePlaybackTick,
     );
 
-    this.playingChunkIndex = 0;
-    this.lastAppendedChunkIndex = 0;
+    this.preloader?.reset(0);
     this.loadedChunkIndex = 0;
-    this.ensureOneChunkAhead();
+    this.preloader?.ensureOneChunkAhead();
   }
 
   async load(source: HistorySource, dispatch: AppDispatch) {
@@ -187,6 +130,12 @@ export class HistoryController {
 
     this.manifest = manifest;
     this.loader = new ChunkLoader(source, manifest);
+    this.preloader = new ChunkPreloadController(
+      this.loader,
+      manifest,
+      this.player,
+      this.appendLogs,
+    );
 
     const snapshot = await source.loadSnapshot();
 
@@ -202,12 +151,11 @@ export class HistoryController {
   }
 
   async seek(tsUs: number): Promise<void> {
-    this.playbackVersion++;
-    this.isPreloadingNextChunk = false;
-    this.player.setAwaitingMoreEvents(false);
-    if (!this.manifest || !this.loader || !this.adapter) return;
-    const { manifest, loader, adapter } = this;
-    const version = this.playbackVersion;
+    this.preloader?.invalidate();
+    if (!this.manifest || !this.loader || !this.adapter || !this.preloader)
+      return;
+    const { manifest, loader, adapter, preloader } = this;
+    const version = preloader.getVersion();
 
     const chunkIndex = findEventChunkIndex(manifest, tsUs);
     const cp = findNearestCheckpoint(manifest, chunkIndex);
@@ -215,14 +163,14 @@ export class HistoryController {
     adapter.clearTimeSeriesData();
     if (cp) {
       const checkpoint = await loader.loadCheckpoint(cp.file);
-      if (version !== this.playbackVersion) return;
+      if (version !== preloader.getVersion()) return;
       console.log(checkpoint);
       if (checkpoint) adapter.hydrateCheckpoint(checkpoint);
     }
     this.badgeExpiration.reset();
 
     const currentChunk = await loader.loadEventChunk(chunkIndex);
-    if (version !== this.playbackVersion) return;
+    if (version !== preloader.getVersion()) return;
 
     await this.loadLogsForChunk(currentChunk);
     this.nextLogIndex = this.getNextLogIndexFromTimestamp(tsUs);
@@ -253,10 +201,9 @@ export class HistoryController {
       tsUs,
     );
 
-    this.playingChunkIndex = chunkIndex;
-    this.lastAppendedChunkIndex = chunkIndex;
+    preloader.reset(chunkIndex);
     this.loadedChunkIndex = chunkIndex;
-    this.ensureOneChunkAhead();
+    preloader.ensureOneChunkAhead();
   }
 
   async play(): Promise<void> {
@@ -267,7 +214,6 @@ export class HistoryController {
       console.warn('[HistoryController] player restart callback called', {
         currentTimeUs: this.player.currentTimeUs(),
         loadedChunkIndex: this.loadedChunkIndex,
-        lastAppendedChunkIndex: this.lastAppendedChunkIndex,
       });
       if (this.adapter && this.snapshot) {
         this.adapter.hydrate(this.snapshot, this.sessionStartUs);
