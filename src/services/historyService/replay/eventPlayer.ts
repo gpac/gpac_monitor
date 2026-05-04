@@ -1,6 +1,6 @@
 import type { HistoryEvent } from '../types';
 
-export type PlayerState = 'idle' | 'playing' | 'paused' | 'done';
+export type PlayerState = 'idle' | 'playing' | 'paused' | 'done' | 'waiting';
 export type PlayerListener = (state: PlayerState, timeUs: number) => void;
 
 /**
@@ -17,6 +17,7 @@ export class EventPlayer {
   private state: PlayerState = 'idle';
   private animationFrameId: number | null = null;
   private listener?: PlayerListener;
+  private awaitingMoreEvents = false;
 
   // Timing
   private playbackStartTimeMs = 0;
@@ -98,6 +99,16 @@ export class EventPlayer {
   append(events: HistoryEvent[]): void {
     if (!events.length) return;
     this.timelineEvents = this.timelineEvents.concat(events);
+    if (this.state === 'waiting') {
+      this.playbackStartTimeMs = performance.now();
+      this.startEventUs = this.currentPlaybackTimeUs;
+      this.setState('playing');
+      this.scheduleFrame();
+    }
+  }
+
+  setAwaitingMoreEvents(value: boolean): void {
+    this.awaitingMoreEvents = value;
   }
 
   durationUs(): number {
@@ -145,6 +156,11 @@ export class EventPlayer {
     this.onTick?.(now);
 
     if (this.nextEventIndex >= this.timelineEvents.length) {
+      if (this.awaitingMoreEvents) {
+        this.currentPlaybackTimeUs = now;
+        this.setState('waiting');
+        return;
+      }
       this.currentPlaybackTimeUs =
         this.timelineEvents[this.timelineEvents.length - 1].ts_us;
       this.setState('done');
