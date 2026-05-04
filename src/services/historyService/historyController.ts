@@ -31,6 +31,30 @@ export class HistoryController {
     this.player.setListener(listener);
   }
 
+  private handleReplayEvent = (event: HistoryEvent): void => {
+    this.adapter!.handleEvent(event);
+    this.scheduleBadgeIfNeeded(event);
+  };
+
+  private flushVisibleLogs(currentTimeUs: number): void {
+    if (!this.adapter) return;
+    while (
+      this.nextLogIndex < this.sessionLogs.length &&
+      this.sessionLogs[this.nextLogIndex].ts_us <= currentTimeUs
+    ) {
+      this.adapter.handleLogEvent(this.sessionLogs[this.nextLogIndex]);
+      this.nextLogIndex++;
+    }
+  }
+
+  private handlePlaybackTick = (currentTimeUs: number): void => {
+    this.flushVisibleLogs(currentTimeUs);
+    const expired = this.badgeExpiration.tick(currentTimeUs);
+    if (expired.length > 0) {
+      this.adapter!.clearExpiredBadges(expired);
+    }
+  };
+
   async load(source: HistorySource, dispatch: AppDispatch) {
     const manifest = await source.getManifest();
     if (!manifest)
@@ -39,41 +63,17 @@ export class HistoryController {
     this.manifest = manifest;
     this.loader = new ChunkLoader(source, manifest);
 
-    const chunk0 = await this.loader.loadEventChunk(0);
-    const logChunks = await this.loader.loadLogChunksInRange(
-      chunk0.fromUs,
-      chunk0.toUs,
-    );
     const snapshot = await source.loadSnapshot();
 
     this.snapshot = snapshot;
     this.sessionStartUs = manifest.startUs;
-    this.sessionLogs = logChunks.flatMap((logChunk) => logChunk.logs);
+    this.sessionLogs = [];
     this.nextLogIndex = 0;
     this.lastSeekUs = null;
     this.adapter = new HistoryAdapter(dispatch);
     this.adapter.hydrate(snapshot, manifest.startUs);
     this.badgeExpiration.reset();
-    this.player.load(
-      chunk0.events,
-      (event) => {
-        this.adapter!.handleEvent(event);
-        this.scheduleBadgeIfNeeded(event);
-      },
-      (currentTimeUs) => {
-        while (
-          this.nextLogIndex < this.sessionLogs.length &&
-          this.sessionLogs[this.nextLogIndex].ts_us <= currentTimeUs
-        ) {
-          this.adapter!.handleLogEvent(this.sessionLogs[this.nextLogIndex]);
-          this.nextLogIndex++;
-        }
-        const expired = this.badgeExpiration.tick(currentTimeUs);
-        if (expired.length > 0) {
-          this.adapter!.clearExpiredBadges(expired);
-        }
-      },
-    );
+    this.player.load([], this.handleReplayEvent, this.handlePlaybackTick);
   }
 
   async seek(tsUs: number): Promise<void> {
@@ -121,22 +121,9 @@ export class HistoryController {
     }
 
     this.player.load(
-      currentChunk.events.filter((e) => e.ts_us >= tsUs),
-      (event) => {
-        this.adapter!.handleEvent(event);
-        this.scheduleBadgeIfNeeded(event);
-      },
-      (currentTimeUs) => {
-        while (
-          this.nextLogIndex < this.sessionLogs.length &&
-          this.sessionLogs[this.nextLogIndex].ts_us <= currentTimeUs
-        ) {
-          this.adapter!.handleLogEvent(this.sessionLogs[this.nextLogIndex]);
-          this.nextLogIndex++;
-        }
-        const expired = this.badgeExpiration.tick(currentTimeUs);
-        if (expired.length > 0) this.adapter!.clearExpiredBadges(expired);
-      },
+      currentChunk.events.filter((event) => event.ts_us >= tsUs),
+      this.handleReplayEvent,
+      this.handlePlaybackTick,
       tsUs,
     );
   }
