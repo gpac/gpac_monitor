@@ -37,7 +37,7 @@ export class HistoryController {
       throw new Error('[HistoryController] No manifest for session');
 
     this.manifest = manifest;
-    this.loader = new ChunkLoader(source, source.sessionId, manifest);
+    this.loader = new ChunkLoader(source, manifest);
 
     const chunk0 = await this.loader.loadEventChunk(0);
     const logChunks = await this.loader.loadLogChunksInRange(

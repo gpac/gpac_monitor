@@ -18,19 +18,16 @@ export class FileHistorySource implements HistorySource {
     return this.loadManifest();
   }
 
-  async readChunk(sessionId: string, index: number): Promise<HistoryEvent[]> {
-    return this.reader.readChunk(sessionId, index);
+  async readChunk(index: number): Promise<HistoryEvent[]> {
+    return this.reader.readChunk(this.sessionId, index);
   }
 
-  async readLogChunk(sessionId: string, index: number): Promise<LogEvent[]> {
-    return this.reader.readLogChunk(sessionId, index);
+  async readLogChunk(index: number): Promise<LogEvent[]> {
+    return this.reader.readLogChunk(this.sessionId, index);
   }
 
-  async readCheckpoint(
-    sessionId: string,
-    chunkIndex: number,
-  ): Promise<unknown> {
-    return this.reader.readCheckpoint(sessionId, chunkIndex);
+  async readCheckpoint(chunkIndex: number): Promise<unknown> {
+    return this.reader.readCheckpoint(this.sessionId, chunkIndex);
   }
 
   private async loadManifest(): Promise<HistoryManifest | null> {
