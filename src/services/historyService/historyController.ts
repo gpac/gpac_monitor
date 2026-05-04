@@ -9,6 +9,7 @@ import {
 } from './replay/badgeExpirationController';
 import type { HistoryManifest, HistorySource } from './source/types';
 import { ChunkLoader } from './chunkLoader';
+import type { EventChunk } from './chunkLoader';
 import { findEventChunkIndex, findNearestCheckpoint } from './manifestParser';
 
 /**
@@ -25,7 +26,7 @@ export class HistoryController {
   private nextLogIndex = 0;
   private loader: ChunkLoader | null = null;
   private manifest: HistoryManifest | null = null;
-  private lastSeekUs: number | null = null;
+  private loadedChunkIndex: number | null = null;
 
   setListener(listener: PlayerListener) {
     this.player.setListener(listener);
@@ -55,6 +56,43 @@ export class HistoryController {
     }
   };
 
+  private async loadLogsForChunk(chunk: EventChunk): Promise<void> {
+    if (!this.loader)
+      throw new Error('[HistoryController] Loader not initialized');
+
+    const logChunks = await this.loader.loadLogChunksInRange(
+      chunk.fromUs,
+      chunk.toUs,
+    );
+
+    this.sessionLogs = logChunks
+      .flatMap((logChunk) => logChunk.logs)
+      .sort((leftLog, rightLog) => leftLog.ts_us - rightLog.ts_us);
+
+    this.nextLogIndex = 0;
+  }
+
+  private async loadInitialPlaybackChunk(): Promise<void> {
+    if (!this.loader)
+      throw new Error('[HistoryController] Loader not initialized');
+
+    const firstChunk = await this.loader.loadEventChunk(0);
+
+    await this.loadLogsForChunk(firstChunk);
+
+    this.player.load(
+      firstChunk.events,
+      this.handleReplayEvent,
+      this.handlePlaybackTick,
+    );
+
+    this.loader.preloadEventChunk(1).catch((error) => {
+      console.warn('[HistoryController] Failed to preload chunk 1', error);
+    });
+
+    this.loadedChunkIndex = 0;
+  }
+
   async load(source: HistorySource, dispatch: AppDispatch) {
     const manifest = await source.getManifest();
     if (!manifest)
@@ -69,7 +107,7 @@ export class HistoryController {
     this.sessionStartUs = manifest.startUs;
     this.sessionLogs = [];
     this.nextLogIndex = 0;
-    this.lastSeekUs = null;
+    this.loadedChunkIndex = null;
     this.adapter = new HistoryAdapter(dispatch);
     this.adapter.hydrate(snapshot, manifest.startUs);
     this.badgeExpiration.reset();
@@ -89,7 +127,6 @@ export class HistoryController {
       console.log(checkpoint);
       if (checkpoint) adapter.hydrateCheckpoint(checkpoint);
     }
-    this.lastSeekUs = tsUs;
     this.badgeExpiration.reset();
 
     const currentChunk = await loader.loadEventChunk(chunkIndex);
@@ -128,21 +165,15 @@ export class HistoryController {
     );
   }
 
-  play() {
-    if (!this.snapshot || !this.adapter) {
-      this.player.play();
-      return;
+  async play(): Promise<void> {
+    if (this.loadedChunkIndex === null) {
+      await this.loadInitialPlaybackChunk();
     }
-    if (this.lastSeekUs !== null) {
-      this.seek(this.lastSeekUs)
-        .then(() => this.player.play())
-        .catch(console.error);
-      return;
-    }
-    const { snapshot, adapter, sessionStartUs } = this;
     this.player.play(() => {
-      adapter.hydrate(snapshot, sessionStartUs);
-      this.nextLogIndex = 0;
+      if (this.adapter && this.snapshot) {
+        this.adapter.hydrate(this.snapshot, this.sessionStartUs);
+        this.nextLogIndex = 0;
+      }
     });
   }
 
