@@ -130,13 +130,9 @@ export class HistoryController {
     this.badgeExpiration.reset();
 
     const currentChunk = await loader.loadEventChunk(chunkIndex);
-    const logChunks = await loader.loadLogChunksInRange(
-      currentChunk.fromUs,
-      currentChunk.toUs,
-    );
-    this.sessionLogs = logChunks.flatMap((lc) => lc.logs);
-    this.nextLogIndex = this.sessionLogs.findIndex((l) => l.ts_us > tsUs);
-    if (this.nextLogIndex === -1) this.nextLogIndex = this.sessionLogs.length;
+
+    await this.loadLogsForChunk(currentChunk);
+    this.nextLogIndex = this.getNextLogIndexFromTimestamp(tsUs);
     adapter.hydrateLogsForSeek(this.sessionLogs, tsUs);
 
     const eventsBeforeSeek = currentChunk.events.filter(
@@ -163,6 +159,8 @@ export class HistoryController {
       this.handlePlaybackTick,
       tsUs,
     );
+
+    this.loadedChunkIndex = chunkIndex;
   }
 
   async play(): Promise<void> {
@@ -200,6 +198,16 @@ export class HistoryController {
 
   getSessionStartUs(): number {
     return this.sessionStartUs;
+  }
+
+  private getNextLogIndexFromTimestamp(timestampUs: number): number {
+    const firstReplayableLogIndex = this.sessionLogs.findIndex(
+      (log) => log.ts_us >= timestampUs,
+    );
+
+    return firstReplayableLogIndex === -1
+      ? this.sessionLogs.length
+      : firstReplayableLogIndex;
   }
 
   // Registers badge expiry for structural events; ticks call clearExpiredBadges when due.
