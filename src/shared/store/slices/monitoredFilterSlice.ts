@@ -13,8 +13,8 @@ export interface ChartDataPoint {
  * Network chart data for a single filter
  */
 interface NetworkChartData {
-  upload: ChartDataPoint[];
-  download: ChartDataPoint[];
+  outband: ChartDataPoint[];
+  inband: ChartDataPoint[];
 }
 
 /**
@@ -43,13 +43,13 @@ const monitoredFilterSlice = createSlice({
   initialState,
   reducers: {
     /**
-     * Add network data point (upload or download)
+     * Add network data point (outband or inband)
      */
     addNetworkDataPoint: (
       state,
       action: PayloadAction<{
         filterId: string;
-        type: 'upload' | 'download';
+        type: 'outband' | 'inband';
         point: ChartDataPoint;
       }>,
     ) => {
@@ -61,8 +61,8 @@ const monitoredFilterSlice = createSlice({
 
       if (!state.dataByFilter[filterId].network) {
         state.dataByFilter[filterId].network = {
-          upload: [],
-          download: [],
+          outband: [],
+          inband: [],
         };
       }
 

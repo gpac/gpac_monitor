@@ -149,7 +149,7 @@ const MonitoredFilterView = memo(
                 value="network"
                 className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
               >
-                Network
+                Stats
               </TabsTrigger>
               <TabsTrigger
                 value="inputs"

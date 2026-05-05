@@ -6,10 +6,7 @@ import {
   ChartDataPoint,
 } from '@/shared/store/slices/monitoredFilterSlice';
 import { RootState } from '@/shared/store';
-import {
-  selectFilterUploadData,
-  selectFilterDownloadData,
-} from '@/shared/store/selectors';
+import { selectFilterNetworkChartData } from '@/shared/store/selectors';
 import { useGpacService } from '@/shared/hooks/useGpacService';
 
 export interface DataPoint {
@@ -22,7 +19,7 @@ interface UseBandwidthChartOptions {
   filterId: string;
   currentBytes: number;
   refreshInterval: number;
-  type: 'upload' | 'download';
+  type: 'outband' | 'inband';
   windowDurationMs?: number;
 }
 
@@ -37,11 +34,12 @@ export const useBandwidthChart = ({
   const gpacService = useGpacService();
 
   // Select data from Redux store based on type
-  const rawDataPoints = useSelector((state: RootState) =>
-    type === 'upload'
-      ? selectFilterUploadData(state, filterId)
-      : selectFilterDownloadData(state, filterId),
-  );
+  const rawDataPoints = useSelector((state: RootState) => {
+    const networkData = selectFilterNetworkChartData(state, filterId);
+    return type === 'outband'
+      ? (networkData?.outband ?? [])
+      : (networkData?.inband ?? []);
+  });
 
   // Apply time window filtering (returns only points within windowDurationMs)
   const dataPoints = useMemo(() => {
