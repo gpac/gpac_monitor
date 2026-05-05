@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TabPIDData } from '@/types/ui';
-import { formatBytes } from '@/utils/formatting';
+import { formatPidBuffer } from '@/components/views/stats-session/utils/pidFormatters';
 import { getPIDStatusInfo, getPIDType } from '../shared/statusHelpers';
 
 // Import the new specialized components
@@ -46,7 +46,7 @@ export const PIDStatsOverview = memo(
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-sm font-medium text-info tabular-nums">
-                  {formatBytes(pidData.buffer)}
+                  {formatPidBuffer(pidData.buffer)}
                 </div>
                 <div className="text-xs text-muted-foreground stat-label">
                   Buffer Used

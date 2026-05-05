@@ -1,7 +1,10 @@
 import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { getPIDStatusBadge, getMediaTypeInfo } from '@/utils/gpac';
-import { formatPidBuffer, formatPidBitrate } from '../../utils/pidFormatters';
+import {
+  formatPidBuffer,
+  formatPidBitrate,
+} from '@/components/views/stats-session/utils/pidFormatters';
 import { LuEye } from 'react-icons/lu';
 import type { PIDWithIndex } from '../../types';
 import {

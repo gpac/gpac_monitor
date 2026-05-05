@@ -21,7 +21,7 @@ import {
   formatPidBitrate,
   formatPidCount,
   formatPidPeak,
-} from '../../utils/pidFormatters';
+} from '@/components/views/stats-session/utils/pidFormatters';
 
 type PIDCardVariant = 'input' | 'output';
 

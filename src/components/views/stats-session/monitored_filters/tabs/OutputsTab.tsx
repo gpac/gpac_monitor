@@ -2,7 +2,6 @@ import { memo, useMemo } from 'react';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Badge } from '@/components/ui/badge';
 import { getGlobalStatus } from '@/utils/gpac';
-import PIDMetricsCard from './PIDMetricsCard';
 import PIDTable from './PIDTable';
 import type { PIDWithIndex } from '../../types';
 import { TAB_STYLES } from './styles';
@@ -91,29 +90,14 @@ const OutputsTab = memo(
           </div>
         )}
 
-        {/* PIDs Display - Table mode for >1, Grid mode for ≤1 */}
+        {/* PIDs Display */}
         {allPidsWithType.length > 0 ? (
-          allPidsWithType.length > 1 ? (
-            <PIDTable
-              pids={pidsWithIndices}
-              filterIdx={filterData.idx}
-              onOpenProps={handleOpenProps}
-              variant="output"
-            />
-          ) : (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-2">
-              {allPidsWithType.map(({ pid, type }) => (
-                <PIDMetricsCard
-                  key={`${pid.name}-${pid.ipidIdx}`}
-                  pid={pid}
-                  type={type}
-                  filterIdx={filterData.idx}
-                  onOpenProps={handleOpenProps}
-                  variant="output"
-                />
-              ))}
-            </div>
-          )
+          <PIDTable
+            pids={pidsWithIndices}
+            filterIdx={filterData.idx}
+            onOpenProps={handleOpenProps}
+            variant="output"
+          />
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />

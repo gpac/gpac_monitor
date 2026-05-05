@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TabPIDData } from '@/types/ui';
-import { formatBytes } from '@/utils/formatting';
+import { formatPidBuffer } from '@/components/views/stats-session/utils/pidFormatters';
 import { getCriticalAlerts, getPlaybackStatus } from '../shared/statusHelpers';
 
 interface CompactPIDStatsProps {
@@ -105,7 +105,7 @@ export const CompactPIDStats = memo(
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-info tabular-nums">
-                  {formatBytes(pidData.buffer)}
+                  {formatPidBuffer(pidData.buffer)}
                 </span>
                 <span
                   className={`text-xs font-medium tabular-nums ${getBufferColor(bufferUsage)}`}

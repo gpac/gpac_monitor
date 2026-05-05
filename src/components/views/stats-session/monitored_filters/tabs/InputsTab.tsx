@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { useSidebar } from '@/shared/hooks/useSidebar';
 import type { InputsTabProps, PIDWithIndex } from '../../types';
 import { useInputsTabData } from './hooks/useInputsTabData';
-import PIDMetricsCard from './PIDMetricsCard';
 import PIDTable from './PIDTable';
 import { TAB_STYLES } from './styles';
 
@@ -70,27 +69,13 @@ const InputsTab = memo(
             </div>
           </div>
         )}
-        {/* PIDs Display - Table mode for >3, Grid mode for ≤3 */}
+        {/* PIDs Display */}
         {allPidsWithType.length > 0 ? (
-          allPidsWithType.length > 1 ? (
-            <PIDTable
-              pids={inputPidsWithIndices}
-              filterIdx={filterData.idx}
-              onOpenProps={handleOpenProps}
-            />
-          ) : (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-2">
-              {allPidsWithType.map(({ pid, type }) => (
-                <PIDMetricsCard
-                  key={`${pid.name}-${pid.ipidIdx}`}
-                  pid={pid}
-                  type={type}
-                  filterIdx={filterData.idx}
-                  onOpenProps={handleOpenProps}
-                />
-              ))}
-            </div>
-          )
+          <PIDTable
+            pids={inputPidsWithIndices}
+            filterIdx={filterData.idx}
+            onOpenProps={handleOpenProps}
+          />
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
