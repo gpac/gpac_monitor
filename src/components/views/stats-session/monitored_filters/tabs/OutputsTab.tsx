@@ -1,10 +1,9 @@
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Badge } from '@/components/ui/badge';
-import { getGlobalStatus } from '@/utils/gpac';
 import PIDTable from './PIDTable';
-import type { PIDWithIndex } from '../../types';
 import { TAB_STYLES } from './styles';
+import { useOutputsTabData } from './hooks/useOutputsTabData';
 
 interface OutputsTabProps {
   filterData: FilterStatsResponse;
@@ -14,28 +13,8 @@ interface OutputsTabProps {
 
 const OutputsTab = memo(
   ({ filterData, filterName, isLoading = false }: OutputsTabProps) => {
-    // Add index to each PID for properties lookup
-    const pidsWithIndices = useMemo((): PIDWithIndex[] => {
-      if (!filterData.opids) return [];
-      return Object.entries(filterData.opids).map(([_key, pid], index) => ({
-        ...pid,
-        ipidIdx: index,
-      }));
-    }, [filterData.opids]);
+    const { pidsWithIndices, globalStatus } = useOutputsTabData(filterData);
 
-    // Create type-annotated list for grid mode
-    const allPidsWithType = useMemo(
-      () =>
-        pidsWithIndices.map((pid) => ({ pid, type: pid.type || 'Unknown' })),
-      [pidsWithIndices],
-    );
-
-    const globalStatus = getGlobalStatus(
-      pidsWithIndices,
-      pidsWithIndices.length,
-    );
-
-    // Noop handler for outputs (no sidebar action needed)
     const handleOpenProps = () => {};
 
     return (
@@ -91,7 +70,7 @@ const OutputsTab = memo(
         )}
 
         {/* PIDs Display */}
-        {allPidsWithType.length > 0 ? (
+        {pidsWithIndices.length > 0 ? (
           <PIDTable
             pids={pidsWithIndices}
             filterIdx={filterData.idx}
