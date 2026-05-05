@@ -42,12 +42,15 @@ export class HistoryController {
 
   private flushVisibleLogs(currentTimeUs: number): void {
     if (!this.adapter) return;
+    let dispatched = 0;
     while (
+      dispatched < 50 &&
       this.nextLogIndex < this.sessionLogs.length &&
       this.sessionLogs[this.nextLogIndex].ts_us <= currentTimeUs
     ) {
       this.adapter.handleLogEvent(this.sessionLogs[this.nextLogIndex]);
       this.nextLogIndex++;
+      dispatched++;
     }
   }
 
