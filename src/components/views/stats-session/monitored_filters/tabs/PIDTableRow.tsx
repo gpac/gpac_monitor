@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { formatBytes } from '@/utils/formatting';
 import { getPIDStatusBadge, getMediaTypeInfo } from '@/utils/gpac';
+import { formatPidBuffer, formatPidBitrate } from '../../utils/pidFormatters';
 import { LuEye } from 'react-icons/lu';
 import type { PIDWithIndex } from '../../types';
 import {
@@ -98,12 +98,12 @@ const PIDTableRow = memo(
         <td
           className={`${metricValueFont} px-2 py-1.5 text-right text-muted-foreground tabular-nums whitespace-nowrap`}
         >
-          {formatBytes(pid.buffer)}
+          {formatPidBuffer(pid.buffer)}
         </td>
         <td
           className={`${metricValueFont} px-2 py-1.5 text-right text-info tabular-nums font-medium whitespace-nowrap`}
         >
-          {pid.bitrate || 0}
+          {formatPidBitrate(pid.bitrate)}
         </td>
         <td
           className={`${metricValueFont} px-2 py-1.5 text-right text-muted-foreground tabular-nums whitespace-nowrap`}
