@@ -72,22 +72,28 @@ export class ChunkPreloadController {
       version,
       lastAppendedChunkIndex: this.lastAppendedChunkIndex,
     });
-    const nextChunk = await this.loader.loadEventChunk(nextIndex);
-    console.debug('[ChunkPreloadController] event chunk loaded', {
-      nextIndex,
-      stale: version !== this.version,
-      eventsCount: nextChunk.events.length,
-    });
-    if (version !== this.version) return;
-    this.player.append(nextChunk.events);
-    console.debug('[ChunkPreloadController] events appended', {
-      nextIndex,
-      eventsCount: nextChunk.events.length,
-    });
-    this.lastAppendedChunkIndex = nextIndex;
-    this.isPreloadingNextChunk = false;
-    const hasNextChunk = nextIndex + 1 < this.manifest.chunkCount;
-    this.player.setAwaitingMoreEvents(hasNextChunk);
-    void this.appendLogs(nextChunk, () => version !== this.version);
+    try {
+      const nextChunk = await this.loader.loadEventChunk(nextIndex);
+      console.debug('[ChunkPreloadController] event chunk loaded', {
+        nextIndex,
+        stale: version !== this.version,
+        eventsCount: nextChunk.events.length,
+      });
+      if (version !== this.version) return;
+      this.player.append(nextChunk.events);
+      console.debug('[ChunkPreloadController] events appended', {
+        nextIndex,
+        eventsCount: nextChunk.events.length,
+      });
+      this.lastAppendedChunkIndex = nextIndex;
+      const hasNextChunk = nextIndex + 1 < this.manifest.chunkCount;
+      this.player.setAwaitingMoreEvents(hasNextChunk);
+      void this.appendLogs(nextChunk, () => version !== this.version);
+      this.isPreloadingNextChunk = false;
+    } finally {
+      if (version === this.version) {
+        this.isPreloadingNextChunk = false;
+      }
+    }
   }
 }

@@ -145,7 +145,6 @@ export class EventPlayer {
     }
 
     const now = this.currentTimeUs();
-    this.listener?.(this.state, now);
 
     while (this.nextEventIndex < this.timelineEvents.length) {
       const event = this.timelineEvents[this.nextEventIndex];
