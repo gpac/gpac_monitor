@@ -7,7 +7,7 @@ import {
 } from '@/shared/store/slices/monitoredFilterSlice';
 import { RootState } from '@/shared/store';
 import { selectFilterNetworkChartData } from '@/shared/store/selectors';
-import { useGpacService } from '@/shared/hooks/useGpacService';
+import { useGpacService } from '@/shared/hooks';
 
 export interface DataPoint {
   time: string;
