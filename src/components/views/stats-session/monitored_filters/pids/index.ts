@@ -1,0 +1,1 @@
+export { PIDMediaInfoBlock } from './PIDMediaInfoBlock';
