@@ -41,6 +41,9 @@ function PidDataCollector() {
                 pid.stats.nb_processed = stats.nb_processed;
                 pid.stats.max_process_time = stats.max_process_time;
                 pid.stats.total_process_time = stats.total_process_time;
+                const lastTs = stats.last_ts_sent ?? filter.last_ts_sent;
+                if (lastTs) pid.stats.last_ts_sent = lastTs;
+                if (stats.last_process_time) pid.stats.last_process_time = stats.last_process_time;
                 if (stats.buffer_time) pid.stats.buffer_time = stats.buffer_time;
                 if (stats.nb_buffer_units) pid.stats.nb_buffer_units = stats.nb_buffer_units;
                 if (stats.max_buffer_time) pid.stats.max_buffer_time = stats.max_buffer_time;
@@ -109,8 +112,10 @@ function PidDataCollector() {
                 pid.stats.nb_processed = stats.nb_processed;
                 pid.stats.max_process_time = stats.max_process_time;
                 pid.stats.total_process_time = stats.total_process_time;
-                pid.stats.last_ts_sent = stats.last_ts_sent;
                 pid.stats.first_process_time = stats.first_process_time;
+                const lastTs = stats.last_ts_sent ?? filter.last_ts_sent;
+                if (lastTs) pid.stats.last_ts_sent = lastTs;
+                if (stats.last_process_time) pid.stats.last_process_time = stats.last_process_time;
                 if (stats.buffer_time) pid.stats.buffer_time = stats.buffer_time;
                 if (stats.nb_buffer_units) pid.stats.nb_buffer_units = stats.nb_buffer_units;
                 if (stats.max_buffer_time) pid.stats.max_buffer_time = stats.max_buffer_time;

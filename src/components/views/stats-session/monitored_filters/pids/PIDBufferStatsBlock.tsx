@@ -8,7 +8,7 @@ interface PIDBufferStatsBlockProps {
 }
 
 const resolveData = (pid: PIDproperties) => {
-  const { stats } = pid;
+  const stats = pid.stats ?? {};
   return {
     bufferFill: pid.buffer,
     bufferTime: stats.buffer_time ?? null,
@@ -20,7 +20,7 @@ const resolveData = (pid: PIDproperties) => {
 };
 
 const hasData = (pid: PIDproperties): boolean => {
-  const { stats } = pid;
+  const stats = pid.stats ?? {};
   const hasDynamic = stats.buffer_time != null || stats.nb_buffer_units != null;
   return hasDynamic || pid.buffer > 0;
 };

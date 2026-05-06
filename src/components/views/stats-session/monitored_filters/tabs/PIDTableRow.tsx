@@ -4,7 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
 import { getPIDStatusBadge } from '@/utils/gpac';
 import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
-import { formatPidBuffer, formatPidBitrate } from '../../utils/pidFormatters';
+import {
+  formatPidBuffer,
+  formatPidBitrate,
+  formatLastTsSent,
+} from '../../utils/pidFormatters';
 import { formatGpacFps } from '../../utils/pidProps';
 import { formatSamplerate } from '../cards/media-info/formatters';
 import type { PIDWithIndex } from '../../types';
@@ -77,28 +81,48 @@ const PIDTableRow = memo(
             <span className="text-muted-foreground">{buildInfoLine(pid)}</span>
           </div>
         </td>
-        {/* Metrics compact */}
-        <td className="px-2 py-2 align-middle text-xs tabular-nums">
-          <span className="text-info">{formatPidBitrate(pid.bitrate)}</span>
+        {/* Rate / Peak */}
+        <td className="px-2 py-2 align-middle text-xs tabular-nums whitespace-nowrap">
+          <span className="text-info" title="Bitrate">
+            {formatPidBitrate(pid.bitrate)}
+          </span>
           <span className="text-muted-foreground"> · </span>
-          <span className="text-info">
-            {formatPidBuffer(pid.stats?.last_process_time)}
+          <span className="text-info" title="max_process_time (µs)">
+            {formatPidBuffer(pid.stats?.max_process_time)}
           </span>
         </td>
-        {/* Buffer */}
-        <td className="px-2 py-2 align-middle text-xs tabular-nums text-info">
-          {formatPidBuffer(pid.buffer)}
-        </td>
-        {/* Status */}
-        <td className="px-2 py-2 align-middle">
-          {statusBadge && (
-            <Badge
-              variant={statusBadge.variant}
-              className="text-xs px-1 py-0 h-4 font-normal"
-            >
-              {statusBadge.text}
-            </Badge>
+        {/* Buffer: fill / max */}
+        <td className="px-2 py-2 align-middle text-xs tabular-nums">
+          <span className="text-info" title="buffer (µs)">
+            {formatPidBuffer(pid.buffer)}
+          </span>
+          {pid.max_buffer != null && (
+            <>
+              <span className="text-muted-foreground"> / </span>
+              <span className="text-info" title="max_buffer (µs)">
+                {formatPidBuffer(pid.max_buffer)}
+              </span>
+            </>
           )}
+        </td>
+        {/* TS / Stat */}
+        <td className="px-2 py-2 align-middle">
+          <div className="flex items-center gap-1">
+            <span
+              className="text-xs tabular-nums text-info font-mono"
+              title="last_ts_sent (s)"
+            >
+              {formatLastTsSent(pid.stats?.last_ts_sent)}
+            </span>
+            {statusBadge && (
+              <Badge
+                variant={statusBadge.variant}
+                className="text-xs px-1 py-0 h-4 font-normal"
+              >
+                {statusBadge.text}
+              </Badge>
+            )}
+          </div>
         </td>
       </tr>
     );

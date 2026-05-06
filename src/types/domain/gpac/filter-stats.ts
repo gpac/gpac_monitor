@@ -41,7 +41,10 @@ export interface PIDStats {
   nb_processed: number;
   max_process_time: number;
   total_process_time: number;
-  last_ts_sent?: number;
+  last_ts_sent?:
+    | { n: number; d: number }
+    | { num: number; den: number }
+    | number;
   first_process_time?: number;
   last_process_time?: number;
   // Dynamic buffer fields from GF_FilterPidStatistics — optional, sent only when non-zero
