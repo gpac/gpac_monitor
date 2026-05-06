@@ -33,7 +33,7 @@ const InputsTab = memo(
             <div className={TAB_STYLES.STATUS_BAR_CONTENT}>
               <div className={TAB_STYLES.STATUS_BAR_LEFT}>
                 <span className="text-xs font-medium">Status</span>
-                <span className="text-xs text-info tabular-nums">
+                <span className="text-xs text-muted-foreground tabular-nums">
                   {globalStatus.totalPids} stream
                   {globalStatus.totalPids > 1 ? 's' : ''}
                 </span>

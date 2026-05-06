@@ -4,11 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
 import { getPIDStatusBadge } from '@/utils/gpac';
 import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
-import {
-  formatPidBuffer,
-  formatPidBitrate,
-  formatPidCount,
-} from '../../utils/pidFormatters';
+import { formatPidBuffer, formatPidBitrate } from '../../utils/pidFormatters';
 import { formatGpacFps } from '../../utils/pidProps';
 import { formatSamplerate } from '../cards/media-info/formatters';
 import type { PIDWithIndex } from '../../types';
@@ -85,12 +81,12 @@ const PIDTableRow = memo(
         <td className="px-2 py-2 align-middle text-xs tabular-nums">
           <span className="text-info">{formatPidBitrate(pid.bitrate)}</span>
           <span className="text-muted-foreground"> · </span>
-          <span className="text-muted-foreground">
-            {formatPidCount(pid.stats?.nb_processed)} pkt
+          <span className="text-info">
+            {formatPidBuffer(pid.stats?.last_process_time)}
           </span>
         </td>
         {/* Buffer */}
-        <td className="px-2 py-2 align-middle text-xs tabular-nums text-muted-foreground">
+        <td className="px-2 py-2 align-middle text-xs tabular-nums text-info">
           {formatPidBuffer(pid.buffer)}
         </td>
         {/* Status */}

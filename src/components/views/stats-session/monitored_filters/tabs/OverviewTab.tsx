@@ -27,7 +27,9 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
     <div className="flex flex-col h-full gap-2 p-2">
       {/* ROW 1: Status Strip Bar - Single compact line */}
       <div className="flex items-center gap-2 px-3 py-2 bg-monitor-panel/40 rounded border-b border-monitor-line/10 text-xs shrink-0">
-        <span className="font-medium text-info">[{type || 'unknown'}]</span>
+        <span className="font-medium text-muted-foreground">
+          [{type || 'unknown'}]
+        </span>
         <Badge
           variant={healthInfo.variant}
           className="text-xs py-0 px-1.5 h-fit"

@@ -10,8 +10,9 @@ interface PIDBufferStatsBlockProps {
 const resolveData = (pid: PIDproperties) => {
   const { stats } = pid;
   return {
-    bufferTime: stats.buffer_time ?? pid.buffer,
-    maxBufferTime: stats.max_buffer_time ?? pid.max_buffer ?? null,
+    bufferFill: pid.buffer,
+    bufferTime: stats.buffer_time ?? null,
+    maxBufferTime: stats.max_buffer_time ?? null,
     nbUnits: stats.nb_buffer_units ?? null,
     minPlayout: stats.min_playout_time ?? null,
     maxPlayout: stats.max_playout_time ?? null,
@@ -36,17 +37,27 @@ const StatRow = ({ label, value }: { label: string; value: string }) => (
 export const PIDBufferStatsBlock = memo(({ pid }: PIDBufferStatsBlockProps) => {
   if (!hasData(pid)) return null;
 
-  const { bufferTime, maxBufferTime, nbUnits, minPlayout, maxPlayout } =
-    resolveData(pid);
+  const {
+    bufferFill,
+    bufferTime,
+    maxBufferTime,
+    nbUnits,
+    minPlayout,
+    maxPlayout,
+  } = resolveData(pid);
 
   const hasPlayout = minPlayout != null && maxPlayout != null;
 
   return (
     <div className="space-y-0.5">
-      <StatRow label="Buffer" value={formatPidBuffer(bufferTime)} />
+      <StatRow label="Buffer fill" value={formatPidBuffer(bufferFill)} />
+
+      {bufferTime != null && (
+        <StatRow label="Buffer time" value={formatPidBuffer(bufferTime)} />
+      )}
 
       {maxBufferTime != null && (
-        <StatRow label="Max buffer" value={formatPidBuffer(maxBufferTime)} />
+        <StatRow label="Max buf time" value={formatPidBuffer(maxBufferTime)} />
       )}
 
       {nbUnits != null && <StatRow label="Units" value={String(nbUnits)} />}
