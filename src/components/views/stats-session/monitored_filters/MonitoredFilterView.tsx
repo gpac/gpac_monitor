@@ -89,7 +89,7 @@ const MonitoredFilterView = memo(
     return (
       <div className="flex flex-col gap-2">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 pb-2 space-y-2">
+          <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 space-y-1 px-1 py-2">
             <div className="flex justify-stretch items-center gap-4">
               <h2 className="text-lg font-semibold text-monitor-active-filter">
                 {overviewData.name}

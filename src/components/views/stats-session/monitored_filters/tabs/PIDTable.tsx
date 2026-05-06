@@ -17,9 +17,6 @@ const PIDTable = memo(
       <table className="w-full text-left">
         <thead>
           <tr className="border-b border-white/10 bg-monitor-panel">
-            <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide w-16">
-              Type
-            </th>
             <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
               Infos
             </th>

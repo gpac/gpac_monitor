@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
+import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
 import { technicalDetailsFont } from '@/utils/responsiveFonts';
 import { formatGpacFps } from '../../utils/pidProps';
 import { formatSamplerate } from '../cards/media-info/formatters';
@@ -11,27 +12,6 @@ interface PIDInfosBlockProps {
 }
 
 const NA = '—';
-
-const BADGE_CONFIG: Partial<
-  Record<GpacStreamType, { label: string; className: string }>
-> = {
-  [GpacStreamType.Visual]: {
-    label: 'V',
-    className: 'bg-blue-900/40 text-blue-300 border-blue-700/50',
-  },
-  [GpacStreamType.Audio]: {
-    label: 'A',
-    className: 'bg-emerald-900/40 text-emerald-300 border-emerald-700/50',
-  },
-  [GpacStreamType.Text]: {
-    label: 'T',
-    className: 'bg-amber-900/40 text-amber-300 border-amber-700/50',
-  },
-  [GpacStreamType.Metadata]: {
-    label: 'M',
-    className: 'bg-purple-900/40 text-purple-300 border-purple-700/50',
-  },
-};
 
 const val = (value: string | number | null | undefined): string =>
   value != null && value !== '' ? String(value) : NA;
@@ -87,10 +67,7 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => (
 );
 
 export const PIDInfosBlock = memo(({ pid }: PIDInfosBlockProps) => {
-  const badgeConfig = BADGE_CONFIG[pid.type] ?? {
-    label: pid.type?.[0]?.toUpperCase() ?? '?',
-    className: 'bg-gray-900/40 text-gray-400 border-gray-700/50',
-  };
+  const badgeConfig = getStreamTypeBadgeConfig(pid.type);
   const rows = buildRows(pid);
 
   return (

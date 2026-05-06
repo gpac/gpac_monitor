@@ -57,6 +57,41 @@ export const getFilterColor = (filterType: FilterType): string => {
 };
 
 /**
+ * Tailwind badge classes (bg + text + border) for each filter type
+ */
+export const BADGE_CLASSES: Record<FilterType, string> = {
+  video: 'bg-blue-900/40 text-blue-300 border-blue-700/50',
+  audio: 'bg-emerald-900/40 text-emerald-300 border-emerald-700/50',
+  text: 'bg-amber-900/40 text-amber-300 border-amber-700/50',
+  file: 'bg-rose-900/40 text-rose-300 border-rose-700/50',
+};
+
+/**
+ * Short label (single letter) per GPAC stream type — used in PID type badges
+ */
+export const STREAM_TYPE_SHORT_LABEL: Partial<Record<GpacStreamType, string>> =
+  {
+    [GpacStreamType.Visual]: 'V',
+    [GpacStreamType.Audio]: 'A',
+    [GpacStreamType.Text]: 'T',
+    [GpacStreamType.Metadata]: 'M',
+    [GpacStreamType.File]: 'F',
+  };
+
+/**
+ * Returns the badge label + Tailwind className for a given GPAC stream type
+ */
+export const getStreamTypeBadgeConfig = (
+  type: GpacStreamType,
+): { label: string; className: string } => {
+  const filterType = mapStreamTypeToFilterType(type);
+  return {
+    label: STREAM_TYPE_SHORT_LABEL[type] ?? type?.[0]?.toUpperCase() ?? '?',
+    className: BADGE_CLASSES[filterType],
+  };
+};
+
+/**
  * Map string stream type to FilterType (case-insensitive, handles 'Visual', 'Video', etc.)
  */
 export const STREAM_TYPE_TO_FILTER: Partial<

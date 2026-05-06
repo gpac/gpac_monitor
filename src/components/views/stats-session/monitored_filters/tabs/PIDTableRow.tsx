@@ -3,6 +3,7 @@ import { LuEye } from 'react-icons/lu';
 import { Badge } from '@/components/ui/badge';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
 import { getPIDStatusBadge } from '@/utils/gpac';
+import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
 import {
   formatPidBuffer,
   formatPidBitrate,
@@ -25,27 +26,6 @@ interface PIDTableRowProps {
   isEven: boolean;
   variant?: PIDTableRowVariant;
 }
-
-const TYPE_BADGE: Partial<
-  Record<GpacStreamType, { label: string; className: string }>
-> = {
-  [GpacStreamType.Visual]: {
-    label: 'V',
-    className: 'bg-blue-900/40 text-blue-300 border-blue-700/50',
-  },
-  [GpacStreamType.Audio]: {
-    label: 'A',
-    className: 'bg-emerald-900/40 text-emerald-300 border-emerald-700/50',
-  },
-  [GpacStreamType.Text]: {
-    label: 'T',
-    className: 'bg-amber-900/40 text-amber-300 border-amber-700/50',
-  },
-  [GpacStreamType.Metadata]: {
-    label: 'M',
-    className: 'bg-purple-900/40 text-purple-300 border-purple-700/50',
-  },
-};
 
 const buildInfoLine = (pid: PIDWithIndex): string => {
   const parts: string[] = [];
@@ -78,17 +58,14 @@ const PIDTableRow = memo(
       [onOpenProps, filterIdx, pid.ipidIdx],
     );
 
-    const badgeConfig = TYPE_BADGE[pid.type] ?? {
-      label: pid.type?.[0]?.toUpperCase() ?? '?',
-      className: 'bg-gray-900/40 text-gray-400 border-gray-700/50',
-    };
+    const badgeConfig = getStreamTypeBadgeConfig(pid.type);
     const statusBadge = getPIDStatusBadge(pid);
     const bgClass = isEven ? 'bg-black/10' : 'bg-black/20';
 
     return (
       <tr className={`${bgClass} border-b border-white/5`}>
-        {/* Type + eye button */}
-        <td className="px-2 py-2 align-middle">
+        {/* Type badge + eye button + infos */}
+        <td className={`px-2 py-2 align-middle ${formatIdentifierFont}`}>
           <div className="flex items-center gap-1.5">
             {variant === 'input' && (
               <button
@@ -96,22 +73,17 @@ const PIDTableRow = memo(
                 className="p-0.5 rounded bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-700/80 flex-shrink-0"
                 title="View input properties"
               >
-                <LuEye className="h-4 w-5" />
+                <LuEye className="h-3.5 w-3.5" />
               </button>
             )}
             <Badge
               variant="outline"
-              className={`px-1.5 py-0 h-5 font-mono font-bold text-[10px] ${badgeConfig.className}`}
+              className={`px-1.5 py-0 h-5 font-mono font-bold text-[10px] flex-shrink-0 ${badgeConfig.className}`}
             >
               {badgeConfig.label}
             </Badge>
+            <span className="text-muted-foreground">{buildInfoLine(pid)}</span>
           </div>
-        </td>
-        {/* Infos compact */}
-        <td
-          className={`px-2 py-2 align-middle ${formatIdentifierFont} text-muted-foreground`}
-        >
-          {buildInfoLine(pid)}
         </td>
         {/* Metrics compact */}
         <td
