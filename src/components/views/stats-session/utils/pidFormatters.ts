@@ -2,7 +2,7 @@ import { formatBitrate, formatTime } from '@/utils/formatting';
 
 // buffer is in microseconds
 export const formatPidBuffer = (value: number | null | undefined): string => {
-  if (value == null || isNaN(value)) return '—';
+  if (value == null || isNaN(value) || value < 0) return '—';
   if (value < 1000) return `${value}µs`;
   if (value < 1_000_000) return `${(value / 1000).toFixed(1)}ms`;
   return `${(value / 1_000_000).toFixed(2)}s`;

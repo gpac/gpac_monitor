@@ -5,7 +5,6 @@ import {
   formatPidBuffer,
   formatPidBitrate,
 } from '@/components/views/stats-session/utils/pidFormatters';
-import { LuEye } from 'react-icons/lu';
 import type { PIDWithIndex } from '../../types';
 import {
   metricValueFont,
@@ -123,21 +122,7 @@ const PIDTableRow = memo(
             </Badge>
           )}
         </td>
-        {!isOutput && (
-          <td className="px-2 py-1.5 text-center">
-            <button
-              className="px-0.5 py-0.5 text-xs rounded bg-gray-700/50 border border-gray-600/50 text-gray-200 hover:bg-gray-700/80 inline-flex items-center gap-1.5"
-              onClick={(e) => {
-                e.stopPropagation();
-                onOpenProps(filterIdx, pid.ipidIdx);
-              }}
-              title="View properties"
-            >
-              <LuEye className="h-3.5 w-3.5" />
-              <span className="font-cond">Props</span>
-            </button>
-          </td>
-        )}
+        {!isOutput && <td className="px-2 py-1.5 text-center"></td>}
       </tr>
     );
   },
