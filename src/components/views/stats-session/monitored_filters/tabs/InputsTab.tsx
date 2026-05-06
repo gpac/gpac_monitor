@@ -12,7 +12,6 @@ const InputsTab = memo(
     const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
       useInputsTabData(filterData);
 
-    // Stable callback for opening PID properties
     const handleOpenProps = useCallback(
       (filterIdx: number, ipidIdx: number) => {
         openPIDProps({ filterIdx, ipidIdx });
@@ -20,7 +19,6 @@ const InputsTab = memo(
       [openPIDProps],
     );
 
-    // Flatten all PIDs for grid display
     const allPidsWithType = inputNames.flatMap((inputName) =>
       Object.entries(groupedInputs[inputName]).flatMap(([type, pids]) =>
         pids.map((pid: PIDWithIndex) => ({ pid, type })),

@@ -1,13 +1,17 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
+import { LuEye } from 'react-icons/lu';
 import { Badge } from '@/components/ui/badge';
-import { getPIDStatusBadge, getMediaTypeInfo } from '@/utils/gpac';
+import { GpacStreamType } from '@/types/domain/gpac/stream-types';
+import { getPIDStatusBadge } from '@/utils/gpac';
 import {
   formatPidBuffer,
   formatPidBitrate,
-} from '@/components/views/stats-session/utils/pidFormatters';
+  formatPidCount,
+} from '../../utils/pidFormatters';
+import { formatGpacFps } from '../../utils/pidProps';
+import { formatSamplerate } from '../cards/media-info/formatters';
 import type { PIDWithIndex } from '../../types';
 import {
-  metricValueFont,
   technicalDetailsFont,
   formatIdentifierFont,
 } from '@/utils/responsiveFonts';
@@ -22,6 +26,45 @@ interface PIDTableRowProps {
   variant?: PIDTableRowVariant;
 }
 
+const TYPE_BADGE: Partial<
+  Record<GpacStreamType, { label: string; className: string }>
+> = {
+  [GpacStreamType.Visual]: {
+    label: 'V',
+    className: 'bg-blue-900/40 text-blue-300 border-blue-700/50',
+  },
+  [GpacStreamType.Audio]: {
+    label: 'A',
+    className: 'bg-emerald-900/40 text-emerald-300 border-emerald-700/50',
+  },
+  [GpacStreamType.Text]: {
+    label: 'T',
+    className: 'bg-amber-900/40 text-amber-300 border-amber-700/50',
+  },
+  [GpacStreamType.Metadata]: {
+    label: 'M',
+    className: 'bg-purple-900/40 text-purple-300 border-purple-700/50',
+  },
+};
+
+const buildInfoLine = (pid: PIDWithIndex): string => {
+  const parts: string[] = [];
+  if (pid.codec) parts.push(pid.codec.toLowerCase());
+
+  if (pid.type === GpacStreamType.Visual) {
+    if (pid.width && pid.height) parts.push(`${pid.width}×${pid.height}`);
+    const fps = formatGpacFps(pid.properties?.['FPS']?.value);
+    if (fps !== '—') parts.push(fps);
+  } else if (pid.type === GpacStreamType.Audio) {
+    if (pid.samplerate != null) parts.push(formatSamplerate(pid.samplerate));
+    if (pid.channels) parts.push(`${pid.channels} ch`);
+  } else if (pid.type === GpacStreamType.Text && pid.language) {
+    parts.push(pid.language);
+  }
+
+  return parts.join(' · ') || '—';
+};
+
 const PIDTableRow = memo(
   ({
     pid,
@@ -30,99 +73,73 @@ const PIDTableRow = memo(
     isEven,
     variant = 'input',
   }: PIDTableRowProps) => {
+    const handleOpenProps = useCallback(
+      () => onOpenProps(filterIdx, pid.ipidIdx),
+      [onOpenProps, filterIdx, pid.ipidIdx],
+    );
+
+    const badgeConfig = TYPE_BADGE[pid.type] ?? {
+      label: pid.type?.[0]?.toUpperCase() ?? '?',
+      className: 'bg-gray-900/40 text-gray-400 border-gray-700/50',
+    };
     const statusBadge = getPIDStatusBadge(pid);
-    const type = (pid.type || 'Unknown').toLowerCase();
-    const isVisual = type === 'visual' || type === 'video';
-    const isAudio = type === 'audio';
-    const mediaInfo = getMediaTypeInfo(type);
-
-    // Resolution/Channels based on type
-    const resOrCh =
-      isVisual && pid.width && pid.height
-        ? `${pid.width}×${pid.height}`
-        : isAudio && pid.channels
-          ? `${pid.channels}ch`
-          : '—';
-
     const bgClass = isEven ? 'bg-black/10' : 'bg-black/20';
-    const isOutput = variant === 'output';
-    const displayName = isOutput ? pid.type || pid.name : pid.name;
-
-    // Technical details for outputs
-    const technicalDetails = isOutput
-      ? [
-          isVisual && pid.pixelformat ? pid.pixelformat.toUpperCase() : null,
-          isAudio && pid.samplerate
-            ? `${(pid.samplerate / 1000).toFixed(0)}kHz`
-            : null,
-        ]
-          .filter(Boolean)
-          .join(' ')
-      : null;
 
     return (
-      <tr
-        className={`${bgClass} ${!isOutput ? 'hover:bg-black/30 cursor-pointer' : ''}`}
-        onClick={
-          !isOutput ? () => onOpenProps(filterIdx, pid.ipidIdx) : undefined
-        }
-      >
-        <td className="px-2 py-1.5">
-          {isOutput ? (
-            <div className="flex items-center gap-2">
-              <Badge
-                variant="secondary"
-                className={`${technicalDetailsFont} px-1.5 py-0 h-5 font-medium ${mediaInfo.color}`}
+      <tr className={`${bgClass} border-b border-white/5`}>
+        {/* Type + eye button */}
+        <td className="px-2 py-2 align-middle">
+          <div className="flex items-center gap-1.5">
+            {variant === 'input' && (
+              <button
+                onClick={handleOpenProps}
+                className="p-0.5 rounded bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-700/80 flex-shrink-0"
+                title="View input properties"
               >
-                {mediaInfo.label}
-              </Badge>
-              {technicalDetails && (
-                <span
-                  className={`${formatIdentifierFont} text-muted-foreground font-mono`}
-                >
-                  {technicalDetails}
-                </span>
-              )}
-            </div>
-          ) : (
-            <span
-              className={`${metricValueFont} font-medium truncate max-w-[140px]`}
+                <LuEye className="h-4 w-5" />
+              </button>
+            )}
+            <Badge
+              variant="outline"
+              className={`px-1.5 py-0 h-5 font-mono font-bold text-[10px] ${badgeConfig.className}`}
             >
-              {displayName}
-            </span>
-          )}
+              {badgeConfig.label}
+            </Badge>
+          </div>
         </td>
+        {/* Infos compact */}
         <td
-          className={`${formatIdentifierFont} px-2 py-1.5 text-muted-foreground uppercase`}
+          className={`px-2 py-2 align-middle ${formatIdentifierFont} text-muted-foreground`}
         >
-          {pid.codec || '—'}
+          {buildInfoLine(pid)}
         </td>
+        {/* Metrics compact */}
         <td
-          className={`${metricValueFont} px-2 py-1.5 text-right text-muted-foreground tabular-nums whitespace-nowrap`}
+          className={`px-2 py-2 align-middle ${formatIdentifierFont} tabular-nums`}
+        >
+          <span className="text-info">{formatPidBitrate(pid.bitrate)}</span>
+          <span className="text-muted-foreground"> · </span>
+          <span className="text-muted-foreground">
+            {formatPidCount(pid.stats?.nb_processed)} pkt
+          </span>
+        </td>
+        {/* Buffer */}
+        <td
+          className={`px-2 py-2 align-middle ${technicalDetailsFont} tabular-nums text-muted-foreground`}
         >
           {formatPidBuffer(pid.buffer)}
         </td>
-        <td
-          className={`${metricValueFont} px-2 py-1.5 text-right text-info tabular-nums font-medium whitespace-nowrap`}
-        >
-          {formatPidBitrate(pid.bitrate)}
-        </td>
-        <td
-          className={`${metricValueFont} px-2 py-1.5 text-right text-muted-foreground tabular-nums whitespace-nowrap`}
-        >
-          {resOrCh}
-        </td>
-        <td className="px-2 py-1.5">
+        {/* Status */}
+        <td className="px-2 py-2 align-middle">
           {statusBadge && (
             <Badge
-              variant="secondary"
+              variant={statusBadge.variant}
               className={`${technicalDetailsFont} px-1 py-0 h-4 font-normal`}
             >
               {statusBadge.text}
             </Badge>
           )}
         </td>
-        {!isOutput && <td className="px-2 py-1.5 text-center"></td>}
       </tr>
     );
   },
