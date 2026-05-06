@@ -81,6 +81,7 @@ function PidDataCollector() {
             pid.width = filter.opid_props(i, "Width");
             pid.height = filter.opid_props(i, "Height");
             pid.pixelformat = filter.opid_props(i, "PixelFormat");
+            pid.bitrate = filter.opid_props(i, "Bitrate");
 
             pid.samplerate = filter.opid_props(i, "SampleRate");
             pid.channels = filter.opid_props(i, "Channels");

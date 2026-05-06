@@ -1,4 +1,4 @@
-import { formatBitrate } from '@/utils/formatting';
+import { formatBitrate, formatTime } from '@/utils/formatting';
 
 // buffer is in microseconds
 export const formatPidBuffer = (value: number | null | undefined): string => {
@@ -15,4 +15,4 @@ export const formatPidCount = (value: number | null | undefined): string =>
   value != null ? value.toLocaleString() : '—';
 
 export const formatPidPeak = (value: number | null | undefined): string =>
-  value != null ? `${value}µs` : '—';
+  value != null ? formatTime(value) : '—';
