@@ -6,7 +6,7 @@ import { technicalDetailsFont } from '@/utils/responsiveFonts';
 import { formatGpacFps } from '../../utils/pidProps';
 import { formatSamplerate } from '../cards/media-info/formatters';
 
-interface PIDMediaInfoBlockProps {
+interface PIDInfosBlockProps {
   pid: PIDproperties;
 }
 
@@ -86,7 +86,7 @@ const InfoRow = ({ label, value }: { label: string; value: string }) => (
   </div>
 );
 
-export const PIDMediaInfoBlock = memo(({ pid }: PIDMediaInfoBlockProps) => {
+export const PIDInfosBlock = memo(({ pid }: PIDInfosBlockProps) => {
   const badgeConfig = BADGE_CONFIG[pid.type] ?? {
     label: pid.type?.[0]?.toUpperCase() ?? '?',
     className: 'bg-gray-900/40 text-gray-400 border-gray-700/50',
@@ -110,4 +110,4 @@ export const PIDMediaInfoBlock = memo(({ pid }: PIDMediaInfoBlockProps) => {
   );
 });
 
-PIDMediaInfoBlock.displayName = 'PIDMediaInfoBlock';
+PIDInfosBlock.displayName = 'PIDInfosBlock';

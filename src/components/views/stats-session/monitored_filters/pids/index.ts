@@ -1,1 +1,2 @@
-export { PIDMediaInfoBlock } from './PIDMediaInfoBlock';
+export { PIDInfosBlock } from './PIDInfosBlock';
+export { PIDGenericInfoBlock } from './PIDGenericInfoBlock';
