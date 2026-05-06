@@ -12,10 +12,6 @@ import {
 import { formatGpacFps } from '../../utils/pidProps';
 import { formatSamplerate } from '../cards/media-info/formatters';
 import type { PIDWithIndex } from '../../types';
-import {
-  technicalDetailsFont,
-  formatIdentifierFont,
-} from '@/utils/responsiveFonts';
 
 type PIDTableRowVariant = 'input' | 'output';
 
@@ -65,7 +61,7 @@ const PIDTableRow = memo(
     return (
       <tr className={`${bgClass} border-b border-white/5`}>
         {/* Type badge + eye button + infos */}
-        <td className={`px-2 py-2 align-middle ${formatIdentifierFont}`}>
+        <td className="px-2 py-2 align-middle text-xs">
           <div className="flex items-center gap-1.5">
             {variant === 'input' && (
               <button
@@ -73,7 +69,7 @@ const PIDTableRow = memo(
                 className="p-0.5 rounded bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-700/80 flex-shrink-0"
                 title="View input properties"
               >
-                <LuEye className="h-3.5 w-3.5" />
+                <LuEye className="h-4 w-5" />
               </button>
             )}
             <Badge
@@ -86,9 +82,7 @@ const PIDTableRow = memo(
           </div>
         </td>
         {/* Metrics compact */}
-        <td
-          className={`px-2 py-2 align-middle ${formatIdentifierFont} tabular-nums`}
-        >
+        <td className="px-2 py-2 align-middle text-xs tabular-nums">
           <span className="text-info">{formatPidBitrate(pid.bitrate)}</span>
           <span className="text-muted-foreground"> · </span>
           <span className="text-muted-foreground">
@@ -96,9 +90,7 @@ const PIDTableRow = memo(
           </span>
         </td>
         {/* Buffer */}
-        <td
-          className={`px-2 py-2 align-middle ${technicalDetailsFont} tabular-nums text-muted-foreground`}
-        >
+        <td className="px-2 py-2 align-middle text-xs tabular-nums text-muted-foreground">
           {formatPidBuffer(pid.buffer)}
         </td>
         {/* Status */}
@@ -106,7 +98,7 @@ const PIDTableRow = memo(
           {statusBadge && (
             <Badge
               variant={statusBadge.variant}
-              className={`${technicalDetailsFont} px-1 py-0 h-4 font-normal`}
+              className="text-xs px-1 py-0 h-4 font-normal"
             >
               {statusBadge.text}
             </Badge>

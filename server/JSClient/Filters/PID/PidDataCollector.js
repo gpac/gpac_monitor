@@ -41,6 +41,11 @@ function PidDataCollector() {
                 pid.stats.nb_processed = stats.nb_processed;
                 pid.stats.max_process_time = stats.max_process_time;
                 pid.stats.total_process_time = stats.total_process_time;
+                if (stats.buffer_time) pid.stats.buffer_time = stats.buffer_time;
+                if (stats.nb_buffer_units) pid.stats.nb_buffer_units = stats.nb_buffer_units;
+                if (stats.max_buffer_time) pid.stats.max_buffer_time = stats.max_buffer_time;
+                if (stats.max_playout_time) pid.stats.max_playout_time = stats.max_playout_time;
+                if (stats.min_playout_time) pid.stats.min_playout_time = stats.min_playout_time;
             }
 
             if (withPidProperties) {
@@ -104,10 +109,13 @@ function PidDataCollector() {
                 pid.stats.nb_processed = stats.nb_processed;
                 pid.stats.max_process_time = stats.max_process_time;
                 pid.stats.total_process_time = stats.total_process_time;
-
-                // Capture first_process_time and last_ts_sent for latency monitoring
                 pid.stats.last_ts_sent = stats.last_ts_sent;
                 pid.stats.first_process_time = stats.first_process_time;
+                if (stats.buffer_time) pid.stats.buffer_time = stats.buffer_time;
+                if (stats.nb_buffer_units) pid.stats.nb_buffer_units = stats.nb_buffer_units;
+                if (stats.max_buffer_time) pid.stats.max_buffer_time = stats.max_buffer_time;
+                if (stats.max_playout_time) pid.stats.max_playout_time = stats.max_playout_time;
+                if (stats.min_playout_time) pid.stats.min_playout_time = stats.min_playout_time;
             }
 
             const key = pid.name || `opid_${i}`;
