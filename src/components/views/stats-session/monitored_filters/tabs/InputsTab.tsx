@@ -1,9 +1,8 @@
 import { memo, useCallback } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { useSidebar } from '@/shared/hooks/useSidebar';
 import type { InputsTabProps, PIDWithIndex } from '../../types';
 import { useInputsTabData } from './hooks/useInputsTabData';
-import PIDTable from './PIDTable';
+import { PIDTable, PIDStatusBar } from './shared';
 import { TAB_STYLES } from './styles';
 
 const InputsTab = memo(
@@ -29,43 +28,12 @@ const InputsTab = memo(
       <div className={TAB_STYLES.SPACE_Y_2}>
         {/* Global Status Bar */}
         {inputPidsWithIndices.length > 0 && (
-          <div className={TAB_STYLES.STATUS_BAR_CONTAINER}>
-            <div className={TAB_STYLES.STATUS_BAR_CONTENT}>
-              <div className={TAB_STYLES.STATUS_BAR_LEFT}>
-                <span className="text-xs font-medium">Status</span>
-                <span className="text-xs text-muted-foreground tabular-nums">
-                  {globalStatus.totalPids} stream
-                  {globalStatus.totalPids > 1 ? 's' : ''}
-                </span>
-              </div>
-              <div className={TAB_STYLES.STATUS_BAR_RIGHT}>
-                {globalStatus.errors > 0 && (
-                  <Badge
-                    variant="destructive"
-                    className="text-[10px] px-1.5 py-0 h-5 tabular-nums"
-                  >
-                    {globalStatus.errors} Error
-                  </Badge>
-                )}
-                {globalStatus.active > 0 && (
-                  <Badge
-                    variant="default"
-                    className="text-[10px] px-1.5 py-0 h-5 tabular-nums"
-                  >
-                    {globalStatus.active} Active
-                  </Badge>
-                )}
-                {globalStatus.eos > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px] px-1.5 py-0 h-5 tabular-nums"
-                  >
-                    {globalStatus.eos} EOS
-                  </Badge>
-                )}
-              </div>
-            </div>
-          </div>
+          <PIDStatusBar
+            totalPids={globalStatus.totalPids}
+            errors={globalStatus.errors}
+            active={globalStatus.active}
+            eos={globalStatus.eos}
+          />
         )}
         {/* PIDs Display */}
         {allPidsWithType.length > 0 ? (
