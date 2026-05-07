@@ -6,6 +6,7 @@ import {
   formatTime,
   formatNumber,
 } from '@/utils/formatting';
+import { formatLastTsSent } from '@/components/views/stats-session/utils/pidFormatters';
 
 export interface PerformanceData {
   throughput: {
@@ -66,7 +67,7 @@ export const usePerformanceMetrics = (pidData: TabPIDData): PerformanceData => {
             : undefined,
         lastTsSent:
           pidData.stats.last_ts_sent !== undefined
-            ? formatNumber(pidData.stats.last_ts_sent)
+            ? formatLastTsSent(pidData.stats.last_ts_sent)
             : undefined,
       },
     };
