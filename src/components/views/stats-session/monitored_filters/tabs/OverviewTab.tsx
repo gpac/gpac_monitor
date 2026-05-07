@@ -24,7 +24,7 @@ const MetricRow = ({
   label,
   value,
   isEven,
-  valueClassName,
+  valueClassName = 'text-info',
 }: {
   label: string;
   value: string;
@@ -38,7 +38,7 @@ const MetricRow = ({
       {label}
     </td>
     <td
-      className={`px-2 py-2 align-middle text-xs font-medium tabular-nums ${valueClassName ?? 'text-info'}`}
+      className={`px-2 py-2 align-middle text-xs font-medium tabular-nums text-right w-28 whitespace-nowrap ${valueClassName}`}
     >
       {value}
     </td>
@@ -53,7 +53,11 @@ const TableSection = ({
   children: ReactNode;
 }) => (
   <div className="bg-monitor-app">
-    <table className="w-full text-left">
+    <table className="w-full text-left table-fixed">
+      <colgroup>
+        <col />
+        <col className="w-28" />
+      </colgroup>
       <thead>
         <tr className="bg-monitor-panel border-b border-white/10">
           <th
