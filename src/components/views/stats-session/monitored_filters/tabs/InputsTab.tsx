@@ -8,6 +8,7 @@ import { TAB_STYLES } from './styles';
 const InputsTab = memo(
   ({ filterData, filterName, isLoading = false }: InputsTabProps) => {
     const { openPIDProps } = useSidebar();
+
     const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
       useInputsTabData(filterData);
 
@@ -35,16 +36,22 @@ const InputsTab = memo(
             eos={globalStatus.eos}
           />
         )}
+
         {/* PIDs Display */}
         {allPidsWithType.length > 0 ? (
-          <PIDTable
-            pids={inputPidsWithIndices}
-            filterIdx={filterData.idx}
-            onOpenProps={handleOpenProps}
-          />
+          <div className="grid grid-cols-[minmax(620px,840px)_minmax(0,1fr)] gap-4">
+            <PIDTable
+              pids={inputPidsWithIndices}
+              filterIdx={filterData.idx}
+              onOpenProps={handleOpenProps}
+            />
+
+            {/* Future PID graph panel */}
+            <div />
+          </div>
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-" />
           </div>
         ) : (
           <div className="py-8 text-center text-muted-foreground text-sm">

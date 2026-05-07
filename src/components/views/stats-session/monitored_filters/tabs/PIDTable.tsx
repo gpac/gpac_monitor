@@ -13,37 +13,47 @@ interface PIDTableProps {
 
 const PIDTable = memo(
   ({ pids, filterIdx, onOpenProps, variant = 'input' }: PIDTableProps) => (
-    <div className="bg-monitor-app">
-      <table className="w-[70%] text-left table-fixed">
-        <thead>
-          <tr className="border-b border-white/10 bg-monitor-panel">
-            <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-              Infos
-            </th>
-            <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide w-32">
-              Rate / Peak
-            </th>
-            <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide w-28">
-              Buffer
-            </th>
-            <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide w-20">
-              TS / Stat
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {pids.map((pid, index) => (
-            <PIDTableRow
-              key={`${pid.name}-${pid.ipidIdx}`}
-              pid={pid}
-              filterIdx={filterIdx}
-              onOpenProps={onOpenProps}
-              isEven={index % 2 === 0}
-              variant={variant}
-            />
-          ))}
-        </tbody>
-      </table>
+    <div className="bg-monitor-app overflow-hidden">
+      <div className="w-full overflow-x-auto">
+        <table className="w-[clamp(620px,60%,760px)] text-left table-fixed">
+          <colgroup>
+            <col className="w-[220px]" />
+            <col className="w-[130px]" />
+            <col className="w-[200px]" />
+            <col className="w-[110px]" />
+          </colgroup>
+
+          <thead>
+            <tr className="border-b border-white/10 bg-monitor-panel">
+              <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                Infos
+              </th>
+              <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                Buffer
+              </th>
+              <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                Rate / Peak
+              </th>
+              <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                TS / Stat
+              </th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {pids.map((pid, index) => (
+              <PIDTableRow
+                key={`${pid.name}-${pid.ipidIdx}`}
+                pid={pid}
+                filterIdx={filterIdx}
+                onOpenProps={onOpenProps}
+                isEven={index % 2 === 0}
+                variant={variant}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   ),
 );

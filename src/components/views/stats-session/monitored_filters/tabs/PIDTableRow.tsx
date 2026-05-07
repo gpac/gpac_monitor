@@ -48,7 +48,7 @@ const PIDTableRow = memo(
       <tr className={`${bgClass} border-b border-white/5`}>
         {/* Type badge + eye button + infos */}
         <td className="px-2 py-2 align-middle text-xs">
-          <div className="flex items-center gap-1.5">
+          <div className="min-w-0 flex items-center gap-1.5">
             {variant === 'input' && (
               <button
                 onClick={handleOpenProps}
@@ -64,21 +64,13 @@ const PIDTableRow = memo(
             >
               {badgeConfig.label}
             </Badge>
-            <span className="text-muted-foreground">{infoStats.infoLine}</span>
+            <span className="min-w-0 truncate text-muted-foreground">
+              {infoStats.infoLine}
+            </span>
           </div>
         </td>
         {/* Bitrate · max_process_time */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums whitespace-nowrap">
-          <span className="text-info" title="bitrate">
-            {formatPidBitrate(perfStats.bitrate)}
-          </span>
-          <span className="text-muted-foreground"> · </span>
-          <span className="text-info" title="max_process_time (µs)">
-            {formatPidBuffer(perfStats.max_process_time)}
-          </span>
-        </td>
-        {/* buffer / max_buffer */}
-        <td className="px-2 py-2 align-middle text-xs tabular-nums">
           <span className="text-info" title="buffer (µs)">
             {formatPidBuffer(bufferStats.buffer)}
           </span>
@@ -90,6 +82,16 @@ const PIDTableRow = memo(
               </span>
             </>
           )}
+        </td>
+        {/* bitrate · max_process_time */}
+        <td className="px-2 py-2 align-middle text-xs tabular-nums">
+          <span className="text-info" title="bitrate">
+            {formatPidBitrate(perfStats.bitrate)}
+          </span>
+          <span className="text-muted-foreground"> · </span>
+          <span className="text-info" title="max_process_time (µs)">
+            {formatPidBuffer(perfStats.max_process_time)}
+          </span>
         </td>
         {/* last_ts_sent + status */}
         <td className="px-2 py-2 align-middle">
