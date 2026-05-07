@@ -13,7 +13,7 @@ export const DEFAULT_REFRESH_INTERVAL = 500;
 export const CHART_HEIGHT = 150;
 
 /** Chart margins */
-export const CHART_MARGIN = { top: 5, right: 10, left: 10, bottom: 5 };
+export const CHART_MARGIN = { top: 2, right: 10, left: 10, bottom: 2 };
 
 /**
  * Color configuration for outband/inband bandwidth

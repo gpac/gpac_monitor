@@ -125,11 +125,16 @@ export const createBandwidthCombinedConfig = ({
         ticks: { stroke: '#6ee7b7', size: 5, width: 1 },
         font: '10px monospace',
         size: 50,
-        values: (_u, vals) =>
-          vals.map((v) => {
+        values: (_u, vals) => {
+          const total = timeLabelsRef.current.length;
+          const maxLabels = Math.floor(width / 60);
+          const stride = Math.max(1, Math.ceil(total / maxLabels));
+          return vals.map((v) => {
             const idx = v as number;
+            if (idx % stride !== 0) return '';
             return timeLabelsRef.current[idx] || '';
-          }),
+          });
+        },
       },
       {
         stroke: '#6ee7b7',

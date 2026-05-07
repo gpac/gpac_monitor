@@ -103,7 +103,7 @@ export const BandwidthCombinedChart = memo(
           <CardTitle className="flex justify-center items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <LuArrowUpDown className="h-4 w-4 opacity-60" />
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 rounded-full bg-blue-500" />
+              <span className="w-3 h-0.5 rounded-full bg-monitor-active-filter" />
               Inband
             </span>
             /
