@@ -30,8 +30,10 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
   const metrics = useMemo(() => {
     const secs = microsecondsToSeconds(time);
     return {
-      throughput: secs > 0 ? `${formatBytes(filter.bytes_done / secs)}/s` : '—',
-      packetRate: secs > 0 ? formatPacketRate(filter.pck_done / secs) : '—',
+      processSpeed:
+        secs > 0 ? `${formatBytes(filter.bytes_done / secs)}/s` : '—',
+      processPacketRate:
+        secs > 0 ? formatPacketRate(filter.pck_done / secs) : '—',
     };
   }, [time, filter.bytes_done, filter.pck_done]);
 
@@ -64,11 +66,15 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
 
       {/* 2-column grid: Real-time | Packets + Data */}
       <div className="grid grid-cols-2 gap-2">
-        <TableSection title="Real-time">
-          <MetricRow label="Throughput" value={metrics.throughput} isEven />
+        <TableSection title="Processing">
           <MetricRow
-            label="Packet rate"
-            value={metrics.packetRate}
+            label="Process speed"
+            value={metrics.processSpeed}
+            isEven
+          />
+          <MetricRow
+            label="Packets/s"
+            value={metrics.processPacketRate}
             isEven={false}
           />
         </TableSection>

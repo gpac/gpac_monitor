@@ -19,8 +19,9 @@ const PIDTable = memo(
           <colgroup>
             <col className="w-[220px]" />
             <col className="w-[130px]" />
-            <col className="w-[200px]" />
+            <col className="w-[180px]" />
             <col className="w-[110px]" />
+            <col className="w-[120px]" />
           </colgroup>
 
           <thead>
@@ -32,7 +33,7 @@ const PIDTable = memo(
                 Buffer
               </th>
               <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                Bitrate/wProc.
+                Bitrate/Proc.
               </th>
 
               <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">

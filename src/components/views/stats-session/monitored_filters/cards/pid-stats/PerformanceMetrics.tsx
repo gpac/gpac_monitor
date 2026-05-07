@@ -66,13 +66,13 @@ export const PerformanceMetrics = memo(
                 </div>
 
                 <div className="stat text-xl font-bold leading-none text-info tabular-nums">
-                  {performanceData.throughput.packetRate.average}
+                  {performanceData.throughput.processingRate.average}
                 </div>
 
                 <div className="flex items-center justify-between pt-1 border-t border-border/30">
                   <span className="text-xs stat-label opacity-60">Peak</span>
                   <span className="text-sm font-semibold stat text-info tabular-nums">
-                    {performanceData.throughput.packetRate.max}
+                    {performanceData.throughput.processingRate.max}
                   </span>
                 </div>
               </div>

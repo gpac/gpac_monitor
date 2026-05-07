@@ -1,11 +1,6 @@
 import { useMemo } from 'react';
 import { TabPIDData } from '@/types/ui';
-import {
-  formatBitrate,
-  formatPacketRate,
-  formatTime,
-  formatNumber,
-} from '@/utils/formatting';
+import { formatBitrate, formatTime, formatNumber } from '@/utils/formatting';
 import { formatLastTsSent } from '@/components/views/stats-session/utils/pidFormatters';
 
 export interface PerformanceData {
@@ -14,7 +9,7 @@ export interface PerformanceData {
       average: string;
       max: string;
     };
-    packetRate: {
+    processingRate: {
       average: string;
       max: string;
     };
@@ -51,9 +46,9 @@ export const usePerformanceMetrics = (pidData: TabPIDData): PerformanceData => {
           average: formatBitrate(pidData.stats.average_bitrate),
           max: formatBitrate(pidData.stats.max_bitrate),
         },
-        packetRate: {
-          average: formatPacketRate(pidData.stats.average_process_rate),
-          max: formatPacketRate(pidData.stats.max_process_rate),
+        processingRate: {
+          average: formatBitrate(pidData.stats.average_process_rate),
+          max: formatBitrate(pidData.stats.max_process_rate),
         },
       },
       processing: {
