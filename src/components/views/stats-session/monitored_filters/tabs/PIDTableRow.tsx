@@ -190,9 +190,33 @@ const PIDTableRow = memo(
         {/* TS + status */}
         <td className="px-2 py-2 align-middle">
           <div className="flex items-center gap-1">
-            <span className="text-xs tabular-nums text-info font-mono">
-              {formatLastTsSent(perfStats.last_ts_sent)}
-            </span>
+            <PIDMetricTooltip
+              rows={[
+                {
+                  label: 'last_ts_sent',
+                  value: formatLastTsSent(perfStats.last_ts_sent),
+                  active: true,
+                },
+                {
+                  label: 'first_process_time',
+                  value:
+                    perfStats.first_process_time != null
+                      ? formatPidBuffer(perfStats.first_process_time)
+                      : null,
+                },
+                {
+                  label: 'last_process_time',
+                  value:
+                    perfStats.last_process_time != null
+                      ? formatPidBuffer(perfStats.last_process_time)
+                      : null,
+                },
+              ]}
+            >
+              <span className="text-xs tabular-nums text-info font-mono cursor-default">
+                {formatLastTsSent(perfStats.last_ts_sent)}
+              </span>
+            </PIDMetricTooltip>
             {statusBadge && (
               <Badge
                 variant={statusBadge.variant}
