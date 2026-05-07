@@ -24,7 +24,7 @@ export const BandwidthCombinedChart = memo(
     windowDurationMs,
   }: BandwidthCombinedChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
-    const [dimensions, setDimensions] = useState({ width: 400, height: 230 });
+    const [dimensions, setDimensions] = useState({ width: 400, height: 160 });
     const timeLabelsRef = useRef<string[]>([]);
 
     const { dataPoints: outbandPoints } = useBandwidthChart({
