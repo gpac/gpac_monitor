@@ -1,7 +1,6 @@
 import { memo, useCallback } from 'react';
 import { LuEye } from 'react-icons/lu';
 import { Badge } from '@/components/ui/badge';
-import { GpacStreamType } from '@/types/domain/gpac/stream-types';
 import { getPIDStatusBadge } from '@/utils/gpac';
 import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
 import {
@@ -9,9 +8,10 @@ import {
   formatPidBitrate,
   formatLastTsSent,
 } from '../../utils/pidFormatters';
-import { formatGpacFps } from '../../utils/pidProps';
-import { formatSamplerate } from '../cards/media-info/formatters';
 import type { PIDWithIndex } from '../../types';
+import { usePIDInfoStats } from './hooks/usePIDInfoStats';
+import { usePIDBufferStats } from './hooks/usePIDBufferStats';
+import { usePIDPerformanceStats } from './hooks/usePIDPerformanceStats';
 
 type PIDTableRowVariant = 'input' | 'output';
 
@@ -22,24 +22,6 @@ interface PIDTableRowProps {
   isEven: boolean;
   variant?: PIDTableRowVariant;
 }
-
-const buildInfoLine = (pid: PIDWithIndex): string => {
-  const parts: string[] = [];
-  if (pid.codec) parts.push(pid.codec.toLowerCase());
-
-  if (pid.type === GpacStreamType.Visual) {
-    if (pid.width && pid.height) parts.push(`${pid.width}×${pid.height}`);
-    const fps = formatGpacFps(pid.properties?.['FPS']?.value);
-    if (fps !== '—') parts.push(fps);
-  } else if (pid.type === GpacStreamType.Audio) {
-    if (pid.samplerate != null) parts.push(formatSamplerate(pid.samplerate));
-    if (pid.channels) parts.push(`${pid.channels} ch`);
-  } else if (pid.type === GpacStreamType.Text && pid.language) {
-    parts.push(pid.language);
-  }
-
-  return parts.join(' · ') || '—';
-};
 
 const PIDTableRow = memo(
   ({
@@ -53,6 +35,10 @@ const PIDTableRow = memo(
       () => onOpenProps(filterIdx, pid.ipidIdx),
       [onOpenProps, filterIdx, pid.ipidIdx],
     );
+
+    const infoStats = usePIDInfoStats(pid);
+    const bufferStats = usePIDBufferStats(pid);
+    const perfStats = usePIDPerformanceStats(pid);
 
     const badgeConfig = getStreamTypeBadgeConfig(pid.type);
     const statusBadge = getPIDStatusBadge(pid);
@@ -78,41 +64,41 @@ const PIDTableRow = memo(
             >
               {badgeConfig.label}
             </Badge>
-            <span className="text-muted-foreground">{buildInfoLine(pid)}</span>
+            <span className="text-muted-foreground">{infoStats.infoLine}</span>
           </div>
         </td>
-        {/* Rate / Peak */}
+        {/* Bitrate · max_process_time */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums whitespace-nowrap">
-          <span className="text-info" title="Bitrate">
-            {formatPidBitrate(pid.bitrate)}
+          <span className="text-info" title="bitrate">
+            {formatPidBitrate(perfStats.bitrate)}
           </span>
           <span className="text-muted-foreground"> · </span>
           <span className="text-info" title="max_process_time (µs)">
-            {formatPidBuffer(pid.stats?.max_process_time)}
+            {formatPidBuffer(perfStats.max_process_time)}
           </span>
         </td>
-        {/* Buffer: fill / max */}
+        {/* buffer / max_buffer */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums">
           <span className="text-info" title="buffer (µs)">
-            {formatPidBuffer(pid.buffer)}
+            {formatPidBuffer(bufferStats.buffer)}
           </span>
-          {pid.max_buffer != null && (
+          {bufferStats.max_buffer != null && (
             <>
               <span className="text-muted-foreground"> / </span>
               <span className="text-info" title="max_buffer (µs)">
-                {formatPidBuffer(pid.max_buffer)}
+                {formatPidBuffer(bufferStats.max_buffer)}
               </span>
             </>
           )}
         </td>
-        {/* TS / Stat */}
+        {/* last_ts_sent + status */}
         <td className="px-2 py-2 align-middle">
           <div className="flex items-center gap-1">
             <span
               className="text-xs tabular-nums text-info font-mono"
               title="last_ts_sent (s)"
             >
-              {formatLastTsSent(pid.stats?.last_ts_sent)}
+              {formatLastTsSent(perfStats.last_ts_sent)}
             </span>
             {statusBadge && (
               <Badge
