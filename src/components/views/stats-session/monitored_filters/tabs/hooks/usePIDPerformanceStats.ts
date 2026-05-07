@@ -6,10 +6,10 @@ export interface PIDPerformanceStats {
   bitrate: number | null;
   // From PIDStats — names match source exactly
   disconnected: boolean;
-  average_bitrate: number;
-  max_bitrate: number;
-  average_process_rate: number;
-  max_process_rate: number;
+  average_bitrate: number | null;
+  max_bitrate: number | null;
+  average_process_rate: number | null;
+  max_process_rate: number | null;
   nb_processed: number;
   max_process_time: number;
   total_process_time: number;
@@ -27,10 +27,13 @@ export const usePIDPerformanceStats = (
     return {
       bitrate: pid.bitrate,
       disconnected: stats.disconnected,
-      average_bitrate: stats.average_bitrate,
-      max_bitrate: stats.max_bitrate,
-      average_process_rate: stats.average_process_rate,
-      max_process_rate: stats.max_process_rate,
+      average_bitrate:
+        stats.average_bitrate >= 0 ? stats.average_bitrate : null,
+      max_bitrate: stats.max_bitrate >= 0 ? stats.max_bitrate : null,
+      average_process_rate:
+        stats.average_process_rate >= 0 ? stats.average_process_rate : null,
+      max_process_rate:
+        stats.max_process_rate >= 0 ? stats.max_process_rate : null,
       nb_processed: stats.nb_processed,
       max_process_time: stats.max_process_time,
       total_process_time: stats.total_process_time,

@@ -32,10 +32,14 @@ const PIDTable = memo(
                 Buffer
               </th>
               <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                Rate / Peak
+                Bitrate/wProc.
+              </th>
+
+              <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                Proc. Rate
               </th>
               <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                TS / Stat
+                TS
               </th>
             </tr>
           </thead>

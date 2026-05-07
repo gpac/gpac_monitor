@@ -93,6 +93,12 @@ const PIDTableRow = memo(
             {formatPidBuffer(perfStats.max_process_time)}
           </span>
         </td>
+        {/* average_process_rate */}
+        <td className="px-2 py-2 align-middle text-xs tabular-nums">
+          <span className="text-info" title="average_process_rate(b/s)">
+            {formatPidBitrate(perfStats.average_process_rate)}
+          </span>
+        </td>
         {/* last_ts_sent + status */}
         <td className="px-2 py-2 align-middle">
           <div className="flex items-center gap-1">
@@ -102,6 +108,7 @@ const PIDTableRow = memo(
             >
               {formatLastTsSent(perfStats.last_ts_sent)}
             </span>
+
             {statusBadge && (
               <Badge
                 variant={statusBadge.variant}
