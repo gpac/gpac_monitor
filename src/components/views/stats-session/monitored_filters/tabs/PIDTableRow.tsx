@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react';
 import { LuEye } from 'react-icons/lu';
 import { Badge } from '@/components/ui/badge';
+import { formatNumber } from '@/utils/formatting';
 import { getPIDStatusBadge } from '@/utils/gpac';
 import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
 import {
@@ -12,6 +13,7 @@ import type { PIDWithIndex } from '../../types';
 import { usePIDInfoStats } from './hooks/usePIDInfoStats';
 import { usePIDBufferStats } from './hooks/usePIDBufferStats';
 import { usePIDPerformanceStats } from './hooks/usePIDPerformanceStats';
+import PIDMetricTooltip from './PIDMetricTooltip';
 
 type PIDTableRowVariant = 'input' | 'output';
 
@@ -46,7 +48,7 @@ const PIDTableRow = memo(
 
     return (
       <tr className={`${bgClass} border-b border-white/5`}>
-        {/* Type badge + eye button + infos */}
+        {/* Infos */}
         <td className="px-2 py-2 align-middle text-xs">
           <div className="min-w-0 flex items-center gap-1.5">
             {variant === 'input' && (
@@ -69,46 +71,128 @@ const PIDTableRow = memo(
             </span>
           </div>
         </td>
-        {/* Bitrate · max_process_time */}
+
+        {/* Buffer */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums whitespace-nowrap">
-          <span className="text-info" title="buffer (µs)">
-            {formatPidBuffer(bufferStats.buffer)}
-          </span>
-          {bufferStats.max_buffer != null && (
-            <>
-              <span className="text-muted-foreground"> / </span>
-              <span className="text-info" title="max_buffer (µs)">
-                {formatPidBuffer(bufferStats.max_buffer)}
+          <PIDMetricTooltip
+            rows={[
+              {
+                label: 'buffer_time',
+                value:
+                  bufferStats.buffer_time != null
+                    ? formatPidBuffer(bufferStats.buffer_time)
+                    : null,
+              },
+              {
+                label: 'max_buffer_time',
+                value:
+                  bufferStats.max_buffer_time != null
+                    ? formatPidBuffer(bufferStats.max_buffer_time)
+                    : null,
+              },
+              {
+                label: 'nb_buffer_units',
+                value:
+                  bufferStats.nb_buffer_units != null
+                    ? formatNumber(bufferStats.nb_buffer_units)
+                    : null,
+              },
+              {
+                label: 'playout min',
+                value:
+                  bufferStats.min_playout_time != null
+                    ? formatPidBuffer(bufferStats.min_playout_time)
+                    : null,
+              },
+              {
+                label: 'playout max',
+                value:
+                  bufferStats.max_playout_time != null
+                    ? formatPidBuffer(bufferStats.max_playout_time)
+                    : null,
+              },
+            ]}
+          >
+            <span className="cursor-default">
+              <span className="text-info">
+                {formatPidBuffer(bufferStats.buffer)}
               </span>
-            </>
-          )}
+              {bufferStats.max_buffer != null && (
+                <>
+                  <span className="text-muted-foreground"> / </span>
+                  <span className="text-info">
+                    {formatPidBuffer(bufferStats.max_buffer)}
+                  </span>
+                </>
+              )}
+            </span>
+          </PIDMetricTooltip>
         </td>
-        {/* bitrate · max_process_time */}
+
+        {/* Bitrate · max_process_time */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums">
-          <span className="text-info" title="bitrate">
-            {formatPidBitrate(perfStats.bitrate)}
-          </span>
-          <span className="text-muted-foreground"> · </span>
-          <span className="text-info" title="max_process_time (µs)">
-            {formatPidBuffer(perfStats.max_process_time)}
-          </span>
+          <PIDMetricTooltip
+            rows={[
+              {
+                label: 'max_process_time',
+                value: formatPidBuffer(perfStats.max_process_time),
+                active: true,
+              },
+              {
+                label: 'total_process_time',
+                value:
+                  perfStats.total_process_time > 0
+                    ? formatPidBuffer(perfStats.total_process_time)
+                    : null,
+              },
+              {
+                label: 'nb_processed',
+                value:
+                  perfStats.nb_processed > 0
+                    ? formatNumber(perfStats.nb_processed)
+                    : null,
+              },
+            ]}
+          >
+            <span className="cursor-default">
+              <span className="text-info">
+                {formatPidBitrate(perfStats.bitrate)}
+              </span>
+              <span className="text-muted-foreground"> · </span>
+              <span className="text-info">
+                {formatPidBuffer(perfStats.max_process_time)}
+              </span>
+            </span>
+          </PIDMetricTooltip>
         </td>
-        {/* average_process_rate */}
+
+        {/* Proc. Rate */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums">
-          <span className="text-info" title="average_process_rate(b/s)">
-            {formatPidBitrate(perfStats.average_process_rate)}
-          </span>
+          <PIDMetricTooltip
+            rows={[
+              {
+                label: 'avg process rate',
+                value: formatPidBitrate(perfStats.average_process_rate),
+                active: true,
+              },
+              {
+                label: 'max process rate',
+                value: formatPidBitrate(perfStats.max_process_rate),
+              },
+            ]}
+          >
+            <span className="text-info cursor-default">
+              {formatPidBitrate(perfStats.average_process_rate)}
+            </span>
+          </PIDMetricTooltip>
         </td>
-        {/* last_ts_sent + status */}
+
+        {/* TS + status */}
         <td className="px-2 py-2 align-middle">
           <div className="flex items-center gap-1">
-            <span
-              className="text-xs tabular-nums text-info font-mono"
-              title="last_ts_sent (s)"
-            >
+            <span className="text-xs tabular-nums text-info font-mono">
               {formatLastTsSent(perfStats.last_ts_sent)}
             </span>
-
             {statusBadge && (
               <Badge
                 variant={statusBadge.variant}
