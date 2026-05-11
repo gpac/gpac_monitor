@@ -35,7 +35,7 @@ interface FilterChartData {
 export interface MonitoredFilterState {
   dataByFilter: Record<string, FilterChartData>;
   maxPoints: number; // Default: 600 (10 min at 1Hz)
-  selectedPidTarget: PIDGraphTarget | null;
+  selectedPidTargets: PIDGraphTarget[];
   pidSamples: Record<string, PIDMetricSample[]>;
   maxPidSamples: number;
 }
@@ -43,7 +43,7 @@ export interface MonitoredFilterState {
 const initialState: MonitoredFilterState = {
   dataByFilter: {},
   maxPoints: 600,
-  selectedPidTarget: null,
+  selectedPidTargets: [],
   pidSamples: {},
   maxPidSamples: 300,
 };
@@ -102,8 +102,23 @@ const monitoredFilterSlice = createSlice({
       state.dataByFilter = {};
     },
 
-    setSelectedPid: (state, action: PayloadAction<PIDGraphTarget | null>) => {
-      state.selectedPidTarget = action.payload;
+    toggleSelectedPid: (state, action: PayloadAction<PIDGraphTarget>) => {
+      const incoming = action.payload;
+      const existingIndex = state.selectedPidTargets.findIndex(
+        (existing) =>
+          existing.filterIdx === incoming.filterIdx &&
+          existing.direction === incoming.direction &&
+          existing.pidIndex === incoming.pidIndex,
+      );
+      if (existingIndex >= 0) {
+        state.selectedPidTargets.splice(existingIndex, 1);
+      } else if (state.selectedPidTargets.length < 4) {
+        state.selectedPidTargets.push(incoming);
+      }
+    },
+
+    clearSelectedPids: (state) => {
+      state.selectedPidTargets = [];
     },
 
     addPIDSample: (
@@ -181,7 +196,8 @@ export const {
   clearFilterData,
   resetAllData,
   setMaxPoints,
-  setSelectedPid,
+  toggleSelectedPid,
+  clearSelectedPids,
   addPIDSample,
   addPIDSamples,
   clearPIDSamples,

@@ -39,9 +39,9 @@ export const selectMaxPoints = createSelector(
   (monitoredFilterState) => monitoredFilterState.maxPoints,
 );
 
-export const selectSelectedPidTarget = createSelector(
+export const selectSelectedPidTargets = createSelector(
   [selectMonitoredFilterState],
-  (state) => state.selectedPidTarget,
+  (state) => state.selectedPidTargets,
 );
 
 export const selectPIDSamplesForTarget = createSelector(
