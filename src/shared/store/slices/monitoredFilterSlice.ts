@@ -121,7 +121,7 @@ const monitoredFilterSlice = createSlice({
 
       if (
         lastSample &&
-        lastSample.timestamp === sample.timestamp &&
+        lastSample.sessionTimestampUs === sample.sessionTimestampUs &&
         lastSample.bitrate === sample.bitrate &&
         lastSample.bufferTime === sample.bufferTime &&
         lastSample.processTime === sample.processTime &&
@@ -134,6 +134,28 @@ const monitoredFilterSlice = createSlice({
 
       if (samples.length > state.maxPidSamples) {
         samples.shift();
+      }
+    },
+
+    addPIDSamples: (
+      state,
+      action: PayloadAction<Array<{ key: string; sample: PIDMetricSample }>>,
+    ) => {
+      for (const { key, sample } of action.payload) {
+        if (!state.pidSamples[key]) state.pidSamples[key] = [];
+        const samples = state.pidSamples[key];
+        const last = samples[samples.length - 1];
+        if (
+          last &&
+          last.sessionTimestampUs === sample.sessionTimestampUs &&
+          last.bitrate === sample.bitrate &&
+          last.bufferTime === sample.bufferTime &&
+          last.processTime === sample.processTime &&
+          last.processRate === sample.processRate
+        )
+          continue;
+        samples.push(sample);
+        if (samples.length > state.maxPidSamples) samples.shift();
       }
     },
 
@@ -161,6 +183,7 @@ export const {
   setMaxPoints,
   setSelectedPid,
   addPIDSample,
+  addPIDSamples,
   clearPIDSamples,
   clearAllPIDSamples,
 } = monitoredFilterSlice.actions;

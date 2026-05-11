@@ -7,7 +7,7 @@ export type PIDMetricMode =
   | 'processRate';
 
 export interface PIDMetricSample {
-  timestamp: number;
+  sessionTimestampUs: number;
   bitrate?: number | null;
   bufferTime?: number | null;
   processTime?: number | null;
