@@ -1,4 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type {
+  PIDMetricSample,
+  PIDGraphTarget,
+} from '@/components/views/stats-session/types/pid';
 
 /**
  * Generic data point for charts (time-series data)
@@ -31,11 +35,17 @@ interface FilterChartData {
 export interface MonitoredFilterState {
   dataByFilter: Record<string, FilterChartData>;
   maxPoints: number; // Default: 600 (10 min at 1Hz)
+  selectedPidTarget: PIDGraphTarget | null;
+  pidSamples: Record<string, PIDMetricSample[]>;
+  maxPidSamples: number;
 }
 
 const initialState: MonitoredFilterState = {
   dataByFilter: {},
   maxPoints: 600,
+  selectedPidTarget: null,
+  pidSamples: {},
+  maxPidSamples: 300,
 };
 
 const monitoredFilterSlice = createSlice({
@@ -92,6 +102,49 @@ const monitoredFilterSlice = createSlice({
       state.dataByFilter = {};
     },
 
+    setSelectedPid: (state, action: PayloadAction<PIDGraphTarget | null>) => {
+      state.selectedPidTarget = action.payload;
+    },
+
+    addPIDSample: (
+      state,
+      action: PayloadAction<{ key: string; sample: PIDMetricSample }>,
+    ) => {
+      const { key, sample } = action.payload;
+
+      if (!state.pidSamples[key]) {
+        state.pidSamples[key] = [];
+      }
+
+      const samples = state.pidSamples[key];
+      const lastSample = samples[samples.length - 1];
+
+      if (
+        lastSample &&
+        lastSample.timestamp === sample.timestamp &&
+        lastSample.bitrate === sample.bitrate &&
+        lastSample.bufferTime === sample.bufferTime &&
+        lastSample.processTime === sample.processTime &&
+        lastSample.processRate === sample.processRate
+      ) {
+        return;
+      }
+
+      samples.push(sample);
+
+      if (samples.length > state.maxPidSamples) {
+        samples.shift();
+      }
+    },
+
+    clearPIDSamples: (state, action: PayloadAction<string>) => {
+      delete state.pidSamples[action.payload];
+    },
+
+    clearAllPIDSamples: (state) => {
+      state.pidSamples = {};
+    },
+
     /**
      * Set max points for sliding window
      */
@@ -106,6 +159,10 @@ export const {
   clearFilterData,
   resetAllData,
   setMaxPoints,
+  setSelectedPid,
+  addPIDSample,
+  clearPIDSamples,
+  clearAllPIDSamples,
 } = monitoredFilterSlice.actions;
 
 export default monitoredFilterSlice.reducer;
