@@ -1,8 +1,8 @@
 import { memo } from 'react';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
-import { PIDTable, PIDStatusBar } from './shared';
-import { TAB_STYLES } from './styles';
-import { useOutputsTabData } from './hooks/useOutputsTabData';
+import { PIDTable, PIDStatusBar } from '../pid/shared';
+import { TAB_STYLES } from '../styles';
+import { useOutputsTabData } from '../hooks/useOutputsTabData';
 
 interface OutputsTabProps {
   filterData: FilterStatsResponse;

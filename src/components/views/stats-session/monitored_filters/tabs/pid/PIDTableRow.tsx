@@ -6,13 +6,13 @@ import {
   formatPidBuffer,
   formatPidBitrate,
   formatLastTsSent,
-} from '../../utils/pidFormatters';
-import { buildPIDKey } from '../../types/pid';
-import type { PIDWithIndex } from '../../types';
-import { PID_SELECTION_COLORS } from '../../utils/pidColors';
-import { usePIDInfoStats } from './hooks/usePIDInfoStats';
-import { usePIDBufferStats } from './hooks/usePIDBufferStats';
-import { usePIDPerformanceStats } from './hooks/usePIDPerformanceStats';
+} from '../../../utils/pidFormatters';
+import { buildPIDKey } from '../../../types/pid';
+import type { PIDWithIndex } from '../../../types';
+import { PID_SELECTION_COLORS } from '../../../utils/pidColors';
+import { usePIDInfoStats } from '../hooks/usePIDInfoStats';
+import { usePIDBufferStats } from '../hooks/usePIDBufferStats';
+import { usePIDPerformanceStats } from '../hooks/usePIDPerformanceStats';
 import PIDMetricTooltip from './PIDMetricTooltip';
 import PIDRowInfoCell from './PIDRowInfoCell';
 import { useAppSelector } from '@/shared/hooks/redux';

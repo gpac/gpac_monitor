@@ -5,8 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
-import { PID_SELECTION_COLORS } from '../../utils/pidColors';
-import type { PIDWithIndex } from '../../types';
+import { PID_SELECTION_COLORS } from '../../../utils/pidColors';
+import type { PIDWithIndex } from '../../../types';
 
 interface PIDRowInfoCellProps {
   pid: PIDWithIndex;

@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { TAB_STYLES } from './styles';
+import { TAB_STYLES } from '../styles';
 export { default as PIDTable } from './PIDTable';
 
 interface PIDStatusBarProps {

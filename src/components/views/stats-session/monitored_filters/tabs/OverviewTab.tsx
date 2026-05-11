@@ -14,7 +14,7 @@ import {
   getFilterHealthInfo,
   type FilterAlerts,
 } from '../cards/shared/statusHelpers';
-import { MetricRow, TableSection } from './shared';
+import { MetricRow, TableSection } from './pid/shared';
 
 interface OverviewTabProps {
   filter: OverviewTabData;

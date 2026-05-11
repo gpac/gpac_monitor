@@ -1,9 +1,9 @@
 import { memo, useCallback } from 'react';
 import { useSidebar } from '@/shared/hooks/useSidebar';
-import type { InputsTabProps, PIDWithIndex } from '../../types';
-import { useInputsTabData } from './hooks/useInputsTabData';
+import type { InputsTabProps, PIDWithIndex } from '../../../types';
+import { useInputsTabData } from '../hooks/useInputsTabData';
 import { PIDTable, PIDStatusBar } from './shared';
-import { TAB_STYLES } from './styles';
+import { TAB_STYLES } from '../styles';
 
 const InputsTab = memo(
   ({ filterData, filterName, isLoading = false }: InputsTabProps) => {

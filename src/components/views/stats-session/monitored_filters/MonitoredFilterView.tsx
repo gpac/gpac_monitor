@@ -12,8 +12,8 @@ import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
-import InputsTab from './tabs/InputsTab';
-import OutputsTab from './tabs/OutputsTab';
+import InputsTab from './tabs/pid/InputsTab';
+import OutputsTab from './tabs/pid/OutputsTab';
 
 // Constant fallback
 const EMPTY_FILTER_DATA: FilterStatsResponse = {

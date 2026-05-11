@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { TooltipProvider } from '@/components/ui/tooltip';
-import type { PIDWithIndex } from '../../types';
+import type { PIDWithIndex } from '../../../types';
 import PIDTableRow from './PIDTableRow';
 
 type PIDTableVariant = 'input' | 'output';
