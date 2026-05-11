@@ -68,7 +68,7 @@ const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
       <div className="grid grid-cols-2 gap-2">
         <TableSection title="Processing">
           <MetricRow
-            label="Process speed"
+            label=" Filter Process speed"
             value={metrics.processSpeed}
             isEven
           />
