@@ -129,7 +129,27 @@ const PIDTableRow = memo(
           </PIDMetricTooltip>
         </td>
 
-        {/* Bitrate · max_process_time */}
+        {/* Bitrate */}
+        <td className="px-2 py-2 align-middle text-xs tabular-nums">
+          <PIDMetricTooltip
+            rows={[
+              {
+                label: 'average_bitrate',
+                value: formatPidBitrate(perfStats.average_bitrate),
+              },
+              {
+                label: 'max_bitrate',
+                value: formatPidBitrate(perfStats.max_bitrate),
+              },
+            ]}
+          >
+            <span className="text-info cursor-default">
+              {formatPidBitrate(perfStats.bitrate)}
+            </span>
+          </PIDMetricTooltip>
+        </td>
+
+        {/* Proc. */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums">
           <PIDMetricTooltip
             rows={[
@@ -154,14 +174,8 @@ const PIDTableRow = memo(
               },
             ]}
           >
-            <span className="cursor-default">
-              <span className="text-info">
-                {formatPidBitrate(perfStats.bitrate)}
-              </span>
-              <span className="text-muted-foreground"> · </span>
-              <span className="text-info">
-                {formatPidBuffer(perfStats.max_process_time)}
-              </span>
+            <span className="text-info cursor-default">
+              {formatPidBuffer(perfStats.max_process_time)}
             </span>
           </PIDMetricTooltip>
         </td>
