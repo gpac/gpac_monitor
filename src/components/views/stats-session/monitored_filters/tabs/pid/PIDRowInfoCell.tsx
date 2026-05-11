@@ -5,7 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
-import { PID_SELECTION_COLORS } from '../../../utils/pidColors';
+import { PID_SELECTION_COLORS } from './utils/pidColors';
+import { buildPIDDisplayLabel } from './utils/pidLabel';
 import type { PIDWithIndex } from '../../../types';
 
 interface PIDRowInfoCellProps {
@@ -40,10 +41,10 @@ const PIDRowInfoCell = memo(
           filterIdx,
           direction: variant,
           pidIndex: pid.ipidIdx,
-          label: infoLine,
+          label: buildPIDDisplayLabel(pid),
         }),
       );
-    }, [dispatch, filterIdx, variant, pid.ipidIdx, infoLine]);
+    }, [dispatch, filterIdx, variant, pid.ipidIdx, pid]);
 
     return (
       <div className="min-w-0 flex items-center gap-1.5">

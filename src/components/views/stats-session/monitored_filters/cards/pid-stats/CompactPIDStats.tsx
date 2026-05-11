@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { TabPIDData } from '@/types/ui';
-import { formatPidBuffer } from '@/components/views/stats-session/utils/pidFormatters';
+import { formatPidBuffer } from '@/components/views/stats-session/monitored_filters/tabs/pid/utils/pidFormatters';
 import { getCriticalAlerts, getPlaybackStatus } from '../shared/statusHelpers';
 
 interface CompactPIDStatsProps {

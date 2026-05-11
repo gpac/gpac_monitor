@@ -10,11 +10,18 @@ interface PIDTableProps {
   filterIdx: number;
   onOpenProps: (filterIdx: number, ipidIdx: number) => void;
   variant?: PIDTableVariant;
+  hoveredPidKey?: string | null;
 }
 
 const PIDTable = memo(
-  ({ pids, filterIdx, onOpenProps, variant = 'input' }: PIDTableProps) => (
-    <TooltipProvider delayDuration={300}>
+  ({
+    pids,
+    filterIdx,
+    onOpenProps,
+    variant = 'input',
+    hoveredPidKey = null,
+  }: PIDTableProps) => (
+    <TooltipProvider delayDuration={200}>
       <div className="bg-monitor-app overflow-hidden">
         <div className="w-full overflow-x-auto">
           <table className="w-[clamp(620px,60%,760px)] text-left table-fixed">
@@ -37,7 +44,7 @@ const PIDTable = memo(
                   Buffer
                 </th>
                 <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                  Bitrate
+                  Avg Bitrate
                 </th>
                 <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
                   Proc.
@@ -61,6 +68,7 @@ const PIDTable = memo(
                   onOpenProps={onOpenProps}
                   isEven={index % 2 === 0}
                   variant={variant}
+                  hoveredPidKey={hoveredPidKey}
                 />
               ))}
             </tbody>

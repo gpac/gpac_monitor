@@ -1,8 +1,9 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { PIDTable, PIDStatusBar } from '../pid/shared';
 import { TAB_STYLES } from '../styles';
 import { useOutputsTabData } from '../hooks/useOutputsTabData';
+import TemporalInspector from '../TemporalInspector';
 
 interface OutputsTabProps {
   filterData: FilterStatsResponse;
@@ -13,6 +14,7 @@ interface OutputsTabProps {
 const OutputsTab = memo(
   ({ filterData, filterName, isLoading = false }: OutputsTabProps) => {
     const { pidsWithIndices, globalStatus } = useOutputsTabData(filterData);
+    const [hoveredPidKey, setHoveredPidKey] = useState<string | null>(null);
 
     const handleOpenProps = () => {};
 
@@ -31,12 +33,16 @@ const OutputsTab = memo(
 
         {/* PIDs Display */}
         {pidsWithIndices.length > 0 ? (
-          <PIDTable
-            pids={pidsWithIndices}
-            filterIdx={filterData.idx}
-            onOpenProps={handleOpenProps}
-            variant="output"
-          />
+          <div className="grid grid-cols-[minmax(620px,840px)_minmax(0,1fr)] gap-4">
+            <PIDTable
+              pids={pidsWithIndices}
+              filterIdx={filterData.idx}
+              onOpenProps={handleOpenProps}
+              variant="output"
+              hoveredPidKey={hoveredPidKey}
+            />
+            <TemporalInspector onHoverPid={setHoveredPidKey} />
+          </div>
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />

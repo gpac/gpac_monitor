@@ -2,7 +2,7 @@ import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TabPIDData } from '@/types/ui';
-import { formatPidBuffer } from '@/components/views/stats-session/utils/pidFormatters';
+import { formatPidBuffer } from '@/components/views/stats-session/monitored_filters/tabs/pid/utils/pidFormatters';
 import { getPIDStatusInfo, getPIDType } from '../shared/statusHelpers';
 
 // Import the new specialized components

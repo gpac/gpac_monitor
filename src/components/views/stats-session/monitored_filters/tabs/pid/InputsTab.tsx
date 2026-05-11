@@ -1,13 +1,15 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import { useSidebar } from '@/shared/hooks/useSidebar';
 import type { InputsTabProps, PIDWithIndex } from '../../../types';
 import { useInputsTabData } from '../hooks/useInputsTabData';
 import { PIDTable, PIDStatusBar } from './shared';
 import { TAB_STYLES } from '../styles';
+import TemporalInspector from '../TemporalInspector';
 
 const InputsTab = memo(
   ({ filterData, filterName, isLoading = false }: InputsTabProps) => {
     const { openPIDProps } = useSidebar();
+    const [hoveredPidKey, setHoveredPidKey] = useState<string | null>(null);
 
     const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
       useInputsTabData(filterData);
@@ -44,10 +46,10 @@ const InputsTab = memo(
               pids={inputPidsWithIndices}
               filterIdx={filterData.idx}
               onOpenProps={handleOpenProps}
+              hoveredPidKey={hoveredPidKey}
             />
 
-            {/* Future PID graph panel */}
-            <div />
+            <TemporalInspector onHoverPid={setHoveredPidKey} />
           </div>
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">

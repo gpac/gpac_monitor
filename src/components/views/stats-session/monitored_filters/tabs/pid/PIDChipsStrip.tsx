@@ -3,19 +3,22 @@ import { LuX } from 'react-icons/lu';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { selectSelectedPidTargets } from '@/shared/store/selectors';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
-import { PID_SELECTION_COLORS } from '../../../utils/pidColors';
+import { PID_SELECTION_COLORS } from './utils/pidColors';
 import type { PIDGraphTarget } from '../../../types/pid';
 
 interface PIDChipProps {
   target: PIDGraphTarget;
   color: string;
   onRemove: () => void;
+  onHover: (active: boolean) => void;
 }
 
-const PIDChip = ({ target, color, onRemove }: PIDChipProps) => (
+const PIDChip = ({ target, color, onRemove, onHover }: PIDChipProps) => (
   <div
-    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white/5 border"
+    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white/5 border cursor-default"
     style={{ borderColor: `${color}60` }}
+    onMouseEnter={() => onHover(true)}
+    onMouseLeave={() => onHover(false)}
   >
     <span
       className="w-2 h-2 rounded-full flex-shrink-0"
@@ -34,7 +37,11 @@ const PIDChip = ({ target, color, onRemove }: PIDChipProps) => (
   </div>
 );
 
-const PIDChipsStrip = memo(() => {
+interface PIDChipsStripProps {
+  onHoverPid: (key: string | null) => void;
+}
+
+const PIDChipsStrip = memo(({ onHoverPid }: PIDChipsStripProps) => {
   const dispatch = useAppDispatch();
   const targets = useAppSelector(selectSelectedPidTargets);
 
@@ -42,14 +49,18 @@ const PIDChipsStrip = memo(() => {
 
   return (
     <div className="flex flex-wrap gap-1.5 px-2 py-1.5 border-b border-white/5">
-      {targets.map((target, index) => (
-        <PIDChip
-          key={`${target.filterIdx}:${target.direction}:${target.pidIndex}`}
-          target={target}
-          color={PID_SELECTION_COLORS[index]}
-          onRemove={() => dispatch(toggleSelectedPid(target))}
-        />
-      ))}
+      {targets.map((target, index) => {
+        const pidKey = `${target.filterIdx}:${target.direction}:${target.pidIndex}`;
+        return (
+          <PIDChip
+            key={pidKey}
+            target={target}
+            color={PID_SELECTION_COLORS[index]}
+            onRemove={() => dispatch(toggleSelectedPid(target))}
+            onHover={(active) => onHoverPid(active ? pidKey : null)}
+          />
+        );
+      })}
     </div>
   );
 });

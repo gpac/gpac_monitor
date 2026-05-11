@@ -6,10 +6,10 @@ import {
   formatPidBuffer,
   formatPidBitrate,
   formatLastTsSent,
-} from '../../../utils/pidFormatters';
+} from './utils/pidFormatters';
 import { buildPIDKey } from '../../../types/pid';
 import type { PIDWithIndex } from '../../../types';
-import { PID_SELECTION_COLORS } from '../../../utils/pidColors';
+import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { usePIDInfoStats } from '../hooks/usePIDInfoStats';
 import { usePIDBufferStats } from '../hooks/usePIDBufferStats';
 import { usePIDPerformanceStats } from '../hooks/usePIDPerformanceStats';
@@ -17,6 +17,7 @@ import PIDMetricTooltip from './PIDMetricTooltip';
 import PIDRowInfoCell from './PIDRowInfoCell';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
+import { cn } from '@/utils/core';
 
 type PIDTableRowVariant = 'input' | 'output';
 
@@ -26,6 +27,7 @@ interface PIDTableRowProps {
   onOpenProps: (filterIdx: number, ipidIdx: number) => void;
   isEven: boolean;
   variant?: PIDTableRowVariant;
+  hoveredPidKey?: string | null;
 }
 
 const PIDTableRow = memo(
@@ -35,6 +37,7 @@ const PIDTableRow = memo(
     onOpenProps,
     isEven,
     variant = 'input',
+    hoveredPidKey = null,
   }: PIDTableRowProps) => {
     const handleOpenProps = useCallback(
       () => onOpenProps(filterIdx, pid.ipidIdx),
@@ -60,7 +63,11 @@ const PIDTableRow = memo(
 
     return (
       <tr
-        className={`${bgClass} border-b border-white/5`}
+        className={cn(
+          bgClass,
+          'border-b border-white/5',
+          pidKey === hoveredPidKey && 'pid-row-hovered',
+        )}
         style={borderStyle}
         data-pid-key={pidKey}
       >
@@ -85,6 +92,18 @@ const PIDTableRow = memo(
                 value:
                   bufferStats.buffer_time != null
                     ? formatPidBuffer(bufferStats.buffer_time)
+                    : null,
+                active: true,
+              },
+              {
+                label: 'buffer',
+                value: formatPidBuffer(bufferStats.buffer),
+              },
+              {
+                label: 'max_buffer',
+                value:
+                  bufferStats.max_buffer != null
+                    ? formatPidBuffer(bufferStats.max_buffer)
                     : null,
               },
               {
@@ -119,7 +138,7 @@ const PIDTableRow = memo(
           >
             <span className="cursor-default">
               <span className="text-info">
-                {formatPidBuffer(bufferStats.buffer)}
+                {formatPidBuffer(bufferStats.displayBuffer)}
               </span>
               {bufferStats.max_buffer != null && (
                 <>
@@ -140,6 +159,11 @@ const PIDTableRow = memo(
               {
                 label: 'average_bitrate',
                 value: formatPidBitrate(perfStats.average_bitrate),
+                active: true,
+              },
+              {
+                label: 'bitrate',
+                value: formatPidBitrate(perfStats.bitrate),
               },
               {
                 label: 'max_bitrate',
@@ -148,7 +172,7 @@ const PIDTableRow = memo(
             ]}
           >
             <span className="text-info cursor-default">
-              {formatPidBitrate(perfStats.bitrate)}
+              {formatPidBitrate(perfStats.average_bitrate)}
             </span>
           </PIDMetricTooltip>
         </td>

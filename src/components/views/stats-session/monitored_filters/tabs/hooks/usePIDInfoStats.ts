@@ -1,28 +1,25 @@
 import { useMemo } from 'react';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
-import { formatGpacFps } from '../../../utils/pidProps';
+import { formatGpacFps } from '../pid/utils/pidProps';
 import { formatSamplerate } from '../../cards/media-info/formatters';
 
 export interface PIDInfoStats {
   codec: string | null;
   type: GpacStreamType;
-  // Visual — field names match PIDproperties
   width: number | null;
   height: number | null;
   pixelformat: string | null;
-  fps: string; // formatted from pid.properties['FPS']
-  // Audio
+  fps: string;
   samplerate: number | null;
   channels: number | null;
-  // Text
   language: string | null;
-  // Compact one-line summary for table display
   infoLine: string;
 }
 
 const buildInfoLine = (pid: PIDproperties, fps: string): string => {
   const parts: string[] = [];
+
   if (pid.codec) parts.push(pid.codec.toLowerCase());
 
   if (pid.type === GpacStreamType.Visual) {

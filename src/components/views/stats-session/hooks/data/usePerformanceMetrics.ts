@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { TabPIDData } from '@/types/ui';
 import { formatBitrate, formatTime, formatNumber } from '@/utils/formatting';
-import { formatLastTsSent } from '@/components/views/stats-session/utils/pidFormatters';
+import { formatLastTsSent } from '@/components/views/stats-session/monitored_filters/tabs/pid/utils/pidFormatters';
 
 export interface PerformanceData {
   throughput: {

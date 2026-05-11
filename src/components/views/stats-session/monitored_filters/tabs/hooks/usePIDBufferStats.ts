@@ -2,16 +2,14 @@ import { useMemo } from 'react';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 
 export interface PIDBufferStats {
-  // Direct PIDproperties fields
+  displayBuffer: number;
   buffer: number;
   max_buffer: number | null;
-  // From pid.stats — optional, sent only when non-zero
   buffer_time: number | null;
   max_buffer_time: number | null;
   nb_buffer_units: number | null;
   min_playout_time: number | null;
   max_playout_time: number | null;
-  // True when at least one meaningful value is present
   hasData: boolean;
 }
 
@@ -28,6 +26,7 @@ export const usePIDBufferStats = (pid: PIDproperties): PIDBufferStats => {
       pid.buffer > 0 || buffer_time != null || nb_buffer_units != null;
 
     return {
+      displayBuffer: buffer_time ?? pid.buffer,
       buffer: pid.buffer,
       max_buffer: pid.max_buffer ?? null,
       buffer_time,
