@@ -1,19 +1,22 @@
 import { memo, useCallback } from 'react';
-import { LuEye } from 'react-icons/lu';
 import { Badge } from '@/components/ui/badge';
 import { formatNumber } from '@/utils/formatting';
 import { getPIDStatusBadge } from '@/utils/gpac';
-import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
 import {
   formatPidBuffer,
   formatPidBitrate,
   formatLastTsSent,
 } from '../../utils/pidFormatters';
+import { buildPIDKey } from '../../types/pid';
 import type { PIDWithIndex } from '../../types';
+import { PID_SELECTION_COLORS } from '../../utils/pidColors';
 import { usePIDInfoStats } from './hooks/usePIDInfoStats';
 import { usePIDBufferStats } from './hooks/usePIDBufferStats';
 import { usePIDPerformanceStats } from './hooks/usePIDPerformanceStats';
 import PIDMetricTooltip from './PIDMetricTooltip';
+import PIDRowInfoCell from './PIDRowInfoCell';
+import { useAppSelector } from '@/shared/hooks/redux';
+import { selectPidColorIndexByKey } from '@/shared/store/selectors';
 
 type PIDTableRowVariant = 'input' | 'output';
 
@@ -42,34 +45,35 @@ const PIDTableRow = memo(
     const bufferStats = usePIDBufferStats(pid);
     const perfStats = usePIDPerformanceStats(pid);
 
-    const badgeConfig = getStreamTypeBadgeConfig(pid.type);
     const statusBadge = getPIDStatusBadge(pid);
     const bgClass = isEven ? 'bg-black/10' : 'bg-black/20';
 
+    const pidKey = buildPIDKey(filterIdx, variant, pid.ipidIdx);
+    const colorIndex = useAppSelector(
+      (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
+    );
+    const isSelected = colorIndex >= 0;
+
+    const borderStyle = isSelected
+      ? { borderLeft: `3px solid ${PID_SELECTION_COLORS[colorIndex]}` }
+      : { borderLeft: '3px solid transparent' };
+
     return (
-      <tr className={`${bgClass} border-b border-white/5`}>
+      <tr
+        className={`${bgClass} border-b border-white/5`}
+        style={borderStyle}
+        data-pid-key={pidKey}
+      >
         {/* Infos */}
         <td className="px-2 py-2 align-middle text-xs">
-          <div className="min-w-0 flex items-center gap-1.5">
-            {variant === 'input' && (
-              <button
-                onClick={handleOpenProps}
-                className="p-0.5 rounded bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-700/80 flex-shrink-0"
-                title="View input properties"
-              >
-                <LuEye className="h-4 w-5" />
-              </button>
-            )}
-            <Badge
-              variant="outline"
-              className={`px-1.5 py-0 h-5 font-mono font-bold text-[10px] flex-shrink-0 ${badgeConfig.className}`}
-            >
-              {badgeConfig.label}
-            </Badge>
-            <span className="min-w-0 truncate text-muted-foreground">
-              {infoStats.infoLine}
-            </span>
-          </div>
+          <PIDRowInfoCell
+            pid={pid}
+            filterIdx={filterIdx}
+            variant={variant}
+            pidKey={pidKey}
+            infoLine={infoStats.infoLine}
+            onOpenProps={handleOpenProps}
+          />
         </td>
 
         {/* Buffer */}

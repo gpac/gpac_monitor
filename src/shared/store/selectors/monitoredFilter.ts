@@ -44,6 +44,17 @@ export const selectSelectedPidTargets = createSelector(
   (state) => state.selectedPidTargets,
 );
 
+export const selectPidColorIndexByKey = createSelector(
+  [selectSelectedPidTargets],
+  (targets) =>
+    Object.fromEntries(
+      targets.map((target, index) => [
+        `${target.filterIdx}:${target.direction}:${target.pidIndex}`,
+        index,
+      ]),
+    ) as Record<string, number>,
+);
+
 export const selectPIDSamplesForTarget = createSelector(
   [selectMonitoredFilterState, (_state: RootState, key: string) => key],
   (state, key) => state.pidSamples[key] ?? [],
