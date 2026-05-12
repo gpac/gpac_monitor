@@ -1,5 +1,4 @@
 export { useEnrichedStats } from './useEnrichedStats';
+export { useFilterStats } from './useFilterStats';
 export { useSessionStats } from './useSessionStats';
 export { useStatsCalculations } from './useStatsCalculations';
-export type { StatsCounters, SystemStats } from './useStatsCalculations';
-export { useFilterStats } from './useFilterStats';
