@@ -2,6 +2,30 @@
  * Time formatting utilities
  */
 
+type TsFraction = { n: number; d: number } | { num: number; den: number };
+
+/** Formats a µs duration to a human-readable string. Returns '—' for invalid values. */
+export const formatMicroseconds = (
+  value: number | null | undefined,
+): string => {
+  if (value == null || isNaN(value) || value < 0) return '—';
+  if (value < 1000) return `${value}µs`;
+  if (value < 1_000_000) return `${(value / 1000).toFixed(1)}ms`;
+  return `${(value / 1_000_000).toFixed(2)}s`;
+};
+
+/** Formats a GPAC last_ts_sent value ({n,d}, {num,den} or raw seconds). */
+export const formatLastTsSent = (
+  ts: TsFraction | number | null | undefined,
+): string => {
+  if (ts == null) return '—';
+  if (typeof ts === 'number') return ts > 0 ? `${ts.toFixed(2)}s` : '—';
+  const num = 'n' in ts ? ts.n : ts.num;
+  const den = 'n' in ts ? ts.d : ts.den;
+  if (!den) return '—';
+  return `${(num / den).toFixed(2)}s`;
+};
+
 export const formatTime = (microseconds?: number): string => {
   if (microseconds === undefined) return '0 ms';
   if (microseconds < 1000) return `${microseconds.toFixed(0)} μs`;

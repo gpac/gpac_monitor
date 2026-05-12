@@ -6,7 +6,7 @@ import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { usePIDPerformanceStats } from '../usePIDPerformanceStats';
 import { usePIDBufferStats } from '../usePIDBufferStats';
-import { formatLastTsSent } from '../../pid/utils/pidFormatters';
+import { formatLastTsSent } from '@/utils/formatting';
 import { makePID, makeStats } from './fixtures';
 
 // ─── GPAC guaranteed invariants ──────────────────────────────────────────────

@@ -1,55 +1,55 @@
 import { describe, it, expect } from 'vitest';
 import {
-  formatPidBuffer,
-  formatPidBitrate,
+  formatMicroseconds,
+  formatBps,
   formatLastTsSent,
-} from '../pidFormatters';
+} from '@/utils/formatting';
 
-describe('formatPidBuffer', () => {
+describe('formatMicroseconds', () => {
   it('returns — for null, undefined, NaN', () => {
-    expect(formatPidBuffer(null)).toBe('—');
-    expect(formatPidBuffer(undefined)).toBe('—');
-    expect(formatPidBuffer(NaN)).toBe('—');
+    expect(formatMicroseconds(null)).toBe('—');
+    expect(formatMicroseconds(undefined)).toBe('—');
+    expect(formatMicroseconds(NaN)).toBe('—');
   });
 
   it('returns — for negative values (GPAC uint32 overflow)', () => {
-    expect(formatPidBuffer(-1)).toBe('—');
-    expect(formatPidBuffer(-394014916)).toBe('—');
+    expect(formatMicroseconds(-1)).toBe('—');
+    expect(formatMicroseconds(-394014916)).toBe('—');
   });
 
   it('formats µs range (< 1000)', () => {
-    expect(formatPidBuffer(0)).toBe('0µs');
-    expect(formatPidBuffer(1)).toBe('1µs');
-    expect(formatPidBuffer(999)).toBe('999µs');
+    expect(formatMicroseconds(0)).toBe('0µs');
+    expect(formatMicroseconds(1)).toBe('1µs');
+    expect(formatMicroseconds(999)).toBe('999µs');
   });
 
   it('formats ms range (1000 – 999999)', () => {
-    expect(formatPidBuffer(1000)).toBe('1.0ms');
-    expect(formatPidBuffer(14000)).toBe('14.0ms');
-    expect(formatPidBuffer(999_999)).toBe('1000.0ms');
+    expect(formatMicroseconds(1000)).toBe('1.0ms');
+    expect(formatMicroseconds(14000)).toBe('14.0ms');
+    expect(formatMicroseconds(999_999)).toBe('1000.0ms');
   });
 
   it('formats s range (>= 1 000 000)', () => {
-    expect(formatPidBuffer(1_000_000)).toBe('1.00s');
-    expect(formatPidBuffer(58_730_000)).toBe('58.73s');
+    expect(formatMicroseconds(1_000_000)).toBe('1.00s');
+    expect(formatMicroseconds(58_730_000)).toBe('58.73s');
   });
 });
 
-describe('formatPidBitrate', () => {
+describe('formatBps', () => {
   it('returns — for null and undefined', () => {
-    expect(formatPidBitrate(null)).toBe('—');
-    expect(formatPidBitrate(undefined)).toBe('—');
+    expect(formatBps(null)).toBe('—');
+    expect(formatBps(undefined)).toBe('—');
   });
 
   it('returns — for NaN', () => {
-    expect(formatPidBitrate(NaN)).toBe('—');
+    expect(formatBps(NaN)).toBe('—');
   });
 
   it('formats valid b/s values', () => {
-    expect(formatPidBitrate(500)).toBe('500 b/s');
-    expect(formatPidBitrate(160_010)).toContain('Kb/s');
-    expect(formatPidBitrate(10_000_000)).toContain('Mb/s');
-    expect(formatPidBitrate(2_000_000_000)).toContain('Gb/s');
+    expect(formatBps(500)).toBe('500 b/s');
+    expect(formatBps(160_010)).toContain('Kb/s');
+    expect(formatBps(10_000_000)).toContain('Mb/s');
+    expect(formatBps(2_000_000_000)).toContain('Gb/s');
   });
 });
 

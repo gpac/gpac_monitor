@@ -1,12 +1,12 @@
 import { memo, useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { formatNumber } from '@/utils/formatting';
-import { getPIDStatusBadge } from '@/utils/gpac';
 import {
-  formatPidBuffer,
-  formatPidBitrate,
+  formatNumber,
+  formatMicroseconds,
+  formatBps,
   formatLastTsSent,
-} from './utils/pidFormatters';
+} from '@/utils/formatting';
+import { getPIDStatusBadge } from '@/utils/gpac';
 import { buildPIDKey } from '../../../types/pid';
 import type { PIDWithIndex } from '../../../types';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
@@ -91,26 +91,26 @@ const PIDTableRow = memo(
                 label: 'buffer_time',
                 value:
                   bufferStats.buffer_time != null
-                    ? formatPidBuffer(bufferStats.buffer_time)
+                    ? formatMicroseconds(bufferStats.buffer_time)
                     : null,
                 active: true,
               },
               {
                 label: 'buffer',
-                value: formatPidBuffer(bufferStats.buffer),
+                value: formatMicroseconds(bufferStats.buffer),
               },
               {
                 label: 'max_buffer',
                 value:
                   bufferStats.max_buffer != null
-                    ? formatPidBuffer(bufferStats.max_buffer)
+                    ? formatMicroseconds(bufferStats.max_buffer)
                     : null,
               },
               {
                 label: 'max_buffer_time',
                 value:
                   bufferStats.max_buffer_time != null
-                    ? formatPidBuffer(bufferStats.max_buffer_time)
+                    ? formatMicroseconds(bufferStats.max_buffer_time)
                     : null,
               },
               {
@@ -124,27 +124,27 @@ const PIDTableRow = memo(
                 label: 'playout min',
                 value:
                   bufferStats.min_playout_time != null
-                    ? formatPidBuffer(bufferStats.min_playout_time)
+                    ? formatMicroseconds(bufferStats.min_playout_time)
                     : null,
               },
               {
                 label: 'playout max',
                 value:
                   bufferStats.max_playout_time != null
-                    ? formatPidBuffer(bufferStats.max_playout_time)
+                    ? formatMicroseconds(bufferStats.max_playout_time)
                     : null,
               },
             ]}
           >
             <span className="cursor-default">
               <span className="text-info">
-                {formatPidBuffer(bufferStats.displayBuffer)}
+                {formatMicroseconds(bufferStats.displayBuffer)}
               </span>
               {bufferStats.max_buffer != null && (
                 <>
                   <span className="text-muted-foreground"> / </span>
                   <span className="text-info">
-                    {formatPidBuffer(bufferStats.max_buffer)}
+                    {formatMicroseconds(bufferStats.max_buffer)}
                   </span>
                 </>
               )}
@@ -158,21 +158,21 @@ const PIDTableRow = memo(
             rows={[
               {
                 label: 'average_bitrate',
-                value: formatPidBitrate(perfStats.average_bitrate),
+                value: formatBps(perfStats.average_bitrate),
                 active: true,
               },
               {
                 label: 'bitrate',
-                value: formatPidBitrate(perfStats.bitrate),
+                value: formatBps(perfStats.bitrate),
               },
               {
                 label: 'max_bitrate',
-                value: formatPidBitrate(perfStats.max_bitrate),
+                value: formatBps(perfStats.max_bitrate),
               },
             ]}
           >
             <span className="text-info cursor-default">
-              {formatPidBitrate(perfStats.average_bitrate)}
+              {formatBps(perfStats.average_bitrate)}
             </span>
           </PIDMetricTooltip>
         </td>
@@ -185,19 +185,19 @@ const PIDTableRow = memo(
                 label: 'avg_process_time',
                 value:
                   perfStats.average_process_time != null
-                    ? formatPidBuffer(perfStats.average_process_time)
+                    ? formatMicroseconds(perfStats.average_process_time)
                     : null,
                 active: true,
               },
               {
                 label: 'max_process_time',
-                value: formatPidBuffer(perfStats.max_process_time),
+                value: formatMicroseconds(perfStats.max_process_time),
               },
               {
                 label: 'total_process_time',
                 value:
                   perfStats.total_process_time > 0
-                    ? formatPidBuffer(perfStats.total_process_time)
+                    ? formatMicroseconds(perfStats.total_process_time)
                     : null,
               },
               {
@@ -211,7 +211,7 @@ const PIDTableRow = memo(
           >
             <span className="text-info cursor-default">
               {perfStats.average_process_time != null
-                ? formatPidBuffer(perfStats.average_process_time)
+                ? formatMicroseconds(perfStats.average_process_time)
                 : '—'}
             </span>
           </PIDMetricTooltip>
@@ -223,17 +223,17 @@ const PIDTableRow = memo(
             rows={[
               {
                 label: 'avg process rate',
-                value: formatPidBitrate(perfStats.average_process_rate),
+                value: formatBps(perfStats.average_process_rate),
                 active: true,
               },
               {
                 label: 'max process rate',
-                value: formatPidBitrate(perfStats.max_process_rate),
+                value: formatBps(perfStats.max_process_rate),
               },
             ]}
           >
             <span className="text-info cursor-default">
-              {formatPidBitrate(perfStats.average_process_rate)}
+              {formatBps(perfStats.average_process_rate)}
             </span>
           </PIDMetricTooltip>
         </td>
@@ -252,14 +252,14 @@ const PIDTableRow = memo(
                   label: 'first_process_time',
                   value:
                     perfStats.first_process_time != null
-                      ? formatPidBuffer(perfStats.first_process_time)
+                      ? formatMicroseconds(perfStats.first_process_time)
                       : null,
                 },
                 {
                   label: 'last_process_time',
                   value:
                     perfStats.last_process_time != null
-                      ? formatPidBuffer(perfStats.last_process_time)
+                      ? formatMicroseconds(perfStats.last_process_time)
                       : null,
                 },
               ]}

@@ -2,7 +2,7 @@
  * Verifies that InputsTab and OutputsTab expose data coming directly from
  * PidDataCollector.js (GPAC) without transformation.
  *
- * Formatting (formatPidBitrate, formatPidBuffer…) only affects display strings
+ * Formatting (formatBps, formatMicroseconds…) only affects display strings
  * and does not alter the underlying values — it is out of scope here.
  * These tests assert on raw numeric values, which is the right level to
  * guarantee that what GPAC sends is what the UI receives.

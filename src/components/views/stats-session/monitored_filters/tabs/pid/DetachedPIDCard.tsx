@@ -3,11 +3,11 @@ import { Badge } from '@/components/ui/badge';
 import { getPIDStatusBadge } from '@/utils/gpac';
 import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
 import {
-  formatPidBuffer,
-  formatPidBitrate,
+  formatMicroseconds,
+  formatBps,
   formatLastTsSent,
-} from './utils/pidFormatters';
-import { formatNumber } from '@/utils/formatting';
+  formatNumber,
+} from '@/utils/formatting';
 import { buildPIDKey } from '../../../types/pid';
 import type { PIDWithIndex } from '../../../types';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
@@ -95,23 +95,23 @@ const DetachedPIDCard = memo(
               label: 'buffer_time',
               value:
                 bufferStats.buffer_time != null
-                  ? formatPidBuffer(bufferStats.buffer_time)
+                  ? formatMicroseconds(bufferStats.buffer_time)
                   : null,
               active: true,
             },
-            { label: 'buffer', value: formatPidBuffer(bufferStats.buffer) },
+            { label: 'buffer', value: formatMicroseconds(bufferStats.buffer) },
             {
               label: 'max_buffer',
               value:
                 bufferStats.max_buffer != null
-                  ? formatPidBuffer(bufferStats.max_buffer)
+                  ? formatMicroseconds(bufferStats.max_buffer)
                   : null,
             },
             {
               label: 'max_buffer_time',
               value:
                 bufferStats.max_buffer_time != null
-                  ? formatPidBuffer(bufferStats.max_buffer_time)
+                  ? formatMicroseconds(bufferStats.max_buffer_time)
                   : null,
             },
             {
@@ -124,7 +124,7 @@ const DetachedPIDCard = memo(
           ]}
         >
           <span className={VALUE}>
-            {formatPidBuffer(bufferStats.displayBuffer)}
+            {formatMicroseconds(bufferStats.displayBuffer)}
           </span>
         </PIDMetricTooltip>
 
@@ -135,19 +135,17 @@ const DetachedPIDCard = memo(
           rows={[
             {
               label: 'average_bitrate',
-              value: formatPidBitrate(perfStats.average_bitrate),
+              value: formatBps(perfStats.average_bitrate),
               active: true,
             },
-            { label: 'bitrate', value: formatPidBitrate(perfStats.bitrate) },
+            { label: 'bitrate', value: formatBps(perfStats.bitrate) },
             {
               label: 'max_bitrate',
-              value: formatPidBitrate(perfStats.max_bitrate),
+              value: formatBps(perfStats.max_bitrate),
             },
           ]}
         >
-          <span className={VALUE}>
-            {formatPidBitrate(perfStats.average_bitrate)}
-          </span>
+          <span className={VALUE}>{formatBps(perfStats.average_bitrate)}</span>
         </PIDMetricTooltip>
 
         <div className={sep} />
@@ -159,13 +157,13 @@ const DetachedPIDCard = memo(
               label: 'avg_process_time',
               value:
                 perfStats.average_process_time != null
-                  ? formatPidBuffer(perfStats.average_process_time)
+                  ? formatMicroseconds(perfStats.average_process_time)
                   : null,
               active: true,
             },
             {
               label: 'max_process_time',
-              value: formatPidBuffer(perfStats.max_process_time),
+              value: formatMicroseconds(perfStats.max_process_time),
             },
             {
               label: 'nb_processed',
@@ -178,7 +176,7 @@ const DetachedPIDCard = memo(
         >
           <span className={VALUE}>
             {perfStats.average_process_time != null
-              ? formatPidBuffer(perfStats.average_process_time)
+              ? formatMicroseconds(perfStats.average_process_time)
               : '—'}
           </span>
         </PIDMetricTooltip>
@@ -190,17 +188,17 @@ const DetachedPIDCard = memo(
           rows={[
             {
               label: 'avg process rate',
-              value: formatPidBitrate(perfStats.average_process_rate),
+              value: formatBps(perfStats.average_process_rate),
               active: true,
             },
             {
               label: 'max process rate',
-              value: formatPidBitrate(perfStats.max_process_rate),
+              value: formatBps(perfStats.max_process_rate),
             },
           ]}
         >
           <span className={VALUE}>
-            {formatPidBitrate(perfStats.average_process_rate)}
+            {formatBps(perfStats.average_process_rate)}
           </span>
         </PIDMetricTooltip>
 
@@ -218,14 +216,14 @@ const DetachedPIDCard = memo(
               label: 'first_process_time',
               value:
                 perfStats.first_process_time != null
-                  ? formatPidBuffer(perfStats.first_process_time)
+                  ? formatMicroseconds(perfStats.first_process_time)
                   : null,
             },
             {
               label: 'last_process_time',
               value:
                 perfStats.last_process_time != null
-                  ? formatPidBuffer(perfStats.last_process_time)
+                  ? formatMicroseconds(perfStats.last_process_time)
                   : null,
             },
           ]}
