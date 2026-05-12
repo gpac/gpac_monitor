@@ -38,7 +38,7 @@ export const usePIDPerformanceStats = (
       nb_processed: stats.nb_processed,
       average_process_time:
         stats.average_process_time != null
-          ? Math.round(stats.average_process_time)
+          ? Math.round(stats.average_process_time * 10) / 10
           : null,
       max_process_time: stats.max_process_time,
       total_process_time: stats.total_process_time,
