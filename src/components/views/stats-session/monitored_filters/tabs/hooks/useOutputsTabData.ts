@@ -8,7 +8,7 @@ export const useOutputsTabData = (filterData: FilterStatsResponse) => {
     if (!filterData.opids) return [];
     return Object.entries(filterData.opids).map(([_key, pid], index) => ({
       ...pid,
-      ipidIdx: index,
+      pidIdx: index,
     }));
   }, [filterData.opids]);
 

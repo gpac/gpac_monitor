@@ -10,7 +10,7 @@ type PIDTableVariant = 'input' | 'output';
 interface PIDTableProps {
   pids: PIDWithIndex[];
   filterIdx: number;
-  onOpenProps: (filterIdx: number, ipidIdx: number) => void;
+  onOpenProps: (filterIdx: number, pidIdx: number) => void;
   variant?: PIDTableVariant;
   hoveredPidKey?: string | null;
 }
@@ -31,7 +31,7 @@ const PIDTable = memo(
           <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-2 p-1">
             {pids.map((pid) => (
               <DetachedPIDCard
-                key={`${pid.name}-${pid.ipidIdx}`}
+                key={`${pid.name}-${pid.pidIdx}`}
                 pid={pid}
                 filterIdx={filterIdx}
                 variant={variant}
@@ -81,7 +81,7 @@ const PIDTable = memo(
               <tbody>
                 {pids.map((pid, index) => (
                   <PIDTableRow
-                    key={`${pid.name}-${pid.ipidIdx}`}
+                    key={`${pid.name}-${pid.pidIdx}`}
                     pid={pid}
                     filterIdx={filterIdx}
                     onOpenProps={onOpenProps}

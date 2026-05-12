@@ -44,7 +44,7 @@ const DetachedPIDCard = memo(
 
     const statusBadge = getPIDStatusBadge(pid);
     const badgeConfig = getStreamTypeBadgeConfig(pid.type);
-    const pidKey = buildPIDKey(filterIdx, variant, pid.ipidIdx);
+    const pidKey = buildPIDKey(filterIdx, variant, pid.pidIdx);
     const colorIndex = useAppSelector(
       (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
     );

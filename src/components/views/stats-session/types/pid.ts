@@ -29,10 +29,10 @@ export const buildPIDKey = (
 
 /**
  * PID data with position index for edge mapping
- * ipidIdx is the position index (0, 1, 2...), NOT the key name
+ * pidIdx is the 0-based position index in the parent filter's pid list
  */
 export interface PIDWithIndex extends TabPIDData {
-  ipidIdx: number;
+  pidIdx: number;
 }
 
 /**

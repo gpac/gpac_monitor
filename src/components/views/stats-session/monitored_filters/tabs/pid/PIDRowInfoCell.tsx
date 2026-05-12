@@ -42,11 +42,11 @@ const PIDRowInfoCell = memo(
         toggleSelectedPid({
           filterIdx,
           direction: variant,
-          pidIndex: pid.ipidIdx,
+          pidIndex: pid.pidIdx,
           label: buildPIDDisplayLabel(pid),
         }),
       );
-    }, [dispatch, filterIdx, variant, pid.ipidIdx, pid]);
+    }, [dispatch, filterIdx, variant, pid.pidIdx, pid]);
 
     return (
       <div className="min-w-0 flex items-center gap-1.5">

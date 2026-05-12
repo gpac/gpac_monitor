@@ -49,6 +49,10 @@ function PidDataCollector() {
                 if (stats.max_buffer_time) pid.stats.max_buffer_time = stats.max_buffer_time;
                 if (stats.max_playout_time) pid.stats.max_playout_time = stats.max_playout_time;
                 if (stats.min_playout_time) pid.stats.min_playout_time = stats.min_playout_time;
+                if(stats.total_process_time && stats.total_process_time > 0) {
+                    const average_process_time = stats.total_process_time / stats.nb_processed;
+                    pid.stats.average_process_time = average_process_time;
+                }
             }
 
             if (withPidProperties) {
@@ -121,6 +125,10 @@ function PidDataCollector() {
                 if (stats.max_buffer_time) pid.stats.max_buffer_time = stats.max_buffer_time;
                 if (stats.max_playout_time) pid.stats.max_playout_time = stats.max_playout_time;
                 if (stats.min_playout_time) pid.stats.min_playout_time = stats.min_playout_time;
+                    if(stats.total_process_time && stats.total_process_time > 0) {
+                    const average_process_time = stats.total_process_time / stats.nb_processed;
+                    pid.stats.average_process_time = average_process_time;
+                }
             }
 
             const key = pid.name || `opid_${i}`;

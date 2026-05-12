@@ -24,7 +24,7 @@ type PIDTableRowVariant = 'input' | 'output';
 interface PIDTableRowProps {
   pid: PIDWithIndex;
   filterIdx: number;
-  onOpenProps: (filterIdx: number, ipidIdx: number) => void;
+  onOpenProps: (filterIdx: number, pidIdx: number) => void;
   isEven: boolean;
   variant?: PIDTableRowVariant;
   hoveredPidKey?: string | null;
@@ -40,8 +40,8 @@ const PIDTableRow = memo(
     hoveredPidKey = null,
   }: PIDTableRowProps) => {
     const handleOpenProps = useCallback(
-      () => onOpenProps(filterIdx, pid.ipidIdx),
-      [onOpenProps, filterIdx, pid.ipidIdx],
+      () => onOpenProps(filterIdx, pid.pidIdx),
+      [onOpenProps, filterIdx, pid.pidIdx],
     );
 
     const infoStats = usePIDInfoStats(pid);
@@ -51,7 +51,7 @@ const PIDTableRow = memo(
     const statusBadge = getPIDStatusBadge(pid);
     const bgClass = isEven ? 'bg-black/10' : 'bg-black/20';
 
-    const pidKey = buildPIDKey(filterIdx, variant, pid.ipidIdx);
+    const pidKey = buildPIDKey(filterIdx, variant, pid.pidIdx);
     const colorIndex = useAppSelector(
       (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
     );

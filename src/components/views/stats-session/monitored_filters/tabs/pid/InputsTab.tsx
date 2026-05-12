@@ -17,8 +17,8 @@ const InputsTab = memo(
       useInputsTabData(filterData);
 
     const handleOpenProps = useCallback(
-      (filterIdx: number, ipidIdx: number) => {
-        openPIDProps({ filterIdx, ipidIdx });
+      (filterIdx: number, pidIdx: number) => {
+        openPIDProps({ filterIdx, ipidIdx: pidIdx });
       },
       [openPIDProps],
     );

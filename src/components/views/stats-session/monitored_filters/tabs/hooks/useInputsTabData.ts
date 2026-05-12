@@ -11,9 +11,9 @@ export const useInputsTabData = (filterData: FilterStatsResponse) => {
   const inputPidsWithIndices = useMemo((): PIDWithIndex[] => {
     if (!filterData.ipids) return [];
 
-    return Object.entries(filterData.ipids).map(([_pidName, pid], ipidIdx) => ({
+    return Object.entries(filterData.ipids).map(([_pidName, pid], pidIdx) => ({
       ...pid,
-      ipidIdx,
+      pidIdx,
     }));
   }, [filterData.ipids]);
 

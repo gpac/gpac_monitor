@@ -2,7 +2,7 @@ import type { PIDWithIndex } from '../../../../types';
 import { STREAM_TYPE_SHORT_LABEL } from '@/utils/filters/streamType';
 
 export function buildPIDDisplayLabel(pid: PIDWithIndex): string {
-  const pidIndex = pid.ipidIdx ?? '?';
+  const pidIndex = pid.pidIdx ?? '?';
   const streamType =
     STREAM_TYPE_SHORT_LABEL[pid.type] ?? pid.type?.[0]?.toUpperCase() ?? '?';
   const codec = pid.codec?.toLowerCase() ?? pid.name ?? 'unknown';

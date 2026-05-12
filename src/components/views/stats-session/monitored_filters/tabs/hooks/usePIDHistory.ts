@@ -20,7 +20,7 @@ export const usePIDHistory = (
         pids.map((pid) => {
           const stats = pid.stats;
           return {
-            key: buildPIDKey(filterIdx, direction, pid.ipidIdx),
+            key: buildPIDKey(filterIdx, direction, pid.pidIdx),
             sample: {
               sessionTimestampUs: sampleTimestampUs,
               bitrate:
