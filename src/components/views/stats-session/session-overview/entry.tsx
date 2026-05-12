@@ -7,8 +7,8 @@ import React, {
 } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
 import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
-import { useStatsCalculations } from '../hooks/stats';
-import { useEnrichedStats } from '../hooks/stats';
+import { useStatsCalculations } from '../hooks/stats/useStatsCalculations';
+import { useEnrichedStats } from '../hooks/stats/useEnrichedStats';
 import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { clearPendingFilterOpen } from '@/shared/store/slices/graphSlice';

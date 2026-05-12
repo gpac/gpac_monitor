@@ -186,6 +186,7 @@ const MonitoredFilterView = memo(
                 data={networkData}
                 filterName={overviewData.name}
                 refreshInterval={1000}
+                filterTimeUs={overviewData.time}
               />
             </TabsContent>
             <TabsContent value="inputs">

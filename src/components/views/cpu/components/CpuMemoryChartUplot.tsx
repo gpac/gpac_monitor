@@ -1,6 +1,7 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/UplotChart';
+import { useContainerSize } from '@/components/common/charts';
 import { useChartData } from '../hooks/useChartData';
 import { createCpuMemoryUplotConfig } from './uplotConfig';
 import {
@@ -24,6 +25,9 @@ export const CpuMemoryChartUplot = memo(
     maxPoints = 400,
     windowDuration,
   }: CpuMemoryChartUplotProps) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const dimensions = useContainerSize(containerRef);
+
     const currentMemoryMB = useMemo(
       () => currentMemoryBytes / (1024 * 1024),
       [currentMemoryBytes],
@@ -43,9 +47,15 @@ export const CpuMemoryChartUplot = memo(
       150,
     );
 
-    const options = useMemo(() => {
-      return createCpuMemoryUplotConfig({ memoryYAxisMax });
-    }, [memoryYAxisMax]);
+    const options = useMemo(
+      () =>
+        createCpuMemoryUplotConfig({
+          memoryYAxisMax,
+          width: dimensions.width,
+          height: dimensions.height,
+        }),
+      [memoryYAxisMax, dimensions],
+    );
 
     const data = useMemo(() => {
       const { alignedData } = prepareCpuMemoryData(dataPoints);
@@ -74,7 +84,7 @@ export const CpuMemoryChartUplot = memo(
           </CardTitle>
         </CardHeader>
         <CardContent className="p-2 flex-1 min-h-0">
-          <div className="w-full h-full">
+          <div ref={containerRef} className="w-full h-full">
             <UplotChart
               data={data}
               options={options}

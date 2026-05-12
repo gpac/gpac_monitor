@@ -1,8 +1,10 @@
-import uPlot from 'uplot';
-import React from 'react';
+import type React from 'react';
 import { formatBitrate } from '@/utils/formatting/numbers';
-
-const tooltipIdxMap = new WeakMap<uPlot, number | null>();
+import { formatMicroseconds } from '@/utils/formatting';
+import {
+  createLineChartConfig,
+  type SeriesDef,
+} from '@/components/common/charts';
 
 export interface BandwidthCombinedConfigParams {
   timeLabelsRef: React.MutableRefObject<string[]>;
@@ -10,140 +12,29 @@ export interface BandwidthCombinedConfigParams {
   height?: number;
 }
 
+const formatBw = (v: number) => formatBitrate(v * 8);
+
+const BANDWIDTH_SERIES: SeriesDef[] = [
+  { label: 'Outband', color: '#10b981', formatValue: formatBw },
+  { label: 'Inband', color: '#3b82f6', formatValue: formatBw },
+  {
+    label: 'Uptime',
+    color: '#f59e0b',
+    formatValue: formatMicroseconds,
+    yAxis: 'right',
+  },
+];
+
 export const createBandwidthCombinedConfig = ({
   timeLabelsRef,
   width = 400,
   height = 180,
-}: BandwidthCombinedConfigParams): uPlot.Options => {
-  return {
+}: BandwidthCombinedConfigParams) =>
+  createLineChartConfig({
+    series: BANDWIDTH_SERIES,
+    formatY: formatBw,
+    rightAxis: { formatY: formatMicroseconds },
+    timeLabelsRef,
     width,
     height,
-    padding: [10, 10, 5, 5],
-    cursor: {
-      show: true,
-      drag: { x: false, y: false },
-      points: {
-        size: 8,
-        width: 2,
-      },
-    },
-    legend: {
-      show: false,
-    },
-    hooks: {
-      setCursor: [
-        (u) => {
-          const { left = 0, top = 0, idx } = u.cursor;
-
-          let tooltip = u.root.querySelector(
-            '.u-tooltip',
-          ) as HTMLElement | null;
-
-          if (!tooltip) {
-            tooltip = document.createElement('div');
-            tooltip.className = 'u-tooltip';
-            tooltip.style.cssText = `
-        position: absolute;
-        background: rgb(2 6 23);
-        color: rgb(226 232 240);
-        border: 1px solid hsl(var(--border));
-        border-radius: 6px;
-        padding: 8px 10px;
-        font-size: 11px;
-        font-family: monospace;
-        pointer-events: none;
-        z-index: 100;
-        white-space: nowrap;
-      `;
-            u.root.appendChild(tooltip);
-          }
-
-          if (!tooltip) return;
-
-          //  if idx is null during a refresh, don't change anything
-          if (idx == null) {
-            return;
-          }
-
-          const lastIdx = tooltipIdxMap.get(u) ?? null;
-
-          // If we're on the same point, just update the position, not the content
-          if (lastIdx === idx) {
-            tooltip.style.left = `${left + 15}px`;
-            tooltip.style.top = `${top + 15}px`;
-            return;
-          }
-
-          // Store the new index
-          tooltipIdxMap.set(u, idx);
-
-          const time = timeLabelsRef.current[idx] || '--';
-          const outband = u.data[1][idx]
-            ? formatBitrate(u.data[1][idx] * 8)
-            : '--';
-          const inband = u.data[2][idx]
-            ? formatBitrate(u.data[2][idx] * 8)
-            : '--';
-
-          tooltip.innerHTML = `
-      <div style="margin-bottom: 4px; color: #6ee7b7;">Time: ${time}</div>
-      <div style="color: #10b981;">Outband: ${outband}</div>
-      <div style="color: #3b82f6;">Inband: ${inband}</div>
-    `;
-
-          tooltip.style.display = 'block';
-          tooltip.style.left = `${left + 15}px`;
-          tooltip.style.top = `${top + 15}px`;
-        },
-      ],
-    },
-    series: [
-      { label: 'Time' },
-      {
-        label: 'Outband',
-        stroke: '#10b981',
-        width: 0.7,
-
-        value: (_u, v) => (v == null ? '--' : formatBitrate(v * 8)),
-      },
-      {
-        label: 'Inband',
-        stroke: '#3b82f6',
-        width: 0.7,
-
-        value: (_u, v) => (v == null ? '--' : formatBitrate(v * 8)),
-      },
-    ],
-    scales: {
-      x: { time: false, distr: 2 },
-      y: {},
-    },
-    axes: [
-      {
-        stroke: '#6ee7b7',
-        grid: { show: true, stroke: 'rgba(110, 231, 183, 0.1)', width: 1 },
-        ticks: { stroke: '#6ee7b7', size: 5, width: 1 },
-        font: '10px monospace',
-        size: 50,
-        values: (_u, vals) => {
-          const total = timeLabelsRef.current.length;
-          const maxLabels = Math.floor(width / 60);
-          const stride = Math.max(1, Math.ceil(total / maxLabels));
-          return vals.map((v) => {
-            const idx = v as number;
-            if (idx % stride !== 0) return '';
-            return timeLabelsRef.current[idx] || '';
-          });
-        },
-      },
-      {
-        stroke: '#6ee7b7',
-        grid: { show: true, stroke: 'rgba(110, 231, 183, 0.1)', width: 1 },
-        ticks: { stroke: '#6ee7b7', size: 5, width: 2 },
-        font: '10px monospace',
-        size: 80,
-        values: (_u, vals) => vals.map((v) => formatBitrate(v * 8)),
-      },
-    ],
-  };
-};
+  });

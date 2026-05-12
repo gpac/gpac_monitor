@@ -12,6 +12,7 @@ interface NetworkTabProps {
   data: NetworkTabData;
   filterName: string;
   refreshInterval: number;
+  filterTimeUs?: number;
 }
 
 const NETWORK_DURATION_OPTIONS: ChartDuration[] = [
@@ -23,7 +24,13 @@ const NETWORK_DURATION_OPTIONS: ChartDuration[] = [
 const NETWORK_HISTORY_STORAGE_KEY = 'gpac-network-history';
 
 const NetworkTab = memo(
-  ({ filterId, data, filterName, refreshInterval }: NetworkTabProps) => {
+  ({
+    filterId,
+    data,
+    filterName,
+    refreshInterval,
+    filterTimeUs,
+  }: NetworkTabProps) => {
     const { currentStats, formattedStats } = useNetworkMetrics(
       data,
       filterName,
@@ -65,6 +72,7 @@ const NetworkTab = memo(
           filterId={filterId}
           bytesSent={currentStats.bytesSent}
           bytesReceived={currentStats.bytesReceived}
+          filterTimeUs={filterTimeUs}
           refreshInterval={refreshInterval}
           windowDurationMs={windowDuration}
         />

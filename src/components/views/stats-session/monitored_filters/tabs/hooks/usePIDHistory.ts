@@ -28,7 +28,7 @@ export const usePIDHistory = (
                   ? stats.average_bitrate
                   : null,
               bufferTime: stats?.buffer_time ?? null,
-              processTime: stats?.last_process_time ?? null,
+              processTime: stats?.average_process_time ?? null,
               processRate:
                 stats && stats.average_process_rate >= 0
                   ? stats.average_process_rate
