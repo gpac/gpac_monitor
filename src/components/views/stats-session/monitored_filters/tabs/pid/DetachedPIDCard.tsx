@@ -152,6 +152,39 @@ const DetachedPIDCard = memo(
 
         <div className={sep} />
 
+        <span className={LABEL}>Proc.</span>
+        <PIDMetricTooltip
+          rows={[
+            {
+              label: 'avg_process_time',
+              value:
+                perfStats.average_process_time != null
+                  ? formatPidBuffer(perfStats.average_process_time)
+                  : null,
+              active: true,
+            },
+            {
+              label: 'max_process_time',
+              value: formatPidBuffer(perfStats.max_process_time),
+            },
+            {
+              label: 'nb_processed',
+              value:
+                perfStats.nb_processed > 0
+                  ? formatNumber(perfStats.nb_processed)
+                  : null,
+            },
+          ]}
+        >
+          <span className={VALUE}>
+            {perfStats.average_process_time != null
+              ? formatPidBuffer(perfStats.average_process_time)
+              : '—'}
+          </span>
+        </PIDMetricTooltip>
+
+        <div className={sep} />
+
         <span className={LABEL}>Proc. Rate</span>
         <PIDMetricTooltip
           rows={[

@@ -11,6 +11,7 @@ export interface PIDPerformanceStats {
   average_process_rate: number | null;
   max_process_rate: number | null;
   nb_processed: number;
+  average_process_time: number | null;
   max_process_time: number;
   total_process_time: number;
   last_ts_sent: PIDStats['last_ts_sent'] | null;
@@ -35,6 +36,10 @@ export const usePIDPerformanceStats = (
       max_process_rate:
         stats.max_process_rate >= 0 ? stats.max_process_rate : null,
       nb_processed: stats.nb_processed,
+      average_process_time:
+        stats.average_process_time != null
+          ? Math.round(stats.average_process_time)
+          : null,
       max_process_time: stats.max_process_time,
       total_process_time: stats.total_process_time,
       last_ts_sent: stats.last_ts_sent ?? null,

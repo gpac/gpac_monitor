@@ -39,6 +39,7 @@ export interface PIDStats {
   average_bitrate: number;
   max_bitrate: number;
   nb_processed: number;
+  average_process_time?: number;
   max_process_time: number;
   total_process_time: number;
   last_ts_sent?:

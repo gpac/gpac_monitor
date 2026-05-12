@@ -182,9 +182,16 @@ const PIDTableRow = memo(
           <PIDMetricTooltip
             rows={[
               {
+                label: 'avg_process_time',
+                value:
+                  perfStats.average_process_time != null
+                    ? formatPidBuffer(perfStats.average_process_time)
+                    : null,
+                active: true,
+              },
+              {
                 label: 'max_process_time',
                 value: formatPidBuffer(perfStats.max_process_time),
-                active: true,
               },
               {
                 label: 'total_process_time',
@@ -203,7 +210,9 @@ const PIDTableRow = memo(
             ]}
           >
             <span className="text-info cursor-default">
-              {formatPidBuffer(perfStats.max_process_time)}
+              {perfStats.average_process_time != null
+                ? formatPidBuffer(perfStats.average_process_time)
+                : '—'}
             </span>
           </PIDMetricTooltip>
         </td>
