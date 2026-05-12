@@ -10,10 +10,7 @@ import {
   formatPacketRate,
   microsecondsToSeconds,
 } from '@/utils/formatting';
-import {
-  getFilterHealthInfo,
-  type FilterAlerts,
-} from '../cards/shared/statusHelpers';
+import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { MetricRow, TableSection } from './pid/shared';
 
 interface OverviewTabProps {

@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
 import { formatGpacFps } from '../pid/utils/pidProps';
-import { formatSamplerate } from '../../cards/media-info/formatters';
+import { formatSamplerate } from '@/utils/formatting';
 
 export interface PIDInfoStats {
   codec: string | null;
