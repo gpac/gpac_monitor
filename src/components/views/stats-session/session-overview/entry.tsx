@@ -139,6 +139,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               idx={filter.idx}
               filter={filter}
               isActive={true}
+              isDetached={true}
               onCardClick={handleCardClick}
               onOpenProperties={handleOpenProperties}
             />

@@ -5,10 +5,12 @@ import { useInputsTabData } from '../hooks/useInputsTabData';
 import { PIDTable, PIDStatusBar } from './shared';
 import { TAB_STYLES } from '../styles';
 import TemporalInspector from '../TemporalInspector';
+import { useIsDetached } from '../../FilterViewContext';
 
 const InputsTab = memo(
   ({ filterData, filterName, isLoading = false }: InputsTabProps) => {
     const { openPIDProps } = useSidebar();
+    const isDetached = useIsDetached();
     const [hoveredPidKey, setHoveredPidKey] = useState<string | null>(null);
 
     const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
@@ -41,16 +43,25 @@ const InputsTab = memo(
 
         {/* PIDs Display */}
         {allPidsWithType.length > 0 ? (
-          <div className="grid grid-cols-[minmax(620px,840px)_minmax(0,1fr)] gap-4">
+          isDetached ? (
             <PIDTable
               pids={inputPidsWithIndices}
               filterIdx={filterData.idx}
               onOpenProps={handleOpenProps}
               hoveredPidKey={hoveredPidKey}
             />
+          ) : (
+            <div className="grid grid-cols-[minmax(620px,840px)_minmax(0,1fr)] gap-4">
+              <PIDTable
+                pids={inputPidsWithIndices}
+                filterIdx={filterData.idx}
+                onOpenProps={handleOpenProps}
+                hoveredPidKey={hoveredPidKey}
+              />
 
-            <TemporalInspector onHoverPid={setHoveredPidKey} />
-          </div>
+              <TemporalInspector onHoverPid={setHoveredPidKey} />
+            </div>
+          )
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-" />

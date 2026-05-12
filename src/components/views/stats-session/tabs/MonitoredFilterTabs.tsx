@@ -51,6 +51,7 @@ interface MonitoredFilterTabProps {
   idx: number;
   filter: EnrichedFilterOverview;
   isActive: boolean;
+  isDetached?: boolean;
   onCardClick: (idx: number) => void;
   onOpenProperties: (filter: EnrichedFilterOverview) => void;
 }
@@ -59,6 +60,7 @@ interface MonitoredFilterTabProps {
 export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   filter,
   isActive,
+  isDetached = false,
   onCardClick,
   onOpenProperties,
 }) => {
@@ -164,6 +166,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         onOpenProperties={handleOpenProperties}
         initialTab={initialTabRef.current || undefined}
         isLoading={effectiveIsLoading}
+        isDetached={isDetached}
       />
     </div>
   );

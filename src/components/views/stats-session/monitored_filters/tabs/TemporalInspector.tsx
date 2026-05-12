@@ -20,7 +20,7 @@ const TemporalInspector = memo(({ onHoverPid }: TemporalInspectorProps) => {
         <>
           <PIDChipsStrip onHoverPid={onHoverPid} />
           <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground/30 select-none">
-            Graph — T9
+            Graph
           </div>
         </>
       )}

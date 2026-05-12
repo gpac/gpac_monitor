@@ -10,6 +10,7 @@ import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelect
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { FilterViewProvider } from './FilterViewContext';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
 import InputsTab from './tabs/pid/InputsTab';
@@ -40,6 +41,7 @@ interface MonitoredFilterViewProps {
   onOpenProperties: () => void;
   initialTab?: InitialTabType;
   isLoading?: boolean;
+  isDetached?: boolean;
 }
 
 const MemoizedOverviewTab = memo(OverviewTab);
@@ -53,10 +55,11 @@ const MonitoredFilterView = memo(
     networkData,
     inputPids,
     outputPids,
-    filterData = EMPTY_FILTER_DATA, // constant fallback
+    filterData = EMPTY_FILTER_DATA,
     onOpenProperties,
     initialTab,
     isLoading = false,
+    isDetached = false,
   }: MonitoredFilterViewProps) => {
     const [activeTab, setActiveTab] = useState<string>(
       initialTab || 'overview',
@@ -87,117 +90,124 @@ const MonitoredFilterView = memo(
     const filterKey =
       overviewData.idx !== undefined ? String(overviewData.idx) : null;
     return (
-      <div className="flex flex-col gap-2">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 space-y-1 px-1 py-2">
-            <div className="flex justify-stretch items-center gap-4">
-              <h2 className="text-lg font-semibold text-monitor-active-filter">
-                {overviewData.name}
-              </h2>
+      <FilterViewProvider value={isDetached}>
+        <div className="flex flex-col gap-2">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 space-y-1 px-1 py-2">
+              <div className="flex justify-stretch items-center gap-4">
+                <h2 className="text-lg font-semibold text-monitor-active-filter">
+                  {overviewData.name}
+                </h2>
 
-              <FilterChangeBadges filterIdx={overviewData.idx} />
-              <StatusBadge
-                label={`${alerts?.errors} ERR`}
-                colorScheme="red"
-                visible={Boolean(alerts && alerts.errors > 0)}
-                title={`${alerts?.errors} error(s) in logs`}
-                onClick={
-                  filterKey
-                    ? () =>
-                        openLogsWidget({
-                          levels: [GpacLogLevel.ERROR],
-                          filterKeys: [filterKey],
-                        })
-                    : undefined
-                }
-              />
-              <StatusBadge
-                label={`${alerts?.warnings} WARN`}
-                colorScheme="amber"
-                visible={Boolean(alerts && alerts.warnings > 0)}
-                title={`${alerts?.warnings} warning(s) in logs`}
-                onClick={
-                  filterKey
-                    ? () =>
-                        openLogsWidget({
-                          levels: [GpacLogLevel.WARNING],
-                          filterKeys: [filterKey],
-                        })
-                    : undefined
-                }
-              />
+                <FilterChangeBadges filterIdx={overviewData.idx} />
+                <StatusBadge
+                  label={`${alerts?.errors} ERR`}
+                  colorScheme="red"
+                  visible={Boolean(alerts && alerts.errors > 0)}
+                  title={`${alerts?.errors} error(s) in logs`}
+                  onClick={
+                    filterKey
+                      ? () =>
+                          openLogsWidget({
+                            levels: [GpacLogLevel.ERROR],
+                            filterKeys: [filterKey],
+                          })
+                      : undefined
+                  }
+                />
+                <StatusBadge
+                  label={`${alerts?.warnings} WARN`}
+                  colorScheme="amber"
+                  visible={Boolean(alerts && alerts.warnings > 0)}
+                  title={`${alerts?.warnings} warning(s) in logs`}
+                  onClick={
+                    filterKey
+                      ? () =>
+                          openLogsWidget({
+                            levels: [GpacLogLevel.WARNING],
+                            filterKeys: [filterKey],
+                          })
+                      : undefined
+                  }
+                />
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onOpenProperties}
-                className="h-7 px-2 py-0"
-                title="Display filter properties"
-              >
-                <LuSettings className="h-5 w-5" />
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onOpenProperties}
+                  className="h-7 px-2 py-0"
+                  title="Display filter properties"
+                >
+                  <LuSettings className="h-5 w-5" />
+                </Button>
+              </div>
+
+              <TabsList className="h-8 justify-start  w-full">
+                <TabsTrigger
+                  value="overview"
+                  className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
+                >
+                  Overview
+                </TabsTrigger>
+                <TabsTrigger
+                  value="network"
+                  className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
+                >
+                  Stats
+                </TabsTrigger>
+                <TabsTrigger
+                  value="inputs"
+                  className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
+                >
+                  Inputs ({counts.inputs})
+                </TabsTrigger>
+                <TabsTrigger
+                  value="outputs"
+                  className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
+                >
+                  Outputs ({counts.outputs})
+                </TabsTrigger>
+              </TabsList>
             </div>
 
-            <TabsList className="h-8 justify-start  w-full">
-              <TabsTrigger
-                value="overview"
-                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value="network"
-                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
-              >
-                Stats
-              </TabsTrigger>
-              <TabsTrigger
-                value="inputs"
-                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
-              >
-                Inputs ({counts.inputs})
-              </TabsTrigger>
-              <TabsTrigger
-                value="outputs"
-                className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
-              >
-                Outputs ({counts.outputs})
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="overview">
-            <MemoizedOverviewTab filter={overviewData} alerts={alerts} />
-          </TabsContent>
-          <TabsContent value="network" className="data-[state=inactive]:hidden">
-            <MemoizedNetworkTab
-              filterId={overviewData.idx.toString()}
-              data={networkData}
-              filterName={overviewData.name}
-              refreshInterval={1000}
-            />
-          </TabsContent>
-          <TabsContent value="inputs">
-            <MemoizedInputsTab
-              filterData={filterData}
-              filterName={overviewData.name}
-              isLoading={isLoading}
-            />
-          </TabsContent>
-          <TabsContent value="outputs">
-            <MemoizedOutputsTab
-              filterData={filterData}
-              filterName={overviewData.name}
-              isLoading={isLoading}
-            />
-          </TabsContent>
-        </Tabs>
-      </div>
+            <TabsContent value="overview">
+              <MemoizedOverviewTab filter={overviewData} alerts={alerts} />
+            </TabsContent>
+            <TabsContent
+              value="network"
+              className="data-[state=inactive]:hidden"
+            >
+              <MemoizedNetworkTab
+                filterId={overviewData.idx.toString()}
+                data={networkData}
+                filterName={overviewData.name}
+                refreshInterval={1000}
+              />
+            </TabsContent>
+            <TabsContent value="inputs">
+              <MemoizedInputsTab
+                filterData={filterData}
+                filterName={overviewData.name}
+                isLoading={isLoading}
+              />
+            </TabsContent>
+            <TabsContent value="outputs">
+              <MemoizedOutputsTab
+                filterData={filterData}
+                filterName={overviewData.name}
+                isLoading={isLoading}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </FilterViewProvider>
     );
   },
   (prevProps, nextProps) => {
-    // Custom comparison to prevent re-renders when only frequently-changing data updates
-
     const filterDataUnchanged =
       prevProps.filterData?.idx === nextProps.filterData?.idx &&
       prevProps.filterData?.status === nextProps.filterData?.status;
