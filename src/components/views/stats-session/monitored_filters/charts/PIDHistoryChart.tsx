@@ -59,6 +59,10 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
   const dimensions = useContainerSize(containerRef);
   const timeLabelsRef = useRef<string[]>([]);
 
+  const seriesKey = entries
+    .map((entry) => `${entry.label}:${entry.color}:${entry.metricLabel ?? ''}`)
+    .join('|');
+
   const series = useMemo<SeriesDef[]>(
     () =>
       entries.map((entry) => ({
@@ -69,7 +73,8 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
         strokeWidth: 1.5,
         metricLabel: entry.metricLabel,
       })),
-    [entries, mode],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [seriesKey, mode],
   );
 
   const options = useMemo(

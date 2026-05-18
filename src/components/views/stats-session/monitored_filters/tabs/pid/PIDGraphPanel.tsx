@@ -26,7 +26,7 @@ const PIDGraphPanel = memo(({ mode }: PIDGraphPanelProps) => {
     () =>
       allSamples.map(({ target, pidHistory }, index) => {
         const typeStr = target.streamTypeLabel
-          ? `(${target.streamTypeLabel})`
+          ? ` (${target.streamTypeLabel})`
           : '';
         return {
           pidHistory,

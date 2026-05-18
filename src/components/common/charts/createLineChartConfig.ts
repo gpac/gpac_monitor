@@ -37,16 +37,17 @@ const tooltipIdxMap = new WeakMap<uPlot, number | null>();
 
 const TOOLTIP_STYLE = `
   position: absolute;
-  background: rgb(2 6 23);
-  color: rgb(226 232 240);
-  border: 1px solid hsl(var(--border));
+  background: rgb(17 24 39);
+  color: rgb(209 213 219);
+  border: 1px solid rgb(55 65 81);
   border-radius: 6px;
-  padding: 8px 10px;
+  padding: 8px 12px;
   font-size: 11px;
   font-family: monospace;
   pointer-events: none;
   z-index: 100;
   white-space: nowrap;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
 `;
 
 const DEFAULT_GRID = 'rgba(110, 231, 183, 0.1)';
@@ -117,13 +118,13 @@ export const createLineChartConfig = ({
                     ? def.formatValue(raw as number)
                     : String(raw)
                   : '--';
-              const row = def.metricLabel
-                ? `${def.label}. ${def.metricLabel} = ${display}`
-                : `${def.label}: ${display}`;
-              return `<div style="color:${def.color}">${row}</div>`;
+              if (def.metricLabel) {
+                return `<div style="margin-bottom:3px"><div style="color:${def.color};font-weight:600">${def.label}</div><div style="color:${def.color}">${def.metricLabel} = ${display}</div></div>`;
+              }
+              return `<div style="color:${def.color}">${def.label}: ${display}</div>`;
             })
             .join('');
-          tooltip.innerHTML = `<div style="margin-bottom:4px;color:#6ee7b7">Time: ${time}</div>${rows}`;
+          tooltip.innerHTML = `<div style="margin-bottom:4px;color:#6ee7b7">time = ${time}</div>${rows}`;
           tooltip.style.display = 'block';
           tooltip.style.left = `${left + 15}px`;
           tooltip.style.top = `${top + 15}px`;
