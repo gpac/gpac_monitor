@@ -19,6 +19,12 @@ export interface AxisConfig {
   size?: number;
 }
 
+export interface EndLabelInfo {
+  top: number;
+  value: string;
+  color: string;
+}
+
 export interface LineChartConfigOptions {
   series: SeriesDef[];
   leftAxis?: AxisConfig;
@@ -29,6 +35,7 @@ export interface LineChartConfigOptions {
   formatX?: (v: number) => string;
   /** @deprecated use leftAxis.formatY */
   formatY?: (v: number) => string;
+  onEndLabels?: (labels: EndLabelInfo[]) => void;
   width: number;
   height: number;
 }
@@ -59,6 +66,7 @@ export const createLineChartConfig = ({
   formatY = String,
   timeLabelsRef,
   formatX,
+  onEndLabels,
   width,
   height,
 }: LineChartConfigOptions): uPlot.Options => {
@@ -88,6 +96,36 @@ export const createLineChartConfig = ({
     },
     legend: { show: false },
     hooks: {
+      draw: onEndLabels
+        ? [
+            (u) => {
+              const oy =
+                u.over.getBoundingClientRect().top -
+                u.root.getBoundingClientRect().top;
+              const labels: EndLabelInfo[] = [];
+              for (let i = 0; i < series.length; i++) {
+                const col = u.data[i + 1] as (number | null)[];
+                let lastVal: number | null = null;
+                for (let j = col.length - 1; j >= 0; j--) {
+                  if (col[j] != null) {
+                    lastVal = col[j] as number;
+                    break;
+                  }
+                }
+                if (lastVal == null) continue;
+                const def = series[i];
+                labels.push({
+                  top: oy + u.valToPos(lastVal, 'y', false),
+                  value: def.formatValue
+                    ? def.formatValue(lastVal)
+                    : String(lastVal),
+                  color: def.color,
+                });
+              }
+              onEndLabels(labels);
+            },
+          ]
+        : [],
       init: [
         (u) => {
           u.over.addEventListener('mouseleave', () => {
@@ -116,12 +154,14 @@ export const createLineChartConfig = ({
             tooltipIdxMap.set(u, null);
             return;
           }
-          const ox = u.over.offsetLeft;
-          const oy = u.over.offsetTop;
+          const overRect = u.over.getBoundingClientRect();
+          const rootRect = u.root.getBoundingClientRect();
+          const ox = overRect.left - rootRect.left;
+          const oy = overRect.top - rootRect.top;
           const lastIdx = tooltipIdxMap.get(u) ?? null;
           if (lastIdx === idx) {
             tooltip.style.left = `${ox + left + 10}px`;
-            tooltip.style.top = `${oy + top + 10}px`;
+            tooltip.style.top = `${oy + top + 1}px`;
             return;
           }
           tooltipIdxMap.set(u, idx);

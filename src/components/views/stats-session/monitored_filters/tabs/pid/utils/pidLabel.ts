@@ -12,5 +12,5 @@ export function buildPIDDisplayLabel(pid: PIDWithIndex): string {
 
   return [`#${pidIndex}`, streamType, codec, resolution ?? sampleRate]
     .filter(Boolean)
-    .join(' · ');
+    .join('·');
 }

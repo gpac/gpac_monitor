@@ -1,10 +1,11 @@
-import { memo, useMemo, useRef } from 'react';
+import { memo, useMemo, useRef, useState } from 'react';
 import uPlot from 'uplot';
 import { UplotChart } from '@/components/common/UplotChart';
 import {
   createLineChartConfig,
   useContainerSize,
   type SeriesDef,
+  type EndLabelInfo,
 } from '@/components/common/charts';
 import {
   formatBitrate,
@@ -58,6 +59,7 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const dimensions = useContainerSize(containerRef);
   const timeLabelsRef = useRef<string[]>([]);
+  const [endLabels, setEndLabels] = useState<EndLabelInfo[]>([]);
 
   const seriesKey = entries
     .map((entry) => `${entry.label}:${entry.color}:${entry.metricLabel ?? ''}`)
@@ -83,6 +85,7 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
         series,
         timeLabelsRef,
         leftAxis: { formatY: MODE_FORMATTERS[mode] },
+        onEndLabels: setEndLabels,
         ...dimensions,
       }),
     [series, dimensions, mode],
@@ -122,8 +125,29 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
   }, [entries, mode]);
 
   return (
-    <div ref={containerRef} style={{ width: '100%', height: CHART_HEIGHT }}>
+    <div
+      ref={containerRef}
+      style={{ width: '100%', height: CHART_HEIGHT, position: 'relative' }}
+    >
       <UplotChart data={data} options={options} className="w-full h-full" />
+      {endLabels.map((label, index) => (
+        <div
+          key={index}
+          style={{
+            position: 'absolute',
+            top: label.top,
+            right: 2,
+            transform: 'translateY(-50%)',
+            background: `${label.color}20`,
+            border: `1px solid ${label.color}40`,
+            pointerEvents: 'none',
+            zIndex: 10,
+          }}
+          className="text-[10px] font-mono leading-none text-info px-1 py-0.5 rounded"
+        >
+          {label.value}
+        </div>
+      ))}
     </div>
   );
 });

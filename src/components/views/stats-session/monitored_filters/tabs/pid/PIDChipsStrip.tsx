@@ -14,9 +14,7 @@ interface PIDChipProps {
 }
 
 const PIDChip = ({ target, color, onRemove, onHover }: PIDChipProps) => {
-  const label = target.streamTypeLabel
-    ? `${target.streamTypeLabel}·${target.pidIndex}`
-    : `#${target.pidIndex}`;
+  const label = target.label ?? `#${target.pidIndex}`;
 
   return (
     <div
