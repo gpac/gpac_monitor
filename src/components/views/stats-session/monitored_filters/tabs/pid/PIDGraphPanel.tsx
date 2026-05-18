@@ -1,63 +1,48 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
-import {
-  selectSelectedPidTargets,
-  selectPIDSamplesForTarget,
-} from '@/shared/store/selectors';
-import {
-  buildPIDKey,
-  type PIDMetricMode,
-  type PIDGraphTarget,
-} from '../../../types/pid';
+import { selectAllSelectedPidSamples } from '@/shared/store/selectors';
+import type { PIDMetricMode } from '../../../types/pid';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
-import PIDHistoryChart from '../../charts/PIDHistoryChart';
+import PIDHistoryChart, {
+  type PIDSeriesEntry,
+} from '../../charts/PIDHistoryChart';
 
-interface PIDChartRowProps {
-  target: PIDGraphTarget;
-  index: number;
-  mode: PIDMetricMode;
-}
-
-const PIDChartRow = memo(({ target, index, mode }: PIDChartRowProps) => {
-  const pidKey = buildPIDKey(
-    target.filterIdx,
-    target.direction,
-    target.pidIndex,
-  );
-  const history = useAppSelector((state) =>
-    selectPIDSamplesForTarget(state, pidKey),
-  );
-  const color = PID_SELECTION_COLORS[index];
-
-  return (
-    <PIDHistoryChart
-      history={history}
-      mode={mode}
-      label={target.label ?? `PID ${target.pidIndex}`}
-      color={color}
-    />
-  );
-});
-
-PIDChartRow.displayName = 'PIDChartRow';
+const MODE_LABELS: Record<PIDMetricMode, string> = {
+  bitrate: 'Avg Bitrate',
+  buffer: 'Buffer',
+  processTime: 'Proc.',
+  processRate: 'Proc. Rate',
+  ts: 'TS',
+};
 
 interface PIDGraphPanelProps {
   mode: PIDMetricMode;
 }
 
 const PIDGraphPanel = memo(({ mode }: PIDGraphPanelProps) => {
-  const targets = useAppSelector(selectSelectedPidTargets);
+  const allSamples = useAppSelector(selectAllSelectedPidSamples);
+
+  const entries = useMemo<PIDSeriesEntry[]>(
+    () =>
+      allSamples.map(({ target, pidHistory }, index) => {
+        const typeStr = target.streamTypeLabel
+          ? `(${target.streamTypeLabel})`
+          : '';
+        return {
+          pidHistory,
+          label: `PID ${target.pidIndex}${typeStr}`,
+          metricLabel: MODE_LABELS[mode],
+          color: PID_SELECTION_COLORS[index],
+        };
+      }),
+    [allSamples, mode],
+  );
+
+  if (entries.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-1 p-2">
-      {targets.map((target, index) => (
-        <PIDChartRow
-          key={buildPIDKey(target.filterIdx, target.direction, target.pidIndex)}
-          target={target}
-          index={index}
-          mode={mode}
-        />
-      ))}
+    <div className="p-2">
+      <PIDHistoryChart entries={entries} mode={mode} />
     </div>
   );
 });

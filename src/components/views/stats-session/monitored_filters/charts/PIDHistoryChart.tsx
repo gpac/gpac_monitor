@@ -1,16 +1,28 @@
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useRef } from 'react';
 import uPlot from 'uplot';
 import { UplotChart } from '@/components/common/UplotChart';
+import {
+  createLineChartConfig,
+  useContainerSize,
+  type SeriesDef,
+} from '@/components/common/charts';
+import {
+  formatBitrate,
+  formatBufferTime,
+  formatMicroseconds,
+  formatPacketRate,
+} from '@/utils/formatting';
 import type { PIDMetricSample, PIDMetricMode } from '../../types/pid';
 
-interface PIDHistoryChartProps {
-  history: PIDMetricSample[];
-  mode: PIDMetricMode;
-  label: string;
-  color?: string;
-}
+const CHART_HEIGHT = 140;
 
-const DEFAULT_COLOR = '#3b82f6';
+const MODE_FORMATTERS: Record<PIDMetricMode, (v: number) => string> = {
+  bitrate: formatBitrate,
+  buffer: formatBufferTime,
+  processTime: formatMicroseconds,
+  processRate: formatPacketRate,
+  ts: formatMicroseconds,
+};
 
 const extractValue = (
   sample: PIDMetricSample,
@@ -30,47 +42,86 @@ const extractValue = (
   }
 };
 
-const buildChartOptions = (label: string, color: string): uPlot.Options => ({
-  width: 300,
-  height: 80,
-  scales: { x: { time: true } },
-  axes: [{ show: false }, { show: false }],
-  series: [
-    {},
-    {
-      label,
-      stroke: color,
-      fill: `${color}20`,
-      width: 1.5,
-      spanGaps: false,
-    },
-  ],
-  legend: { show: false },
-  cursor: { show: false },
-  padding: [4, 0, 0, 0],
-});
+export interface PIDSeriesEntry {
+  pidHistory: PIDMetricSample[];
+  label: string;
+  color: string;
+  metricLabel?: string;
+}
 
-const PIDHistoryChart = memo(
-  ({ history, mode, label, color = DEFAULT_COLOR }: PIDHistoryChartProps) => {
-    const options = useMemo(
-      () => buildChartOptions(label, color),
-      [label, color],
+interface PIDHistoryChartProps {
+  entries: PIDSeriesEntry[];
+  mode: PIDMetricMode;
+}
+
+const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const dimensions = useContainerSize(containerRef);
+  const timeLabelsRef = useRef<string[]>([]);
+
+  const series = useMemo<SeriesDef[]>(
+    () =>
+      entries.map((entry) => ({
+        label: entry.label,
+        color: entry.color,
+        formatValue: MODE_FORMATTERS[mode],
+        fill: `${entry.color}15`,
+        strokeWidth: 1.5,
+        metricLabel: entry.metricLabel,
+      })),
+    [entries, mode],
+  );
+
+  const options = useMemo(
+    () =>
+      createLineChartConfig({
+        series,
+        timeLabelsRef,
+        leftAxis: { formatY: MODE_FORMATTERS[mode] },
+        ...dimensions,
+      }),
+    [series, dimensions, mode],
+  );
+
+  const data = useMemo<uPlot.AlignedData>(() => {
+    const maxLen = Math.max(...entries.map((e) => e.pidHistory.length), 0);
+    if (maxLen === 0) {
+      timeLabelsRef.current = [];
+      return [[0], ...entries.map(() => [null])] as uPlot.AlignedData;
+    }
+
+    const indices = Array.from({ length: maxLen }, (_, i) => i);
+    const longest = entries.reduce(
+      (acc, entry) =>
+        entry.pidHistory.length >= acc.pidHistory.length ? entry : acc,
+      entries[0],
+    );
+    timeLabelsRef.current = longest.pidHistory.map((s) =>
+      new Date(s.sessionTimestampUs / 1000).toLocaleTimeString('en-US', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      }),
     );
 
-    const data = useMemo<uPlot.AlignedData>(() => {
-      if (history.length === 0) return [[Date.now() / 1000], [null]];
-      const timestamps = history.map(
-        (sample) => sample.sessionTimestampUs / 1_000_000,
-      );
-      const values = history.map((sample) => extractValue(sample, mode));
-      return [timestamps, values] as uPlot.AlignedData;
-    }, [history, mode]);
+    const valueCols = entries.map((entry) => {
+      const offset = maxLen - entry.pidHistory.length;
+      return indices.map((i) => {
+        const j = i - offset;
+        return j < 0 ? null : extractValue(entry.pidHistory[j], mode);
+      });
+    });
 
-    return (
+    return [indices, ...valueCols] as uPlot.AlignedData;
+  }, [entries, mode]);
+
+  return (
+    <div ref={containerRef} style={{ width: '100%', height: CHART_HEIGHT }}>
       <UplotChart data={data} options={options} className="w-full h-full" />
-    );
-  },
-);
+    </div>
+  );
+});
 
 PIDHistoryChart.displayName = 'PIDHistoryChart';
 

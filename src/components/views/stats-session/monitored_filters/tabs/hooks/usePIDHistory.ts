@@ -8,12 +8,13 @@ export const usePIDHistory = (
   pids: PIDWithIndex[],
   filterIdx: number,
   direction: 'input' | 'output',
-  sampleTimestampUs: number,
 ): void => {
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (pids.length === 0) return;
+
+    const nowUs = Date.now() * 1000;
 
     dispatch(
       addPIDSamples(
@@ -22,8 +23,8 @@ export const usePIDHistory = (
           return {
             key: buildPIDKey(filterIdx, direction, pid.pidIdx),
             sample: {
-              sessionTimestampUs: sampleTimestampUs,
-              bitrate:
+              sessionTimestampUs: nowUs,
+              averageBitrate:
                 stats && stats.average_bitrate >= 0
                   ? stats.average_bitrate
                   : null,
@@ -38,5 +39,5 @@ export const usePIDHistory = (
         }),
       ),
     );
-  }, [pids, filterIdx, direction, sampleTimestampUs, dispatch]);
+  }, [pids, filterIdx, direction, dispatch]);
 };

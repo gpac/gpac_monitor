@@ -9,7 +9,7 @@ export const formatMicroseconds = (
   value: number | null | undefined,
 ): string => {
   if (value == null || isNaN(value) || value < 0) return '—';
-  if (value < 1000) return `${value}µs`;
+  if (value < 1000) return `${Math.round(value)}µs`;
   if (value < 1_000_000) return `${(value / 1000).toFixed(1)}ms`;
   return `${(value / 1_000_000).toFixed(2)}s`;
 };

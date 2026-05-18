@@ -8,6 +8,7 @@ export interface SeriesDef {
   yAxis?: 'left' | 'right';
   fill?: string;
   strokeWidth?: number;
+  metricLabel?: string;
 }
 
 export interface AxisConfig {
@@ -116,7 +117,10 @@ export const createLineChartConfig = ({
                     ? def.formatValue(raw as number)
                     : String(raw)
                   : '--';
-              return `<div style="color:${def.color}">${def.label}: ${display}</div>`;
+              const row = def.metricLabel
+                ? `${def.label}. ${def.metricLabel} = ${display}`
+                : `${def.label}: ${display}`;
+              return `<div style="color:${def.color}">${row}</div>`;
             })
             .join('');
           tooltip.innerHTML = `<div style="margin-bottom:4px;color:#6ee7b7">Time: ${time}</div>${rows}`;

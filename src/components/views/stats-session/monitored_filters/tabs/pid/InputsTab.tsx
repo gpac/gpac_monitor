@@ -5,6 +5,7 @@ import { useInputsTabData } from '../hooks/useInputsTabData';
 import { PIDTable, PIDStatusBar } from './shared';
 import { TAB_STYLES } from '../styles';
 import { useIsDetached } from '../../FilterViewContext';
+import { usePIDSampler } from '../hooks/usePIDSampler';
 import PIDInlineLayout from './PIDInlineLayout';
 
 const InputsTab = memo(
@@ -15,6 +16,8 @@ const InputsTab = memo(
 
     const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
       useInputsTabData(filterData);
+
+    usePIDSampler(inputPidsWithIndices, filterData.idx, 'input');
 
     const handleOpenProps = useCallback(
       (filterIdx: number, pidIdx: number) => {

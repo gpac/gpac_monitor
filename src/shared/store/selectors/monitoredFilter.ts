@@ -59,3 +59,15 @@ export const selectPIDSamplesForTarget = createSelector(
   [selectMonitoredFilterState, (_state: RootState, key: string) => key],
   (state, key) => state.pidSamples[key] ?? [],
 );
+
+export const selectAllSelectedPidSamples = createSelector(
+  [selectMonitoredFilterState, selectSelectedPidTargets],
+  (state, targets) =>
+    targets.map((target) => ({
+      target,
+      pidHistory:
+        state.pidSamples[
+          `${target.filterIdx}:${target.direction}:${target.pidIndex}`
+        ] ?? [],
+    })),
+);

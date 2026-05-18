@@ -21,6 +21,7 @@ export interface PIDGraphTarget {
   direction: 'input' | 'output';
   pidIndex: number;
   label?: string;
+  streamTypeLabel?: string;
 }
 
 export const buildPIDKey = (

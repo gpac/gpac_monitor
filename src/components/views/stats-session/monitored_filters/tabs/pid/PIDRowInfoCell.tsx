@@ -2,7 +2,10 @@ import { memo, useCallback } from 'react';
 import { LuEye } from 'react-icons/lu';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { Badge } from '@/components/ui/badge';
-import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
+import {
+  getStreamTypeBadgeConfig,
+  STREAM_TYPE_SHORT_LABEL,
+} from '@/utils/filters/streamType';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
@@ -44,6 +47,7 @@ const PIDRowInfoCell = memo(
           direction: variant,
           pidIndex: pid.pidIdx,
           label: buildPIDDisplayLabel(pid),
+          streamTypeLabel: STREAM_TYPE_SHORT_LABEL[pid.type],
         }),
       );
     }, [dispatch, filterIdx, variant, pid.pidIdx, pid]);

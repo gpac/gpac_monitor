@@ -4,6 +4,7 @@ import { PIDTable, PIDStatusBar } from '../pid/shared';
 import { TAB_STYLES } from '../styles';
 import { useOutputsTabData } from '../hooks/useOutputsTabData';
 import { useIsDetached } from '../../FilterViewContext';
+import { usePIDSampler } from '../hooks/usePIDSampler';
 import PIDInlineLayout from './PIDInlineLayout';
 
 interface OutputsTabProps {
@@ -15,6 +16,8 @@ interface OutputsTabProps {
 const OutputsTab = memo(
   ({ filterData, filterName, isLoading = false }: OutputsTabProps) => {
     const { pidsWithIndices, globalStatus } = useOutputsTabData(filterData);
+
+    usePIDSampler(pidsWithIndices, filterData.idx, 'output');
     const isDetached = useIsDetached();
     const [hoveredPidKey, setHoveredPidKey] = useState<string | null>(null);
 
