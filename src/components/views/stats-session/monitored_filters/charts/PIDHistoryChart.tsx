@@ -79,16 +79,19 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
     [seriesKey, mode],
   );
 
+  const shouldShowEndLabels = entries.length < 2;
+
   const options = useMemo(
     () =>
       createLineChartConfig({
         series,
         timeLabelsRef,
         leftAxis: { formatY: MODE_FORMATTERS[mode] },
-        onEndLabels: setEndLabels,
+        onEndLabels: shouldShowEndLabels ? setEndLabels : undefined,
         ...dimensions,
       }),
-    [series, dimensions, mode],
+     
+    [series, dimensions, mode, shouldShowEndLabels],
   );
 
   const data = useMemo<uPlot.AlignedData>(() => {
@@ -125,29 +128,38 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
   }, [entries, mode]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{ width: '100%', height: CHART_HEIGHT, position: 'relative' }}
-    >
-      <UplotChart data={data} options={options} className="w-full h-full" />
-      {endLabels.map((label, index) => (
-        <div
-          key={index}
-          style={{
-            position: 'absolute',
-            top: label.top,
-            right: 2,
-            transform: 'translateY(-50%)',
-            background: `${label.color}20`,
-            border: `1px solid ${label.color}40`,
-            pointerEvents: 'none',
-            zIndex: 10,
-          }}
-          className="text-[10px] font-mono leading-none text-info px-1 py-0.5 rounded"
-        >
-          {label.value}
-        </div>
-      ))}
+    <div style={{ width: '100%' }}>
+      <div
+        ref={containerRef}
+        style={{ width: '100%', height: CHART_HEIGHT, position: 'relative' }}
+      >
+        <UplotChart data={data} options={options} className="w-full h-full" />
+        {endLabels.map((endLabel, index) => {
+          const clampedTop = Math.min(
+            Math.max(endLabel.top, 0),
+            CHART_HEIGHT - 16,
+          );
+          return (
+            <div
+              key={index}
+              style={{
+                position: 'absolute',
+                top: clampedTop,
+                right: 2,
+                transform: 'translateY(-50%)',
+                background: `${endLabel.color}20`,
+                border: `1px solid ${endLabel.color}40`,
+                pointerEvents: 'none',
+                zIndex: 10,
+              }}
+              className="text-[10px] font-mono leading-none text-info px-1 py-0.5 rounded"
+            >
+              <span className="opacity-70">{endLabel.label}</span>{' '}
+              {endLabel.value}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 });

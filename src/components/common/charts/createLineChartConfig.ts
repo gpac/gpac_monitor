@@ -23,6 +23,7 @@ export interface EndLabelInfo {
   top: number;
   value: string;
   color: string;
+  label: string;
 }
 
 export interface LineChartConfigOptions {
@@ -120,6 +121,7 @@ export const createLineChartConfig = ({
                     ? def.formatValue(lastVal)
                     : String(lastVal),
                   color: def.color,
+                  label: def.label,
                 });
               }
               onEndLabels(labels);

@@ -46,7 +46,7 @@ const TableCore = ({
   onMetricClick,
 }: TableCoreProps) => (
   <table className="w-full text-left table-fixed">
-    <thead>
+    <thead className="sticky top-0 z-10">
       <tr className="border-b border-white/10 bg-monitor-panel">
         <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
           Infos

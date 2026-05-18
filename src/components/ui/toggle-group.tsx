@@ -26,7 +26,7 @@ export const ToggleGroupItem = React.forwardRef<
     className={cn(
       'px-2.5 py-1 text-xs rounded font-medium transition-colors',
       'text-gray-400 hover:text-gray-200 hover:bg-white/5',
-      'data-[state=on]:bg-monitor-active-tab/25cea data-[state=on]:text-white data-[state=on]:shadow-sm',
+      'data-[state=on]:bg-monitor-active-tab/25 data-[state=on]:text-white data-[state=on]:shadow-sm',
       className,
     )}
     {...props}
