@@ -4,14 +4,16 @@ export type PIDMetricMode =
   | 'bitrate'
   | 'buffer'
   | 'processTime'
-  | 'processRate';
+  | 'processRate'
+  | 'ts';
 
 export interface PIDMetricSample {
   sessionTimestampUs: number;
-  bitrate?: number | null;
+  average_bitrate?: number | null;
   bufferTime?: number | null;
   processTime?: number | null;
   processRate?: number | null;
+  ts?: number | null;
 }
 
 export interface PIDGraphTarget {
