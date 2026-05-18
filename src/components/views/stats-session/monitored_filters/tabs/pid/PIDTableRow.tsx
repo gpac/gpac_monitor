@@ -57,18 +57,21 @@ const PIDTableRow = memo(
     );
     const isSelected = colorIndex >= 0;
 
-    const borderStyle = isSelected
-      ? { borderLeft: `3px solid ${PID_SELECTION_COLORS[colorIndex]}` }
+    const rowStyle = isSelected
+      ? {
+          borderLeft: `3px solid ${PID_SELECTION_COLORS[colorIndex]}`,
+          background: `${PID_SELECTION_COLORS[colorIndex]}12`,
+        }
       : { borderLeft: '3px solid transparent' };
 
     return (
       <tr
         className={cn(
-          bgClass,
+          !isSelected && bgClass,
           'border-b border-white/5',
           pidKey === hoveredPidKey && 'pid-row-hovered',
         )}
-        style={borderStyle}
+        style={rowStyle}
         data-pid-key={pidKey}
       >
         {/* Infos */}

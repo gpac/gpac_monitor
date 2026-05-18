@@ -13,29 +13,35 @@ interface PIDChipProps {
   onHover: (active: boolean) => void;
 }
 
-const PIDChip = ({ target, color, onRemove, onHover }: PIDChipProps) => (
-  <div
-    className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-white/5 border cursor-default"
-    style={{ borderColor: `${color}60` }}
-    onMouseEnter={() => onHover(true)}
-    onMouseLeave={() => onHover(false)}
-  >
-    <span
-      className="w-2 h-2 rounded-full flex-shrink-0"
-      style={{ background: color }}
-    />
-    <span className="text-muted-foreground truncate max-w-[120px]">
-      {target.label ?? `PID ${target.pidIndex}`}
-    </span>
-    <button
-      onClick={onRemove}
-      className="ml-0.5 text-muted-foreground hover:text-white transition-colors focus:outline-none"
-      title="Deselect PID"
+const PIDChip = ({ target, color, onRemove, onHover }: PIDChipProps) => {
+  const label = target.streamTypeLabel
+    ? `${target.streamTypeLabel}·${target.pidIndex}`
+    : `#${target.pidIndex}`;
+
+  return (
+    <div
+      className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs border cursor-default transition-colors"
+      style={{ borderColor: `${color}60`, background: `${color}15` }}
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
     >
-      <LuX className="h-3 w-3" />
-    </button>
-  </div>
-);
+      <span
+        className="w-3 h-0.5 rounded-full flex-shrink-0"
+        style={{ background: color }}
+      />
+      <span className="font-mono font-medium" style={{ color }}>
+        {label}
+      </span>
+      <button
+        onClick={onRemove}
+        className="text-muted-foreground hover:text-white transition-colors focus:outline-none"
+        title="Deselect PID"
+      >
+        <LuX className="h-2.5 w-2.5" />
+      </button>
+    </div>
+  );
+};
 
 interface PIDChipsStripProps {
   onHoverPid: (key: string | null) => void;
@@ -48,7 +54,7 @@ const PIDChipsStrip = memo(({ onHoverPid }: PIDChipsStripProps) => {
   if (targets.length === 0) return null;
 
   return (
-    <div className="flex flex-wrap gap-1.5 px-2 py-1.5 border-b border-white/5">
+    <div className="flex flex-wrap gap-1">
       {targets.map((target, index) => {
         const pidKey = `${target.filterIdx}:${target.direction}:${target.pidIndex}`;
         return (

@@ -1,11 +1,20 @@
 import { memo } from 'react';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { cn } from '@/utils/core';
 import type { PIDWithIndex } from '../../../types';
+import type { PIDMetricMode } from '../../../types/pid';
 import PIDTableRow from './PIDTableRow';
 import DetachedPIDCard from './DetachedPIDCard';
 import { useIsDetached } from '../../FilterViewContext';
 
 type PIDTableVariant = 'input' | 'output';
+
+const CLICKABLE_METRICS: { metric: PIDMetricMode; label: string }[] = [
+  { metric: 'buffer', label: 'Buffer' },
+  { metric: 'bitrate', label: 'Avg Bitrate' },
+  { metric: 'processTime', label: 'Proc.' },
+  { metric: 'processRate', label: 'Proc. Rate' },
+];
 
 interface PIDTableProps {
   pids: PIDWithIndex[];
@@ -13,6 +22,8 @@ interface PIDTableProps {
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
   variant?: PIDTableVariant;
   hoveredPidKey?: string | null;
+  activeMetric?: PIDMetricMode;
+  onMetricClick?: (metric: PIDMetricMode) => void;
 }
 
 const PIDTable = memo(
@@ -22,6 +33,8 @@ const PIDTable = memo(
     onOpenProps,
     variant = 'input',
     hoveredPidKey = null,
+    activeMetric,
+    onMetricClick,
   }: PIDTableProps) => {
     const isDetached = useIsDetached();
 
@@ -61,18 +74,21 @@ const PIDTable = memo(
                   <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
                     Infos
                   </th>
-                  <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                    Buffer
-                  </th>
-                  <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                    Avg Bitrate
-                  </th>
-                  <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                    Proc.
-                  </th>
-                  <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-                    Proc. Rate
-                  </th>
+                  {CLICKABLE_METRICS.map(({ metric, label }) => (
+                    <th key={metric} className="px-2 py-1.5">
+                      <button
+                        onClick={() => onMetricClick?.(metric)}
+                        className={cn(
+                          'text-[10px] font-medium uppercase tracking-wide transition-colors',
+                          activeMetric === metric
+                            ? 'text-monitor-active-tab border-b border-monitor-active-tab pb-0.5'
+                            : 'text-muted-foreground hover:text-foreground cursor-pointer',
+                        )}
+                      >
+                        {label}
+                      </button>
+                    </th>
+                  ))}
                   <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
                     TS
                   </th>

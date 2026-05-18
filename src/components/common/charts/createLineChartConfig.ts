@@ -116,10 +116,12 @@ export const createLineChartConfig = ({
             tooltipIdxMap.set(u, null);
             return;
           }
+          const ox = u.over.offsetLeft;
+          const oy = u.over.offsetTop;
           const lastIdx = tooltipIdxMap.get(u) ?? null;
           if (lastIdx === idx) {
-            tooltip.style.left = `${left + 15}px`;
-            tooltip.style.top = `${top + 15}px`;
+            tooltip.style.left = `${ox + left + 10}px`;
+            tooltip.style.top = `${oy + top + 10}px`;
             return;
           }
           tooltipIdxMap.set(u, idx);
@@ -141,8 +143,8 @@ export const createLineChartConfig = ({
             .join('');
           tooltip.innerHTML = `<div style="margin-bottom:4px;color:#6ee7b7">time = ${time}</div>${rows}`;
           tooltip.style.display = 'block';
-          tooltip.style.left = `${left + 15}px`;
-          tooltip.style.top = `${top + 15}px`;
+          tooltip.style.left = `${ox + left + 10}px`;
+          tooltip.style.top = `${oy + top + 10}px`;
         },
       ],
     },

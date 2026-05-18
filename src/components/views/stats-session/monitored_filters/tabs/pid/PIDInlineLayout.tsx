@@ -1,5 +1,6 @@
-import { memo } from 'react';
+import { memo, useState } from 'react';
 import type { PIDWithIndex } from '../../../types';
+import type { PIDMetricMode } from '../../../types/pid';
 import { PIDTable } from './shared';
 import PIDGraphSection from './PIDGraphSection';
 
@@ -23,6 +24,7 @@ const PIDInlineLayout = memo(
     onHoverPid,
     variant = 'input',
   }: PIDInlineLayoutProps) => {
+    const [mode, setMode] = useState<PIDMetricMode>('bitrate');
     const half = Math.ceil(pids.length / 2);
     const isSplit = pids.length >= PID_SPLIT_THRESHOLD;
 
@@ -36,6 +38,8 @@ const PIDInlineLayout = memo(
               onOpenProps={onOpenProps}
               variant={variant}
               hoveredPidKey={hoveredPidKey}
+              activeMetric={mode}
+              onMetricClick={setMode}
             />
             <PIDTable
               pids={pids.slice(half)}
@@ -43,6 +47,8 @@ const PIDInlineLayout = memo(
               onOpenProps={onOpenProps}
               variant={variant}
               hoveredPidKey={hoveredPidKey}
+              activeMetric={mode}
+              onMetricClick={setMode}
             />
           </div>
         ) : (
@@ -52,9 +58,11 @@ const PIDInlineLayout = memo(
             onOpenProps={onOpenProps}
             variant={variant}
             hoveredPidKey={hoveredPidKey}
+            activeMetric={mode}
+            onMetricClick={setMode}
           />
         )}
-        <PIDGraphSection onHoverPid={onHoverPid} />
+        <PIDGraphSection mode={mode} onHoverPid={onHoverPid} />
       </div>
     );
   },
