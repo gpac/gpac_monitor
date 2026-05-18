@@ -3,8 +3,8 @@ import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { PIDTable, PIDStatusBar } from '../pid/shared';
 import { TAB_STYLES } from '../styles';
 import { useOutputsTabData } from '../hooks/useOutputsTabData';
-import TemporalInspector from '../TemporalInspector';
 import { useIsDetached } from '../../FilterViewContext';
+import PIDInlineLayout from './PIDInlineLayout';
 
 interface OutputsTabProps {
   filterData: FilterStatsResponse;
@@ -22,7 +22,6 @@ const OutputsTab = memo(
 
     return (
       <div className={TAB_STYLES.SPACE_Y_2}>
-        {/* Global Status Bar */}
         {pidsWithIndices.length > 0 && (
           <PIDStatusBar
             totalPids={globalStatus.totalPids}
@@ -33,7 +32,6 @@ const OutputsTab = memo(
           />
         )}
 
-        {/* PIDs Display */}
         {pidsWithIndices.length > 0 ? (
           isDetached ? (
             <PIDTable
@@ -44,16 +42,14 @@ const OutputsTab = memo(
               hoveredPidKey={hoveredPidKey}
             />
           ) : (
-            <div className="grid grid-cols-[minmax(620px,840px)_minmax(0,1fr)] gap-4">
-              <PIDTable
-                pids={pidsWithIndices}
-                filterIdx={filterData.idx}
-                onOpenProps={handleOpenProps}
-                variant="output"
-                hoveredPidKey={hoveredPidKey}
-              />
-              <TemporalInspector onHoverPid={setHoveredPidKey} />
-            </div>
+            <PIDInlineLayout
+              pids={pidsWithIndices}
+              filterIdx={filterData.idx}
+              onOpenProps={handleOpenProps}
+              hoveredPidKey={hoveredPidKey}
+              onHoverPid={setHoveredPidKey}
+              variant="output"
+            />
           )
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">

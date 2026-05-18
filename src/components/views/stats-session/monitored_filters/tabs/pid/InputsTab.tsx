@@ -4,8 +4,8 @@ import type { InputsTabProps, PIDWithIndex } from '../../../types';
 import { useInputsTabData } from '../hooks/useInputsTabData';
 import { PIDTable, PIDStatusBar } from './shared';
 import { TAB_STYLES } from '../styles';
-import TemporalInspector from '../TemporalInspector';
 import { useIsDetached } from '../../FilterViewContext';
+import PIDInlineLayout from './PIDInlineLayout';
 
 const InputsTab = memo(
   ({ filterData, filterName, isLoading = false }: InputsTabProps) => {
@@ -31,7 +31,6 @@ const InputsTab = memo(
 
     return (
       <div className={TAB_STYLES.SPACE_Y_2}>
-        {/* Global Status Bar */}
         {inputPidsWithIndices.length > 0 && (
           <PIDStatusBar
             totalPids={globalStatus.totalPids}
@@ -41,7 +40,6 @@ const InputsTab = memo(
           />
         )}
 
-        {/* PIDs Display */}
         {allPidsWithType.length > 0 ? (
           isDetached ? (
             <PIDTable
@@ -51,16 +49,13 @@ const InputsTab = memo(
               hoveredPidKey={hoveredPidKey}
             />
           ) : (
-            <div className="grid grid-cols-[minmax(620px,840px)_minmax(0,1fr)] gap-4">
-              <PIDTable
-                pids={inputPidsWithIndices}
-                filterIdx={filterData.idx}
-                onOpenProps={handleOpenProps}
-                hoveredPidKey={hoveredPidKey}
-              />
-
-              <TemporalInspector onHoverPid={setHoveredPidKey} />
-            </div>
+            <PIDInlineLayout
+              pids={inputPidsWithIndices}
+              filterIdx={filterData.idx}
+              onOpenProps={handleOpenProps}
+              hoveredPidKey={hoveredPidKey}
+              onHoverPid={setHoveredPidKey}
+            />
           )
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">

@@ -137,7 +137,7 @@ const monitoredFilterSlice = createSlice({
       if (
         lastSample &&
         lastSample.sessionTimestampUs === sample.sessionTimestampUs &&
-        lastSample.average_bitrate === sample.average_bitrate &&
+        lastSample.averageBitrate === sample.averageBitrate &&
         lastSample.bufferTime === sample.bufferTime &&
         lastSample.processTime === sample.processTime &&
         lastSample.processRate === sample.processRate
@@ -163,7 +163,7 @@ const monitoredFilterSlice = createSlice({
         if (
           last &&
           last.sessionTimestampUs === sample.sessionTimestampUs &&
-          last.average_bitrate === sample.average_bitrate &&
+          last.averageBitrate === sample.averageBitrate &&
           last.bufferTime === sample.bufferTime &&
           last.processTime === sample.processTime &&
           last.processRate === sample.processRate

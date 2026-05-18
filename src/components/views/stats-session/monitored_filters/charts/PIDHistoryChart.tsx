@@ -18,7 +18,7 @@ const extractValue = (
 ): number | null => {
   switch (mode) {
     case 'bitrate':
-      return sample.average_bitrate ?? null;
+      return sample.averageBitrate ?? null;
     case 'buffer':
       return sample.bufferTime ?? null;
     case 'processTime':
