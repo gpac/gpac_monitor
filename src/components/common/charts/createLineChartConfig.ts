@@ -88,6 +88,17 @@ export const createLineChartConfig = ({
     },
     legend: { show: false },
     hooks: {
+      init: [
+        (u) => {
+          u.over.addEventListener('mouseleave', () => {
+            const tooltip = u.root.querySelector(
+              '.u-tooltip',
+            ) as HTMLElement | null;
+            if (tooltip) tooltip.style.display = 'none';
+            tooltipIdxMap.set(u, null);
+          });
+        },
+      ],
       setCursor: [
         (u) => {
           const { left = 0, top = 0, idx } = u.cursor;
@@ -100,7 +111,11 @@ export const createLineChartConfig = ({
             tooltip.style.cssText = TOOLTIP_STYLE;
             u.root.appendChild(tooltip);
           }
-          if (idx == null) return;
+          if (idx == null) {
+            tooltip.style.display = 'none';
+            tooltipIdxMap.set(u, null);
+            return;
+          }
           const lastIdx = tooltipIdxMap.get(u) ?? null;
           if (lastIdx === idx) {
             tooltip.style.left = `${left + 15}px`;
