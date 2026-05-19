@@ -11,13 +11,9 @@ import {
 import { buildPIDKey } from '../../../types/pid';
 import type { PIDWithIndex } from '../../../types';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
-import { usePIDInfoStats } from '../hooks/usePIDInfoStats';
-import { usePIDBufferStats } from '../hooks/usePIDBufferStats';
-import { usePIDPerformanceStats } from '../hooks/usePIDPerformanceStats';
-import { usePIDSample } from '../hooks/usePIDSample';
+import { usePIDMetricsRow } from '../hooks/usePIDMetricsRow';
+import { buildBufferTooltipRows } from './utils/pidTooltipRows';
 import PIDMetricTooltip from './PIDMetricTooltip';
-import { useAppSelector } from '@/shared/hooks/redux';
-import { selectPidColorIndexByKey } from '@/shared/store/selectors';
 
 type Variant = 'input' | 'output';
 
@@ -39,23 +35,12 @@ const DetachedPIDCard = memo(
     variant = 'input',
     wide = false,
   }: DetachedPIDCardProps) => {
-    const infoStats = usePIDInfoStats(pid);
-    const bufferStats = usePIDBufferStats(pid);
-    const perfStats = usePIDPerformanceStats(pid);
+    const pidKey = buildPIDKey(filterIdx, variant, pid.pidIdx);
+    const { infoStats, bufferStats, perfStats, colorIndex, isSelected } =
+      usePIDMetricsRow(pid, pidKey);
 
     const statusBadge = getPIDStatusBadge(pid);
     const badgeConfig = getStreamTypeBadgeConfig(pid.type);
-    const pidKey = buildPIDKey(filterIdx, variant, pid.pidIdx);
-    usePIDSample(pidKey, {
-      averageBitrate: perfStats.average_bitrate,
-      bufferTime: bufferStats.displayBuffer,
-      processTime: perfStats.average_process_time,
-      processRate: perfStats.average_process_rate,
-    });
-    const colorIndex = useAppSelector(
-      (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
-    );
-    const isSelected = colorIndex >= 0;
 
     const borderStyle = isSelected
       ? { borderLeft: `3px solid ${PID_SELECTION_COLORS[colorIndex]}` }
@@ -96,44 +81,7 @@ const DetachedPIDCard = memo(
         <div className={sep} />
 
         <span className={LABEL}>Buffer</span>
-        <PIDMetricTooltip
-          rows={[
-            {
-              label: 'buffer_time',
-              value:
-                bufferStats.buffer_time != null
-                  ? formatMicroseconds(bufferStats.buffer_time)
-                  : null,
-              active: bufferStats.buffer_time != null,
-            },
-            {
-              label: 'buffer',
-              value: formatMicroseconds(bufferStats.buffer),
-              active: bufferStats.buffer_time == null,
-            },
-            {
-              label: 'max_buffer',
-              value:
-                bufferStats.max_buffer != null
-                  ? formatMicroseconds(bufferStats.max_buffer)
-                  : null,
-            },
-            {
-              label: 'max_buffer_time',
-              value:
-                bufferStats.max_buffer_time != null
-                  ? formatMicroseconds(bufferStats.max_buffer_time)
-                  : null,
-            },
-            {
-              label: 'nb_buffer_units',
-              value:
-                bufferStats.nb_buffer_units != null
-                  ? formatNumber(bufferStats.nb_buffer_units)
-                  : null,
-            },
-          ]}
-        >
+        <PIDMetricTooltip rows={buildBufferTooltipRows(bufferStats)}>
           <span className={VALUE}>
             {formatMicroseconds(bufferStats.displayBuffer)}
           </span>
@@ -150,10 +98,7 @@ const DetachedPIDCard = memo(
               active: true,
             },
             { label: 'bitrate', value: formatBps(perfStats.bitrate) },
-            {
-              label: 'max_bitrate',
-              value: formatBps(perfStats.max_bitrate),
-            },
+            { label: 'max_bitrate', value: formatBps(perfStats.max_bitrate) },
           ]}
         >
           <span className={VALUE}>{formatBps(perfStats.average_bitrate)}</span>

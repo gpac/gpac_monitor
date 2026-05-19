@@ -27,7 +27,6 @@ export const UplotChart = memo(
       onDestroyRef.current = onDestroy;
     });
 
-    // Create chart - recreate only when options change (memoized by parent)
     useEffect(() => {
       if (!containerRef.current) return;
 
@@ -72,7 +71,6 @@ export const UplotChart = memo(
     return <div ref={containerRef} className={className} />;
   },
   (prev, next) => {
-    // Memo based on stable references (parent should memoize options)
     return (
       prev.data === next.data &&
       prev.options === next.options &&

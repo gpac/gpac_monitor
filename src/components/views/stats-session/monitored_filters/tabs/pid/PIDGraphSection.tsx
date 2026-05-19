@@ -53,7 +53,6 @@ const getLastValue = (
 
 interface PIDGraphSectionProps {
   mode: PIDMetricMode;
-  onHoverPid: (key: string | null) => void;
 }
 
 const PIDGraphSection = memo(({ mode }: PIDGraphSectionProps) => {

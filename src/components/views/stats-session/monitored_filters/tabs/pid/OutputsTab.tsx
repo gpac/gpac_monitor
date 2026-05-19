@@ -1,4 +1,4 @@
-import { memo, useState } from 'react';
+import { memo } from 'react';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { PIDTable, PIDStatusBar } from '../pid/shared';
 import { TAB_STYLES } from '../styles';
@@ -15,11 +15,7 @@ interface OutputsTabProps {
 const OutputsTab = memo(
   ({ filterData, filterName, isLoading = false }: OutputsTabProps) => {
     const { pidsWithIndices, globalStatus } = useOutputsTabData(filterData);
-
     const isDetached = useIsDetached();
-    const [hoveredPidKey, setHoveredPidKey] = useState<string | null>(null);
-
-    const handleOpenProps = () => {};
 
     return (
       <div className={TAB_STYLES.SPACE_Y_2}>
@@ -38,17 +34,16 @@ const OutputsTab = memo(
             <PIDTable
               pids={pidsWithIndices}
               filterIdx={filterData.idx}
-              onOpenProps={handleOpenProps}
+              onOpenProps={() => {}}
               variant="output"
-              hoveredPidKey={hoveredPidKey}
+              hoveredPidKey={null}
             />
           ) : (
             <PIDInlineLayout
               pids={pidsWithIndices}
               filterIdx={filterData.idx}
-              onOpenProps={handleOpenProps}
-              hoveredPidKey={hoveredPidKey}
-              onHoverPid={setHoveredPidKey}
+              onOpenProps={() => {}}
+              hoveredPidKey={null}
               variant="output"
             />
           )

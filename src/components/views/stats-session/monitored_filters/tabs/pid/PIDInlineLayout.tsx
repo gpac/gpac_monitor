@@ -11,7 +11,6 @@ interface PIDInlineLayoutProps {
   filterIdx: number;
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
   hoveredPidKey: string | null;
-  onHoverPid: (key: string | null) => void;
   variant?: 'input' | 'output';
 }
 
@@ -21,7 +20,6 @@ const PIDInlineLayout = memo(
     filterIdx,
     onOpenProps,
     hoveredPidKey,
-    onHoverPid,
     variant = 'input',
   }: PIDInlineLayoutProps) => {
     const dispatch = useAppDispatch();
@@ -45,7 +43,7 @@ const PIDInlineLayout = memo(
           activeMetric={mode}
           onMetricClick={setMode}
         />
-        <PIDGraphSection mode={mode} onHoverPid={onHoverPid} />
+        <PIDGraphSection mode={mode} />
       </div>
     );
   },

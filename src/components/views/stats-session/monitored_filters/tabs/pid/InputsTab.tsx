@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback } from 'react';
 import { useSidebar } from '@/shared/hooks/useSidebar';
 import type { InputsTabProps, PIDWithIndex } from '../../../types';
 import { useInputsTabData } from '../hooks/useInputsTabData';
@@ -11,7 +11,6 @@ const InputsTab = memo(
   ({ filterData, filterName, isLoading = false }: InputsTabProps) => {
     const { openPIDProps } = useSidebar();
     const isDetached = useIsDetached();
-    const [hoveredPidKey, setHoveredPidKey] = useState<string | null>(null);
 
     const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
       useInputsTabData(filterData);
@@ -46,15 +45,14 @@ const InputsTab = memo(
               pids={inputPidsWithIndices}
               filterIdx={filterData.idx}
               onOpenProps={handleOpenProps}
-              hoveredPidKey={hoveredPidKey}
+              hoveredPidKey={null}
             />
           ) : (
             <PIDInlineLayout
               pids={inputPidsWithIndices}
               filterIdx={filterData.idx}
               onOpenProps={handleOpenProps}
-              hoveredPidKey={hoveredPidKey}
-              onHoverPid={setHoveredPidKey}
+              hoveredPidKey={null}
             />
           )
         ) : isLoading ? (

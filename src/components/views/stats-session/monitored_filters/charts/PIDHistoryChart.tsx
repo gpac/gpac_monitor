@@ -133,7 +133,7 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
         ref={containerRef}
         style={{ width: '100%', height: CHART_HEIGHT, position: 'relative' }}
       >
-        <UplotChart data={data} options={options} className="w-full h-full" />
+        <UplotChart data={data} options={options} className="w-12/12 h-full" />
         {endLabels.map((endLabel, index) => {
           const clampedTop = Math.min(
             Math.max(endLabel.top, 0),
@@ -148,7 +148,7 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
                 right: 2,
                 transform: 'translateY(-50%)',
                 background: `${endLabel.color}20`,
-                border: `1px solid ${endLabel.color}40`,
+                border: `1px solid ${endLabel.color}`,
                 pointerEvents: 'none',
                 zIndex: 10,
               }}

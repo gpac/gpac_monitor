@@ -10,14 +10,10 @@ import { getPIDStatusBadge } from '@/utils/gpac';
 import { buildPIDKey } from '../../../types/pid';
 import type { PIDWithIndex } from '../../../types';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
-import { usePIDInfoStats } from '../hooks/usePIDInfoStats';
-import { usePIDBufferStats } from '../hooks/usePIDBufferStats';
-import { usePIDPerformanceStats } from '../hooks/usePIDPerformanceStats';
-import { usePIDSample } from '../hooks/usePIDSample';
+import { usePIDMetricsRow } from '../hooks/usePIDMetricsRow';
+import { buildBufferTooltipRows } from './utils/pidTooltipRows';
 import PIDMetricTooltip from './PIDMetricTooltip';
 import PIDRowInfoCell from './PIDRowInfoCell';
-import { useAppSelector } from '@/shared/hooks/redux';
-import { selectPidColorIndexByKey } from '@/shared/store/selectors';
 import { cn } from '@/utils/core';
 
 type PIDTableRowVariant = 'input' | 'output';
@@ -45,25 +41,12 @@ const PIDTableRow = memo(
       [onOpenProps, filterIdx, pid.pidIdx],
     );
 
-    const infoStats = usePIDInfoStats(pid);
-    const bufferStats = usePIDBufferStats(pid);
-    const perfStats = usePIDPerformanceStats(pid);
+    const pidKey = buildPIDKey(filterIdx, variant, pid.pidIdx);
+    const { infoStats, bufferStats, perfStats, colorIndex, isSelected } =
+      usePIDMetricsRow(pid, pidKey);
 
     const statusBadge = getPIDStatusBadge(pid);
     const bgClass = isEven ? 'bg-black/10' : 'bg-black/20';
-
-    const pidKey = buildPIDKey(filterIdx, variant, pid.pidIdx);
-    usePIDSample(pidKey, {
-      averageBitrate: perfStats.average_bitrate,
-      bufferTime: bufferStats.displayBuffer,
-      processTime: perfStats.average_process_time,
-      processRate: perfStats.average_process_rate,
-    });
-    const colorIndex = useAppSelector(
-      (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
-    );
-    const isSelected = colorIndex >= 0;
-
     const rowStyle = isSelected
       ? {
           borderLeft: `3px solid ${PID_SELECTION_COLORS[colorIndex]}`,
@@ -81,7 +64,6 @@ const PIDTableRow = memo(
         style={rowStyle}
         data-pid-key={pidKey}
       >
-        {/* Infos */}
         <td className="px-2 py-2 align-middle text-xs">
           <PIDRowInfoCell
             pid={pid}
@@ -93,44 +75,10 @@ const PIDTableRow = memo(
           />
         </td>
 
-        {/* Buffer */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums whitespace-nowrap">
           <PIDMetricTooltip
             rows={[
-              {
-                label: 'buffer_time',
-                value:
-                  bufferStats.buffer_time != null
-                    ? formatMicroseconds(bufferStats.buffer_time)
-                    : null,
-                active: bufferStats.buffer_time != null,
-              },
-              {
-                label: 'buffer',
-                value: formatMicroseconds(bufferStats.buffer),
-                active: bufferStats.buffer_time == null,
-              },
-              {
-                label: 'max_buffer',
-                value:
-                  bufferStats.max_buffer != null
-                    ? formatMicroseconds(bufferStats.max_buffer)
-                    : null,
-              },
-              {
-                label: 'max_buffer_time',
-                value:
-                  bufferStats.max_buffer_time != null
-                    ? formatMicroseconds(bufferStats.max_buffer_time)
-                    : null,
-              },
-              {
-                label: 'nb_buffer_units',
-                value:
-                  bufferStats.nb_buffer_units != null
-                    ? formatNumber(bufferStats.nb_buffer_units)
-                    : null,
-              },
+              ...buildBufferTooltipRows(bufferStats),
               {
                 label: 'playout min',
                 value:
@@ -163,7 +111,6 @@ const PIDTableRow = memo(
           </PIDMetricTooltip>
         </td>
 
-        {/* Bitrate */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums">
           <PIDMetricTooltip
             rows={[
@@ -172,14 +119,8 @@ const PIDTableRow = memo(
                 value: formatBps(perfStats.average_bitrate),
                 active: true,
               },
-              {
-                label: 'bitrate',
-                value: formatBps(perfStats.bitrate),
-              },
-              {
-                label: 'max_bitrate',
-                value: formatBps(perfStats.max_bitrate),
-              },
+              { label: 'bitrate', value: formatBps(perfStats.bitrate) },
+              { label: 'max_bitrate', value: formatBps(perfStats.max_bitrate) },
             ]}
           >
             <span className="text-info cursor-default">
@@ -188,7 +129,6 @@ const PIDTableRow = memo(
           </PIDMetricTooltip>
         </td>
 
-        {/* Proc. */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums">
           <PIDMetricTooltip
             rows={[
@@ -228,7 +168,6 @@ const PIDTableRow = memo(
           </PIDMetricTooltip>
         </td>
 
-        {/* Proc. Rate */}
         <td className="px-2 py-2 align-middle text-xs tabular-nums">
           <PIDMetricTooltip
             rows={[
@@ -249,7 +188,6 @@ const PIDTableRow = memo(
           </PIDMetricTooltip>
         </td>
 
-        {/* TS + status */}
         <td className="px-2 py-2 align-middle">
           <div className="flex items-center gap-1">
             <PIDMetricTooltip
