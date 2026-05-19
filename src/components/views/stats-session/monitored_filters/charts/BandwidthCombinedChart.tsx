@@ -5,7 +5,6 @@ import { UplotChart } from '@/components/common/UplotChart';
 import uPlot from 'uplot';
 import { useBandwidthChart } from './hooks/useBandwidthChart';
 import { createBandwidthCombinedConfig } from './config/bandwidthCombinedUplotConfig';
-import { DEFAULT_REFRESH_INTERVAL } from './config/bandwidthChartConfig';
 import { useContainerSize } from '@/components/common/charts';
 
 interface BandwidthCombinedChartProps {
@@ -23,7 +22,7 @@ export const BandwidthCombinedChart = memo(
     bytesSent,
     bytesReceived,
     filterTimeUs = 0,
-    refreshInterval = DEFAULT_REFRESH_INTERVAL,
+    refreshInterval = 1000,
     windowDurationMs,
   }: BandwidthCombinedChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
