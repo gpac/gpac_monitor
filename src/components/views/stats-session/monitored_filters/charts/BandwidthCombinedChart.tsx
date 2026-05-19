@@ -97,7 +97,11 @@ export const BandwidthCombinedChart = memo(
               <span className="w-3 h-0.5 rounded-full bg-emerald-500" />
               Outband
             </span>
-            <span className="opacity-60 normal-case">Mb/s</span>
+            <span className="opacity-60 normal-case">Mb/s</span> /{' '}
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5 rounded-full bg-[#f59e0b]" />
+              Uptime
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
@@ -105,6 +109,7 @@ export const BandwidthCombinedChart = memo(
             ref={containerRef}
             style={{ width: '100%', height: 230, minHeight: 230 }}
           >
+            œ
             <UplotChart
               data={data}
               options={options}

@@ -6,6 +6,7 @@ import type { ChartDuration } from '@/utils/charts';
 import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';
 import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 import { TAB_STYLES } from './styles';
+import { formatMicroseconds } from '@/utils';
 
 interface NetworkTabProps {
   filterId: string;
@@ -56,6 +57,9 @@ const NetworkTab = memo(
             ↑ {formattedStats.bytesSentRate}
           </span>
           <span className={TAB_STYLES.STATUS_SEPARATOR}>·</span>
+          <span className="text-[#f59e0b] tabular-nums font-mono">
+            {formatMicroseconds(filterTimeUs)}
+          </span>
           <div className="ml-auto flex items-center gap-2">
             <WindowDurationBadge
               value={duration}
