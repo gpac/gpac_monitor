@@ -1,8 +1,6 @@
 import { memo, useMemo, useState, useEffect } from 'react';
-import { LuSettings } from 'react-icons/lu';
 import { OverviewTabData, TabPIDData, NetworkTabData } from '@/types/ui';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
@@ -99,10 +97,6 @@ const MonitoredFilterView = memo(
           >
             <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 space-y-1 px-1 py-2">
               <div className="flex justify-stretch items-center gap-4">
-                <h2 className="text-lg font-semibold text-monitor-active-filter">
-                  {overviewData.name}
-                </h2>
-
                 <FilterChangeBadges filterIdx={overviewData.idx} />
                 <StatusBadge
                   label={`${alerts?.errors} ERR`}
@@ -134,16 +128,6 @@ const MonitoredFilterView = memo(
                       : undefined
                   }
                 />
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={onOpenProperties}
-                  className="h-7 px-2 py-0"
-                  title="Display filter properties"
-                >
-                  <LuSettings className="h-5 w-5" />
-                </Button>
               </div>
 
               <TabsList className="h-8 justify-start  w-full">
@@ -175,7 +159,11 @@ const MonitoredFilterView = memo(
             </div>
 
             <TabsContent value="overview">
-              <MemoizedOverviewTab filter={overviewData} alerts={alerts} />
+              <MemoizedOverviewTab
+                filter={overviewData}
+                alerts={alerts}
+                onOpenProperties={onOpenProperties}
+              />
             </TabsContent>
             <TabsContent
               value="network"

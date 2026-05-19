@@ -3,7 +3,7 @@ import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
 import { useFilterStats } from '@/components/views/stats-session/hooks/stats/useFilterStats';
-import { useAppDispatch } from '@/shared/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   clearInitialTab,
   InitialTabType,
@@ -13,6 +13,8 @@ import {
   FilterStatsResponse,
   PIDproperties,
 } from '@/types/domain/gpac/filter-stats';
+import { selectActiveConnection } from '@/shared/store/selectors/header/connectionsSelectors';
+import { ConnectionStatus } from '@/types/communication/shared';
 
 interface MonitoredFilterTabsProps {
   monitoredFilters: Map<number, EnrichedFilterOverview>;
@@ -92,9 +94,16 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   // Subscribe to live stats when tab is active
   const { stats, isLoading } = useFilterStats(filter.idx, isActive, 1000);
 
-  // Effective loading: true if explicitly loading OR stats don't match current filter
+  const isConnected = useAppSelector(
+    (state) =>
+      selectActiveConnection(state)?.status === ConnectionStatus.CONNECTED,
+  );
+
+  // Effective loading: true only when connected and waiting for first stats.
+
   const effectiveIsLoading =
-    isLoading || (isActive && (!stats || stats.idx !== filter.idx));
+    isConnected &&
+    (isLoading || (isActive && (!stats || stats.idx !== filter.idx)));
 
   // Merge static filter data with live stats
   const filterWithStats = useMemo(

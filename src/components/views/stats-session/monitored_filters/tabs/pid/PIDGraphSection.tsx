@@ -46,7 +46,7 @@ const PIDGraphSection = memo(
     if (targets.length === 0) return null;
 
     return (
-      <Card className="bg-monitor-panel border-transparent">
+      <Card className="bg-monitor-panel border-t-monitor-line border-transparent">
         <CardHeader className="pb-1 px-3 pt-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-foreground">
@@ -57,7 +57,7 @@ const PIDGraphSection = memo(
                 type="single"
                 value={mode}
                 onValueChange={(v) => v && onModeChange(v as PIDMetricMode)}
-                className="flex gap-0.5 p-0 bg-transparent border-0"
+                className="flex gap-0.5 p-0 bg-transparent border-0 "
               >
                 {CLICKABLE_METRICS.map(({ metric, label }) => (
                   <ToggleGroupItem
