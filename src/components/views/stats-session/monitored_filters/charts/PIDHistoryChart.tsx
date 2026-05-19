@@ -53,116 +53,124 @@ export interface PIDSeriesEntry {
 interface PIDHistoryChartProps {
   entries: PIDSeriesEntry[];
   mode: PIDMetricMode;
+  showEndLabels?: boolean;
 }
 
-const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const dimensions = useContainerSize(containerRef);
-  const timeLabelsRef = useRef<string[]>([]);
-  const [endLabels, setEndLabels] = useState<EndLabelInfo[]>([]);
+const PIDHistoryChart = memo(
+  ({ entries, mode, showEndLabels }: PIDHistoryChartProps) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const dimensions = useContainerSize(containerRef);
+    const timeLabelsRef = useRef<string[]>([]);
+    const [endLabels, setEndLabels] = useState<EndLabelInfo[]>([]);
 
-  const seriesKey = entries
-    .map((entry) => `${entry.label}:${entry.color}:${entry.metricLabel ?? ''}`)
-    .join('|');
+    const seriesKey = entries
+      .map(
+        (entry) => `${entry.label}:${entry.color}:${entry.metricLabel ?? ''}`,
+      )
+      .join('|');
 
-  const series = useMemo<SeriesDef[]>(
-    () =>
-      entries.map((entry) => ({
-        label: entry.label,
-        color: entry.color,
-        formatValue: MODE_FORMATTERS[mode],
-        fill: `${entry.color}15`,
-        strokeWidth: 1.5,
-        metricLabel: entry.metricLabel,
-      })),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [seriesKey, mode],
-  );
-
-  const shouldShowEndLabels = entries.length < 2;
-
-  const options = useMemo(
-    () =>
-      createLineChartConfig({
-        series,
-        timeLabelsRef,
-        leftAxis: { formatY: MODE_FORMATTERS[mode] },
-        onEndLabels: shouldShowEndLabels ? setEndLabels : undefined,
-        ...dimensions,
-      }),
-
-    [series, dimensions, mode, shouldShowEndLabels],
-  );
-
-  const data = useMemo<uPlot.AlignedData>(() => {
-    const maxLen = Math.max(...entries.map((e) => e.pidHistory.length), 0);
-    if (maxLen === 0) {
-      timeLabelsRef.current = [];
-      return [[0], ...entries.map(() => [null])] as uPlot.AlignedData;
-    }
-
-    const indices = Array.from({ length: maxLen }, (_, i) => i);
-    const longest = entries.reduce(
-      (acc, entry) =>
-        entry.pidHistory.length >= acc.pidHistory.length ? entry : acc,
-      entries[0],
-    );
-    timeLabelsRef.current = longest.pidHistory.map((s) =>
-      new Date(s.sessionTimestampUs / 1000).toLocaleTimeString('en-US', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      }),
+    const series = useMemo<SeriesDef[]>(
+      () =>
+        entries.map((entry) => ({
+          label: entry.label,
+          color: entry.color,
+          formatValue: MODE_FORMATTERS[mode],
+          fill: `${entry.color}15`,
+          strokeWidth: 1.5,
+          metricLabel: entry.metricLabel,
+        })),
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [seriesKey, mode],
     );
 
-    const valueCols = entries.map((entry) => {
-      const offset = maxLen - entry.pidHistory.length;
-      return indices.map((i) => {
-        const j = i - offset;
-        return j < 0 ? null : extractValue(entry.pidHistory[j], mode);
+    const shouldShowEndLabels = showEndLabels ?? entries.length < 2;
+
+    const options = useMemo(
+      () =>
+        createLineChartConfig({
+          series,
+          timeLabelsRef,
+          leftAxis: { formatY: MODE_FORMATTERS[mode] },
+          onEndLabels: shouldShowEndLabels ? setEndLabels : undefined,
+          ...dimensions,
+        }),
+
+      [series, dimensions, mode, shouldShowEndLabels],
+    );
+
+    const data = useMemo<uPlot.AlignedData>(() => {
+      const maxLen = Math.max(...entries.map((e) => e.pidHistory.length), 0);
+      if (maxLen === 0) {
+        timeLabelsRef.current = [];
+        return [[0], ...entries.map(() => [null])] as uPlot.AlignedData;
+      }
+
+      const indices = Array.from({ length: maxLen }, (_, i) => i);
+      const longest = entries.reduce(
+        (acc, entry) =>
+          entry.pidHistory.length >= acc.pidHistory.length ? entry : acc,
+        entries[0],
+      );
+      timeLabelsRef.current = longest.pidHistory.map((s) =>
+        new Date(s.sessionTimestampUs / 1000).toLocaleTimeString('en-US', {
+          hour12: false,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        }),
+      );
+
+      const valueCols = entries.map((entry) => {
+        const offset = maxLen - entry.pidHistory.length;
+        return indices.map((i) => {
+          const j = i - offset;
+          return j < 0 ? null : extractValue(entry.pidHistory[j], mode);
+        });
       });
-    });
 
-    return [indices, ...valueCols] as uPlot.AlignedData;
-  }, [entries, mode]);
+      return [indices, ...valueCols] as uPlot.AlignedData;
+    }, [entries, mode]);
 
-  return (
-    <div style={{ width: '100%' }}>
-      <div
-        ref={containerRef}
-        style={{ width: '100%', height: CHART_HEIGHT, position: 'relative' }}
-      >
-        <UplotChart data={data} options={options} className="w-12/12 h-full" />
-        {endLabels.map((endLabel, index) => {
-          const clampedTop = Math.min(
-            Math.max(endLabel.top, 0),
-            CHART_HEIGHT - 16,
-          );
-          return (
-            <div
-              key={index}
-              style={{
-                position: 'absolute',
-                top: clampedTop,
-                right: 2,
-                transform: 'translateY(-50%)',
-                background: `${endLabel.color}20`,
-                border: `1px solid ${endLabel.color}`,
-                pointerEvents: 'none',
-                zIndex: 10,
-              }}
-              className="text-[10px] font-mono leading-none text-info px-1 py-0.5 rounded"
-            >
-              <span className="opacity-70">{endLabel.label}</span>{' '}
-              {endLabel.value}
-            </div>
-          );
-        })}
+    return (
+      <div style={{ width: '100%' }}>
+        <div
+          ref={containerRef}
+          style={{ width: '100%', height: CHART_HEIGHT, position: 'relative' }}
+        >
+          <UplotChart
+            data={data}
+            options={options}
+            className="w-12/12 h-full"
+          />
+          {endLabels.map((endLabel, index) => {
+            const clampedTop = Math.min(
+              Math.max(endLabel.top, 0),
+              CHART_HEIGHT - 16,
+            );
+            return (
+              <div
+                key={index}
+                style={{
+                  position: 'absolute',
+                  top: clampedTop,
+                  right: 2,
+                  transform: 'translateY(-50%)',
+                  border: `1px solid ${endLabel.color}`,
+                  pointerEvents: 'none',
+                  zIndex: 10,
+                }}
+                className="bg-gray-900 text-[10px] font-mono leading-none text-info px-1 py-0.5 rounded"
+              >
+                <span className="opacity-70">{endLabel.label}</span>{' '}
+                {endLabel.value}
+              </div>
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 PIDHistoryChart.displayName = 'PIDHistoryChart';
 
