@@ -18,7 +18,7 @@ const BANDWIDTH_SERIES: SeriesDef[] = [
   { label: 'Outband', color: '#10b981', formatValue: formatBw },
   { label: 'Inband', color: '#3b82f6', formatValue: formatBw },
   {
-    label: 'Uptime',
+    label: 'Filter Proc. Time',
     color: '#f59e0b',
     formatValue: formatMicroseconds,
     yAxis: 'right',
