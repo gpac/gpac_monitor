@@ -15,12 +15,11 @@ import {
 } from '@/utils/formatting';
 import type { PIDMetricMode, PIDMetricSample } from '../../../types/pid';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
-import PIDChipsStrip from './PIDChipsStrip';
 import PIDGraphPanel from './PIDGraphPanel';
 
 const METRIC_LABELS: Record<PIDMetricMode, string> = {
   bitrate: 'Avg Bitrate',
-  buffer: 'Buffer',
+  bufferTime: 'Buffer',
   processTime: 'Proc. Time',
   processRate: 'Proc. Rate',
   ts: 'TS',
@@ -28,7 +27,7 @@ const METRIC_LABELS: Record<PIDMetricMode, string> = {
 
 const METRIC_FORMATTERS: Record<PIDMetricMode, (v: number) => string> = {
   bitrate: formatBitrate,
-  buffer: formatBufferTime,
+  bufferTime: formatBufferTime,
   processTime: formatMicroseconds,
   processRate: formatPacketRate,
   ts: formatMicroseconds,
@@ -43,7 +42,7 @@ const getLastValue = (
   const raw = (
     {
       bitrate: last.averageBitrate,
-      buffer: last.bufferTime,
+      bufferTime: last.bufferTime,
       processTime: last.processTime,
       processRate: last.processRate,
       ts: last.ts,
@@ -57,14 +56,14 @@ interface PIDGraphSectionProps {
   onHoverPid: (key: string | null) => void;
 }
 
-const PIDGraphSection = memo(({ mode, onHoverPid }: PIDGraphSectionProps) => {
+const PIDGraphSection = memo(({ mode }: PIDGraphSectionProps) => {
   const dispatch = useAppDispatch();
   const targets = useAppSelector(selectSelectedPidTargets);
   const allSamples = useAppSelector(selectAllSelectedPidSamples);
 
   const pidLabels = useMemo(
     () =>
-      allSamples.length >= 4
+      allSamples.length >= 1
         ? allSamples.map(({ target, pidHistory }, index) => ({
             target,
             color: PID_SELECTION_COLORS[index],
@@ -89,7 +88,6 @@ const PIDGraphSection = memo(({ mode, onHoverPid }: PIDGraphSectionProps) => {
             <span className="mx-1 opacity-40">·</span>
             Live <span className="text-error">⏺</span>
           </span>
-          <PIDChipsStrip onHoverPid={onHoverPid} />
           {pidLabels && (
             <ToggleGroup
               type="multiple"

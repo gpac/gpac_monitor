@@ -10,7 +10,7 @@ import { useIsDetached } from '../../FilterViewContext';
 type PIDTableVariant = 'input' | 'output';
 
 const CLICKABLE_METRICS: { metric: PIDMetricMode; label: string }[] = [
-  { metric: 'buffer', label: 'Buffer' },
+  { metric: 'bufferTime', label: 'Buffer' },
   { metric: 'bitrate', label: 'Avg Bitrate' },
   { metric: 'processTime', label: 'Proc.' },
   { metric: 'processRate', label: 'Proc. Rate' },

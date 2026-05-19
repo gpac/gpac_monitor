@@ -2,7 +2,7 @@ import type { FilterStatsResponse, TabPIDData } from '@/types';
 
 export type PIDMetricMode =
   | 'bitrate'
-  | 'buffer'
+  | 'bufferTime'
   | 'processTime'
   | 'processRate'
   | 'ts';

@@ -1,4 +1,6 @@
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
+import { useAppDispatch } from '@/shared/hooks/redux';
+import { clearSelectedPids } from '@/shared/store/slices/monitoredFilterSlice';
 import type { PIDWithIndex } from '../../../types';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PIDTable } from './shared';
@@ -22,7 +24,15 @@ const PIDInlineLayout = memo(
     onHoverPid,
     variant = 'input',
   }: PIDInlineLayoutProps) => {
+    const dispatch = useAppDispatch();
     const [mode, setMode] = useState<PIDMetricMode>('bitrate');
+
+    useEffect(
+      () => () => {
+        dispatch(clearSelectedPids());
+      },
+      [dispatch],
+    );
 
     return (
       <div className="flex flex-col gap-2">

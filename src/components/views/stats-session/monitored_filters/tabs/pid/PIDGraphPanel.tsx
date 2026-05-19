@@ -9,7 +9,7 @@ import PIDHistoryChart, {
 
 const MODE_LABELS: Record<PIDMetricMode, string> = {
   bitrate: 'Avg Bitrate',
-  buffer: 'Buffer',
+  bufferTime: 'Buffer',
   processTime: 'Proc.',
   processRate: 'Proc. Rate',
   ts: 'TS',

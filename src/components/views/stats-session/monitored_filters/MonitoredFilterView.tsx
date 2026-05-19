@@ -211,7 +211,8 @@ const MonitoredFilterView = memo(
   (prevProps, nextProps) => {
     const filterDataUnchanged =
       prevProps.filterData?.idx === nextProps.filterData?.idx &&
-      prevProps.filterData?.status === nextProps.filterData?.status;
+      prevProps.filterData?.status === nextProps.filterData?.status &&
+      prevProps.filterData?.time === nextProps.filterData?.time;
 
     // Overview data contains frequently changing metrics
     const overviewUnchanged =

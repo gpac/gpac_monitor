@@ -19,7 +19,7 @@ const CHART_HEIGHT = 140;
 
 const MODE_FORMATTERS: Record<PIDMetricMode, (v: number) => string> = {
   bitrate: formatBitrate,
-  buffer: formatBufferTime,
+  bufferTime: formatBufferTime,
   processTime: formatMicroseconds,
   processRate: formatPacketRate,
   ts: formatMicroseconds,
@@ -32,7 +32,7 @@ const extractValue = (
   switch (mode) {
     case 'bitrate':
       return sample.averageBitrate ?? null;
-    case 'buffer':
+    case 'bufferTime':
       return sample.bufferTime ?? null;
     case 'processTime':
       return sample.processTime ?? null;
@@ -90,7 +90,7 @@ const PIDHistoryChart = memo(({ entries, mode }: PIDHistoryChartProps) => {
         onEndLabels: shouldShowEndLabels ? setEndLabels : undefined,
         ...dimensions,
       }),
-     
+
     [series, dimensions, mode, shouldShowEndLabels],
   );
 

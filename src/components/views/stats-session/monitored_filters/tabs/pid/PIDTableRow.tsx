@@ -13,6 +13,7 @@ import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { usePIDInfoStats } from '../hooks/usePIDInfoStats';
 import { usePIDBufferStats } from '../hooks/usePIDBufferStats';
 import { usePIDPerformanceStats } from '../hooks/usePIDPerformanceStats';
+import { usePIDSample } from '../hooks/usePIDSample';
 import PIDMetricTooltip from './PIDMetricTooltip';
 import PIDRowInfoCell from './PIDRowInfoCell';
 import { useAppSelector } from '@/shared/hooks/redux';
@@ -52,6 +53,12 @@ const PIDTableRow = memo(
     const bgClass = isEven ? 'bg-black/10' : 'bg-black/20';
 
     const pidKey = buildPIDKey(filterIdx, variant, pid.pidIdx);
+    usePIDSample(pidKey, {
+      averageBitrate: perfStats.average_bitrate,
+      bufferTime: bufferStats.displayBuffer,
+      processTime: perfStats.average_process_time,
+      processRate: perfStats.average_process_rate,
+    });
     const colorIndex = useAppSelector(
       (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
     );
@@ -96,11 +103,12 @@ const PIDTableRow = memo(
                   bufferStats.buffer_time != null
                     ? formatMicroseconds(bufferStats.buffer_time)
                     : null,
-                active: true,
+                active: bufferStats.buffer_time != null,
               },
               {
                 label: 'buffer',
                 value: formatMicroseconds(bufferStats.buffer),
+                active: bufferStats.buffer_time == null,
               },
               {
                 label: 'max_buffer',
