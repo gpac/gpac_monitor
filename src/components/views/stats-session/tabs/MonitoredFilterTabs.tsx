@@ -58,7 +58,7 @@ interface MonitoredFilterTabProps {
   onOpenProperties: (filter: EnrichedFilterOverview) => void;
 }
 
-// Internal component without TabsContent wrapper (for detached mode)
+// Internal component for detached mode
 export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   filter,
   isActive,
@@ -83,7 +83,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
     lastAppliedTabRef.current = currentInitialTab;
   }
 
-  // Clear initialTab in effect (after render) - ref mutation doesn't cause re-render
+  // Clear initialTab in effect
   useEffect(() => {
     if (initialTabRef.current) {
       dispatch(clearInitialTab());
@@ -105,13 +105,11 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
     isConnected &&
     (isLoading || (isActive && (!stats || stats.idx !== filter.idx)));
 
-  // Merge static filter data with live stats
   const filterWithStats = useMemo(
     () => ({ ...filter, ...stats }),
     [filter, stats],
   );
 
-  // Extract real data directly from filterWithStats
   const tabsData = useMemo(() => {
     return {
       overviewData: {
