@@ -57,7 +57,7 @@ const NetworkTab = memo(
             ↑ {formattedStats.bytesSentRate}
           </span>
           <span className={TAB_STYLES.STATUS_SEPARATOR}>·</span>
-          <span className="text-[#f59e0b] tabular-nums font-mono">
+          <span className="text-amber-400 tabular-nums font-mono">
             {formatMicroseconds(filterTimeUs)}
           </span>
           <div className="ml-auto flex items-center gap-2">

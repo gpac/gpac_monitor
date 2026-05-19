@@ -99,7 +99,7 @@ export const BandwidthCombinedChart = memo(
             </span>
             <span className="opacity-60 normal-case">Mb/s</span> /{' '}
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 rounded-full bg-[#f59e0b]" />
+              <span className="w-3 h-0.5 rounded-full bg-amber-400" />
               Filter Proc. Time
             </span>
           </CardTitle>

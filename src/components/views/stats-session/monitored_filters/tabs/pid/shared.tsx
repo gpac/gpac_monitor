@@ -28,10 +28,7 @@ export const PIDStatusBar = ({
       </div>
       <div className={TAB_STYLES.STATUS_BAR_RIGHT}>
         {errors > 0 && (
-          <Badge
-            variant="destructive"
-            className="text-[10px] px-1.5 py-0 h-5 tabular-nums"
-          >
+          <Badge variant="destructive" className={TAB_STYLES.BADGE_TINY}>
             {errors} Error
           </Badge>
         )}
@@ -45,18 +42,12 @@ export const PIDStatusBar = ({
           </Badge>
         )}
         {active > 0 && (
-          <Badge
-            variant="default"
-            className="text-[10px] px-1.5 py-0 h-5 tabular-nums"
-          >
+          <Badge variant="default" className={TAB_STYLES.BADGE_TINY}>
             {active} Active
           </Badge>
         )}
         {eos > 0 && (
-          <Badge
-            variant="secondary"
-            className="text-[10px] px-1.5 py-0 h-5 tabular-nums"
-          >
+          <Badge variant="secondary" className={TAB_STYLES.BADGE_TINY}>
             {eos} EOS
           </Badge>
         )}
@@ -107,10 +98,7 @@ export const TableSection = ({
       </colgroup>
       <thead>
         <tr className="bg-monitor-panel border-b border-white/10">
-          <th
-            colSpan={2}
-            className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide"
-          >
+          <th colSpan={2} className={TAB_STYLES.TABLE_HEADER}>
             <div className="flex items-center justify-between">
               <span>{title}</span>
               {badge}

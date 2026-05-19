@@ -6,6 +6,7 @@ import type { PIDMetricMode } from '../../../types/pid';
 import PIDTableRow from './PIDTableRow';
 import DetachedPIDCard from './DetachedPIDCard';
 import { useIsDetached } from '../../FilterViewContext';
+import { TAB_STYLES } from '../styles';
 
 type PIDTableVariant = 'input' | 'output';
 
@@ -48,9 +49,7 @@ const TableCore = ({
   <table className="w-full text-left table-fixed">
     <thead className="sticky top-0 z-10">
       <tr className="border-b border-white/10 bg-monitor-panel">
-        <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-          Infos
-        </th>
+        <th className={TAB_STYLES.TABLE_HEADER}>Infos</th>
         {CLICKABLE_METRICS.map(({ metric, label }) => (
           <th key={metric} className="px-2 py-1.5">
             <button
@@ -66,9 +65,7 @@ const TableCore = ({
             </button>
           </th>
         ))}
-        <th className="px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
-          TS
-        </th>
+        <th className={TAB_STYLES.TABLE_HEADER}>TS</th>
       </tr>
     </thead>
     <tbody>
