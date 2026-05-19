@@ -17,9 +17,10 @@ const MODE_LABELS: Record<PIDMetricMode, string> = {
 
 interface PIDGraphPanelProps {
   mode: PIDMetricMode;
+  showEndLabels: boolean;
 }
 
-const PIDGraphPanel = memo(({ mode }: PIDGraphPanelProps) => {
+const PIDGraphPanel = memo(({ mode, showEndLabels }: PIDGraphPanelProps) => {
   const allSamples = useAppSelector(selectAllSelectedPidSamples);
 
   const entries = useMemo<PIDSeriesEntry[]>(
@@ -42,7 +43,11 @@ const PIDGraphPanel = memo(({ mode }: PIDGraphPanelProps) => {
 
   return (
     <div className="p-2">
-      <PIDHistoryChart entries={entries} mode={mode} />
+      <PIDHistoryChart
+        entries={entries}
+        mode={mode}
+        showEndLabels={showEndLabels}
+      />
     </div>
   );
 });

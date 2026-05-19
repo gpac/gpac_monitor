@@ -43,7 +43,11 @@ const PIDInlineLayout = memo(
           activeMetric={mode}
           onMetricClick={setMode}
         />
-        <PIDGraphSection mode={mode} />
+        <PIDGraphSection
+          mode={mode}
+          onModeChange={setMode}
+          totalPids={pids.length}
+        />
       </div>
     );
   },
