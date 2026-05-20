@@ -14,6 +14,7 @@ interface BandwidthCombinedChartProps {
   filterTimeUs?: number;
   refreshInterval?: number;
   windowDurationMs?: number;
+  showCurrentTime?: boolean;
 }
 
 export const BandwidthCombinedChart = memo(
@@ -24,6 +25,7 @@ export const BandwidthCombinedChart = memo(
     filterTimeUs = 0,
     refreshInterval = 1000,
     windowDurationMs,
+    showCurrentTime = false,
   }: BandwidthCombinedChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const dimensions = useContainerSize(containerRef);
@@ -101,6 +103,11 @@ export const BandwidthCombinedChart = memo(
               <span className="w-3 h-0.5 rounded-full bg-amber-400" />
               Filter Proc. Time
             </span>
+            {showCurrentTime && timeLabelsRef.current.length > 0 && (
+              <span className="ml-auto font-mono normal-case opacity-60 text-xs">
+                {timeLabelsRef.current[timeLabelsRef.current.length - 1]}
+              </span>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">

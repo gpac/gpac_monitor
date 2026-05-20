@@ -22,10 +22,16 @@ interface PIDHistoryChartProps {
   entries: PIDSeriesEntry[];
   mode: PIDMetricMode;
   showEndLabels?: boolean;
+  showCurrentTime?: boolean;
 }
 
 const PIDHistoryChart = memo(
-  ({ entries, mode, showEndLabels }: PIDHistoryChartProps) => {
+  ({
+    entries,
+    mode,
+    showEndLabels,
+    showCurrentTime = false,
+  }: PIDHistoryChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const dimensions = useContainerSize(containerRef);
     const timeLabelsRef = useRef<string[]>([]);
@@ -101,6 +107,11 @@ const PIDHistoryChart = memo(
 
     return (
       <div style={{ width: '100%' }}>
+        {showCurrentTime && timeLabelsRef.current.length > 0 && (
+          <div className="text-right font-mono text-xs opacity-60 mb-1">
+            {timeLabelsRef.current[timeLabelsRef.current.length - 1]}
+          </div>
+        )}
         <div
           ref={containerRef}
           style={{ width: '100%', height: CHART_HEIGHT, position: 'relative' }}
