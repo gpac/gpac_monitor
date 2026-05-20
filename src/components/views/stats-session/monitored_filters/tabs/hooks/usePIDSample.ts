@@ -20,6 +20,7 @@ export const usePIDSample = (pidKey: string, metrics: SampleMetrics): void => {
     metrics.bufferTime,
     metrics.processTime,
     metrics.processRate,
+    metrics.ts,
     dispatch,
   ]);
 };

@@ -146,7 +146,8 @@ const monitoredFilterSlice = createSlice({
         lastSample.averageBitrate === sample.averageBitrate &&
         lastSample.bufferTime === sample.bufferTime &&
         lastSample.processTime === sample.processTime &&
-        lastSample.processRate === sample.processRate
+        lastSample.processRate === sample.processRate &&
+        lastSample.ts === sample.ts
       ) {
         return;
       }
@@ -172,7 +173,8 @@ const monitoredFilterSlice = createSlice({
           last.averageBitrate === sample.averageBitrate &&
           last.bufferTime === sample.bufferTime &&
           last.processTime === sample.processTime &&
-          last.processRate === sample.processRate
+          last.processRate === sample.processRate &&
+          last.ts === sample.ts
         )
           continue;
         samples.push(sample);

@@ -13,6 +13,7 @@ export const CLICKABLE_METRICS: { metric: PIDMetricMode; label: string }[] = [
   { metric: 'bitrate', label: 'Avg Bitrate' },
   { metric: 'processTime', label: 'Proc.' },
   { metric: 'processRate', label: 'Proc. Rate' },
+  { metric: 'ts', label: 'TS' },
 ];
 
 interface PIDTableProps {
@@ -63,7 +64,6 @@ const TableCore = ({
             </button>
           </th>
         ))}
-        <th className={TAB_STYLES.TABLE_HEADER}>TS</th>
       </tr>
     </thead>
     <tbody>

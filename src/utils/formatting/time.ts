@@ -14,16 +14,23 @@ export const formatMicroseconds = (
   return `${(value / 1_000_000).toFixed(2)}s`;
 };
 
+/** Converts a GPAC last_ts_sent value ({n,d}, {num,den} or raw seconds) to seconds, or null if invalid. */
+export const tsToSeconds = (
+  ts: TsFraction | number | null | undefined,
+): number | null => {
+  if (ts == null) return null;
+  if (typeof ts === 'number') return ts > 0 ? ts : null;
+  const num = 'n' in ts ? ts.n : ts.num;
+  const den = 'n' in ts ? ts.d : ts.den;
+  return den ? num / den : null;
+};
+
 /** Formats a GPAC last_ts_sent value ({n,d}, {num,den} or raw seconds). */
 export const formatLastTsSent = (
   ts: TsFraction | number | null | undefined,
 ): string => {
-  if (ts == null) return '—';
-  if (typeof ts === 'number') return ts > 0 ? `${ts.toFixed(2)}s` : '—';
-  const num = 'n' in ts ? ts.n : ts.num;
-  const den = 'n' in ts ? ts.d : ts.den;
-  if (!den) return '—';
-  return `${(num / den).toFixed(2)}s`;
+  const seconds = tsToSeconds(ts);
+  return seconds != null ? `${seconds.toFixed(2)}s` : '—';
 };
 
 export const formatTime = (microseconds?: number): string => {

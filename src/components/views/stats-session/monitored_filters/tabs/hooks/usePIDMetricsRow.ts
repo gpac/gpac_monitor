@@ -1,5 +1,6 @@
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
+import { tsToSeconds } from '@/utils/formatting';
 import type { PIDWithIndex } from '../../../types';
 import { usePIDInfoStats } from './usePIDInfoStats';
 import { usePIDBufferStats } from './usePIDBufferStats';
@@ -16,6 +17,7 @@ export const usePIDMetricsRow = (pid: PIDWithIndex, pidKey: string) => {
     bufferTime: bufferStats.displayBuffer,
     processTime: perfStats.average_process_time,
     processRate: perfStats.average_process_rate,
+    ts: tsToSeconds(perfStats.last_ts_sent),
   });
 
   const colorIndex = useAppSelector(
