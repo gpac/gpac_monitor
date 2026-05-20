@@ -1,9 +1,11 @@
 import { memo, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { useChartDuration } from '@/shared/hooks';
 import { selectSelectedPidTargetsByFilter } from '@/shared/store/selectors';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { CLICKABLE_METRICS } from './PIDTable';
@@ -31,6 +33,12 @@ const PIDGraphSection = memo(
       selectSelectedPidTargetsByFilter(state, filterIdx),
     );
 
+    const { duration, setDuration, maxPoints } = useChartDuration(
+      'pid_graph_duration',
+      '5min',
+      1000,
+    );
+
     const usesGraphMetricSelector = totalPids >= 4 || targets.length >= 4;
     const shouldShowEndLabels = targets.length < 4;
 
@@ -55,25 +63,32 @@ const PIDGraphSection = memo(
             <p className="text-sm font-semibold text-foreground">
               {METRIC_LABELS[mode]}
             </p>
-            {usesGraphMetricSelector && (
-              <ToggleGroup
-                type="single"
-                value={mode}
-                onValueChange={(v) => v && onModeChange(v as PIDMetricMode)}
-                className="flex gap-0.5 p-0 bg-transparent border-0 "
-              >
-                {CLICKABLE_METRICS.map(({ metric, label }) => (
-                  <ToggleGroupItem
-                    key={metric}
-                    value={metric}
-                    aria-pressed={mode === metric}
-                    className="h-auto px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
-                  >
-                    {label}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            )}
+            <div className="flex items-center gap-1">
+              <WindowDurationBadge
+                value={duration}
+                onChange={setDuration}
+                options={['1min', '5min']}
+              />
+              {usesGraphMetricSelector && (
+                <ToggleGroup
+                  type="single"
+                  value={mode}
+                  onValueChange={(v) => v && onModeChange(v as PIDMetricMode)}
+                  className="flex gap-0.5 p-0 bg-transparent border-0"
+                >
+                  {CLICKABLE_METRICS.map(({ metric, label }) => (
+                    <ToggleGroupItem
+                      key={metric}
+                      value={metric}
+                      aria-pressed={mode === metric}
+                      className="h-auto px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                    >
+                      {label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              )}
+            </div>
           </div>
           <div className="flex items-center flex-wrap gap-x-1.5 gap-y-1 mt-0.5">
             <span className="text-xs text-muted-foreground">
@@ -121,6 +136,7 @@ const PIDGraphSection = memo(
             filterIdx={filterIdx}
             mode={mode}
             showEndLabels={shouldShowEndLabels}
+            maxPoints={maxPoints}
           />
         </CardContent>
       </Card>

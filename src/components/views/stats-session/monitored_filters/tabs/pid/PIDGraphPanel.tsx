@@ -19,10 +19,11 @@ interface PIDGraphPanelProps {
   filterIdx: number;
   mode: PIDMetricMode;
   showEndLabels: boolean;
+  maxPoints?: number;
 }
 
 const PIDGraphPanel = memo(
-  ({ filterIdx, mode, showEndLabels }: PIDGraphPanelProps) => {
+  ({ filterIdx, mode, showEndLabels, maxPoints }: PIDGraphPanelProps) => {
     const allSamples = useAppSelector((state) =>
       selectAllSelectedPidSamplesByFilter(state, filterIdx),
     );
@@ -33,14 +34,16 @@ const PIDGraphPanel = memo(
           const typeStr = target.streamTypeLabel
             ? ` (${target.streamTypeLabel})`
             : '';
+          const sliced =
+            maxPoints != null ? pidHistory.slice(-maxPoints) : pidHistory;
           return {
-            pidHistory,
+            pidHistory: sliced,
             label: `PID ${target.pidIndex}${typeStr}`,
             metricLabel: MODE_LABELS[mode],
             color: PID_SELECTION_COLORS[index],
           };
         }),
-      [allSamples, mode],
+      [allSamples, mode, maxPoints],
     );
 
     if (entries.length === 0) return null;
