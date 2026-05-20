@@ -30,7 +30,7 @@ const PIDHistoryChart = memo(
     entries,
     mode,
     showEndLabels,
-    showCurrentTime = false,
+    showCurrentTime = true,
   }: PIDHistoryChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const dimensions = useContainerSize(containerRef);
@@ -106,9 +106,9 @@ const PIDHistoryChart = memo(
     }, [entries, mode]);
 
     return (
-      <div style={{ width: '100%' }}>
+      <div style={{ width: '100%' }} className="flex flex-col items-center">
         {showCurrentTime && timeLabelsRef.current.length > 0 && (
-          <div className="text-right font-mono text-xs opacity-60 mb-1">
+          <div className="w-full text-center font-mono text-xs opacity-60 mb-1">
             {timeLabelsRef.current[timeLabelsRef.current.length - 1]}
           </div>
         )}

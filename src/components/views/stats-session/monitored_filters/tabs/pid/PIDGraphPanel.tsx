@@ -47,6 +47,7 @@ const PIDGraphPanel = memo(({ mode, showEndLabels }: PIDGraphPanelProps) => {
         entries={entries}
         mode={mode}
         showEndLabels={showEndLabels}
+        showCurrentTime
       />
     </div>
   );

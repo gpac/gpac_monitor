@@ -79,6 +79,7 @@ const NetworkTab = memo(
           filterTimeUs={filterTimeUs}
           refreshInterval={refreshInterval}
           windowDurationMs={windowDuration}
+          showCurrentTime
         />
       </div>
     );
