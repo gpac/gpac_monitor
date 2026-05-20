@@ -62,7 +62,7 @@ const ManageConnectionsDialog = memo(
 
     return (
       <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="bg-monitor-surface border-monitor-line max-w-2xl">
+        <DialogContent className="bg-monitor-dropdown border-monitor-line max-w-2xl">
           <DialogHeader>
             <DialogTitle className="text-white">Connections</DialogTitle>
           </DialogHeader>
@@ -75,7 +75,7 @@ const ManageConnectionsDialog = memo(
                     {connections.map((conn) => (
                       <div
                         key={conn.id}
-                        className="flex items-center gap-3 p-3 rounded-lg bg-monitor-panel/30 border border-monitor-line group"
+                        className="flex items-center gap-3 p-3 rounded-lg bg-monitor-dropdown border border-monitor-line group"
                       >
                         <span
                           className={`w-2 h-2 rounded-full flex-shrink-0 ${getConnectionStatusClass(conn.status)}`}

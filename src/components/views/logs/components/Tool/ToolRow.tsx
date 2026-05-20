@@ -7,7 +7,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
-import { LEVEL_BADGE_CLASSES, EXCLUDED_LOG_CONFIGS } from '../../utils/constants';
+import {
+  LEVEL_BADGE_CLASSES,
+  EXCLUDED_LOG_CONFIGS,
+} from '../../utils/constants';
 
 interface ToolRowProps {
   tool: GpacLogTool;
@@ -76,8 +79,7 @@ export const ToolRow = memo(function ToolRow({
           </DropdownMenuSubTrigger>
 
           <DropdownMenuSubContent
-            className="z-50 bg-monitor-surface/55 border border-slate-700/50
-              shadow-lg shadow-black/40 rounded-md"
+            className="z-50"
             onMouseLeave={onMouseLeaveSubMenu}
           >
             {availableLevels.map((level) => {

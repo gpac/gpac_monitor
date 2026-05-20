@@ -4,7 +4,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@radix-ui/react-popover';
+} from '@/components/ui/popover';
 import { WidgetButton } from './WidgetButton';
 import { getAllWidgets } from './registry';
 
@@ -49,11 +49,7 @@ const WidgetSelector: React.FC<WidgetSelectorProps> = ({
       </PopoverTrigger>
 
       <PopoverContent
-        className="
-           w-72 bg-monitor-surface ring-1 ring-monitor-line rounded-xl shadow-none p-2 z-50
-          data-[state=open]:animate-popoverShow
-          data-[state=closed]:animate-popoverHide
-        "
+        className="w-72 rounded-xl z-50 data-[state=open]:animate-popoverShow data-[state=closed]:animate-popoverHide"
         sideOffset={5}
       >
         <div className="space-y-2">

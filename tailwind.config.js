@@ -20,6 +20,7 @@ export default {
           surface: "#0b1016",
 
           panel: "#0f141b",
+          dropdown: "#0f141b",
 
           line: "#ffffff1a",
           download: "#6081B7",

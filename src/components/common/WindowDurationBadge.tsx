@@ -43,7 +43,7 @@ export const WindowDurationBadge = memo<WindowDurationBadgeProps>(
           <Button variant="ghost" size="sm" className="px-0 py-0">
             <WidgetStatusBadge
               icon={<LuClock className="w-4 h-4 text-info" />}
-              className="cursor-pointer hover:opacity-80 "
+              className="cursor-pointer hover:opacity-80 bg-monitor-panel/55 "
             >
               <span className="text-sm font-medium text-info">
                 {DURATION_LABELS[value]}
@@ -51,7 +51,7 @@ export const WindowDurationBadge = memo<WindowDurationBadgeProps>(
             </WidgetStatusBadge>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="bg-monitor-surface">
+        <DropdownMenuContent align="end">
           <DropdownMenuRadioGroup
             value={value}
             onValueChange={(next) => onChange(next as ChartDuration)}

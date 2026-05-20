@@ -11,8 +11,7 @@ import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
 import { LEVEL_COLORS } from '../../utils/constants';
 import { bgToTextColor, getEffectiveLevel } from '../../utils/toolUtils';
 import { Button } from '@/components/ui/button';
-import * as Checkbox from '@radix-ui/react-checkbox';
-import { FaCheck } from 'react-icons/fa';
+import { Checkbox } from '@/components/ui/checkbox';
 import { ToolSwitcherItem } from './ToolSwitcherItem';
 import { WidgetStatusBadge } from '@/components/widget/WidgetStatusBadge';
 
@@ -48,16 +47,12 @@ const EmptyToolFallback = React.memo(
           e.stopPropagation();
         }}
       >
-        <Checkbox.Root
+        <Checkbox
           checked={true}
           onCheckedChange={() => {}}
-          className="h-3 w-3 border rounded flex items-center justify-center bg-blue-600 border-blue-600"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Checkbox.Indicator>
-            <FaCheck className="h-2 w-2 text-white" />
-          </Checkbox.Indicator>
-        </Checkbox.Root>
+          className="h-3 w-3 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+          onClick={(event) => event.stopPropagation()}
+        />
 
         <div className="flex items-center justify-between flex-1 min-w-0">
           <span className="font-normal text-xs truncate">
@@ -118,15 +113,16 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
       return Array.from(tools).sort();
     }, [allLogCountsByTool]);
 
-    // Calculate parent checkbox state
-    // ALL is checked only when visibleToolsFilter has multiple tools
-    const isAll = visibleToolsFilter.length > 1;
+    const isAll =
+      visibleToolsFilter.length > 0 &&
+      visibleToolsFilter.length === configuredTools.length;
     const parentChecked = isAll;
 
-    // Memoize current display info
     const currentDisplayInfo = React.useMemo(() => {
-      // Show "ALL" only when multiple tools are selected (align with isAll logic)
-      if (visibleToolsFilter.length > 1) {
+      if (
+        visibleToolsFilter.length > 0 &&
+        visibleToolsFilter.length === configuredTools.length
+      ) {
         return {
           label: 'ALL',
           effectiveLevel: '',
@@ -153,7 +149,13 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
         textColor,
         isCritical,
       };
-    }, [currentTool, levelsByTool, defaultAllLevel, visibleToolsFilter]);
+    }, [
+      currentTool,
+      levelsByTool,
+      defaultAllLevel,
+      visibleToolsFilter,
+      configuredTools,
+    ]);
 
     return (
       <DropdownMenu>
@@ -176,7 +178,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="w-48 bg-monitor-surface max-h-80 overflow-y-auto border-transparent"
+          className="w-48 max-h-80 overflow-y-auto"
         >
           {/* ALL control at the top */}
           {configuredTools.length > 0 && (
@@ -188,7 +190,7 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                   e.stopPropagation();
                 }}
               >
-                <Checkbox.Root
+                <Checkbox
                   checked={parentChecked}
                   onCheckedChange={() => {
                     if (isAll) {
@@ -197,17 +199,13 @@ export const ToolSwitcher: React.FC<ToolSwitcherProps> = React.memo(
                       onSelectAllTools?.(configuredTools);
                     }
                   }}
-                  className={`h-3 w-3 border rounded flex items-center justify-center ${
+                  className={`h-3 w-3 ${
                     parentChecked
-                      ? 'bg-green-600 border-green-600'
+                      ? 'data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600'
                       : 'bg-gray-700 border-gray-600'
                   }`}
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Checkbox.Indicator>
-                    <FaCheck className="h-2 w-2 text-white" />
-                  </Checkbox.Indicator>
-                </Checkbox.Root>
+                  onClick={(event) => event.stopPropagation()}
+                />
                 <span className="text-xs font-medium">ALL</span>
               </DropdownMenuItem>
 
