@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { selectSelectedPidTargets } from '@/shared/store/selectors';
+import { selectSelectedPidTargetsByFilter } from '@/shared/store/selectors';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -18,15 +18,18 @@ const METRIC_LABELS: Record<PIDMetricMode, string> = {
 };
 
 interface PIDGraphSectionProps {
+  filterIdx: number;
   mode: PIDMetricMode;
   onModeChange: (mode: PIDMetricMode) => void;
   totalPids: number;
 }
 
 const PIDGraphSection = memo(
-  ({ mode, onModeChange, totalPids }: PIDGraphSectionProps) => {
+  ({ filterIdx, mode, onModeChange, totalPids }: PIDGraphSectionProps) => {
     const dispatch = useAppDispatch();
-    const targets = useAppSelector(selectSelectedPidTargets);
+    const targets = useAppSelector((state) =>
+      selectSelectedPidTargetsByFilter(state, filterIdx),
+    );
 
     const usesGraphMetricSelector = totalPids >= 4 || targets.length >= 4;
     const shouldShowEndLabels = targets.length < 4;
@@ -114,7 +117,11 @@ const PIDGraphSection = memo(
           </div>
         </CardHeader>
         <CardContent className="px-3 pb-2 pt-0">
-          <PIDGraphPanel mode={mode} showEndLabels={shouldShowEndLabels} />
+          <PIDGraphPanel
+            filterIdx={filterIdx}
+            mode={mode}
+            showEndLabels={shouldShowEndLabels}
+          />
         </CardContent>
       </Card>
     );

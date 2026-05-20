@@ -2,15 +2,13 @@ import { memo, useCallback } from 'react';
 import { useSidebar } from '@/shared/hooks/useSidebar';
 import type { InputsTabProps, PIDWithIndex } from '../../../types';
 import { useInputsTabData } from '../hooks/useInputsTabData';
-import { PIDTable, PIDStatusBar } from './shared';
+import { PIDStatusBar } from './shared';
 import { TAB_STYLES } from '../styles';
-import { useIsDetached } from '../../FilterViewContext';
 import PIDInlineLayout from './PIDInlineLayout';
 
 const InputsTab = memo(
   ({ filterData, filterName, isLoading = false }: InputsTabProps) => {
     const { openPIDProps } = useSidebar();
-    const isDetached = useIsDetached();
 
     const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
       useInputsTabData(filterData);
@@ -40,21 +38,12 @@ const InputsTab = memo(
         )}
 
         {allPidsWithType.length > 0 ? (
-          isDetached ? (
-            <PIDTable
-              pids={inputPidsWithIndices}
-              filterIdx={filterData.idx}
-              onOpenProps={handleOpenProps}
-              hoveredPidKey={null}
-            />
-          ) : (
-            <PIDInlineLayout
-              pids={inputPidsWithIndices}
-              filterIdx={filterData.idx}
-              onOpenProps={handleOpenProps}
-              hoveredPidKey={null}
-            />
-          )
+          <PIDInlineLayout
+            pids={inputPidsWithIndices}
+            filterIdx={filterData.idx}
+            onOpenProps={handleOpenProps}
+            hoveredPidKey={null}
+          />
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-" />

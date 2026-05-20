@@ -1,9 +1,8 @@
 import { memo } from 'react';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
-import { PIDTable, PIDStatusBar } from '../pid/shared';
+import { PIDStatusBar } from '../pid/shared';
 import { TAB_STYLES } from '../styles';
 import { useOutputsTabData } from '../hooks/useOutputsTabData';
-import { useIsDetached } from '../../FilterViewContext';
 import PIDInlineLayout from './PIDInlineLayout';
 
 interface OutputsTabProps {
@@ -15,7 +14,6 @@ interface OutputsTabProps {
 const OutputsTab = memo(
   ({ filterData, filterName, isLoading = false }: OutputsTabProps) => {
     const { pidsWithIndices, globalStatus } = useOutputsTabData(filterData);
-    const isDetached = useIsDetached();
 
     return (
       <div className={TAB_STYLES.SPACE_Y_2}>
@@ -30,23 +28,13 @@ const OutputsTab = memo(
         )}
 
         {pidsWithIndices.length > 0 ? (
-          isDetached ? (
-            <PIDTable
-              pids={pidsWithIndices}
-              filterIdx={filterData.idx}
-              onOpenProps={() => {}}
-              variant="output"
-              hoveredPidKey={null}
-            />
-          ) : (
-            <PIDInlineLayout
-              pids={pidsWithIndices}
-              filterIdx={filterData.idx}
-              onOpenProps={() => {}}
-              hoveredPidKey={null}
-              variant="output"
-            />
-          )
+          <PIDInlineLayout
+            pids={pidsWithIndices}
+            filterIdx={filterData.idx}
+            onOpenProps={() => {}}
+            hoveredPidKey={null}
+            variant="output"
+          />
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500" />

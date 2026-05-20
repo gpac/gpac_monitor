@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { selectAllSelectedPidSamples } from '@/shared/store/selectors';
+import { selectAllSelectedPidSamplesByFilter } from '@/shared/store/selectors';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import PIDHistoryChart, {
@@ -16,42 +16,47 @@ const MODE_LABELS: Record<PIDMetricMode, string> = {
 };
 
 interface PIDGraphPanelProps {
+  filterIdx: number;
   mode: PIDMetricMode;
   showEndLabels: boolean;
 }
 
-const PIDGraphPanel = memo(({ mode, showEndLabels }: PIDGraphPanelProps) => {
-  const allSamples = useAppSelector(selectAllSelectedPidSamples);
+const PIDGraphPanel = memo(
+  ({ filterIdx, mode, showEndLabels }: PIDGraphPanelProps) => {
+    const allSamples = useAppSelector((state) =>
+      selectAllSelectedPidSamplesByFilter(state, filterIdx),
+    );
 
-  const entries = useMemo<PIDSeriesEntry[]>(
-    () =>
-      allSamples.map(({ target, pidHistory }, index) => {
-        const typeStr = target.streamTypeLabel
-          ? ` (${target.streamTypeLabel})`
-          : '';
-        return {
-          pidHistory,
-          label: `PID ${target.pidIndex}${typeStr}`,
-          metricLabel: MODE_LABELS[mode],
-          color: PID_SELECTION_COLORS[index],
-        };
-      }),
-    [allSamples, mode],
-  );
+    const entries = useMemo<PIDSeriesEntry[]>(
+      () =>
+        allSamples.map(({ target, pidHistory }, index) => {
+          const typeStr = target.streamTypeLabel
+            ? ` (${target.streamTypeLabel})`
+            : '';
+          return {
+            pidHistory,
+            label: `PID ${target.pidIndex}${typeStr}`,
+            metricLabel: MODE_LABELS[mode],
+            color: PID_SELECTION_COLORS[index],
+          };
+        }),
+      [allSamples, mode],
+    );
 
-  if (entries.length === 0) return null;
+    if (entries.length === 0) return null;
 
-  return (
-    <div className="p-2">
-      <PIDHistoryChart
-        entries={entries}
-        mode={mode}
-        showEndLabels={showEndLabels}
-        showCurrentTime
-      />
-    </div>
-  );
-});
+    return (
+      <div className="p-2">
+        <PIDHistoryChart
+          entries={entries}
+          mode={mode}
+          showEndLabels={showEndLabels}
+          showCurrentTime
+        />
+      </div>
+    );
+  },
+);
 
 PIDGraphPanel.displayName = 'PIDGraphPanel';
 

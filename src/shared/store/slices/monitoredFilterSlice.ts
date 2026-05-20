@@ -121,6 +121,12 @@ const monitoredFilterSlice = createSlice({
       state.selectedPidTargets = [];
     },
 
+    clearSelectedPidsByFilter: (state, action: PayloadAction<number>) => {
+      state.selectedPidTargets = state.selectedPidTargets.filter(
+        (target) => target.filterIdx !== action.payload,
+      );
+    },
+
     addPIDSample: (
       state,
       action: PayloadAction<{ key: string; sample: PIDMetricSample }>,
@@ -198,6 +204,7 @@ export const {
   setMaxPoints,
   toggleSelectedPid,
   clearSelectedPids,
+  clearSelectedPidsByFilter,
   addPIDSample,
   addPIDSamples,
   clearPIDSamples,

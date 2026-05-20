@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { useAppDispatch } from '@/shared/hooks/redux';
-import { clearSelectedPids } from '@/shared/store/slices/monitoredFilterSlice';
+import { clearSelectedPidsByFilter } from '@/shared/store/slices/monitoredFilterSlice';
 import type { PIDWithIndex } from '../../../types';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PIDTable } from './shared';
@@ -27,9 +27,9 @@ const PIDInlineLayout = memo(
 
     useEffect(
       () => () => {
-        dispatch(clearSelectedPids());
+        dispatch(clearSelectedPidsByFilter(filterIdx));
       },
-      [dispatch],
+      [dispatch, filterIdx],
     );
 
     return (
@@ -44,6 +44,7 @@ const PIDInlineLayout = memo(
           onMetricClick={setMode}
         />
         <PIDGraphSection
+          filterIdx={filterIdx}
           mode={mode}
           onModeChange={setMode}
           totalPids={pids.length}

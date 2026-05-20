@@ -71,3 +71,29 @@ export const selectAllSelectedPidSamples = createSelector(
         ] ?? [],
     })),
 );
+
+export const selectSelectedPidTargetsByFilter = createSelector(
+  [
+    selectSelectedPidTargets,
+    (_state: RootState, filterIdx: number) => filterIdx,
+  ],
+  (targets, filterIdx) =>
+    targets.filter((target) => target.filterIdx === filterIdx),
+);
+
+export const selectAllSelectedPidSamplesByFilter = createSelector(
+  [
+    selectMonitoredFilterState,
+    (_state: RootState, filterIdx: number) => filterIdx,
+  ],
+  (state, filterIdx) =>
+    state.selectedPidTargets
+      .filter((target) => target.filterIdx === filterIdx)
+      .map((target) => ({
+        target,
+        pidHistory:
+          state.pidSamples[
+            `${target.filterIdx}:${target.direction}:${target.pidIndex}`
+          ] ?? [],
+      })),
+);

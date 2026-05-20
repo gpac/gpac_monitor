@@ -10,7 +10,6 @@ import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
-import { useIsDetached } from '../../FilterViewContext';
 import type { PIDWithIndex } from '../../../types';
 
 interface PIDRowInfoCellProps {
@@ -32,7 +31,6 @@ const PIDRowInfoCell = memo(
     onOpenProps,
   }: PIDRowInfoCellProps) => {
     const dispatch = useAppDispatch();
-    const isDetached = useIsDetached();
     const colorIndex = useAppSelector(
       (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
     );
@@ -54,21 +52,19 @@ const PIDRowInfoCell = memo(
 
     return (
       <div className="min-w-0 flex items-center gap-1.5">
-        {!isDetached && (
-          <input
-            type="radio"
-            checked={isSelected}
-            readOnly
-            onClick={handleToggleSelect}
-            title="Select PID for temporal graph"
-            className="flex-shrink-1 cursor-pointer"
-            style={
-              isSelected
-                ? { accentColor: PID_SELECTION_COLORS[colorIndex] }
-                : undefined
-            }
-          />
-        )}
+        <input
+          type="radio"
+          checked={isSelected}
+          readOnly
+          onClick={handleToggleSelect}
+          title="Select PID for temporal graph"
+          className="flex-shrink-1 cursor-pointer"
+          style={
+            isSelected
+              ? { accentColor: PID_SELECTION_COLORS[colorIndex] }
+              : undefined
+          }
+        />
         {variant === 'input' && (
           <button
             onClick={onOpenProps}

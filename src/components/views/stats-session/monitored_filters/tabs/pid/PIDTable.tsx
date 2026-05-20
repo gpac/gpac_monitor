@@ -4,8 +4,6 @@ import { cn } from '@/utils/core';
 import type { PIDWithIndex } from '../../../types';
 import type { PIDMetricMode } from '../../../types/pid';
 import PIDTableRow from './PIDTableRow';
-import DetachedPIDCard from './DetachedPIDCard';
-import { useIsDetached } from '../../FilterViewContext';
 import { TAB_STYLES } from '../styles';
 
 type PIDTableVariant = 'input' | 'output';
@@ -94,26 +92,6 @@ const PIDTable = memo(
     activeMetric,
     onMetricClick,
   }: PIDTableProps) => {
-    const isDetached = useIsDetached();
-
-    if (isDetached) {
-      return (
-        <TooltipProvider delayDuration={200}>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-2 p-1">
-            {pids.map((pid) => (
-              <DetachedPIDCard
-                key={`${pid.name}-${pid.pidIdx}`}
-                pid={pid}
-                filterIdx={filterIdx}
-                variant={variant}
-                wide={pids.length === 1}
-              />
-            ))}
-          </div>
-        </TooltipProvider>
-      );
-    }
-
     return (
       <TooltipProvider delayDuration={200}>
         <div className="bg-monitor-app overflow-hidden">
