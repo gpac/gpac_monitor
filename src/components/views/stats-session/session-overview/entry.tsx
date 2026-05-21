@@ -74,7 +74,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       handleOpenProperties,
     } = useFilterHandlers(setActiveTab);
 
-    // Effects
     // Listen for pending filter open requests from NodeToolbar
     const pendingFilterOpen = useAppSelector(
       (state) => state.graph.pendingFilterOpen,

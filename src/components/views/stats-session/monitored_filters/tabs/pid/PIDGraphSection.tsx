@@ -6,6 +6,7 @@ import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
+import { useIsDetached } from '../../FilterViewContext';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { CLICKABLE_METRICS } from './PIDTable';
@@ -33,6 +34,7 @@ const PIDGraphSection = memo(
       selectSelectedPidTargetsByFilter(state, filterIdx),
     );
 
+    const isDetached = useIsDetached();
     const { duration, setDuration, maxPoints } = useChartDuration(
       'pid_graph_duration',
       '5min',
@@ -40,7 +42,7 @@ const PIDGraphSection = memo(
     );
 
     const usesGraphMetricSelector = totalPids >= 4 || targets.length >= 4;
-    const shouldShowEndLabels = targets.length < 4;
+    const shouldShowEndLabels = !isDetached && targets.length < 4;
 
     const pidLabels = useMemo(
       () =>
@@ -64,11 +66,13 @@ const PIDGraphSection = memo(
               {METRIC_LABELS[mode]}
             </p>
             <div className="flex items-center gap-1">
-              <WindowDurationBadge
-                value={duration}
-                onChange={setDuration}
-                options={['1min', '5min']}
-              />
+              {!isDetached && (
+                <WindowDurationBadge
+                  value={duration}
+                  onChange={setDuration}
+                  options={['1min', '5min']}
+                />
+              )}
               {usesGraphMetricSelector && (
                 <ToggleGroup
                   type="single"

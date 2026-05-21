@@ -7,6 +7,7 @@ import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';
 import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 import { TAB_STYLES } from './styles';
 import { formatMicroseconds } from '@/utils';
+import { useIsDetached } from '../FilterViewContext';
 
 interface NetworkTabProps {
   filterId: string;
@@ -32,6 +33,7 @@ const NetworkTab = memo(
     refreshInterval,
     filterTimeUs,
   }: NetworkTabProps) => {
+    const isDetached = useIsDetached();
     const { currentStats, formattedStats } = useNetworkMetrics(
       data,
       filterName,
@@ -61,11 +63,13 @@ const NetworkTab = memo(
             {formatMicroseconds(filterTimeUs)}
           </span>
           <div className="ml-auto flex items-center gap-2">
-            <WindowDurationBadge
-              value={duration}
-              onChange={setDuration}
-              options={NETWORK_DURATION_OPTIONS}
-            />
+            {!isDetached && (
+              <WindowDurationBadge
+                value={duration}
+                onChange={setDuration}
+                options={NETWORK_DURATION_OPTIONS}
+              />
+            )}
             <span className="text-muted-foreground/70 text-xs">
               Live <span className="text-error">⏺</span>
             </span>
