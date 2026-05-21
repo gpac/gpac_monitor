@@ -1,7 +1,6 @@
 import {
   formatBitrate,
   formatBufferTime,
-  formatLastTsSent,
   formatMicroseconds,
   formatPacketRate,
 } from '@/utils/formatting';
@@ -12,7 +11,7 @@ export const MODE_FORMATTERS: Record<PIDMetricMode, (v: number) => string> = {
   bufferTime: formatBufferTime,
   processTime: formatMicroseconds,
   processRate: formatPacketRate,
-  ts: formatLastTsSent,
+  ts: formatMicroseconds,
 };
 
 export const extractValue = (

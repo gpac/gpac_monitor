@@ -17,7 +17,7 @@ const METRIC_LABELS: Record<PIDMetricMode, string> = {
   bufferTime: 'Buffer',
   processTime: 'Proc. Time',
   processRate: 'Proc. Rate',
-  ts: 'TS',
+  ts: 'Last Proc.',
 };
 
 interface PIDGraphSectionProps {

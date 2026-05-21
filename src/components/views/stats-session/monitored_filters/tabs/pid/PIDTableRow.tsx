@@ -193,9 +193,16 @@ const PIDTableRow = memo(
             <PIDMetricTooltip
               rows={[
                 {
+                  label: 'last_process_time',
+                  value:
+                    perfStats.last_process_time != null
+                      ? formatMicroseconds(perfStats.last_process_time)
+                      : null,
+                  active: true,
+                },
+                {
                   label: 'last_ts_sent',
                   value: formatLastTsSent(perfStats.last_ts_sent),
-                  active: true,
                 },
                 {
                   label: 'first_process_time',
@@ -204,17 +211,12 @@ const PIDTableRow = memo(
                       ? formatMicroseconds(perfStats.first_process_time)
                       : null,
                 },
-                {
-                  label: 'last_process_time',
-                  value:
-                    perfStats.last_process_time != null
-                      ? formatMicroseconds(perfStats.last_process_time)
-                      : null,
-                },
               ]}
             >
               <span className="text-xs tabular-nums text-info font-mono cursor-default">
-                {formatLastTsSent(perfStats.last_ts_sent)}
+                {perfStats.last_process_time != null
+                  ? formatMicroseconds(perfStats.last_process_time)
+                  : '—'}
               </span>
             </PIDMetricTooltip>
             {statusBadge && (

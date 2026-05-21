@@ -12,7 +12,7 @@ const MODE_LABELS: Record<PIDMetricMode, string> = {
   bufferTime: 'Buffer',
   processTime: 'Proc.',
   processRate: 'Proc. Rate',
-  ts: 'TS',
+  ts: 'Last Proc.',
 };
 
 interface PIDGraphPanelProps {

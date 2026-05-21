@@ -13,7 +13,7 @@ export const CLICKABLE_METRICS: { metric: PIDMetricMode; label: string }[] = [
   { metric: 'bitrate', label: 'Avg Bitrate' },
   { metric: 'processTime', label: 'Proc.' },
   { metric: 'processRate', label: 'Proc. Rate' },
-  { metric: 'ts', label: 'TS' },
+  { metric: 'ts', label: 'Last Proc.' },
 ];
 
 interface PIDTableProps {
