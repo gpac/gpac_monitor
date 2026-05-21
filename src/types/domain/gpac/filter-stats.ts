@@ -68,6 +68,7 @@ export interface FilterStatsResponse {
   pck_done: number;
   pck_sent: number;
   time: number;
+  last_task_time?: number;
   nb_ipid: number;
   nb_opid: number;
   stats?: PIDStats;

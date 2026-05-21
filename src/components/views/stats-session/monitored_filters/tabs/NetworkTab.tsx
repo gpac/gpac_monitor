@@ -13,8 +13,7 @@ interface NetworkTabProps {
   filterId: string;
   data: NetworkTabData;
   filterName: string;
-  refreshInterval: number;
-  filterTimeUs?: number;
+  lastTaskTimeUs?: number;
 }
 
 const NETWORK_DURATION_OPTIONS: ChartDuration[] = [
@@ -26,13 +25,7 @@ const NETWORK_DURATION_OPTIONS: ChartDuration[] = [
 const NETWORK_HISTORY_STORAGE_KEY = 'gpac-network-history';
 
 const NetworkTab = memo(
-  ({
-    filterId,
-    data,
-    filterName,
-    refreshInterval,
-    filterTimeUs,
-  }: NetworkTabProps) => {
+  ({ filterId, data, filterName, lastTaskTimeUs }: NetworkTabProps) => {
     const isDetached = useIsDetached();
     const { currentStats, formattedStats } = useNetworkMetrics(
       data,
@@ -42,7 +35,7 @@ const NetworkTab = memo(
     const { duration, setDuration, windowDuration } = useChartDuration(
       NETWORK_HISTORY_STORAGE_KEY,
       '1min',
-      refreshInterval,
+      1000,
     );
 
     return (
@@ -60,7 +53,7 @@ const NetworkTab = memo(
           </span>
           <span className={TAB_STYLES.STATUS_SEPARATOR}>·</span>
           <span className="text-amber-400 tabular-nums font-mono">
-            {formatMicroseconds(filterTimeUs)}
+            {formatMicroseconds(lastTaskTimeUs)}
           </span>
           <div className="ml-auto flex items-center gap-2">
             {!isDetached && (
@@ -80,8 +73,7 @@ const NetworkTab = memo(
           filterId={filterId}
           bytesSent={currentStats.bytesSent}
           bytesReceived={currentStats.bytesReceived}
-          filterTimeUs={filterTimeUs}
-          refreshInterval={refreshInterval}
+          lastTaskTimeUs={lastTaskTimeUs}
           windowDurationMs={windowDuration}
           showCurrentTime
         />

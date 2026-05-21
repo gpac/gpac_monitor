@@ -173,8 +173,7 @@ const MonitoredFilterView = memo(
                 filterId={overviewData.idx.toString()}
                 data={networkData}
                 filterName={overviewData.name}
-                refreshInterval={1000}
-                filterTimeUs={overviewData.time}
+                lastTaskTimeUs={overviewData.last_task_time}
               />
             </TabsContent>
             <TabsContent value="inputs">

@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../../index';
 import { GpacConnectionConfig } from '@/types/connection';
+import { ConnectionStatus } from '@/types/communication/shared';
 
 /** Select connections slice */
 const selectConnectionsSlice = (state: RootState) => state.connections;
@@ -35,6 +36,10 @@ export const selectConnectionById = (id: string) => (state: RootState) =>
 /** Check if has active connection */
 export const selectHasActiveConnection = (state: RootState): boolean =>
   selectActiveConnectionId(state) !== null;
+
+/** True when active connection status is CONNECTED */
+export const selectIsGpacConnected = (state: RootState): boolean =>
+  selectActiveConnection(state)?.status === ConnectionStatus.CONNECTED;
 
 /** Count total connections */
 export const selectConnectionsCount = (state: RootState): number =>

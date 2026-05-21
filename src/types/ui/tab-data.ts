@@ -13,6 +13,7 @@ export interface OverviewTabData {
   // Processing metrics
   tasks?: number;
   time: number;
+  last_task_time?: number;
 
   // Packet metrics
   pck_done: number;

@@ -9,6 +9,7 @@ export interface SessionFilterStats {
   nb_opid: number;
   nb_ipid: number;
   time: number;
+  last_task_time?: number;
   idx: number;
   bytes_sent: number;
   is_eos?: boolean;

@@ -1,15 +1,15 @@
 const DEFAULT_FILTER_FIELDS = [
-    "idx", "status", "bytes_done", "bytes_sent", "pck_sent", "pck_done", "time", "nb_ipid", "nb_opid", "errors", "current_errors"
+    'idx', 'status', 'bytes_done', 'bytes_sent', 'pck_sent', 'pck_done', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors',
 ];
 
 const CPU_STATS_FIELDS = [
-    "total_cpu_usage", "process_cpu_usage",
-    "process_memory", "physical_memory", "physical_memory_avail",
-    "gpac_memory", "thread_count",
+    'total_cpu_usage', 'process_cpu_usage',
+    'process_memory', 'physical_memory', 'physical_memory_avail',
+    'gpac_memory', 'thread_count',
 ];
 
 const FILTER_PROPS_LITE = [
-    'name', 'status', 'bytes_done', 'type', 'ID', 'nb_ipid', 'nb_opid', 'idx', 'itag', 'pck_sent', 'pck_done', 'time',"current_errors"
+    'name', 'status', 'bytes_done', 'type', 'ID', 'nb_ipid', 'nb_opid', 'idx', 'itag', 'pck_sent', 'pck_done', 'time', 'current_errors','last_task_time'
 ];
 
 const FILTER_ARGS_LITE = [];
@@ -17,7 +17,7 @@ const FILTER_ARGS_LITE = [];
 const PID_PROPS_LITE = [];
 
 const FILTER_SUBSCRIPTION_FIELDS = [
-    'status', 'bytes_done', 'bytes_sent', 'pck_done', 'pck_sent', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors'
+    'status', 'bytes_done', 'bytes_sent', 'pck_done', 'pck_sent', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors','last_task_time'
 ];
 
 const UPDATE_INTERVALS = {

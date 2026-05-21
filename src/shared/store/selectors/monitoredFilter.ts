@@ -31,6 +31,15 @@ export const selectFilterNetworkChartData = createSelector(
   },
 );
 
+export const selectFilterLastTaskTimeData = createSelector(
+  [
+    selectMonitoredFilterState,
+    (_state: RootState, filterId: string) => filterId,
+  ],
+  (monitoredFilterState, filterId) =>
+    monitoredFilterState.dataByFilter[filterId]?.lastTaskTime ?? [],
+);
+
 /**
  * Select max points configuration
  */

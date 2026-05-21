@@ -3,7 +3,7 @@ import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/UplotChart';
 import uPlot from 'uplot';
-import { useBandwidthChart } from './hooks/useBandwidthChart';
+import { useFilterPerformanceChartData } from './hooks/useFilterPerformanceChartData';
 import { createBandwidthCombinedConfig } from './config/bandwidthCombinedUplotConfig';
 import { useContainerSize } from '@/components/common/charts';
 
@@ -11,8 +11,8 @@ interface BandwidthCombinedChartProps {
   filterId: string;
   bytesSent: number;
   bytesReceived: number;
-  filterTimeUs?: number;
-  refreshInterval?: number;
+  /** time spent in last task in microseconds */
+  lastTaskTimeUs?: number;
   windowDurationMs?: number;
   showCurrentTime?: boolean;
 }
@@ -22,8 +22,7 @@ export const BandwidthCombinedChart = memo(
     filterId,
     bytesSent,
     bytesReceived,
-    filterTimeUs = 0,
-    refreshInterval = 1000,
+    lastTaskTimeUs = 0,
     windowDurationMs,
     showCurrentTime = false,
   }: BandwidthCombinedChartProps) => {
@@ -31,21 +30,14 @@ export const BandwidthCombinedChart = memo(
     const dimensions = useContainerSize(containerRef);
     const timeLabelsRef = useRef<string[]>([]);
 
-    const { dataPoints: outbandPoints } = useBandwidthChart({
-      filterId,
-      currentBytes: bytesSent,
-      refreshInterval,
-      type: 'outband',
-      windowDurationMs,
-    });
-
-    const { dataPoints: inbandPoints } = useBandwidthChart({
-      filterId,
-      currentBytes: bytesReceived,
-      refreshInterval,
-      type: 'inband',
-      windowDurationMs,
-    });
+    const { outbandPoints, inbandPoints, lastTaskTimePoints } =
+      useFilterPerformanceChartData({
+        filterId,
+        bytesSent,
+        bytesReceived,
+        lastTaskTimeUs,
+        windowDurationMs,
+      });
 
     const options = useMemo(() => {
       return createBandwidthCombinedConfig({
@@ -73,16 +65,18 @@ export const BandwidthCombinedChart = memo(
           outbandPoints[index]?.time || inbandPoints[index]?.time || '',
       );
 
-      const filterTimeData = indices.map(() => filterTimeUs);
+      const lastTaskTimeData = indices.map(
+        (index) => lastTaskTimePoints[index]?.value ?? 0,
+      );
       const alignedData: uPlot.AlignedData = [
         indices,
         outbandData,
         inbandData,
-        filterTimeData,
+        lastTaskTimeData,
       ];
 
       return alignedData;
-    }, [outbandPoints, inbandPoints, filterTimeUs]);
+    }, [outbandPoints, inbandPoints, lastTaskTimePoints]);
 
     return (
       <Card className="bg-monitor-panel border-transparent">

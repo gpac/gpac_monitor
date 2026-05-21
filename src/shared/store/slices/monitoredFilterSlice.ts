@@ -26,6 +26,7 @@ interface NetworkChartData {
  */
 interface FilterChartData {
   network?: NetworkChartData;
+  lastTaskTime?: ChartDataPoint[];
 }
 
 /**
@@ -86,6 +87,31 @@ const monitoredFilterSlice = createSlice({
       if (dataArray.length > state.maxPoints) {
         dataArray.shift();
       }
+    },
+
+    addCombinedNetworkPoint: (
+      state,
+      action: PayloadAction<{
+        filterId: string;
+        outband: ChartDataPoint;
+        inband: ChartDataPoint;
+        lastTaskTime: ChartDataPoint;
+      }>,
+    ) => {
+      const { filterId, outband, inband, lastTaskTime } = action.payload;
+      if (!state.dataByFilter[filterId]) state.dataByFilter[filterId] = {};
+      const data = state.dataByFilter[filterId];
+      if (!data.network) data.network = { outband: [], inband: [] };
+      if (!data.lastTaskTime) data.lastTaskTime = [];
+
+      data.network.outband.push(outband);
+      if (data.network.outband.length > state.maxPoints)
+        data.network.outband.shift();
+      data.network.inband.push(inband);
+      if (data.network.inband.length > state.maxPoints)
+        data.network.inband.shift();
+      data.lastTaskTime.push(lastTaskTime);
+      if (data.lastTaskTime.length > state.maxPoints) data.lastTaskTime.shift();
     },
 
     /**
@@ -201,6 +227,7 @@ const monitoredFilterSlice = createSlice({
 
 export const {
   addNetworkDataPoint,
+  addCombinedNetworkPoint,
   clearFilterData,
   resetAllData,
   setMaxPoints,
