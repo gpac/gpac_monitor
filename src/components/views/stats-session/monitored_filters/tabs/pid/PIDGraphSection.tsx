@@ -106,7 +106,7 @@ const PIDGraphSection = memo(
               <ToggleGroup
                 type="multiple"
                 value={pidLabels.map((_, i) => String(i))}
-                className="flex flex-wrap gap-1 p-0 bg-monitor-line/20 border-0 border-monitor-surface/20 rounded-md"
+                className="flex flex-wrap gap-1 p-0 bg-monitor-line/10 border-0 border-monitor-surface/70 rounded-md"
               >
                 {pidLabels.map((item, index) => (
                   <ToggleGroupItem

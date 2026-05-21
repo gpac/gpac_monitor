@@ -59,7 +59,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     title: 'System Logs',
     icon: widgetIcons[WidgetType.LOGS],
     component: LogsMonitor,
-    defaultSize: { w: 8, h: 7 },
+    defaultSize: { w: 8, h: 6 },
     defaultPosition: { x: 16, y: 5 },
     defaultZIndex: 1002,
     description: 'View and filter system logs.',
