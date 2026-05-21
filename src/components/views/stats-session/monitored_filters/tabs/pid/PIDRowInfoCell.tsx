@@ -88,7 +88,10 @@ const PIDRowInfoCell = memo(
         >
           {badgeConfig.label}
         </Badge>
-        <span className="min-w-0 truncate text-muted-foreground">
+        <span
+          className="min-w-0 truncate text-muted-foreground"
+          title={infoLine}
+        >
           {infoLine}
         </span>
       </div>

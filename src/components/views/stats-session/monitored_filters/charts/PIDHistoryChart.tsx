@@ -106,9 +106,12 @@ const PIDHistoryChart = memo(
     }, [entries, mode]);
 
     return (
-      <div style={{ width: '100%' }} className="flex flex-col items-center">
+      <div
+        style={{ width: '100%' }}
+        className="flex flex-col justify-items-end"
+      >
         {showCurrentTime && timeLabelsRef.current.length > 0 && (
-          <div className="w-full text-center font-mono text-xs opacity-60 mb-1">
+          <div className="w-full text-right font-mono text-xs opacity-60 mb-1">
             {timeLabelsRef.current[timeLabelsRef.current.length - 1]}
           </div>
         )}
