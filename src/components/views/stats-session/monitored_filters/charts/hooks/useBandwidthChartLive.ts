@@ -6,17 +6,14 @@ import {
   ChartDataPoint,
 } from '@/shared/store/slices/monitoredFilterSlice';
 import { RootState } from '@/shared/store';
-import {
-  selectFilterUploadData,
-  selectFilterDownloadData,
-} from '@/shared/store/selectors';
+import { selectFilterNetworkChartData } from '@/shared/store/selectors';
 import { useGpacService } from '@/shared/hooks/connection/useGpacService';
 
 interface UseBandwidthChartLiveOptions {
   filterId: string;
   currentBytes: number;
   refreshInterval: number;
-  type: 'upload' | 'download';
+  type: 'outband' | 'inband';
   windowDurationMs?: number;
 }
 
@@ -30,11 +27,12 @@ export const useBandwidthChartLive = ({
   const dispatch = useDispatch();
   const gpacService = useGpacService();
 
-  const rawDataPoints = useSelector((state: RootState) =>
-    type === 'upload'
-      ? selectFilterUploadData(state, filterId)
-      : selectFilterDownloadData(state, filterId),
-  );
+  const rawDataPoints = useSelector((state: RootState) => {
+    const networkData = selectFilterNetworkChartData(state, filterId);
+    return type === 'outband'
+      ? (networkData?.outband ?? [])
+      : (networkData?.inband ?? []);
+  });
 
   const dataPoints = useMemo(() => {
     if (!windowDurationMs || !Number.isFinite(windowDurationMs)) {

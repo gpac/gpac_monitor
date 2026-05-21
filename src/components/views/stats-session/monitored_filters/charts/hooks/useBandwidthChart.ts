@@ -7,7 +7,7 @@ export interface UseBandwidthChartOptions {
   filterId: string;
   currentBytes: number;
   refreshInterval: number;
-  type: 'upload' | 'download';
+  type: 'outband' | 'inband';
   windowDurationMs?: number;
 }
 

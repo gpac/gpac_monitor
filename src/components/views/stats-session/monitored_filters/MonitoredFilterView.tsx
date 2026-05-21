@@ -151,7 +151,7 @@ const MonitoredFilterView = memo(
                 Overview
               </TabsTrigger>
               <TabsTrigger value="network" className={activeTabClass}>
-                Network
+                Stats
               </TabsTrigger>
               <TabsTrigger value="inputs" className={activeTabClass}>
                 Inputs ({counts.inputs})

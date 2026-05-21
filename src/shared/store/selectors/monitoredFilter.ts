@@ -1,6 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
-import { ChartDataPoint } from '../slices/monitoredFilterSlice';
 
 /**
  * Base selector - get monitored filter state
@@ -10,7 +9,7 @@ export const selectMonitoredFilterState = (state: RootState) =>
 
 /**
  * Select network chart data for a specific filter
- * Returns {upload: [], download: []} or undefined if filter has no data
+ * Returns {outband: [], inband: []} or undefined if filter has no data
  */
 export const selectFilterNetworkChartData = createSelector(
   [
@@ -26,29 +25,9 @@ export const selectFilterNetworkChartData = createSelector(
     }
 
     return {
-      upload: filterData.network.upload,
-      download: filterData.network.download,
+      outband: filterData.network.outband,
+      inband: filterData.network.inband,
     };
-  },
-);
-
-/**
- * Select upload data points for a specific filter
- */
-export const selectFilterUploadData = createSelector(
-  [selectFilterNetworkChartData],
-  (networkData): ChartDataPoint[] => {
-    return networkData?.upload || [];
-  },
-);
-
-/**
- * Select download data points for a specific filter
- */
-export const selectFilterDownloadData = createSelector(
-  [selectFilterNetworkChartData],
-  (networkData): ChartDataPoint[] => {
-    return networkData?.download || [];
   },
 );
 

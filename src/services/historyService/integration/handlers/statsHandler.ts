@@ -17,7 +17,7 @@ import { formatCompactTime } from '@/utils/formatting/time';
 
 export type BandwidthBuffer = Record<
   string,
-  { upload: ChartDataPoint[]; download: ChartDataPoint[] }
+  { outband: ChartDataPoint[]; inband: ChartDataPoint[] }
 >;
 
 export type PrevBandwidthState = Record<
@@ -61,24 +61,24 @@ export function dispatchSessionStats(
   if (silent) {
     for (const point of points) {
       if (!pendingBandwidth[point.filterId])
-        pendingBandwidth[point.filterId] = { upload: [], download: [] };
-      pendingBandwidth[point.filterId].upload.push(point.upload);
-      pendingBandwidth[point.filterId].download.push(point.download);
+        pendingBandwidth[point.filterId] = { outband: [], inband: [] };
+      pendingBandwidth[point.filterId].outband.push(point.outband);
+      pendingBandwidth[point.filterId].inband.push(point.inband);
     }
   } else {
     for (const point of points) {
       dispatch(
         addNetworkDataPoint({
           filterId: point.filterId,
-          type: 'upload',
-          point: point.upload,
+          type: 'outband',
+          point: point.outband,
         }),
       );
       dispatch(
         addNetworkDataPoint({
           filterId: point.filterId,
-          type: 'download',
-          point: point.download,
+          type: 'inband',
+          point: point.inband,
         }),
       );
     }

@@ -3,39 +3,39 @@
 exports[`computeBandwidthPoints > computes correct bandwidth deltas between two real events 1`] = `
 [
   {
-    "download": {
+    "filterId": "0",
+    "inband": {
       "time": "2.2s",
       "timestamp": 2238647,
       "value": 466543.17065031244,
     },
-    "filterId": "0",
-    "upload": {
+    "outband": {
       "time": "2.2s",
       "timestamp": 2238647,
       "value": 466543.17065031244,
     },
   },
   {
-    "download": {
+    "filterId": "1",
+    "inband": {
       "time": "2.2s",
       "timestamp": 2238647,
       "value": 42818346.95186653,
     },
-    "filterId": "1",
-    "upload": {
+    "outband": {
       "time": "2.2s",
       "timestamp": 2238647,
       "value": 0,
     },
   },
   {
-    "download": {
+    "filterId": "4",
+    "inband": {
       "time": "2.2s",
       "timestamp": 2238647,
       "value": 0,
     },
-    "filterId": "4",
-    "upload": {
+    "outband": {
       "time": "2.2s",
       "timestamp": 2238647,
       "value": 471648.87165007065,
@@ -47,39 +47,39 @@ exports[`computeBandwidthPoints > computes correct bandwidth deltas between two 
 exports[`computeBandwidthPoints > returns zero values on first event (no previous reference) 1`] = `
 [
   {
-    "download": {
-      "time": "1.2s",
-      "timestamp": 1237805,
-      "value": 0,
-    },
     "filterId": "0",
-    "upload": {
+    "inband": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
+    "outband": {
       "time": "1.2s",
       "timestamp": 1237805,
       "value": 0,
     },
   },
   {
-    "download": {
-      "time": "1.2s",
-      "timestamp": 1237805,
-      "value": 0,
-    },
     "filterId": "1",
-    "upload": {
+    "inband": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
+    "outband": {
       "time": "1.2s",
       "timestamp": 1237805,
       "value": 0,
     },
   },
   {
-    "download": {
+    "filterId": "4",
+    "inband": {
       "time": "1.2s",
       "timestamp": 1237805,
       "value": 0,
     },
-    "filterId": "4",
-    "upload": {
+    "outband": {
       "time": "1.2s",
       "timestamp": 1237805,
       "value": 0,

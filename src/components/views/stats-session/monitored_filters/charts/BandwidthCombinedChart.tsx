@@ -29,19 +29,19 @@ export const BandwidthCombinedChart = memo(
     const [dimensions, setDimensions] = useState({ width: 400, height: 230 });
     const timeLabelsRef = useRef<string[]>([]);
 
-    const { dataPoints: uploadPoints } = useBandwidthChart({
+    const { dataPoints: outbandPoints } = useBandwidthChart({
       filterId,
       currentBytes: bytesSent,
       refreshInterval,
-      type: 'upload',
+      type: 'outband',
       windowDurationMs,
     });
 
-    const { dataPoints: downloadPoints } = useBandwidthChart({
+    const { dataPoints: inbandPoints } = useBandwidthChart({
       filterId,
       currentBytes: bytesReceived,
       refreshInterval,
-      type: 'download',
+      type: 'inband',
       windowDurationMs,
     });
 
@@ -78,31 +78,27 @@ export const BandwidthCombinedChart = memo(
     }, [dimensions, isHistory]);
 
     const data = useMemo(() => {
-      const maxLength = Math.max(uploadPoints.length, downloadPoints.length);
+      const maxLength = Math.max(outbandPoints.length, inbandPoints.length);
       const indices = Array.from(
         { length: maxLength },
         (_unused, index) => index,
       );
 
-      const uploadData = indices.map(
-        (index) => uploadPoints[index]?.value || 0,
+      const outbandData = indices.map(
+        (index) => outbandPoints[index]?.value || 0,
       );
-      const downloadData = indices.map(
-        (index) => downloadPoints[index]?.value || 0,
+      const inbandData = indices.map(
+        (index) => inbandPoints[index]?.value || 0,
       );
       timeLabelsRef.current = indices.map(
         (index) =>
-          uploadPoints[index]?.time || downloadPoints[index]?.time || '',
+          outbandPoints[index]?.time || inbandPoints[index]?.time || '',
       );
 
-      const alignedData: uPlot.AlignedData = [
-        indices,
-        uploadData,
-        downloadData,
-      ];
+      const alignedData: uPlot.AlignedData = [indices, outbandData, inbandData];
 
       return alignedData;
-    }, [uploadPoints, downloadPoints]);
+    }, [outbandPoints, inbandPoints]);
 
     return (
       <Card className="bg-monitor-panel border-transparent">
@@ -111,12 +107,12 @@ export const BandwidthCombinedChart = memo(
             <LuArrowUpDown className="h-4 w-4 opacity-60" />
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-0.5 rounded-full bg-blue-500" />
-              Download
+              Inband
             </span>
             /
             <span className="flex items-center gap-1.5">
               <span className="w-3 h-0.5 rounded-full bg-emerald-500" />
-              Upload
+              Outband
             </span>
             <span className="opacity-60 normal-case">Mb/s</span>
           </CardTitle>

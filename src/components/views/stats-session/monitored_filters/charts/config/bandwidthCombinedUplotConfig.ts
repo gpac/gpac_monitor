@@ -82,17 +82,17 @@ export const createBandwidthCombinedConfig = ({
           tooltipIdxMap.set(u, idx);
 
           const time = timeLabelsRef.current[idx] || '--';
-          const upload = u.data[1][idx]
+          const outband = u.data[1][idx]
             ? formatBitrate(u.data[1][idx] * 8)
             : '--';
-          const download = u.data[2][idx]
+          const inband = u.data[2][idx]
             ? formatBitrate(u.data[2][idx] * 8)
             : '--';
 
           tooltip.innerHTML = `
       <div style="margin-bottom: 4px; color: #6ee7b7;">${timeLabel}: ${time}</div>
-      <div style="color: #10b981;">Upload: ${upload}</div>
-      <div style="color: #3b82f6;">Download: ${download}</div>
+      <div style="color: #10b981;">Outband: ${outband}</div>
+      <div style="color: #3b82f6;">Inband: ${inband}</div>
     `;
 
           tooltip.style.display = 'block';
@@ -104,14 +104,14 @@ export const createBandwidthCombinedConfig = ({
     series: [
       { label: 'Time' },
       {
-        label: 'Upload',
+        label: 'Outband',
         stroke: '#10b981',
         width: 0.7,
 
         value: (_u, v) => (v == null ? '--' : formatBitrate(v * 8)),
       },
       {
-        label: 'Download',
+        label: 'Inband',
         stroke: '#3b82f6',
         width: 0.7,
 

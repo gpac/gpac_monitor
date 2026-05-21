@@ -16,19 +16,19 @@ export const CHART_HEIGHT = 150;
 export const CHART_MARGIN = { top: 5, right: 10, left: 10, bottom: 5 };
 
 /**
- * Color configuration for upload/download bandwidth
+ * Color configuration for outband/inband bandwidth
  */
 export const BANDWIDTH_COLORS = {
-  sent: '#10b981', // Green for upload
-  received: '#3b82f6', // Blue for download
+  sent: '#10b981', // Green for outband
+  received: '#3b82f6', // Blue for inband
 } as const;
 
 /**
  * Chart titles for different bandwidth types
  */
 export const CHART_TITLES = {
-  sent: 'Upload Bandwidth',
-  received: 'Download Bandwidth',
+  sent: 'Outband Bandwidth',
+  received: 'Inband Bandwidth',
 } as const;
 
 /**

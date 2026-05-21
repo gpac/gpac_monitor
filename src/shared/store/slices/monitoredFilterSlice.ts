@@ -13,8 +13,8 @@ export interface ChartDataPoint {
  * Network chart data for a single filter
  */
 interface NetworkChartData {
-  upload: ChartDataPoint[];
-  download: ChartDataPoint[];
+  outband: ChartDataPoint[];
+  inband: ChartDataPoint[];
 }
 
 /**
@@ -43,13 +43,13 @@ const monitoredFilterSlice = createSlice({
   initialState,
   reducers: {
     /**
-     * Add network data point (upload or download)
+     * Add network data point (outband or inband)
      */
     addNetworkDataPoint: (
       state,
       action: PayloadAction<{
         filterId: string;
-        type: 'upload' | 'download';
+        type: 'outband' | 'inband';
         point: ChartDataPoint;
       }>,
     ) => {
@@ -61,8 +61,8 @@ const monitoredFilterSlice = createSlice({
 
       if (!state.dataByFilter[filterId].network) {
         state.dataByFilter[filterId].network = {
-          upload: [],
-          download: [],
+          outband: [],
+          inband: [],
         };
       }
 
@@ -96,15 +96,15 @@ const monitoredFilterSlice = createSlice({
     bulkAddNetworkData: (
       state,
       action: PayloadAction<
-        Record<string, { upload: ChartDataPoint[]; download: ChartDataPoint[] }>
+        Record<string, { outband: ChartDataPoint[]; inband: ChartDataPoint[] }>
       >,
     ) => {
       for (const [filterId, data] of Object.entries(action.payload)) {
         if (!state.dataByFilter[filterId]) state.dataByFilter[filterId] = {};
         if (!state.dataByFilter[filterId].network)
-          state.dataByFilter[filterId].network = { upload: [], download: [] };
+          state.dataByFilter[filterId].network = { outband: [], inband: [] };
         const network = state.dataByFilter[filterId].network!;
-        for (const direction of ['upload', 'download'] as const) {
+        for (const direction of ['outband', 'inband'] as const) {
           network[direction].push(...data[direction]);
           if (network[direction].length > state.maxPoints)
             network[direction].splice(

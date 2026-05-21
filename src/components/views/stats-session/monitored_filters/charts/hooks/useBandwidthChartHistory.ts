@@ -2,14 +2,11 @@ import { useCallback } from 'react';
 import { useSelector } from 'react-redux';
 import { formatBytes } from '@/utils/formatting';
 import { RootState } from '@/shared/store';
-import {
-  selectFilterUploadData,
-  selectFilterDownloadData,
-} from '@/shared/store/selectors';
+import { selectFilterNetworkChartData } from '@/shared/store/selectors';
 
 interface UseBandwidthChartHistoryOptions {
   filterId: string;
-  type: 'upload' | 'download';
+  type: 'outband' | 'inband';
 }
 
 /**
@@ -20,11 +17,12 @@ export const useBandwidthChartHistory = ({
   filterId,
   type,
 }: UseBandwidthChartHistoryOptions) => {
-  const dataPoints = useSelector((state: RootState) =>
-    type === 'upload'
-      ? selectFilterUploadData(state, filterId)
-      : selectFilterDownloadData(state, filterId),
-  );
+  const dataPoints = useSelector((state: RootState) => {
+    const networkData = selectFilterNetworkChartData(state, filterId);
+    return type === 'outband'
+      ? (networkData?.outband ?? [])
+      : (networkData?.inband ?? []);
+  });
 
   const formatBandwidth = useCallback(
     (value: number): string => `${formatBytes(value)}/s`,

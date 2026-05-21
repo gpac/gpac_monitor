@@ -39,12 +39,12 @@ const NetworkTab = memo(
       refreshInterval,
     );
 
-    const uploadActivity = useMemo(
+    const outbandActivity = useMemo(
       () => getActivityLevel(instantRates.bytesSentRate),
       [instantRates.bytesSentRate, getActivityLevel],
     );
 
-    const downloadActivity = useMemo(
+    const inbandActivity = useMemo(
       () => getActivityLevel(instantRates.bytesReceivedRate),
       [instantRates.bytesReceivedRate, getActivityLevel],
     );
@@ -53,7 +53,7 @@ const NetworkTab = memo(
       <div className={TAB_STYLES.TAB_CONTAINER}>
         {/* ROW 1: Compact Status Bar */}
         <div className={TAB_STYLES.STATUS_BAR}>
-          <span className="font-medium text-info">Network Activity</span>
+          <span className="font-medium text-info">Stats Live</span>
           <span className={TAB_STYLES.STATUS_SEPARATOR}>·</span>
           <span className={TAB_STYLES.STATUS_LABEL}>Filter: {filterName}</span>
           <div className="ml-auto flex items-center gap-2">
@@ -84,14 +84,14 @@ const NetworkTab = memo(
                     <span className="w-0.5 h-5 rounded-full bg-blue-500" />
                     <LuDownload className="h-4 w-4 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Download
+                      INBAND
                     </span>
                   </div>
                   <Badge
-                    variant={downloadActivity.variant}
+                    variant={inbandActivity.variant}
                     className="text-[11px] h-5 px-2"
                   >
-                    {downloadActivity.level}
+                    {inbandActivity.level}
                   </Badge>
                 </div>
 
@@ -134,14 +134,14 @@ const NetworkTab = memo(
                     <span className="w-0.5 h-5 rounded-full bg-emerald-500" />
                     <LuUpload className="h-4 w-4 text-muted-foreground" />
                     <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Upload
+                      OUTBAND
                     </span>
                   </div>
                   <Badge
-                    variant={uploadActivity.variant}
+                    variant={outbandActivity.variant}
                     className="text-[11px] h-5 px-2"
                   >
-                    {uploadActivity.level}
+                    {outbandActivity.level}
                   </Badge>
                 </div>
 
