@@ -1,19 +1,21 @@
-import { memo, useMemo, useRef, useEffect, useState } from 'react';
+import { memo, useMemo, useRef } from 'react';
 import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/UplotChart';
 import uPlot from 'uplot';
 import { useBandwidthChart } from './hooks/useBandwidthChart';
 import { createBandwidthCombinedConfig } from './config/bandwidthCombinedUplotConfig';
-import { DEFAULT_REFRESH_INTERVAL } from './config/bandwidthChartConfig';
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
+import { useContainerSize } from '@/components/common/charts';
 
 interface BandwidthCombinedChartProps {
   filterId: string;
   bytesSent: number;
   bytesReceived: number;
-  refreshInterval?: number;
+  /** time spent in last task in microseconds */
+  lastTaskTimeUs?: number;
   windowDurationMs?: number;
+  showCurrentTime?: boolean;
 }
 
 export const BandwidthCombinedChart = memo(
@@ -21,52 +23,23 @@ export const BandwidthCombinedChart = memo(
     filterId,
     bytesSent,
     bytesReceived,
-    refreshInterval = DEFAULT_REFRESH_INTERVAL,
+    lastTaskTimeUs = 0,
     windowDurationMs,
+    showCurrentTime = false,
   }: BandwidthCombinedChartProps) => {
     const { isHistory } = useDataMode();
     const containerRef = useRef<HTMLDivElement>(null);
-    const [dimensions, setDimensions] = useState({ width: 400, height: 230 });
+    const dimensions = useContainerSize(containerRef);
     const timeLabelsRef = useRef<string[]>([]);
 
-    const { dataPoints: outbandPoints } = useBandwidthChart({
-      filterId,
-      currentBytes: bytesSent,
-      refreshInterval,
-      type: 'outband',
-      windowDurationMs,
-    });
-
-    const { dataPoints: inbandPoints } = useBandwidthChart({
-      filterId,
-      currentBytes: bytesReceived,
-      refreshInterval,
-      type: 'inband',
-      windowDurationMs,
-    });
-
-    // Resize observer to adapt chart to container size
-    useEffect(() => {
-      if (!containerRef.current) return;
-
-      const updateDimensions = () => {
-        if (containerRef.current) {
-          const { width } = containerRef.current.getBoundingClientRect();
-          setDimensions({ width: width || 400, height: 230 });
-        }
-      };
-
-      // Initial measurement
-      updateDimensions();
-
-      // Observe resize
-      const resizeObserver = new ResizeObserver(updateDimensions);
-      resizeObserver.observe(containerRef.current);
-
-      return () => {
-        resizeObserver.disconnect();
-      };
-    }, []);
+    const { outbandPoints, inbandPoints, lastTaskTimePoints } =
+      useBandwidthChart({
+        filterId,
+        bytesSent,
+        bytesReceived,
+        lastTaskTimeUs,
+        windowDurationMs,
+      });
 
     const options = useMemo(() => {
       return createBandwidthCombinedConfig({
@@ -95,10 +68,18 @@ export const BandwidthCombinedChart = memo(
           outbandPoints[index]?.time || inbandPoints[index]?.time || '',
       );
 
-      const alignedData: uPlot.AlignedData = [indices, outbandData, inbandData];
+      const lastTaskTimeData = indices.map(
+        (index) => lastTaskTimePoints[index]?.value ?? 0,
+      );
+      const alignedData: uPlot.AlignedData = [
+        indices,
+        outbandData,
+        inbandData,
+        lastTaskTimeData,
+      ];
 
       return alignedData;
-    }, [outbandPoints, inbandPoints]);
+    }, [outbandPoints, inbandPoints, lastTaskTimePoints]);
 
     return (
       <Card className="bg-monitor-panel border-transparent">
@@ -106,7 +87,7 @@ export const BandwidthCombinedChart = memo(
           <CardTitle className="flex justify-center items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <LuArrowUpDown className="h-4 w-4 opacity-60" />
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 rounded-full bg-blue-500" />
+              <span className="w-3 h-0.5 rounded-full bg-monitor-active-filter" />
               Inband
             </span>
             /
@@ -114,7 +95,16 @@ export const BandwidthCombinedChart = memo(
               <span className="w-3 h-0.5 rounded-full bg-emerald-500" />
               Outband
             </span>
-            <span className="opacity-60 normal-case">Mb/s</span>
+            <span className="opacity-60 normal-case">Mb/s</span> /{' '}
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-0.5 rounded-full bg-amber-400" />
+              Filter Proc. Time
+            </span>
+            {showCurrentTime && timeLabelsRef.current.length > 0 && (
+              <span className="ml-auto font-mono normal-case opacity-60 text-xs">
+                {timeLabelsRef.current[timeLabelsRef.current.length - 1]}
+              </span>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">

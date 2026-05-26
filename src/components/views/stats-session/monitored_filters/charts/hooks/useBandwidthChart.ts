@@ -1,27 +1,16 @@
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
-import { useBandwidthChartLive } from './useBandwidthChartLive';
-import { useBandwidthChartHistory } from './useBandwidthChartHistory';
-import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
+import {
+  useFilterPerformanceChartData,
+  type FilterPerformanceChartOptions,
+} from './useFilterPerformanceChartData';
 
-export interface UseBandwidthChartOptions {
-  filterId: string;
-  currentBytes: number;
-  refreshInterval: number;
-  type: 'outband' | 'inband';
-  windowDurationMs?: number;
-}
+export type UseBandwidthChartOptions = Omit<FilterPerformanceChartOptions, 'enabled'>;
 
+/**
+ * Facade: live mode dispatches new points, history mode reads store populated by replay.
+ * Same pattern as useCPUStats → useCPUStatsLive / useCPUStatsHistory.
+ */
 export const useBandwidthChart = (options: UseBandwidthChartOptions) => {
   const { isHistory } = useDataMode();
-
-  const history = useBandwidthChartHistory({
-    filterId: options.filterId,
-    type: options.type,
-  });
-
-  const live = useBandwidthChartLive(options);
-
-  return isHistory ? history : live;
+  return useFilterPerformanceChartData({ ...options, enabled: !isHistory });
 };
-
-export type { ChartDataPoint };

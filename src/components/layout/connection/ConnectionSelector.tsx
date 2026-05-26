@@ -5,7 +5,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@radix-ui/react-popover';
+} from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { useConnectionStatusSync } from '@/shared/hooks/connection/useConnectionStatusSync';
@@ -66,7 +66,7 @@ const ConnectionSelector = memo(() => {
             focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400/30
             ${
               isOpen
-                ? ' bg-monitor-panel/55 text-white ring-1 ring-emerald-400/30'
+                ? ' bg-monitor-dropdown text-white ring-1 ring-emerald-400/30'
                 : 'text-white/70 hover:bg-white/5 hover:text-white'
             }
           `}
@@ -87,11 +87,7 @@ const ConnectionSelector = memo(() => {
       </PopoverTrigger>
 
       <PopoverContent
-        className="
-          w-72 bg-monitor-surface ring-1 ring-monitor-line rounded-xl shadow-none p-2 z-50
-          data-[state=open]:animate-popoverShow
-          data-[state=closed]:animate-popoverHide
-        "
+        className="w-72 rounded-xl z-50 data-[state=open]:animate-popoverShow data-[state=closed]:animate-popoverHide"
         sideOffset={5}
       >
         <div className="px-2 py-1.5 text-xs font-semibold text-gray-400">

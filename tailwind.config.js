@@ -21,8 +21,9 @@ export default {
 
           panel: "#0f141b",
           timeline: {
-          subtle: "#121826",
-        },
+            subtle: "#121826",
+          },
+          dropdown: "#0f141b",
 
           line: "#ffffff1a",
           download: "#6081B7",

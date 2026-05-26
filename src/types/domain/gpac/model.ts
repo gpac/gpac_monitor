@@ -12,6 +12,7 @@ export interface MonitoredFilterStats {
   pck_sent: number;
   pck_done: number;
   time: number;
+  last_task_time?: number;
   nb_ipid: number;
   nb_opid: number;
   ipids?: Record<string, PIDproperties>;

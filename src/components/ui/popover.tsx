@@ -22,7 +22,7 @@ const PopoverContent = forwardRef<
         side={side}
         align={align}
         className={cn(
-          'z-50 min-w-[8rem] max-w-[20rem] overflow-hidden rounded-md border bg-gray-800 p-2 text-gray-100 shadow-md',
+          'z-50 min-w-[8rem] max-w-[20rem] overflow-hidden rounded-md border border-slate-700/50 bg-monitor-dropdown p-2 text-slate-200 shadow-lg shadow-black/40',
           'data-[state=open]:animate-in data-[state=closed]:animate-out',
           'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
           'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95',
@@ -43,7 +43,7 @@ const PopoverArrow = forwardRef<
 >(({ className, ...props }, ref) => (
   <PopoverPrimitive.Arrow
     ref={ref}
-    className={cn('fill-gray-800', className)}
+    className={cn('fill-monitor-dropdown', className)}
     {...props}
   />
 ));

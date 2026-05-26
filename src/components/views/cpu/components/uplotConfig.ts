@@ -1,16 +1,22 @@
 import type { MutableRefObject } from 'react';
 import uPlot from 'uplot';
 
+export interface UplotConfigParams {
+  memoryYAxisMax: number;
+  timeLabelsRef: MutableRefObject<string[]>;
+  width?: number;
+  height?: number;
+}
+
 export const createCpuMemoryUplotConfig = ({
   memoryYAxisMax,
   timeLabelsRef,
-}: {
-  memoryYAxisMax: number;
-  timeLabelsRef: MutableRefObject<string[]>;
-}): uPlot.Options => {
+  width = 100,
+  height = 100,
+}: UplotConfigParams): uPlot.Options => {
   return {
-    width: 100, // Will be auto-resized by UplotChart
-    height: 100, //
+    width,
+    height,
     padding: [10, 10, 5, 5],
     cursor: {
       show: true,

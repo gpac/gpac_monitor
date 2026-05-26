@@ -7,8 +7,8 @@ import React, {
 } from 'react';
 import { useOptimizedResize } from '@/shared/hooks/ui/useOptimizedResize';
 import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
-import { useStatsCalculations } from '../hooks/stats';
-import { useEnrichedStats } from '../hooks/stats';
+import { useStatsCalculations } from '../hooks/stats/useStatsCalculations';
+import { useEnrichedStats } from '../hooks/stats/useEnrichedStats';
 import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { clearPendingFilterOpen } from '@/shared/store/slices/graphSlice';
@@ -74,7 +74,6 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       handleOpenProperties,
     } = useFilterHandlers(setActiveTab);
 
-    // Effects
     // Listen for pending filter open requests from NodeToolbar
     const pendingFilterOpen = useAppSelector(
       (state) => state.graph.pendingFilterOpen,
@@ -139,6 +138,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               idx={filter.idx}
               filter={filter}
               isActive={true}
+              isDetached={true}
               onCardClick={handleCardClick}
               onOpenProperties={handleOpenProperties}
             />

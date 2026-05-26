@@ -4,7 +4,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@radix-ui/react-popover';
+} from '@/components/ui/popover';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectThreadAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { useOpenLogsWidget } from '@/shared/hooks/ui/useOpenLogsWidget';
@@ -60,7 +60,7 @@ export const ThreadFilterDropdown = memo(() => {
 
       <PopoverContent
         align="end"
-        className="bg-monitor-panel border-gray-700 rounded-md shadow-lg z-50 min-w-[220px] max-h-[320px] overflow-hidden"
+        className="rounded-md z-50 min-w-[220px] max-h-[320px] overflow-hidden"
       >
         <div className="px-3 py-2 text-xs text-gray-400 border-b border-gray-700 font-semibold">
           Threads with Alerts

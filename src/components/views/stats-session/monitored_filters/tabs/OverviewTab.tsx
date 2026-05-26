@@ -1,117 +1,154 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
+import { LuSettings } from 'react-icons/lu';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import { OverviewTabData } from '@/types/ui';
-import { PacketsCard, DataCard, RealtimeMetricsCard } from '../cards';
 import { Badge } from '@/components/ui/badge';
-import { formatTime } from '@/utils/formatting';
+import { Button } from '@/components/ui/button';
 import {
-  getFilterHealthInfo,
-  type FilterAlerts,
-} from '../cards/shared/statusHelpers';
-import { TAB_STYLES } from './styles';
+  formatTime,
+  formatBytes,
+  formatNumber,
+  formatPacketRate,
+  microsecondsToSeconds,
+} from '@/utils/formatting';
+import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
+import { MetricRow, TableSection } from './pid/shared';
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
   alerts?: FilterAlerts | null;
+  onOpenProperties?: () => void;
 }
 
-const OverviewTab = memo(({ filter, alerts }: OverviewTabProps) => {
-  const { status, type, idx, time } = filter;
+const OverviewTab = memo(
+  ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
+    const { status, type, idx, time } = filter;
+    const { isHistory } = useDataMode();
+    const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
+    const healthInfo = getFilterHealthInfo(status, isStalled, alerts);
 
-  const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
-  const healthInfo = getFilterHealthInfo(status, isStalled, alerts);
-  const formattedUptime = formatTime(time);
-  const { isHistory } = useDataMode();
+    const metrics = useMemo(() => {
+      const secs = microsecondsToSeconds(time);
+      return {
+        processSpeed:
+          secs > 0 ? `${formatBytes(filter.bytes_done / secs)}/s` : '—',
+        processPacketRate:
+          secs > 0 ? formatPacketRate(filter.pck_done / secs) : '—',
+      };
+    }, [time, filter.bytes_done, filter.pck_done]);
 
-  return (
-    <div className="flex flex-col h-full gap-2 p-2">
-      {/* ROW 1: Status Strip Bar - Single compact line */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-monitor-panel/40 rounded border-b border-monitor-line/10 text-xs shrink-0">
-        <span className="font-medium text-info">[{type || 'unknown'}]</span>
-        <Badge
-          variant={healthInfo.variant}
-          className="text-xs py-0 px-1.5 h-fit"
-        >
-          ● {healthInfo.label}
-        </Badge>
-        <span className="text-muted-foreground/50">·</span>
-        <span className="text-muted-foreground">Index: {idx}</span>
-        <span className="text-muted-foreground/50">·</span>
-        <span className="text-muted-foreground">
-          Uptime:{' '}
-          <span className="font-medium tabular-nums">{formattedUptime}</span>
-        </span>
-        <span className="ml-auto text-muted-foreground/70 text-xs">
-          {isHistory ? (
-            <>
-              <span className="text-purple-400"> ⏺ </span> History
-            </>
-          ) : (
-            <>
-              Live <span className="text-error">⏺</span>
-            </>
+    const totalErrors = (filter.errors || 0) + (filter.current_errors || 0);
+
+    return (
+      <div className="flex flex-col gap-2 p-2">
+        {/* Status strip */}
+        <div className="flex items-center gap-2 px-3 py-2 bg-monitor-panel/40 rounded border-b border-monitor-line/10 text-xs shrink-0">
+          {onOpenProperties && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onOpenProperties}
+              className="h-6 px-1.5 py-0"
+              title="Display filter arguments"
+            >
+              <LuSettings className="h-3.5 w-3.5" />
+            </Button>
           )}
-        </span>
-      </div>
-
-      {/* ROW 2: Compact KPIs grid - Auto-adaptive based on container width */}
-      <div className={TAB_STYLES.GRID_AUTO_FIT}>
-        {/* Column 1: Filter Health + PIDs */}
-        <div className="flex flex-col gap-2">
-          {/* Compact Health Card */}
-          <div className="bg-monitor-panel/60 border-r border-monitor-line/10 rounded p-2">
-            <div className="text-xs font-medium text-gray-400 mb-1">Health</div>
-            <div className={`${healthInfo.color} text-xs font-medium py-1`}>
-              {status || 'Unknown'}
-            </div>
-            {((filter.errors && filter.errors > 0) ||
-              (filter.current_errors && filter.current_errors > 0)) && (
-              <div className="text-xs text-rose-400 mt-1" title="Total errors">
-                {(filter.errors || 0) + (filter.current_errors || 0)} errors
-              </div>
+          <span className="font-medium text-muted-foreground">
+            [{type || 'unknown'}]
+          </span>
+          <Badge
+            variant={healthInfo.variant}
+            className="text-xs py-0 px-1.5 h-fit"
+          >
+            ● {healthInfo.label}
+          </Badge>
+          <span className="text-muted-foreground/50">·</span>
+          <span className="text-muted-foreground">Index: {idx}</span>
+          <span className="text-muted-foreground/50">·</span>
+          <span className="text-muted-foreground">
+            Uptime:{' '}
+            <span className="font-medium tabular-nums">{formatTime(time)}</span>
+          </span>
+          <span className="ml-auto text-muted-foreground/70">
+            {isHistory ? (
+              <>
+                <span className="text-purple-400"> ⏺ </span> History
+              </>
+            ) : (
+              <>
+                Live <span className="text-error">⏺</span>
+              </>
             )}
-          </div>
-          {/* Compact PIDs Card */}
-          <div className="bg-monitor-panel/60 border-0 border-r border-monitor-line/10 rounded p-2">
-            <div className="text-xs font-medium text-info mb-1">PIDs</div>
-            <div className="text-xs space-y-0.5">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Ipid:</span>
-                <span className="font-medium">{filter.nb_ipid}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Opid:</span>
-                <span className="font-medium">{filter.nb_opid}</span>
-              </div>
-            </div>
+          </span>
+        </div>
+
+        {/* 2-column grid: Processing | Packets + Data */}
+        <div className="grid grid-cols-2 gap-2">
+          <TableSection title="Processing">
+            <MetricRow
+              label="Filter Process speed"
+              value={metrics.processSpeed}
+              isEven
+            />
+            <MetricRow
+              label="Packets/s"
+              value={metrics.processPacketRate}
+              isEven={false}
+            />
+          </TableSection>
+
+          <div className="flex flex-col gap-2">
+            <TableSection title="Packets">
+              <MetricRow
+                label="Done"
+                value={formatNumber(filter.pck_done)}
+                isEven
+              />
+              <MetricRow
+                label="Sent"
+                value={formatNumber(filter.pck_sent)}
+                isEven={false}
+              />
+              {filter.pck_ifce_sent !== undefined && (
+                <MetricRow
+                  label="Interface"
+                  value={formatNumber(filter.pck_ifce_sent)}
+                  isEven
+                />
+              )}
+            </TableSection>
+            <TableSection title="Data">
+              <MetricRow
+                label="Done"
+                value={formatBytes(filter.bytes_done)}
+                isEven
+              />
+              <MetricRow
+                label="Sent"
+                value={formatBytes(filter.bytes_sent)}
+                isEven={false}
+              />
+            </TableSection>
           </div>
         </div>
 
-        {/* Column 2: Realtime Metrics */}
-        <div className="flex flex-col gap-2">
-          <RealtimeMetricsCard filter={filter} />
-        </div>
-
-        {/* Column 3: Packets & Data */}
-        <div className="flex flex-col gap-2">
-          <PacketsCard
-            pck_done={filter.pck_done}
-            pck_sent={filter.pck_sent}
-            pck_ifce_sent={filter.pck_ifce_sent}
-          />
-          <DataCard
-            bytes_done={filter.bytes_done}
-            bytes_sent={filter.bytes_sent}
-          />
-        </div>
+        {totalErrors > 0 && (
+          <TableSection title="Errors">
+            <MetricRow
+              label="Total"
+              value={String(totalErrors)}
+              isEven
+              valueClassName="text-destructive"
+            />
+          </TableSection>
+        )}
       </div>
-
-      <div className="flex-1 overflow-hidden"></div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 OverviewTab.displayName = 'OverviewTab';
 

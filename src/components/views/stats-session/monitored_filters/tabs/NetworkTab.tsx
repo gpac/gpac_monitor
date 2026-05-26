@@ -10,12 +10,14 @@ import type { ChartDuration } from '@/utils/charts';
 import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';
 import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 import { TAB_STYLES } from './styles';
+import { formatMicroseconds } from '@/utils/formatting/time';
+import { useIsDetached } from '../FilterViewContext';
 
 interface NetworkTabProps {
   filterId: string;
   data: NetworkTabData;
   filterName: string;
-  refreshInterval: number;
+  lastTaskTimeUs?: number;
 }
 
 const NETWORK_DURATION_OPTIONS: ChartDuration[] = [
@@ -24,19 +26,19 @@ const NETWORK_DURATION_OPTIONS: ChartDuration[] = [
   '5min',
   '10min',
 ];
-
 const NETWORK_HISTORY_STORAGE_KEY = 'gpac-network-history';
 
 const NetworkTab = memo(
-  ({ filterId, data, filterName, refreshInterval }: NetworkTabProps) => {
+  ({ filterId, data, filterName, lastTaskTimeUs }: NetworkTabProps) => {
     const { isHistory } = useDataMode();
+    const isDetached = useIsDetached();
     const { currentStats, instantRates, formattedStats, getActivityLevel } =
       useNetworkMetrics(data, filterName);
 
     const { duration, setDuration, windowDuration } = useChartDuration(
       NETWORK_HISTORY_STORAGE_KEY,
       '1min',
-      refreshInterval,
+      1000,
     );
 
     const outbandActivity = useMemo(
@@ -50,14 +52,24 @@ const NetworkTab = memo(
     );
 
     return (
-      <div className={TAB_STYLES.TAB_CONTAINER}>
-        {/* ROW 1: Compact Status Bar */}
+      <div className="flex flex-col gap-1 p-1">
+        {/* Status bar with inline rates */}
         <div className={TAB_STYLES.STATUS_BAR}>
-          <span className="font-medium text-info">Stats Live</span>
+          <span className={TAB_STYLES.STATUS_LABEL}>{filterName}</span>
+          <span className="font-medium text-info">Stats</span>
           <span className={TAB_STYLES.STATUS_SEPARATOR}>·</span>
-          <span className={TAB_STYLES.STATUS_LABEL}>Filter: {filterName}</span>
+          <span className="text-monitor-active-filter tabular-nums font-mono">
+            ↓ {formattedStats.bytesReceivedRate}
+          </span>
+          <span className="text-emerald-400 tabular-nums font-mono">
+            ↑ {formattedStats.bytesSentRate}
+          </span>
+          <span className={TAB_STYLES.STATUS_SEPARATOR}>·</span>
+          <span className="text-amber-400 tabular-nums font-mono">
+            {formatMicroseconds(lastTaskTimeUs)}
+          </span>
           <div className="ml-auto flex items-center gap-2">
-            {!isHistory && (
+            {!isHistory && !isDetached && (
               <WindowDurationBadge
                 value={duration}
                 onChange={setDuration}
@@ -73,12 +85,11 @@ const NetworkTab = memo(
           </div>
         </div>
 
-        {/* ROW 2: Stats cards - 2 columns */}
+        {/* Stats cards - 2 columns */}
         <div className={TAB_STYLES.GRID_2_COL}>
           <Card className="bg-monitor-panel border-transparent">
             <CardContent className="p-2">
               <div className="space-y-2">
-                {/* Header: title + badge */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-0.5 h-5 rounded-full bg-blue-500" />
@@ -94,8 +105,6 @@ const NetworkTab = memo(
                     {inbandActivity.level}
                   </Badge>
                 </div>
-
-                {/* Main rate  */}
                 <div className="flex items-baseline gap-1.5 leading-none">
                   <span className="text-xl font-bold text-monitor-download tabular-nums">
                     {isHistory
@@ -108,8 +117,6 @@ const NetworkTab = memo(
                     </span>
                   )}
                 </div>
-
-                {/* Secondary stats */}
                 <div className="text-[11px] text-muted-foreground">
                   {!isHistory && (
                     <>
@@ -126,6 +133,7 @@ const NetworkTab = memo(
               </div>
             </CardContent>
           </Card>
+
           <Card className="bg-monitor-panel border-transparent">
             <CardContent className="p-2">
               <div className="space-y-2">
@@ -144,8 +152,6 @@ const NetworkTab = memo(
                     {outbandActivity.level}
                   </Badge>
                 </div>
-
-                {/* Main rate*/}
                 <div className="flex items-baseline gap-1.5 leading-none">
                   <span className="text-xl font-bold text-emerald-500 tabular-nums">
                     {isHistory
@@ -158,8 +164,6 @@ const NetworkTab = memo(
                     </span>
                   )}
                 </div>
-
-                {/* Secondary stats */}
                 <div className="text-[11px] text-muted-foreground">
                   {!isHistory && (
                     <>
@@ -183,8 +187,9 @@ const NetworkTab = memo(
           filterId={filterId}
           bytesSent={currentStats.bytesSent}
           bytesReceived={currentStats.bytesReceived}
-          refreshInterval={refreshInterval}
+          lastTaskTimeUs={lastTaskTimeUs}
           windowDurationMs={isHistory ? undefined : windowDuration}
+          showCurrentTime
         />
       </div>
     );

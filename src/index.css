@@ -202,6 +202,10 @@ html {
     font-variant-numeric: tabular-nums;
     min-width: 3.5ch;
   }
+
+  .pid-row-hovered {
+    filter: brightness(1.4);
+  }
 }
 
 /* Custom scrollbar styles */

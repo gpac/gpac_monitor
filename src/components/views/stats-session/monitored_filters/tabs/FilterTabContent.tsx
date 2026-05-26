@@ -20,6 +20,7 @@ interface FilterTabContentProps {
   onOpenProperties: () => void;
   initialTab?: InitialTabType;
   isLoading?: boolean;
+  isDetached?: boolean;
 }
 
 export const FilterTabContent: React.FC<FilterTabContentProps> = ({
@@ -32,6 +33,7 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   onOpenProperties,
   initialTab,
   isLoading = false,
+  isDetached = false,
 }) => {
   const props = {
     overviewData,
@@ -42,7 +44,8 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
     onOpenProperties,
     initialTab,
     isLoading,
-    ...(filterData && { filterData }), // Only pass if defined
+    isDetached,
+    ...(filterData && { filterData }),
   };
 
   return <MonitoredFilterView {...props} />;

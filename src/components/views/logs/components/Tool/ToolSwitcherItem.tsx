@@ -1,8 +1,7 @@
 import React, { useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import * as Checkbox from '@radix-ui/react-checkbox';
-import { FaCheck } from 'react-icons/fa';
+import { Checkbox } from '@/components/ui/checkbox';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
 import { LEVEL_COLORS } from '../../utils/constants';
 import { bgToTextColor, getEffectiveLevel } from '../../utils/toolUtils';
@@ -61,20 +60,16 @@ export const ToolSwitcherItem: React.FC<ToolSwitcherItemProps> = React.memo(
           e.stopPropagation();
         }}
       >
-        <Checkbox.Root
+        <Checkbox
           checked={isChecked}
           onCheckedChange={onToggle}
-          className={`h-3 w-3 border rounded flex items-center justify-center ${
+          className={`h-3 w-3 ${
             isChecked
-              ? 'bg-blue-600 border-blue-600'
+              ? 'data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600'
               : 'bg-gray-700 border-gray-600'
           }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <Checkbox.Indicator>
-            <FaCheck className="h-2 w-2 text-white" />
-          </Checkbox.Indicator>
-        </Checkbox.Root>
+          onClick={(event) => event.stopPropagation()}
+        />
 
         <div
           className="flex items-center justify-between flex-1 min-w-0 cursor-pointer"

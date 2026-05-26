@@ -2,8 +2,8 @@ import React, { useMemo, useEffect, useRef } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
-import { useFilterStats } from '@/components/views/stats-session/hooks/stats';
-import { useAppDispatch } from '@/shared/hooks/redux';
+import { useFilterStats } from '@/components/views/stats-session/hooks/stats/useFilterStats';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   clearInitialTab,
   InitialTabType,
@@ -13,6 +13,8 @@ import {
   FilterStatsResponse,
   PIDproperties,
 } from '@/types/domain/gpac/filter-stats';
+import { selectActiveConnection } from '@/shared/store/selectors/header/connectionsSelectors';
+import { ConnectionStatus } from '@/types/communication/shared';
 
 interface MonitoredFilterTabsProps {
   monitoredFilters: Map<number, EnrichedFilterOverview>;
@@ -51,14 +53,16 @@ interface MonitoredFilterTabProps {
   idx: number;
   filter: EnrichedFilterOverview;
   isActive: boolean;
+  isDetached?: boolean;
   onCardClick: (idx: number) => void;
   onOpenProperties: (filter: EnrichedFilterOverview) => void;
 }
 
-// Internal component without TabsContent wrapper (for detached mode)
+// Internal component for detached mode
 export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   filter,
   isActive,
+  isDetached = false,
   onCardClick,
   onOpenProperties,
 }) => {
@@ -79,7 +83,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
     lastAppliedTabRef.current = currentInitialTab;
   }
 
-  // Clear initialTab in effect (after render) - ref mutation doesn't cause re-render
+  // Clear initialTab in effect
   useEffect(() => {
     if (initialTabRef.current) {
       dispatch(clearInitialTab());
@@ -90,17 +94,22 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   // Subscribe to live stats when tab is active
   const { stats, isLoading } = useFilterStats(filter.idx, isActive, 1000);
 
-  // Effective loading: true if explicitly loading OR stats don't match current filter
-  const effectiveIsLoading =
-    isLoading || (isActive && (!stats || stats.idx !== filter.idx));
+  const isConnected = useAppSelector(
+    (state) =>
+      selectActiveConnection(state)?.status === ConnectionStatus.CONNECTED,
+  );
 
-  // Merge static filter data with live stats
+  // Effective loading: true only when connected and waiting for first stats.
+
+  const effectiveIsLoading =
+    isConnected &&
+    (isLoading || (isActive && (!stats || stats.idx !== filter.idx)));
+
   const filterWithStats = useMemo(
     () => ({ ...filter, ...stats }),
     [filter, stats],
   );
 
-  // Extract real data directly from filterWithStats
   const tabsData = useMemo(() => {
     return {
       overviewData: {
@@ -109,6 +118,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         type: filterWithStats.type,
         status: filterWithStats.status,
         time: filterWithStats.time,
+        last_task_time: filterWithStats.last_task_time,
         pck_done: filterWithStats.pck_done,
         pck_sent: filterWithStats.pck_sent,
         bytes_done: filterWithStats.bytes_done,
@@ -156,7 +166,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   };
 
   return (
-    <div className="flex-1 p-4">
+    <div className="flex-1 px-4">
       <FilterTabContent
         {...tabsData}
         filterData={stats as FilterStatsResponse | undefined}
@@ -164,6 +174,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         onOpenProperties={handleOpenProperties}
         initialTab={initialTabRef.current || undefined}
         isLoading={effectiveIsLoading}
+        isDetached={isDetached}
       />
     </div>
   );

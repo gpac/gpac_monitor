@@ -123,10 +123,8 @@ export const ToolSettingsDropdown = memo(
             sideOffset={6}
             avoidCollisions
             onScroll={() => setOpenSubMenu(null)}
-            className=" z-20 w-64 max-h-80 overflow-y-auto p-0
-            rounded-xl border border-slate-700/50
-            bg-monitor-panel/55 
-            shadow-xl shadow-black/50"
+            className="z-20 w-64 max-h-80 overflow-y-auto p-0
+            rounded-xl shadow-xl shadow-black/50"
           >
             <div className="relative font-cond text-slate-200 text-xs">
               {/* Sticky header */}

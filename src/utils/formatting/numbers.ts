@@ -34,3 +34,10 @@ export const formatPacketRate = (
 export const formatPercent = (value: number): string => {
   return `${value.toFixed(1)}%`;
 };
+
+/** Null-safe wrapper around formatBitrate. Returns '—' for null/undefined/NaN. */
+export const formatBps = (value: number | null | undefined): string =>
+  value != null && !isNaN(value) ? formatBitrate(value) : '—';
+
+export const formatSamplerate = (value: number): string =>
+  `${(value / 1000).toFixed(1)} kHz`;

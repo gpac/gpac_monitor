@@ -35,7 +35,7 @@ export const ConnectionForm = memo(
     const isValid = Boolean(name && address);
 
     return (
-      <div className="space-y-3 pt-4 border-t border-monitor-line">
+      <div className="space-y-3 pt-4 border-t bg-monitor-dropdown border-monitor-line">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-400">
             {initialData ? 'EDIT CONNECTION' : 'ADD CONNECTION'}
@@ -66,7 +66,7 @@ export const ConnectionForm = memo(
           <button
             onClick={handleSubmit}
             disabled={!isValid}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 disabled:text-emerald-900 disabled:bg-emerald-900/10 disabled:cursor-not-allowed transition-colors"
           >
             {initialData ? (
               <LuSave className="w-4 h-4" />

@@ -39,10 +39,21 @@ export interface PIDStats {
   average_bitrate: number;
   max_bitrate: number;
   nb_processed: number;
+  average_process_time?: number;
   max_process_time: number;
   total_process_time: number;
-  last_ts_sent?: number;
+  last_ts_sent?:
+    | { n: number; d: number }
+    | { num: number; den: number }
+    | number;
   first_process_time?: number;
+  last_process_time?: number;
+  // Dynamic buffer fields from GF_FilterPidStatistics — optional, sent only when non-zero
+  buffer_time?: number;
+  nb_buffer_units?: number;
+  max_buffer_time?: number;
+  max_playout_time?: number;
+  min_playout_time?: number;
 }
 
 /**
@@ -57,6 +68,7 @@ export interface FilterStatsResponse {
   pck_done: number;
   pck_sent: number;
   time: number;
+  last_task_time?: number;
   nb_ipid: number;
   nb_opid: number;
   stats?: PIDStats;
