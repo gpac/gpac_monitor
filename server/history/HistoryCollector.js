@@ -9,6 +9,7 @@ const LOG_ID = '_hist_';
 
 function HistoryCollector(historyDir) {
     this.writer = new HistoryWriter(historyDir);
+    this.pidCollector = new PidDataCollector();
     this.snapshotWritten = false;
     this.lastRecordUs = 0;
     this.lastCpuRecordUs = 0;
@@ -145,14 +146,32 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
         const ts_us = sys.clock_us();
         if (!force && ts_us - this.lastRecordUs < RATE_LIMIT_US) return;
         this.lastRecordUs = ts_us;
+
+        const filterMap = {};
+        session.lock_filters(true);
+        for (let i = 0; i < session.nb_filters; i++) {
+            const f = session.get_filter(i);
+            if (!f.is_destroyed()) filterMap[f.idx] = f;
+        }
+        const enrichedStats = payload.stats.map(stat => {
+            const f = filterMap[stat.idx];
+            if (!f) return stat;
+            const entry = { ...stat };
+            if (f.nb_ipid > 0) entry.ipids = this.pidCollector.collectInputPids(f, false, true);
+            if (f.nb_opid > 0) entry.opids = this.pidCollector.collectOutputPids(f, true);
+            return entry;
+        });
+        session.lock_filters(false);
+
         const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'session_stats',
             ts_us,
-            ...payload,
+            all_packets_done: payload.all_packets_done,
+            stats: enrichedStats,
         }), ts_us);
         this._lastEventTsUs = ts_us;
-    if (rotated) this._onChunkRotated(ts_us);
+        if (rotated) this._onChunkRotated(ts_us);
     };
 
     this.recordCpuStats = function(payload) {

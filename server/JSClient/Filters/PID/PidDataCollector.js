@@ -1,6 +1,6 @@
 function PidDataCollector() {
 
-    this.collectInputPids = function(filter, withPidProperties) {
+    this.collectInputPids = function(filter, withPidProperties, statsOnly) {
         const ipids = {};
 
         for (let i = 0; i < filter.nb_ipid; i++) {
@@ -64,13 +64,13 @@ function PidDataCollector() {
             }
 
             const key = pid.name || `ipid_${i}`;
-            ipids[key] = pid;
+            ipids[key] = statsOnly ? { buffer: pid.buffer, bitrate: pid.bitrate, ...(pid.stats && { stats: pid.stats }) } : pid;
         }
 
       return ipids;
     };
 
-    this.collectOutputPids = function(filter) {
+    this.collectOutputPids = function(filter, statsOnly) {
         const opids = {};
 
         for (let i = 0; i < filter.nb_opid; i++) {
@@ -132,7 +132,7 @@ function PidDataCollector() {
             }
 
             const key = pid.name || `opid_${i}`;
-            opids[key] = pid;
+            opids[key] = statsOnly ? { buffer: pid.buffer, max_buffer: pid.max_buffer, bitrate: pid.bitrate, ...(pid.stats && { stats: pid.stats }) } : pid;
         }
 
         return opids;
