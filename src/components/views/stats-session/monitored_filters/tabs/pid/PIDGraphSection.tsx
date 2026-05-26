@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useIsDetached } from '../../FilterViewContext';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { CLICKABLE_METRICS } from './PIDTable';
@@ -35,6 +36,7 @@ const PIDGraphSection = memo(
     );
 
     const isDetached = useIsDetached();
+    const { isHistory } = useDataMode();
     const { duration, setDuration, maxPoints } = useChartDuration(
       'pid_graph_duration',
       '5min',
@@ -141,6 +143,7 @@ const PIDGraphSection = memo(
             mode={mode}
             showEndLabels={shouldShowEndLabels}
             maxPoints={maxPoints}
+            showSessionTimeLabel={isHistory}
           />
         </CardContent>
       </Card>

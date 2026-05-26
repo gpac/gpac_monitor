@@ -9,6 +9,8 @@ export type PIDMetricMode =
 
 export interface PIDMetricSample {
   sessionTimestampUs: number;
+  /** Formatted session-relative time string (e.g. "00:05:32") — set in history mode */
+  time?: string;
   averageBitrate?: number | null;
   bufferTime?: number | null;
   processTime?: number | null;

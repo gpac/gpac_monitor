@@ -8,8 +8,11 @@ import {
   type EndLabelInfo,
 } from '@/components/common/charts';
 import type { PIDMetricMode, PIDMetricSample } from '../../types/pid';
-import { MODE_FORMATTERS, extractValue } from './config/pidHistoryChartConfig';
-import { CHART_HEIGHT } from './config/pidHistoryChartConfig';
+import {
+  MODE_FORMATTERS,
+  extractValue,
+  CHART_HEIGHT,
+} from './config/pidHistoryChartConfig';
 
 export interface PIDSeriesEntry {
   pidHistory: PIDMetricSample[];
@@ -23,6 +26,7 @@ interface PIDHistoryChartProps {
   mode: PIDMetricMode;
   showEndLabels?: boolean;
   showCurrentTime?: boolean;
+  showSessionTimeLabel?: boolean;
 }
 
 const PIDHistoryChart = memo(
@@ -31,6 +35,7 @@ const PIDHistoryChart = memo(
     mode,
     showEndLabels,
     showCurrentTime = true,
+    showSessionTimeLabel = false,
   }: PIDHistoryChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const dimensions = useContainerSize(containerRef);
@@ -85,13 +90,15 @@ const PIDHistoryChart = memo(
           entry.pidHistory.length >= acc.pidHistory.length ? entry : acc,
         entries[0],
       );
-      timeLabelsRef.current = longest.pidHistory.map((s) =>
-        new Date(s.sessionTimestampUs / 1000).toLocaleTimeString('en-US', {
-          hour12: false,
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        }),
+      timeLabelsRef.current = longest.pidHistory.map(
+        (s) =>
+          s.time ??
+          new Date(s.sessionTimestampUs / 1000).toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          }),
       );
 
       const valueCols = entries.map((entry) => {
@@ -112,6 +119,9 @@ const PIDHistoryChart = memo(
       >
         {showCurrentTime && timeLabelsRef.current.length > 0 && (
           <div className="w-full text-right font-mono text-xs opacity-60 mb-1">
+            {showSessionTimeLabel && (
+              <span className="opacity-60 mr-1">Session time:</span>
+            )}
             {timeLabelsRef.current[timeLabelsRef.current.length - 1]}
           </div>
         )}

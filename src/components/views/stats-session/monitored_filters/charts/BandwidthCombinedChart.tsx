@@ -102,6 +102,9 @@ export const BandwidthCombinedChart = memo(
             </span>
             {showCurrentTime && timeLabelsRef.current.length > 0 && (
               <span className="ml-auto font-mono normal-case opacity-60 text-xs">
+                {isHistory && (
+                  <span className="opacity-60 mr-1">Session time:</span>
+                )}
                 {timeLabelsRef.current[timeLabelsRef.current.length - 1]}
               </span>
             )}

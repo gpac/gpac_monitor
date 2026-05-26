@@ -12,8 +12,6 @@ export interface BandwidthPoint {
 
 /**
  * Compute bandwidth delta points from a session_stats event.
- * Pure function — no Redux, no side effects.
- * Mutates prevBandwidth in place for efficiency.
  */
 export function computeBandwidthPoints(
   event: SessionStatsEvent,

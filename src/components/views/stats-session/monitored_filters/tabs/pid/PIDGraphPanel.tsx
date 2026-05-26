@@ -20,10 +20,17 @@ interface PIDGraphPanelProps {
   mode: PIDMetricMode;
   showEndLabels: boolean;
   maxPoints?: number;
+  showSessionTimeLabel?: boolean;
 }
 
 const PIDGraphPanel = memo(
-  ({ filterIdx, mode, showEndLabels, maxPoints }: PIDGraphPanelProps) => {
+  ({
+    filterIdx,
+    mode,
+    showEndLabels,
+    maxPoints,
+    showSessionTimeLabel,
+  }: PIDGraphPanelProps) => {
     const allSamples = useAppSelector((state) =>
       selectAllSelectedPidSamplesByFilter(state, filterIdx),
     );
@@ -55,6 +62,7 @@ const PIDGraphPanel = memo(
           mode={mode}
           showEndLabels={showEndLabels}
           showCurrentTime
+          showSessionTimeLabel={showSessionTimeLabel}
         />
       </div>
     );
