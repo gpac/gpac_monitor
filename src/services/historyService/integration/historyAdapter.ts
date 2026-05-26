@@ -1,6 +1,9 @@
 import type { AppDispatch } from '@/shared/store';
 import type { CPUStats } from '@/types/domain/system';
-import type { SessionFilterStats, FilterPids } from '@/shared/store/slices/sessionStatsSlice';
+import type {
+  SessionFilterStats,
+  FilterPids,
+} from '@/shared/store/slices/sessionStatsSlice';
 import {
   setLoading,
   clearGraph,
@@ -10,7 +13,10 @@ import {
   clearArgUpdated,
 } from '@/shared/store/slices/graphSlice';
 import { filtersUpdated } from '@/shared/store/actions/globalActions';
-import { resetAllData } from '@/shared/store/slices/monitoredFilterSlice';
+import {
+  resetAllData,
+  clearAllPIDSamples,
+} from '@/shared/store/slices/monitoredFilterSlice';
 import {
   setCommandLine,
   clearSessionDetails,
@@ -54,7 +60,9 @@ import {
 import type {
   BandwidthBuffer,
   PrevBandwidthState,
+  PIDSamplesBuffer,
 } from './handlers/statsHandler';
+import type { PIDDynamicByFilter } from './extractPIDSamples';
 import { dispatchLogEvent } from './handlers/logHandler';
 import {
   MAX_LOGS_ON_SEEK,
@@ -81,6 +89,8 @@ export class HistoryAdapter {
   private pendingArgTimestamps = new Map<number, number>();
   private pendingPidsByFilter: Record<string, FilterPids> = {};
   private pendingArgsByFilter: Record<string, GpacArgument[]> = {};
+  private pendingPIDSamples: PIDSamplesBuffer = [];
+  private pendingPIDDynamic: PIDDynamicByFilter = {};
 
   constructor(private dispatch: AppDispatch) {}
 
@@ -96,6 +106,8 @@ export class HistoryAdapter {
       this.pendingArgTimestamps = new Map();
       this.pendingPidsByFilter = {};
       this.pendingArgsByFilter = {};
+      this.pendingPIDSamples = [];
+      this.pendingPIDDynamic = {};
     }
   }
 
@@ -108,6 +120,8 @@ export class HistoryAdapter {
       this.pendingLastStats,
       this.pendingBandwidth,
       this.pendingCpuStats,
+      this.pendingPIDSamples,
+      this.pendingPIDDynamic,
     );
     const badgeMinUs = targetUs !== undefined ? targetUs - BADGE_WINDOW_US : 0;
     const recentPidIndexes = filterRecentIndexes(
@@ -139,11 +153,14 @@ export class HistoryAdapter {
     this.pendingArgTimestamps = new Map();
     this.pendingPidsByFilter = {};
     this.pendingArgsByFilter = {};
+    this.pendingPIDSamples = [];
+    this.pendingPIDDynamic = {};
   }
 
   clearTimeSeriesData(): void {
     this.dispatch(resetSystemStatsHistory());
     this.dispatch(resetAllData());
+    this.dispatch(clearAllPIDSamples());
   }
 
   resetTemporalState(): void {
@@ -161,12 +178,17 @@ export class HistoryAdapter {
     dispatch(clearFilterPids());
     const pidsByFilter = buildPidsByFilter(checkpoint.filters);
     if (checkpoint.pid_state) {
-      for (const [idx, allPidProperties] of Object.entries(checkpoint.pid_state)) {
+      for (const [idx, allPidProperties] of Object.entries(
+        checkpoint.pid_state,
+      )) {
         const filterIpids = pidsByFilter[idx]?.ipids;
         if (filterIpids) {
           for (const [pidKey, propsMap] of Object.entries(allPidProperties)) {
             if (filterIpids[pidKey]) {
-              filterIpids[pidKey] = { ...filterIpids[pidKey], properties: propsMap };
+              filterIpids[pidKey] = {
+                ...filterIpids[pidKey],
+                properties: propsMap,
+              };
             }
           }
         }
@@ -215,9 +237,13 @@ export class HistoryAdapter {
           this.silent,
           this.pendingLastStats,
           this.pendingBandwidth,
+          this.pendingPIDSamples,
+          this.pendingPIDDynamic,
         );
         this.pendingLastStats = result.pendingStats;
         this.pendingBandwidth = result.pendingBandwidth;
+        this.pendingPIDSamples = result.pendingPIDSamples;
+        this.pendingPIDDynamic = result.pendingPIDDynamic;
         break;
       }
       case 'cpu_stats':
@@ -246,7 +272,10 @@ export class HistoryAdapter {
           this.dispatch(markPidReconfigured(event.indexes));
           if (event.pidsByFilter) {
             const pidsForStore = Object.fromEntries(
-              Object.entries(event.pidsByFilter).map(([idx, ipids]) => [idx, { ipids }]),
+              Object.entries(event.pidsByFilter).map(([idx, ipids]) => [
+                idx,
+                { ipids },
+              ]),
             );
             this.dispatch(setFilterPids(pidsForStore));
           }

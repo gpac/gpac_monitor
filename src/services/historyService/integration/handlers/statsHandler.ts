@@ -3,17 +3,24 @@ import type { CPUStats } from '@/types/domain/system';
 import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
 import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 import type { SessionStatsEvent, CpuStatsEvent } from '../../types';
+import type { PIDSample, PIDDynamicByFilter } from '../extractPIDSamples';
 import {
   addNetworkDataPoint,
   bulkAddNetworkData,
+  addPIDSamples,
 } from '@/shared/store/slices/monitoredFilterSlice';
-import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
+import {
+  updateSessionStats,
+  setFilterPids,
+} from '@/shared/store/slices/sessionStatsSlice';
+import type { FilterPids } from '@/shared/store/slices/sessionStatsSlice';
 import {
   setSystemStats,
   bulkAddSystemStats,
 } from '@/shared/store/slices/sessionDetailsSlice';
 import { computeBandwidthPoints } from '../computeBandwidth';
 import { formatCompactTime } from '@/utils/formatting/time';
+import { extractPIDSamples, extractPIDDynamic } from '../extractPIDSamples';
 
 export type BandwidthBuffer = Record<
   string,
@@ -24,6 +31,8 @@ export type PrevBandwidthState = Record<
   string,
   { bytes_sent: number; bytes_done: number; ts_us: number }
 >;
+
+export type PIDSamplesBuffer = PIDSample[];
 
 export function mapCpuStatsEvent(event: CpuStatsEvent): CPUStats {
   return {
@@ -44,16 +53,34 @@ export function dispatchSessionStats(
   silent: boolean,
   pendingStats: { stats: SessionFilterStats[]; ts_us: number } | null,
   pendingBandwidth: BandwidthBuffer,
-): { pendingStats: typeof pendingStats; pendingBandwidth: BandwidthBuffer } {
+  pendingPIDSamples: PIDSamplesBuffer,
+  pendingPIDDynamic: PIDDynamicByFilter,
+): {
+  pendingStats: typeof pendingStats;
+  pendingBandwidth: BandwidthBuffer;
+  pendingPIDSamples: PIDSamplesBuffer;
+  pendingPIDDynamic: PIDDynamicByFilter;
+} {
   const statsPayload = {
     stats: event.stats as SessionFilterStats[],
     ts_us: event.ts_us,
   };
+  const pidSamples = extractPIDSamples(
+    event.stats,
+    event.ts_us,
+    sessionStartUs,
+  );
+  const pidDynamic = extractPIDDynamic(event.stats);
 
   if (silent) {
     pendingStats = statsPayload;
+    pendingPIDSamples.push(...pidSamples);
+    pendingPIDDynamic = { ...pendingPIDDynamic, ...pidDynamic };
   } else {
     dispatch(updateSessionStats(statsPayload));
+    if (pidSamples.length) dispatch(addPIDSamples(pidSamples));
+    if (Object.keys(pidDynamic).length)
+      dispatch(setFilterPids(pidDynamic as Record<string, FilterPids>));
   }
 
   const points = computeBandwidthPoints(event, sessionStartUs, prevBandwidth);
@@ -84,7 +111,12 @@ export function dispatchSessionStats(
     }
   }
 
-  return { pendingStats, pendingBandwidth };
+  return {
+    pendingStats,
+    pendingBandwidth,
+    pendingPIDSamples,
+    pendingPIDDynamic,
+  };
 }
 
 export function dispatchCpuStats(
@@ -110,9 +142,14 @@ export function flushStats(
   pendingStats: { stats: SessionFilterStats[]; ts_us: number } | null,
   pendingBandwidth: BandwidthBuffer,
   pendingCpuStats: CPUStats[],
+  pendingPIDSamples: PIDSamplesBuffer,
+  pendingPIDDynamic: PIDDynamicByFilter,
 ): void {
   if (pendingStats) dispatch(updateSessionStats(pendingStats));
   if (Object.keys(pendingBandwidth).length)
     dispatch(bulkAddNetworkData(pendingBandwidth));
   if (pendingCpuStats.length) dispatch(bulkAddSystemStats(pendingCpuStats));
+  if (pendingPIDSamples.length) dispatch(addPIDSamples(pendingPIDSamples));
+  if (Object.keys(pendingPIDDynamic).length)
+    dispatch(setFilterPids(pendingPIDDynamic as Record<string, FilterPids>));
 }
