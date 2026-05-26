@@ -137,7 +137,20 @@ const sessionStatsSlice = createSlice({
       action: PayloadAction<Record<string, FilterPids>>,
     ) => {
       for (const [idx, pids] of Object.entries(action.payload)) {
-        state.pidsByFilter[idx] = { ...state.pidsByFilter[idx], ...pids };
+        if (!state.pidsByFilter[idx]) {
+          state.pidsByFilter[idx] = pids;
+          continue;
+        }
+        const existing = state.pidsByFilter[idx];
+        for (const dir of ['ipids', 'opids'] as const) {
+          if (!pids[dir]) continue;
+          existing[dir] = existing[dir] ?? {};
+          for (const [key, pid] of Object.entries(pids[dir]!)) {
+            existing[dir]![key] = existing[dir]![key]
+              ? { ...existing[dir]![key], ...pid }
+              : pid;
+          }
+        }
       }
     },
 
