@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
@@ -29,6 +29,12 @@ export const MonitoredFilterTabs: React.FC<MonitoredFilterTabsProps> = ({
   onCardClick,
   onOpenProperties,
 }) => {
+  const lastInnerTabByFilter = useRef<Record<number, string>>({});
+
+  const handleInnerTabChange = useCallback((filterIdx: number, tab: string) => {
+    lastInnerTabByFilter.current[filterIdx] = tab;
+  }, []);
+
   return (
     <>
       {Array.from(monitoredFilters.entries()).map(([idx, filter]) => {
@@ -40,6 +46,8 @@ export const MonitoredFilterTabs: React.FC<MonitoredFilterTabsProps> = ({
             idx={idx}
             filter={filter}
             isActive={isActive}
+            lastTab={lastInnerTabByFilter.current[idx]}
+            onInnerTabChange={(tab) => handleInnerTabChange(idx, tab)}
             onCardClick={onCardClick}
             onOpenProperties={onOpenProperties}
           />
@@ -54,6 +62,8 @@ interface MonitoredFilterTabProps {
   filter: EnrichedFilterOverview;
   isActive: boolean;
   isDetached?: boolean;
+  lastTab?: string;
+  onInnerTabChange?: (tab: string) => void;
   onCardClick: (idx: number) => void;
   onOpenProperties: (filter: EnrichedFilterOverview) => void;
 }
@@ -63,6 +73,8 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   filter,
   isActive,
   isDetached = false,
+  lastTab,
+  onInnerTabChange,
   onCardClick,
   onOpenProperties,
 }) => {
@@ -172,7 +184,10 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         filterData={stats as FilterStatsResponse | undefined}
         onBack={handleBack}
         onOpenProperties={handleOpenProperties}
-        initialTab={initialTabRef.current || undefined}
+        initialTab={
+          (initialTabRef.current || lastTab) as InitialTabType | undefined
+        }
+        onTabChange={onInnerTabChange}
         isLoading={effectiveIsLoading}
         isDetached={isDetached}
       />
