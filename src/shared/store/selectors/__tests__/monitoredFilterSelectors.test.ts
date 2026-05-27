@@ -9,17 +9,20 @@ import monitoredFilterReducer, {
 } from '../../slices/monitoredFilterSlice';
 import type { RootState } from '../../index';
 import type { PIDGraphTarget } from '@/components/views/stats-session/types/pid';
+import { GpacStreamType } from '@/types/domain/gpac';
 
 const makePidTarget = (
   filterIdx: number,
   pidIndex: number,
   direction: 'input' | 'output' = 'output',
+  streamType?: GpacStreamType,
 ): PIDGraphTarget => ({
   filterIdx,
   pidIndex,
   direction,
   label: `PID ${pidIndex}`,
   streamTypeLabel: undefined,
+  streamType,
 });
 
 const makeState = (partial: Partial<MonitoredFilterState>): RootState =>
@@ -145,6 +148,34 @@ describe('selectAllSelectedPidSamplesByFilter', () => {
 
     const result = selectAllSelectedPidSamplesByFilter(state, 0);
     expect(result[0].pidHistory).toEqual([]);
+  });
+});
+
+describe('selectAllSelectedPidSamplesByFilter — streamType preserved', () => {
+  it('target.streamType is passed through to chart entries', () => {
+    const state = makeState({
+      selectedPidTargets: [
+        makePidTarget(0, 0, 'output', GpacStreamType.Audio),
+        makePidTarget(0, 1, 'output', GpacStreamType.Visual),
+      ],
+      pidSamples: {},
+    });
+
+    const entries = selectAllSelectedPidSamplesByFilter(state, 0);
+
+    expect(entries[0].target.streamType).toBe(GpacStreamType.Audio);
+    expect(entries[1].target.streamType).toBe(GpacStreamType.Visual);
+  });
+
+  it('audio PID at index 0 keeps GpacStreamType.Audio (not overridden by position)', () => {
+    const state = makeState({
+      selectedPidTargets: [makePidTarget(0, 3, 'output', GpacStreamType.Audio)],
+      pidSamples: {},
+    });
+
+    const entries = selectAllSelectedPidSamplesByFilter(state, 0);
+
+    expect(entries[0].target.streamType).toBe(GpacStreamType.Audio);
   });
 });
 
