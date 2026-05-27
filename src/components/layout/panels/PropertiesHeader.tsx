@@ -3,14 +3,15 @@ import { Checkbox } from '../../ui/checkbox';
 import { SearchBar } from '../../ui/search-bar';
 import {
   getFilterColor,
+  FILTER_LABELS,
   DEFAULT_STREAM_COLOR,
 } from '@/utils/filters/streamType';
-import { FilterType } from '@/types';
+import { FilterType, GpacStreamType } from '@/types';
 
 interface PropertiesHeaderProps {
   filterName: string;
   filterIdx: number;
-  streamType?: FilterType;
+  streamType?: FilterType | GpacStreamType;
   onClose: () => void;
   showExpert?: boolean;
   showAdvanced?: boolean;
@@ -34,6 +35,9 @@ const PropertiesHeader = ({
   const borderColor = streamType
     ? getFilterColor(streamType)
     : DEFAULT_STREAM_COLOR;
+  const label = streamType
+    ? (FILTER_LABELS[streamType as FilterType] ?? streamType)
+    : undefined;
 
   return (
     <div className="bg-monitor-surface border-b border-monitor-line">
@@ -46,10 +50,8 @@ const PropertiesHeader = ({
           >
             {filterName}
           </h3>
-          {streamType && (
-            <p className="text-xs text-monitor-text-muted mt-0.5">
-              ({streamType})
-            </p>
+          {label && (
+            <p className="text-xs text-monitor-text-muted mt-0.5">({label})</p>
           )}
 
           <div className="flex gap-2 mt-1 text-xs text-monitor-text-muted">

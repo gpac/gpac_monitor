@@ -8,7 +8,10 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useIsDetached } from '../../FilterViewContext';
 import type { PIDMetricMode } from '../../../types/pid';
-import { PID_SELECTION_COLORS } from './utils/pidColors';
+import {
+  getFilterColor,
+  DEFAULT_STREAM_COLOR,
+} from '@/utils/filters/streamType';
 import { CLICKABLE_METRICS } from './PIDTable';
 import PIDGraphPanel from './PIDGraphPanel';
 
@@ -47,9 +50,11 @@ const PIDGraphSection = memo(
     const pidLabels = useMemo(
       () =>
         targets.length >= 1
-          ? targets.map((target, index) => ({
+          ? targets.map((target) => ({
               target,
-              color: PID_SELECTION_COLORS[index],
+              color: target.streamType
+                ? getFilterColor(target.streamType)
+                : DEFAULT_STREAM_COLOR,
               label: target.label ?? `#${target.pidIndex}`,
             }))
           : null,

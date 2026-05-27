@@ -2,7 +2,10 @@ import { memo, useMemo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectAllSelectedPidSamplesByFilter } from '@/shared/store/selectors';
 import type { PIDMetricMode } from '../../../types/pid';
-import { PID_SELECTION_COLORS } from './utils/pidColors';
+import {
+  getFilterColor,
+  DEFAULT_STREAM_COLOR,
+} from '@/utils/filters/streamType';
 import PIDHistoryChart, {
   type PIDSeriesEntry,
 } from '../../charts/PIDHistoryChart';
@@ -30,7 +33,7 @@ const PIDGraphPanel = memo(
 
     const entries = useMemo<PIDSeriesEntry[]>(
       () =>
-        allSamples.map(({ target, pidHistory }, index) => {
+        allSamples.map(({ target, pidHistory }) => {
           const typeStr = target.streamTypeLabel
             ? ` (${target.streamTypeLabel})`
             : '';
@@ -40,7 +43,9 @@ const PIDGraphPanel = memo(
             pidHistory: sliced,
             label: `PID ${target.pidIndex}${typeStr}`,
             metricLabel: MODE_LABELS[mode],
-            color: PID_SELECTION_COLORS[index],
+            color: target.streamType
+              ? getFilterColor(target.streamType)
+              : DEFAULT_STREAM_COLOR,
           };
         }),
       [allSamples, mode, maxPoints],

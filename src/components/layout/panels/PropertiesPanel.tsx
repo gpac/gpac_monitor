@@ -18,6 +18,13 @@ const PropertiesPanel = () => {
     return getFilterInfoByIdx(filters, sidebarContent.filterIdx);
   }, [filters, sidebarContent]);
 
+  const pidStreamType = useMemo(() => {
+    if (sidebarContent?.type !== 'pid-props') return undefined;
+    const filter = filters.find((f) => f.idx === sidebarContent.filterIdx);
+    return Object.values(filter?.ipid ?? {})[sidebarContent.ipidIdx]
+      ?.stream_type;
+  }, [filters, sidebarContent]);
+
   // Local state for filter args visibility options
   const [showExpert, setShowExpert] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -75,7 +82,7 @@ const PropertiesPanel = () => {
           <PropertiesHeader
             filterName={`${filterInfo?.name || 'Filter'} IPIDs`}
             filterIdx={sidebarContent.filterIdx}
-            streamType={filterInfo?.streamType}
+            streamType={pidStreamType ?? filterInfo?.streamType}
             mode="ipid"
             onClose={closeSidebar}
             onSearchChange={handleSearchChange}
