@@ -10,8 +10,8 @@ import {
 import type { PIDMetricMode, PIDMetricSample } from '../../types/pid';
 import {
   MODE_FORMATTERS,
-  extractValue,
   CHART_HEIGHT,
+  buildUplotAlignedData,
 } from './config/pidHistoryChartConfig';
 
 export interface PIDSeriesEntry {
@@ -78,38 +78,9 @@ const PIDHistoryChart = memo(
     );
 
     const data = useMemo<uPlot.AlignedData>(() => {
-      const maxLen = Math.max(...entries.map((e) => e.pidHistory.length), 0);
-      if (maxLen === 0) {
-        timeLabelsRef.current = [];
-        return [[0], ...entries.map(() => [null])] as uPlot.AlignedData;
-      }
-
-      const indices = Array.from({ length: maxLen }, (_, i) => i);
-      const longest = entries.reduce(
-        (acc, entry) =>
-          entry.pidHistory.length >= acc.pidHistory.length ? entry : acc,
-        entries[0],
-      );
-      timeLabelsRef.current = longest.pidHistory.map(
-        (s) =>
-          s.time ??
-          new Date(s.sessionTimestampUs / 1000).toLocaleTimeString('en-US', {
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-          }),
-      );
-
-      const valueCols = entries.map((entry) => {
-        const offset = maxLen - entry.pidHistory.length;
-        return indices.map((i) => {
-          const j = i - offset;
-          return j < 0 ? null : extractValue(entry.pidHistory[j], mode);
-        });
-      });
-
-      return [indices, ...valueCols] as uPlot.AlignedData;
+      const { alignedData, timeLabels } = buildUplotAlignedData(entries, mode);
+      timeLabelsRef.current = timeLabels;
+      return alignedData;
     }, [entries, mode]);
 
     return (
@@ -129,11 +100,7 @@ const PIDHistoryChart = memo(
           ref={containerRef}
           style={{ width: '100%', height: CHART_HEIGHT, position: 'relative' }}
         >
-          <UplotChart
-            data={data}
-            options={options}
-            className="w-12/12 h-full"
-          />
+          <UplotChart data={data} options={options} className="w-full h-full" />
           {endLabels.map((endLabel, index) => {
             const clampedTop = Math.min(
               Math.max(endLabel.top, 0),

@@ -85,6 +85,14 @@ export const formatChartTime = (): string => {
   });
 };
 
+export const formatChartTimeFromUs = (microseconds: number): string =>
+  new Date(microseconds / 1000).toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+
 export const formatBufferTime = (microseconds: number): string => {
   if (microseconds === 0) return '0 ms';
   const milliseconds = microseconds / 1000;
