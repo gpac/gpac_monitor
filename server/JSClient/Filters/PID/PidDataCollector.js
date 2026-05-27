@@ -33,6 +33,7 @@ function _collectStats(stats, filter) {
     if (stats.max_playout_time) result.max_playout_time = stats.max_playout_time;
     if (stats.min_playout_time) result.min_playout_time = stats.min_playout_time;
     if (stats.total_process_time > 0) result.average_process_time = stats.total_process_time / stats.nb_processed;
+    if (stats.first_process_time) result.first_process_time = stats.first_process_time;
     return result;
 }
 
@@ -101,10 +102,7 @@ function PidDataCollector() {
             };
 
             const stats = _collectStats(rawStats, filter);
-            if (stats) {
-                if (rawStats.first_process_time) stats.first_process_time = rawStats.first_process_time;
-                pid.stats = stats;
-            }
+            if (stats) pid.stats = stats;
 
             const key = pid.name || `opid_${i}`;
             opids[key] = statsOnly ? { buffer: pid.buffer, max_buffer: pid.max_buffer, bitrate: pid.bitrate, ...(pid.stats && { stats: pid.stats }) } : pid;
