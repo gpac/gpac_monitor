@@ -9,6 +9,11 @@ exports[`computeBandwidthPoints > computes correct bandwidth deltas between two 
       "timestamp": 2238647,
       "value": 466543.17065031244,
     },
+    "lastTaskTime": {
+      "time": "2.2s",
+      "timestamp": 2238647,
+      "value": 0,
+    },
     "outband": {
       "time": "2.2s",
       "timestamp": 2238647,
@@ -22,6 +27,11 @@ exports[`computeBandwidthPoints > computes correct bandwidth deltas between two 
       "timestamp": 2238647,
       "value": 42818346.95186653,
     },
+    "lastTaskTime": {
+      "time": "2.2s",
+      "timestamp": 2238647,
+      "value": 0,
+    },
     "outband": {
       "time": "2.2s",
       "timestamp": 2238647,
@@ -31,6 +41,11 @@ exports[`computeBandwidthPoints > computes correct bandwidth deltas between two 
   {
     "filterId": "4",
     "inband": {
+      "time": "2.2s",
+      "timestamp": 2238647,
+      "value": 0,
+    },
+    "lastTaskTime": {
       "time": "2.2s",
       "timestamp": 2238647,
       "value": 0,
@@ -53,6 +68,11 @@ exports[`computeBandwidthPoints > returns zero values on first event (no previou
       "timestamp": 1237805,
       "value": 0,
     },
+    "lastTaskTime": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
     "outband": {
       "time": "1.2s",
       "timestamp": 1237805,
@@ -66,6 +86,11 @@ exports[`computeBandwidthPoints > returns zero values on first event (no previou
       "timestamp": 1237805,
       "value": 0,
     },
+    "lastTaskTime": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
     "outband": {
       "time": "1.2s",
       "timestamp": 1237805,
@@ -75,6 +100,11 @@ exports[`computeBandwidthPoints > returns zero values on first event (no previou
   {
     "filterId": "4",
     "inband": {
+      "time": "1.2s",
+      "timestamp": 1237805,
+      "value": 0,
+    },
+    "lastTaskTime": {
       "time": "1.2s",
       "timestamp": 1237805,
       "value": 0,

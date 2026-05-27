@@ -132,7 +132,14 @@ const monitoredFilterSlice = createSlice({
     bulkAddNetworkData: (
       state,
       action: PayloadAction<
-        Record<string, { outband: ChartDataPoint[]; inband: ChartDataPoint[] }>
+        Record<
+          string,
+          {
+            outband: ChartDataPoint[];
+            inband: ChartDataPoint[];
+            lastTaskTime: ChartDataPoint[];
+          }
+        >
       >,
     ) => {
       for (const [filterId, data] of Object.entries(action.payload)) {
@@ -146,6 +153,17 @@ const monitoredFilterSlice = createSlice({
             network[direction].splice(
               0,
               network[direction].length - state.maxPoints,
+            );
+        }
+        if (data.lastTaskTime.length) {
+          if (!state.dataByFilter[filterId].lastTaskTime)
+            state.dataByFilter[filterId].lastTaskTime = [];
+          const lastTaskTimePoints = state.dataByFilter[filterId].lastTaskTime!;
+          lastTaskTimePoints.push(...data.lastTaskTime);
+          if (lastTaskTimePoints.length > state.maxPoints)
+            lastTaskTimePoints.splice(
+              0,
+              lastTaskTimePoints.length - state.maxPoints,
             );
         }
       }

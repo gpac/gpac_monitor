@@ -8,6 +8,7 @@ export interface BandwidthPoint {
   filterId: string;
   outband: ChartDataPoint;
   inband: ChartDataPoint;
+  lastTaskTime: ChartDataPoint;
 }
 
 /**
@@ -51,6 +52,11 @@ export function computeBandwidthPoints(
       filterId,
       outband: { time, timestamp: event.ts_us, value: outbandValue },
       inband: { time, timestamp: event.ts_us, value: inbandValue },
+      lastTaskTime: {
+        time,
+        timestamp: event.ts_us,
+        value: filter.last_task_time ?? 0,
+      },
     });
   }
 

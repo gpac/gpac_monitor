@@ -75,10 +75,11 @@ describe('HistoryAdapter silent mode', () => {
     adapter.handleEvent(sessionStatsEvent);
 
     const bandwidthDispatches = dispatch.mock.calls.filter(
-      ([action]: any) => action.type === 'monitoredFilter/addNetworkDataPoint',
+      ([action]: any) =>
+        action.type === 'monitoredFilter/addCombinedNetworkPoint',
     );
-    // 2 filters × 2 directions = 4 dispatches
-    expect(bandwidthDispatches).toHaveLength(4);
+    // 2 filters × 1 combined dispatch = 2 dispatches
+    expect(bandwidthDispatches).toHaveLength(2);
   });
 
   it('buffers bandwidth when silent, dispatches bulk on flush', () => {
@@ -86,7 +87,8 @@ describe('HistoryAdapter silent mode', () => {
     adapter.handleEvent(sessionStatsEvent);
 
     const bandwidthDispatches = dispatch.mock.calls.filter(
-      ([action]: any) => action.type === 'monitoredFilter/addNetworkDataPoint',
+      ([action]: any) =>
+        action.type === 'monitoredFilter/addCombinedNetworkPoint',
     );
     expect(bandwidthDispatches).toHaveLength(0);
 
@@ -179,8 +181,9 @@ describe('HistoryAdapter silent mode', () => {
     adapter.handleEvent(sessionStatsEvent);
 
     const bandwidthDispatches = dispatch.mock.calls.filter(
-      ([action]: any) => action.type === 'monitoredFilter/addNetworkDataPoint',
+      ([action]: any) =>
+        action.type === 'monitoredFilter/addCombinedNetworkPoint',
     );
-    expect(bandwidthDispatches).toHaveLength(4);
+    expect(bandwidthDispatches).toHaveLength(2);
   });
 });

@@ -5,7 +5,7 @@ import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice
 import type { SessionStatsEvent, CpuStatsEvent } from '../../types';
 import type { PIDSample, PIDDynamicByFilter } from '../extractPIDSamples';
 import {
-  addNetworkDataPoint,
+  addCombinedNetworkPoint,
   bulkAddNetworkData,
   addPIDSamples,
 } from '@/shared/store/slices/monitoredFilterSlice';
@@ -22,9 +22,13 @@ import { computeBandwidthPoints } from '../computeBandwidth';
 import { formatCompactTime } from '@/utils/formatting/time';
 import { extractPIDSamples, extractPIDDynamic } from '../extractPIDSamples';
 
-export type BandwidthBuffer = Record<
+export type CombinedBandwidthBuffer = Record<
   string,
-  { outband: ChartDataPoint[]; inband: ChartDataPoint[] }
+  {
+    outband: ChartDataPoint[];
+    inband: ChartDataPoint[];
+    lastTaskTime: ChartDataPoint[];
+  }
 >;
 
 export type PrevBandwidthState = Record<
@@ -52,12 +56,12 @@ export function dispatchSessionStats(
   prevBandwidth: PrevBandwidthState,
   silent: boolean,
   pendingStats: { stats: SessionFilterStats[]; ts_us: number } | null,
-  pendingBandwidth: BandwidthBuffer,
+  pendingBandwidth: CombinedBandwidthBuffer,
   pendingPIDSamples: PIDSamplesBuffer,
   pendingPIDDynamic: PIDDynamicByFilter,
 ): {
   pendingStats: typeof pendingStats;
-  pendingBandwidth: BandwidthBuffer;
+  pendingBandwidth: CombinedBandwidthBuffer;
   pendingPIDSamples: PIDSamplesBuffer;
   pendingPIDDynamic: PIDDynamicByFilter;
 } {
@@ -88,24 +92,23 @@ export function dispatchSessionStats(
   if (silent) {
     for (const point of points) {
       if (!pendingBandwidth[point.filterId])
-        pendingBandwidth[point.filterId] = { outband: [], inband: [] };
+        pendingBandwidth[point.filterId] = {
+          outband: [],
+          inband: [],
+          lastTaskTime: [],
+        };
       pendingBandwidth[point.filterId].outband.push(point.outband);
       pendingBandwidth[point.filterId].inband.push(point.inband);
+      pendingBandwidth[point.filterId].lastTaskTime.push(point.lastTaskTime);
     }
   } else {
     for (const point of points) {
       dispatch(
-        addNetworkDataPoint({
+        addCombinedNetworkPoint({
           filterId: point.filterId,
-          type: 'outband',
-          point: point.outband,
-        }),
-      );
-      dispatch(
-        addNetworkDataPoint({
-          filterId: point.filterId,
-          type: 'inband',
-          point: point.inband,
+          outband: point.outband,
+          inband: point.inband,
+          lastTaskTime: point.lastTaskTime,
         }),
       );
     }
@@ -140,7 +143,7 @@ export function dispatchCpuStats(
 export function flushStats(
   dispatch: AppDispatch,
   pendingStats: { stats: SessionFilterStats[]; ts_us: number } | null,
-  pendingBandwidth: BandwidthBuffer,
+  pendingBandwidth: CombinedBandwidthBuffer,
   pendingCpuStats: CPUStats[],
   pendingPIDSamples: PIDSamplesBuffer,
   pendingPIDDynamic: PIDDynamicByFilter,

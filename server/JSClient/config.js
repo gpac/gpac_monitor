@@ -1,5 +1,5 @@
 const DEFAULT_FILTER_FIELDS = [
-    'idx', 'status', 'bytes_done', 'bytes_sent', 'pck_sent', 'pck_done', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors',
+    'idx', 'status', 'bytes_done', 'bytes_sent', 'pck_sent', 'pck_done', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors', 'last_task_time',
 ];
 
 const CPU_STATS_FIELDS = [
@@ -10,7 +10,7 @@ const CPU_STATS_FIELDS = [
 
 
 const FILTER_PROPS_LITE = [
-    'name', 'status', 'bytes_done', 'type', 'ID', 'nb_ipid', 'nb_opid', 'idx', 'itag', 'pck_sent', 'pck_done', 'time', 'current_errors','last_task_time'
+    'name', 'status', 'bytes_done', 'type', 'ID', 'nb_ipid', 'nb_opid', 'idx', 'itag', 'pck_sent', 'pck_done', 'time', 'current_errors','po'
 ];
 
 const FILTER_ARGS_LITE = [];

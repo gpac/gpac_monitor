@@ -24,6 +24,7 @@ export interface SessionFilterStatistics extends Record<string, unknown> {
   pck_sent: number;
   pck_done: number;
   time: number;
+  last_task_time?: number;
   nb_ipid: number;
   nb_opid: number;
   is_eos?: boolean;

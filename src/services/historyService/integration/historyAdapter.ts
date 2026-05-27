@@ -58,7 +58,7 @@ import {
   flushStats,
 } from './handlers/statsHandler';
 import type {
-  BandwidthBuffer,
+  CombinedBandwidthBuffer,
   PrevBandwidthState,
   PIDSamplesBuffer,
 } from './handlers/statsHandler';
@@ -77,7 +77,7 @@ export class HistoryAdapter {
   private baseArgs: Record<string, GpacArgument[]> = {};
   private sessionStartUs = 0;
   private silent = false;
-  private pendingBandwidth: BandwidthBuffer = {};
+  private pendingBandwidth: CombinedBandwidthBuffer = {};
   private pendingCpuStats: CPUStats[] = [];
   private pendingLastFilters: FiltersEvent | null = null;
   private pendingLastStats: {
