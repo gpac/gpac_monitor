@@ -144,12 +144,13 @@ const sessionStatsSlice = createSlice({
         const existing = state.pidsByFilter[idx];
         for (const dir of ['ipids', 'opids'] as const) {
           if (!pids[dir]) continue;
-          existing[dir] = existing[dir] ?? {};
+          const merged: Record<string, PIDproperties> = {};
           for (const [key, pid] of Object.entries(pids[dir]!)) {
-            existing[dir]![key] = existing[dir]![key]
+            merged[key] = existing[dir]?.[key]
               ? { ...existing[dir]![key], ...pid }
               : pid;
           }
+          existing[dir] = merged;
         }
       }
     },
