@@ -38,6 +38,7 @@ interface MonitoredFilterViewProps {
   onBack: () => void;
   onOpenProperties: () => void;
   initialTab?: InitialTabType;
+  onTabChange?: (tab: string) => void;
   isLoading?: boolean;
   isDetached?: boolean;
 }
@@ -56,12 +57,18 @@ const MonitoredFilterView = memo(
     filterData = EMPTY_FILTER_DATA,
     onOpenProperties,
     initialTab,
+    onTabChange,
     isLoading = false,
     isDetached = false,
   }: MonitoredFilterViewProps) => {
     const [activeTab, setActiveTab] = useState<string>(
       initialTab || 'overview',
     );
+
+    const handleTabChange = (tab: string) => {
+      setActiveTab(tab);
+      onTabChange?.(tab);
+    };
 
     // Get log alerts for this filter
     const alerts = useAppSelector((state) =>
@@ -92,7 +99,7 @@ const MonitoredFilterView = memo(
         <div className="flex flex-col gap-2">
           <Tabs
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={handleTabChange}
             className="w-full"
           >
             <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 space-y-1 px-1 py-2">
