@@ -23,10 +23,14 @@ interface OverviewTabProps {
 
 const OverviewTab = memo(
   ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
-    const { status, type, idx, time } = filter;
+    const { status, parsedStatus, type, idx, time } = filter;
 
     const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
-    const healthInfo = getFilterHealthInfo(status, isStalled, alerts);
+    const healthInfo = getFilterHealthInfo(
+      parsedStatus,
+      isStalled,
+      alerts ?? null,
+    );
 
     const metrics = useMemo(() => {
       const secs = microsecondsToSeconds(time);

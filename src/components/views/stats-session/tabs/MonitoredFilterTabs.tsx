@@ -117,6 +117,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         name: filterWithStats.name,
         type: filterWithStats.type,
         status: filterWithStats.status,
+        parsedStatus: filterWithStats.parsedStatus ?? { raw: '', entries: [] },
         time: filterWithStats.time,
         last_task_time: filterWithStats.last_task_time,
         pck_done: filterWithStats.pck_done,
