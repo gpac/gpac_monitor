@@ -1,4 +1,5 @@
 import { GpacNodeData } from '@/types/domain/gpac/model';
+import { parseFilterStatus, ParsedFilterStatus } from './filterStatusParser';
 
 // Lightweight versions of utility functions
 const calculateBufferUsage = (ipid: Record<string, any> = {}): number => {
@@ -144,6 +145,7 @@ const formatPacketRate = (rate: number): string => {
 
 // Enriched filter data with pre-computed values
 export interface EnrichedFilterData extends GpacNodeData {
+  parsedStatus: ParsedFilterStatus;
   computed: {
     bufferUsage: number;
     activityLevel: string;
@@ -181,6 +183,7 @@ self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
       const key = filter.idx ?? filter.ID ?? filter.name;
       const cached = enrichedCache.get(key);
 
+      const parsedStatus = parseFilterStatus(filter.status ?? '');
       const bufferUsage = calculateBufferUsage(filter.ipid);
       const activityLevel = getActivityLevel(filter.bytes_done, filter.time);
       const sessionType = determineFilterSessionType(filter);
@@ -199,6 +202,7 @@ self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
         cached &&
         cached.idx === filter.idx &&
         cached.name === filter.name &&
+        cached.status === filter.status &&
         cached.errors === filter.errors &&
         cached.computed.bufferUsage === bufferUsage &&
         cached.computed.activityLevel === activityLevel &&
@@ -218,6 +222,7 @@ self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
       // Create new enriched object only if data changed
       const enriched: EnrichedFilterData = {
         ...filter,
+        parsedStatus,
         computed: {
           bufferUsage,
           activityLevel,
