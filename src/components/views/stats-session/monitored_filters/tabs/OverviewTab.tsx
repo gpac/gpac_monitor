@@ -64,6 +64,11 @@ const OverviewTab = memo(
           >
             ● {healthInfo.label}
           </Badge>
+          {status && (
+            <span className="font-mono text-xs text-muted-foreground/70">
+              {status}
+            </span>
+          )}
           <span className="text-muted-foreground/50">·</span>
           <span className="text-muted-foreground">Index: {idx}</span>
           <span className="text-muted-foreground/50">·</span>
