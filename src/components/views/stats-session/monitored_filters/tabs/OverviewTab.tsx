@@ -14,6 +14,7 @@ import {
 } from '@/utils/formatting';
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { MetricRow, TableSection } from './pid/shared';
+import FilterStatusMetrics from './FilterStatusMetrics';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
@@ -23,7 +24,7 @@ interface OverviewTabProps {
 
 const OverviewTab = memo(
   ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
-    const { status, parsedStatus, type, idx, time } = filter;
+    const { parsedStatus, type, idx, time } = filter;
 
     const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
     const healthInfo = getFilterHealthInfo(
@@ -68,11 +69,6 @@ const OverviewTab = memo(
           >
             ● {healthInfo.label}
           </Badge>
-          {status && (
-            <span className="font-mono text-xs text-muted-foreground/70">
-              {status}
-            </span>
-          )}
           <span className="text-muted-foreground/50">·</span>
           <span className="text-muted-foreground">Index: {idx}</span>
           <span className="text-muted-foreground/50">·</span>
@@ -87,18 +83,23 @@ const OverviewTab = memo(
 
         {/* 2-column grid: Real-time | Packets + Data */}
         <div className="grid grid-cols-2 gap-2">
-          <TableSection title="Processing">
-            <MetricRow
-              label=" Filter Process speed"
-              value={metrics.processSpeed}
-              isEven
-            />
-            <MetricRow
-              label="Packets/s"
-              value={metrics.processPacketRate}
-              isEven={false}
-            />
-          </TableSection>
+          <div className="flex flex-col gap-2">
+            <TableSection title="Processing">
+              <MetricRow
+                label=" Filter Process speed"
+                value={metrics.processSpeed}
+                isEven
+              />
+              <MetricRow
+                label="Packets/s"
+                value={metrics.processPacketRate}
+                isEven={false}
+              />
+            </TableSection>
+            {parsedStatus.entries.length > 0 && (
+              <FilterStatusMetrics parsedStatus={parsedStatus} />
+            )}
+          </div>
 
           <div className="flex flex-col gap-2">
             <TableSection title="Packets">

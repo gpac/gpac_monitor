@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
+import { parseFilterStatus } from '@/workers/filterStatusParser';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
 import { useFilterStats } from '@/components/views/stats-session/hooks/stats/useFilterStats';
@@ -117,7 +118,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         name: filterWithStats.name,
         type: filterWithStats.type,
         status: filterWithStats.status,
-        parsedStatus: filterWithStats.parsedStatus ?? { raw: '', entries: [] },
+        parsedStatus: parseFilterStatus(filterWithStats.status ?? ''),
         time: filterWithStats.time,
         last_task_time: filterWithStats.last_task_time,
         pck_done: filterWithStats.pck_done,
