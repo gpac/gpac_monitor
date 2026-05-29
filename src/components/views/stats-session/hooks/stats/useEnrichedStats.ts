@@ -11,7 +11,11 @@ export function useEnrichedStats(rawFilters: GpacNodeData[]) {
 
   // Stabilize rawFilters by creating a serialized key
   const filtersKey = useMemo(() => {
-    return rawFilters.map((f) => `${f.idx}-${f.bytes_done}`).join(',');
+    return rawFilters
+      .map(
+        (filter) => `${filter.idx}:${filter.bytes_done}:${filter.status ?? ''}`,
+      )
+      .join('|');
   }, [rawFilters]);
 
   useEffect(() => {
