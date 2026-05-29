@@ -13,6 +13,7 @@ import {
   microsecondsToSeconds,
 } from '@/utils/formatting';
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
+import { buildStatusGroups } from '../utils/statusViewModel';
 import { MetricRow, TableSection } from './pid/shared';
 import FilterStatusMetrics from './FilterStatusMetrics';
 
@@ -32,6 +33,19 @@ const OverviewTab = memo(
       isStalled,
       alerts ?? null,
     );
+
+    const statusGroups = useMemo(
+      () => buildStatusGroups(parsedStatus),
+      [parsedStatus],
+    );
+
+    const hasStatusContent =
+      statusGroups.info != null ||
+      statusGroups.progress != null ||
+      statusGroups.numericMetrics.length > 0 ||
+      statusGroups.textMetrics.length > 0 ||
+      statusGroups.stateBadges.length > 0 ||
+      statusGroups.arrays.length > 0;
 
     const metrics = useMemo(() => {
       const secs = microsecondsToSeconds(time);
@@ -96,9 +110,7 @@ const OverviewTab = memo(
                 isEven={false}
               />
             </TableSection>
-            {parsedStatus.entries.length > 0 && (
-              <FilterStatusMetrics parsedStatus={parsedStatus} />
-            )}
+            {hasStatusContent && <FilterStatusMetrics groups={statusGroups} />}
           </div>
 
           <div className="flex flex-col gap-2">

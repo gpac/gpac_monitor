@@ -36,11 +36,16 @@ export type ArrayGroup = {
   items: ArrayItem[];
 };
 
+export type TextMetric = {
+  key: string;
+  value: string;
+};
+
 export type StatusGroups = {
   info?: string;
   progress?: ProgressBar;
-  buffer?: ProgressBar;
   numericMetrics: NumericMetric[];
+  textMetrics: TextMetric[];
   stateBadges: StateBadge[];
   arrays: ArrayGroup[];
 };
@@ -48,14 +53,10 @@ export type StatusGroups = {
 function isProgressEntry(entry: StatusEntry): entry is StatusNum {
   if (entry.type !== 'num') return false;
   const num = entry as StatusNum;
-  return num.key === 'prog' || num.key === 'pc' || num.fraction?.den === 100;
-}
-
-function isBufferEntry(entry: StatusEntry): entry is StatusNum {
   return (
-    entry.type === 'num' &&
-    (entry as StatusNum).key === 'buffer' &&
-    (entry as StatusNum).fraction !== undefined
+    num.key === 'prog' ||
+    num.key === 'pc' ||
+    (num.fraction?.den === 100 && num.key !== 'buffer')
   );
 }
 
@@ -75,11 +76,12 @@ function toProgressBar(entry: StatusNum): ProgressBar {
 }
 
 function toNumericMetric(entry: StatusNum): NumericMetric {
-  const value = entry.fraction
+  const raw = entry.fraction
     ? `${entry.fraction.num} / ${entry.fraction.den}`
     : Number.isInteger(entry.value)
       ? String(entry.value)
       : entry.value.toFixed(2);
+  const value = entry.unit ? `${raw} ${entry.unit}` : raw;
   return { key: entry.key, value };
 }
 
@@ -119,13 +121,8 @@ export function buildStatusGroups(
     (entry): entry is StatusStr => entry.type === 'str' && entry.key === 'info',
   );
   const progressEntry = entries.find(isProgressEntry);
-  const bufferEntry = entries.find(isBufferEntry);
 
-  const excluded = new Set<StatusEntry | undefined>([
-    infoEntry,
-    progressEntry,
-    bufferEntry,
-  ]);
+  const excluded = new Set<StatusEntry | undefined>([infoEntry, progressEntry]);
 
   const numericMetrics = entries
     .filter(
@@ -134,11 +131,18 @@ export function buildStatusGroups(
     )
     .map(toNumericMetric);
 
+  const textMetrics = entries
+    .filter(
+      (entry): entry is StatusStr =>
+        entry.type === 'str' && entry.key !== 'info' && entry.quoted,
+    )
+    .map((entry): TextMetric => ({ key: entry.key, value: entry.value }));
+
   const stateBadges = entries
     .filter(
       (entry): entry is StatusBool | StatusStr =>
         entry.type === 'bool' ||
-        (entry.type === 'str' && (entry as StatusStr).key !== 'info'),
+        (entry.type === 'str' && entry.key !== 'info' && !entry.quoted),
     )
     .map(toStateBadge);
 
@@ -154,8 +158,8 @@ export function buildStatusGroups(
   return {
     info: infoEntry?.value,
     progress: progressEntry ? toProgressBar(progressEntry) : undefined,
-    buffer: bufferEntry ? toProgressBar(bufferEntry) : undefined,
     numericMetrics,
+    textMetrics,
     stateBadges,
     arrays,
   };

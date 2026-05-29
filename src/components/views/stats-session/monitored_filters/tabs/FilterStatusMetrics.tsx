@@ -1,200 +1,151 @@
 import { useState } from 'react';
 import type {
-  ParsedFilterStatus,
-  StatusScalar,
-  StatusNum,
-  StatusStr,
-  StatusArray,
-} from '@/workers/filterStatusParser';
-import { Badge } from '@/components/ui/badge';
+  StatusGroups,
+  ProgressBar,
+  NumericMetric,
+  TextMetric,
+  StateBadge,
+  ArrayGroup,
+} from '../utils/statusViewModel';
 import { Progress } from '@/components/ui/progress';
-import { MetricRow, TableSection } from './pid/shared';
 
 interface FilterStatusMetricsProps {
-  parsedStatus: ParsedFilterStatus;
+  groups: StatusGroups;
 }
 
-type DisplayKind = 'text' | 'badge' | 'progress' | 'ratio' | 'number';
+const BADGE_STYLES: Record<string, string> = {
+  wait: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
+  done: 'border-white/10 bg-white/5 text-muted-foreground',
+  running: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+};
+const DEFAULT_BADGE = 'border-white/10 bg-white/5 text-muted-foreground';
 
-function getDisplayKind(entry: StatusScalar): DisplayKind {
-  if (entry.type === 'str') return 'text';
-  if (entry.type === 'bool') return 'badge';
-  const num = entry as StatusNum;
-  if (entry.key === 'prog') return 'progress';
-  if (entry.key === 'pc' || num.fraction?.den === 100) return 'progress';
-  if (entry.key === 'buffer' || num.fraction) return 'ratio';
-  return 'number';
-}
-
-function toPercent(entry: StatusNum): number {
-  return entry.key === 'pc'
-    ? Math.min(100, entry.value)
-    : Math.min(100, Math.round(entry.value * 100));
-}
-
-function ProgressRow({ entry, isEven }: { entry: StatusNum; isEven: boolean }) {
-  const pct = toPercent(entry);
-  const displayValue = entry.fraction
-    ? `${entry.fraction.num} / ${entry.fraction.den}`
-    : `${pct}%`;
-  const rowCls = `${isEven ? 'bg-black/10' : 'bg-black/20'} border-b border-white/5`;
+function BarMetric({ bar }: { bar: ProgressBar }) {
   return (
-    <>
-      <tr className={rowCls}>
-        <td className="px-2 py-1.5 text-xs text-muted-foreground">
-          {entry.key}
-        </td>
-        <td className="px-2 py-1.5 text-xs text-right tabular-nums text-info">
-          {displayValue}
-        </td>
-      </tr>
-      <tr className={rowCls}>
-        <td colSpan={2} className="px-2 pb-1.5">
-          <Progress value={pct} className="h-1" />
-        </td>
-      </tr>
-    </>
+    <div className="space-y-1">
+      <div className="flex justify-between text-xs">
+        <span className="text-muted-foreground">{bar.key}</span>
+        <span className="tabular-nums text-info">{bar.valueLabel}</span>
+      </div>
+      <Progress value={bar.percentage} className="h-1.5" />
+    </div>
   );
 }
 
-function ArraySection({ array }: { array: StatusArray }) {
-  const [open, setOpen] = useState(true);
+function NumericCell({ metric }: { metric: NumericMetric }) {
   return (
-    <>
-      <tr
-        className="bg-black/30 border-b border-white/5 cursor-pointer"
+    <div className="space-y-0.5">
+      <div className="text-[10px] text-muted-foreground">{metric.key}</div>
+      <div className="text-xs font-medium tabular-nums text-info">
+        {metric.value}
+      </div>
+    </div>
+  );
+}
+
+function TextMetricRow({ metric }: { metric: TextMetric }) {
+  return (
+    <div className="flex gap-2 text-xs">
+      <span className="text-muted-foreground">{metric.key}</span>
+      <span className="text-muted-foreground/70 italic">{metric.value}</span>
+    </div>
+  );
+}
+
+function StateBadgeItem({ badge }: { badge: StateBadge }) {
+  const style = BADGE_STYLES[badge.styleKey] ?? DEFAULT_BADGE;
+  return (
+    <span
+      className={`inline-flex rounded border px-1.5 py-0.5 text-[10px] font-medium ${style}`}
+    >
+      {badge.label}
+    </span>
+  );
+}
+
+function ArraySection({ array }: { array: ArrayGroup }) {
+  const [open, setOpen] = useState(array.items.length <= 4);
+  return (
+    <div>
+      <button
         onClick={() => setOpen((prev) => !prev)}
+        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
       >
-        <td colSpan={2} className="px-2 py-1.5">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <span>tracks</span>
-            <span className="text-[10px]">{open ? '˅' : '›'}</span>
-          </div>
-        </td>
-      </tr>
-      {open &&
-        array.items.map((item) => {
-          const progEntry = item.entries.find(
-            (entry): entry is StatusNum =>
-              entry.type === 'num' &&
-              (entry.key === 'pc' || entry.fraction !== undefined),
-          );
-          if (progEntry) {
-            const pct = toPercent(progEntry);
-            return (
-              <tr
-                key={item.name}
-                className="bg-black/5 border-b border-white/5"
-              >
-                <td className="px-2 py-1.5 text-xs text-muted-foreground align-middle">
+        {array.name} <span className="text-[10px]">{open ? '˅' : '›'}</span>
+      </button>
+      {open && (
+        <div className="mt-1.5 space-y-1.5">
+          {array.items.map((item) =>
+            item.progress !== undefined ? (
+              <div key={item.name} className="flex items-center gap-2">
+                <span className="w-8 shrink-0 text-[10px] text-muted-foreground">
                   {item.name}
-                </td>
-                <td className="px-2 py-1.5">
-                  <div className="flex items-center gap-2 justify-end">
-                    <span className="text-xs tabular-nums text-info">
-                      {pct}%
-                    </span>
-                    <Progress value={pct} className="h-1 w-16" />
-                  </div>
-                </td>
-              </tr>
-            );
-          }
-          const raw = item.entries
-            .map((entry) =>
-              entry.type === 'bool' ? entry.key : `${entry.key}=${entry.value}`,
-            )
-            .join(' ');
-          return (
-            <MetricRow
-              key={item.name}
-              label={item.name}
-              value={raw || '—'}
-              isEven={false}
-              valueClassName="text-muted-foreground"
-            />
-          );
-        })}
-    </>
+                </span>
+                <Progress value={item.progress} className="h-1 flex-1" />
+                <span className="w-8 text-right text-[10px] tabular-nums text-info">
+                  {item.progress}%
+                </span>
+              </div>
+            ) : (
+              <div key={item.name} className="flex gap-2 text-[10px]">
+                <span className="w-8 shrink-0 text-muted-foreground">
+                  {item.name}
+                </span>
+                <span className="font-mono text-info">
+                  {item.rawText || '—'}
+                </span>
+              </div>
+            ),
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
-function ScalarRow({
-  entry,
-  isEven,
-}: {
-  entry: StatusScalar;
-  isEven: boolean;
-}) {
-  const kind = getDisplayKind(entry);
-  const rowCls = `${isEven ? 'bg-black/10' : 'bg-black/20'} border-b border-white/5`;
-
-  if (kind === 'badge') {
-    return (
-      <tr className={rowCls}>
-        <td colSpan={2} className="px-2 py-1.5">
-          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">
-            {entry.key}
-          </Badge>
-        </td>
-      </tr>
-    );
-  }
-
-  if (kind === 'text') {
-    const str = entry as StatusStr;
-    if (str.key === 'info') {
-      return (
-        <tr className={rowCls}>
-          <td
-            colSpan={2}
-            className="px-2 py-1.5 text-xs text-muted-foreground/70 italic"
-          >
-            {str.value}
-          </td>
-        </tr>
-      );
-    }
-    return (
-      <MetricRow
-        label={str.key}
-        value={str.value}
-        isEven={isEven}
-        valueClassName="text-muted-foreground"
-      />
-    );
-  }
-
-  if (kind === 'progress' || kind === 'ratio') {
-    return <ProgressRow entry={entry as StatusNum} isEven={isEven} />;
-  }
-
-  const num = entry as StatusNum;
-  const value = Number.isInteger(num.value)
-    ? String(num.value)
-    : num.value.toFixed(2);
-  return <MetricRow label={num.key} value={value} isEven={isEven} />;
-}
-
-function FilterStatusMetrics({ parsedStatus }: FilterStatusMetricsProps) {
-  if (parsedStatus.entries.length === 0) return null;
-
-  const scalars = parsedStatus.entries.filter(
-    (entry): entry is StatusScalar => entry.type !== 'array',
-  );
-  const arrays = parsedStatus.entries.filter(
-    (entry): entry is StatusArray => entry.type === 'array',
-  );
-
+function FilterStatusMetrics({ groups }: FilterStatusMetricsProps) {
   return (
-    <TableSection title="Status Metrics">
-      {scalars.map((entry, i) => (
-        <ScalarRow key={entry.key} entry={entry} isEven={i % 2 === 0} />
-      ))}
-      {arrays.map((array, i) => (
-        <ArraySection key={`array-${i}`} array={array} />
-      ))}
-    </TableSection>
+    <section className="border-t border-border/60">
+      <div className="px-2 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+        Status Metrics
+      </div>
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.45fr)] gap-6 px-2 pb-3">
+        <div className="space-y-3">
+          {groups.info && (
+            <p className="text-xs italic text-muted-foreground/70">
+              {groups.info}
+            </p>
+          )}
+          {groups.textMetrics.length > 0 && (
+            <div className="space-y-1">
+              {groups.textMetrics.map((metric) => (
+                <TextMetricRow key={metric.key} metric={metric} />
+              ))}
+            </div>
+          )}
+          {groups.progress && <BarMetric bar={groups.progress} />}
+        </div>
+        <div className="space-y-3">
+          {groups.numericMetrics.length > 0 && (
+            <div className="grid grid-cols-3 gap-4">
+              {groups.numericMetrics.map((metric) => (
+                <NumericCell key={metric.key} metric={metric} />
+              ))}
+            </div>
+          )}
+          {groups.stateBadges.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {groups.stateBadges.map((badge) => (
+                <StateBadgeItem key={badge.key} badge={badge} />
+              ))}
+            </div>
+          )}
+          {groups.arrays.map((array) => (
+            <ArraySection key={array.name} array={array} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 

@@ -4,8 +4,14 @@ export type StatusNum = {
   key: string;
   value: number;
   fraction?: { num: number; den: number };
+  unit?: string;
 };
-export type StatusStr = { type: 'str'; key: string; value: string };
+export type StatusStr = {
+  type: 'str';
+  key: string;
+  value: string;
+  quoted: boolean;
+};
 export type StatusArray = { type: 'array'; items: StatusArrayItem[] };
 
 export type StatusScalar = StatusBool | StatusNum | StatusStr;
@@ -33,7 +39,7 @@ function parseScalarToken(token: string): StatusScalar | null {
   if (!key) return null;
 
   if (rawValue.startsWith('"') && rawValue.endsWith('"')) {
-    return { type: 'str', key, value: rawValue.slice(1, -1) };
+    return { type: 'str', key, value: rawValue.slice(1, -1), quoted: true };
   }
 
   const fractionMatch = rawValue.match(/^(\d+)\/(\d+)$/);
@@ -54,7 +60,7 @@ function parseScalarToken(token: string): StatusScalar | null {
     return { type: 'num', key, value: numericValue };
   }
 
-  return { type: 'str', key, value: rawValue };
+  return { type: 'str', key, value: rawValue, quoted: false };
 }
 
 // space-split, quoted values kept as single token
@@ -117,7 +123,17 @@ export function parseFilterStatus(raw: string): ParsedFilterStatus {
 
   for (const token of splitStatusTokens(scalarPart)) {
     const scalar = parseScalarToken(token);
-    if (scalar) entries.push(scalar);
+    if (!scalar) continue;
+
+    if (scalar.type === 'bool') {
+      const lastEntry = entries[entries.length - 1];
+      if (lastEntry?.type === 'num') {
+        lastEntry.unit = scalar.key;
+        continue;
+      }
+    }
+
+    entries.push(scalar);
   }
 
   if (arrayEntry) entries.push(arrayEntry);
