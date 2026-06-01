@@ -27,6 +27,7 @@ export type StateBadge = {
 
 export type ArrayItem = {
   name: string;
+  type?: string;
   progress?: number;
   rawText?: string;
 };
@@ -133,15 +134,19 @@ function toArrayItem(item: {
   name: string;
   entries: StatusScalar[];
 }): ArrayItem {
+  const typeEntry = item.entries.find(
+    (entry): entry is StatusStr => entry.type === 'str' && entry.key === 'type',
+  );
   const progressEntry = item.entries.find(isProgressEntry) as
     | StatusNum
     | undefined;
-  const nonProgressEntries = item.entries.filter(
-    (entry) => entry !== progressEntry,
+  const excluded = new Set<StatusScalar>(
+    [typeEntry, progressEntry].filter(Boolean) as StatusScalar[],
   );
+  const remaining = item.entries.filter((entry) => !excluded.has(entry));
   const rawText =
-    nonProgressEntries.length > 0
-      ? nonProgressEntries.map(formatScalarCompact).join(' ')
+    remaining.length > 0
+      ? remaining.map(formatScalarCompact).join(' ')
       : undefined;
 
   if (progressEntry) {
@@ -149,9 +154,14 @@ function toArrayItem(item: {
       progressEntry.key === 'pc'
         ? clampPercentage(progressEntry.value)
         : clampPercentage(progressEntry.value * 100);
-    return { name: item.name, progress: percentage, rawText };
+    return {
+      name: item.name,
+      type: typeEntry?.value,
+      progress: percentage,
+      rawText,
+    };
   }
-  return { name: item.name, rawText };
+  return { name: item.name, type: typeEntry?.value, rawText };
 }
 
 export function buildFilterStatusViewModel(
