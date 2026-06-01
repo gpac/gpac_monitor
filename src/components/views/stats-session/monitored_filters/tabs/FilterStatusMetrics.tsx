@@ -134,7 +134,7 @@ function ArraySection({ array }: { array: ArrayGroup }) {
 function FilterStatusMetrics({ groups }: { groups: FilterStatusViewModel }) {
   const hasInfo = groups.info != null || groups.textMetrics.length > 0;
   return (
-    <section className="space-y-1 rounded-sm bg-black/20 ring-1 ring-white/5 mt-1 overflow-hidden">
+    <section className="space-y-1 rounded-sm bg-black/20 ring-1 ring-white/5 mt-1 ">
       {hasInfo && (
         <TableSection title="Info">
           {groups.info && (
@@ -167,6 +167,7 @@ function FilterStatusMetrics({ groups }: { groups: FilterStatusViewModel }) {
               label={metric.key}
               value={metric.value}
               isEven={index % 2 === 0}
+              title={metric.tooltip}
             />
           ))}
         </TableSection>

@@ -7,7 +7,7 @@ import type {
   StatusBool,
   StatusArray,
 } from '@/workers/filterStatusParser';
-import { formatFps } from '@/utils/formatting';
+import { formatFps, formatFractionAsTime } from '@/utils/formatting';
 
 export type ProgressBar = {
   key: string;
@@ -18,6 +18,7 @@ export type ProgressBar = {
 export type NumericMetric = {
   key: string;
   value: string;
+  tooltip?: string;
 };
 
 export type StateBadge = {
@@ -121,6 +122,14 @@ function toProgressBar(entry: StatusNum): ProgressBar {
 function toNumericMetric(entry: StatusNum): NumericMetric {
   if (entry.key === 'fps' || entry.unit === 'fps') {
     return { key: entry.key, value: formatFps(entry.value) };
+  }
+  if (entry.key === 'time' && entry.fraction) {
+    const { num, den } = entry.fraction;
+    return {
+      key: entry.key,
+      value: formatFractionAsTime(num, den),
+      tooltip: `${num}/${den}`,
+    };
   }
   const formattedValue = formatNumericValue(entry);
   return {

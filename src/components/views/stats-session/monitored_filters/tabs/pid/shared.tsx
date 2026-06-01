@@ -1,6 +1,8 @@
 import { type ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { TAB_STYLES } from '../styles';
+import PIDMetricTooltip from './PIDMetricTooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 export { default as PIDTable } from './PIDTable';
 
 interface PIDStatusBarProps {
@@ -61,11 +63,13 @@ export const MetricRow = ({
   value,
   isEven,
   valueClassName = 'text-info',
+  title,
 }: {
   label: string;
   value: string;
   isEven: boolean;
   valueClassName?: string;
+  title?: string;
 }) => (
   <tr
     className={`${isEven ? 'bg-black/10' : 'bg-black/20'} border-b border-white/5`}
@@ -76,7 +80,15 @@ export const MetricRow = ({
     <td
       className={`px-2 py-2 align-middle text-xs font-medium tabular-nums text-right w-28 whitespace-nowrap ${valueClassName}`}
     >
-      {value}
+      {title ? (
+        <TooltipProvider delayDuration={200}>
+          <PIDMetricTooltip rows={[{ label: 'raw', value: title }]}>
+            <span>{value}</span>
+          </PIDMetricTooltip>
+        </TooltipProvider>
+      ) : (
+        value
+      )}
     </td>
   </tr>
 );

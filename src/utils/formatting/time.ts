@@ -56,6 +56,21 @@ export const microsecondsToSeconds = (microseconds: number): number => {
   return microseconds / 1_000_000;
 };
 
+/** Formats a GPAC status time fraction (num/den) as a human-readable duration. */
+export const formatFractionAsTime = (num: number, den: number): string => {
+  if (den === 0) return '—';
+  const seconds = num / den;
+  if (seconds < 60) return `${seconds.toFixed(2)}s`;
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60)
+    .toString()
+    .padStart(2, '0');
+  if (mins < 60) return `${mins}:${secs}`;
+  const hours = Math.floor(mins / 60);
+  const remainingMins = (mins % 60).toString().padStart(2, '0');
+  return `${hours}:${remainingMins}:${secs}`;
+};
+
 /**
  * Formats current time as HH:MM:SS for chart display
  */
