@@ -220,4 +220,280 @@ describe('parseFilterStatus', () => {
       expect(result.entries[1]).toMatchObject({ type: 'num', key: 'fps' });
     });
   });
+
+  describe('real snapshot — output sink (vout/aout)', () => {
+    it('parses video sink: quoted info with space + time fraction + buffer+ms + fps', () => {
+      const result = parseFilterStatus(
+        'info="640x480 yuv420" time=152064/12800 buffer=101/100 ms fps=25.08',
+      );
+      expect(result.entries).toHaveLength(4);
+      expect(result.entries[0]).toEqual({
+        type: 'str',
+        key: 'info',
+        value: '640x480 yuv420',
+        quoted: true,
+      });
+      expect(result.entries[1]).toMatchObject({
+        type: 'num',
+        key: 'time',
+        fraction: { num: 152064, den: 12800 },
+      });
+      const buffer = result.entries[2];
+      expect(buffer.type).toBe('num');
+      if (buffer.type === 'num') {
+        expect(buffer.key).toBe('buffer');
+        expect(buffer.fraction).toEqual({ num: 101, den: 100 });
+        expect(buffer.unit).toBe('ms');
+      }
+      expect(result.entries[3]).toMatchObject({ type: 'num', key: 'fps' });
+    });
+
+    it('parses audio sink: multi-word quoted info + time fraction + buffer+ms', () => {
+      const result = parseFilterStatus(
+        'info="48000 Hz 6 ch s32" time=579584/48000 buffer=229/200 ms',
+      );
+      expect(result.entries).toHaveLength(3);
+      expect(result.entries[0]).toEqual({
+        type: 'str',
+        key: 'info',
+        value: '48000 Hz 6 ch s32',
+        quoted: true,
+      });
+      expect(result.entries[1]).toMatchObject({
+        type: 'num',
+        key: 'time',
+        fraction: { num: 579584, den: 48000 },
+      });
+      const buffer = result.entries[2];
+      expect(buffer.type).toBe('num');
+      if (buffer.type === 'num') {
+        expect(buffer.unit).toBe('ms');
+        expect(buffer.fraction).toEqual({ num: 229, den: 200 });
+      }
+    });
+  });
+
+  describe('real snapshot — rfnalu (unknown keys as plain counters)', () => {
+    it('parses all-integer counter metrics with unknown keys', () => {
+      const result = parseFilterStatus(
+        'NALU=62 I=3 P=18 B=34 SI=0 SP=0 IDR=3 CRA=0 SEI=1',
+      );
+      expect(result.entries).toHaveLength(9);
+      for (const entry of result.entries) {
+        expect(entry.type).toBe('num');
+      }
+      expect(result.entries[0]).toEqual({
+        type: 'num',
+        key: 'NALU',
+        value: 62,
+      });
+      expect(result.entries[6]).toEqual({ type: 'num', key: 'IDR', value: 3 });
+    });
+  });
+
+  describe('real snapshot — DASH demux', () => {
+    it('parses time=4.09s as bare string, not a fraction', () => {
+      const result = parseFilterStatus('period=1 time=4.09s prog=0');
+      expect(result.entries[1]).toEqual({
+        type: 'str',
+        key: 'time',
+        value: '4.09s',
+        quoted: false,
+      });
+    });
+
+    it('parses prog=0 as plain integer (no fraction)', () => {
+      const result = parseFilterStatus('prog=0');
+      expect(result.entries[0]).toEqual({ type: 'num', key: 'prog', value: 0 });
+    });
+
+    it('parses array with item names containing # and .', () => {
+      const result = parseFilterStatus(
+        '[AS#1.1 type=A seg=5 prog=3824/44100, AS#2.1 type=V seg=3]',
+      );
+      const array = result.entries[0];
+      expect(array.type).toBe('array');
+      if (array.type === 'array') {
+        expect(array.items[0].name).toBe('AS#1.1');
+        expect(array.items[1].name).toBe('AS#2.1');
+        expect(array.items[0].entries).toContainEqual({
+          type: 'str',
+          key: 'type',
+          value: 'A',
+          quoted: false,
+        });
+        expect(array.items[0].entries).toContainEqual(
+          expect.objectContaining({
+            type: 'num',
+            key: 'prog',
+            fraction: { num: 3824, den: 44100 },
+          }),
+        );
+      }
+    });
+
+    it('parses full DASH status: array + scalars after (scalars emitted before array)', () => {
+      const raw =
+        '[AS#1.1 type=A seg=5 prog=3824/44100, AS#2.1 type=V seg=3 prog=0/12800] period=1 time=4.09s prog=0';
+      const result = parseFilterStatus(raw);
+      expect(result.entries).toHaveLength(4);
+      expect(result.entries[0]).toEqual({
+        type: 'num',
+        key: 'period',
+        value: 1,
+      });
+      expect(result.entries[1]).toEqual({
+        type: 'str',
+        key: 'time',
+        value: '4.09s',
+        quoted: false,
+      });
+      expect(result.entries[2]).toEqual({ type: 'num', key: 'prog', value: 0 });
+      const array = result.entries[3];
+      expect(array.type).toBe('array');
+      if (array.type === 'array') {
+        expect(array.items).toHaveLength(2);
+        expect(array.items[0].name).toBe('AS#1.1');
+      }
+    });
+
+    it('parses prog fraction + explicit pc float', () => {
+      const result = parseFilterStatus('prog=350000/652932 pc=53.60');
+      expect(result.entries[0]).toMatchObject({
+        type: 'num',
+        key: 'prog',
+        fraction: { num: 350000, den: 652932 },
+      });
+      const pc = result.entries[1];
+      expect(pc.type).toBe('num');
+      if (pc.type === 'num') expect(pc.value).toBeCloseTo(53.6);
+    });
+  });
+
+  describe('real snapshot — mp4mx / mux', () => {
+    it('parses info="importing" (quoted single word) + array', () => {
+      const result = parseFilterStatus(
+        'info="importing" [TK2 type=A pc=20, TK1 type=V pc=14]',
+      );
+      expect(result.entries[0]).toEqual({
+        type: 'str',
+        key: 'info',
+        value: 'importing',
+        quoted: true,
+      });
+      const array = result.entries[1];
+      expect(array.type).toBe('array');
+      if (array.type === 'array') {
+        expect(array.items.map((i) => i.name)).toEqual(['TK2', 'TK1']);
+      }
+    });
+
+    it('parses segs + frags + next float + array', () => {
+      const result = parseFilterStatus(
+        'segs=4 frags=1 next=5.000 [TK2 type=A spf=10 pc=0]',
+      );
+      expect(result.entries).toHaveLength(4);
+      expect(result.entries[0]).toEqual({ type: 'num', key: 'segs', value: 4 });
+      expect(result.entries[1]).toEqual({
+        type: 'num',
+        key: 'frags',
+        value: 1,
+      });
+      expect(result.entries[2]).toMatchObject({ type: 'num', key: 'next' });
+      expect(result.entries[3].type).toBe('array');
+    });
+
+    it('parses custom s_bytes metric', () => {
+      const result = parseFilterStatus(
+        'info="video_dash_track1_2.m4s" s_bytes=145225',
+      );
+      expect(result.entries[0]).toEqual({
+        type: 'str',
+        key: 'info',
+        value: 'video_dash_track1_2.m4s',
+        quoted: true,
+      });
+      expect(result.entries[1]).toEqual({
+        type: 'num',
+        key: 's_bytes',
+        value: 145225,
+      });
+    });
+  });
+
+  describe('custom developer metrics — any unknown key must parse', () => {
+    it('parses unknown numeric key', () => {
+      const result = parseFilterStatus('my_metric=42');
+      expect(result.entries).toEqual([
+        { type: 'num', key: 'my_metric', value: 42 },
+      ]);
+    });
+
+    it('parses unknown bool flag', () => {
+      const result = parseFilterStatus('my_flag');
+      expect(result.entries).toEqual([{ type: 'bool', key: 'my_flag' }]);
+    });
+
+    it('parses unknown bare-word enum', () => {
+      const result = parseFilterStatus('codec=h264');
+      expect(result.entries).toEqual([
+        { type: 'str', key: 'codec', value: 'h264', quoted: false },
+      ]);
+    });
+
+    it('parses unknown quoted string', () => {
+      const result = parseFilterStatus('status_msg="processing input data"');
+      expect(result.entries).toEqual([
+        {
+          type: 'str',
+          key: 'status_msg',
+          value: 'processing input data',
+          quoted: true,
+        },
+      ]);
+    });
+
+    it('parses mix of custom and standard metrics — bool must come before numerics to avoid unit annotation', () => {
+      const result = parseFilterStatus('active fps=30 my_rate=100');
+      expect(result.entries).toHaveLength(3);
+      expect(result.entries[0]).toEqual({ type: 'bool', key: 'active' });
+      expect(result.entries[1]).toMatchObject({ type: 'num', key: 'fps' });
+      expect(result.entries[2]).toEqual({
+        type: 'num',
+        key: 'my_rate',
+        value: 100,
+      });
+    });
+
+    it('bare word after a num entry is consumed as its unit, not a bool', () => {
+      const result = parseFilterStatus('fps=30 my_rate=100 active');
+      expect(result.entries).toHaveLength(2);
+      const myRate = result.entries[1];
+      expect(myRate.type).toBe('num');
+      if (myRate.type === 'num') {
+        expect(myRate.key).toBe('my_rate');
+        expect(myRate.unit).toBe('active');
+      }
+    });
+
+    it('parses custom array with unknown item names and bool entries', () => {
+      const result = parseFilterStatus(
+        '[worker_1 tasks=5 done, worker_2 tasks=3]',
+      );
+      const array = result.entries[0];
+      expect(array.type).toBe('array');
+      if (array.type === 'array') {
+        expect(array.items[0].name).toBe('worker_1');
+        expect(array.items[0].entries).toContainEqual({
+          type: 'num',
+          key: 'tasks',
+          value: 5,
+        });
+        expect(array.items[0].entries).toContainEqual({
+          type: 'bool',
+          key: 'done',
+        });
+      }
+    });
+  });
 });
