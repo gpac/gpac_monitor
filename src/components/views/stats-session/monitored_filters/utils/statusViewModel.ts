@@ -27,11 +27,13 @@ export type StateBadge = {
   styleKey: string;
 };
 
+export type ArrayMetric = { key: string; value: string; tooltip?: string };
+
 export type ArrayItem = {
   name: string;
   type?: string;
+  metrics: ArrayMetric[];
   progress?: number;
-  rawText?: string;
 };
 
 export type ArrayGroup = {
@@ -96,18 +98,6 @@ function formatNumericValue(entry: StatusNum): string {
     : entry.value.toFixed(2);
 }
 
-function formatScalarCompact(entry: StatusScalar): string {
-  if (entry.type === 'bool') return entry.key;
-  if (entry.type === 'str') return `${entry.key}=${entry.value}`;
-  const numericEntry = entry as StatusNum;
-  const formattedValue = numericEntry.fraction
-    ? `${numericEntry.fraction.num}/${numericEntry.fraction.den}`
-    : Number.isInteger(numericEntry.value)
-      ? String(numericEntry.value)
-      : numericEntry.value.toFixed(2);
-  return `${numericEntry.key}=${formattedValue}`;
-}
-
 function toProgressBar(entry: StatusNum): ProgressBar {
   const rawPercentage = entry.key === 'pc' ? entry.value : entry.value * 100;
 
@@ -143,6 +133,19 @@ function toStateBadge(entry: StatusBool | StatusStr): StateBadge {
   return { key: entry.key, label, styleKey: normalizeStyleKey(label) };
 }
 
+function scalarValueStr(entry: StatusScalar): string {
+  if (entry.type === 'bool') return '●';
+  if (entry.type === 'str') return entry.value;
+  const num = entry as StatusNum;
+  const unit = num.unit ? ` ${num.unit}` : '';
+  if (num.fraction) {
+    if (entry.key === 'time')
+      return formatFractionAsTime(num.fraction.num, num.fraction.den);
+    return `${num.fraction.num}/${num.fraction.den}${unit}`;
+  }
+  return `${Number.isInteger(num.value) ? String(num.value) : num.value.toFixed(2)}${unit}`;
+}
+
 function toArrayItem(item: {
   name: string;
   entries: StatusScalar[];
@@ -156,11 +159,16 @@ function toArrayItem(item: {
   const excluded = new Set<StatusScalar>(
     [typeEntry, progressEntry].filter(Boolean) as StatusScalar[],
   );
-  const remaining = item.entries.filter((entry) => !excluded.has(entry));
-  const rawText =
-    remaining.length > 0
-      ? remaining.map(formatScalarCompact).join(' ')
-      : undefined;
+  const metrics: ArrayMetric[] = item.entries
+    .filter((entry) => !excluded.has(entry))
+    .map((entry) => {
+      const value = scalarValueStr(entry);
+      const tooltip =
+        entry.type === 'num' && entry.key === 'time' && entry.fraction
+          ? `${entry.fraction.num}/${entry.fraction.den}`
+          : undefined;
+      return { key: entry.key, value, tooltip };
+    });
 
   if (progressEntry) {
     const percentage =
@@ -170,11 +178,11 @@ function toArrayItem(item: {
     return {
       name: item.name,
       type: typeEntry?.value,
+      metrics,
       progress: percentage,
-      rawText,
     };
   }
-  return { name: item.name, type: typeEntry?.value, rawText };
+  return { name: item.name, type: typeEntry?.value, metrics };
 }
 
 export function buildFilterStatusViewModel(
