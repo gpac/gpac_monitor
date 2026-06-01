@@ -32,7 +32,8 @@ export type ArrayItem = {
 };
 
 export type ArrayGroup = {
-  name: string;
+  key: string;
+  label: string;
   items: ArrayItem[];
 };
 
@@ -41,7 +42,7 @@ export type TextMetric = {
   value: string;
 };
 
-export type StatusGroups = {
+export type FilterStatusViewModel = {
   info?: string;
   progress?: ProgressBar;
   numericMetrics: NumericMetric[];
@@ -50,107 +51,139 @@ export type StatusGroups = {
   arrays: ArrayGroup[];
 };
 
+export type StatusGroups = FilterStatusViewModel;
+
+const PROGRESS_METRIC_KEYS = new Set(['prog', 'pc']);
+
+function clampPercentage(value: number): number {
+  return Math.max(0, Math.min(100, value));
+}
+
+function isInfoEntry(entry: StatusEntry): entry is StatusStr {
+  return entry.type === 'str' && entry.key === 'info';
+}
+
 function isProgressEntry(entry: StatusEntry): entry is StatusNum {
-  if (entry.type !== 'num') return false;
-  const num = entry as StatusNum;
+  return entry.type === 'num' && PROGRESS_METRIC_KEYS.has(entry.key);
+}
+
+function isTextMetricEntry(entry: StatusEntry): entry is StatusStr {
+  return entry.type === 'str' && entry.key !== 'info' && entry.quoted;
+}
+
+function isStateBadgeEntry(
+  entry: StatusEntry,
+): entry is StatusBool | StatusStr {
   return (
-    num.key === 'prog' ||
-    num.key === 'pc' ||
-    (num.fraction?.den === 100 && num.key !== 'buffer')
+    entry.type === 'bool' ||
+    (entry.type === 'str' && entry.key !== 'info' && !entry.quoted)
   );
 }
 
-function toProgressBar(entry: StatusNum): ProgressBar {
-  let percentage: number;
-  let valueLabel: string;
-  if (entry.key === 'pc' || entry.fraction?.den === 100) {
-    percentage = Math.min(100, entry.fraction?.num ?? entry.value);
-    valueLabel = `${Math.round(percentage)}%`;
-  } else {
-    percentage = Math.min(100, Math.round(entry.value * 100));
-    valueLabel = entry.fraction
-      ? `${entry.fraction.num} / ${entry.fraction.den}`
-      : `${percentage}%`;
+function normalizeStyleKey(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function formatNumericValue(entry: StatusNum): string {
+  if (entry.fraction) {
+    return `${entry.fraction.num} / ${entry.fraction.den}`;
   }
+  return Number.isInteger(entry.value)
+    ? String(entry.value)
+    : entry.value.toFixed(2);
+}
+
+function formatScalarCompact(entry: StatusScalar): string {
+  if (entry.type === 'bool') return entry.key;
+  if (entry.type === 'str') return `${entry.key}=${entry.value}`;
+  const numericEntry = entry as StatusNum;
+  const formattedValue = numericEntry.fraction
+    ? `${numericEntry.fraction.num}/${numericEntry.fraction.den}`
+    : Number.isInteger(numericEntry.value)
+      ? String(numericEntry.value)
+      : numericEntry.value.toFixed(2);
+  return `${numericEntry.key}=${formattedValue}`;
+}
+
+function toProgressBar(entry: StatusNum): ProgressBar {
+  const rawPercentage = entry.key === 'pc' ? entry.value : entry.value * 100;
+
+  const percentage = clampPercentage(rawPercentage);
+  const valueLabel = entry.fraction
+    ? `${entry.fraction.num} / ${entry.fraction.den}`
+    : `${Math.round(percentage)}%`;
+
   return { key: entry.key, valueLabel, percentage };
 }
 
 function toNumericMetric(entry: StatusNum): NumericMetric {
-  const raw = entry.fraction
-    ? `${entry.fraction.num} / ${entry.fraction.den}`
-    : Number.isInteger(entry.value)
-      ? String(entry.value)
-      : entry.value.toFixed(2);
-  const value = entry.unit ? `${raw} ${entry.unit}` : raw;
-  return { key: entry.key, value };
+  const formattedValue = formatNumericValue(entry);
+  return {
+    key: entry.key,
+    value: entry.unit ? `${formattedValue} ${entry.unit}` : formattedValue,
+  };
 }
 
 function toStateBadge(entry: StatusBool | StatusStr): StateBadge {
   const label = entry.type === 'bool' ? entry.key : (entry as StatusStr).value;
-  return { key: entry.key, label, styleKey: label.trim().toLowerCase() };
+  return { key: entry.key, label, styleKey: normalizeStyleKey(label) };
 }
 
 function toArrayItem(item: {
   name: string;
   entries: StatusScalar[];
 }): ArrayItem {
-  const prog = item.entries.find(isProgressEntry) as StatusNum | undefined;
-  if (prog) {
+  const progressEntry = item.entries.find(isProgressEntry) as
+    | StatusNum
+    | undefined;
+  const nonProgressEntries = item.entries.filter(
+    (entry) => entry !== progressEntry,
+  );
+  const rawText =
+    nonProgressEntries.length > 0
+      ? nonProgressEntries.map(formatScalarCompact).join(' ')
+      : undefined;
+
+  if (progressEntry) {
     const percentage =
-      prog.key === 'pc'
-        ? Math.min(100, prog.value)
-        : Math.min(100, Math.round(prog.value * 100));
-    return { name: item.name, progress: percentage };
+      progressEntry.key === 'pc'
+        ? clampPercentage(progressEntry.value)
+        : clampPercentage(progressEntry.value * 100);
+    return { name: item.name, progress: percentage, rawText };
   }
-  const rawText = item.entries
-    .map((entry) =>
-      entry.type === 'bool'
-        ? entry.key
-        : `${entry.key}=${(entry as StatusStr | StatusNum).value}`,
-    )
-    .join(' ');
-  return { name: item.name, rawText: rawText || undefined };
+  return { name: item.name, rawText };
 }
 
-export function buildStatusGroups(
+export function buildFilterStatusViewModel(
   parsedStatus: ParsedFilterStatus,
-): StatusGroups {
+): FilterStatusViewModel {
   const { entries } = parsedStatus;
 
-  const infoEntry = entries.find(
-    (entry): entry is StatusStr => entry.type === 'str' && entry.key === 'info',
-  );
+  const infoEntry = entries.find(isInfoEntry);
   const progressEntry = entries.find(isProgressEntry);
-
-  const excluded = new Set<StatusEntry | undefined>([infoEntry, progressEntry]);
+  const excludedEntries = new Set<StatusEntry>(
+    [infoEntry, progressEntry].filter(Boolean) as StatusEntry[],
+  );
 
   const numericMetrics = entries
     .filter(
       (entry): entry is StatusNum =>
-        entry.type === 'num' && !excluded.has(entry),
+        entry.type === 'num' && !excludedEntries.has(entry),
     )
     .map(toNumericMetric);
 
   const textMetrics = entries
-    .filter(
-      (entry): entry is StatusStr =>
-        entry.type === 'str' && entry.key !== 'info' && entry.quoted,
-    )
+    .filter(isTextMetricEntry)
     .map((entry): TextMetric => ({ key: entry.key, value: entry.value }));
 
-  const stateBadges = entries
-    .filter(
-      (entry): entry is StatusBool | StatusStr =>
-        entry.type === 'bool' ||
-        (entry.type === 'str' && entry.key !== 'info' && !entry.quoted),
-    )
-    .map(toStateBadge);
+  const stateBadges = entries.filter(isStateBadgeEntry).map(toStateBadge);
 
-  const arrays = entries
+  const arrayGroups = entries
     .filter((entry): entry is StatusArray => entry.type === 'array')
     .map(
-      (array): ArrayGroup => ({
-        name: 'entries',
+      (array, index): ArrayGroup => ({
+        key: `status-array-${index}`,
+        label: '',
         items: array.items.map(toArrayItem),
       }),
     );
@@ -161,6 +194,6 @@ export function buildStatusGroups(
     numericMetrics,
     textMetrics,
     stateBadges,
-    arrays,
+    arrays: arrayGroups,
   };
 }

@@ -13,7 +13,7 @@ import {
   microsecondsToSeconds,
 } from '@/utils/formatting';
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
-import { buildStatusGroups } from '../utils/statusViewModel';
+import { buildFilterStatusViewModel } from '../utils/statusViewModel';
 import { MetricRow, TableSection } from './pid/shared';
 import FilterStatusMetrics from './FilterStatusMetrics';
 
@@ -35,7 +35,7 @@ const OverviewTab = memo(
     );
 
     const statusGroups = useMemo(
-      () => buildStatusGroups(parsedStatus),
+      () => buildFilterStatusViewModel(parsedStatus),
       [parsedStatus],
     );
 

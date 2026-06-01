@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type {
-  StatusGroups,
+  FilterStatusViewModel,
   ProgressBar,
   NumericMetric,
   TextMetric,
@@ -8,22 +8,25 @@ import type {
   ArrayGroup,
 } from '../utils/statusViewModel';
 import { Progress } from '@/components/ui/progress';
+import { formatPercent } from '@/utils/formatting';
 
 interface FilterStatusMetricsProps {
-  groups: StatusGroups;
+  groups: FilterStatusViewModel;
 }
 
 const BADGE_STYLE: Record<string, string> = {
-  wait: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
-  done: 'border-monitor-line bg-white/5 text-monitor-text-muted',
-  running: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
+  done: 'border-slate-400/20  bg-slate-400/10  text-slate-300',
+  stopped: 'border-slate-400/20  bg-slate-400/10  text-slate-300',
+  wait: 'border-amber-400/30  bg-amber-400/10  text-amber-300',
+  stalled: 'border-amber-400/30  bg-amber-400/10  text-amber-300',
+  error: 'border-red-400/30    bg-red-400/10    text-red-300',
 };
 const BADGE_DEFAULT =
   'border-monitor-line bg-white/5 text-monitor-text-primary';
 
 function StatusInfo({ info }: { info?: string }) {
   if (!info) return null;
-  return <p className="text-[11px] italic text-monitor-text-muted">{info}</p>;
+  return <p className="text-[11px] italic text-muted-foreground">{info}</p>;
 }
 
 function TextMetrics({ metrics }: { metrics: TextMetric[] }) {
@@ -32,8 +35,8 @@ function TextMetrics({ metrics }: { metrics: TextMetric[] }) {
     <div className="space-y-0.5">
       {metrics.map((metric) => (
         <div key={metric.key} className="flex gap-2 text-[11px]">
-          <span className="text-monitor-text-muted">{metric.key}</span>
-          <span className="italic text-monitor-text-muted">{metric.value}</span>
+          <span className="text-muted-foreground">{metric.key}</span>
+          <span className="italic text-muted-foreground">{metric.value}</span>
         </div>
       ))}
     </div>
@@ -63,7 +66,7 @@ function MetricGrid({ numerics }: { numerics: NumericMetric[] }) {
     <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
       {numerics.map((metric) => (
         <div key={metric.key} className="flex justify-between gap-1 text-xs">
-          <span className="text-monitor-text-muted truncate">{metric.key}</span>
+          <span className="text-muted-foreground truncate">{metric.key}</span>
           <span className="font-mono tabular-nums slashed-zero text-monitor-text-primary shrink-0">
             {metric.value}
           </span>
@@ -75,9 +78,9 @@ function MetricGrid({ numerics }: { numerics: NumericMetric[] }) {
 
 function ProgressMetric({ bar }: { bar: ProgressBar }) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 max-w-48">
       <div className="flex justify-between text-xs">
-        <span className="text-monitor-text-muted">{bar.key}</span>
+        <span className="text-muted-foreground">{bar.key}</span>
         <span className="font-mono tabular-nums slashed-zero text-monitor-text-primary">
           {bar.valueLabel}
         </span>
@@ -93,41 +96,37 @@ function ArraySection({ array }: { array: ArrayGroup }) {
     <div>
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-1 text-xs text-monitor-text-muted hover:text-monitor-text-primary"
+        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-monitor-text-primary"
       >
-        {array.name}
-        <span className="text-[10px]">{open ? ' ˅' : ' ›'}</span>
+        {array.label && <span>{array.label}</span>}
+        <span className="text-[10px]">{open ? '˅' : '›'}</span>
       </button>
       {open && (
         <table className="mt-1 w-full text-[10px]">
           <tbody className="divide-y divide-monitor-line">
-            {array.items.map((item) =>
-              item.progress !== undefined ? (
-                <tr key={item.name}>
-                  <td className="py-0.5 pr-2 w-8 text-monitor-text-muted">
-                    {item.name}
-                  </td>
-                  <td className="py-0.5">
+            {array.items.map((item) => (
+              <tr key={item.name}>
+                <td className="py-0.5 pr-2 text-muted-foreground align-top whitespace-nowrap">
+                  {item.name}
+                </td>
+                <td className="py-0.5 w-full">
+                  {item.rawText && (
+                    <div className="font-mono text-[9px] text-muted-foreground mb-0.5">
+                      {item.rawText}
+                    </div>
+                  )}
+                  {item.progress !== undefined && (
                     <Progress value={item.progress} className="h-1" />
-                  </td>
-                  <td className="py-0.5 pl-2 w-8 text-right font-mono tabular-nums text-monitor-text-primary">
-                    {item.progress}%
-                  </td>
-                </tr>
-              ) : (
-                <tr key={item.name}>
-                  <td className="py-0.5 pr-2 w-8 text-monitor-text-muted">
-                    {item.name}
-                  </td>
-                  <td
-                    className="py-0.5 font-mono text-monitor-text-primary"
-                    colSpan={2}
-                  >
-                    {item.rawText || '—'}
-                  </td>
-                </tr>
-              ),
-            )}
+                  )}
+                  {item.progress === undefined && !item.rawText && '—'}
+                </td>
+                <td className="py-0.5 pl-2 text-right font-mono tabular-nums text-monitor-text-primary align-top whitespace-nowrap">
+                  {item.progress !== undefined
+                    ? formatPercent(item.progress)
+                    : ''}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       )}
@@ -140,7 +139,7 @@ function ArraySections({ arrays }: { arrays: ArrayGroup[] }) {
   return (
     <div className="space-y-2">
       {arrays.map((array) => (
-        <ArraySection key={array.name} array={array} />
+        <ArraySection key={array.key} array={array} />
       ))}
     </div>
   );
