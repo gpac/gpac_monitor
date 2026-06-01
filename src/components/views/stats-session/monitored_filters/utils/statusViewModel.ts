@@ -7,6 +7,7 @@ import type {
   StatusBool,
   StatusArray,
 } from '@/workers/filterStatusParser';
+import { formatFps } from '@/utils/formatting';
 
 export type ProgressBar = {
   key: string;
@@ -118,6 +119,9 @@ function toProgressBar(entry: StatusNum): ProgressBar {
 }
 
 function toNumericMetric(entry: StatusNum): NumericMetric {
+  if (entry.key === 'fps' || entry.unit === 'fps') {
+    return { key: entry.key, value: formatFps(entry.value) };
+  }
   const formattedValue = formatNumericValue(entry);
   return {
     key: entry.key,
