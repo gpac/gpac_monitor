@@ -63,6 +63,18 @@ function parseScalarToken(token: string): StatusScalar | null {
   return { type: 'str', key, value: rawValue, quoted: false };
 }
 
+const KNOWN_UNITS = new Set([
+  'kbps',
+  'fps',
+  'ms',
+  's',
+  'bytes',
+  'f',
+  'p',
+  'bool',
+  'pc',
+]);
+
 // space-split, quoted values kept as single token
 function splitStatusTokens(input: string): string[] {
   const tokens: string[] = [];
@@ -127,7 +139,11 @@ export function parseFilterStatus(raw: string): ParsedFilterStatus {
 
     if (scalar.type === 'bool') {
       const lastEntry = entries[entries.length - 1];
-      if (lastEntry?.type === 'num') {
+      if (
+        lastEntry?.type === 'num' &&
+        !lastEntry.unit &&
+        KNOWN_UNITS.has(scalar.key)
+      ) {
         lastEntry.unit = scalar.key;
         continue;
       }

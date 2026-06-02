@@ -116,7 +116,7 @@ function ArraySection({ array }: { array: ArrayGroup }) {
         <div className="flex flex-col divide-y divide-white/5 pb-1">
           {array.items.map((item) => (
             <div
-              key={item.name}
+              key={item.key}
               className="grid items-center gap-x-3 px-2 py-1.5"
               style={{ gridTemplateColumns: '5rem 1fr 2.5rem 5rem' }}
             >

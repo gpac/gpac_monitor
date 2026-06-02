@@ -123,6 +123,32 @@ describe('parseFilterStatus', () => {
         expect(entry.unit).toBe('kbps');
       }
     });
+
+    it('does not consume state flags as numeric units', () => {
+      const result = parseFilterStatus('custom=42 kbps done info="ok"');
+      expect(result.entries).toHaveLength(3);
+      const num = result.entries[0];
+      expect(num.type).toBe('num');
+      if (num.type === 'num') {
+        expect(num.key).toBe('custom');
+        expect(num.unit).toBe('kbps');
+      }
+      expect(result.entries[1]).toEqual({ type: 'bool', key: 'done' });
+      expect(result.entries[2]).toEqual({
+        type: 'str',
+        key: 'info',
+        value: 'ok',
+        quoted: true,
+      });
+    });
+
+    it('does not overwrite an already-attached unit', () => {
+      const result = parseFilterStatus('buffer=120/200 ms fps');
+      const entry = result.entries[0];
+      expect(entry.type).toBe('num');
+      if (entry.type === 'num') expect(entry.unit).toBe('ms');
+      expect(result.entries).toHaveLength(2);
+    });
   });
 
   describe('array parsing', () => {
@@ -465,15 +491,16 @@ describe('parseFilterStatus', () => {
       });
     });
 
-    it('bare word after a num entry is consumed as its unit, not a bool', () => {
+    it('unknown bare word after a num entry is emitted as a bool, not consumed as unit', () => {
       const result = parseFilterStatus('fps=30 my_rate=100 active');
-      expect(result.entries).toHaveLength(2);
+      expect(result.entries).toHaveLength(3);
       const myRate = result.entries[1];
       expect(myRate.type).toBe('num');
       if (myRate.type === 'num') {
         expect(myRate.key).toBe('my_rate');
-        expect(myRate.unit).toBe('active');
+        expect(myRate.unit).toBeUndefined();
       }
+      expect(result.entries[2]).toEqual({ type: 'bool', key: 'active' });
     });
 
     it('parses custom array with unknown item names and bool entries', () => {

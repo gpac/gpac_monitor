@@ -30,6 +30,7 @@ export type StateBadge = {
 export type ArrayMetric = { key: string; value: string; tooltip?: string };
 
 export type ArrayItem = {
+  key: string;
   name: string;
   type?: string;
   metrics: ArrayMetric[];
@@ -229,13 +230,14 @@ function toArrayItem(item: {
   if (activeProgress) {
     const percentage = getProgressPercentage(activeProgress);
     return {
+      key: item.name,
       name: item.name,
       type: typeEntry?.value,
       metrics,
       progress: percentage ?? undefined,
     };
   }
-  return { name: item.name, type: typeEntry?.value, metrics };
+  return { key: item.name, name: item.name, type: typeEntry?.value, metrics };
 }
 
 export function buildFilterStatusViewModel(
