@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
+import { buildStatusMetricKey } from '@/components/views/stats-session/types/statusMetric';
 
 /**
  * Base selector - get monitored filter state
@@ -105,4 +106,20 @@ export const selectAllSelectedPidSamplesByFilter = createSelector(
             `${target.filterIdx}:${target.direction}:${target.pidIndex}`
           ] ?? [],
       })),
+);
+
+export const selectSelectedStatusMetric = (
+  state: RootState,
+  filterIdx: number,
+): string | null =>
+  state.monitoredFilter.selectedStatusMetricByFilter[filterIdx] ?? null;
+
+export const selectStatusMetricSamples = createSelector(
+  [
+    selectMonitoredFilterState,
+    (_state: RootState, filterIdx: number) => filterIdx,
+    (_state: RootState, _filterIdx: number, metricKey: string) => metricKey,
+  ],
+  (state, filterIdx, metricKey) =>
+    state.statusMetricSamples[buildStatusMetricKey(filterIdx, metricKey)] ?? [],
 );
