@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type {
   FilterStatusViewModel,
   ProgressBar,
+  BufferMetric,
   StateBadge,
   ArrayGroup,
 } from '../utils/statusViewModel';
@@ -86,6 +87,17 @@ function ProgressMetric({ bar }: { bar: ProgressBar }) {
       </div>
       <Progress value={bar.percentage} className="h-1.5" />
     </div>
+  );
+}
+
+function BufferMetricRow({ buffer }: { buffer: BufferMetric }) {
+  return (
+    <MetricRow
+      label="buffer"
+      value={`${buffer.current} / ${buffer.max} ms`}
+      title={`${buffer.percentage.toFixed(1)}%`}
+      isEven
+    />
   );
 }
 
@@ -197,7 +209,10 @@ function FilterStatusMetrics({ groups }: { groups: FilterStatusViewModel }) {
           ))}
         </TableSection>
       )}
-      {groups.progress && <ProgressMetric bar={groups.progress} />}
+      {groups.primaryProgress && (
+        <ProgressMetric bar={groups.primaryProgress} />
+      )}
+      {groups.buffer && <BufferMetricRow buffer={groups.buffer} />}
       {groups.arrays.map((array) => (
         <ArraySection key={array.key} array={array} />
       ))}

@@ -41,7 +41,7 @@ const OverviewTab = memo(
 
     const hasStatusContent =
       statusGroups.info != null ||
-      statusGroups.progress != null ||
+      statusGroups.primaryProgress != null ||
       statusGroups.numericMetrics.length > 0 ||
       statusGroups.textMetrics.length > 0 ||
       statusGroups.stateBadges.length > 0 ||

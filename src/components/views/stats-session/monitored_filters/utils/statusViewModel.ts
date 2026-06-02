@@ -206,8 +206,13 @@ function toArrayItem(item: {
   const progressEntry = item.entries.find(isProgressEntry) as
     | StatusNum
     | undefined;
+  const pcEntry = !progressEntry
+    ? item.entries.find(
+        (e): e is StatusNum => e.type === 'num' && isExplicitPercentEntry(e),
+      )
+    : undefined;
   const excluded = new Set<StatusScalar>(
-    [typeEntry, progressEntry].filter(Boolean) as StatusScalar[],
+    [typeEntry, progressEntry ?? pcEntry].filter(Boolean) as StatusScalar[],
   );
   const metrics: ArrayMetric[] = item.entries
     .filter((entry) => !excluded.has(entry))
@@ -220,8 +225,9 @@ function toArrayItem(item: {
       return { key: entry.key, value, tooltip };
     });
 
-  if (progressEntry) {
-    const percentage = getProgressPercentage(progressEntry);
+  const activeProgress = progressEntry ?? pcEntry;
+  if (activeProgress) {
+    const percentage = getProgressPercentage(activeProgress);
     return {
       name: item.name,
       type: typeEntry?.value,
@@ -261,7 +267,10 @@ export function buildFilterStatusViewModel(
     .filter((entry): entry is StatusArray => entry.type === 'array')
     .map(
       (array, index): ArrayGroup => ({
-        key: `status-array-${index}`,
+        key:
+          array.items.length > 0
+            ? array.items.map((item) => item.name).join(',')
+            : `array-${index}`,
         label: '',
         items: array.items.map(toArrayItem),
       }),
@@ -269,7 +278,8 @@ export function buildFilterStatusViewModel(
 
   return {
     info: infoEntry?.value,
-    progress: progressEntry ? toProgressBar(progressEntry) : undefined,
+    primaryProgress: progressEntry ? toProgressBar(progressEntry) : undefined,
+    buffer: bufferEntry ? toBufferMetric(bufferEntry as StatusNum) : undefined,
     numericMetrics,
     textMetrics,
     stateBadges,
