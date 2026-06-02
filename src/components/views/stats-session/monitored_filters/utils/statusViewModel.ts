@@ -47,9 +47,18 @@ export type TextMetric = {
   value: string;
 };
 
+export type BufferMetric = {
+  key: 'buffer';
+  current: number;
+  max: number;
+  unit: 'ms';
+  percentage: number;
+};
+
 export type FilterStatusViewModel = {
   info?: string;
-  progress?: ProgressBar;
+  primaryProgress?: ProgressBar;
+  buffer?: BufferMetric;
   numericMetrics: NumericMetric[];
   textMetrics: TextMetric[];
   stateBadges: StateBadge[];
@@ -125,14 +134,23 @@ function formatNumericValue(entry: StatusNum): string {
 }
 
 function toProgressBar(entry: StatusNum): ProgressBar {
-  const rawPercentage = entry.key === 'pc' ? entry.value : entry.value * 100;
+  if (entry.fraction) {
+    const { num, den } = entry.fraction;
+    const percentage = den > 0 ? clampPercentage((num / den) * 100) : 0;
+    return { key: entry.key, valueLabel: `${num} / ${den}`, percentage };
+  }
+  const percentage = clampPercentage(entry.value);
+  return {
+    key: entry.key,
+    valueLabel: `${Math.round(percentage)}%`,
+    percentage,
+  };
+}
 
-  const percentage = clampPercentage(rawPercentage);
-  const valueLabel = entry.fraction
-    ? `${entry.fraction.num} / ${entry.fraction.den}`
-    : `${Math.round(percentage)}%`;
-
-  return { key: entry.key, valueLabel, percentage };
+function toBufferMetric(entry: StatusNum): BufferMetric {
+  const { num, den } = entry.fraction!;
+  const percentage = den > 0 ? clampPercentage((num / den) * 100) : 0;
+  return { key: 'buffer', current: num, max: den, unit: 'ms', percentage };
 }
 
 function toNumericMetric(entry: StatusNum): NumericMetric {
