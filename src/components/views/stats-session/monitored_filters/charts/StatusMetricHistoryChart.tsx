@@ -1,7 +1,7 @@
 import { memo, useMemo } from 'react';
 import uPlot from 'uplot';
 import { type SeriesDef } from '@/components/common/charts';
-import { formatClockTime } from '@/utils/formatting';
+import { formatChartTimeFromUs } from '@/utils/formatting';
 import type { StatusMetricSample } from '../../types/statusMetric';
 import LineHistoryChart from './LineHistoryChart';
 import {
@@ -52,7 +52,7 @@ const StatusMetricHistoryChart = memo(
           samples.map((sample) => sample.value),
         ] as uPlot.AlignedData,
         timeLabels: samples.map((sample) =>
-          formatClockTime(sample.sessionTimestampUs / 1000),
+          formatChartTimeFromUs(sample.sessionTimestampUs),
         ),
       };
     }, [samples]);

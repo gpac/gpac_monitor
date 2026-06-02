@@ -71,17 +71,25 @@ export const formatFractionAsTime = (num: number, den: number): string => {
   return `${hours}:${remainingMins}:${secs}`;
 };
 
-/** Formats an epoch-ms timestamp as HH:MM:SS for chart display. */
-export const formatClockTime = (epochMs: number): string =>
-  new Date(epochMs).toLocaleTimeString('en-US', {
+/**
+ * Formats current time as HH:MM:SS for chart display
+ */
+export const formatChartTime = (): string => {
+  return new Date().toLocaleTimeString('en-US', {
     hour12: false,
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
   });
+};
 
-/** Formats current wall-clock time as HH:MM:SS for chart display. */
-export const formatChartTime = (): string => formatClockTime(Date.now());
+export const formatChartTimeFromUs = (microseconds: number): string =>
+  new Date(microseconds / 1000).toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 
 export const formatBufferTime = (microseconds: number): string => {
   if (microseconds === 0) return '0 ms';
