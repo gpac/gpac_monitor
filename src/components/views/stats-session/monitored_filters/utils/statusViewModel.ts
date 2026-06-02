@@ -8,6 +8,7 @@ import type {
   StatusArray,
 } from '@/workers/filterStatusParser';
 import { formatFps, formatFractionAsTime } from '@/utils/formatting';
+import { isGraphableStatusMetric } from './statusMetricGraph';
 
 export type ProgressBar = {
   key: string;
@@ -19,6 +20,10 @@ export type NumericMetric = {
   key: string;
   value: string;
   tooltip?: string;
+  /** Real numeric value (null for fractions / non-finite values), source for charting. */
+  rawValue: number | null;
+  /** True when this metric is worth plotting on a time-series chart. */
+  graphable: boolean;
 };
 
 export type StateBadge = {
@@ -154,9 +159,19 @@ function toBufferMetric(entry: StatusNum): BufferMetric {
   return { key: 'buffer', current: num, max: den, unit: 'ms', percentage };
 }
 
+function graphFields(entry: StatusNum): {
+  rawValue: number | null;
+  graphable: boolean;
+} {
+  const rawValue =
+    entry.fraction || !Number.isFinite(entry.value) ? null : entry.value;
+  return { rawValue, graphable: isGraphableStatusMetric(entry) };
+}
+
 function toNumericMetric(entry: StatusNum): NumericMetric {
+  const graph = graphFields(entry);
   if (entry.key === 'fps' || entry.unit === 'fps') {
-    return { key: entry.key, value: formatFps(entry.value) };
+    return { key: entry.key, value: formatFps(entry.value), ...graph };
   }
   if (isTimeEntry(entry) && entry.fraction) {
     const { num, den } = entry.fraction;
@@ -164,18 +179,20 @@ function toNumericMetric(entry: StatusNum): NumericMetric {
       key: entry.key,
       value: formatFractionAsTime(num, den),
       tooltip: `${num}/${den}`,
+      ...graph,
     };
   }
   if (isExplicitPercentEntry(entry)) {
     const formatted = Number.isInteger(entry.value)
       ? String(entry.value)
       : entry.value.toFixed(1);
-    return { key: entry.key, value: `${formatted}%` };
+    return { key: entry.key, value: `${formatted}%`, ...graph };
   }
   const formattedValue = formatNumericValue(entry);
   return {
     key: entry.key,
     value: entry.unit ? `${formattedValue} ${entry.unit}` : formattedValue,
+    ...graph,
   };
 }
 

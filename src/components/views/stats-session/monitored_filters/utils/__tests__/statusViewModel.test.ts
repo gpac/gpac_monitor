@@ -106,6 +106,40 @@ describe('buildFilterStatusViewModel', () => {
     });
   });
 
+  describe('rawValue + graphable', () => {
+    it('fps → graphable true, rawValue numeric', () => {
+      const metric = build('fps=30').numericMetrics.find(
+        (m) => m.key === 'fps',
+      );
+      expect(metric?.graphable).toBe(true);
+      expect(metric?.rawValue).toBe(30);
+    });
+
+    it('frames → graphable false (cumulative counter)', () => {
+      const metric = build('frames=1200').numericMetrics.find(
+        (m) => m.key === 'frames',
+      );
+      expect(metric?.graphable).toBe(false);
+      expect(metric?.rawValue).toBe(1200);
+    });
+
+    it('time fraction → graphable false, rawValue null', () => {
+      const metric = build('time=57057/90000').numericMetrics.find(
+        (m) => m.key === 'time',
+      );
+      expect(metric?.graphable).toBe(false);
+      expect(metric?.rawValue).toBeNull();
+    });
+
+    it('unknown fraction → rawValue null, graphable false', () => {
+      const metric = build('drop=3/100').numericMetrics.find(
+        (m) => m.key === 'drop',
+      );
+      expect(metric?.rawValue).toBeNull();
+      expect(metric?.graphable).toBe(false);
+    });
+  });
+
   describe('custom filter metrics — unknown keys must not break viewModel', () => {
     it('unknown numeric with unit → in numericMetrics with unit', () => {
       expect(
