@@ -3,34 +3,11 @@ import { selectSelectedStatusMetric } from '@/shared/store/selectors';
 import { setSelectedStatusMetric } from '@/shared/store/slices/monitoredFilterSlice';
 import type { NumericMetric } from '../../utils/statusViewModel';
 import { TableSection, MetricRow } from '../pid/shared';
+import GraphRadio from '../shared/GraphRadio';
 
 interface StatusMetricsTableProps {
   metrics: NumericMetric[];
   filterIdx: number;
-}
-
-function GraphRadio({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      aria-label={`Graph ${label}`}
-      className={`mr-1.5 align-middle text-[11px] leading-none transition-colors ${
-        active ? 'text-info' : 'text-muted-foreground/50 hover:text-info'
-      }`}
-    >
-      {active ? '◉' : '○'}
-    </button>
-  );
 }
 
 function StatusMetricsTable({ metrics, filterIdx }: StatusMetricsTableProps) {
@@ -52,18 +29,20 @@ function StatusMetricsTable({ metrics, filterIdx }: StatusMetricsTableProps) {
           title={metric.tooltip}
           leading={
             metric.graphable ? (
-              <GraphRadio
-                active={selectedKey === metric.key}
-                label={metric.key}
-                onClick={() =>
-                  dispatch(
-                    setSelectedStatusMetric({
-                      filterIdx,
-                      metricKey: metric.key,
-                    }),
-                  )
-                }
-              />
+              <span className="mr-1.5">
+                <GraphRadio
+                  active={selectedKey === metric.key}
+                  label={metric.key}
+                  onClick={() =>
+                    dispatch(
+                      setSelectedStatusMetric({
+                        filterIdx,
+                        metricKey: metric.key,
+                      }),
+                    )
+                  }
+                />
+              </span>
             ) : undefined
           }
         />
