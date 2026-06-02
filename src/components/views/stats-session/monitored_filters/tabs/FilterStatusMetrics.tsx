@@ -7,6 +7,7 @@ import type {
   ArrayGroup,
 } from '../utils/statusViewModel';
 import { TableSection, MetricRow } from './pid/shared';
+import StatusMetricsTable from './status/StatusMetricsTable';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
@@ -168,7 +169,13 @@ function ArraySection({ array }: { array: ArrayGroup }) {
   );
 }
 
-function FilterStatusMetrics({ groups }: { groups: FilterStatusViewModel }) {
+function FilterStatusMetrics({
+  groups,
+  filterIdx,
+}: {
+  groups: FilterStatusViewModel;
+  filterIdx: number;
+}) {
   const hasInfo = groups.info != null || groups.textMetrics.length > 0;
   return (
     <section className="space-y-1 rounded-sm bg-black/20 ring-1 ring-white/5 mt-1 ">
@@ -196,19 +203,10 @@ function FilterStatusMetrics({ groups }: { groups: FilterStatusViewModel }) {
       {groups.stateBadges.length > 0 && (
         <StateBadgeRow badges={groups.stateBadges} />
       )}
-      {groups.numericMetrics.length > 0 && (
-        <TableSection title="Metrics">
-          {groups.numericMetrics.map((metric, index) => (
-            <MetricRow
-              key={metric.key}
-              label={metric.key}
-              value={metric.value}
-              isEven={index % 2 === 0}
-              title={metric.tooltip}
-            />
-          ))}
-        </TableSection>
-      )}
+      <StatusMetricsTable
+        metrics={groups.numericMetrics}
+        filterIdx={filterIdx}
+      />
       {groups.primaryProgress && (
         <ProgressMetric bar={groups.primaryProgress} />
       )}

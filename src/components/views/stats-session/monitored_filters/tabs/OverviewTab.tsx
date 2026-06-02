@@ -110,7 +110,9 @@ const OverviewTab = memo(
                 isEven={false}
               />
             </TableSection>
-            {hasStatusContent && <FilterStatusMetrics groups={statusGroups} />}
+            {hasStatusContent && (
+              <FilterStatusMetrics groups={statusGroups} filterIdx={idx} />
+            )}
           </div>
 
           <div className="flex flex-col gap-2">

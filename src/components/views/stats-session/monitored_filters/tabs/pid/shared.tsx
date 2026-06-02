@@ -64,17 +64,20 @@ export const MetricRow = ({
   isEven,
   valueClassName = 'text-info',
   title,
+  leading,
 }: {
   label: string;
   value: string;
   isEven: boolean;
   valueClassName?: string;
   title?: string;
+  leading?: ReactNode;
 }) => (
   <tr
     className={`${isEven ? 'bg-black/10' : 'bg-black/20'} border-b border-white/5`}
   >
     <td className="px-2 py-2 align-middle text-xs text-muted-foreground">
+      {leading}
       {label}
     </td>
     <td
