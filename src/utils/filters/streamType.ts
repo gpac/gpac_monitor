@@ -129,10 +129,7 @@ export const getIconColorForMediaType = (type: string): string => {
  */
 const determineFilterType = (filter: GraphFilterData): FilterType => {
   // Collect stream types from output PIDs, fallback to input PIDs
-  const pids =
-    filter.opid && Object.keys(filter.opid).length > 0
-      ? Object.values(filter.opid)
-      : Object.values(filter.ipid ?? {});
+  const pids = filter.opid.length > 0 ? filter.opid : (filter.ipid ?? []);
 
   for (const pid of pids) {
     if (pid.stream_type) {
