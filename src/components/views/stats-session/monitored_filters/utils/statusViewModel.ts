@@ -58,10 +58,19 @@ export type FilterStatusViewModel = {
 
 export type StatusGroups = FilterStatusViewModel;
 
-const PROGRESS_METRIC_KEYS = new Set(['prog', 'pc']);
-
 function clampPercentage(value: number): number {
   return Math.max(0, Math.min(100, value));
+}
+
+function getFractionPercentage(entry: StatusNum): number | null {
+  if (!entry.fraction || entry.fraction.den <= 0) return null;
+  return clampPercentage((entry.fraction.num / entry.fraction.den) * 100);
+}
+
+function getProgressPercentage(entry: StatusNum): number | null {
+  if (entry.fraction) return getFractionPercentage(entry);
+  if (!Number.isFinite(entry.value)) return null;
+  return clampPercentage(entry.value);
 }
 
 function isInfoEntry(entry: StatusEntry): entry is StatusStr {
@@ -69,7 +78,24 @@ function isInfoEntry(entry: StatusEntry): entry is StatusStr {
 }
 
 function isProgressEntry(entry: StatusEntry): entry is StatusNum {
-  return entry.type === 'num' && PROGRESS_METRIC_KEYS.has(entry.key);
+  return entry.type === 'num' && entry.key === 'prog';
+}
+
+function isExplicitPercentEntry(entry: StatusNum): boolean {
+  return entry.key === 'pc' || entry.unit === 'pc' || entry.unit === 'percent';
+}
+
+function isBufferEntry(entry: StatusEntry): entry is StatusNum {
+  return (
+    entry.type === 'num' &&
+    entry.key === 'buffer' &&
+    Boolean((entry as StatusNum).fraction) &&
+    (entry as StatusNum).unit === 'ms'
+  );
+}
+
+function isTimeEntry(entry: StatusNum): boolean {
+  return entry.key === 'time';
 }
 
 function isTextMetricEntry(entry: StatusEntry): entry is StatusStr {
@@ -113,13 +139,19 @@ function toNumericMetric(entry: StatusNum): NumericMetric {
   if (entry.key === 'fps' || entry.unit === 'fps') {
     return { key: entry.key, value: formatFps(entry.value) };
   }
-  if (entry.key === 'time' && entry.fraction) {
+  if (isTimeEntry(entry) && entry.fraction) {
     const { num, den } = entry.fraction;
     return {
       key: entry.key,
       value: formatFractionAsTime(num, den),
       tooltip: `${num}/${den}`,
     };
+  }
+  if (isExplicitPercentEntry(entry)) {
+    const formatted = Number.isInteger(entry.value)
+      ? String(entry.value)
+      : entry.value.toFixed(1);
+    return { key: entry.key, value: `${formatted}%` };
   }
   const formattedValue = formatNumericValue(entry);
   return {
@@ -139,7 +171,7 @@ function scalarValueStr(entry: StatusScalar): string {
   const num = entry as StatusNum;
   const unit = num.unit ? ` ${num.unit}` : '';
   if (num.fraction) {
-    if (entry.key === 'time')
+    if (isTimeEntry(num))
       return formatFractionAsTime(num.fraction.num, num.fraction.den);
     return `${num.fraction.num}/${num.fraction.den}${unit}`;
   }
@@ -171,15 +203,12 @@ function toArrayItem(item: {
     });
 
   if (progressEntry) {
-    const percentage =
-      progressEntry.key === 'pc'
-        ? clampPercentage(progressEntry.value)
-        : clampPercentage(progressEntry.value * 100);
+    const percentage = getProgressPercentage(progressEntry);
     return {
       name: item.name,
       type: typeEntry?.value,
       metrics,
-      progress: percentage,
+      progress: percentage ?? undefined,
     };
   }
   return { name: item.name, type: typeEntry?.value, metrics };
@@ -192,8 +221,9 @@ export function buildFilterStatusViewModel(
 
   const infoEntry = entries.find(isInfoEntry);
   const progressEntry = entries.find(isProgressEntry);
+  const bufferEntry = entries.find(isBufferEntry);
   const excludedEntries = new Set<StatusEntry>(
-    [infoEntry, progressEntry].filter(Boolean) as StatusEntry[],
+    [infoEntry, progressEntry, bufferEntry].filter(Boolean) as StatusEntry[],
   );
 
   const numericMetrics = entries
