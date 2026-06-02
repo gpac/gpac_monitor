@@ -15,15 +15,15 @@ export function enrichFiltersWithStats(
     return {
       ...staticFilter,
       ipid: Object.fromEntries(
-        Object.entries(staticFilter.ipid).map(([key, value]) => [
-          key,
-          { ...value, buffer: 0, buffer_total: 0 },
+        staticFilter.ipid.map((pid) => [
+          `ipid-${pid.pid_index}`,
+          { ...pid, buffer: 0, buffer_total: 0 },
         ]),
       ),
       opid: Object.fromEntries(
-        Object.entries(staticFilter.opid).map(([key, value]) => [
-          key,
-          { ...value, buffer: 0, buffer_total: 0 },
+        staticFilter.opid.map((pid) => [
+          `opid-${pid.pid_index}`,
+          { ...pid, buffer: 0, buffer_total: 0 },
         ]),
       ),
       status: dynamicStats?.status || staticFilter.status,

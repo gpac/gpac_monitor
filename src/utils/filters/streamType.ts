@@ -59,10 +59,9 @@ export const getStreamTypeBadgeConfig = (
 });
 
 const determineFilterType = (filter: GraphFilterData): FilterType => {
-  const pids =
-    filter.opid && Object.keys(filter.opid).length > 0
-      ? Object.values(filter.opid)
-      : Object.values(filter.ipid ?? {});
+  // Collect stream types from output PIDs, fallback to input PIDs
+  const pids = filter.opid.length > 0 ? filter.opid : (filter.ipid ?? []);
+
   for (const pid of pids) {
     const mapped = STREAM_TYPE_TO_FILTER[pid.stream_type];
     if (mapped) return mapped;
