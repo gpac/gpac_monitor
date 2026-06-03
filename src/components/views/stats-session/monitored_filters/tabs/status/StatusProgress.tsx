@@ -7,7 +7,7 @@ export function StatusProgressBar({ bar }: { bar: ProgressBar }) {
     <div className="space-y-1 px-2 py-1 max-w-48">
       <div className="flex justify-between text-xs">
         <span className="text-muted-foreground">{bar.key}</span>
-        <span className="font-mono tabular-nums slashed-zero text-monitor-text-primary">
+        <span className="font-mono tabular-nums slashed-zero text-monitor">
           {bar.valueLabel}
         </span>
       </div>

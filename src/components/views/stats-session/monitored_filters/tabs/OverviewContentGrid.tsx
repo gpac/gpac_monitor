@@ -147,15 +147,14 @@ const OverviewContentGrid = memo(
     }
 
     const allCols = [...staticCols, ...procCols];
+    const gridTemplateColumns = [
+      ...staticCols.map(() => 'minmax(0, 1.4fr)'),
+      ...procCols.map(() => 'minmax(0, 0.8fr)'),
+    ].join(' ');
     return (
       <div className="flex flex-col gap-2">
         <StatusStateBadges badges={groups.stateBadges} />
-        <div
-          className="grid gap-2 items-start"
-          style={{
-            gridTemplateColumns: `repeat(${allCols.length}, minmax(0, 1fr))`,
-          }}
-        >
+        <div className="grid gap-2 items-start" style={{ gridTemplateColumns }}>
           {allCols}
         </div>
       </div>

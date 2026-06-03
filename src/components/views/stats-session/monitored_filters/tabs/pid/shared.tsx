@@ -112,7 +112,7 @@ export const TableSection = ({
         <col className="w-28" />
       </colgroup>
       <thead>
-        <tr className="bg-monitor-panel border-b border-white/10">
+        <tr className="bg-white/5 border-b border-white/10">
           <th colSpan={2} className={TAB_STYLES.TABLE_HEADER}>
             <div className="flex items-center justify-between">
               <span>{title}</span>

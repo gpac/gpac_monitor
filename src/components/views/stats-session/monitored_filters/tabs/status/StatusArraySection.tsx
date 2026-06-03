@@ -11,7 +11,7 @@ function StatusArraySection({ array }: { array: ArrayGroup }) {
     <div>
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className={`flex items-center gap-1 w-full text-left ${TAB_STYLES.TABLE_HEADER} hover:text-monitor-text-primary`}
+        className={`flex items-center gap-1 w-full text-left bg-white/5 border-b border-white/10 ${TAB_STYLES.TABLE_HEADER} hover:text-monitor-text-primary`}
       >
         <span>{array.label || 'Tracks'}</span>
         <span className="text-[10px] ml-1">{open ? '˅' : '›'}</span>
