@@ -24,43 +24,37 @@ interface OverviewContentGridProps {
 
 const OverviewContentGrid = memo(
   ({ groups, processing, isDetached }: OverviewContentGridProps) => {
-    const hasInfo =
-      groups.info != null ||
-      groups.textMetrics.length > 0 ||
-      groups.buffer != null;
+    const hasInfo = groups.info != null || groups.textMetrics.length > 0;
     const numericMetrics = groups.numericMetrics.filter((m) => !m.graphable);
+    const hasMetrics =
+      groups.primaryProgress != null ||
+      groups.buffer != null ||
+      numericMetrics.length > 0;
+    const bufferOffset = groups.buffer ? 1 : 0;
 
     const staticCols: ReactNode[] = [];
 
-    if (hasInfo || groups.primaryProgress != null) {
+    if (hasInfo) {
       staticCols.push(
-        <div key="info" className="flex flex-col gap-1">
-          {hasInfo && (
-            <TableSection title="Info">
-              {groups.info && (
-                <MetricRow
-                  label=""
-                  value={groups.info}
-                  isEven
-                  valueClassName="italic text-muted-foreground"
-                />
-              )}
-              {groups.textMetrics.map((metric, index) => (
-                <MetricRow
-                  key={metric.key}
-                  label={metric.key}
-                  value={metric.value}
-                  isEven={index % 2 === 0}
-                  valueClassName="italic text-muted-foreground truncate"
-                />
-              ))}
-              {groups.buffer && <StatusBufferRow buffer={groups.buffer} />}
-            </TableSection>
+        <TableSection key="info" title="Info">
+          {groups.info && (
+            <MetricRow
+              label=""
+              value={groups.info}
+              isEven
+              valueClassName="italic text-muted-foreground"
+            />
           )}
-          {groups.primaryProgress && (
-            <StatusProgressBar bar={groups.primaryProgress} />
-          )}
-        </div>,
+          {groups.textMetrics.map((metric, index) => (
+            <MetricRow
+              key={metric.key}
+              label={metric.key}
+              value={metric.value}
+              isEven={index % 2 === 0}
+              valueClassName="italic text-muted-foreground truncate"
+            />
+          ))}
+        </TableSection>,
       );
     }
 
@@ -74,19 +68,27 @@ const OverviewContentGrid = memo(
       );
     }
 
-    if (numericMetrics.length > 0) {
+    if (hasMetrics) {
       staticCols.push(
-        <TableSection key="metrics" title="Metrics">
-          {numericMetrics.map((metric, index) => (
-            <MetricRow
-              key={metric.key}
-              label={metric.key}
-              value={metric.value}
-              isEven={index % 2 === 0}
-              title={metric.tooltip}
-            />
-          ))}
-        </TableSection>,
+        <div key="metrics" className="flex flex-col gap-1">
+          {groups.primaryProgress && (
+            <StatusProgressBar bar={groups.primaryProgress} />
+          )}
+          {(groups.buffer || numericMetrics.length > 0) && (
+            <TableSection title="Metrics">
+              {groups.buffer && <StatusBufferRow buffer={groups.buffer} />}
+              {numericMetrics.map((metric, index) => (
+                <MetricRow
+                  key={metric.key}
+                  label={metric.key}
+                  value={metric.value}
+                  isEven={(index + bufferOffset) % 2 === 0}
+                  title={metric.tooltip}
+                />
+              ))}
+            </TableSection>
+          )}
+        </div>,
       );
     }
 
