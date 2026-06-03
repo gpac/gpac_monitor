@@ -46,7 +46,7 @@ const PIDTableRow = memo(
       usePIDMetricsRow(pid, pidKey);
 
     const statusBadge = getPIDStatusBadge(pid);
-    const bgClass = isEven ? 'bg-black/10' : 'bg-black/20';
+    const bgClass = isEven ? 'bg-monitor-panel' : 'bg-transparent';
     const rowStyle = isSelected
       ? {
           borderLeft: `3px solid ${PID_SELECTION_COLORS[colorIndex]}`,

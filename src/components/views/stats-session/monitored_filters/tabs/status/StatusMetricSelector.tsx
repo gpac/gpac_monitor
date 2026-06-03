@@ -1,3 +1,4 @@
+import { useLayoutEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { selectSelectedStatusMetric } from '@/shared/store/selectors';
 import { setSelectedStatusMetric } from '@/shared/store/slices/monitoredFilterSlice';
@@ -19,12 +20,21 @@ function StatusMetricSelector({
   );
 
   const graphable = metrics.filter((metric) => metric.graphable);
+  const firstKey = graphable[0]?.key;
+  const effectiveKey = selectedKey ?? firstKey ?? null;
+
+  useLayoutEffect(() => {
+    if (!selectedKey && firstKey) {
+      dispatch(setSelectedStatusMetric({ filterIdx, metricKey: firstKey }));
+    }
+  }, [dispatch, filterIdx, firstKey, selectedKey]);
+
   if (graphable.length === 0) return null;
 
   return (
     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-1">
       {graphable.map((metric) => {
-        const active = selectedKey === metric.key;
+        const active = effectiveKey === metric.key;
         const onSelect = () =>
           dispatch(
             setSelectedStatusMetric({ filterIdx, metricKey: metric.key }),

@@ -1,163 +1,148 @@
 import { memo, type ReactNode } from 'react';
-import { formatBytes, formatNumber } from '@/utils/formatting';
 import { MetricRow, TableSection } from './pid/shared';
 import type { FilterStatusViewModel } from '../utils/statusViewModel';
 import StatusArraySection from './status/StatusArraySection';
 import StatusStateBadges from './status/StatusStateBadges';
-import { StatusProgressBar, StatusBufferRow } from './status/StatusProgress';
-
-export interface ProcessingValues {
-  processSpeed: string;
-  processPacketRate: string;
-  pckDone: number;
-  pckSent: number;
-  pckIfceSent?: number;
-  bytesDone: number;
-  bytesSent: number;
-}
+import { StatusProgressRow, StatusBufferRow } from './status/StatusProgress';
 
 interface OverviewContentGridProps {
   groups: FilterStatusViewModel;
-  processing: ProcessingValues;
   isDetached: boolean;
 }
 
 const OverviewContentGrid = memo(
-  ({ groups, processing, isDetached }: OverviewContentGridProps) => {
-    const hasInfo = groups.info != null || groups.textMetrics.length > 0;
-    const numericMetrics = groups.numericMetrics.filter((m) => !m.graphable);
+  ({ groups, isDetached }: OverviewContentGridProps) => {
+    const infoTextMetrics = groups.textMetrics.filter(
+      (metric) => metric.quoted,
+    );
+    const valueTextMetrics = groups.textMetrics.filter(
+      (metric) => !metric.quoted,
+    );
+    const hasInfo = groups.info != null || infoTextMetrics.length > 0;
+    const numericMetrics = groups.numericMetrics.filter(
+      (metric) => !metric.graphable,
+    );
+    const hasProgress = groups.primaryProgress != null;
     const hasMetrics =
-      groups.primaryProgress != null ||
+      hasProgress ||
       groups.buffer != null ||
-      numericMetrics.length > 0;
+      numericMetrics.length > 0 ||
+      valueTextMetrics.length > 0;
+    const hasArrays = groups.arrays.length > 0;
+
+    const progressOffset = hasProgress ? 1 : 0;
     const bufferOffset = groups.buffer ? 1 : 0;
 
-    const staticCols: ReactNode[] = [];
-
-    if (hasInfo) {
-      staticCols.push(
-        <TableSection key="info" title="Info">
-          {groups.info && (
-            <MetricRow
-              label=""
-              value={groups.info}
-              isEven
-              valueClassName="italic text-muted-foreground"
-            />
-          )}
-          {groups.textMetrics.map((metric, index) => (
-            <MetricRow
-              key={metric.key}
-              label={metric.key}
-              value={metric.value}
-              isEven={index % 2 === 0}
-              valueClassName="italic text-muted-foreground truncate"
-            />
-          ))}
-        </TableSection>,
-      );
-    }
-
-    if (hasMetrics) {
-      staticCols.push(
-        <div key="metrics" className="flex flex-col gap-1">
-          {groups.primaryProgress && (
-            <StatusProgressBar bar={groups.primaryProgress} />
-          )}
-          {(groups.buffer || numericMetrics.length > 0) && (
-            <TableSection title="Metrics">
-              {groups.buffer && <StatusBufferRow buffer={groups.buffer} />}
-              {numericMetrics.map((metric, index) => (
-                <MetricRow
-                  key={metric.key}
-                  label={metric.key}
-                  value={metric.value}
-                  isEven={(index + bufferOffset) % 2 === 0}
-                  title={metric.tooltip}
-                />
-              ))}
-            </TableSection>
-          )}
-        </div>,
-      );
-    }
-
-    if (groups.arrays.length > 0) {
-      staticCols.push(
-        <div key="tracks" className="flex flex-col gap-1">
-          {groups.arrays.map((array) => (
-            <StatusArraySection key={array.key} array={array} />
-          ))}
-        </div>,
-      );
-    }
-
-    const procCols: ReactNode[] = [
-      <TableSection key="proc" title="Processing">
-        <MetricRow
-          label=" Filter Process speed"
-          value={processing.processSpeed}
-          isEven
-        />
-        <MetricRow
-          label="Packets/s"
-          value={processing.processPacketRate}
-          isEven={false}
-        />
-      </TableSection>,
-      <TableSection key="pack" title="Packets">
-        <MetricRow
-          label="Done"
-          value={formatNumber(processing.pckDone)}
-          isEven
-        />
-        <MetricRow
-          label="Sent"
-          value={formatNumber(processing.pckSent)}
-          isEven={false}
-        />
-        {processing.pckIfceSent !== undefined && (
+    const infoCol: ReactNode = hasInfo ? (
+      <TableSection key="info" title="Info">
+        {groups.info && (
+          <tr className="bg-monitor-panel border-b border-white/5">
+            <td
+              colSpan={2}
+              className="px-2 py-2 text-xs italic text-muted-foreground"
+            >
+              {groups.info}
+            </td>
+          </tr>
+        )}
+        {infoTextMetrics.map((metric, index) => (
           <MetricRow
-            label="Interface"
-            value={formatNumber(processing.pckIfceSent)}
-            isEven
+            key={metric.key}
+            label={metric.key}
+            value={metric.value}
+            isEven={index % 2 === 0}
+            valueClassName="italic text-muted-foreground truncate"
+          />
+        ))}
+      </TableSection>
+    ) : null;
+
+    const metricsCol: ReactNode = hasMetrics ? (
+      <TableSection key="metrics" title="Metrics">
+        {groups.primaryProgress && (
+          <StatusProgressRow bar={groups.primaryProgress} isEven />
+        )}
+        {groups.buffer && (
+          <StatusBufferRow
+            buffer={groups.buffer}
+            isEven={progressOffset % 2 === 0}
           />
         )}
-      </TableSection>,
-      <TableSection key="data" title="Data">
-        <MetricRow
-          label="Done"
-          value={formatBytes(processing.bytesDone)}
-          isEven
-        />
-        <MetricRow
-          label="Sent"
-          value={formatBytes(processing.bytesSent)}
-          isEven={false}
-        />
-      </TableSection>,
-    ];
+        {numericMetrics.map((metric, index) => (
+          <MetricRow
+            key={metric.key}
+            label={metric.key}
+            value={metric.value}
+            isEven={(index + progressOffset + bufferOffset) % 2 === 0}
+            title={metric.tooltip}
+          />
+        ))}
+        {valueTextMetrics.map((metric, index) => (
+          <MetricRow
+            key={metric.key}
+            label={metric.key}
+            value={metric.value}
+            isEven={
+              (numericMetrics.length + index + progressOffset + bufferOffset) %
+                2 ===
+              0
+            }
+          />
+        ))}
+      </TableSection>
+    ) : null;
+
+    const arraysCol: ReactNode = hasArrays ? (
+      <div key="tracks" className="flex flex-col gap-1">
+        {groups.arrays.map((array) => (
+          <StatusArraySection key={array.key} array={array} />
+        ))}
+      </div>
+    ) : null;
+
+    if (
+      !hasInfo &&
+      !hasMetrics &&
+      !hasArrays &&
+      groups.stateBadges.length === 0
+    ) {
+      return null;
+    }
 
     if (isDetached) {
       return (
         <div className="flex flex-col gap-2">
           <StatusStateBadges badges={groups.stateBadges} />
-          {staticCols}
-          <div className="grid grid-cols-3 gap-2">{procCols}</div>
+          {infoCol}
+          {metricsCol}
+          {arraysCol}
         </div>
       );
     }
 
-    const allCols = [...staticCols, ...procCols];
-    const gridTemplateColumns = [
-      ...staticCols.map(() => 'minmax(0, 1.4fr)'),
-      ...procCols.map(() => 'minmax(0, 0.8fr)'),
-    ].join(' ');
+    if (hasArrays) {
+      return (
+        <div className="flex flex-col gap-2">
+          <StatusStateBadges badges={groups.stateBadges} />
+          <div className="grid grid-cols-2 gap-2 items-start">
+            {arraysCol}
+            {(hasInfo || hasMetrics) && (
+              <div className="flex flex-col gap-2">
+                {infoCol}
+                {metricsCol}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col gap-2">
         <StatusStateBadges badges={groups.stateBadges} />
-        <div className="grid gap-2 items-start" style={{ gridTemplateColumns }}>
-          {allCols}
+        <div className="grid grid-cols-2 gap-2 items-start">
+          {infoCol}
+          {metricsCol}
         </div>
       </div>
     );

@@ -10,12 +10,12 @@ import {
 } from '@/utils/formatting';
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { buildFilterStatusViewModel } from '../utils/statusViewModel';
-import { getStatusOverviewState } from '../utils/statusOverviewState';
 import { useIsDetached } from '../FilterViewContext';
 import { MetricRow, TableSection } from './pid/shared';
 import { useStatusMetricSamples } from './hooks/useStatusMetricSamples';
 import FilterIdentityStrip from './FilterIdentityStrip';
 import OverviewContentGrid from './OverviewContentGrid';
+import RuntimeDetailsSection from './RuntimeDetailsSection';
 import StatusGraphCard from './status/StatusGraphCard';
 
 interface OverviewTabProps {
@@ -41,7 +41,6 @@ const OverviewTab = memo(
       () => buildFilterStatusViewModel(parsedStatus),
       [parsedStatus],
     );
-    const state = getStatusOverviewState(statusGroups);
 
     const graphableMetrics = useMemo(
       () =>
@@ -92,20 +91,17 @@ const OverviewTab = memo(
           healthVariant={healthInfo.variant}
           onOpenProperties={onOpenProperties}
         />
-
-        <OverviewContentGrid
-          groups={statusGroups}
-          processing={processing}
-          isDetached={isDetached}
-        />
-
-        {state === 'graph' && (
+        {graphableMetrics.length > 0 && (
           <StatusGraphCard
             metrics={statusGroups.numericMetrics}
             filterIdx={idx}
             filterName={name}
           />
         )}
+
+        <OverviewContentGrid groups={statusGroups} isDetached={isDetached} />
+
+        <RuntimeDetailsSection processing={processing} />
 
         {totalErrors > 0 && (
           <TableSection title="Errors">

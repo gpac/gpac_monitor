@@ -63,6 +63,14 @@ describe('buildFilterStatusViewModel', () => {
       expect(metric?.tooltip).toBe('57057/90000');
       expect(vm.primaryProgress).toBeUndefined();
     });
+
+    it('time=7.08s (str with digit) → textMetrics quoted:false, not a badge', () => {
+      const vm = build('time=7.08s');
+      const metric = vm.textMetrics.find((m) => m.key === 'time');
+      expect(metric?.value).toBe('7.08s');
+      expect(metric?.quoted).toBe(false);
+      expect(vm.stateBadges.find((b) => b.key === 'time')).toBeUndefined();
+    });
   });
 
   describe('unknown fraction', () => {
@@ -155,11 +163,28 @@ describe('buildFilterStatusViewModel', () => {
       ).toBeDefined();
     });
 
-    it('unknown quoted string → in textMetrics', () => {
+    it('unknown quoted string → in textMetrics with quoted:true', () => {
+      const metric = build('status="processing"').textMetrics.find(
+        (m) => m.key === 'status',
+      );
+      expect(metric?.value).toBe('processing');
+      expect(metric?.quoted).toBe(true);
+    });
+
+    it('unquoted string with digit → textMetrics quoted:false, not a badge', () => {
+      const vm = build('resolution=1280x720');
+      const metric = vm.textMetrics.find((m) => m.key === 'resolution');
+      expect(metric?.value).toBe('1280x720');
+      expect(metric?.quoted).toBe(false);
       expect(
-        build('status="processing"').textMetrics.find((m) => m.key === 'status')
-          ?.value,
-      ).toBe('processing');
+        vm.stateBadges.find((b) => b.key === 'resolution'),
+      ).toBeUndefined();
+    });
+
+    it('unquoted string without digit → stateBadge, not in textMetrics', () => {
+      const vm = build('PT=B');
+      expect(vm.stateBadges.find((b) => b.key === 'PT')).toBeDefined();
+      expect(vm.textMetrics.find((m) => m.key === 'PT')).toBeUndefined();
     });
 
     it('unknown fraction → numericMetrics "num / den"', () => {

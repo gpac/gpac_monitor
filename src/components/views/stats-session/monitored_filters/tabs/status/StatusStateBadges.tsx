@@ -12,7 +12,7 @@ const SHORT_TO_STREAM: Partial<Record<string, GpacStreamType>> = {
 };
 
 const STATE_BADGE: Record<string, string> = {
-  done: 'border-slate-400/20 bg-slate-400/10 text-slate-300',
+  done: 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300',
   stopped: 'border-slate-400/20 bg-slate-400/10 text-slate-300',
   wait: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
   stalled: 'border-amber-400/30 bg-amber-400/10 text-amber-300',
@@ -58,6 +58,9 @@ function StatusStateBadges({ badges }: { badges: StateBadge[] }) {
             variant="outline"
             className={`${TAB_STYLES.BADGE_TINY} ${STATE_BADGE[badge.styleKey] ?? STATE_BADGE._default}`}
           >
+            {badge.styleKey === 'done' && (
+              <span className="mr-1 text-emerald-400">●</span>
+            )}
             {badge.label}
           </Badge>
         );

@@ -17,9 +17,11 @@ interface StatusGraphCardProps {
 
 const StatusGraphCard = memo(
   ({ metrics, filterIdx, filterName }: StatusGraphCardProps) => {
-    const metricKey = useAppSelector((state) =>
+    const storedKey = useAppSelector((state) =>
       selectSelectedStatusMetric(state, filterIdx),
     );
+    const firstGraphableKey = metrics.find((metric) => metric.graphable)?.key;
+    const metricKey = storedKey ?? firstGraphableKey ?? null;
     const isDetached = useIsDetached();
     const { duration, setDuration, maxPoints } = useChartDuration(
       'status_graph_duration',

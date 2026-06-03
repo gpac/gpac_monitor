@@ -82,7 +82,7 @@ const LineHistoryChart = memo(
                   pointerEvents: 'none',
                   zIndex: 10,
                 }}
-                className="bg-gray-900 text-[10px] font-mono leading-none text-info px-1 py-0.5 rounded"
+                className="bg-monitor-panel text-[10px] font-mono leading-none text-info px-1 py-0.5 rounded"
               >
                 <span className="opacity-70">{endLabel.label}</span>{' '}
                 {endLabel.value}

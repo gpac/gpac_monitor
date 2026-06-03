@@ -51,6 +51,7 @@ export type ArrayGroup = {
 export type TextMetric = {
   key: string;
   value: string;
+  quoted: boolean;
 };
 
 export type BufferMetric = {
@@ -114,16 +115,16 @@ function isTimeEntry(entry: StatusNum): boolean {
 }
 
 function isTextMetricEntry(entry: StatusEntry): entry is StatusStr {
-  return entry.type === 'str' && entry.key !== 'info' && entry.quoted;
+  if (entry.type !== 'str' || entry.key === 'info') return false;
+  return entry.quoted || /\d/.test(entry.value);
 }
 
 function isStateBadgeEntry(
   entry: StatusEntry,
 ): entry is StatusBool | StatusStr {
-  return (
-    entry.type === 'bool' ||
-    (entry.type === 'str' && entry.key !== 'info' && !entry.quoted)
-  );
+  if (entry.type === 'bool') return true;
+  if (entry.type !== 'str') return false;
+  return entry.key !== 'info' && !entry.quoted && !/\d/.test(entry.value);
 }
 
 function normalizeStyleKey(value: string): string {
@@ -278,7 +279,13 @@ export function buildFilterStatusViewModel(
 
   const textMetrics = entries
     .filter(isTextMetricEntry)
-    .map((entry): TextMetric => ({ key: entry.key, value: entry.value }));
+    .map(
+      (entry): TextMetric => ({
+        key: entry.key,
+        value: entry.value,
+        quoted: entry.quoted,
+      }),
+    );
 
   const stateBadges = entries.filter(isStateBadgeEntry).map(toStateBadge);
 
