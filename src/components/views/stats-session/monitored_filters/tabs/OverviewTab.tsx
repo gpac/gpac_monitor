@@ -11,7 +11,7 @@ import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { buildFilterStatusViewModel } from '../utils/statusViewModel';
 import { MetricRow, TableSection } from './pid/shared';
 import FilterIdentityStrip from './FilterIdentityStrip';
-import StatusMetricsSection from './status/StatusMetricsSection';
+import FilterStatusOverview from './status/FilterStatusOverview';
 import FilterProcessingMetrics from './FilterProcessingMetrics';
 
 interface OverviewTabProps {
@@ -36,14 +36,6 @@ const OverviewTab = memo(
       [parsedStatus],
     );
 
-    const hasStatusContent =
-      statusGroups.info != null ||
-      statusGroups.primaryProgress != null ||
-      statusGroups.numericMetrics.length > 0 ||
-      statusGroups.textMetrics.length > 0 ||
-      statusGroups.stateBadges.length > 0 ||
-      statusGroups.arrays.length > 0;
-
     const metrics = useMemo(() => {
       const secs = microsecondsToSeconds(time);
       return {
@@ -67,13 +59,11 @@ const OverviewTab = memo(
           onOpenProperties={onOpenProperties}
         />
 
-        {hasStatusContent && (
-          <StatusMetricsSection
-            groups={statusGroups}
-            filterIdx={idx}
-            filterName={name}
-          />
-        )}
+        <FilterStatusOverview
+          groups={statusGroups}
+          filterIdx={idx}
+          filterName={name}
+        />
 
         <FilterProcessingMetrics
           processSpeed={metrics.processSpeed}
