@@ -8,14 +8,14 @@ import { Button } from '@/components/ui/button';
 import {
   formatTime,
   formatBytes,
-  formatNumber,
   formatPacketRate,
   microsecondsToSeconds,
 } from '@/utils/formatting';
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { buildFilterStatusViewModel } from '../utils/statusViewModel';
 import { MetricRow, TableSection } from './pid/shared';
-import FilterStatusMetrics from './FilterStatusMetrics';
+import StatusMetricsSection from './status/StatusMetricsSection';
+import FilterProcessingMetrics from './FilterProcessingMetrics';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
@@ -25,7 +25,7 @@ interface OverviewTabProps {
 
 const OverviewTab = memo(
   ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
-    const { parsedStatus, type, idx, time } = filter;
+    const { parsedStatus, type, idx, time, name } = filter;
 
     const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
     const healthInfo = getFilterHealthInfo(
@@ -95,60 +95,23 @@ const OverviewTab = memo(
           </span>
         </div>
 
-        {/* 2-column grid: Real-time | Packets + Data */}
-        <div className="grid grid-cols-2 gap-2">
-          <div className="flex flex-col gap-2">
-            <TableSection title="Processing">
-              <MetricRow
-                label=" Filter Process speed"
-                value={metrics.processSpeed}
-                isEven
-              />
-              <MetricRow
-                label="Packets/s"
-                value={metrics.processPacketRate}
-                isEven={false}
-              />
-            </TableSection>
-            {hasStatusContent && (
-              <FilterStatusMetrics groups={statusGroups} filterIdx={idx} />
-            )}
-          </div>
+        {hasStatusContent && (
+          <StatusMetricsSection
+            groups={statusGroups}
+            filterIdx={idx}
+            filterName={name}
+          />
+        )}
 
-          <div className="flex flex-col gap-2">
-            <TableSection title="Packets">
-              <MetricRow
-                label="Done"
-                value={formatNumber(filter.pck_done)}
-                isEven
-              />
-              <MetricRow
-                label="Sent"
-                value={formatNumber(filter.pck_sent)}
-                isEven={false}
-              />
-              {filter.pck_ifce_sent !== undefined && (
-                <MetricRow
-                  label="Interface"
-                  value={formatNumber(filter.pck_ifce_sent)}
-                  isEven
-                />
-              )}
-            </TableSection>
-            <TableSection title="Data">
-              <MetricRow
-                label="Done"
-                value={formatBytes(filter.bytes_done)}
-                isEven
-              />
-              <MetricRow
-                label="Sent"
-                value={formatBytes(filter.bytes_sent)}
-                isEven={false}
-              />
-            </TableSection>
-          </div>
-        </div>
+        <FilterProcessingMetrics
+          processSpeed={metrics.processSpeed}
+          processPacketRate={metrics.processPacketRate}
+          pckDone={filter.pck_done}
+          pckSent={filter.pck_sent}
+          pckIfceSent={filter.pck_ifce_sent}
+          bytesDone={filter.bytes_done}
+          bytesSent={filter.bytes_sent}
+        />
 
         {totalErrors > 0 && (
           <TableSection title="Errors">

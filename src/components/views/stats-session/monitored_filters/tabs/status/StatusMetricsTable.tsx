@@ -18,9 +18,14 @@ function StatusMetricsTable({ metrics, filterIdx }: StatusMetricsTableProps) {
 
   if (metrics.length === 0) return null;
 
+  const orderedMetrics = [
+    ...metrics.filter((metric) => metric.graphable),
+    ...metrics.filter((metric) => !metric.graphable),
+  ];
+
   return (
     <TableSection title="Metrics">
-      {metrics.map((metric, index) => (
+      {orderedMetrics.map((metric, index) => (
         <MetricRow
           key={metric.key}
           label={metric.key}

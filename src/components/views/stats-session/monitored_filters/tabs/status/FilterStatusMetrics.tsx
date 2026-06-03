@@ -5,14 +5,14 @@ import type {
   BufferMetric,
   StateBadge,
   ArrayGroup,
-} from '../utils/statusViewModel';
-import { TableSection, MetricRow } from './pid/shared';
-import StatusMetricsTable from './status/StatusMetricsTable';
+} from '../../utils/statusViewModel';
+import { TableSection, MetricRow } from '../pid/shared';
+import StatusMetricsTable from './StatusMetricsTable';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { getStreamTypeBadgeConfig } from '@/utils/filters/streamType';
 import { GpacStreamType } from '@/types/domain/gpac';
-import { TAB_STYLES } from './styles';
+import { TAB_STYLES } from '../styles';
 import { formatPercent } from '@/utils/formatting';
 
 const SHORT_TO_STREAM: Partial<Record<string, GpacStreamType>> = {
