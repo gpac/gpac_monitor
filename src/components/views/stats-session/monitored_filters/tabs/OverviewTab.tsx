@@ -1,12 +1,8 @@
 import { memo, useMemo } from 'react';
-import { LuSettings } from 'react-icons/lu';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import { OverviewTabData } from '@/types/ui';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
-  formatTime,
   formatBytes,
   formatPacketRate,
   microsecondsToSeconds,
@@ -14,6 +10,7 @@ import {
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { buildFilterStatusViewModel } from '../utils/statusViewModel';
 import { MetricRow, TableSection } from './pid/shared';
+import FilterIdentityStrip from './FilterIdentityStrip';
 import StatusMetricsSection from './status/StatusMetricsSection';
 import FilterProcessingMetrics from './FilterProcessingMetrics';
 
@@ -61,39 +58,14 @@ const OverviewTab = memo(
 
     return (
       <div className="flex flex-col gap-2 p-2">
-        {/* Status strip */}
-        <div className="flex items-center gap-2 px-3 py-2 bg-monitor-panel/40 rounded border-b border-monitor-line/10 text-xs shrink-0">
-          {onOpenProperties && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onOpenProperties}
-              className="h-6 px-1.5 py-0"
-              title="Display filter arguments"
-            >
-              <LuSettings className="h-3.5 w-3.5" />
-            </Button>
-          )}
-          <span className="font-medium text-muted-foreground">
-            [{type || 'unknown'}]
-          </span>
-          <Badge
-            variant={healthInfo.variant}
-            className="text-xs py-0 px-1.5 h-fit"
-          >
-            ● {healthInfo.label}
-          </Badge>
-          <span className="text-muted-foreground/50">·</span>
-          <span className="text-muted-foreground">Index: {idx}</span>
-          <span className="text-muted-foreground/50">·</span>
-          <span className="text-muted-foreground">
-            Uptime:{' '}
-            <span className="font-medium tabular-nums">{formatTime(time)}</span>
-          </span>
-          <span className="ml-auto text-muted-foreground/70">
-            Live <span className="text-error">⏺</span>
-          </span>
-        </div>
+        <FilterIdentityStrip
+          type={type}
+          idx={idx}
+          time={time}
+          healthLabel={healthInfo.label}
+          healthVariant={healthInfo.variant}
+          onOpenProperties={onOpenProperties}
+        />
 
         {hasStatusContent && (
           <StatusMetricsSection
