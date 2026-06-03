@@ -22,21 +22,17 @@ const OverviewContentGrid = memo(
     const numericMetrics = groups.numericMetrics.filter(
       (metric) => !metric.graphable,
     );
-    const hasProgress = groups.primaryProgress != null;
     const hasMetrics =
-      hasProgress ||
+      groups.primaryProgress != null ||
       groups.buffer != null ||
       numericMetrics.length > 0 ||
       valueTextMetrics.length > 0;
     const hasArrays = groups.arrays.length > 0;
 
-    const progressOffset = hasProgress ? 1 : 0;
-    const bufferOffset = groups.buffer ? 1 : 0;
-
     const infoCol: ReactNode = hasInfo ? (
       <TableSection key="info" title="Info">
         {groups.info && (
-          <tr className="bg-monitor-panel border-b border-white/5">
+          <tr className="bg-monitor-panel border-b border-transparent">
             <td
               colSpan={2}
               className="px-2 py-2 text-xs italic text-muted-foreground"
@@ -45,12 +41,11 @@ const OverviewContentGrid = memo(
             </td>
           </tr>
         )}
-        {infoTextMetrics.map((metric, index) => (
+        {infoTextMetrics.map((metric) => (
           <MetricRow
             key={metric.key}
             label={metric.key}
             value={metric.value}
-            isEven={index % 2 === 0}
             valueClassName="italic text-muted-foreground truncate"
           />
         ))}
@@ -60,34 +55,19 @@ const OverviewContentGrid = memo(
     const metricsCol: ReactNode = hasMetrics ? (
       <TableSection key="metrics" title="Metrics">
         {groups.primaryProgress && (
-          <StatusProgressRow bar={groups.primaryProgress} isEven />
+          <StatusProgressRow bar={groups.primaryProgress} />
         )}
-        {groups.buffer && (
-          <StatusBufferRow
-            buffer={groups.buffer}
-            isEven={progressOffset % 2 === 0}
-          />
-        )}
-        {numericMetrics.map((metric, index) => (
+        {groups.buffer && <StatusBufferRow buffer={groups.buffer} />}
+        {numericMetrics.map((metric) => (
           <MetricRow
             key={metric.key}
             label={metric.key}
             value={metric.value}
-            isEven={(index + progressOffset + bufferOffset) % 2 === 0}
             title={metric.tooltip}
           />
         ))}
-        {valueTextMetrics.map((metric, index) => (
-          <MetricRow
-            key={metric.key}
-            label={metric.key}
-            value={metric.value}
-            isEven={
-              (numericMetrics.length + index + progressOffset + bufferOffset) %
-                2 ===
-              0
-            }
-          />
+        {valueTextMetrics.map((metric) => (
+          <MetricRow key={metric.key} label={metric.key} value={metric.value} />
         ))}
       </TableSection>
     ) : null;

@@ -23,44 +23,22 @@ const RuntimeDetailsSection = memo(
         <MetricRow
           label="Filter Process speed"
           value={processing.processSpeed}
-          isEven
         />
-        <MetricRow
-          label="Packets/s"
-          value={processing.processPacketRate}
-          isEven={false}
-        />
+        <MetricRow label="Packets/s" value={processing.processPacketRate} />
       </TableSection>
       <TableSection title="Packets">
-        <MetricRow
-          label="Done"
-          value={formatNumber(processing.pckDone)}
-          isEven
-        />
-        <MetricRow
-          label="Sent"
-          value={formatNumber(processing.pckSent)}
-          isEven={false}
-        />
+        <MetricRow label="Done" value={formatNumber(processing.pckDone)} />
+        <MetricRow label="Sent" value={formatNumber(processing.pckSent)} />
         {processing.pckIfceSent !== undefined && (
           <MetricRow
             label="Interface"
             value={formatNumber(processing.pckIfceSent)}
-            isEven
           />
         )}
       </TableSection>
       <TableSection title="Data">
-        <MetricRow
-          label="Done"
-          value={formatBytes(processing.bytesDone)}
-          isEven
-        />
-        <MetricRow
-          label="Sent"
-          value={formatBytes(processing.bytesSent)}
-          isEven={false}
-        />
+        <MetricRow label="Done" value={formatBytes(processing.bytesDone)} />
+        <MetricRow label="Sent" value={formatBytes(processing.bytesSent)} />
       </TableSection>
     </div>
   ),

@@ -108,7 +108,6 @@ const OverviewTab = memo(
             <MetricRow
               label="Total"
               value={String(totalErrors)}
-              isEven
               valueClassName="text-destructive"
             />
           </TableSection>
