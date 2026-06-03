@@ -1,6 +1,7 @@
-import { memo, useMemo } from 'react';
-import { useAppSelector } from '@/shared/hooks/redux';
+import { memo, useEffect, useMemo } from 'react';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
+import { clearStatusMetricsByFilter } from '@/shared/store/slices/monitoredFilterSlice';
 import { OverviewTabData } from '@/types/ui';
 import {
   formatBytes,
@@ -9,10 +10,13 @@ import {
 } from '@/utils/formatting';
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { buildFilterStatusViewModel } from '../utils/statusViewModel';
+import { getStatusOverviewState } from '../utils/statusOverviewState';
+import { useIsDetached } from '../FilterViewContext';
 import { MetricRow, TableSection } from './pid/shared';
+import { useStatusMetricSamples } from './hooks/useStatusMetricSamples';
 import FilterIdentityStrip from './FilterIdentityStrip';
-import FilterStatusOverview from './status/FilterStatusOverview';
-import FilterProcessingMetrics from './FilterProcessingMetrics';
+import OverviewContentGrid from './OverviewContentGrid';
+import StatusGraphCard from './status/StatusGraphCard';
 
 interface OverviewTabProps {
   filter: OverviewTabData;
@@ -23,6 +27,8 @@ interface OverviewTabProps {
 const OverviewTab = memo(
   ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
     const { parsedStatus, type, idx, time, name } = filter;
+    const dispatch = useAppDispatch();
+    const isDetached = useIsDetached();
 
     const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
     const healthInfo = getFilterHealthInfo(
@@ -35,16 +41,44 @@ const OverviewTab = memo(
       () => buildFilterStatusViewModel(parsedStatus),
       [parsedStatus],
     );
+    const state = getStatusOverviewState(statusGroups);
 
-    const metrics = useMemo(() => {
+    const graphableMetrics = useMemo(
+      () =>
+        statusGroups.numericMetrics
+          .filter((metric) => metric.graphable)
+          .map((metric) => ({ key: metric.key, rawValue: metric.rawValue })),
+      [statusGroups.numericMetrics],
+    );
+    useStatusMetricSamples(idx, graphableMetrics);
+    useEffect(
+      () => () => {
+        dispatch(clearStatusMetricsByFilter(idx));
+      },
+      [dispatch, idx],
+    );
+
+    const processing = useMemo(() => {
       const secs = microsecondsToSeconds(time);
       return {
         processSpeed:
           secs > 0 ? `${formatBytes(filter.bytes_done / secs)}/s` : '—',
         processPacketRate:
           secs > 0 ? formatPacketRate(filter.pck_done / secs) : '—',
+        pckDone: filter.pck_done,
+        pckSent: filter.pck_sent,
+        pckIfceSent: filter.pck_ifce_sent,
+        bytesDone: filter.bytes_done,
+        bytesSent: filter.bytes_sent,
       };
-    }, [time, filter.bytes_done, filter.pck_done]);
+    }, [
+      time,
+      filter.bytes_done,
+      filter.bytes_sent,
+      filter.pck_done,
+      filter.pck_sent,
+      filter.pck_ifce_sent,
+    ]);
 
     const totalErrors = (filter.errors || 0) + (filter.current_errors || 0);
 
@@ -59,21 +93,19 @@ const OverviewTab = memo(
           onOpenProperties={onOpenProperties}
         />
 
-        <FilterStatusOverview
+        <OverviewContentGrid
           groups={statusGroups}
-          filterIdx={idx}
-          filterName={name}
+          processing={processing}
+          isDetached={isDetached}
         />
 
-        <FilterProcessingMetrics
-          processSpeed={metrics.processSpeed}
-          processPacketRate={metrics.processPacketRate}
-          pckDone={filter.pck_done}
-          pckSent={filter.pck_sent}
-          pckIfceSent={filter.pck_ifce_sent}
-          bytesDone={filter.bytes_done}
-          bytesSent={filter.bytes_sent}
-        />
+        {state === 'graph' && (
+          <StatusGraphCard
+            metrics={statusGroups.numericMetrics}
+            filterIdx={idx}
+            filterName={name}
+          />
+        )}
 
         {totalErrors > 0 && (
           <TableSection title="Errors">
