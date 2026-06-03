@@ -22,37 +22,28 @@ const FilterProcessingMetrics = memo(
     bytesDone,
     bytesSent,
   }: FilterProcessingMetricsProps) => (
-    <div className="grid grid-cols-2 gap-2">
+    <div className="grid grid-cols-3 gap-2">
       <TableSection title="Processing">
         <MetricRow label=" Filter Process speed" value={processSpeed} isEven />
         <MetricRow label="Packets/s" value={processPacketRate} isEven={false} />
       </TableSection>
 
-      <div className="flex flex-col gap-2">
-        <TableSection title="Packets">
-          <MetricRow label="Done" value={formatNumber(pckDone)} isEven />
+      <TableSection title="Packets">
+        <MetricRow label="Done" value={formatNumber(pckDone)} isEven />
+        <MetricRow label="Sent" value={formatNumber(pckSent)} isEven={false} />
+        {pckIfceSent !== undefined && (
           <MetricRow
-            label="Sent"
-            value={formatNumber(pckSent)}
-            isEven={false}
+            label="Interface"
+            value={formatNumber(pckIfceSent)}
+            isEven
           />
-          {pckIfceSent !== undefined && (
-            <MetricRow
-              label="Interface"
-              value={formatNumber(pckIfceSent)}
-              isEven
-            />
-          )}
-        </TableSection>
-        <TableSection title="Data">
-          <MetricRow label="Done" value={formatBytes(bytesDone)} isEven />
-          <MetricRow
-            label="Sent"
-            value={formatBytes(bytesSent)}
-            isEven={false}
-          />
-        </TableSection>
-      </div>
+        )}
+      </TableSection>
+
+      <TableSection title="Data">
+        <MetricRow label="Done" value={formatBytes(bytesDone)} isEven />
+        <MetricRow label="Sent" value={formatBytes(bytesSent)} isEven={false} />
+      </TableSection>
     </div>
   ),
 );
