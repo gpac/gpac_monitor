@@ -5,6 +5,7 @@ import type { FilterStatusViewModel } from '../../utils/statusViewModel';
 import { getStatusOverviewState } from '../../utils/statusOverviewState';
 import { useStatusMetricSamples } from '../hooks/useStatusMetricSamples';
 import FilterStatusMetrics from './FilterStatusMetrics';
+import StatusSummaryCard from './StatusSummaryCard';
 import StatusGraphSection from './StatusGraphSection';
 
 interface FilterStatusOverviewProps {
@@ -36,13 +37,12 @@ const FilterStatusOverview = memo(
     );
 
     if (state === 'none') return null;
+    if (state === 'summary') return <StatusSummaryCard groups={groups} />;
 
     return (
       <div className="flex flex-col gap-2">
         <FilterStatusMetrics groups={groups} filterIdx={filterIdx} />
-        {state === 'graph' && (
-          <StatusGraphSection filterIdx={filterIdx} filterName={filterName} />
-        )}
+        <StatusGraphSection filterIdx={filterIdx} filterName={filterName} />
       </div>
     );
   },
