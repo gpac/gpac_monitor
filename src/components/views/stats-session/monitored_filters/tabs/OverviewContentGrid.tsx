@@ -58,16 +58,6 @@ const OverviewContentGrid = memo(
       );
     }
 
-    if (groups.arrays.length > 0) {
-      staticCols.push(
-        <div key="tracks" className="flex flex-col gap-1">
-          {groups.arrays.map((array) => (
-            <StatusArraySection key={array.key} array={array} />
-          ))}
-        </div>,
-      );
-    }
-
     if (hasMetrics) {
       staticCols.push(
         <div key="metrics" className="flex flex-col gap-1">
@@ -88,6 +78,16 @@ const OverviewContentGrid = memo(
               ))}
             </TableSection>
           )}
+        </div>,
+      );
+    }
+
+    if (groups.arrays.length > 0) {
+      staticCols.push(
+        <div key="tracks" className="flex flex-col gap-1">
+          {groups.arrays.map((array) => (
+            <StatusArraySection key={array.key} array={array} />
+          ))}
         </div>,
       );
     }
