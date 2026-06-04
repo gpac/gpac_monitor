@@ -8,6 +8,7 @@ export interface MessageHandlerCallbacks {
   onLogSubscriptionChange: (isSubscribed: boolean) => void;
   onPidReconfigured: (indexes: number[]) => void;
   onArgUpdated: (indexes: number[]) => void;
+  onSetMetricDefinitions: (raw: string) => void;
   onSessionEnd?: (data: any) => void;
 }
 

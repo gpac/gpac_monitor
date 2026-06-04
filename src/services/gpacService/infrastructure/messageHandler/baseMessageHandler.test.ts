@@ -12,6 +12,7 @@ function createMockCallbacks(): MessageHandlerCallbacks {
     onLogSubscriptionChange: vi.fn(),
     onPidReconfigured: vi.fn(),
     onArgUpdated: vi.fn(),
+    onSetMetricDefinitions: vi.fn(),
   };
 }
 
