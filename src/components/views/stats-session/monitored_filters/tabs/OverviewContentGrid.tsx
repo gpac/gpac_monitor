@@ -73,7 +73,7 @@ const OverviewContentGrid = memo(
     ) : null;
 
     const arraysCol: ReactNode = hasArrays ? (
-      <div key="tracks" className="flex flex-col gap-1">
+      <div key="tracks" className="flex flex-col gap-1 bg-monitor-panel">
         {groups.arrays.map((array) => (
           <StatusArraySection key={array.key} array={array} />
         ))}

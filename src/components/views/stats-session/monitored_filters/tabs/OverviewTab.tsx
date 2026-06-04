@@ -49,7 +49,7 @@ const OverviewTab = memo(
           .map((metric) => ({ key: metric.key, rawValue: metric.rawValue })),
       [statusGroups.numericMetrics],
     );
-    useStatusMetricSamples(idx, graphableMetrics);
+    useStatusMetricSamples(idx, graphableMetrics, time);
     useEffect(
       () => () => {
         dispatch(clearStatusMetricsByFilter(idx));
