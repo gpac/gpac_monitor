@@ -1,3 +1,5 @@
+import type { MetricDefinitionMap } from './metricDefinitionParser';
+
 export type StatusBool = { type: 'bool'; key: string };
 export type StatusNum = {
   type: 'num';
@@ -27,7 +29,10 @@ export interface ParsedFilterStatus {
   entries: StatusEntry[];
 }
 
-function parseScalarToken(token: string): StatusScalar | null {
+function parseScalarToken(
+  token: string,
+  definitions?: MetricDefinitionMap,
+): StatusScalar | null {
   const separatorIdx = token.indexOf('=');
 
   if (separatorIdx === -1) {
@@ -40,6 +45,11 @@ function parseScalarToken(token: string): StatusScalar | null {
 
   if (rawValue.startsWith('"') && rawValue.endsWith('"')) {
     return { type: 'str', key, value: rawValue.slice(1, -1), quoted: true };
+  }
+
+  // Definition overrides value-based type inference for declared string metrics
+  if (definitions?.[key]?.type === 'str') {
+    return { type: 'str', key, value: rawValue, quoted: false };
   }
 
   const fractionMatch = rawValue.match(/^(\d+)\/(\d+)$/);
@@ -98,20 +108,26 @@ function splitStatusTokens(input: string): string[] {
   return tokens;
 }
 
-function parseArrayItem(itemStr: string): StatusArrayItem | null {
+function parseArrayItem(
+  itemStr: string,
+  definitions?: MetricDefinitionMap,
+): StatusArrayItem | null {
   const parts = itemStr.trim().split(/\s+/);
   if (!parts[0]) return null;
 
   const entries: StatusScalar[] = [];
   for (let i = 1; i < parts.length; i++) {
-    const scalar = parseScalarToken(parts[i]);
+    const scalar = parseScalarToken(parts[i], definitions);
     if (scalar) entries.push(scalar);
   }
 
   return { name: parts[0], entries };
 }
 
-export function parseFilterStatus(raw: string): ParsedFilterStatus {
+export function parseFilterStatus(
+  raw: string,
+  definitions?: MetricDefinitionMap,
+): ParsedFilterStatus {
   if (!raw?.trim()) return { raw: raw ?? '', entries: [] };
 
   const entries: StatusEntry[] = [];
@@ -127,14 +143,14 @@ export function parseFilterStatus(raw: string): ParsedFilterStatus {
 
     const items = arrayContent
       .split(',')
-      .map(parseArrayItem)
+      .map((item) => parseArrayItem(item, definitions))
       .filter((item): item is StatusArrayItem => item !== null);
 
     if (items.length > 0) arrayEntry = { type: 'array', items };
   }
 
   for (const token of splitStatusTokens(scalarPart)) {
-    const scalar = parseScalarToken(token);
+    const scalar = parseScalarToken(token, definitions);
     if (!scalar) continue;
 
     if (scalar.type === 'bool') {
