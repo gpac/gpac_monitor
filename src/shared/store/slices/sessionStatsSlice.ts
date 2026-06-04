@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TimeFraction } from '../../../types/domain/gpac/model';
+import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 
 export interface SessionFilterStats {
   status: string;
@@ -27,6 +28,7 @@ export interface SessionStatsState {
   isLoading: boolean;
   subscribedComponents: string[];
   isSubscribed: boolean;
+  metricDefinitions: MetricDefinitionMap;
 }
 
 const initialState: SessionStatsState = {
@@ -38,6 +40,7 @@ const initialState: SessionStatsState = {
   isLoading: false,
   subscribedComponents: [],
   isSubscribed: false,
+  metricDefinitions: {},
 };
 
 const sessionStatsSlice = createSlice({
@@ -114,6 +117,13 @@ const sessionStatsSlice = createSlice({
       state.lastUpdate = null;
       state.isLoading = false;
     },
+
+    setMetricDefinitions: (
+      state,
+      action: PayloadAction<MetricDefinitionMap>,
+    ) => {
+      state.metricDefinitions = action.payload;
+    },
   },
 });
 
@@ -126,6 +136,7 @@ export const {
   subscribeToSessionStats,
   unsubscribeFromSessionStats,
   resetSessionStats,
+  setMetricDefinitions,
 } = sessionStatsSlice.actions;
 
 export default sessionStatsSlice.reducer;
