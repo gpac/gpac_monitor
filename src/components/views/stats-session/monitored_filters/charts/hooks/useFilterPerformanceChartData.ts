@@ -40,6 +40,8 @@ export const useFilterPerformanceChartData = ({
   const dispatch = useDispatch();
   const prevRef = useRef({ bytesSent, bytesReceived, timestamp: Date.now() });
   const isInitializedRef = useRef(false);
+  const lastTaskTimeRef = useRef(lastTaskTimeUs);
+  lastTaskTimeRef.current = lastTaskTimeUs;
 
   useEffect(() => {
     const now = Date.now();
@@ -66,14 +68,18 @@ export const useFilterPerformanceChartData = ({
               (bytesReceived - prevRef.current.bytesReceived) / elapsed,
             ),
           },
-          lastTaskTime: { time, timestamp: now, value: lastTaskTimeUs },
+          lastTaskTime: {
+            time,
+            timestamp: now,
+            value: lastTaskTimeRef.current,
+          },
         }),
       );
     }
 
     prevRef.current = { bytesSent, bytesReceived, timestamp: now };
     isInitializedRef.current = true;
-  }, [bytesSent, bytesReceived, lastTaskTimeUs, filterId, dispatch]);
+  }, [bytesSent, bytesReceived, filterId, dispatch]);
 
   const rawNetwork = useSelector((state: RootState) =>
     selectFilterNetworkChartData(state, filterId),
