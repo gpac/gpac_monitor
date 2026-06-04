@@ -14,7 +14,10 @@ import {
   FilterStatsResponse,
   PIDproperties,
 } from '@/types/domain/gpac/filter-stats';
-import { selectActiveConnection } from '@/shared/store/selectors/header/connectionsSelectors';
+import {
+  selectActiveConnection,
+  selectMetricDefinitions,
+} from '@/shared/store/selectors';
 import { ConnectionStatus } from '@/types/communication/shared';
 
 interface MonitoredFilterTabsProps {
@@ -95,6 +98,8 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   // Subscribe to live stats when tab is active
   const { stats, isLoading } = useFilterStats(filter.idx, isActive, 1000);
 
+  const definitions = useAppSelector(selectMetricDefinitions);
+
   const isConnected = useAppSelector(
     (state) =>
       selectActiveConnection(state)?.status === ConnectionStatus.CONNECTED,
@@ -118,7 +123,10 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         name: filterWithStats.name,
         type: filterWithStats.type,
         status: filterWithStats.status,
-        parsedStatus: parseFilterStatus(filterWithStats.status ?? ''),
+        parsedStatus: parseFilterStatus(
+          filterWithStats.status ?? '',
+          definitions,
+        ),
         time: filterWithStats.time,
         last_task_time: filterWithStats.last_task_time,
         pck_done: filterWithStats.pck_done,
@@ -156,7 +164,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
           )
         : [],
     };
-  }, [filterWithStats, stats]);
+  }, [filterWithStats, stats, definitions]);
 
   const handleBack = () => {
     // Navigate back to the main dashboard view

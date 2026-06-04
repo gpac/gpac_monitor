@@ -4,6 +4,7 @@ import {
   EnrichedStatsResponse,
   EnrichedFilterData,
 } from '@/workers/enrichedStatsWorker';
+import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 import EnrichedStatsWorker from '../../workers/enrichedStatsWorker?worker&inline';
 import { BaseWorkerService } from './BaseWorkerService';
 
@@ -25,11 +26,16 @@ class EnrichedStatsWorkerService extends BaseWorkerService<
     return eventData.enrichedFilters;
   }
 
-  protected createMessage(filters: GpacNodeData[]): EnrichStatsMessage {
-    return { type: 'ENRICH_STATS', filters };
+  private definitions: MetricDefinitionMap = {};
+
+  setDefinitions(definitions: MetricDefinitionMap): void {
+    this.definitions = definitions;
   }
 
-  // Alias for backward compatibility
+  protected createMessage(filters: GpacNodeData[]): EnrichStatsMessage {
+    return { type: 'ENRICH_STATS', filters, definitions: this.definitions };
+  }
+
   enrichStats(filters: GpacNodeData[]): void {
     this.process(filters);
   }

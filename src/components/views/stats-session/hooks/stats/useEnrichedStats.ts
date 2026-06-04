@@ -2,12 +2,15 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { GpacNodeData } from '@/types/domain/gpac/model';
 import { enrichedStatsWorkerService } from '@/services/workers/enrichedStatsWorkerService';
 import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
+import { useAppSelector } from '@/shared/hooks/redux';
+import { selectMetricDefinitions } from '@/shared/store/selectors';
 
 export function useEnrichedStats(rawFilters: GpacNodeData[]) {
   const [enrichedFilters, setEnrichedFilters] = useState<EnrichedFilterData[]>(
     [],
   );
   const isProcessingRef = useRef(false);
+  const definitions = useAppSelector(selectMetricDefinitions);
 
   // Stabilize rawFilters by creating a serialized key
   const filtersKey = useMemo(() => {
@@ -30,6 +33,7 @@ export function useEnrichedStats(rawFilters: GpacNodeData[]) {
 
     isProcessingRef.current = true;
 
+    enrichedStatsWorkerService.setDefinitions(definitions);
     enrichedStatsWorkerService.enrichStats(rawFilters);
 
     const unsubscribe = enrichedStatsWorkerService.subscribe((enriched) => {

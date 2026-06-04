@@ -1,5 +1,6 @@
 import { GpacNodeData } from '@/types/domain/gpac/model';
 import { parseFilterStatus, ParsedFilterStatus } from './filterStatusParser';
+import type { MetricDefinitionMap } from './metricDefinitionParser';
 
 // Lightweight versions of utility functions
 const calculateBufferUsage = (ipid: Record<string, any> = {}): number => {
@@ -164,6 +165,7 @@ export interface EnrichedFilterData extends GpacNodeData {
 export interface EnrichStatsMessage {
   type: 'ENRICH_STATS';
   filters: GpacNodeData[];
+  definitions?: MetricDefinitionMap;
 }
 
 export interface EnrichedStatsResponse {
@@ -176,14 +178,14 @@ const enrichedCache = new Map<string | number, EnrichedFilterData>();
 
 // Process incoming filters and enrich them
 self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
-  const { type, filters } = event.data;
+  const { type, filters, definitions } = event.data;
 
   if (type === 'ENRICH_STATS') {
     const enrichedFilters: EnrichedFilterData[] = filters.map((filter) => {
       const key = filter.idx ?? filter.ID ?? filter.name;
       const cached = enrichedCache.get(key);
 
-      const parsedStatus = parseFilterStatus(filter.status ?? '');
+      const parsedStatus = parseFilterStatus(filter.status ?? '', definitions);
       const bufferUsage = calculateBufferUsage(filter.ipid);
       const activityLevel = getActivityLevel(filter.bytes_done, filter.time);
       const sessionType = determineFilterSessionType(filter);
