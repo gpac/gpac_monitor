@@ -14,22 +14,19 @@ export const formatMicroseconds = (
   return `${(value / 1_000_000).toFixed(2)}s`;
 };
 
-/** Converts a GPAC last_ts_sent value ({n,d}, {num,den} or raw seconds) to seconds, or null if invalid. */
-export const tsToSeconds = (
-  ts: TsFraction | number | null | undefined,
-): number | null => {
-  if (ts == null) return null;
-  if (typeof ts === 'number') return ts > 0 ? ts : null;
-  const num = 'n' in ts ? ts.n : ts.num;
-  const den = 'n' in ts ? ts.d : ts.den;
-  return den ? num / den : null;
-};
-
 /** Formats a GPAC last_ts_sent value ({n,d}, {num,den} or raw seconds). */
 export const formatLastTsSent = (
   ts: TsFraction | number | null | undefined,
 ): string => {
-  const seconds = tsToSeconds(ts);
+  if (ts == null) return '—';
+  let seconds: number | null;
+  if (typeof ts === 'number') {
+    seconds = ts > 0 ? ts : null;
+  } else {
+    const num = 'n' in ts ? ts.n : ts.num;
+    const den = 'n' in ts ? ts.d : ts.den;
+    seconds = den ? num / den : null;
+  }
   return seconds != null ? `${seconds.toFixed(2)}s` : '—';
 };
 
@@ -117,47 +114,4 @@ export const formatChartSeconds = (seconds: number): string => {
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
   return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
-};
-
-/**
- * Format time in compact form for dashboard display
- * Input: microseconds from GPAC (f.time)
- * Output: Compact readable format
- * - < 1ms: "123μs"
- * - < 1s: "45ms"
- * - < 1min: "12.3s"
- * - < 1h: "22:59" (mm:ss format)
- * - >= 1h: "1:23h" (h:mm format)
- */
-export const formatCompactTime = (microseconds?: number): string => {
-  if (microseconds === undefined || microseconds === 0) return '0ms';
-
-  // < 1ms: show microseconds
-  if (microseconds < 1000) return `${microseconds.toFixed(0)}μs`;
-
-  const milliseconds = microseconds / 1000;
-
-  // < 1s: show milliseconds
-  if (milliseconds < 1000) return `${milliseconds.toFixed(0)}ms`;
-
-  const seconds = milliseconds / 1000;
-
-  // < 1min: show seconds with 1 decimal
-  if (seconds < 60) return `${seconds.toFixed(1)}s`;
-
-  const totalMinutes = Math.floor(seconds / 60);
-  const remainingSeconds = Math.floor(seconds % 60);
-
-  // < 1h: show mm:ss format
-  if (totalMinutes < 60) {
-    const mm = totalMinutes.toString().padStart(2, '0');
-    const ss = remainingSeconds.toString().padStart(2, '0');
-    return `${mm}:${ss}`;
-  }
-
-  // >= 1h: show h:mm format
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  const mmFormatted = minutes.toString().padStart(2, '0');
-  return `${hours}:${mmFormatted}h`;
 };
