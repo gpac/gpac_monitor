@@ -1,17 +1,22 @@
 import { memo, type ReactNode } from 'react';
+import { LuInfo } from 'react-icons/lu';
 import { MetricRow, TableSection } from './pid/shared';
+import { TooltipProvider } from '@/components/ui/tooltip';
 import type { FilterStatusViewModel } from '../utils/statusViewModel';
+import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 import StatusArraySection from './status/StatusArraySection';
 import StatusStateBadges from './status/StatusStateBadges';
 import { StatusProgressRow, StatusBufferRow } from './status/StatusProgress';
+import StatusMetricTooltip from './status/StatusMetricTooltip';
 
 interface OverviewContentGridProps {
   groups: FilterStatusViewModel;
   isDetached: boolean;
+  definitions?: MetricDefinitionMap;
 }
 
 const OverviewContentGrid = memo(
-  ({ groups, isDetached }: OverviewContentGridProps) => {
+  ({ groups, isDetached, definitions }: OverviewContentGridProps) => {
     const infoTextMetrics = groups.textMetrics.filter(
       (metric) => metric.quoted,
     );
@@ -53,23 +58,41 @@ const OverviewContentGrid = memo(
     ) : null;
 
     const metricsCol: ReactNode = hasMetrics ? (
-      <TableSection key="metrics" title="Metrics">
-        {groups.primaryProgress && (
-          <StatusProgressRow bar={groups.primaryProgress} />
-        )}
-        {groups.buffer && <StatusBufferRow buffer={groups.buffer} />}
-        {numericMetrics.map((metric) => (
-          <MetricRow
-            key={metric.key}
-            label={metric.key}
-            value={metric.value}
-            title={metric.tooltip}
-          />
-        ))}
-        {valueTextMetrics.map((metric) => (
-          <MetricRow key={metric.key} label={metric.key} value={metric.value} />
-        ))}
-      </TableSection>
+      <TooltipProvider delayDuration={300}>
+        <TableSection key="metrics" title="Metrics">
+          {groups.primaryProgress && (
+            <StatusProgressRow bar={groups.primaryProgress} />
+          )}
+          {groups.buffer && <StatusBufferRow buffer={groups.buffer} />}
+          {numericMetrics.map((metric) => {
+            const def = definitions?.[metric.key];
+            return (
+              <MetricRow
+                key={metric.key}
+                label={metric.key}
+                value={metric.value}
+                title={metric.tooltip}
+                leading={
+                  def ? (
+                    <StatusMetricTooltip def={def}>
+                      <span className="inline-flex mr-1 cursor-help">
+                        <LuInfo className="h-3 w-3 opacity-40 hover:opacity-80" />
+                      </span>
+                    </StatusMetricTooltip>
+                  ) : undefined
+                }
+              />
+            );
+          })}
+          {valueTextMetrics.map((metric) => (
+            <MetricRow
+              key={metric.key}
+              label={metric.key}
+              value={metric.value}
+            />
+          ))}
+        </TableSection>
+      </TooltipProvider>
     ) : null;
 
     const arraysCol: ReactNode = hasArrays ? (

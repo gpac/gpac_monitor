@@ -11,6 +11,7 @@ import {
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { buildFilterStatusViewModel } from '../utils/statusViewModel';
 import { useIsDetached } from '../FilterViewContext';
+import { selectMetricDefinitions } from '@/shared/store/selectors';
 import { MetricRow, TableSection } from './pid/shared';
 import { useStatusMetricSamples } from './hooks/useStatusMetricSamples';
 import FilterIdentityStrip from './FilterIdentityStrip';
@@ -31,6 +32,7 @@ const OverviewTab = memo(
     const isDetached = useIsDetached();
 
     const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
+    const definitions = useAppSelector(selectMetricDefinitions);
     const healthInfo = getFilterHealthInfo(
       parsedStatus,
       isStalled,
@@ -99,7 +101,11 @@ const OverviewTab = memo(
           />
         )}
 
-        <OverviewContentGrid groups={statusGroups} isDetached={isDetached} />
+        <OverviewContentGrid
+          groups={statusGroups}
+          isDetached={isDetached}
+          definitions={definitions}
+        />
 
         <RuntimeDetailsSection processing={processing} />
 
