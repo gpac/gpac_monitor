@@ -13,6 +13,7 @@ function SessionStatsManager(client) {
     this.isSubscribed = false;
     this.interval = UPDATE_INTERVALS.SESSION_STATS;
     this.fields = [];
+    this.customMetricsSent = false;
 
     this.subscribe = function(interval, fields) {
         this.isSubscribed = true;
@@ -105,10 +106,19 @@ function SessionStatsManager(client) {
         if (this.client.client) {
             this.client.client.send(serialized);
         }
+
+        if (!this.customMetricsSent && session.custom_metrics) {
+            this.customMetricsSent = true;
+            this.client.client.send(JSON.stringify({
+                message: 'custom_metrics',
+                data: session.custom_metrics
+            }));
+        }
     };
 
     this.cleanup = function() {
         this.isSubscribed = false;
+        this.customMetricsSent = false;
     };
 
     this.handleSessionEnd = function() {

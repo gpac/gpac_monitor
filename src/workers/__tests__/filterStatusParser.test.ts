@@ -523,4 +523,36 @@ describe('parseFilterStatus', () => {
       }
     });
   });
+
+  describe('MetricDefinitionMap — type override', () => {
+    it('period=1 without definitions → StatusNum (value-based inference)', () => {
+      const result = parseFilterStatus('period=1');
+      expect(result.entries[0]).toEqual({ type: 'num', key: 'period', value: 1 });
+    });
+
+    it('period=1 with t=str definition → StatusStr (definition wins)', () => {
+      const definitions = { period: { type: 'str' as const, label: 'Period ID', freg: 'dasher' } };
+      const result = parseFilterStatus('period=1', definitions);
+      expect(result.entries[0]).toEqual({ type: 'str', key: 'period', value: '1', quoted: false });
+    });
+
+    it('seg=5 with t=num definition → StatusNum (no change)', () => {
+      const definitions = { seg: { type: 'num' as const, label: 'Segment Number', freg: 'dasher' } };
+      const result = parseFilterStatus('seg=5', definitions);
+      expect(result.entries[0]).toEqual({ type: 'num', key: 'seg', value: 5 });
+    });
+
+    it('undefined key without matching definition → value-based inference unchanged', () => {
+      const definitions = { period: { type: 'str' as const, label: 'Period ID', freg: 'dasher' } };
+      const result = parseFilterStatus('fps=30', definitions);
+      expect(result.entries[0]).toEqual({ type: 'num', key: 'fps', value: 30 });
+    });
+
+    it('full DASH status with definitions → period is StatusStr', () => {
+      const definitions = { period: { type: 'str' as const, label: 'Period ID', freg: 'dasher' } };
+      const raw = 'period=1 time=4.09s prog=0';
+      const result = parseFilterStatus(raw, definitions);
+      expect(result.entries[0]).toEqual({ type: 'str', key: 'period', value: '1', quoted: false });
+    });
+  });
 });

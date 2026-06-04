@@ -123,11 +123,11 @@ describe('buildFilterStatusViewModel', () => {
       expect(metric?.rawValue).toBe(30);
     });
 
-    it('frames → graphable false (cumulative counter)', () => {
+    it('frames → graphable true (type-driven: StatusNum is graphable)', () => {
       const metric = build('frames=1200').numericMetrics.find(
         (m) => m.key === 'frames',
       );
-      expect(metric?.graphable).toBe(false);
+      expect(metric?.graphable).toBe(true);
       expect(metric?.rawValue).toBe(1200);
     });
 

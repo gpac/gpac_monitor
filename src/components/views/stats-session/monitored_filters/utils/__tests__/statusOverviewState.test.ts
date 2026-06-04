@@ -18,13 +18,13 @@ describe('getStatusOverviewState', () => {
     expect(stateOf('info="importing"')).toBe('summary');
   });
 
-  it('non-graphable numeric (cumulative frames) → summary', () => {
-    expect(stateOf('frames=13')).toBe('summary');
+  it('numeric scalar (frames) → graph (type-driven: StatusNum is graphable)', () => {
+    expect(stateOf('frames=13')).toBe('graph');
   });
 
-  it('tracks array without graphable scalar → summary', () => {
+  it('tracks array with numeric scalar → graph', () => {
     expect(stateOf('frames=13 [TK1 type=V pc=96, TK2 type=A pc=4]')).toBe(
-      'summary',
+      'graph',
     );
   });
 
