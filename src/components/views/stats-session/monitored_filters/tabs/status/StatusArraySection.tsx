@@ -1,10 +1,18 @@
 import { Progress } from '@/components/ui/progress';
+import { LuInfo } from 'react-icons/lu';
 import { formatPercent } from '@/utils/formatting';
 import { TAB_STYLES } from '../styles';
 import type { ArrayGroup } from '../../utils/statusViewModel';
+import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 import { StreamTypeBadge } from './StatusStateBadges';
+import StatusMetricTooltip from './StatusMetricTooltip';
 
-function StatusArraySection({ array }: { array: ArrayGroup }) {
+interface StatusArraySectionProps {
+  array: ArrayGroup;
+  definitions?: MetricDefinitionMap;
+}
+
+function StatusArraySection({ array, definitions }: StatusArraySectionProps) {
   return (
     <div>
       <div
@@ -28,22 +36,32 @@ function StatusArraySection({ array }: { array: ArrayGroup }) {
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 min-w-0">
-              {item.metrics.map((metric) => (
-                <span
-                  key={metric.key}
-                  className="text-[10px] font-mono whitespace-nowrap"
-                >
-                  <span className="text-muted-foreground/70">
-                    {metric.key}:
-                  </span>{' '}
+              {item.metrics.map((metric) => {
+                const def = definitions?.[metric.key];
+                return (
                   <span
-                    className="tabular-nums text-info"
-                    title={metric.tooltip}
+                    key={metric.key}
+                    className="text-[10px] font-mono whitespace-nowrap inline-flex items-center gap-0.5"
                   >
-                    {metric.value}
+                    {def && (
+                      <StatusMetricTooltip def={def}>
+                        <span className="inline-flex cursor-help">
+                          <LuInfo className="h-2.5 w-2.5 text-muted-foreground" />
+                        </span>
+                      </StatusMetricTooltip>
+                    )}
+                    <span className="text-muted-foreground/70">
+                      {metric.key}:
+                    </span>{' '}
+                    <span
+                      className="tabular-nums text-info"
+                      title={metric.tooltip}
+                    >
+                      {metric.value}
+                    </span>
                   </span>
-                </span>
-              ))}
+                );
+              })}
             </div>
             <span className="text-[10px] font-mono tabular-nums text-info text-right">
               {item.progress !== undefined ? formatPercent(item.progress) : ''}

@@ -29,7 +29,14 @@ const StatusMetricTooltip = ({ def, children }: StatusMetricTooltipProps) => (
         <Row label="Type" value={def.type} />
         {def.unit && <Row label="Unit" value={def.unit} />}
         {def.info && <Row label="Info" value={def.info} />}
-        <Row label="Filter" value={def.freg} />
+        {def.freg !== '*' && <Row label="Filter" value={def.freg} />}
+        {def.values && (
+          <div className="flex flex-col gap-0.5 pt-1 border-t border-white/10">
+            {def.values.map((v) => (
+              <Row key={v.code} label={v.code} value={v.desc} />
+            ))}
+          </div>
+        )}
       </div>
       <TooltipArrow className="fill-gray-900" />
     </TooltipContent>

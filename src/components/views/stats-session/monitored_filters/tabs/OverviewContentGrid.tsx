@@ -15,6 +15,19 @@ interface OverviewContentGridProps {
   definitions?: MetricDefinitionMap;
 }
 
+function makeLeading(
+  def: Parameters<typeof StatusMetricTooltip>[0]['def'] | undefined,
+) {
+  if (!def) return undefined;
+  return (
+    <StatusMetricTooltip def={def}>
+      <span className="inline-flex mr-1 cursor-help">
+        <LuInfo className="h-3 w-3 text-muted-foreground" />
+      </span>
+    </StatusMetricTooltip>
+  );
+}
+
 const OverviewContentGrid = memo(
   ({ groups, isDetached, definitions }: OverviewContentGridProps) => {
     const infoTextMetrics = groups.textMetrics.filter(
@@ -61,34 +74,32 @@ const OverviewContentGrid = memo(
       <TooltipProvider delayDuration={300}>
         <TableSection key="metrics" title="Metrics">
           {groups.primaryProgress && (
-            <StatusProgressRow bar={groups.primaryProgress} />
+            <StatusProgressRow
+              bar={groups.primaryProgress}
+              leading={makeLeading(definitions?.[groups.primaryProgress.key])}
+            />
           )}
-          {groups.buffer && <StatusBufferRow buffer={groups.buffer} />}
-          {numericMetrics.map((metric) => {
-            const def = definitions?.[metric.key];
-            return (
-              <MetricRow
-                key={metric.key}
-                label={metric.key}
-                value={metric.value}
-                title={metric.tooltip}
-                leading={
-                  def ? (
-                    <StatusMetricTooltip def={def}>
-                      <span className="inline-flex mr-1 cursor-help">
-                        <LuInfo className="h-3 w-3 opacity-40 hover:opacity-80" />
-                      </span>
-                    </StatusMetricTooltip>
-                  ) : undefined
-                }
-              />
-            );
-          })}
+          {groups.buffer && (
+            <StatusBufferRow
+              buffer={groups.buffer}
+              leading={makeLeading(definitions?.['buffer'])}
+            />
+          )}
+          {numericMetrics.map((metric) => (
+            <MetricRow
+              key={metric.key}
+              label={metric.key}
+              value={metric.value}
+              title={metric.tooltip}
+              leading={makeLeading(definitions?.[metric.key])}
+            />
+          ))}
           {valueTextMetrics.map((metric) => (
             <MetricRow
               key={metric.key}
               label={metric.key}
               value={metric.value}
+              leading={makeLeading(definitions?.[metric.key])}
             />
           ))}
         </TableSection>
@@ -96,11 +107,17 @@ const OverviewContentGrid = memo(
     ) : null;
 
     const arraysCol: ReactNode = hasArrays ? (
-      <div key="tracks" className="flex flex-col gap-1 bg-monitor-panel">
-        {groups.arrays.map((array) => (
-          <StatusArraySection key={array.key} array={array} />
-        ))}
-      </div>
+      <TooltipProvider delayDuration={300}>
+        <div key="tracks" className="flex flex-col gap-1 bg-monitor-panel">
+          {groups.arrays.map((array) => (
+            <StatusArraySection
+              key={array.key}
+              array={array}
+              definitions={definitions}
+            />
+          ))}
+        </div>
+      </TooltipProvider>
     ) : null;
 
     if (
