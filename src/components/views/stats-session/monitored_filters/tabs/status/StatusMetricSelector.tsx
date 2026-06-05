@@ -21,20 +21,21 @@ function StatusMetricSelector({
   filterIdx,
 }: StatusMetricSelectorProps) {
   const dispatch = useAppDispatch();
-  const selectedKey = useAppSelector((state) =>
+  const selectedKeys = useAppSelector((state) =>
     selectSelectedStatusMetric(state, filterIdx),
   );
   const definitions = useAppSelector(selectMetricDefinitions);
 
   const graphable = metrics.filter((metric) => metric.graphable);
-  const firstKey = graphable[0]?.key;
-  const effectiveKey = selectedKey ?? firstKey ?? null;
+  const atMax = selectedKeys.length >= 4;
 
   useLayoutEffect(() => {
-    if (!selectedKey && firstKey) {
-      dispatch(setSelectedStatusMetric({ filterIdx, metricKey: firstKey }));
+    if (selectedKeys.length === 0 && graphable.length > 0) {
+      graphable.slice(0, 4).forEach((metric) => {
+        dispatch(setSelectedStatusMetric({ filterIdx, metricKey: metric.key }));
+      });
     }
-  }, [dispatch, filterIdx, firstKey, selectedKey]);
+  });
 
   if (graphable.length === 0) return null;
 
@@ -42,22 +43,27 @@ function StatusMetricSelector({
     <TooltipProvider delayDuration={300}>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-1">
         {graphable.map((metric) => {
-          const active = effectiveKey === metric.key;
+          const active = selectedKeys.includes(metric.key);
+          const disabled = atMax && !active;
           const def = definitions[metric.key];
-          const onSelect = () =>
+          const onToggle = () =>
             dispatch(
               setSelectedStatusMetric({ filterIdx, metricKey: metric.key }),
             );
           return (
-            <span key={metric.key} className="inline-flex items-center gap-1">
+            <span
+              key={metric.key}
+              className={`inline-flex items-center gap-1 ${disabled ? 'opacity-40' : ''}`}
+            >
               <GraphRadio
                 active={active}
                 label={metric.key}
-                onClick={onSelect}
+                onClick={disabled ? () => {} : onToggle}
               />
               <button
                 type="button"
-                onClick={onSelect}
+                onClick={disabled ? undefined : onToggle}
+                disabled={disabled}
                 className={`text-[11px] font-mono leading-none transition-colors ${
                   active ? 'text-info' : 'text-muted-foreground hover:text-info'
                 }`}

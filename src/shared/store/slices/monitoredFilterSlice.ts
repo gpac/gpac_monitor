@@ -41,7 +41,7 @@ export interface MonitoredFilterState {
   pidSamples: Record<string, PIDMetricSample[]>;
   maxPidSamples: number;
   statusMetricSamples: Record<string, StatusMetricSample[]>;
-  selectedStatusMetricByFilter: Record<number, string | null>;
+  selectedStatusMetricByFilter: Record<number, string[]>;
 }
 
 const initialState: MonitoredFilterState = {
@@ -246,9 +246,14 @@ const monitoredFilterSlice = createSlice({
       action: PayloadAction<{ filterIdx: number; metricKey: string }>,
     ) => {
       const { filterIdx, metricKey } = action.payload;
-      const current = state.selectedStatusMetricByFilter[filterIdx];
-      state.selectedStatusMetricByFilter[filterIdx] =
-        current === metricKey ? null : metricKey;
+      const current = state.selectedStatusMetricByFilter[filterIdx] ?? [];
+      const index = current.indexOf(metricKey);
+      if (index !== -1) {
+        current.splice(index, 1);
+      } else if (current.length < 4) {
+        current.push(metricKey);
+      }
+      state.selectedStatusMetricByFilter[filterIdx] = current;
     },
 
     clearStatusMetricsByFilter: (state, action: PayloadAction<number>) => {

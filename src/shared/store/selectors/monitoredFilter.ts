@@ -111,8 +111,8 @@ export const selectAllSelectedPidSamplesByFilter = createSelector(
 export const selectSelectedStatusMetric = (
   state: RootState,
   filterIdx: number,
-): string | null =>
-  state.monitoredFilter.selectedStatusMetricByFilter[filterIdx] ?? null;
+): string[] =>
+  state.monitoredFilter.selectedStatusMetricByFilter[filterIdx] ?? [];
 
 export const selectStatusMetricSamples = createSelector(
   [
