@@ -41,6 +41,11 @@ describe('parseMetricDefinitions', () => {
       expect(map['buf']?.type).toBe('frac');
     });
 
+    it('parses t=bool', () => {
+      const map = parseMetricDefinitions('freg=foo;done=Done;t=bool');
+      expect(map['done']?.type).toBe('bool');
+    });
+
     it('falls back to num for unknown t value', () => {
       const map = parseMetricDefinitions('freg=foo;x=X;t=unknown');
       expect(map['x']?.type).toBe('num');

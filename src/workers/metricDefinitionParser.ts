@@ -1,4 +1,4 @@
-export type MetricType = 'num' | 'str' | 'frac';
+export type MetricType = 'num' | 'str' | 'frac' | 'bool';
 
 export type EnumValue = { code: string; desc: string };
 
@@ -18,6 +18,7 @@ export type MetricDefinitionMap = Record<string, MetricDef>;
 function parseType(raw: string): MetricType {
   if (raw === 'str') return 'str';
   if (raw === 'frac') return 'frac';
+  if (raw === 'bool') return 'bool';
   return 'num';
 }
 
