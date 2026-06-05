@@ -1,17 +1,30 @@
-import { memo, useMemo, useRef } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UplotChart } from '@/components/common/UplotChart';
-import uPlot from 'uplot';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import type uPlot from 'uplot';
 import { useFilterPerformanceChartData } from './hooks/useFilterPerformanceChartData';
-import { createBandwidthCombinedConfig } from './config/bandwidthCombinedUplotConfig';
-import { useContainerSize } from '@/components/common/charts';
+import {
+  BANDWIDTH_SERIES,
+  formatBw,
+} from './config/bandwidthCombinedUplotConfig';
+import { formatMicroseconds } from '@/utils/formatting';
+import LineHistoryChart from './LineHistoryChart';
+
+type SeriesKey = 'outband' | 'inband' | 'lastTaskTime';
+
+const SERIES_ORDER: SeriesKey[] = ['outband', 'inband', 'lastTaskTime'];
+
+const SERIES_META: Record<SeriesKey, { label: string; color: string }> = {
+  outband: { label: 'Outband', color: '#10b981' },
+  inband: { label: 'Inband', color: '#3b82f6' },
+  lastTaskTime: { label: 'Filter Proc. Time', color: '#f59e0b' },
+};
 
 interface BandwidthCombinedChartProps {
   filterId: string;
   bytesSent: number;
   bytesReceived: number;
-  /** time spent in last task in microseconds */
   lastTaskTimeUs?: number;
   windowDurationMs?: number;
   showCurrentTime?: boolean;
@@ -26,9 +39,11 @@ export const BandwidthCombinedChart = memo(
     windowDurationMs,
     showCurrentTime = false,
   }: BandwidthCombinedChartProps) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const dimensions = useContainerSize(containerRef);
-    const timeLabelsRef = useRef<string[]>([]);
+    const [visible, setVisible] = useState<Record<SeriesKey, boolean>>({
+      outband: true,
+      inband: true,
+      lastTaskTime: true,
+    });
 
     const { outbandPoints, inbandPoints, lastTaskTimePoints } =
       useFilterPerformanceChartData({
@@ -39,82 +54,94 @@ export const BandwidthCombinedChart = memo(
         windowDurationMs,
       });
 
-    const options = useMemo(() => {
-      return createBandwidthCombinedConfig({
-        timeLabelsRef,
-        width: dimensions.width,
-        height: dimensions.height,
-      });
-    }, [dimensions]);
-
-    const data = useMemo(() => {
+    const { data, timeLabels } = useMemo(() => {
       const maxLength = Math.max(outbandPoints.length, inbandPoints.length);
       const indices = Array.from(
         { length: maxLength },
         (_unused, index) => index,
       );
 
-      const outbandData = indices.map(
-        (index) => outbandPoints[index]?.value || 0,
-      );
-      const inbandData = indices.map(
-        (index) => inbandPoints[index]?.value || 0,
-      );
-      timeLabelsRef.current = indices.map(
+      const labels = indices.map(
         (index) =>
           outbandPoints[index]?.time || inbandPoints[index]?.time || '',
       );
 
-      const lastTaskTimeData = indices.map(
-        (index) => lastTaskTimePoints[index]?.value ?? 0,
-      );
-      const alignedData: uPlot.AlignedData = [
+      const pointsMap: Record<SeriesKey, (number | null)[]> = {
+        outband: indices.map((index) => outbandPoints[index]?.value ?? 0),
+        inband: indices.map((index) => inbandPoints[index]?.value ?? 0),
+        lastTaskTime: indices.map(
+          (index) => lastTaskTimePoints[index]?.value ?? 0,
+        ),
+      };
+
+      const visibleKeys = SERIES_ORDER.filter((key) => visible[key]);
+      const filteredData: uPlot.AlignedData = [
         indices,
-        outbandData,
-        inbandData,
-        lastTaskTimeData,
+        ...visibleKeys.map((key) => pointsMap[key]),
       ];
 
-      return alignedData;
-    }, [outbandPoints, inbandPoints, lastTaskTimePoints]);
+      return { data: filteredData, timeLabels: labels };
+    }, [outbandPoints, inbandPoints, lastTaskTimePoints, visible]);
+
+    const filteredSeries = useMemo(
+      () =>
+        SERIES_ORDER.flatMap((key, idx) =>
+          visible[key] ? [BANDWIDTH_SERIES[idx]] : [],
+        ),
+      [visible],
+    );
 
     return (
       <Card className="bg-monitor-panel border-transparent">
         <CardHeader className="pb-1">
           <CardTitle className="flex justify-center items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <LuArrowUpDown className="h-4 w-4 opacity-60" />
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 rounded-full bg-monitor-active-filter" />
-              Inband
-            </span>
-            /
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 rounded-full bg-emerald-500" />
-              Outband
-            </span>
-            <span className="opacity-60 normal-case">Mb/s</span> /{' '}
-            <span className="flex items-center gap-1.5">
-              <span className="w-3 h-0.5 rounded-full bg-amber-400" />
-              Filter Proc. Time
-            </span>
-            {showCurrentTime && timeLabelsRef.current.length > 0 && (
+            <ToggleGroup
+              type="multiple"
+              value={SERIES_ORDER.filter((key) => visible[key]) as string[]}
+              onValueChange={(values) =>
+                setVisible({
+                  outband: values.includes('outband'),
+                  inband: values.includes('inband'),
+                  lastTaskTime: values.includes('lastTaskTime'),
+                })
+              }
+              className="flex items-center gap-2 p-0 bg-transparent border-0"
+            >
+              {SERIES_ORDER.map((key) => (
+                <ToggleGroupItem
+                  key={key}
+                  value={key}
+                  className="flex items-center gap-1.5 h-auto px-0 py-0 bg-transparent border-0 shadow-none opacity-40 data-[state=on]:opacity-100 normal-case"
+                >
+                  <span
+                    className="w-3 h-0.5 rounded-full"
+                    style={{ background: SERIES_META[key].color }}
+                  />
+                  <span style={{ color: SERIES_META[key].color }}>
+                    {SERIES_META[key].label}
+                  </span>
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+            {showCurrentTime && timeLabels.length > 0 && (
               <span className="ml-auto font-mono normal-case opacity-60 text-xs">
-                {timeLabelsRef.current[timeLabelsRef.current.length - 1]}
+                {timeLabels[timeLabels.length - 1]}
               </span>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div
-            ref={containerRef}
-            style={{ width: '100%', height: 230, minHeight: 230 }}
-          >
-            <UplotChart
-              data={data}
-              options={options}
-              className="w-full h-full"
-            />
-          </div>
+          <LineHistoryChart
+            series={filteredSeries}
+            data={data}
+            timeLabels={timeLabels}
+            leftAxisFormat={formatBw}
+            rightAxisFormat={formatMicroseconds}
+            showCurrentTime={false}
+            showEndLabels={false}
+            height={230}
+          />
         </CardContent>
       </Card>
     );

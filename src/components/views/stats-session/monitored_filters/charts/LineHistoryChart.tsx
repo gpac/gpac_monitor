@@ -15,6 +15,7 @@ interface LineHistoryChartProps {
   data: uPlot.AlignedData;
   timeLabels: string[];
   leftAxisFormat?: (value: number) => string;
+  rightAxisFormat?: (value: number) => string;
   showCurrentTime?: boolean;
   showEndLabels?: boolean;
   height?: number;
@@ -30,6 +31,7 @@ const LineHistoryChart = memo(
     showCurrentTime = true,
     showEndLabels = true,
     height = CHART_HEIGHT,
+    rightAxisFormat,
   }: LineHistoryChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const dimensions = useContainerSize(containerRef);
@@ -43,10 +45,11 @@ const LineHistoryChart = memo(
           series,
           timeLabelsRef,
           leftAxis: leftAxisFormat ? { formatY: leftAxisFormat } : undefined,
+          rightAxis: rightAxisFormat ? { formatY: rightAxisFormat } : undefined,
           onEndLabels: showEndLabels ? setEndLabels : undefined,
           ...dimensions,
         }),
-      [series, dimensions, leftAxisFormat, showEndLabels],
+      [series, dimensions, leftAxisFormat, rightAxisFormat, showEndLabels],
     );
 
     return (
