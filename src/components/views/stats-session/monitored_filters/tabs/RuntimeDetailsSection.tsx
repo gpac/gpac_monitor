@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { formatBytes, formatNumber } from '@/utils/formatting';
-import { MetricRow, TableSection } from './pid/shared';
+import { MetricRow, TableSection } from './shared/tableLayout';
 
 export interface ProcessingValues {
   processSpeed: string;

@@ -12,7 +12,7 @@ import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { buildFilterStatusViewModel } from '../utils/statusViewModel';
 import { useIsDetached } from '../FilterViewContext';
 import { selectMetricDefinitions } from '@/shared/store/selectors';
-import { MetricRow, TableSection } from './pid/shared';
+import { MetricRow, TableSection } from './shared/tableLayout';
 import { useStatusMetricSamples } from './hooks/useStatusMetricSamples';
 import FilterIdentityStrip from './FilterIdentityStrip';
 import OverviewContentGrid from './OverviewContentGrid';

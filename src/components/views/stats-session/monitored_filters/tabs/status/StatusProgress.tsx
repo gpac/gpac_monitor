@@ -1,6 +1,6 @@
 import { type ReactNode } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { MetricRow } from '../pid/shared';
+import { MetricRow } from '../shared/tableLayout';
 import type { ProgressBar, BufferMetric } from '../../utils/statusViewModel';
 
 export function StatusProgressRow({

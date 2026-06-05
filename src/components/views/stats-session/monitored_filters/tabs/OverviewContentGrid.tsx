@@ -1,6 +1,6 @@
 import { memo, type ReactNode } from 'react';
 import { LuInfo } from 'react-icons/lu';
-import { MetricRow, TableSection } from './pid/shared';
+import { MetricRow, TableSection } from './shared/tableLayout';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { FilterStatusViewModel } from '../utils/statusViewModel';
 import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';

@@ -1,6 +1,6 @@
 import { memo, useMemo, useRef, useState } from 'react';
 import uPlot from 'uplot';
-import { UplotChart } from '@/components/common/UplotChart';
+import { UplotChart } from '@/components/common/charts/UplotChart';
 import {
   createLineChartConfig,
   useContainerSize,
