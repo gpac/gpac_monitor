@@ -13,7 +13,7 @@ import { buildFilterStatusViewModel } from '../utils/statusViewModel';
 import { useIsDetached } from '../FilterViewContext';
 import { selectMetricDefinitions } from '@/shared/store/selectors';
 import { MetricRow, TableSection } from './shared/tableLayout';
-import { useStatusMetricSamples } from './hooks/useStatusMetricSamples';
+import { useCollectStatusMetricSamples } from './hooks/useCollectStatusMetricSamples';
 import FilterIdentityStrip from './FilterIdentityStrip';
 import OverviewContentGrid from './OverviewContentGrid';
 import RuntimeDetailsSection from './RuntimeDetailsSection';
@@ -51,7 +51,7 @@ const OverviewTab = memo(
           .map((metric) => ({ key: metric.key, rawValue: metric.rawValue })),
       [statusGroups.numericMetrics],
     );
-    useStatusMetricSamples(idx, graphableMetrics, time);
+    useCollectStatusMetricSamples(idx, graphableMetrics, time);
     useEffect(
       () => () => {
         dispatch(clearStatusMetricsByFilter(idx));

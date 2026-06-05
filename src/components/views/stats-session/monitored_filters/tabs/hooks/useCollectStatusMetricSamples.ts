@@ -5,7 +5,7 @@ import { buildStatusMetricKey } from '../../../types/statusMetric';
 
 type GraphableMetric = { key: string; rawValue: number | null };
 
-export const useStatusMetricSamples = (
+export const useCollectStatusMetricSamples = (
   filterIdx: number,
   graphableMetrics: GraphableMetric[],
   tickUs: number,
