@@ -31,5 +31,3 @@ export const extractValue = (
       return sample.ts ?? null;
   }
 };
-
-export const CHART_HEIGHT = 140;
