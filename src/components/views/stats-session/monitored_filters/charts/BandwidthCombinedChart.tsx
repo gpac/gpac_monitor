@@ -1,8 +1,8 @@
 import { memo, useMemo, useState } from 'react';
 import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import type uPlot from 'uplot';
+import GraphRadio from '../tabs/shared/GraphRadio';
 import { useFilterPerformanceChartData } from './hooks/useFilterPerformanceChartData';
 import {
   BANDWIDTH_SERIES,
@@ -96,34 +96,37 @@ export const BandwidthCombinedChart = memo(
         <CardHeader className="pb-1">
           <CardTitle className="flex justify-center items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
             <LuArrowUpDown className="h-4 w-4 opacity-60" />
-            <ToggleGroup
-              type="multiple"
-              value={SERIES_ORDER.filter((key) => visible[key]) as string[]}
-              onValueChange={(values) =>
-                setVisible({
-                  outband: values.includes('outband'),
-                  inband: values.includes('inband'),
-                  lastTaskTime: values.includes('lastTaskTime'),
-                })
-              }
-              className="flex items-center gap-2 p-0 bg-transparent border-0"
-            >
-              {SERIES_ORDER.map((key) => (
-                <ToggleGroupItem
-                  key={key}
-                  value={key}
-                  className="flex items-center gap-1.5 h-auto px-0 py-0 bg-transparent border-0 shadow-none opacity-40 data-[state=on]:opacity-100 normal-case"
-                >
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              {SERIES_ORDER.map((key) => {
+                const isOn = visible[key];
+                const color = SERIES_META[key].color;
+                const toggle = () =>
+                  setVisible((prev) => ({ ...prev, [key]: !prev[key] }));
+                return (
                   <span
-                    className="w-3 h-0.5 rounded-full"
-                    style={{ background: SERIES_META[key].color }}
-                  />
-                  <span style={{ color: SERIES_META[key].color }}>
-                    {SERIES_META[key].label}
+                    key={key}
+                    className="inline-flex items-center gap-1 normal-case"
+                  >
+                    <GraphRadio
+                      active={isOn}
+                      onClick={toggle}
+                      label={SERIES_META[key].label}
+                      color={color}
+                    />
+                    <button
+                      type="button"
+                      onClick={toggle}
+                      className={`text-[11px] font-mono leading-none transition-colors ${
+                        isOn ? '' : 'text-muted-foreground hover:text-info'
+                      }`}
+                      style={isOn ? { color } : undefined}
+                    >
+                      {SERIES_META[key].label}
+                    </button>
                   </span>
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
+                );
+              })}
+            </span>
             {showCurrentTime && timeLabels.length > 0 && (
               <span className="ml-auto font-mono normal-case opacity-60 text-xs">
                 {timeLabels[timeLabels.length - 1]}
