@@ -1,11 +1,16 @@
 export type MetricType = 'num' | 'str' | 'frac';
 
+export type EnumValue = { code: string; desc: string };
+
 export type MetricDef = {
   type: MetricType;
   label: string;
+  freg: string;
   unit?: string;
   info?: string;
-  freg: string;
+  min?: number;
+  max?: number;
+  values?: EnumValue[];
 };
 
 export type MetricDefinitionMap = Record<string, MetricDef>;
@@ -38,6 +43,26 @@ function parseLine(line: string): [string, MetricDef] | null {
     if (part.startsWith('t=')) def.type = parseType(part.slice(2));
     else if (part.startsWith('u=')) def.unit = part.slice(2);
     else if (part.startsWith('i=')) def.info = part.slice(2);
+    else if (part.startsWith('m=')) {
+      const n = Number(part.slice(2));
+      if (!isNaN(n)) def.min = n;
+    } else if (part.startsWith('M=')) {
+      const n = Number(part.slice(2));
+      if (!isNaN(n)) def.max = n;
+    } else if (part.startsWith('v=[') && part.endsWith(']')) {
+      const inner = part.slice(3, -1);
+      def.values = inner
+        .split(',')
+        .map((item) => {
+          const colonIdx = item.indexOf(':');
+          if (colonIdx === -1) return { code: item.trim(), desc: '' };
+          return {
+            code: item.slice(0, colonIdx).trim(),
+            desc: item.slice(colonIdx + 1).trim(),
+          };
+        })
+        .filter((item) => item.code !== '');
+    }
   }
 
   return [key, def];

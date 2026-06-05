@@ -117,6 +117,74 @@ describe('parseMetricDefinitions', () => {
     });
   });
 
+  describe('min/max fields', () => {
+    it('parses m= as min', () => {
+      const map = parseMetricDefinitions('freg=foo;level=Level;t=num;m=0');
+      expect(map['level']?.min).toBe(0);
+    });
+
+    it('parses M= as max', () => {
+      const map = parseMetricDefinitions('freg=foo;level=Level;t=num;M=100');
+      expect(map['level']?.max).toBe(100);
+    });
+
+    it('parses both m= and M=', () => {
+      const map = parseMetricDefinitions(
+        'freg=foo;pc=Percent;t=num;m=0;M=100;u=pc',
+      );
+      expect(map['pc']?.min).toBe(0);
+      expect(map['pc']?.max).toBe(100);
+      expect(map['pc']?.unit).toBe('pc');
+    });
+
+    it('leaves min/max undefined when absent', () => {
+      const map = parseMetricDefinitions('freg=foo;x=X');
+      expect(map['x']?.min).toBeUndefined();
+      expect(map['x']?.max).toBeUndefined();
+    });
+  });
+
+  describe('enum values v= field', () => {
+    it('parses v=[A:desc, B:desc]', () => {
+      const map = parseMetricDefinitions(
+        'freg=foo;type=Stream Type;t=str;v=[V:Video, A:Audio, T:Text, M:Metadata]',
+      );
+      expect(map['type']?.values).toEqual([
+        { code: 'V', desc: 'Video' },
+        { code: 'A', desc: 'Audio' },
+        { code: 'T', desc: 'Text' },
+        { code: 'M', desc: 'Metadata' },
+      ]);
+    });
+
+    it('leaves values undefined when absent', () => {
+      const map = parseMetricDefinitions('freg=foo;x=X');
+      expect(map['x']?.values).toBeUndefined();
+    });
+
+    it('parses v= with descriptions containing spaces', () => {
+      const map = parseMetricDefinitions(
+        'freg=foo;state=State;t=str;v=[OK:All good, ERR:Error occurred]',
+      );
+      expect(map['state']?.values?.[0]).toEqual({
+        code: 'OK',
+        desc: 'All good',
+      });
+      expect(map['state']?.values?.[1]).toEqual({
+        code: 'ERR',
+        desc: 'Error occurred',
+      });
+    });
+
+    it('parses code-only entry (no colon) as empty desc', () => {
+      const map = parseMetricDefinitions('freg=foo;mode=Mode;t=str;v=[A, B]');
+      expect(map['mode']?.values).toEqual([
+        { code: 'A', desc: '' },
+        { code: 'B', desc: '' },
+      ]);
+    });
+  });
+
   describe('edge cases', () => {
     it('returns empty map for empty string', () => {
       expect(parseMetricDefinitions('')).toEqual({});
