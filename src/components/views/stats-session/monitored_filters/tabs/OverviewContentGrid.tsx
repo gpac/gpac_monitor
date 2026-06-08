@@ -15,7 +15,7 @@ interface OverviewContentGridProps {
   definitions?: MetricDefinitionMap;
 }
 
-function makeLeading(
+function makeTooltipIcon(
   def: Parameters<typeof StatusMetricTooltip>[0]['def'] | undefined,
 ) {
   if (!def) return undefined;
@@ -76,13 +76,15 @@ const OverviewContentGrid = memo(
           {groups.primaryProgress && (
             <StatusProgressRow
               bar={groups.primaryProgress}
-              infoIcon={makeLeading(definitions?.[groups.primaryProgress.key])}
+              infoIcon={makeTooltipIcon(
+                definitions?.[groups.primaryProgress.key],
+              )}
             />
           )}
           {groups.buffer && (
             <StatusBufferRow
               buffer={groups.buffer}
-              infoIcon={makeLeading(definitions?.['buffer'])}
+              infoIcon={makeTooltipIcon(definitions?.['buffer'])}
             />
           )}
           {numericMetrics.map((metric) => (
@@ -91,7 +93,7 @@ const OverviewContentGrid = memo(
               label={metric.key}
               value={metric.value}
               title={metric.tooltip}
-              infoIcon={makeLeading(definitions?.[metric.key])}
+              infoIcon={makeTooltipIcon(definitions?.[metric.key])}
             />
           ))}
           {valueTextMetrics.map((metric) => (
@@ -99,7 +101,7 @@ const OverviewContentGrid = memo(
               key={metric.key}
               label={metric.key}
               value={metric.value}
-              infoIcon={makeLeading(definitions?.[metric.key])}
+              infoIcon={makeTooltipIcon(definitions?.[metric.key])}
             />
           ))}
         </TableSection>

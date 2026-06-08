@@ -18,7 +18,7 @@ export const PIDStatusBar = ({
   eos,
   blocked,
 }: PIDStatusBarProps) => (
-  <div className={`${TAB_STYLES.STATUS_BAR_CONTAINER} w-[60%]`}>
+  <div className={`${TAB_STYLES.FILTER_STATUS_WIDGET} w-[60%]`}>
     <div className={TAB_STYLES.STATUS_BAR_CONTENT}>
       <div className={TAB_STYLES.STATUS_BAR_LEFT}>
         <span className="text-xs font-medium">Status</span>
