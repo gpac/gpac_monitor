@@ -71,7 +71,7 @@ function StatusMetricSelector({
                 onClick={disabled ? undefined : onToggle}
                 disabled={disabled}
                 style={color ? { color } : undefined}
-                className={`text-[11px] font-mono leading-none transition-colors ${
+                className={`text-[11px] font-mono leading-none transition-colors capitalize ${
                   active ? '' : 'text-muted-foreground hover:text-info'
                 }`}
               >
