@@ -8,6 +8,7 @@ import {
 import { setSelectedStatusMetric } from '@/shared/store/slices/monitoredFilterSlice';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { NumericMetric } from '../../utils/statusViewModel';
+import { PID_SELECTION_COLORS } from '../pid/utils/pidColors';
 import GraphRadio from '../shared/GraphRadio';
 import StatusMetricTooltip from './StatusMetricTooltip';
 
@@ -46,6 +47,10 @@ function StatusMetricSelector({
           const active = selectedKeys.includes(metric.key);
           const disabled = atMax && !active;
           const def = definitions[metric.key];
+          const colorIndex = selectedKeys.indexOf(metric.key);
+          const color = active
+            ? PID_SELECTION_COLORS[colorIndex % PID_SELECTION_COLORS.length]
+            : undefined;
           const onToggle = () =>
             dispatch(
               setSelectedStatusMetric({ filterIdx, metricKey: metric.key }),
@@ -58,14 +63,16 @@ function StatusMetricSelector({
               <GraphRadio
                 active={active}
                 label={metric.key}
+                color={color}
                 onClick={disabled ? () => {} : onToggle}
               />
               <button
                 type="button"
                 onClick={disabled ? undefined : onToggle}
                 disabled={disabled}
+                style={color ? { color } : undefined}
                 className={`text-[11px] font-mono leading-none transition-colors ${
-                  active ? 'text-info' : 'text-muted-foreground hover:text-info'
+                  active ? '' : 'text-muted-foreground hover:text-info'
                 }`}
               >
                 {metric.key}
