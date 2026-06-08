@@ -18,7 +18,7 @@ export const MetricRow = ({
 }) => (
   <tr className="bg-monitor-panel border-b border-transparent">
     <td className="px-2 py-2 align-middle text-xs text-muted-foreground">
-      {infoIcon}p {label}
+      {infoIcon} {label}
     </td>
     <td
       className={`px-2 py-2 align-middle text-xs font-medium tabular-nums text-right w-28 whitespace-nowrap ${valueClassName}`}
