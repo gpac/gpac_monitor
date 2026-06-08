@@ -8,18 +8,17 @@ export const MetricRow = ({
   value,
   valueClassName = 'text-info',
   title,
-  leading,
+  infoIcon,
 }: {
   label: string;
   value: string;
   valueClassName?: string;
   title?: string;
-  leading?: ReactNode;
+  infoIcon?: ReactNode;
 }) => (
   <tr className="bg-monitor-panel border-b border-transparent">
     <td className="px-2 py-2 align-middle text-xs text-muted-foreground">
-      {leading}
-      {label}
+      {infoIcon}p {label}
     </td>
     <td
       className={`px-2 py-2 align-middle text-xs font-medium tabular-nums text-right w-28 whitespace-nowrap ${valueClassName}`}

@@ -5,16 +5,16 @@ import type { ProgressBar, BufferMetric } from '../../utils/statusViewModel';
 
 export function StatusProgressRow({
   bar,
-  leading,
+  infoIcon,
 }: {
   bar: ProgressBar;
-  leading?: ReactNode;
+  infoIcon?: ReactNode;
 }) {
   return (
     <tr className="bg-monitor-panel border-b border-transparent">
       <td colSpan={2} className="px-2 py-1.5">
         <div className="flex items-center gap-2">
-          {leading}
+          {infoIcon}
           <span className="text-xs text-muted-foreground shrink-0">
             {bar.key}
           </span>
@@ -34,17 +34,17 @@ export function StatusProgressRow({
 
 export function StatusBufferRow({
   buffer,
-  leading,
+  infoIcon,
 }: {
   buffer: BufferMetric;
-  leading?: ReactNode;
+  infoIcon?: ReactNode;
 }) {
   return (
     <MetricRow
       label="buffer"
       value={`${buffer.current} / ${buffer.max} ms`}
       title={`${buffer.percentage.toFixed(1)}%`}
-      leading={leading}
+      infoIcon={infoIcon}
     />
   );
 }

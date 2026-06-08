@@ -76,13 +76,13 @@ const OverviewContentGrid = memo(
           {groups.primaryProgress && (
             <StatusProgressRow
               bar={groups.primaryProgress}
-              leading={makeLeading(definitions?.[groups.primaryProgress.key])}
+              infoIcon={makeLeading(definitions?.[groups.primaryProgress.key])}
             />
           )}
           {groups.buffer && (
             <StatusBufferRow
               buffer={groups.buffer}
-              leading={makeLeading(definitions?.['buffer'])}
+              infoIcon={makeLeading(definitions?.['buffer'])}
             />
           )}
           {numericMetrics.map((metric) => (
@@ -91,7 +91,7 @@ const OverviewContentGrid = memo(
               label={metric.key}
               value={metric.value}
               title={metric.tooltip}
-              leading={makeLeading(definitions?.[metric.key])}
+              infoIcon={makeLeading(definitions?.[metric.key])}
             />
           ))}
           {valueTextMetrics.map((metric) => (
@@ -99,7 +99,7 @@ const OverviewContentGrid = memo(
               key={metric.key}
               label={metric.key}
               value={metric.value}
-              leading={makeLeading(definitions?.[metric.key])}
+              infoIcon={makeLeading(definitions?.[metric.key])}
             />
           ))}
         </TableSection>
