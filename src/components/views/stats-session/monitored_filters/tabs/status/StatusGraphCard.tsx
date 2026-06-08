@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { useChartDuration } from '@/shared/hooks';
+import { useChartDuration, useAdaptiveChartHeight } from '@/shared/hooks';
 import { selectSelectedStatusMetric } from '@/shared/store/selectors';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
@@ -22,6 +22,7 @@ const StatusGraphCard = memo(
       selectSelectedStatusMetric(state, filterIdx),
     );
     const isDetached = useIsDetached();
+    const chartHeight = useAdaptiveChartHeight();
     const { duration, setDuration, maxPoints } = useChartDuration(
       'status_graph_duration',
       '5min',
@@ -60,6 +61,7 @@ const StatusGraphCard = memo(
               data={data}
               timeLabels={timeLabels}
               showCurrentTime
+              height={chartHeight}
             />
           </CardContent>
         )}
