@@ -22,7 +22,22 @@ export function useStatusMetricChartData(
     (state) => state.monitoredFilter.statusMetricSamples,
   );
 
-  return useMemo(() => {
+  const series = useMemo<SeriesDef[]>(
+    () =>
+      selectedKeys.map((key, index) => {
+        const color = PID_SELECTION_COLORS[index % PID_SELECTION_COLORS.length];
+        return {
+          label: key,
+          color,
+          formatValue: makeStatusValueFormatter(),
+          fill: `${color}15`,
+          strokeWidth: 1.5,
+        };
+      }),
+    [selectedKeys],
+  );
+
+  const { data, timeLabels } = useMemo(() => {
     const allSamples = selectedKeys.map((key) => {
       const storeKey = buildStatusMetricKey(filterIdx, key);
       const samples = statusMetricSamples[storeKey] ?? [];
@@ -33,30 +48,17 @@ export function useStatusMetricChartData(
 
     if (maxLen === 0) {
       return {
-        series: [] as SeriesDef[],
         data: [[0], ...selectedKeys.map(() => [null])] as uPlot.AlignedData,
         timeLabels: [] as string[],
       };
     }
 
-    const indices = Array.from({ length: maxLen }, (_, idx) => idx);
+    const indices = Array.from({ length: maxLen }, (_, index) => index);
 
     const longest = allSamples.reduce(
       (acc, samples) => (samples.length >= acc.length ? samples : acc),
       allSamples[0] ?? [],
     );
-
-    const series: SeriesDef[] = selectedKeys.map((key, idx) => {
-      const colorIndex = idx % PID_SELECTION_COLORS.length;
-      const color = PID_SELECTION_COLORS[colorIndex];
-      return {
-        label: key,
-        color,
-        formatValue: makeStatusValueFormatter(),
-        fill: `${color}15`,
-        strokeWidth: 1.5,
-      };
-    });
 
     const valueCols = allSamples.map((samples) => {
       const offset = maxLen - samples.length;
@@ -67,11 +69,12 @@ export function useStatusMetricChartData(
     });
 
     return {
-      series,
       data: [indices, ...valueCols] as uPlot.AlignedData,
       timeLabels: longest.map((sample) =>
         formatChartTimeFromUs(sample.sessionTimestampUs),
       ),
     };
   }, [selectedKeys, statusMetricSamples, filterIdx, maxPoints]);
+
+  return { series, data, timeLabels };
 }
