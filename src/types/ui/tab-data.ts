@@ -36,31 +36,6 @@ export interface OverviewTabData {
 }
 
 /**
- * Buffer information for a single PID
- */
-export interface PIDBufferInfo {
-  name: string;
-  buffer: number;
-  bufferTotal: number;
-  usage: number; // percentage
-  sourceIdx?: number;
-  color: string;
-}
-
-/**
- * Data structure specifically for Buffers Tab
- */
-export interface BuffersTabData {
-  name: string;
-  inputBuffers: PIDBufferInfo[];
-  totalBufferInfo: {
-    totalBuffer: number;
-    totalCapacity: number;
-    averageUsage: number;
-  };
-}
-
-/**
  * Enhanced PID data for Input/Output tabs (alias to PIDproperties)
  */
 export type TabPIDData = PIDproperties;

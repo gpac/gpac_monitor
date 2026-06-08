@@ -142,11 +142,6 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         packetsSent: filterWithStats.pck_sent || 0,
         packetsReceived: filterWithStats.pck_done || 0,
       },
-      buffersData: {
-        name: filterWithStats.name,
-        inputBuffers: [],
-        totalBufferInfo: { totalBuffer: 0, totalCapacity: 0, averageUsage: 0 },
-      },
       inputPids: (stats as FilterStatsResponse)?.ipids
         ? Object.values(
             (stats as FilterStatsResponse).ipids as Record<
