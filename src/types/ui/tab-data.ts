@@ -8,7 +8,7 @@ export interface OverviewTabData {
   // Filter identification
   name: string;
   type: string;
-  idx: number;
+  filterIdx: number;
   status: string;
   parsedStatus: ParsedFilterStatus;
 

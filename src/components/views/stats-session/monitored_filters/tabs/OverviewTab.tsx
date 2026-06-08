@@ -27,11 +27,13 @@ interface OverviewTabProps {
 
 const OverviewTab = memo(
   ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
-    const { parsedStatus, type, idx, time, name } = filter;
+    const { parsedStatus, type, filterIdx, time, name } = filter;
     const dispatch = useAppDispatch();
     const isDetached = useIsDetached();
 
-    const isStalled = useAppSelector(selectIsFilterStalled(idx.toString()));
+    const isStalled = useAppSelector(
+      selectIsFilterStalled(filterIdx.toString()),
+    );
     const definitions = useAppSelector(selectMetricDefinitions);
     const healthInfo = getFilterHealthInfo(
       parsedStatus,
@@ -51,12 +53,12 @@ const OverviewTab = memo(
           .map((metric) => ({ key: metric.key, rawValue: metric.rawValue })),
       [statusGroups.numericMetrics],
     );
-    useCollectStatusMetricSamples(idx, graphableMetrics, time);
+    useCollectStatusMetricSamples(filterIdx, graphableMetrics, time);
     useEffect(
       () => () => {
-        dispatch(clearStatusMetricsByFilter(idx));
+        dispatch(clearStatusMetricsByFilter(filterIdx));
       },
-      [dispatch, idx],
+      [dispatch, filterIdx],
     );
 
     const processing = useMemo(() => {
@@ -87,7 +89,7 @@ const OverviewTab = memo(
       <div className="flex flex-col gap-2 p-2">
         <FilterIdentityStrip
           type={type}
-          idx={idx}
+          idx={filterIdx}
           time={time}
           healthLabel={healthInfo.label}
           healthVariant={healthInfo.variant}
@@ -96,7 +98,7 @@ const OverviewTab = memo(
         {graphableMetrics.length > 0 && (
           <StatusGraphCard
             metrics={statusGroups.numericMetrics}
-            filterIdx={idx}
+            filterIdx={filterIdx}
             filterName={name}
           />
         )}

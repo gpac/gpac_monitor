@@ -119,7 +119,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   const tabsData = useMemo(() => {
     return {
       overviewData: {
-        idx: filterWithStats.idx,
+        filterIdx: filterWithStats.idx,
         name: filterWithStats.name,
         type: filterWithStats.type,
         status: filterWithStats.status,
