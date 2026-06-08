@@ -11,6 +11,7 @@ import { buildPIDKey } from '../../../types/pid';
 import type { PIDWithIndex } from '../../../types';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { usePIDMetricsRow } from '../hooks/usePIDMetricsRow';
+import { usePIDSample } from '../hooks/usePIDSample';
 import { buildBufferTooltipRows } from './utils/pidTooltipRows';
 import PIDMetricTooltip from './PIDMetricTooltip';
 import PIDRowInfoCell from './PIDRowInfoCell';
@@ -42,6 +43,14 @@ const PIDTableRow = memo(
     const pidKey = buildPIDKey(filterIdx, variant, pid.pidIdx);
     const { infoStats, bufferStats, perfStats, colorIndex, isSelected } =
       usePIDMetricsRow(pid, pidKey);
+
+    usePIDSample(pidKey, {
+      averageBitrate: perfStats.average_bitrate,
+      bufferTime: bufferStats.displayBuffer,
+      processTime: perfStats.average_process_time,
+      processRate: perfStats.average_process_rate,
+      ts: perfStats.last_process_time,
+    });
 
     const statusBadge = getPIDStatusBadge(pid);
     const bgClass = 'bg-monitor-panel';
