@@ -1,4 +1,4 @@
-import { memo, type ReactNode } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import { LuInfo } from 'react-icons/lu';
 import { MetricRow, TableSection } from './shared/tableLayout';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -30,20 +30,26 @@ function makeTooltipIcon(
 
 const OverviewContentGrid = memo(
   ({ groups, isDetached, definitions }: OverviewContentGridProps) => {
-    const infoTextMetrics = groups.textMetrics.filter(
-      (metric) => metric.quoted,
-    );
-    const valueTextMetrics = groups.textMetrics.filter(
-      (metric) => !metric.quoted,
-    );
+    const infoTextMetrics = groups.textMetrics.filter((m) => m.quoted);
+    const valueTextMetrics = groups.textMetrics.filter((m) => !m.quoted);
     const hasInfo = groups.info != null || infoTextMetrics.length > 0;
-    const numericMetrics = groups.numericMetrics.filter(
-      (metric) => !metric.graphable,
+
+    // Stable split across definitions/isDetached re-renders
+    const [completionMetrics, liveMetrics] = useMemo(
+      () => [
+        groups.numericMetrics.filter((m) => m.completionSnapshot),
+        groups.numericMetrics.filter(
+          (m) => !m.graphable && !m.completionSnapshot,
+        ),
+      ],
+      [groups.numericMetrics],
     );
+
+    const hasCompletion = completionMetrics.length > 0;
     const hasMetrics =
       groups.primaryProgress != null ||
       groups.buffer != null ||
-      numericMetrics.length > 0 ||
+      liveMetrics.length > 0 ||
       valueTextMetrics.length > 0;
     const hasArrays = groups.arrays.length > 0;
 
@@ -87,7 +93,7 @@ const OverviewContentGrid = memo(
               infoIcon={makeTooltipIcon(definitions?.['buffer'])}
             />
           )}
-          {numericMetrics.map((metric) => (
+          {liveMetrics.map((metric) => (
             <MetricRow
               key={metric.key}
               label={metric.key}
@@ -108,6 +114,24 @@ const OverviewContentGrid = memo(
       </TooltipProvider>
     ) : null;
 
+    const completionCol: ReactNode = hasCompletion ? (
+      <div className="w-1/3">
+        <TooltipProvider delayDuration={300}>
+          <TableSection key="report" title="Report">
+            {completionMetrics.map((metric) => (
+              <MetricRow
+                key={metric.key}
+                label={metric.key}
+                value={metric.value}
+                title={metric.tooltip}
+                infoIcon={makeTooltipIcon(definitions?.[metric.key])}
+              />
+            ))}
+          </TableSection>
+        </TooltipProvider>
+      </div>
+    ) : null;
+
     const arraysCol: ReactNode = hasArrays ? (
       <TooltipProvider delayDuration={300}>
         <div key="tracks" className="flex flex-col gap-1 bg-monitor-panel">
@@ -125,6 +149,7 @@ const OverviewContentGrid = memo(
     if (
       !hasInfo &&
       !hasMetrics &&
+      !hasCompletion &&
       !hasArrays &&
       groups.stateBadges.length === 0
     ) {
@@ -137,6 +162,7 @@ const OverviewContentGrid = memo(
           <StatusStateBadges badges={groups.stateBadges} />
           {infoCol}
           {metricsCol}
+          {completionCol}
           {arraysCol}
         </div>
       );
@@ -148,10 +174,11 @@ const OverviewContentGrid = memo(
           <StatusStateBadges badges={groups.stateBadges} />
           <div className="grid grid-cols-2 gap-2 items-start">
             {arraysCol}
-            {(hasInfo || hasMetrics) && (
+            {(hasInfo || hasMetrics || hasCompletion) && (
               <div className="flex flex-col gap-2">
                 {infoCol}
                 {metricsCol}
+                {completionCol}
               </div>
             )}
           </div>
@@ -166,6 +193,7 @@ const OverviewContentGrid = memo(
           {infoCol}
           {metricsCol}
         </div>
+        {completionCol}
       </div>
     );
   },

@@ -18,6 +18,10 @@ describe('isGraphableStatusMetric', () => {
     ['send rate kbps', num('s_rate', 850, { unit: 'kbps' })],
     ['recv rate kbps', num('r_rate', 640, { unit: 'kbps' })],
     ['period as numeric', num('period', 1)],
+    ['r_bytes cumulative', num('r_bytes', 4096)],
+    ['r_pck cumulative', num('r_pck', 42)],
+    ['s_bytes cumulative', num('s_bytes', 2048)],
+    ['s_pck cumulative', num('s_pck', 18)],
   ])('graphs numeric scalar %s', (_label, entry) => {
     expect(isGraphableStatusMetric(entry)).toBe(true);
   });
@@ -33,14 +37,8 @@ describe('isGraphableStatusMetric', () => {
     ],
     ['NaN value', num('fps', Number.NaN)],
     ['Infinity value', num('fps', Number.POSITIVE_INFINITY)],
-    // u=pc → gauge display, not time-series
     ['percent key pc', num('pc', 7)],
     ['overhead ohead u=pc', num('ohead', 3, { unit: 'pc' })],
-    // cumulative totals (doc: "number of X received/sent") → not time-series
-    ['r_bytes cumulative', num('r_bytes', 4096)],
-    ['r_pck cumulative', num('r_pck', 42)],
-    ['s_bytes cumulative', num('s_bytes', 2048)],
-    ['s_pck cumulative', num('s_pck', 18)],
   ])('rejects non-graphable entry %s', (_label, entry) => {
     expect(isGraphableStatusMetric(entry)).toBe(false);
   });
