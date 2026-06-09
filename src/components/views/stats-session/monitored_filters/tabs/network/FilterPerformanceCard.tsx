@@ -9,6 +9,7 @@ import {
   formatBw,
 } from '../../charts/config/bandwidthCombinedUplotConfig';
 import { formatMicroseconds } from '@/utils/formatting';
+import { useAdaptiveChartHeight } from '@/shared/hooks';
 import LineHistoryChart from '../../charts/LineHistoryChart';
 
 type SeriesKey = 'outband' | 'inband' | 'lastTaskTime';
@@ -39,6 +40,8 @@ export const FilterPerformanceCard = memo(
     windowDurationMs,
     showCurrentTime = false,
   }: FilterPerformanceCardProps) => {
+    const chartHeight = useAdaptiveChartHeight();
+
     const [visible, setVisible] = useState<Record<SeriesKey, boolean>>({
       outband: true,
       inband: true,
@@ -143,7 +146,7 @@ export const FilterPerformanceCard = memo(
             rightAxisFormat={formatMicroseconds}
             showCurrentTime={false}
             showEndLabels={false}
-            height={230}
+            height={chartHeight}
           />
         </CardContent>
       </Card>

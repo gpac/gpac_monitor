@@ -1,5 +1,6 @@
 import { memo, useMemo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
+import { useAdaptiveChartHeight } from '@/shared/hooks';
 import { selectAllSelectedPidSamplesByFilter } from '@/shared/store/selectors';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
@@ -49,6 +50,7 @@ const PIDGraphPanel = memo(
       [allSamples, mode, maxPoints],
     );
 
+    const chartHeight = useAdaptiveChartHeight();
     const { series, data, timeLabels } = usePIDChartData(entries, mode);
 
     if (entries.length === 0) return null;
@@ -62,6 +64,7 @@ const PIDGraphPanel = memo(
           leftAxisFormat={MODE_FORMATTERS[mode]}
           showCurrentTime
           showEndLabels={showEndLabels}
+          height={chartHeight}
         />
       </div>
     );
