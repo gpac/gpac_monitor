@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { buildFilterStatusViewModel } from '../statusViewModel';
+import { buildFilterStatusViewModel, hasDoneFlag } from '../statusViewModel';
 import { parseFilterStatus } from '@/workers/filterStatusParser';
 import { formatFractionAsTime } from '@/utils/formatting';
 import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
@@ -231,5 +231,22 @@ describe('buildFilterStatusViewModel', () => {
       expect(metric).toBeDefined();
       expect(metric?.value).toBe('25%');
     });
+  });
+});
+
+describe('hasDoneFlag', () => {
+  it('returns true when "done" bool entry is present', () => {
+    const { entries } = parseFilterStatus('done r_bytes=4096');
+    expect(hasDoneFlag(entries)).toBe(true);
+  });
+
+  it('returns false when no "done" entry', () => {
+    const { entries } = parseFilterStatus('fps=25');
+    expect(hasDoneFlag(entries)).toBe(false);
+  });
+
+  it('returns false when "done" is a value (not a bool flag)', () => {
+    const { entries } = parseFilterStatus('state=done fps=25');
+    expect(hasDoneFlag(entries)).toBe(false);
   });
 });

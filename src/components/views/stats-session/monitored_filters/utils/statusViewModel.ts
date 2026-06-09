@@ -260,6 +260,10 @@ function toArrayItem(item: {
   return { key: item.name, name: item.name, type: typeEntry?.value, metrics };
 }
 
+export function hasDoneFlag(entries: StatusEntry[]): boolean {
+  return entries.some((e) => e.type === 'bool' && e.key === 'done');
+}
+
 export function buildFilterStatusViewModel(
   parsedStatus: ParsedFilterStatus,
 ): FilterStatusViewModel {
