@@ -13,7 +13,7 @@ import {
 } from '@/components/common/charts';
 import type { NumericMetric } from '../../utils/statusViewModel';
 import { PID_SELECTION_COLORS } from '../pid/utils/pidColors';
-import StatusMetricTooltip from './StatusMetricTooltip';
+import MetricTooltip from '../shared/MetricTooltip';
 
 interface StatusMetricSelectorProps {
   metrics: NumericMetric[];
@@ -60,11 +60,11 @@ function StatusMetricSelector({
       onToggle: () =>
         dispatch(setSelectedStatusMetric({ filterIdx, metricKey: metric.key })),
       tooltip: def ? (
-        <StatusMetricTooltip def={def}>
+        <MetricTooltip def={def}>
           <span className="inline-flex cursor-help">
             <LuInfo className="h-3 w-3 opacity-40 hover:opacity-80" />
           </span>
-        </StatusMetricTooltip>
+        </MetricTooltip>
       ) : undefined,
     };
   });

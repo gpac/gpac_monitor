@@ -5,7 +5,7 @@ import { TAB_STYLES } from '../styles';
 import type { ArrayGroup } from '../../utils/statusViewModel';
 import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 import { StreamTypeBadge } from './StatusStateBadges';
-import StatusMetricTooltip from './StatusMetricTooltip';
+import MetricTooltip from '../shared/MetricTooltip';
 
 interface StatusArraySectionProps {
   array: ArrayGroup;
@@ -44,11 +44,11 @@ function StatusArraySection({ array, definitions }: StatusArraySectionProps) {
                     className="text-[10px] font-mono whitespace-nowrap inline-flex items-center gap-0.5"
                   >
                     {def && (
-                      <StatusMetricTooltip def={def}>
+                      <MetricTooltip def={def}>
                         <span className="inline-flex cursor-help">
                           <LuInfo className="h-2.5 w-2.5 text-muted-foreground" />
                         </span>
-                      </StatusMetricTooltip>
+                      </MetricTooltip>
                     )}
                     <span className="text-muted-foreground/70">
                       {metric.key}:

@@ -7,7 +7,7 @@ import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 import StatusArraySection from './status/StatusArraySection';
 import StatusStateBadges from './status/StatusStateBadges';
 import { StatusProgressRow, StatusBufferRow } from './status/StatusProgress';
-import StatusMetricTooltip from './status/StatusMetricTooltip';
+import MetricTooltip from './shared/MetricTooltip';
 
 interface OverviewContentGridProps {
   groups: FilterStatusViewModel;
@@ -16,15 +16,15 @@ interface OverviewContentGridProps {
 }
 
 function makeTooltipIcon(
-  def: Parameters<typeof StatusMetricTooltip>[0]['def'] | undefined,
+  def: Parameters<typeof MetricTooltip>[0]['def'] | undefined,
 ) {
   if (!def) return undefined;
   return (
-    <StatusMetricTooltip def={def}>
+    <MetricTooltip def={def}>
       <span className="inline-flex mr-1 cursor-help">
         <LuInfo className="h-3 w-3 text-muted-foreground" />
       </span>
-    </StatusMetricTooltip>
+    </MetricTooltip>
   );
 }
 

@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/tooltip';
 import type { MetricDef } from '@/workers/metricDefinitionParser';
 
-interface StatusMetricTooltipProps {
+interface MetricTooltipProps {
   def: MetricDef;
   children: ReactNode;
 }
@@ -20,7 +20,7 @@ const Row = ({ label, value }: { label: string; value: string }) => (
 );
 
 // TooltipProvider must be provided by the parent (hoist it to avoid N instances).
-const StatusMetricTooltip = ({ def, children }: StatusMetricTooltipProps) => (
+const MetricTooltip = ({ def, children }: MetricTooltipProps) => (
   <Tooltip>
     <TooltipTrigger asChild>{children}</TooltipTrigger>
     <TooltipContent side="top" className="min-w-[200px]">
@@ -43,4 +43,4 @@ const StatusMetricTooltip = ({ def, children }: StatusMetricTooltipProps) => (
   </Tooltip>
 );
 
-export default StatusMetricTooltip;
+export default MetricTooltip;
