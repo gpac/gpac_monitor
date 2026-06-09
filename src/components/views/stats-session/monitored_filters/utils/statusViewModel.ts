@@ -24,6 +24,8 @@ export type NumericMetric = {
   rawValue: number | null;
   /** True when this metric is worth plotting on a time-series chart. */
   graphable: boolean;
+  /** True when all metrics in this status represent a completion snapshot (done flag present). */
+  completionSnapshot?: boolean;
 };
 
 export type StateBadge = {
@@ -276,12 +278,17 @@ export function buildFilterStatusViewModel(
     [infoEntry, progressEntry, bufferEntry].filter(Boolean) as StatusEntry[],
   );
 
+  const isDone = hasDoneFlag(entries);
+
   const numericMetrics = entries
     .filter(
       (entry): entry is StatusNum =>
         entry.type === 'num' && !excludedEntries.has(entry),
     )
-    .map(toNumericMetric);
+    .map((entry) => ({
+      ...toNumericMetric(entry),
+      ...(isDone && { completionSnapshot: true as const, graphable: false }),
+    }));
 
   const textMetrics = entries.filter(isTextMetricEntry).map(
     (entry): TextMetric => ({

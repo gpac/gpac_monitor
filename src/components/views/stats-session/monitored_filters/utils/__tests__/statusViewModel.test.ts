@@ -234,6 +234,34 @@ describe('buildFilterStatusViewModel', () => {
   });
 });
 
+describe('completionSnapshot — done flag propagation', () => {
+  it('done + metrics → all numericMetrics have completionSnapshot:true and graphable:false', () => {
+    const vm = build('done r_bytes=4096 r_pck=10');
+    expect(vm.numericMetrics.length).toBeGreaterThan(0);
+    for (const metric of vm.numericMetrics) {
+      expect(metric.completionSnapshot).toBe(true);
+      expect(metric.graphable).toBe(false);
+    }
+  });
+
+  it('no done flag → completionSnapshot absent, graphable unaffected', () => {
+    const vm = build('fps=109.57 frames=13');
+    for (const metric of vm.numericMetrics) {
+      expect(metric.completionSnapshot).toBeUndefined();
+    }
+    expect(vm.numericMetrics.find((m) => m.key === 'fps')?.graphable).toBe(
+      true,
+    );
+  });
+
+  it('done + normally-graphable metric → completionSnapshot:true overrides graphable', () => {
+    const vm = build('done fps=25');
+    const metric = vm.numericMetrics.find((m) => m.key === 'fps');
+    expect(metric?.completionSnapshot).toBe(true);
+    expect(metric?.graphable).toBe(false);
+  });
+});
+
 describe('hasDoneFlag', () => {
   it('returns true when "done" bool entry is present', () => {
     const { entries } = parseFilterStatus('done r_bytes=4096');
