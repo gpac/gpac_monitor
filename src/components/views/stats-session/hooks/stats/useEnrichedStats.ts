@@ -45,7 +45,7 @@ export function useEnrichedStats(rawFilters: GpacNodeData[]) {
       unsubscribe();
       isProcessingRef.current = false;
     };
-  }, [filtersKey]); // Use stable key instead of rawFilters
+  }, [filtersKey, definitions]);
 
   return enrichedFilters;
 }

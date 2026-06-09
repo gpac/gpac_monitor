@@ -21,7 +21,7 @@ function SeriesLegend({ items }: SeriesLegendProps) {
       {items.map((item) => (
         <span
           key={item.key}
-          className={`inline-flex items-center gap-1 ${item.disabled ? 'opacity-40' : ''}`}
+          className={`inline-flex text-muted-foreground  items-center gap-1 ${item.disabled ? 'opacity-40' : ''}`}
         >
           <GraphRadio
             active={item.active}
