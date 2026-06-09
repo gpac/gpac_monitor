@@ -3,7 +3,7 @@ import { NetworkTabData } from '@/types/ui';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useChartDuration } from '@/shared/hooks';
 import type { ChartDuration } from '@/utils/charts';
-import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';
+import { FilterPerformanceCard } from './network/FilterPerformanceCard';
 import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 import { TAB_STYLES } from './styles';
 import { formatMicroseconds } from '@/utils';
@@ -69,7 +69,7 @@ const NetworkTab = memo(
           </div>
         </div>
 
-        <BandwidthCombinedChart
+        <FilterPerformanceCard
           filterId={filterId}
           bytesSent={currentStats.bytesSent}
           bytesReceived={currentStats.bytesReceived}

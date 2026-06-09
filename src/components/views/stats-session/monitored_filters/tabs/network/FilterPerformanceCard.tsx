@@ -2,14 +2,14 @@ import { memo, useMemo, useState } from 'react';
 import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type uPlot from 'uplot';
-import GraphRadio from '../tabs/shared/GraphRadio';
-import { useFilterPerformanceChartData } from './hooks/useFilterPerformanceChartData';
+import GraphRadio from '../shared/GraphRadio';
+import { useFilterPerformanceChartData } from '../../charts/hooks/useFilterPerformanceChartData';
 import {
   BANDWIDTH_SERIES,
   formatBw,
-} from './config/bandwidthCombinedUplotConfig';
+} from '../../charts/config/bandwidthCombinedUplotConfig';
 import { formatMicroseconds } from '@/utils/formatting';
-import LineHistoryChart from './LineHistoryChart';
+import LineHistoryChart from '../../charts/LineHistoryChart';
 
 type SeriesKey = 'outband' | 'inband' | 'lastTaskTime';
 
@@ -21,7 +21,7 @@ const SERIES_META: Record<SeriesKey, { label: string; color: string }> = {
   lastTaskTime: { label: 'Filter Proc. Time', color: '#f59e0b' },
 };
 
-interface BandwidthCombinedChartProps {
+interface FilterPerformanceCardProps {
   filterId: string;
   bytesSent: number;
   bytesReceived: number;
@@ -30,7 +30,7 @@ interface BandwidthCombinedChartProps {
   showCurrentTime?: boolean;
 }
 
-export const BandwidthCombinedChart = memo(
+export const FilterPerformanceCard = memo(
   ({
     filterId,
     bytesSent,
@@ -38,7 +38,7 @@ export const BandwidthCombinedChart = memo(
     lastTaskTimeUs = 0,
     windowDurationMs,
     showCurrentTime = false,
-  }: BandwidthCombinedChartProps) => {
+  }: FilterPerformanceCardProps) => {
     const [visible, setVisible] = useState<Record<SeriesKey, boolean>>({
       outband: true,
       inband: true,
@@ -151,4 +151,4 @@ export const BandwidthCombinedChart = memo(
   },
 );
 
-BandwidthCombinedChart.displayName = 'BandwidthCombinedChart';
+FilterPerformanceCard.displayName = 'FilterPerformanceCard';
