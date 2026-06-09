@@ -176,72 +176,76 @@ export interface EnrichedStatsResponse {
 // Cache for enriched filters to prevent unnecessary re-creation
 const enrichedCache = new Map<string | number, EnrichedFilterData>();
 
-// Process incoming filters and enrich them
+export function enrichFilter(
+  filter: GpacNodeData,
+  definitions: MetricDefinitionMap | undefined,
+  cache: Map<string | number, EnrichedFilterData>,
+): EnrichedFilterData {
+  const key = filter.idx ?? filter.ID ?? filter.name;
+  const cached = cache.get(key);
+
+  const parsedStatus = parseFilterStatus(filter.status ?? '', definitions);
+  const bufferUsage = calculateBufferUsage(filter.ipid);
+  const activityLevel = getActivityLevel(filter.bytes_done, filter.time);
+  const sessionType = determineFilterSessionType(filter);
+  const formattedBytes = formatBytes(filter.bytes_done);
+  const formattedTime = formatTime(filter.time);
+  const formattedPackets = formatNumber(filter.pck_done);
+  const activityColor = getActivityColorClass(activityLevel);
+  const activityLabel = getActivityLabel(activityLevel);
+  const packetRate = calculatePacketRate(filter.pck_done, filter.time);
+  const formattedPacketRate = formatPacketRate(packetRate);
+
+  if (
+    cached &&
+    cached.idx === filter.idx &&
+    cached.name === filter.name &&
+    cached.status === filter.status &&
+    cached.errors === filter.errors &&
+    JSON.stringify(cached.parsedStatus.entries) ===
+      JSON.stringify(parsedStatus.entries) &&
+    cached.computed.bufferUsage === bufferUsage &&
+    cached.computed.activityLevel === activityLevel &&
+    cached.computed.activityColor === activityColor &&
+    cached.computed.activityLabel === activityLabel &&
+    cached.computed.sessionType === sessionType &&
+    cached.computed.formattedBytes === formattedBytes &&
+    cached.computed.formattedTime === formattedTime &&
+    cached.computed.formattedPackets === formattedPackets &&
+    cached.computed.packetRate === packetRate &&
+    cached.computed.formattedPacketRate === formattedPacketRate
+  ) {
+    return cached;
+  }
+
+  const enriched: EnrichedFilterData = {
+    ...filter,
+    parsedStatus,
+    computed: {
+      bufferUsage,
+      activityLevel,
+      activityColor,
+      activityLabel,
+      sessionType,
+      formattedBytes,
+      formattedTime,
+      formattedPackets,
+      packetRate,
+      formattedPacketRate,
+    },
+  };
+
+  cache.set(key, enriched);
+  return enriched;
+}
+
 self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
   const { type, filters, definitions } = event.data;
 
   if (type === 'ENRICH_STATS') {
-    const enrichedFilters: EnrichedFilterData[] = filters.map((filter) => {
-      const key = filter.idx ?? filter.ID ?? filter.name;
-      const cached = enrichedCache.get(key);
-
-      const parsedStatus = parseFilterStatus(filter.status ?? '', definitions);
-      const bufferUsage = calculateBufferUsage(filter.ipid);
-      const activityLevel = getActivityLevel(filter.bytes_done, filter.time);
-      const sessionType = determineFilterSessionType(filter);
-      const formattedBytes = formatBytes(filter.bytes_done);
-      const formattedTime = formatTime(filter.time);
-      const formattedPackets = formatNumber(filter.pck_done);
-      const activityColor = getActivityColorClass(activityLevel);
-      const activityLabel = getActivityLabel(activityLevel);
-
-      // Real-time performance metric
-      const packetRate = calculatePacketRate(filter.pck_done, filter.time);
-      const formattedPacketRate = formatPacketRate(packetRate);
-
-      // Check if computed values changed
-      if (
-        cached &&
-        cached.idx === filter.idx &&
-        cached.name === filter.name &&
-        cached.status === filter.status &&
-        cached.errors === filter.errors &&
-        cached.computed.bufferUsage === bufferUsage &&
-        cached.computed.activityLevel === activityLevel &&
-        cached.computed.activityColor === activityColor &&
-        cached.computed.activityLabel === activityLabel &&
-        cached.computed.sessionType === sessionType &&
-        cached.computed.formattedBytes === formattedBytes &&
-        cached.computed.formattedTime === formattedTime &&
-        cached.computed.formattedPackets === formattedPackets &&
-        cached.computed.packetRate === packetRate &&
-        cached.computed.formattedPacketRate === formattedPacketRate
-      ) {
-        // Return cached object to maintain reference equality
-        return cached;
-      }
-
-      // Create new enriched object only if data changed
-      const enriched: EnrichedFilterData = {
-        ...filter,
-        parsedStatus,
-        computed: {
-          bufferUsage,
-          activityLevel,
-          activityColor,
-          activityLabel,
-          sessionType,
-          formattedBytes,
-          formattedTime,
-          formattedPackets,
-          packetRate,
-          formattedPacketRate,
-        },
-      };
-
-      enrichedCache.set(key, enriched);
-      return enriched;
-    });
+    const enrichedFilters = filters.map((filter) =>
+      enrichFilter(filter, definitions, enrichedCache),
+    );
 
     self.postMessage({
       type: 'ENRICHED_STATS',
