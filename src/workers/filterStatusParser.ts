@@ -151,9 +151,12 @@ export function parseFilterStatus(
 
     if (scalar.type === 'bool') {
       const lastEntry = entries[entries.length - 1];
-      if (lastEntry?.type === 'num' && !lastEntry.unit) {
-        lastEntry.unit = scalar.key;
-        continue;
+      if (lastEntry?.type === 'num') {
+        if (!lastEntry.unit) {
+          lastEntry.unit = scalar.key;
+          continue;
+        }
+        if (lastEntry.unit === scalar.key) continue;
       }
     }
 

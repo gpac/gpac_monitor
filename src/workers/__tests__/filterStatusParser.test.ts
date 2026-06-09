@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseFilterStatus } from '../filterStatusParser';
+import type { MetricDefinitionMap } from '../metricDefinitionParser';
 
 describe('parseFilterStatus', () => {
   it('returns empty entries for empty string', () => {
@@ -147,6 +148,21 @@ describe('parseFilterStatus', () => {
       const entry = result.entries[0];
       expect(entry.type).toBe('num');
       if (entry.type === 'num') expect(entry.unit).toBe('ms');
+      expect(result.entries).toHaveLength(2);
+    });
+
+    it('regression 5a22c9fe: skips redundant unit token when defUnit already attached', () => {
+      const defs: MetricDefinitionMap = {
+        buffer: { type: 'num', unit: 'ms', label: 'Buffer', freg: '*' },
+      };
+      const result = parseFilterStatus('buffer=120/200 ms fps=25', defs);
+      const spurious = result.entries.find(
+        (e) => e.type === 'bool' && (e as { key: string }).key === 'ms',
+      );
+      expect(
+        spurious,
+        'ms must not appear as a bool when defUnit already set',
+      ).toBeUndefined();
       expect(result.entries).toHaveLength(2);
     });
   });
