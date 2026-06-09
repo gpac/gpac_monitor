@@ -2,9 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { buildFilterStatusViewModel } from '../statusViewModel';
 import { parseFilterStatus } from '@/workers/filterStatusParser';
 import { formatFractionAsTime } from '@/utils/formatting';
+import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 
 function build(raw: string) {
   return buildFilterStatusViewModel(parseFilterStatus(raw));
+}
+
+function buildWithDefs(raw: string, defs: MetricDefinitionMap) {
+  return buildFilterStatusViewModel(parseFilterStatus(raw, defs));
 }
 
 describe('buildFilterStatusViewModel', () => {
@@ -201,6 +206,30 @@ describe('buildFilterStatusViewModel', () => {
       );
       expect(vm.stateBadges.find((b) => b.key === 'done')).toBeDefined();
       expect(vm.info).toBe('ok');
+    });
+  });
+
+  describe('definitions — unit propagation', () => {
+    it('ohead=0.03 with u=pc definition → "0.03%" (2 decimals for values < 1)', () => {
+      const defs: MetricDefinitionMap = {
+        ohead: { type: 'num', unit: 'pc', label: 'Overhead', freg: '*' },
+      };
+      const metric = buildWithDefs('ohead=0.03', defs).numericMetrics.find(
+        (m) => m.key === 'ohead',
+      );
+      expect(metric?.value).toBe('0.03%');
+    });
+
+    it('ohead=25 with u=pc definition → numericMetrics formatted as "25%"', () => {
+      const defs: MetricDefinitionMap = {
+        ohead: { type: 'num', unit: 'pc', label: 'Overhead', freg: '*' },
+      };
+      const vm = buildWithDefs('ohead=25', defs);
+      // Without parser fix: unit not attached → "25" (plain number, no %)
+      // With parser fix: unit: 'pc' → isExplicitPercentEntry → "25%"
+      const metric = vm.numericMetrics.find((m) => m.key === 'ohead');
+      expect(metric).toBeDefined();
+      expect(metric?.value).toBe('25%');
     });
   });
 });

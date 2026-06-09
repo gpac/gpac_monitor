@@ -12,8 +12,12 @@ import type { StatusNum } from '@/workers/filterStatusParser';
  * Note: str metrics with enum values (stateBadges) are candidates for histogram display
  * in a future iteration — not handled here.
  */
+const CUMULATIVE_KEYS = new Set(['r_bytes', 'r_pck', 's_bytes', 's_pck']);
+
 export function isGraphableStatusMetric(entry: StatusNum): boolean {
   if (entry.fraction) return false;
   if (!Number.isFinite(entry.value)) return false;
+  if (entry.key === 'pc' || entry.unit === 'pc') return false;
+  if (CUMULATIVE_KEYS.has(entry.key)) return false;
   return true;
 }

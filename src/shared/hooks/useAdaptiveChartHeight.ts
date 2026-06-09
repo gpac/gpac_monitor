@@ -9,7 +9,7 @@ interface AdaptiveChartHeightOptions {
 export function useAdaptiveChartHeight({
   min = 180,
   max = 320,
-  viewportFraction = 0.22,
+  viewportFraction = 0.2,
 }: AdaptiveChartHeightOptions = {}): number {
   const compute = () =>
     Math.max(

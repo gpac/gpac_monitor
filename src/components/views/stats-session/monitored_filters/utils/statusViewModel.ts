@@ -186,7 +186,9 @@ function toNumericMetric(entry: StatusNum): NumericMetric {
   if (isExplicitPercentEntry(entry)) {
     const formatted = Number.isInteger(entry.value)
       ? String(entry.value)
-      : entry.value.toFixed(1);
+      : entry.value < 1
+        ? entry.value.toFixed(2)
+        : entry.value.toFixed(1);
     return { key: entry.key, value: `${formatted}%`, ...graph };
   }
   const formattedValue = formatNumericValue(entry);
@@ -277,15 +279,13 @@ export function buildFilterStatusViewModel(
     )
     .map(toNumericMetric);
 
-  const textMetrics = entries
-    .filter(isTextMetricEntry)
-    .map(
-      (entry): TextMetric => ({
-        key: entry.key,
-        value: entry.value,
-        quoted: entry.quoted,
-      }),
-    );
+  const textMetrics = entries.filter(isTextMetricEntry).map(
+    (entry): TextMetric => ({
+      key: entry.key,
+      value: entry.value,
+      quoted: entry.quoted,
+    }),
+  );
 
   const stateBadges = entries.filter(isStateBadgeEntry).map(toStateBadge);
 

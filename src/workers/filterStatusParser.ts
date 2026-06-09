@@ -52,6 +52,8 @@ function parseScalarToken(
     return { type: 'str', key, value: rawValue, quoted: false };
   }
 
+  const defUnit = definitions?.[key]?.unit;
+
   const fractionMatch = rawValue.match(/^(\d+)\/(\d+)$/);
   if (fractionMatch) {
     const numerator = Number(fractionMatch[1]);
@@ -62,12 +64,18 @@ function parseScalarToken(
       key,
       value,
       fraction: { num: numerator, den: denominator },
+      ...(defUnit && { unit: defUnit }),
     };
   }
 
   const numericValue = Number(rawValue);
   if (!isNaN(numericValue) && rawValue !== '') {
-    return { type: 'num', key, value: numericValue };
+    return {
+      type: 'num',
+      key,
+      value: numericValue,
+      ...(defUnit && { unit: defUnit }),
+    };
   }
 
   return { type: 'str', key, value: rawValue, quoted: false };

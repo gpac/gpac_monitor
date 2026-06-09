@@ -586,5 +586,24 @@ describe('parseFilterStatus', () => {
         quoted: false,
       });
     });
+
+    it('ohead=25 with u=pc definition → StatusNum with unit "pc"', () => {
+      const definitions = {
+        ohead: {
+          type: 'num' as const,
+          unit: 'pc',
+          label: 'Overhead',
+          freg: '*',
+        },
+      };
+      const result = parseFilterStatus('ohead=25', definitions);
+      // Bug: parser attaches type override from definitions but not unit
+      expect(result.entries[0]).toMatchObject({
+        type: 'num',
+        key: 'ohead',
+        value: 25,
+        unit: 'pc',
+      });
+    });
   });
 });
