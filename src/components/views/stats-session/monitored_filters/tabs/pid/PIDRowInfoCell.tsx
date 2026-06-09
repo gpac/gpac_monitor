@@ -10,7 +10,7 @@ import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
-import GraphRadio from '../shared/GraphRadio';
+import { GraphRadio } from '@/components/common/charts';
 import type { PIDWithIndex } from '../../../types';
 
 interface PIDRowInfoCellProps {

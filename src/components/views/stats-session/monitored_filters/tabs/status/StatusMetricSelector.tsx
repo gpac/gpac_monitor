@@ -7,9 +7,12 @@ import {
 } from '@/shared/store/selectors';
 import { setSelectedStatusMetric } from '@/shared/store/slices/monitoredFilterSlice';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import {
+  SeriesLegend,
+  type SeriesLegendItem,
+} from '@/components/common/charts';
 import type { NumericMetric } from '../../utils/statusViewModel';
 import { PID_SELECTION_COLORS } from '../pid/utils/pidColors';
-import GraphRadio from '../shared/GraphRadio';
 import StatusMetricTooltip from './StatusMetricTooltip';
 
 interface StatusMetricSelectorProps {
@@ -40,53 +43,36 @@ function StatusMetricSelector({
 
   if (graphable.length === 0) return null;
 
+  const items: SeriesLegendItem[] = graphable.map((metric) => {
+    const active = selectedKeys.includes(metric.key);
+    const disabled = atMax && !active;
+    const def = definitions[metric.key];
+    const colorIndex = selectedKeys.indexOf(metric.key);
+    const color = active
+      ? PID_SELECTION_COLORS[colorIndex % PID_SELECTION_COLORS.length]
+      : undefined;
+    return {
+      key: metric.key,
+      label: metric.key,
+      color,
+      active,
+      disabled,
+      onToggle: () =>
+        dispatch(setSelectedStatusMetric({ filterIdx, metricKey: metric.key })),
+      tooltip: def ? (
+        <StatusMetricTooltip def={def}>
+          <span className="inline-flex cursor-help">
+            <LuInfo className="h-3 w-3 opacity-40 hover:opacity-80" />
+          </span>
+        </StatusMetricTooltip>
+      ) : undefined,
+    };
+  });
+
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-2 py-1">
-        {graphable.map((metric) => {
-          const active = selectedKeys.includes(metric.key);
-          const disabled = atMax && !active;
-          const def = definitions[metric.key];
-          const colorIndex = selectedKeys.indexOf(metric.key);
-          const color = active
-            ? PID_SELECTION_COLORS[colorIndex % PID_SELECTION_COLORS.length]
-            : undefined;
-          const onToggle = () =>
-            dispatch(
-              setSelectedStatusMetric({ filterIdx, metricKey: metric.key }),
-            );
-          return (
-            <span
-              key={metric.key}
-              className={`inline-flex items-center gap-1 ${disabled ? 'opacity-40' : ''}`}
-            >
-              <GraphRadio
-                active={active}
-                label={metric.key}
-                color={color}
-                onClick={disabled ? () => {} : onToggle}
-              />
-              <button
-                type="button"
-                onClick={disabled ? undefined : onToggle}
-                disabled={disabled}
-                style={color ? { color } : undefined}
-                className={`text-[11px] font-mono leading-none transition-colors capitalize ${
-                  active ? '' : 'text-muted-foreground hover:text-info'
-                }`}
-              >
-                {metric.key}
-              </button>
-              {def && (
-                <StatusMetricTooltip def={def}>
-                  <span className="inline-flex cursor-help">
-                    <LuInfo className="h-3 w-3 opacity-40 hover:opacity-80" />
-                  </span>
-                </StatusMetricTooltip>
-              )}
-            </span>
-          );
-        })}
+      <div className="px-2 py-1">
+        <SeriesLegend items={items} />
       </div>
     </TooltipProvider>
   );

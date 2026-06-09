@@ -41,7 +41,7 @@ const StatusGraphCard = memo(
           <div className="flex items-center justify-between gap-2">
             <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               Status
-              <span className="mx-1 opacity-40">·</span>
+              <span className="mx-1 opacity-50">·</span>
               <span className="normal-case font-normal">{filterName}</span>
             </p>
             {!isDetached && (

@@ -2,7 +2,7 @@ import { memo, useMemo, useState } from 'react';
 import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type uPlot from 'uplot';
-import GraphRadio from '../shared/GraphRadio';
+import { SeriesLegend } from '@/components/common/charts';
 import { useFilterPerformanceChartData } from '../../charts/hooks/useFilterPerformanceChartData';
 import {
   BANDWIDTH_SERIES,
@@ -97,39 +97,18 @@ export const FilterPerformanceCard = memo(
     return (
       <Card className="bg-monitor-panel border-transparent">
         <CardHeader className="pb-1">
-          <CardTitle className="flex justify-center items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            <LuArrowUpDown className="h-4 w-4 opacity-60" />
-            <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              {SERIES_ORDER.map((key) => {
-                const isOn = visible[key];
-                const color = SERIES_META[key].color;
-                const toggle = () =>
-                  setVisible((prev) => ({ ...prev, [key]: !prev[key] }));
-                return (
-                  <span
-                    key={key}
-                    className="inline-flex items-center gap-1 normal-case"
-                  >
-                    <GraphRadio
-                      active={isOn}
-                      onClick={toggle}
-                      label={SERIES_META[key].label}
-                      color={color}
-                    />
-                    <button
-                      type="button"
-                      onClick={toggle}
-                      className={`text-[11px] font-mono leading-none transition-colors ${
-                        isOn ? '' : 'text-muted-foreground hover:text-info'
-                      }`}
-                      style={isOn ? { color } : undefined}
-                    >
-                      {SERIES_META[key].label}
-                    </button>
-                  </span>
-                );
-              })}
-            </span>
+          <CardTitle className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
+            <LuArrowUpDown className="h-4 w-4 opacity-60 shrink-0" />
+            <SeriesLegend
+              items={SERIES_ORDER.map((key) => ({
+                key,
+                label: SERIES_META[key].label,
+                color: SERIES_META[key].color,
+                active: visible[key],
+                onToggle: () =>
+                  setVisible((prev) => ({ ...prev, [key]: !prev[key] })),
+              }))}
+            />
             {showCurrentTime && timeLabels.length > 0 && (
               <span className="ml-auto font-mono normal-case opacity-60 text-xs">
                 {timeLabels[timeLabels.length - 1]}

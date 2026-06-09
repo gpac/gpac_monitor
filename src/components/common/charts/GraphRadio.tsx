@@ -4,7 +4,7 @@ interface GraphRadioProps {
   active: boolean;
   onClick: () => void;
   label: string;
-  /** When active, tints the dot (e.g. per-PID color); defaults to text-info. */
+  /** When active, tints the dot with the series color; defaults to text-info. */
   color?: string;
 }
 
