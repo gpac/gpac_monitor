@@ -30,7 +30,7 @@ export const BUILTIN_STATUS_METRICS: MetricDefinitionMap = {
     unit: 'pc',
     info: 'overhead of mux / packetization / etc',
   },
-  ohead_pc: {
+  ohead_pck: {
     type: 'num',
     label: 'Per-packet overhead',
     freg: '*',

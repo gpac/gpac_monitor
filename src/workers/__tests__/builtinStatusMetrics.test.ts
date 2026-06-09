@@ -15,7 +15,7 @@ const SPEC_KEYS = [
   's_bytes',
   's_pck',
   'ohead',
-  'ohead_pc',
+  'ohead_pck',
   'twnd',
   'wait',
   'buffer',
