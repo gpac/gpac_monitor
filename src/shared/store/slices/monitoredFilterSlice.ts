@@ -250,7 +250,8 @@ const monitoredFilterSlice = createSlice({
       const index = current.indexOf(metricKey);
       if (index !== -1) {
         current.splice(index, 1);
-      } else if (current.length < 4) {
+      } else {
+        if (current.length >= 4) current.shift();
         current.push(metricKey);
       }
       state.selectedStatusMetricByFilter[filterIdx] = current;

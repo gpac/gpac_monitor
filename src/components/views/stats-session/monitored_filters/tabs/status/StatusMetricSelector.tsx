@@ -31,7 +31,6 @@ function StatusMetricSelector({
   const definitions = useAppSelector(selectMetricDefinitions);
 
   const graphable = metrics.filter((metric) => metric.graphable);
-  const atMax = selectedKeys.length >= 4;
 
   useLayoutEffect(() => {
     if (selectedKeys.length === 0 && graphable.length > 0) {
@@ -45,7 +44,6 @@ function StatusMetricSelector({
 
   const items: SeriesLegendItem[] = graphable.map((metric) => {
     const active = selectedKeys.includes(metric.key);
-    const disabled = atMax && !active;
     const def = definitions[metric.key];
     const colorIndex = selectedKeys.indexOf(metric.key);
     const color = active
@@ -56,7 +54,6 @@ function StatusMetricSelector({
       label: metric.key,
       color,
       active,
-      disabled,
       onToggle: () =>
         dispatch(setSelectedStatusMetric({ filterIdx, metricKey: metric.key })),
       tooltip: def ? (
