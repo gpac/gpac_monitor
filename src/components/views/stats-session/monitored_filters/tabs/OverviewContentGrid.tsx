@@ -47,6 +47,9 @@ const OverviewContentGrid = memo(
     );
 
     const hasCompletion = completionMetrics.length > 0;
+    const visibleBadges = groups.stateBadges.filter(
+      (badge) => badge.styleKey !== 'done',
+    );
     const hasMetrics =
       groups.primaryProgress != null ||
       groups.buffer != null ||
@@ -150,7 +153,7 @@ const OverviewContentGrid = memo(
     if (isDetached) {
       return (
         <div className="flex flex-col gap-2">
-          <StatusStateBadges badges={groups.stateBadges} />
+          <StatusStateBadges badges={visibleBadges} />
           {infoCol}
           {metricsCol}
           {reportSection}
@@ -162,7 +165,7 @@ const OverviewContentGrid = memo(
     if (hasArrays) {
       return (
         <div className="flex flex-col gap-2">
-          <StatusStateBadges badges={groups.stateBadges} />
+          <StatusStateBadges badges={visibleBadges} />
           <div className="grid grid-cols-2 gap-2 items-start">
             {arraysCol}
             {(hasInfo || hasMetrics || hasCompletion) && (
@@ -179,7 +182,7 @@ const OverviewContentGrid = memo(
 
     return (
       <div className="flex flex-col gap-2">
-        <StatusStateBadges badges={groups.stateBadges} />
+        <StatusStateBadges badges={visibleBadges} />
         <div className="grid grid-cols-2 gap-2 items-start">
           {infoCol}
           {metricsCol}
