@@ -262,6 +262,16 @@ describe('completionSnapshot — done flag propagation', () => {
   });
 });
 
+describe('completionDone', () => {
+  it('is true when done flag present', () => {
+    expect(build('done fps=25').completionDone).toBe(true);
+  });
+
+  it('is undefined when no done flag', () => {
+    expect(build('fps=25').completionDone).toBeUndefined();
+  });
+});
+
 describe('hasDoneFlag', () => {
   it('returns true when "done" bool entry is present', () => {
     const { entries } = parseFilterStatus('done r_bytes=4096');

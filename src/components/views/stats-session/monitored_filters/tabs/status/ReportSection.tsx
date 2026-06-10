@@ -11,7 +11,11 @@ interface ReportSectionProps {
   isDone: boolean;
 }
 
-const ReportSection = ({ metrics, definitions }: ReportSectionProps) => {
+const ReportSection = ({
+  metrics,
+  definitions,
+  isDone,
+}: ReportSectionProps) => {
   if (metrics.length === 0) return null;
 
   const chunkSize = Math.ceil(metrics.length / 3);
@@ -28,13 +32,21 @@ const ReportSection = ({ metrics, definitions }: ReportSectionProps) => {
           <span className={TAB_STYLES.TABLE_HEADER}>Report</span>
         </div>
         <div className="grid grid-cols-3">
-          {chunks.map((chunk) => (
+          {chunks.map((chunk, index) => (
             <table key={chunk[0].key} className="w-full text-left table-fixed">
               <colgroup>
                 <col />
                 <col className="w-28" />
               </colgroup>
               <tbody>
+                {index === 0 && isDone && (
+                  <MetricRow
+                    label="Done"
+                    value="✓"
+                    valueClassName="text-green-400"
+                    infoIcon={<MetricInfoIcon def={definitions?.['done']} />}
+                  />
+                )}
                 {chunk.map((metric) => (
                   <MetricRow
                     key={metric.key}

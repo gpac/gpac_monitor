@@ -119,7 +119,7 @@ const OverviewContentGrid = memo(
       <ReportSection
         metrics={completionMetrics}
         definitions={definitions}
-        isDone={hasCompletion}
+        isDone={groups.completionDone ?? false}
       />
     ) : null;
 

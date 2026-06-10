@@ -72,6 +72,7 @@ export type FilterStatusViewModel = {
   textMetrics: TextMetric[];
   stateBadges: StateBadge[];
   arrays: ArrayGroup[];
+  completionDone?: boolean;
 };
 
 export type StatusGroups = FilterStatusViewModel;
@@ -321,5 +322,6 @@ export function buildFilterStatusViewModel(
     textMetrics,
     stateBadges,
     arrays: arrayGroups,
+    completionDone: isDone || undefined,
   };
 }
