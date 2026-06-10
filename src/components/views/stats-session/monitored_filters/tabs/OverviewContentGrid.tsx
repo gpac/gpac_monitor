@@ -8,6 +8,7 @@ import StatusArraySection from './status/StatusArraySection';
 import StatusStateBadges from './status/StatusStateBadges';
 import { StatusProgressRow, StatusBufferRow } from './status/StatusProgress';
 import MetricTooltip from './shared/MetricTooltip';
+import ReportSection from './status/ReportSection';
 
 interface OverviewContentGridProps {
   groups: FilterStatusViewModel;
@@ -114,22 +115,12 @@ const OverviewContentGrid = memo(
       </TooltipProvider>
     ) : null;
 
-    const completionCol: ReactNode = hasCompletion ? (
-      <div className="w-1/3">
-        <TooltipProvider delayDuration={300}>
-          <TableSection key="report" title="Report">
-            {completionMetrics.map((metric) => (
-              <MetricRow
-                key={metric.key}
-                label={metric.key}
-                value={metric.value}
-                title={metric.tooltip}
-                infoIcon={makeTooltipIcon(definitions?.[metric.key])}
-              />
-            ))}
-          </TableSection>
-        </TooltipProvider>
-      </div>
+    const reportSection = hasCompletion ? (
+      <ReportSection
+        metrics={completionMetrics}
+        definitions={definitions}
+        isDone={hasCompletion}
+      />
     ) : null;
 
     const arraysCol: ReactNode = hasArrays ? (
@@ -162,7 +153,7 @@ const OverviewContentGrid = memo(
           <StatusStateBadges badges={groups.stateBadges} />
           {infoCol}
           {metricsCol}
-          {completionCol}
+          {reportSection}
           {arraysCol}
         </div>
       );
@@ -178,7 +169,7 @@ const OverviewContentGrid = memo(
               <div className="flex flex-col gap-2">
                 {infoCol}
                 {metricsCol}
-                {completionCol}
+                {reportSection}
               </div>
             )}
           </div>
@@ -193,7 +184,7 @@ const OverviewContentGrid = memo(
           {infoCol}
           {metricsCol}
         </div>
-        {completionCol}
+        {reportSection}
       </div>
     );
   },
