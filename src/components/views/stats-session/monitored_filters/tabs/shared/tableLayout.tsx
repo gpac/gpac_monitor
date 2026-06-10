@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react';
-import { TooltipProvider } from '@/components/ui/tooltip';
+import { CustomTooltip } from '@/components/ui/tooltip';
 import { TAB_STYLES } from '../styles';
-import PIDMetricTooltip from '../pid/PIDMetricTooltip';
 
 export const MetricRow = ({
   label,
@@ -24,11 +23,9 @@ export const MetricRow = ({
       className={`px-2 py-2 align-middle text-xs font-medium tabular-nums text-right w-28 whitespace-nowrap ${valueClassName}`}
     >
       {title ? (
-        <TooltipProvider delayDuration={200}>
-          <PIDMetricTooltip rows={[{ label: 'raw', value: title }]}>
-            <span>{value}</span>
-          </PIDMetricTooltip>
-        </TooltipProvider>
+        <CustomTooltip content={title}>
+          <span>{value}</span>
+        </CustomTooltip>
       ) : (
         value
       )}
