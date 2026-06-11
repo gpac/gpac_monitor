@@ -16,19 +16,22 @@ export const MetricRow = ({
   infoIcon?: ReactNode;
 }) => (
   <tr className="bg-monitor-panel border-b border-transparent">
-    <td className="px-2 py-2 align-middle text-xs text-muted-foreground">
-      {infoIcon} {label}
-    </td>
-    <td
-      className={`px-2 py-2 align-middle text-xs font-medium tabular-nums text-right w-28 whitespace-nowrap ${valueClassName}`}
-    >
-      {title ? (
-        <CustomTooltip content={title}>
-          <span>{value}</span>
-        </CustomTooltip>
-      ) : (
-        value
-      )}
+    <td colSpan={2} className="px-2 py-2">
+      <div className="flex items-center gap-2">
+        {infoIcon}
+        <span className="text-xs text-muted-foreground shrink-0">{label}</span>
+        <span
+          className={`text-xs font-medium tabular-nums min-w-0  ${valueClassName}`}
+        >
+          {title ? (
+            <CustomTooltip content={title}>
+              <span>{value}</span>
+            </CustomTooltip>
+          ) : (
+            value
+          )}
+        </span>
+      </div>
     </td>
   </tr>
 );
