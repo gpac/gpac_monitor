@@ -1,6 +1,5 @@
 import { type ReactNode } from 'react';
 import { Progress } from '@/components/ui/progress';
-import { MetricRow } from '../shared/tableLayout';
 import type { ProgressBar, BufferMetric } from '../../utils/statusViewModel';
 
 export function StatusProgressRow({
@@ -40,10 +39,12 @@ export function StatusBufferRow({
   infoIcon?: ReactNode;
 }) {
   return (
-    <MetricRow
-      label="buffer"
-      value={`${buffer.current} / ${buffer.max} ms`}
-      title={`${buffer.percentage.toFixed(1)}%`}
+    <StatusProgressRow
+      bar={{
+        key: buffer.key,
+        valueLabel: `${buffer.current} / ${buffer.max} ${buffer.unit}`,
+        percentage: buffer.percentage,
+      }}
       infoIcon={infoIcon}
     />
   );
