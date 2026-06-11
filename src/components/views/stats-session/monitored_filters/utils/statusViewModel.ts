@@ -7,7 +7,7 @@ import type {
   StatusBool,
   StatusArray,
 } from '@/workers/filterStatusParser';
-import { formatFps, formatFractionAsTime } from '@/utils/formatting';
+import { formatFps, formatFractionAsTimeWithRaw } from '@/utils/formatting';
 import { isGraphableStatusMetric } from './statusMetricGraph';
 
 export type ProgressBar = {
@@ -181,8 +181,7 @@ function toNumericMetric(entry: StatusNum): NumericMetric {
     const { num, den } = entry.fraction;
     return {
       key: entry.key,
-      value: formatFractionAsTime(num, den),
-      tooltip: `${num}/${den}`,
+      value: formatFractionAsTimeWithRaw(num, den),
       ...graph,
     };
   }
@@ -214,7 +213,7 @@ function scalarValueStr(entry: StatusScalar): string {
   const unit = num.unit ? ` ${num.unit}` : '';
   if (num.fraction) {
     if (isTimeEntry(num))
-      return formatFractionAsTime(num.fraction.num, num.fraction.den);
+      return formatFractionAsTimeWithRaw(num.fraction.num, num.fraction.den);
     return `${num.fraction.num}/${num.fraction.den}${unit}`;
   }
   return `${Number.isInteger(num.value) ? String(num.value) : num.value.toFixed(2)}${unit}`;

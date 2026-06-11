@@ -48,3 +48,37 @@ describe('enrichFilter — definitions cache invalidation', () => {
     });
   });
 });
+
+describe('enrichFilter — session stats cache invalidation', () => {
+  it('returns updated stats when only dynamic fields change (status unchanged)', () => {
+    // Regression: filters whose status string never changes (or is empty)
+    // were served from cache forever, freezing bytes_done/pck_done/time in the UI.
+
+    const cache = new Map<string | number, EnrichedFilterData>();
+
+    const tick1 = enrichFilter(makeFilter(''), undefined, cache);
+    expect(tick1.bytes_done).toBe(0);
+
+    const tick2Input = {
+      ...makeFilter(''),
+      bytes_done: 1024,
+      pck_done: 42,
+      time: 500_000,
+    } as GpacNodeData;
+    const tick2 = enrichFilter(tick2Input, undefined, cache);
+
+    expect(tick2.bytes_done).toBe(1024);
+    expect(tick2.pck_done).toBe(42);
+    expect(tick2.time).toBe(500_000);
+    expect(tick2).not.toBe(tick1);
+  });
+
+  it('returns cached object when nothing changed (reference equality preserved)', () => {
+    const cache = new Map<string | number, EnrichedFilterData>();
+
+    const tick1 = enrichFilter(makeFilter('done'), undefined, cache);
+    const tick2 = enrichFilter(makeFilter('done'), undefined, cache);
+
+    expect(tick2).toBe(tick1);
+  });
+});

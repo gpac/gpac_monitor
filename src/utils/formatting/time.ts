@@ -68,6 +68,15 @@ export const formatFractionAsTime = (num: number, den: number): string => {
   return `${hours}:${remainingMins}:${secs}`;
 };
 
+/** Formats a GPAC time fraction as readable duration plus the raw fraction, e.g. "21.32s (1918917/90000)". */
+export const formatFractionAsTimeWithRaw = (
+  num: number,
+  den: number,
+): string => {
+  if (den === 0) return '—';
+  return `${formatFractionAsTime(num, den)} (${num}/${den})`;
+};
+
 /**
  * Formats current time as HH:MM:SS for chart display
  */

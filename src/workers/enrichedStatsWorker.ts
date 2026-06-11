@@ -29,12 +29,20 @@ export function enrichFilter(
 
   const parsedStatus = parseFilterStatus(filter.status ?? '', definitions);
 
+  // Dynamic session fields must be compared too: a filter whose status string
+  // never changes would otherwise be served from cache with frozen stats.
   if (
     cached &&
     cached.idx === filter.idx &&
     cached.name === filter.name &&
     cached.status === filter.status &&
     cached.errors === filter.errors &&
+    cached.bytes_done === filter.bytes_done &&
+    cached.bytes_sent === filter.bytes_sent &&
+    cached.pck_done === filter.pck_done &&
+    cached.pck_sent === filter.pck_sent &&
+    cached.time === filter.time &&
+    cached.is_eos === filter.is_eos &&
     JSON.stringify(cached.parsedStatus.entries) ===
       JSON.stringify(parsedStatus.entries)
   ) {

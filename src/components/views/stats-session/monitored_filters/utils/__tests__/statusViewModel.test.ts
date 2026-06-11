@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildFilterStatusViewModel, hasDoneFlag } from '../statusViewModel';
 import { parseFilterStatus } from '@/workers/filterStatusParser';
-import { formatFractionAsTime } from '@/utils/formatting';
+import { formatFractionAsTimeWithRaw } from '@/utils/formatting';
 import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 
 function build(raw: string) {
@@ -61,11 +61,11 @@ describe('buildFilterStatusViewModel', () => {
   });
 
   describe('time metric', () => {
-    it('time fraction → formatted value with tooltip, no primaryProgress', () => {
+    it('time fraction → inline value with raw fraction, no tooltip, no primaryProgress', () => {
       const vm = build('time=57057/90000');
       const metric = vm.numericMetrics.find((m) => m.key === 'time');
-      expect(metric?.value).toBe(formatFractionAsTime(57057, 90000));
-      expect(metric?.tooltip).toBe('57057/90000');
+      expect(metric?.value).toBe(formatFractionAsTimeWithRaw(57057, 90000));
+      expect(metric?.tooltip).toBeUndefined();
       expect(vm.primaryProgress).toBeUndefined();
     });
 
