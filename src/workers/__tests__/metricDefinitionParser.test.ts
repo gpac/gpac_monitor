@@ -41,14 +41,20 @@ describe('parseMetricDefinitions', () => {
       expect(map['buf']?.type).toBe('frac');
     });
 
-    it('parses t=bool', () => {
+    it('t=bool is not a valid type (GPAC doc: num/frac/str) → num', () => {
       const map = parseMetricDefinitions('freg=foo;done=Done;t=bool');
-      expect(map['done']?.type).toBe('bool');
+      expect(map['done']?.type).toBe('num');
     });
 
     it('falls back to num for unknown t value', () => {
       const map = parseMetricDefinitions('freg=foo;x=X;t=unknown');
       expect(map['x']?.type).toBe('num');
+    });
+
+    it('keeps u=bool as unit, type stays num (per GPAC doc)', () => {
+      const map = parseMetricDefinitions('freg=*;done=Done;u=bool');
+      expect(map['done']?.type).toBe('num');
+      expect(map['done']?.unit).toBe('bool');
     });
   });
 

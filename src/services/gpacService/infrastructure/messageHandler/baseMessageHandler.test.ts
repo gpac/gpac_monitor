@@ -100,6 +100,19 @@ describe('BaseMessageHandler', () => {
     });
   });
 
+  describe('session_metrics', () => {
+    it('should call onSetMetricDefinitions with data', () => {
+      simulateMessage(handler, {
+        message: 'session_metrics',
+        data: 'freg=*;done=Done;u=bool\nfreg=rfnalu;NALU=NAL Units',
+      });
+
+      expect(callbacks.onSetMetricDefinitions).toHaveBeenCalledWith(
+        'freg=*;done=Done;u=bool\nfreg=rfnalu;NALU=NAL Units',
+      );
+    });
+  });
+
   describe('filter_arg_updated', () => {
     it('should call onArgUpdated with indexes', () => {
       simulateMessage(handler, {

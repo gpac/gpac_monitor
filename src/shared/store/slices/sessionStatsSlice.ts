@@ -1,7 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TimeFraction } from '../../../types/domain/gpac/model';
 import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
-import { BUILTIN_STATUS_METRICS } from '@/workers/builtinStatusMetrics';
 
 export interface SessionFilterStats {
   status: string;
@@ -41,7 +40,7 @@ const initialState: SessionStatsState = {
   isLoading: false,
   subscribedComponents: [],
   isSubscribed: false,
-  metricDefinitions: BUILTIN_STATUS_METRICS,
+  metricDefinitions: {},
 };
 
 const sessionStatsSlice = createSlice({

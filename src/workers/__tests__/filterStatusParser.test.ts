@@ -333,6 +333,63 @@ describe('parseFilterStatus', () => {
     });
   });
 
+  describe('free text preservation (ufnalu)', () => {
+    it('routes unrecognized bare tokens to an info entry', () => {
+      const result = parseFilterStatus('AVC|H264 1920x1080 NALU=123');
+      expect(result.entries).toContainEqual({
+        type: 'num',
+        key: 'NALU',
+        value: 123,
+      });
+      expect(result.entries).toContainEqual({
+        type: 'str',
+        key: 'info',
+        value: 'AVC|H264 1920x1080',
+        quoted: false,
+      });
+    });
+
+    it('does not parse 1920x1080 as a bool flag', () => {
+      const result = parseFilterStatus('1920x1080');
+      expect(
+        result.entries.find((entry) => entry.type === 'bool'),
+      ).toBeUndefined();
+    });
+
+    it('appends free text to an explicit info entry', () => {
+      const result = parseFilterStatus('info="muxing" AVC|H264 NALU=5');
+      const info = result.entries.find(
+        (entry) => entry.type === 'str' && entry.key === 'info',
+      );
+      expect(info).toMatchObject({ value: 'muxing AVC|H264' });
+    });
+
+    it('attaches % token as unit of preceding number', () => {
+      const result = parseFilterStatus('ohead=2.5 %');
+      expect(result.entries[0]).toMatchObject({
+        type: 'num',
+        key: 'ohead',
+        value: 2.5,
+        unit: '%',
+      });
+      expect(result.entries).toHaveLength(1);
+    });
+
+    it('skips % token when unit pc already set by definition', () => {
+      const definitions = {
+        ohead: {
+          type: 'num' as const,
+          unit: 'pc',
+          label: 'Overhead',
+          freg: '*',
+        },
+      };
+      const result = parseFilterStatus('ohead=2.5 %', definitions);
+      expect(result.entries[0]).toMatchObject({ unit: 'pc' });
+      expect(result.entries).toHaveLength(1);
+    });
+  });
+
   describe('real snapshot — DASH demux', () => {
     it('parses time=4.09s as bare string, not a fraction', () => {
       const result = parseFilterStatus('period=1 time=4.09s prog=0');

@@ -36,7 +36,8 @@ function parseScalarToken(
   const separatorIdx = token.indexOf('=');
 
   if (separatorIdx === -1) {
-    return /^\w+$/.test(token) ? { type: 'bool', key: token } : null;
+    // identifier-like only: bare values such as "1920x1080" are not flags
+    return /^[a-zA-Z_]\w*$/.test(token) ? { type: 'bool', key: token } : null;
   }
 
   const key = token.slice(0, separatorIdx);
@@ -145,9 +146,28 @@ export function parseFilterStatus(
     if (items.length > 0) arrayEntry = { type: 'array', items };
   }
 
+  const freeTokens: string[] = [];
+
   for (const token of splitStatusTokens(scalarPart)) {
     const scalar = parseScalarToken(token, definitions);
-    if (!scalar) continue;
+
+    // unrecognized bare token: unit of the preceding number, else free text
+    if (!scalar) {
+      const lastEntry = entries[entries.length - 1];
+      if (lastEntry?.type === 'num' && !token.includes('=')) {
+        if (!lastEntry.unit) {
+          lastEntry.unit = token;
+          continue;
+        }
+        if (
+          lastEntry.unit === token ||
+          (token === '%' && lastEntry.unit === 'pc')
+        )
+          continue;
+      }
+      freeTokens.push(token);
+      continue;
+    }
 
     if (scalar.type === 'bool') {
       const lastEntry = entries[entries.length - 1];
@@ -161,6 +181,17 @@ export function parseFilterStatus(
     }
 
     entries.push(scalar);
+  }
+
+  // GPAC allows free text in statuses: preserve it through the info channel
+  if (freeTokens.length > 0) {
+    const infoEntry = entries.find(
+      (entry): entry is StatusStr =>
+        entry.type === 'str' && entry.key === 'info',
+    );
+    const text = freeTokens.join(' ');
+    if (infoEntry) infoEntry.value = `${infoEntry.value} ${text}`;
+    else entries.push({ type: 'str', key: 'info', value: text, quoted: false });
   }
 
   if (arrayEntry) entries.push(arrayEntry);
