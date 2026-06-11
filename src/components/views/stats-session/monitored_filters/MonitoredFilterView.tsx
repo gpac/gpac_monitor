@@ -97,7 +97,9 @@ const MonitoredFilterView = memo(
             onValueChange={setActiveTab}
             className="w-full"
           >
-            <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 space-y-1 px-1 py-2">
+            <div
+              className={`sticky ${isDetached ? 'top-0' : 'top-10'} z-10 bg-monitor-surface space-y-1 px-1 py-2`}
+            >
               <div className="flex justify-stretch items-center gap-4">
                 <FilterChangeBadges filterIdx={overviewData.filterIdx} />
                 <StatusBadge

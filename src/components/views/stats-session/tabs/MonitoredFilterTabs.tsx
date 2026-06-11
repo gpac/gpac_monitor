@@ -162,8 +162,8 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   }, [filterWithStats, stats, definitions]);
 
   const handleBack = () => {
-    // Navigate back to the main dashboard view
-    onCardClick(-1); // Special value to indicate going back to dashboard
+    // back to the main dashboard view
+    onCardClick(-1);
   };
 
   const handleOpenProperties = () => {
@@ -189,7 +189,7 @@ export const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = (
   props,
 ) => {
   return (
-    <TabsContent value={`filter-${props.idx}`} className="flex-1 p-4">
+    <TabsContent value={`filter-${props.idx}`} className="mt-0 flex-1 pb-4">
       <MonitoredFilterContent {...props} />
     </TabsContent>
   );
