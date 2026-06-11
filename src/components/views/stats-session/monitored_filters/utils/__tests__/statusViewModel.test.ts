@@ -89,6 +89,41 @@ describe('buildFilterStatusViewModel', () => {
     });
   });
 
+  describe('enum → number migration (generic parsing)', () => {
+    it('integer without definition → num, appears in numericMetrics, graphable', () => {
+      // No definition → parser infers num by value. Must land in numericMetrics
+      // with graphable:true so StatusGraphCard picks it up automatically.
+      const vm = build('state=1');
+      const metric = vm.numericMetrics.find((m) => m.key === 'state');
+      expect(metric).toBeDefined();
+      expect(metric?.graphable).toBe(true);
+      expect(vm.textMetrics.find((m) => m.key === 'state')).toBeUndefined();
+    });
+
+    it('integer with type:str definition → str, appears in textMetrics, NOT graphable', () => {
+      // Old enum behavior: definition forces str → never graphed.
+      const vm = buildWithDefs('state=1', {
+        state: { type: 'str', label: 'State', freg: '*' },
+      });
+      expect(vm.textMetrics.find((m) => m.key === 'state')).toBeDefined();
+      expect(vm.numericMetrics.find((m) => m.key === 'state')).toBeUndefined();
+    });
+
+    it('removing str definition makes the metric graphable without other changes', () => {
+      // Transition: drop the definition → same raw value now auto-graphed.
+      const withDef = buildWithDefs('state=2', {
+        state: { type: 'str', label: 'State', freg: '*' },
+      });
+      const withoutDef = build('state=2');
+      expect(
+        withDef.numericMetrics.find((m) => m.key === 'state'),
+      ).toBeUndefined();
+      expect(
+        withoutDef.numericMetrics.find((m) => m.key === 'state')?.graphable,
+      ).toBe(true);
+    });
+  });
+
   describe('array items', () => {
     it('item key equals item name (stable React key)', () => {
       const vm = build('[AS#1.1 prog=0, AS#2.1 prog=0]');
