@@ -43,6 +43,12 @@ export const BUILTIN_STATUS_METRICS: MetricDefinitionMap = {
     freg: '*',
     info: 'the filter is in a waiting state',
   },
-  buffer: { type: 'frac', label: 'Buffer occupancy', freg: '*', unit: 'ms' },
+  buffer: {
+    type: 'frac',
+    label: 'Buffer occupancy',
+    freg: '*',
+    unit: 'ms',
+    info: 'buffer occupancy cur/max, cur buffer in ms and max : target max buffer in ms',
+  },
   fps: { type: 'num', label: 'Frames per second', freg: '*', unit: 'fps' },
 };
