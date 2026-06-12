@@ -21,8 +21,34 @@ function parseType(raw: string): MetricType {
   return 'num';
 }
 
+function splitDefinitionParts(line: string): string[] {
+  const parts: string[] = [];
+  let current = '';
+  let inQuote = false;
+  for (const char of line) {
+    if (char === '"') {
+      inQuote = !inQuote;
+      current += char;
+    } else if (char === ';' && !inQuote) {
+      parts.push(current);
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  parts.push(current);
+  return parts;
+}
+
+function unquote(value: string): string {
+  if (value.length >= 2 && value.startsWith('"') && value.endsWith('"')) {
+    return value.slice(1, -1);
+  }
+  return value;
+}
+
 function parseLine(line: string): [string, MetricDef] | null {
-  const parts = line.split(';');
+  const parts = splitDefinitionParts(line);
   if (parts.length < 2) return null;
 
   const fregPart = parts[0];
@@ -42,7 +68,7 @@ function parseLine(line: string): [string, MetricDef] | null {
     const part = parts[i];
     if (part.startsWith('t=')) def.type = parseType(part.slice(2));
     else if (part.startsWith('u=')) def.unit = part.slice(2);
-    else if (part.startsWith('i=')) def.info = part.slice(2);
+    else if (part.startsWith('i=')) def.info = unquote(part.slice(2));
     else if (part.startsWith('m=')) {
       const n = Number(part.slice(2));
       if (!isNaN(n)) def.min = n;
