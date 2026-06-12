@@ -1,36 +1,12 @@
 import type { GraphFilterData } from '@/types/domain/gpac/model';
-import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
 import type {
   SessionFilterStats,
   FilterPids,
 } from '@/shared/store/slices/sessionStatsSlice';
 import type { HistoryFilter } from '../types';
-import { GpacStreamType } from '@/types';
 
 export function toGraphFilterData(f: HistoryFilter): GraphFilterData {
-  const ipid: GraphFilterData['ipid'] = {};
-  const opid: GraphFilterData['opid'] = {};
-
-  if (f.ipids) {
-    for (const [name, pid] of Object.entries(f.ipids)) {
-      const p = pid as PIDproperties & { stream_type?: GpacStreamType };
-      ipid[name] = {
-        source_idx: p.source_idx ?? 0,
-        stream_type: p.stream_type ?? p.type,
-      };
-    }
-  }
-
-  if (f.opids) {
-    for (const [name, pid] of Object.entries(f.opids)) {
-      const p = pid as PIDproperties & { stream_type?: GpacStreamType };
-      opid[name] = {
-        stream_type: p.stream_type ?? p.type,
-      };
-    }
-  }
-
   return {
     idx: f.idx,
     name: f.name,
@@ -40,8 +16,8 @@ export function toGraphFilterData(f: HistoryFilter): GraphFilterData {
     ID: f.ID ?? null,
     nb_ipid: f.nb_ipid,
     nb_opid: f.nb_opid,
-    ipid,
-    opid,
+    ipid: f.ipids ?? [],
+    opid: f.opids ?? [],
   };
 }
 
@@ -65,7 +41,7 @@ export function buildPidsByFilter(
 ): Record<string, FilterPids> {
   const result: Record<string, FilterPids> = {};
   for (const f of filters) {
-    const ipids = f.properties?.ipids ?? f.ipids;
+    const ipids = f.properties?.ipids;
     const opids = f.properties?.opids;
     if (ipids || opids) {
       result[f.idx.toString()] = { ipids, opids };

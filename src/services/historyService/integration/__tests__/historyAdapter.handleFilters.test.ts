@@ -27,8 +27,8 @@ const makeFilter = (
   status: 'connected',
   nb_ipid: 0,
   nb_opid: 1,
-  ipids: {},
-  opids: {},
+  ipids: [],
+  opids: [],
   gpac_args: [{ name: argName, value: argValue } as any],
 });
 

@@ -1,5 +1,5 @@
 import { Sys as sys } from 'gpaccore';
-import { gpac_filter_to_object } from '../JSClient/filterUtils.js';
+import { gpac_filter_to_object, gpac_filter_to_minimal_object } from '../JSClient/filterUtils.js';
 import { PidDataCollector } from '../JSClient/Filters/PID/PidDataCollector.js';
 
 /**
@@ -18,8 +18,13 @@ function SnapshotBuilder() {
         const entry = gpac_filter_to_object(f, true);
         delete entry.ipid;
         delete entry.opid;
-        entry.ipids = this.pidCollector.collectInputPids(f, true);
-        entry.opids = this.pidCollector.collectOutputPids(f);
+        const minimal = gpac_filter_to_minimal_object(f);
+        entry.ipids = minimal.ipid;
+        entry.opids = minimal.opid;
+        entry.properties = {
+            ipids: this.pidCollector.collectInputPids(f, true),
+            opids: this.pidCollector.collectOutputPids(f),
+        };
 
         return entry;
     };

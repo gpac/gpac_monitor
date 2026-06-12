@@ -70,8 +70,8 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
 
         return {
             ...rest,
-            ipids: ipid ?? {},
-            opids: opid ?? {},
+            ipids: ipid ?? [],
+            opids: opid ?? [],
             gpac_args: filterInstance.all_args(true).filter(Boolean),
             properties: {
                 ipids: pidCollector.collectInputPids(filterInstance, true),

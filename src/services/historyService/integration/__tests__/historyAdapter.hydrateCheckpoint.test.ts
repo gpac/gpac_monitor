@@ -28,8 +28,8 @@ const baseFilter: HistoryFilter = {
   status: 'connected',
   nb_ipid: 0,
   nb_opid: 1,
-  ipids: {},
-  opids: {},
+  ipids: [],
+  opids: [],
   gpac_args: [{ name: 'src', value: 'file.mp4' } as any],
 };
 

@@ -2,6 +2,10 @@ import type {
   GpacArgument,
   GpacArgumentValue,
 } from '@/types/domain/gpac/gpac_args';
+import type {
+  GraphInputPid,
+  GraphOutputPid,
+} from '@/types/domain/gpac/model';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { SessionFilterStatistics } from '@/types/domain/gpac/filter-stats';
 import type { PidPropsMap } from '@/types/domain/gpac/pid_props';
@@ -115,8 +119,8 @@ export interface HistoryFilter {
   ID?: string | null;
   nb_ipid: number;
   nb_opid: number;
-  ipids?: Record<string, PIDproperties>;
-  opids?: Record<string, PIDproperties>;
+  ipids?: GraphInputPid[];
+  opids?: GraphOutputPid[];
   gpac_args?: GpacArgument[];
   properties?: {
     ipids: Record<string, PIDproperties>;
