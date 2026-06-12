@@ -35,22 +35,13 @@ export function createNodeFromFilter(
 
       // Find maximum depth among all source dependencies
       let maxDepth = 0;
-      if (currentFilter.ipid) {
-        Object.values(currentFilter.ipid).forEach((pid) => {
-          if (pid.source_idx !== undefined && pid.source_idx !== null) {
-            const sourceFilter = allFilters.find(
-              (f) => f.idx === pid.source_idx,
-            );
-            if (sourceFilter && !visited.has(sourceFilter.idx)) {
-              const sourceDepth = calculateDepth(
-                sourceFilter,
-                new Set(visited),
-              );
-              maxDepth = Math.max(maxDepth, sourceDepth);
-            }
-          }
-        });
-      }
+      currentFilter.ipid.forEach((pid) => {
+        const sourceFilter = allFilters.find((f) => f.idx === pid.source_idx);
+        if (sourceFilter && !visited.has(sourceFilter.idx)) {
+          const sourceDepth = calculateDepth(sourceFilter, new Set(visited));
+          maxDepth = Math.max(maxDepth, sourceDepth);
+        }
+      });
 
       return maxDepth + 1;
     };
@@ -106,59 +97,36 @@ export function createEdgesFromFilters(
   const newEdges: Edge[] = [];
 
   filters.forEach((filter) => {
-    if (filter.ipid) {
-      Object.entries(filter.ipid).forEach(
-        ([pidName, pid], ipidIndex: number) => {
-          if (pid.source_idx !== undefined && pid.source_idx !== null) {
-            // Use numeric ipidIndex for stable edge ID (not pidName which may change)
-            const edgeId = `${pid.source_idx}-${filter.idx}-${ipidIndex}`;
-            const existingEdge = existingEdges.find((e) => e.id === edgeId);
+    filter.ipid.forEach((pid) => {
+      const edgeId = `edge:${pid.source_idx}->${filter.idx}:ipid:${pid.pid_index}`;
+      const existingEdge = existingEdges.find((e) => e.id === edgeId);
 
-            const filterColor = getFilterColor(pid.stream_type);
+      const filterColor = getFilterColor(pid.stream_type);
 
-            // Precise mapping of sourceHandle
-            const sourceFilter = filters.find((f) => f.idx === pid.source_idx);
-            let sourceHandle: string | undefined;
+      // Match source opid by stream_type, fallback to first
+      const sourceFilter = filters.find((f) => f.idx === pid.source_idx);
+      let sourceHandle: string | undefined;
+      if (sourceFilter && sourceFilter.opid.length > 0) {
+        const matchingOpid =
+          sourceFilter.opid.find((o) => o.stream_type === pid.stream_type) ??
+          sourceFilter.opid[0];
+        sourceHandle = `opid-${matchingOpid.pid_index}`;
+      }
 
-            if (sourceFilter?.opid) {
-              if (Object.keys(sourceFilter.opid).length === 1) {
-                sourceHandle = Object.keys(sourceFilter.opid)[0];
-              } else {
-                const matchingOutputPid = Object.keys(sourceFilter.opid).find(
-                  (opid) =>
-                    opid === pidName ||
-                    opid.includes(pidName) ||
-                    pidName.includes(opid),
-                );
-                sourceHandle =
-                  matchingOutputPid || Object.keys(sourceFilter.opid)[0];
-              }
-            }
-
-            newEdges.push({
-              id: edgeId,
-              source: pid.source_idx.toString(),
-              target: filter.idx.toString(),
-              sourceHandle: sourceHandle,
-              targetHandle: pidName,
-              type: 'simplebezier',
-              data: {},
-              animated: true,
-              style: {
-                stroke: filterColor,
-                strokeWidth: 3,
-                opacity: 0.9,
-              },
-              markerEnd: {
-                type: MarkerType.ArrowClosed,
-                color: filterColor,
-              },
-              selected: existingEdge?.selected,
-            });
-          }
-        },
-      );
-    }
+      newEdges.push({
+        id: edgeId,
+        source: pid.source_idx.toString(),
+        target: filter.idx.toString(),
+        sourceHandle,
+        targetHandle: `ipid-${pid.pid_index}`,
+        type: 'simplebezier',
+        data: {},
+        animated: true,
+        style: { stroke: filterColor, strokeWidth: 3, opacity: 0.9 },
+        markerEnd: { type: MarkerType.ArrowClosed, color: filterColor },
+        selected: existingEdge?.selected,
+      });
+    });
   });
 
   return newEdges;

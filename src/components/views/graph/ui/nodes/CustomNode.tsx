@@ -63,32 +63,29 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
     File: 3,
   };
 
-  const sortByStreamType = (
-    keys: string[],
-    pids: Record<string, { stream_type: string }>,
-  ) =>
-    [...keys].sort(
+  const sortPidsByStreamType = <T extends { stream_type: string }>(
+    pids: T[],
+  ): T[] =>
+    [...pids].sort(
       (a, b) =>
-        (STREAM_TYPE_ORDER[pids[a]?.stream_type] ?? 99) -
-        (STREAM_TYPE_ORDER[pids[b]?.stream_type] ?? 99),
+        (STREAM_TYPE_ORDER[a.stream_type] ?? 99) -
+        (STREAM_TYPE_ORDER[b.stream_type] ?? 99),
     );
 
-  // Create input handles only if nb_ipid > 0
   const inputHandles =
     nb_ipid > 0
-      ? sortByStreamType(Object.keys(ipid), ipid).map((pidId, index) => ({
-          id: pidId,
+      ? sortPidsByStreamType(ipid).map((pid, index) => ({
+          id: `ipid-${pid.pid_index}`,
           type: 'target' as const,
           position: Position.Left,
           index,
         }))
       : [];
 
-  // Create output handles only if nb_opid > 0
   const outputHandles =
     nb_opid > 0
-      ? sortByStreamType(Object.keys(opid), opid).map((pidId, index) => ({
-          id: pidId,
+      ? sortPidsByStreamType(opid).map((pid, index) => ({
+          id: `opid-${pid.pid_index}`,
           type: 'source' as const,
           position: Position.Right,
           index,
@@ -214,13 +211,13 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
                     INPUTS
                   </span>
                   <div className="mt-1">
-                    {Object.keys(ipid).map((pidId) => (
+                    {ipid.map((pid) => (
                       <div
-                        key={pidId}
+                        key={`ipid-${pid.pid_index}`}
                         className="text-xs text-gray-100 truncate"
-                        title={pidId}
+                        title={pid.name}
                       >
-                        {formatPidLabel(pidId)}
+                        {formatPidLabel(pid.name)}
                       </div>
                     ))}
                   </div>
@@ -236,13 +233,13 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
                     OUTPUTS
                   </span>
                   <div className="mt-1">
-                    {Object.keys(opid).map((pidId) => (
+                    {opid.map((pid) => (
                       <div
-                        key={pidId}
+                        key={`opid-${pid.pid_index}`}
                         className="text-xs text-gray-100 text-right truncate"
-                        title={pidId}
+                        title={pid.name}
                       >
-                        {formatPidLabel(pidId)}
+                        {formatPidLabel(pid.name)}
                       </div>
                     ))}
                   </div>

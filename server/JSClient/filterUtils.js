@@ -62,25 +62,24 @@ function gpac_filter_to_minimal_object(f) {
         ID: f.ID || null,
         nb_ipid: f.nb_ipid,
         nb_opid: f.nb_opid,
-        ipid: {},
-        opid: {}
+        ipid: [],
+        opid: []
     };
 
     for (let i = 0; i < f.nb_ipid; i++) {
-        const pidName = f.ipid_props(i, "name");
-        const streamType = f.ipid_props(i, "StreamType");
-        minimalFilters.ipid[pidName] = {
+        minimalFilters.ipid.push({
+            pid_index: i,
+            name: f.ipid_props(i, "name"),
             source_idx: f.ipid_source(i).idx,
-            stream_type: streamType
-        };
+            stream_type: f.ipid_props(i, "StreamType")
+        });
     }
     for (let o = 0; o < f.nb_opid; o++) {
-        const pidName = f.opid_props(o, "name");
-        const streamType = f.opid_props(o, "StreamType");
-        minimalFilters.opid[pidName] = {
-        
-            stream_type: streamType
-        };
+        minimalFilters.opid.push({
+            pid_index: o,
+            name: f.opid_props(o, "name"),
+            stream_type: f.opid_props(o, "StreamType")
+        });
     }
 
     return minimalFilters;
