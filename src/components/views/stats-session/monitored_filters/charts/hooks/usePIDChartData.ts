@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type uPlot from 'uplot';
 import { type SeriesDef } from '@/components/common/charts';
 import { formatChartTimeFromUs } from '@/utils/formatting';
@@ -16,9 +16,23 @@ export function usePIDChartData(
   entries: PIDSeriesEntry[],
   mode: PIDMetricMode,
 ) {
-  const series = useMemo<SeriesDef[]>(
-    () =>
-      entries.map((entry) => ({
+  const seriesCacheRef = useRef<{ key: string; value: SeriesDef[] }>({
+    key: '',
+    value: [],
+  });
+  const seriesKey =
+    mode +
+    '|' +
+    entries
+      .map(
+        (entry) => `${entry.label}|${entry.color}|${entry.metricLabel ?? ''}`,
+      )
+      .join(',');
+
+  if (seriesCacheRef.current.key !== seriesKey) {
+    seriesCacheRef.current = {
+      key: seriesKey,
+      value: entries.map((entry) => ({
         label: entry.label,
         color: entry.color,
         formatValue: MODE_FORMATTERS[mode],
@@ -26,8 +40,10 @@ export function usePIDChartData(
         strokeWidth: 1.5,
         metricLabel: entry.metricLabel,
       })),
-    [entries, mode],
-  );
+    };
+  }
+
+  const series = seriesCacheRef.current.value;
 
   const { data, timeLabels } = useMemo(() => {
     const maxLen = Math.max(
