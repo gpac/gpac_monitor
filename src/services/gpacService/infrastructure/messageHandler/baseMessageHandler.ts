@@ -161,6 +161,9 @@ export class BaseMessageHandler {
       case 'filter_arg_updated':
         this.callbacks.onArgUpdated(data.indexes);
         break;
+      case 'session_metrics':
+        this.callbacks.onSetMetricDefinitions(data.data);
+        break;
       case 'session_end':
         this.handleSessionEnd(data);
         break;

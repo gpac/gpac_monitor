@@ -11,6 +11,7 @@ import { buildPIDKey } from '../../../types/pid';
 import type { PIDWithIndex } from '../../../types';
 import { getFilterColor } from '@/utils/filters/streamType';
 import { usePIDMetricsRow } from '../hooks/usePIDMetricsRow';
+import { usePIDSample } from '../hooks/usePIDSample';
 import { buildBufferTooltipRows } from './utils/pidTooltipRows';
 import PIDMetricTooltip from './PIDMetricTooltip';
 import PIDRowInfoCell from './PIDRowInfoCell';
@@ -22,7 +23,6 @@ interface PIDTableRowProps {
   pid: PIDWithIndex;
   filterIdx: number;
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
-  isEven: boolean;
   variant?: PIDTableRowVariant;
   hoveredPidKey?: string | null;
 }
@@ -32,7 +32,6 @@ const PIDTableRow = memo(
     pid,
     filterIdx,
     onOpenProps,
-    isEven,
     variant = 'input',
     hoveredPidKey = null,
   }: PIDTableRowProps) => {
@@ -47,8 +46,16 @@ const PIDTableRow = memo(
       pidKey,
     );
 
+    usePIDSample(pidKey, {
+      averageBitrate: perfStats.average_bitrate,
+      bufferTime: bufferStats.displayBuffer,
+      processTime: perfStats.average_process_time,
+      processRate: perfStats.average_process_rate,
+      ts: perfStats.last_process_time,
+    });
+
     const statusBadge = getPIDStatusBadge(pid);
-    const bgClass = isEven ? 'bg-black/10' : 'bg-black/20';
+    const bgClass = 'bg-monitor-panel';
     const rowStyle = isSelected
       ? {
           borderLeft: `3px solid ${getFilterColor(pid.type)}`,

@@ -85,6 +85,11 @@ export interface SessionStatsMessage {
   all_packets_done?: boolean;
 }
 
+export interface SessionMetricsMessage {
+  message: 'session_metrics';
+  data: string;
+}
+
 export interface CpuStatsMessage {
   message: 'cpu_stats';
   stats: CPUStats;
@@ -151,6 +156,7 @@ export type IncomingWsMessage =
   | UpdateMessage
   | DetailsMessage
   | SessionStatsMessage
+  | SessionMetricsMessage
   | CpuStatsMessage
   | FilterStatsMessage
   | LogBatchResponse

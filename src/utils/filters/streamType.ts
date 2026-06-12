@@ -36,7 +36,9 @@ export const STREAM_TYPE_SHORT_LABEL: Partial<Record<GpacStreamType, string>> =
     [GpacStreamType.File]: 'F',
   };
 
-const STREAM_TYPE_TO_FILTER: Partial<Record<GpacStreamType, FilterType>> = {
+export const STREAM_TYPE_TO_FILTER: Partial<
+  Record<GpacStreamType, FilterType>
+> = {
   [GpacStreamType.Visual]: 'video',
   [GpacStreamType.Audio]: 'audio',
   [GpacStreamType.Text]: 'text',

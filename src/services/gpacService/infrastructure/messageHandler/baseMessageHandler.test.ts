@@ -12,6 +12,7 @@ function createMockCallbacks(): MessageHandlerCallbacks {
     onLogSubscriptionChange: vi.fn(),
     onPidReconfigured: vi.fn(),
     onArgUpdated: vi.fn(),
+    onSetMetricDefinitions: vi.fn(),
   };
 }
 
@@ -96,6 +97,19 @@ describe('BaseMessageHandler', () => {
       });
 
       expect(callbacks.onArgUpdated).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('session_metrics', () => {
+    it('should call onSetMetricDefinitions with data', () => {
+      simulateMessage(handler, {
+        message: 'session_metrics',
+        data: 'freg=*;done=Done;u=bool\nfreg=rfnalu;NALU=NAL Units',
+      });
+
+      expect(callbacks.onSetMetricDefinitions).toHaveBeenCalledWith(
+        'freg=*;done=Done;u=bool\nfreg=rfnalu;NALU=NAL Units',
+      );
     });
   });
 

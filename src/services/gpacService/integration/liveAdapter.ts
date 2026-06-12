@@ -5,7 +5,10 @@ import {
   markArgUpdated,
 } from '@/shared/store/slices/graphSlice';
 import { filtersUpdated } from '@/shared/store/actions/globalActions';
-import { updateSessionStats } from '@/shared/store/slices/sessionStatsSlice';
+import {
+  updateSessionStats,
+  setMetricDefinitions,
+} from '@/shared/store/slices/sessionStatsSlice';
 import {
   appendLogsForAllTools,
   setSubscriptionStatus,
@@ -16,6 +19,7 @@ import {
 } from '@/shared/store/slices/sessionDetailsSlice';
 import { MessageHandlerCallbacks } from '../infrastructure/messageHandler/baseMessageHandler';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
+import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
 
 export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateGraphData: (data) => {
@@ -33,4 +37,6 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
     store.dispatch(setCommandLine(commandLine)),
   onPidReconfigured: (indexes) => store.dispatch(markPidReconfigured(indexes)),
   onArgUpdated: (indexes) => store.dispatch(markArgUpdated(indexes)),
+  onSetMetricDefinitions: (raw) =>
+    store.dispatch(setMetricDefinitions(parseMetricDefinitions(raw))),
 });

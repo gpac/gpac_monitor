@@ -19,6 +19,7 @@ export interface MessageHandlerCallbacks {
   onUpdateCommandLine?: (commandLine: string | null) => void;
   onPidReconfigured: (indexes: number[]) => void;
   onArgUpdated: (indexes: number[]) => void;
+  onSetMetricDefinitions: (raw: string) => void;
 }
 
 export interface MessageHandlerDependencies {

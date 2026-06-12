@@ -17,7 +17,6 @@ export const formatMicroseconds = (
   return `${(value / 1_000_000).toFixed(2)}s`;
 };
 
-/** Converts a GPAC last_ts_sent value ({n,d}, {num,den} or raw seconds) to seconds, or null if invalid. */
 export const tsToSeconds = (
   ts: TsFraction | number | null | undefined,
 ): number | null => {
@@ -71,6 +70,30 @@ export const parseMMSS = (str: string, maxUs: number): number | null => {
   if (!match) return null;
   const us = (parseInt(match[1], 10) * 60 + parseInt(match[2], 10)) * 1_000_000;
   return us >= 0 && us <= maxUs ? us : null;
+};
+
+/** Formats a GPAC status time fraction (num/den) as a human-readable duration. */
+export const formatFractionAsTime = (num: number, den: number): string => {
+  if (den === 0) return '—';
+  const seconds = num / den;
+  if (seconds < 60) return `${seconds.toFixed(2)}s`;
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60)
+    .toString()
+    .padStart(2, '0');
+  if (mins < 60) return `${mins}:${secs}`;
+  const hours = Math.floor(mins / 60);
+  const remainingMins = (mins % 60).toString().padStart(2, '0');
+  return `${hours}:${remainingMins}:${secs}`;
+};
+
+/** Formats a GPAC time fraction as readable duration plus the raw fraction, e.g. "21.32s (1918917/90000)". */
+export const formatFractionAsTimeWithRaw = (
+  num: number,
+  den: number,
+): string => {
+  if (den === 0) return '—';
+  return `${formatFractionAsTime(num, den)} (${num}/${den})`;
 };
 
 /**

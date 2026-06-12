@@ -1,5 +1,6 @@
 import uPlot from 'uplot';
 import type React from 'react';
+import { createTooltipPlugin } from './plugins/createTooltipPlugin';
 
 export interface SeriesDef {
   label: string;
@@ -41,23 +42,6 @@ export interface LineChartConfigOptions {
   height: number;
 }
 
-const tooltipIdxMap = new WeakMap<uPlot, number | null>();
-
-const TOOLTIP_STYLE = `
-  position: absolute;
-  background: rgb(17 24 39);
-  color: rgb(209 213 219);
-  border: 1px solid rgb(55 65 81);
-  border-radius: 6px;
-  padding: 8px 12px;
-  font-size: 11px;
-  font-family: monospace;
-  pointer-events: none;
-  z-index: 100;
-  white-space: nowrap;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3);
-`;
-
 const DEFAULT_GRID = 'rgba(110, 231, 183, 0.1)';
 
 export const createLineChartConfig = ({
@@ -96,6 +80,7 @@ export const createLineChartConfig = ({
       points: { size: 8, width: 2 },
     },
     legend: { show: false },
+    plugins: [createTooltipPlugin(series, getTimeLabel)],
     hooks: {
       draw: onEndLabels
         ? [
@@ -128,67 +113,6 @@ export const createLineChartConfig = ({
             },
           ]
         : [],
-      init: [
-        (u) => {
-          u.over.addEventListener('mouseleave', () => {
-            const tooltip = u.root.querySelector(
-              '.u-tooltip',
-            ) as HTMLElement | null;
-            if (tooltip) tooltip.style.display = 'none';
-            tooltipIdxMap.set(u, null);
-          });
-        },
-      ],
-      setCursor: [
-        (u) => {
-          const { left = 0, top = 0, idx } = u.cursor;
-          let tooltip = u.root.querySelector(
-            '.u-tooltip',
-          ) as HTMLElement | null;
-          if (!tooltip) {
-            tooltip = document.createElement('div');
-            tooltip.className = 'u-tooltip';
-            tooltip.style.cssText = TOOLTIP_STYLE;
-            u.root.appendChild(tooltip);
-          }
-          if (idx == null) {
-            tooltip.style.display = 'none';
-            tooltipIdxMap.set(u, null);
-            return;
-          }
-          const overRect = u.over.getBoundingClientRect();
-          const rootRect = u.root.getBoundingClientRect();
-          const ox = overRect.left - rootRect.left;
-          const oy = overRect.top - rootRect.top;
-          const lastIdx = tooltipIdxMap.get(u) ?? null;
-          if (lastIdx === idx) {
-            tooltip.style.left = `${ox + left + 10}px`;
-            tooltip.style.top = `${oy + top + 1}px`;
-            return;
-          }
-          tooltipIdxMap.set(u, idx);
-          const time = getTimeLabel(u, idx);
-          const rows = series
-            .map((def, seriesIdx) => {
-              const raw = u.data[seriesIdx + 1]?.[idx];
-              const display =
-                raw != null
-                  ? def.formatValue
-                    ? def.formatValue(raw as number)
-                    : String(raw)
-                  : '--';
-              if (def.metricLabel) {
-                return `<div style="margin-bottom:3px"><div style="color:${def.color};font-weight:600">${def.label}</div><div style="color:${def.color}">${def.metricLabel} = ${display}</div></div>`;
-              }
-              return `<div style="color:${def.color}">${def.label}: ${display}</div>`;
-            })
-            .join('');
-          tooltip.innerHTML = `<div style="margin-bottom:4px;color:#6ee7b7">time = ${time}</div>${rows}`;
-          tooltip.style.display = 'block';
-          tooltip.style.left = `${ox + left + 10}px`;
-          tooltip.style.top = `${oy + top + 10}px`;
-        },
-      ],
     },
     series: [
       { label: 'Time' },

@@ -3,6 +3,7 @@ import type {
   PIDMetricSample,
   PIDGraphTarget,
 } from '@/components/views/stats-session/types/pid';
+import type { StatusMetricSample } from '@/components/views/stats-session/types/statusMetric';
 
 /**
  * Generic data point for charts (time-series data)
@@ -39,6 +40,8 @@ export interface MonitoredFilterState {
   selectedPidTargets: PIDGraphTarget[];
   pidSamples: Record<string, PIDMetricSample[]>;
   maxPidSamples: number;
+  statusMetricSamples: Record<string, StatusMetricSample[]>;
+  selectedStatusMetricByFilter: Record<number, string[]>;
 }
 
 const initialState: MonitoredFilterState = {
@@ -47,6 +50,8 @@ const initialState: MonitoredFilterState = {
   selectedPidTargets: [],
   pidSamples: {},
   maxPidSamples: 300,
+  statusMetricSamples: {},
+  selectedStatusMetricByFilter: {},
 };
 
 const monitoredFilterSlice = createSlice({
@@ -257,6 +262,53 @@ const monitoredFilterSlice = createSlice({
       state.pidSamples = {};
     },
 
+    addStatusMetricSamples: (
+      state,
+      action: PayloadAction<Array<{ key: string; sample: StatusMetricSample }>>,
+    ) => {
+      for (const { key, sample } of action.payload) {
+        if (!state.statusMetricSamples[key])
+          state.statusMetricSamples[key] = [];
+        const samples = state.statusMetricSamples[key];
+        const last = samples[samples.length - 1];
+        if (
+          last &&
+          last.sessionTimestampUs === sample.sessionTimestampUs &&
+          last.value === sample.value
+        )
+          continue;
+        samples.push(sample);
+        if (samples.length > state.maxPidSamples) samples.shift();
+      }
+    },
+
+    setSelectedStatusMetric: (
+      state,
+      action: PayloadAction<{ filterIdx: number; metricKey: string }>,
+    ) => {
+      const { filterIdx, metricKey } = action.payload;
+      const current = state.selectedStatusMetricByFilter[filterIdx] ?? [];
+      const index = current.indexOf(metricKey);
+      if (index !== -1) {
+        current.splice(index, 1);
+      } else {
+        if (current.length >= 4) current.shift();
+        current.push(metricKey);
+      }
+      state.selectedStatusMetricByFilter[filterIdx] = current;
+    },
+
+    clearStatusMetricsByFilter: (state, action: PayloadAction<number>) => {
+      const prefix = `${action.payload}:`;
+      for (const key of Object.keys(state.statusMetricSamples)) {
+        if (key.startsWith(prefix)) delete state.statusMetricSamples[key];
+      }
+      delete state.selectedStatusMetricByFilter[action.payload];
+    },
+
+    /**
+     * Set max points for sliding window
+     */
     setMaxPoints: (state, action: PayloadAction<number>) => {
       state.maxPoints = action.payload;
     },
@@ -277,6 +329,9 @@ export const {
   addPIDSamples,
   clearPIDSamples,
   clearAllPIDSamples,
+  addStatusMetricSamples,
+  setSelectedStatusMetric,
+  clearStatusMetricsByFilter,
 } = monitoredFilterSlice.actions;
 
 export default monitoredFilterSlice.reducer;

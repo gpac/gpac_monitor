@@ -4,12 +4,13 @@ import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { Badge } from '@/components/ui/badge';
 import {
   getStreamTypeBadgeConfig,
-  getFilterColor,
   STREAM_TYPE_SHORT_LABEL,
 } from '@/utils/filters/streamType';
+import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
+import { GraphRadio } from '@/components/common/charts';
 import type { PIDWithIndex } from '../../../types';
 
 interface PIDRowInfoCellProps {
@@ -53,16 +54,11 @@ const PIDRowInfoCell = memo(
 
     return (
       <div className="min-w-0 flex items-center gap-1.5">
-        <input
-          type="radio"
-          checked={isSelected}
-          readOnly
+        <GraphRadio
+          active={isSelected}
           onClick={handleToggleSelect}
-          title="Select PID for temporal graph"
-          className="flex-shrink-1 cursor-pointer"
-          style={
-            isSelected ? { accentColor: getFilterColor(pid.type) } : undefined
-          }
+          label={buildPIDDisplayLabel(pid)}
+          color={isSelected ? PID_SELECTION_COLORS[colorIndex] : undefined}
         />
         {variant === 'input' && (
           <button
@@ -79,8 +75,8 @@ const PIDRowInfoCell = memo(
           style={
             isSelected
               ? {
-                  borderColor: getFilterColor(pid.type),
-                  color: getFilterColor(pid.type),
+                  borderColor: PID_SELECTION_COLORS[colorIndex],
+                  color: PID_SELECTION_COLORS[colorIndex],
                 }
               : undefined
           }

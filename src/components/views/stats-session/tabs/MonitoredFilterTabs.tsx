@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
+import { parseFilterStatus } from '@/workers/filterStatusParser';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
 import { useFilterStats } from '@/components/views/stats-session/hooks/stats/useFilterStats';
@@ -13,7 +14,10 @@ import {
   FilterStatsResponse,
   PIDproperties,
 } from '@/types/domain/gpac/filter-stats';
-import { selectActiveConnection } from '@/shared/store/selectors/header/connectionsSelectors';
+import {
+  selectActiveConnection,
+  selectMetricDefinitions,
+} from '@/shared/store/selectors';
 import { ConnectionStatus } from '@/types/communication/shared';
 
 interface MonitoredFilterTabsProps {
@@ -106,6 +110,8 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   // Subscribe to live stats when tab is active
   const { stats, isLoading } = useFilterStats(filter.idx, isActive, 1000);
 
+  const definitions = useAppSelector(selectMetricDefinitions);
+
   const isConnected = useAppSelector(
     (state) =>
       selectActiveConnection(state)?.status === ConnectionStatus.CONNECTED,
@@ -125,10 +131,14 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   const tabsData = useMemo(() => {
     return {
       overviewData: {
-        idx: filterWithStats.idx,
+        filterIdx: filterWithStats.idx,
         name: filterWithStats.name,
         type: filterWithStats.type,
         status: filterWithStats.status,
+        parsedStatus: parseFilterStatus(
+          filterWithStats.status ?? '',
+          definitions,
+        ),
         time: filterWithStats.time,
         last_task_time: filterWithStats.last_task_time,
         pck_done: filterWithStats.pck_done,
@@ -143,11 +153,6 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         bytesReceived: filterWithStats.bytes_done || 0,
         packetsSent: filterWithStats.pck_sent || 0,
         packetsReceived: filterWithStats.pck_done || 0,
-      },
-      buffersData: {
-        name: filterWithStats.name,
-        inputBuffers: [],
-        totalBufferInfo: { totalBuffer: 0, totalCapacity: 0, averageUsage: 0 },
       },
       inputPids: (stats as FilterStatsResponse)?.ipids
         ? Object.values(
@@ -166,7 +171,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
           )
         : [],
     };
-  }, [filterWithStats, stats]);
+  }, [filterWithStats, stats, definitions]);
 
   const handleBack = () => {
     // Navigate back to the main dashboard view
@@ -199,7 +204,7 @@ export const MonitoredFilterTab: React.FC<MonitoredFilterTabProps> = (
   props,
 ) => {
   return (
-    <TabsContent value={`filter-${props.idx}`} className="flex-1 p-4">
+    <TabsContent value={`filter-${props.idx}`} className="mt-0 flex-1 pb-4">
       <MonitoredFilterContent {...props} />
     </TabsContent>
   );

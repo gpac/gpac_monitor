@@ -1,4 +1,5 @@
 export { useAppDispatch, useAppSelector } from './redux';
+export { useAdaptiveChartHeight } from './ui/useAdaptiveChartHeight';
 export { useChartDuration } from './data/useChartDuration';
 export type { HookLifecycle, HookFunction } from './types';
 export { useCommandLine } from './data/useCommandLine';

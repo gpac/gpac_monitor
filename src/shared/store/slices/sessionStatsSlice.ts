@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TimeFraction } from '../../../types/domain/gpac/model';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
+import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 
 export interface FilterPids {
   ipids?: Record<string, PIDproperties>;
@@ -35,6 +36,7 @@ export interface SessionStatsState {
   isLoading: boolean;
   subscribedComponents: string[];
   isSubscribed: boolean;
+  metricDefinitions: MetricDefinitionMap;
 }
 
 const initialState: SessionStatsState = {
@@ -48,6 +50,7 @@ const initialState: SessionStatsState = {
   isLoading: false,
   subscribedComponents: [],
   isSubscribed: false,
+  metricDefinitions: {},
 };
 
 const sessionStatsSlice = createSlice({
@@ -158,6 +161,13 @@ const sessionStatsSlice = createSlice({
     clearFilterPids: (state) => {
       state.pidsByFilter = {};
     },
+
+    setMetricDefinitions: (
+      state,
+      action: PayloadAction<MetricDefinitionMap>,
+    ) => {
+      state.metricDefinitions = action.payload;
+    },
   },
 });
 
@@ -172,6 +182,7 @@ export const {
   resetSessionStats,
   setFilterPids,
   clearFilterPids,
+  setMetricDefinitions,
 } = sessionStatsSlice.actions;
 
 export default sessionStatsSlice.reducer;
