@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
 import { buildStatusMetricKey } from '@/components/views/stats-session/types/statusMetric';
+import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
 
 /**
  * Base selector - get monitored filter state
@@ -116,6 +117,15 @@ export const selectSelectedStatusMetric = (
 ): string[] =>
   state.monitoredFilter.selectedStatusMetricByFilter[filterIdx] ??
   EMPTY_METRIC_KEYS;
+
+const EMPTY_PARSED_STATUS: ParsedFilterStatus = { raw: '', entries: [] };
+
+export const selectParsedStatus = (
+  state: RootState,
+  filterIdx: number,
+): ParsedFilterStatus =>
+  state.monitoredFilter.parsedStatusByFilterIdx[filterIdx] ??
+  EMPTY_PARSED_STATUS;
 
 export const selectStatusMetricSamples = createSelector(
   [
