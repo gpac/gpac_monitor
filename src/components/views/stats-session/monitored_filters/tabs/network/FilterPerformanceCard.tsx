@@ -3,7 +3,7 @@ import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type uPlot from 'uplot';
 import { SeriesLegend } from '@/components/common/charts';
-import { useFilterPerformanceChartData } from '../../charts/hooks/useFilterPerformanceChartData';
+import { useBandwidthChart } from '../../charts/hooks/useBandwidthChart';
 import {
   BANDWIDTH_SERIES,
   formatBw,
@@ -49,7 +49,7 @@ export const FilterPerformanceCard = memo(
     });
 
     const { outbandPoints, inbandPoints, lastTaskTimePoints } =
-      useFilterPerformanceChartData({
+      useBandwidthChart({
         filterId,
         bytesSent,
         bytesReceived,

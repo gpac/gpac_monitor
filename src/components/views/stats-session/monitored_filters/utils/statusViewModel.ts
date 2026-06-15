@@ -8,7 +8,7 @@ import type {
   StatusArray,
 } from '@/workers/filterStatusParser';
 import { formatFps, formatFractionAsTimeWithRaw } from '@/utils/formatting';
-import { isGraphableStatusMetric } from './statusMetricGraph';
+import { isGraphableStatusMetric } from '@/utils/metrics/statusMetricGraph';
 
 export type ProgressBar = {
   key: string;
