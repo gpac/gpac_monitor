@@ -4,11 +4,6 @@ export interface StatusMetricSample {
   time?: string;
 }
 
-export interface GraphableStatusMetric {
-  key: string;
-  rawValue: number | null;
-}
-
 export const buildStatusMetricKey = (
   filterIdx: number,
   metricKey: string,

@@ -82,6 +82,7 @@ export interface DetailsMessage {
 export interface SessionStatsMessage {
   message: 'session_stats';
   stats: SessionFilterStatistics[];
+  ts_us?: number;
   all_packets_done?: boolean;
 }
 

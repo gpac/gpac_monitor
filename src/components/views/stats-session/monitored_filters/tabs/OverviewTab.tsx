@@ -14,7 +14,6 @@ import { useIsDetached } from '../FilterViewContext';
 import { useDataMode } from '@/shared/hooks';
 import { selectMetricDefinitions } from '@/shared/store/selectors';
 import { MetricRow, TableSection } from './shared/tableLayout';
-import { useCollectStatusMetricSamples } from './hooks/useCollectStatusMetricSamples';
 import FilterIdentityStrip from './FilterIdentityStrip';
 import OverviewContentGrid from './OverviewContentGrid';
 import RuntimeDetailsSection from './RuntimeDetailsSection';
@@ -55,7 +54,6 @@ const OverviewTab = memo(
           .map((metric) => ({ key: metric.key, rawValue: metric.rawValue })),
       [statusGroups.numericMetrics],
     );
-    useCollectStatusMetricSamples(filterIdx, graphableMetrics, time);
     useEffect(
       () => () => {
         if (!isHistory) dispatch(clearStatusMetricsByFilter(filterIdx));

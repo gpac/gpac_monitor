@@ -205,7 +205,10 @@ export class BaseMessageHandler {
   private handleSessionStatsMessage(data: SessionStatsMessage): void {
     if (data.stats && Array.isArray(data.stats)) {
       this.sessionStatsHandler.handleSessionStats(data.stats);
-      this.callbacks.onUpdateSessionStats(data.stats);
+      this.callbacks.onUpdateSessionStats({
+        stats: data.stats,
+        ts_us: data.ts_us,
+      });
     }
   }
 
