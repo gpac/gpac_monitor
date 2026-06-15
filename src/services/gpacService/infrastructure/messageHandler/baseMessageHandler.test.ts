@@ -108,7 +108,10 @@ describe('BaseMessageHandler', () => {
       });
 
       expect(callbacks.onSetMetricDefinitions).toHaveBeenCalledWith(
-        'freg=*;done=Done;u=bool\nfreg=rfnalu;NALU=NAL Units',
+        expect.objectContaining({
+          done: expect.any(Object),
+          NALU: expect.any(Object),
+        }),
       );
     });
   });

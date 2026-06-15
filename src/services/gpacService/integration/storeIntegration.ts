@@ -15,7 +15,6 @@ import {
 } from '@/shared/store/slices/logsSlice';
 import { MessageHandlerCallbacks } from '../infrastructure/messageHandler/baseMessageHandler';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
-import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
 
 export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateGraphData: (data) => {
@@ -31,6 +30,6 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onPidReconfigured: (indexes: number[]) =>
     store.dispatch(markPidReconfigured(indexes)),
   onArgUpdated: (indexes: number[]) => store.dispatch(markArgUpdated(indexes)),
-  onSetMetricDefinitions: (raw: string) =>
-    store.dispatch(setMetricDefinitions(parseMetricDefinitions(raw))),
+  onSetMetricDefinitions: (definitions) =>
+    store.dispatch(setMetricDefinitions(definitions)),
 });

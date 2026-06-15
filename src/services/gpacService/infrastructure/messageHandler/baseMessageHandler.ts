@@ -8,6 +8,7 @@ import { FilterStatsHandler } from './filterStatsHandler';
 import { WSMessageBatcher } from '../../../utils/WSMessageBatcher';
 
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
+import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
@@ -153,7 +154,9 @@ export class BaseMessageHandler {
         this.callbacks.onArgUpdated(data.indexes);
         break;
       case 'session_metrics':
-        this.callbacks.onSetMetricDefinitions(data.data);
+        this.callbacks.onSetMetricDefinitions(
+          parseMetricDefinitions(data.data),
+        );
         break;
       case 'session_end':
         this.handleSessionEnd(data);

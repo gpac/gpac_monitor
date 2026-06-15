@@ -1,4 +1,5 @@
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
+import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 
 export interface MessageHandlerCallbacks {
   onUpdateGraphData: (data: any) => void;
@@ -8,7 +9,7 @@ export interface MessageHandlerCallbacks {
   onLogSubscriptionChange: (isSubscribed: boolean) => void;
   onPidReconfigured: (indexes: number[]) => void;
   onArgUpdated: (indexes: number[]) => void;
-  onSetMetricDefinitions: (raw: string) => void;
+  onSetMetricDefinitions: (definitions: MetricDefinitionMap) => void;
   onSessionEnd?: (data: any) => void;
 }
 
