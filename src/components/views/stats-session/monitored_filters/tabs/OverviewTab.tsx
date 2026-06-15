@@ -11,6 +11,7 @@ import {
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { buildFilterStatusViewModel } from '../utils/statusViewModel';
 import { useIsDetached } from '../FilterViewContext';
+import { useDataMode } from '@/shared/hooks';
 import { selectMetricDefinitions } from '@/shared/store/selectors';
 import { MetricRow, TableSection } from './shared/tableLayout';
 import { useCollectStatusMetricSamples } from './hooks/useCollectStatusMetricSamples';
@@ -30,6 +31,7 @@ const OverviewTab = memo(
     const { parsedStatus, type, filterIdx, time, name } = filter;
     const dispatch = useAppDispatch();
     const isDetached = useIsDetached();
+    const { isHistory } = useDataMode();
 
     const isStalled = useAppSelector(
       selectIsFilterStalled(filterIdx.toString()),
@@ -56,9 +58,9 @@ const OverviewTab = memo(
     useCollectStatusMetricSamples(filterIdx, graphableMetrics, time);
     useEffect(
       () => () => {
-        dispatch(clearStatusMetricsByFilter(filterIdx));
+        if (!isHistory) dispatch(clearStatusMetricsByFilter(filterIdx));
       },
-      [dispatch, filterIdx],
+      [dispatch, filterIdx, isHistory],
     );
 
     const processing = useMemo(() => {

@@ -16,6 +16,7 @@ import { filtersUpdated } from '@/shared/store/actions/globalActions';
 import {
   resetAllData,
   clearAllPIDSamples,
+  clearAllStatusMetricSamples,
 } from '@/shared/store/slices/monitoredFilterSlice';
 import {
   setCommandLine,
@@ -61,6 +62,7 @@ import type {
   CombinedBandwidthBuffer,
   PrevBandwidthState,
   PIDSamplesBuffer,
+  StatusMetricSamplesBuffer,
 } from './handlers/statsHandler';
 import type { PIDDynamicByFilter } from './extractPIDSamples';
 import { dispatchLogEvent } from './handlers/logHandler';
@@ -91,6 +93,7 @@ export class HistoryAdapter {
   private pendingArgsByFilter: Record<string, GpacArgument[]> = {};
   private pendingPIDSamples: PIDSamplesBuffer = [];
   private pendingPIDDynamic: PIDDynamicByFilter = {};
+  private pendingStatusMetricSamples: StatusMetricSamplesBuffer = [];
 
   constructor(private dispatch: AppDispatch) {}
 
@@ -108,6 +111,7 @@ export class HistoryAdapter {
       this.pendingArgsByFilter = {};
       this.pendingPIDSamples = [];
       this.pendingPIDDynamic = {};
+      this.pendingStatusMetricSamples = [];
     }
   }
 
@@ -122,6 +126,7 @@ export class HistoryAdapter {
       this.pendingCpuStats,
       this.pendingPIDSamples,
       this.pendingPIDDynamic,
+      this.pendingStatusMetricSamples,
     );
     const badgeMinUs = targetUs !== undefined ? targetUs - BADGE_WINDOW_US : 0;
     const recentPidIndexes = filterRecentIndexes(
@@ -155,12 +160,14 @@ export class HistoryAdapter {
     this.pendingArgsByFilter = {};
     this.pendingPIDSamples = [];
     this.pendingPIDDynamic = {};
+    this.pendingStatusMetricSamples = [];
   }
 
   clearTimeSeriesData(): void {
     this.dispatch(resetSystemStatsHistory());
     this.dispatch(resetAllData());
     this.dispatch(clearAllPIDSamples());
+    this.dispatch(clearAllStatusMetricSamples());
   }
 
   resetTemporalState(): void {
@@ -239,11 +246,13 @@ export class HistoryAdapter {
           this.pendingBandwidth,
           this.pendingPIDSamples,
           this.pendingPIDDynamic,
+          this.pendingStatusMetricSamples,
         );
         this.pendingLastStats = result.pendingStats;
         this.pendingBandwidth = result.pendingBandwidth;
         this.pendingPIDSamples = result.pendingPIDSamples;
         this.pendingPIDDynamic = result.pendingPIDDynamic;
+        this.pendingStatusMetricSamples = result.pendingStatusMetricSamples;
         break;
       }
       case 'cpu_stats':

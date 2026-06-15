@@ -262,6 +262,10 @@ const monitoredFilterSlice = createSlice({
       state.pidSamples = {};
     },
 
+    clearAllStatusMetricSamples: (state) => {
+      state.statusMetricSamples = {};
+    },
+
     addStatusMetricSamples: (
       state,
       action: PayloadAction<Array<{ key: string; sample: StatusMetricSample }>>,
@@ -330,6 +334,7 @@ export const {
   clearPIDSamples,
   clearAllPIDSamples,
   addStatusMetricSamples,
+  clearAllStatusMetricSamples,
   setSelectedStatusMetric,
   clearStatusMetricsByFilter,
 } = monitoredFilterSlice.actions;
