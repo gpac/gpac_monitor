@@ -179,6 +179,12 @@ export class BaseMessageHandler {
     this.callbacks.onUpdateGraphData(data.filters);
 
     if (data.filters) {
+      this.callbacks.onFilterStatuses(
+        data.filters.map((filter: GpacNodeData) => ({
+          idx: filter.idx,
+          status: filter.status,
+        })),
+      );
       data.filters.forEach((filter: GpacNodeData) => {
         this.notificationHandlers.onFilterUpdate?.(filter);
       });
@@ -198,6 +204,9 @@ export class BaseMessageHandler {
 
   private handleSessionStatsMessage(data: any): void {
     if (data.stats && Array.isArray(data.stats)) {
+      this.callbacks.onFilterStatuses(
+        data.stats.map((stat: any) => ({ idx: stat.idx, status: stat.status })),
+      );
       // Process immediately (low frequency: ~1 msg/sec)
       this.sessionStatsHandler.handleSessionStats(data.stats);
       // Dispatch to Redux for stall detection
@@ -214,6 +223,7 @@ export class BaseMessageHandler {
 
   private handleFilterStatsMessage(data: any): void {
     if (data.idx !== undefined) {
+      this.callbacks.onFilterStatuses([{ idx: data.idx, status: data.status }]);
       // Process immediately (low frequency: ~1 msg/sec per filter)
       this.filterStatsHandler.handleFilterStatsUpdate(data);
     }

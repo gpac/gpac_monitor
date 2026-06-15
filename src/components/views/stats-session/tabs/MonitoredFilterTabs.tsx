@@ -1,6 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
-import { parseFilterStatus } from '@/workers/filterStatusParser';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
 import { useFilterStats } from '@/components/views/stats-session/hooks/stats/useFilterStats';
@@ -14,10 +13,8 @@ import {
   FilterStatsResponse,
   PIDproperties,
 } from '@/types/domain/gpac/filter-stats';
-import {
-  selectActiveConnection,
-  selectMetricDefinitions,
-} from '@/shared/store/selectors';
+import { selectActiveConnection } from '@/shared/store/selectors';
+import { selectParsedStatus } from '@/shared/store/selectors/monitoredFilter';
 import { ConnectionStatus } from '@/types/communication/shared';
 
 interface MonitoredFilterTabsProps {
@@ -98,7 +95,9 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   // Subscribe to live stats when tab is active
   const { stats, isLoading } = useFilterStats(filter.idx, isActive, 1000);
 
-  const definitions = useAppSelector(selectMetricDefinitions);
+  const parsedStatus = useAppSelector((state) =>
+    selectParsedStatus(state, filter.idx),
+  );
 
   const isConnected = useAppSelector(
     (state) =>
@@ -123,10 +122,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         name: filterWithStats.name,
         type: filterWithStats.type,
         status: filterWithStats.status,
-        parsedStatus: parseFilterStatus(
-          filterWithStats.status ?? '',
-          definitions,
-        ),
+        parsedStatus,
         time: filterWithStats.time,
         last_task_time: filterWithStats.last_task_time,
         pck_done: filterWithStats.pck_done,
@@ -159,7 +155,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
           )
         : [],
     };
-  }, [filterWithStats, stats, definitions]);
+  }, [filterWithStats, stats, parsedStatus]);
 
   const handleBack = () => {
     // back to the main dashboard view

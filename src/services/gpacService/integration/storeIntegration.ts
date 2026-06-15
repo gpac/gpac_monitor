@@ -13,8 +13,11 @@ import {
   appendLogsForAllTools,
   setSubscriptionStatus,
 } from '@/shared/store/slices/logsSlice';
+import { setParsedStatuses } from '@/shared/store/slices/monitoredFilterSlice';
+import { selectMetricDefinitions } from '@/shared/store/selectors';
 import { MessageHandlerCallbacks } from '../infrastructure/messageHandler/baseMessageHandler';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
+import { extractParsedStatuses } from './extractParsedStatuses';
 
 export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onUpdateGraphData: (data) => {
@@ -32,4 +35,13 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   onArgUpdated: (indexes: number[]) => store.dispatch(markArgUpdated(indexes)),
   onSetMetricDefinitions: (definitions) =>
     store.dispatch(setMetricDefinitions(definitions)),
+  onFilterStatuses: (entries) =>
+    store.dispatch(
+      setParsedStatuses(
+        extractParsedStatuses(
+          entries,
+          selectMetricDefinitions(store.getState()),
+        ),
+      ),
+    ),
 });

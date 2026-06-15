@@ -1,5 +1,6 @@
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { FilterStatusInput } from '@/services/gpacService/integration/extractParsedStatuses';
 
 export interface MessageHandlerCallbacks {
   onUpdateGraphData: (data: any) => void;
@@ -10,6 +11,7 @@ export interface MessageHandlerCallbacks {
   onPidReconfigured: (indexes: number[]) => void;
   onArgUpdated: (indexes: number[]) => void;
   onSetMetricDefinitions: (definitions: MetricDefinitionMap) => void;
+  onFilterStatuses: (entries: FilterStatusInput[]) => void;
   onSessionEnd?: (data: any) => void;
 }
 
