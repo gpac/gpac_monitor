@@ -108,11 +108,14 @@ export const selectAllSelectedPidSamplesByFilter = createSelector(
       })),
 );
 
+const EMPTY_METRIC_KEYS: string[] = [];
+
 export const selectSelectedStatusMetric = (
   state: RootState,
   filterIdx: number,
 ): string[] =>
-  state.monitoredFilter.selectedStatusMetricByFilter[filterIdx] ?? [];
+  state.monitoredFilter.selectedStatusMetricByFilter[filterIdx] ??
+  EMPTY_METRIC_KEYS;
 
 export const selectStatusMetricSamples = createSelector(
   [
