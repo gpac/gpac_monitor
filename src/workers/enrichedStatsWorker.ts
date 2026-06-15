@@ -17,15 +17,14 @@ export interface EnrichedStatsResponse {
   enrichedFilters: EnrichedFilterData[];
 }
 
-const enrichedCache = new Map<string | number, EnrichedFilterData>();
+export const enrichedCache = new Map<string | number, EnrichedFilterData>();
 
 export function enrichFilter(
   filter: GpacNodeData,
   definitions: MetricDefinitionMap | undefined,
-  cache: Map<string | number, EnrichedFilterData>,
 ): EnrichedFilterData {
   const key = filter.idx ?? filter.ID ?? filter.name;
-  const cached = cache.get(key);
+  const cached = enrichedCache.get(key);
 
   const parsedStatus = parseFilterStatus(filter.status ?? '', definitions);
 
@@ -50,7 +49,7 @@ export function enrichFilter(
   }
 
   const enriched: EnrichedFilterData = { ...filter, parsedStatus };
-  cache.set(key, enriched);
+  enrichedCache.set(key, enriched);
   return enriched;
 }
 
@@ -59,7 +58,7 @@ self.addEventListener('message', (event: MessageEvent<EnrichStatsMessage>) => {
 
   if (type === 'ENRICH_STATS') {
     const enrichedFilters = filters.map((filter) =>
-      enrichFilter(filter, definitions, enrichedCache),
+      enrichFilter(filter, definitions),
     );
 
     self.postMessage({
