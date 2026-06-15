@@ -4,7 +4,6 @@ import type {
   PIDGraphTarget,
 } from '@/components/views/stats-session/types/pid';
 import type { StatusMetricSample } from '@/components/views/stats-session/types/statusMetric';
-import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
 
 /**
  * Generic data point for charts (time-series data)
@@ -43,7 +42,6 @@ export interface MonitoredFilterState {
   maxPidSamples: number;
   statusMetricSamples: Record<string, StatusMetricSample[]>;
   selectedStatusMetricByFilter: Record<number, string[]>;
-  parsedStatusByFilterIdx: Record<number, ParsedFilterStatus>;
 }
 
 const initialState: MonitoredFilterState = {
@@ -54,7 +52,6 @@ const initialState: MonitoredFilterState = {
   maxPidSamples: 300,
   statusMetricSamples: {},
   selectedStatusMetricByFilter: {},
-  parsedStatusByFilterIdx: {},
 };
 
 const monitoredFilterSlice = createSlice({
@@ -260,17 +257,6 @@ const monitoredFilterSlice = createSlice({
       state.selectedStatusMetricByFilter[filterIdx] = current;
     },
 
-    setParsedStatuses: (
-      state,
-      action: PayloadAction<
-        Array<{ filterIdx: number; parsedStatus: ParsedFilterStatus }>
-      >,
-    ) => {
-      for (const { filterIdx, parsedStatus } of action.payload) {
-        state.parsedStatusByFilterIdx[filterIdx] = parsedStatus;
-      }
-    },
-
     clearStatusMetricsByFilter: (state, action: PayloadAction<number>) => {
       const prefix = `${action.payload}:`;
       for (const key of Object.keys(state.statusMetricSamples)) {
@@ -304,7 +290,6 @@ export const {
   addStatusMetricSamples,
   setSelectedStatusMetric,
   clearStatusMetricsByFilter,
-  setParsedStatuses,
 } = monitoredFilterSlice.actions;
 
 export default monitoredFilterSlice.reducer;
