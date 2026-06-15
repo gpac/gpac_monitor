@@ -9,11 +9,11 @@ export function useEnrichedStats(rawFilters: GpacNodeData[]) {
   const [enrichedFilters, setEnrichedFilters] = useState<EnrichedFilterData[]>(
     [],
   );
-  const isProcessingRef = useRef(false);
+  const isAwaitingWorkerResponseRef = useRef(false);
   const definitions = useAppSelector(selectMetricDefinitions);
 
   // Stabilize rawFilters by creating a serialized key
-  const filtersKey = useMemo(() => {
+  const filtersCacheKey = useMemo(() => {
     return rawFilters
       .map(
         (filter) => `${filter.idx}:${filter.bytes_done}:${filter.status ?? ''}`,
@@ -27,25 +27,25 @@ export function useEnrichedStats(rawFilters: GpacNodeData[]) {
       return;
     }
 
-    if (isProcessingRef.current) {
+    if (isAwaitingWorkerResponseRef.current) {
       return;
     }
 
-    isProcessingRef.current = true;
+    isAwaitingWorkerResponseRef.current = true;
 
     enrichedStatsWorkerService.setDefinitions(definitions);
     enrichedStatsWorkerService.enrichStats(rawFilters);
 
     const unsubscribe = enrichedStatsWorkerService.subscribe((enriched) => {
       setEnrichedFilters(enriched);
-      isProcessingRef.current = false;
+      isAwaitingWorkerResponseRef.current = false;
     });
 
     return () => {
       unsubscribe();
-      isProcessingRef.current = false;
+      isAwaitingWorkerResponseRef.current = false;
     };
-  }, [filtersKey, definitions]);
+  }, [filtersCacheKey, definitions]);
 
   return enrichedFilters;
 }
