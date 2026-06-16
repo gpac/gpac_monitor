@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, memo } from 'react';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import { Badge } from '@/components/ui/badge';
 import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
-import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
+import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
@@ -13,7 +13,7 @@ import { formatNumber, formatPacketRate } from '@/utils/formatting/numbers';
 import { microsecondsToSeconds } from '@/utils/formatting/time';
 
 interface FilterStatCardProps {
-  filter: EnrichedFilterData;
+  filter: EnrichedFilterOverview;
   onClick?: (idx: number) => void;
   isMonitored?: boolean;
   isDetached?: boolean;
