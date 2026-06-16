@@ -267,6 +267,8 @@ const monitoredFilterSlice = createSlice({
       >,
     ) => {
       for (const { filterIdx, parsedStatus } of action.payload) {
+        const existing = state.parsedStatusByFilterIdx[filterIdx];
+        if (existing?.raw === parsedStatus.raw) continue;
         state.parsedStatusByFilterIdx[filterIdx] = parsedStatus;
       }
     },
