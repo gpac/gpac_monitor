@@ -1,6 +1,6 @@
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
-import type { FilterStatusInput } from '@/services/gpacService/integration/extractParsedStatuses';
+import type { FilterStatusInput } from '@/services/gpacService/liveAdapter/extractParsedStatuses';
 
 export interface MessageHandlerCallbacks {
   onUpdateGraphData: (data: any) => void;

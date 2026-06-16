@@ -9,7 +9,7 @@ import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './infrastructure/connectionManager';
 import { BaseMessageHandler } from './infrastructure/messageHandler/baseMessageHandler';
 import { GpacCoreService } from './core/gpacCore';
-import { createStoreCallbacks } from './integration/storeIntegration';
+import { createStoreCallbacks } from './liveAdapter/storeIntegration';
 import {
   SubscriptionCallback,
   SubscriptionConfig,
