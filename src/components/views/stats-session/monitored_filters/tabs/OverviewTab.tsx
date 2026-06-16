@@ -1,7 +1,6 @@
-import { memo, useEffect, useMemo } from 'react';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { memo, useMemo } from 'react';
+import { useAppSelector } from '@/shared/hooks/redux';
 import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
-import { clearStatusMetricsByFilter } from '@/shared/store/slices/monitoredFilterSlice';
 import { OverviewTabData } from '@/types/ui';
 import {
   formatBytes,
@@ -28,7 +27,6 @@ interface OverviewTabProps {
 const OverviewTab = memo(
   ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
     const { parsedStatus, type, filterIdx, time, name } = filter;
-    const dispatch = useAppDispatch();
     const isDetached = useIsDetached();
 
     const isStalled = useAppSelector(
@@ -54,12 +52,6 @@ const OverviewTab = memo(
       [statusGroups.numericMetrics],
     );
     useCollectStatusMetricSamples(filterIdx, graphableMetrics, time);
-    useEffect(
-      () => () => {
-        dispatch(clearStatusMetricsByFilter(filterIdx));
-      },
-      [dispatch, filterIdx],
-    );
 
     const processing = useMemo(() => {
       const secs = microsecondsToSeconds(time);
