@@ -1,3 +1,5 @@
+export type SessionTimeUs = number;
+
 export interface StatusMetricSample {
   sessionTimestampUs: number;
   value: number | null;
