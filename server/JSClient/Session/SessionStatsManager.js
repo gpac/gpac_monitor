@@ -99,6 +99,7 @@ function SessionStatsManager(client) {
             return JSON.stringify({
                 message: 'session_stats',
                 all_packets_done,
+                ts_us: now,
                 stats
             });
         });
