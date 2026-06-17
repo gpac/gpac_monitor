@@ -8,7 +8,7 @@ export type PIDMetricMode =
   | 'ts';
 
 export interface PIDMetricSample {
-  sessionTimestampUs: number;
+  sessionTimeUs: number;
   averageBitrate?: number | null;
   bufferTime?: number | null;
   processTime?: number | null;

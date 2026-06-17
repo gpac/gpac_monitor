@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { formatChartTime } from '@/utils/formatting';
 import {
   addCombinedNetworkPoint,
   type ChartDataPoint,
@@ -48,12 +47,10 @@ export const useFilterPerformanceChartData = ({
     const elapsed = (now - prevRef.current.timestamp) / 1000;
 
     if (isInitializedRef.current && elapsed > 0) {
-      const time = formatChartTime();
       dispatch(
         addCombinedNetworkPoint({
           filterId,
           outband: {
-            time,
             timestamp: now,
             value: Math.max(
               0,
@@ -61,7 +58,6 @@ export const useFilterPerformanceChartData = ({
             ),
           },
           inband: {
-            time,
             timestamp: now,
             value: Math.max(
               0,
@@ -69,7 +65,6 @@ export const useFilterPerformanceChartData = ({
             ),
           },
           lastTaskTime: {
-            time,
             timestamp: now,
             value: lastTaskTimeRef.current,
           },

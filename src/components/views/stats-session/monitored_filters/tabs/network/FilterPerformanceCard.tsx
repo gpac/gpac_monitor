@@ -64,10 +64,18 @@ export const FilterPerformanceCard = memo(
         (_unused, index) => index,
       );
 
-      const labels = indices.map(
-        (index) =>
-          outbandPoints[index]?.time || inbandPoints[index]?.time || '',
-      );
+      const labels = indices.map((index) => {
+        const ts =
+          outbandPoints[index]?.timestamp ?? inbandPoints[index]?.timestamp;
+        return ts
+          ? new Date(ts).toLocaleTimeString('en-US', {
+              hour12: false,
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+            })
+          : '';
+      });
 
       const pointsMap: Record<SeriesKey, (number | null)[]> = {
         outband: indices.map((index) => outbandPoints[index]?.value ?? 0),

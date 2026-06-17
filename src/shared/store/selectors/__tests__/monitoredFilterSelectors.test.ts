@@ -76,14 +76,14 @@ describe('selectSelectedPidTargetsByFilter', () => {
 describe('selectAllSelectedPidSamplesByFilter', () => {
   it('returns only samples for the given filterIdx', () => {
     const sample0 = {
-      sessionTimestampUs: 1000,
+      sessionTimeUs: 1000,
       averageBitrate: 100,
       bufferTime: 0,
       processTime: 0,
       processRate: 0,
     };
     const sample1 = {
-      sessionTimestampUs: 2000,
+      sessionTimeUs: 2000,
       averageBitrate: 200,
       bufferTime: 0,
       processTime: 0,
@@ -109,14 +109,14 @@ describe('selectAllSelectedPidSamplesByFilter', () => {
 
   it('chart for filter A is not polluted by PIDs selected in filter B', () => {
     const sampleA = {
-      sessionTimestampUs: 1000,
+      sessionTimeUs: 1000,
       averageBitrate: 500,
       bufferTime: 0,
       processTime: 10,
       processRate: 0,
     };
     const sampleB = {
-      sessionTimestampUs: 1000,
+      sessionTimeUs: 1000,
       averageBitrate: 800,
       bufferTime: 0,
       processTime: 5,

@@ -10,7 +10,6 @@ import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
  * Generic data point for charts (time-series data)
  */
 export interface ChartDataPoint {
-  time: string;
   timestamp: number;
   value: number;
 }
@@ -176,7 +175,7 @@ const monitoredFilterSlice = createSlice({
 
       if (
         lastSample &&
-        lastSample.sessionTimestampUs === sample.sessionTimestampUs &&
+        lastSample.sessionTimeUs === sample.sessionTimeUs &&
         lastSample.averageBitrate === sample.averageBitrate &&
         lastSample.bufferTime === sample.bufferTime &&
         lastSample.processTime === sample.processTime &&
@@ -203,7 +202,7 @@ const monitoredFilterSlice = createSlice({
         const last = samples[samples.length - 1];
         if (
           last &&
-          last.sessionTimestampUs === sample.sessionTimestampUs &&
+          last.sessionTimeUs === sample.sessionTimeUs &&
           last.averageBitrate === sample.averageBitrate &&
           last.bufferTime === sample.bufferTime &&
           last.processTime === sample.processTime &&
@@ -235,7 +234,7 @@ const monitoredFilterSlice = createSlice({
         const last = samples[samples.length - 1];
         if (
           last &&
-          last.sessionTimestampUs === sample.sessionTimestampUs &&
+          last.sessionTimeUs === sample.sessionTimeUs &&
           last.value === sample.value
         )
           continue;

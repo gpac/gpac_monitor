@@ -18,7 +18,7 @@ export const useCollectStatusMetricSamples = (
         graphableMetrics.map((metric) => ({
           key: buildStatusMetricKey(filterIdx, metric.key),
           sample: {
-            sessionTimestampUs: Date.now() * 1000,
+            sessionTimeUs: Date.now() * 1000,
             value: metric.rawValue,
           },
         })),

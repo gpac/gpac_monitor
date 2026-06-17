@@ -64,7 +64,7 @@ export function usePIDChartData(
       entries[0],
     );
     const labels = longest.pidHistory.map((sample) =>
-      formatChartTimeFromUs(sample.sessionTimestampUs),
+      formatChartTimeFromUs(sample.sessionTimeUs),
     );
 
     const valueCols = entries.map((entry) => {

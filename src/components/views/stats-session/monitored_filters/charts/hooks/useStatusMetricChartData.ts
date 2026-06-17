@@ -71,7 +71,7 @@ export function useStatusMetricChartData(
     return {
       data: [indices, ...valueCols] as uPlot.AlignedData,
       timeLabels: longest.map((sample) =>
-        formatChartTimeFromUs(sample.sessionTimestampUs),
+        formatChartTimeFromUs(sample.sessionTimeUs),
       ),
     };
   }, [selectedKeys, statusMetricSamples, filterIdx, maxPoints]);

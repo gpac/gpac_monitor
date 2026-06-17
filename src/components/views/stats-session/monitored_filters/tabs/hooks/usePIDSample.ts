@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { addPIDSample } from '@/shared/store/slices/monitoredFilterSlice';
 import type { PIDMetricSample } from '../../../types/pid';
 
-type SampleMetrics = Omit<PIDMetricSample, 'sessionTimestampUs'>;
+type SampleMetrics = Omit<PIDMetricSample, 'sessionTimeUs'>;
 
 export const usePIDSample = (pidKey: string, metrics: SampleMetrics): void => {
   const dispatch = useDispatch();
@@ -11,7 +11,7 @@ export const usePIDSample = (pidKey: string, metrics: SampleMetrics): void => {
     dispatch(
       addPIDSample({
         key: pidKey,
-        sample: { sessionTimestampUs: Date.now() * 1000, ...metrics },
+        sample: { sessionTimeUs: Date.now() * 1000, ...metrics },
       }),
     );
   }, [

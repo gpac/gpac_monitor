@@ -42,7 +42,7 @@ describe('OverviewTab — status samples lifecycle', () => {
     const store = makeStore();
     store.dispatch(
       addStatusMetricSamples([
-        { key: '0:fps', sample: { sessionTimestampUs: 1000, value: 30 } },
+        { key: '0:fps', sample: { sessionTimeUs: 1000, value: 30 } },
       ]),
     );
 
@@ -56,6 +56,6 @@ describe('OverviewTab — status samples lifecycle', () => {
 
     expect(
       store.getState().monitoredFilter.statusMetricSamples['0:fps'],
-    ).toEqual([{ sessionTimestampUs: 1000, value: 30 }]);
+    ).toEqual([{ sessionTimeUs: 1000, value: 30 }]);
   });
 });
