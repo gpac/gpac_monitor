@@ -207,10 +207,11 @@ export class BaseMessageHandler {
       this.callbacks.onFilterStatuses(
         data.stats.map((stat: any) => ({ idx: stat.idx, status: stat.status })),
       );
-      // Process immediately (low frequency: ~1 msg/sec)
       this.sessionStatsHandler.handleSessionStats(data.stats);
-      // Dispatch to Redux for stall detection
-      this.callbacks.onUpdateSessionStats(data.stats);
+      this.callbacks.onUpdateSessionStats({
+        stats: data.stats,
+        ts_us: data.ts_us,
+      });
     }
   }
 

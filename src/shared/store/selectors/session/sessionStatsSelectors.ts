@@ -14,6 +14,12 @@ const timeFractionChanged = (
 // Base selector
 export const selectSessionStatsState = (state: RootState) => state.sessionStats;
 
+export const selectSessionStartUs = (state: RootState): number | null =>
+  state.sessionStats.sessionStartUs;
+
+export const selectLastUpdateUs = (state: RootState): number | null =>
+  state.sessionStats.lastUpdateUs;
+
 export const selectMetricDefinitions = (state: RootState) =>
   state.sessionStats.metricDefinitions;
 

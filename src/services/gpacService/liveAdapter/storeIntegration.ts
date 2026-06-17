@@ -24,7 +24,8 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
     store.dispatch(filtersUpdated(data));
   },
   onSetLoading: (loading) => store.dispatch(setLoading(loading)),
-  onUpdateSessionStats: (stats) => store.dispatch(updateSessionStats(stats)),
+  onUpdateSessionStats: (payload) =>
+    store.dispatch(updateSessionStats(payload)),
   onLogsUpdate: (logs: GpacLogEntry[]) => {
     store.dispatch(appendLogsForAllTools(logs));
   },
