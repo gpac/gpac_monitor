@@ -97,6 +97,18 @@ export const formatChartTimeFromUs = (microseconds: number): string =>
     second: '2-digit',
   });
 
+export const formatCompactTime = (us: number): string => {
+  const totalSeconds = Math.floor(us / 1_000_000);
+  const seconds = totalSeconds % 60;
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const minutes = totalMinutes % 60;
+  const hours = Math.floor(totalMinutes / 60);
+  const ss = String(seconds).padStart(2, '0');
+  const mm = String(minutes).padStart(2, '0');
+  if (hours > 0) return `${String(hours).padStart(2, '0')}:${mm}:${ss}`;
+  return `${mm}:${ss}`;
+};
+
 export const formatBufferTime = (microseconds: number): string => {
   if (microseconds === 0) return '0 ms';
   const milliseconds = microseconds / 1000;
