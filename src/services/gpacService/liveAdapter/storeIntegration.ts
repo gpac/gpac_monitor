@@ -16,12 +16,14 @@ import {
 import {
   setParsedStatuses,
   addStatusMetricSamples,
+  addPIDSamples,
 } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectMetricDefinitions } from '@/shared/store/selectors';
 import {
   buildStatusSamplesFromStats,
   buildStatusSamplesFromParsed,
 } from '@/utils/metrics/statusMetricGraph';
+import { buildPIDSamplesFromFilterStats } from '@/utils/metrics/pidMetricGraph';
 import { selectSessionStartUs } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import { selectParsedStatus } from '@/shared/store/selectors/monitoredFilter';
 import { MessageHandlerCallbacks } from '../infrastructure/messageHandler/baseMessageHandler';
@@ -46,13 +48,23 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => ({
   },
   onUpdateFilterStats: (payload) => {
     const state = store.getState();
+    const sessionStartUs = selectSessionStartUs(state);
+
     const parsedStatus = selectParsedStatus(state, payload.idx);
-    const samples = buildStatusSamplesFromParsed(
+    const statusSamples = buildStatusSamplesFromParsed(
       { [payload.idx]: parsedStatus },
       payload.ts_us,
-      selectSessionStartUs(state),
+      sessionStartUs,
     );
-    if (samples.length > 0) store.dispatch(addStatusMetricSamples(samples));
+    if (statusSamples.length > 0)
+      store.dispatch(addStatusMetricSamples(statusSamples));
+
+    const pidSamples = buildPIDSamplesFromFilterStats(
+      payload,
+      payload.ts_us,
+      sessionStartUs,
+    );
+    if (pidSamples.length > 0) store.dispatch(addPIDSamples(pidSamples));
   },
   onLogsUpdate: (logs: GpacLogEntry[]) => {
     store.dispatch(appendLogsForAllTools(logs));
