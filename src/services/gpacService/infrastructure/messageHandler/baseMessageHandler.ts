@@ -225,6 +225,7 @@ export class BaseMessageHandler {
   private handleFilterStatsMessage(data: any): void {
     if (data.idx !== undefined) {
       this.callbacks.onFilterStatuses([{ idx: data.idx, status: data.status }]);
+      this.callbacks.onUpdateFilterStats({ idx: data.idx, ts_us: data.ts_us });
       // Process immediately (low frequency: ~1 msg/sec per filter)
       this.filterStatsHandler.handleFilterStatsUpdate(data);
     }

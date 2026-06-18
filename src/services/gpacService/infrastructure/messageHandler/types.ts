@@ -12,6 +12,7 @@ export interface MessageHandlerCallbacks {
   onArgUpdated: (indexes: number[]) => void;
   onSetMetricDefinitions: (definitions: MetricDefinitionMap) => void;
   onFilterStatuses: (entries: FilterStatusInput[]) => void;
+  onUpdateFilterStats: (payload: { idx: number; ts_us?: number }) => void;
   onSessionEnd?: (data: any) => void;
 }
 
