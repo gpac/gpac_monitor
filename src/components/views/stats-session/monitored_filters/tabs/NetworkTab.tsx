@@ -27,12 +27,9 @@ const NETWORK_HISTORY_STORAGE_KEY = 'gpac-network-history';
 const NetworkTab = memo(
   ({ filterId, data, filterName, lastTaskTimeUs }: NetworkTabProps) => {
     const isDetached = useIsDetached();
-    const { currentStats, formattedStats } = useNetworkMetrics(
-      data,
-      filterName,
-    );
+    const { formattedStats } = useNetworkMetrics(data, filterName);
 
-    const { duration, setDuration, windowDuration } = useChartDuration(
+    const { duration, setDuration } = useChartDuration(
       NETWORK_HISTORY_STORAGE_KEY,
       '1min',
       1000,
@@ -69,14 +66,7 @@ const NetworkTab = memo(
           </div>
         </div>
 
-        <FilterPerformanceCard
-          filterId={filterId}
-          bytesSent={currentStats.bytesSent}
-          bytesReceived={currentStats.bytesReceived}
-          lastTaskTimeUs={lastTaskTimeUs}
-          windowDurationMs={windowDuration}
-          showCurrentTime
-        />
+        <FilterPerformanceCard filterId={filterId} showCurrentTime />
       </div>
     );
   },

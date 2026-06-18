@@ -230,6 +230,9 @@ export class BaseMessageHandler {
         ts_us: data.ts_us,
         ipids: data.ipids,
         opids: data.opids,
+        bytes_sent: data.bytes_sent ?? 0,
+        bytes_done: data.bytes_done ?? 0,
+        last_task_time: data.last_task_time,
       });
       // Process immediately (low frequency: ~1 msg/sec per filter)
       this.filterStatsHandler.handleFilterStatsUpdate(data);

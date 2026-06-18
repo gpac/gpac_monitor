@@ -8,6 +8,9 @@ export interface FilterStatsPayload {
   ts_us?: number;
   ipids?: Record<string, PIDproperties>;
   opids?: Record<string, PIDproperties>;
+  bytes_sent: number;
+  bytes_done: number;
+  last_task_time?: number;
 }
 
 export interface MessageHandlerCallbacks {

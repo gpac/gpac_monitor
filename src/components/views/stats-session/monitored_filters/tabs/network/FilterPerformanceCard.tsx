@@ -8,7 +8,7 @@ import {
   BANDWIDTH_SERIES,
   formatBw,
 } from '../../charts/config/bandwidthCombinedUplotConfig';
-import { formatMicroseconds } from '@/utils/formatting';
+import { formatMicroseconds, formatChartTimeFromUs } from '@/utils/formatting';
 import { useAdaptiveChartHeight } from '@/shared/hooks';
 import LineHistoryChart from '../../charts/LineHistoryChart';
 
@@ -24,22 +24,11 @@ const SERIES_META: Record<SeriesKey, { label: string; color: string }> = {
 
 interface FilterPerformanceCardProps {
   filterId: string;
-  bytesSent: number;
-  bytesReceived: number;
-  lastTaskTimeUs?: number;
-  windowDurationMs?: number;
   showCurrentTime?: boolean;
 }
 
 export const FilterPerformanceCard = memo(
-  ({
-    filterId,
-    bytesSent,
-    bytesReceived,
-    lastTaskTimeUs = 0,
-    windowDurationMs,
-    showCurrentTime = false,
-  }: FilterPerformanceCardProps) => {
+  ({ filterId, showCurrentTime = false }: FilterPerformanceCardProps) => {
     const chartHeight = useAdaptiveChartHeight();
 
     const [visible, setVisible] = useState<Record<SeriesKey, boolean>>({
@@ -49,13 +38,7 @@ export const FilterPerformanceCard = memo(
     });
 
     const { outbandPoints, inbandPoints, lastTaskTimePoints } =
-      useFilterPerformanceChartData({
-        filterId,
-        bytesSent,
-        bytesReceived,
-        lastTaskTimeUs,
-        windowDurationMs,
-      });
+      useFilterPerformanceChartData({ filterId });
 
     const { data, timeLabels } = useMemo(() => {
       const maxLength = Math.max(outbandPoints.length, inbandPoints.length);
@@ -67,14 +50,7 @@ export const FilterPerformanceCard = memo(
       const labels = indices.map((index) => {
         const ts =
           outbandPoints[index]?.timestamp ?? inbandPoints[index]?.timestamp;
-        return ts
-          ? new Date(ts).toLocaleTimeString('en-US', {
-              hour12: false,
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-            })
-          : '';
+        return ts ? formatChartTimeFromUs(ts) : '';
       });
 
       const pointsMap: Record<SeriesKey, (number | null)[]> = {
