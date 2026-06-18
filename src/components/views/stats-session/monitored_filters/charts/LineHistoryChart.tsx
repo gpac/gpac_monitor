@@ -13,7 +13,7 @@ export const CHART_HEIGHT = 140;
 interface LineHistoryChartProps {
   series: SeriesDef[];
   data: uPlot.AlignedData;
-  timeLabels: string[];
+  formatX: (v: number) => string;
   leftAxisFormat?: (value: number) => string;
   rightAxisFormat?: (value: number) => string;
   showCurrentTime?: boolean;
@@ -21,12 +21,12 @@ interface LineHistoryChartProps {
   height?: number;
 }
 
-/** Index-based multi-series time chart with end-value labels (uPlot common layer). */
+/** Multi-series time chart with real X timestamps and end-value labels (uPlot). */
 const LineHistoryChart = memo(
   ({
     series,
     data,
-    timeLabels,
+    formatX,
     leftAxisFormat,
     showCurrentTime = true,
     showEndLabels = true,
@@ -35,31 +35,39 @@ const LineHistoryChart = memo(
   }: LineHistoryChartProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const dimensions = useContainerSize(containerRef);
-    const timeLabelsRef = useRef<string[]>([]);
-    timeLabelsRef.current = timeLabels;
     const [endLabels, setEndLabels] = useState<EndLabelInfo[]>([]);
 
     const options = useMemo(
       () =>
         createLineChartConfig({
           series,
-          timeLabelsRef,
+          formatX,
           leftAxis: leftAxisFormat ? { formatY: leftAxisFormat } : undefined,
           rightAxis: rightAxisFormat ? { formatY: rightAxisFormat } : undefined,
           onEndLabels: showEndLabels ? setEndLabels : undefined,
           ...dimensions,
         }),
-      [series, dimensions, leftAxisFormat, rightAxisFormat, showEndLabels],
+      [
+        series,
+        formatX,
+        dimensions,
+        leftAxisFormat,
+        rightAxisFormat,
+        showEndLabels,
+      ],
     );
+
+    const xData = data[0] as number[];
+    const lastX = xData.length > 0 ? xData[xData.length - 1] : null;
 
     return (
       <div
         style={{ width: '100%' }}
         className="flex flex-col justify-items-end"
       >
-        {showCurrentTime && timeLabels.length > 0 && (
+        {showCurrentTime && lastX != null && (
           <div className="w-full text-right font-mono text-xs opacity-60 mb-1">
-            {timeLabels[timeLabels.length - 1]}
+            {formatX(lastX)}
           </div>
         )}
         <div

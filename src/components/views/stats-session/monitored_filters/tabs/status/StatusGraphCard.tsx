@@ -7,6 +7,7 @@ import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useIsDetached } from '../../FilterViewContext';
 import type { NumericMetric } from '../../utils/statusViewModel';
 import { useStatusMetricChartData } from '../../charts/hooks/useStatusMetricChartData';
+import { formatCompactTime } from '@/utils/formatting';
 import LineHistoryChart from '../../charts/LineHistoryChart';
 import StatusMetricSelector from './StatusMetricSelector';
 
@@ -29,7 +30,7 @@ const StatusGraphCard = memo(
       1000,
     );
 
-    const { series, data, timeLabels } = useStatusMetricChartData(
+    const { series, data } = useStatusMetricChartData(
       filterIdx,
       selectedKeys,
       maxPoints,
@@ -59,7 +60,7 @@ const StatusGraphCard = memo(
             <LineHistoryChart
               series={series}
               data={data}
-              timeLabels={timeLabels}
+              formatX={formatCompactTime}
               showCurrentTime
               height={chartHeight}
             />

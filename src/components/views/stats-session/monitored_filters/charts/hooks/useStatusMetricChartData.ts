@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import type uPlot from 'uplot';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { type SeriesDef } from '@/components/common/charts';
-import { formatChartTimeFromUs } from '@/utils/formatting';
 import { buildStatusMetricKey } from '../../../types/statusMetric';
 import { makeStatusValueFormatter } from '../config/statusMetricChartConfig';
 import { PID_SELECTION_COLORS } from '../../tabs/pid/utils/pidColors';
@@ -10,7 +9,6 @@ import { PID_SELECTION_COLORS } from '../../tabs/pid/utils/pidColors';
 interface StatusMetricChartData {
   series: SeriesDef[];
   data: uPlot.AlignedData;
-  timeLabels: string[];
 }
 
 export function useStatusMetricChartData(
@@ -37,7 +35,7 @@ export function useStatusMetricChartData(
     [selectedKeys],
   );
 
-  const { data, timeLabels } = useMemo(() => {
+  const data = useMemo((): uPlot.AlignedData => {
     const allSamples = selectedKeys.map((key) => {
       const storeKey = buildStatusMetricKey(filterIdx, key);
       const samples = statusMetricSamples[storeKey] ?? [];
@@ -47,34 +45,31 @@ export function useStatusMetricChartData(
     const maxLen = Math.max(...allSamples.map((samples) => samples.length), 0);
 
     if (maxLen === 0) {
-      return {
-        data: [[0], ...selectedKeys.map(() => [null])] as uPlot.AlignedData,
-        timeLabels: [] as string[],
-      };
+      return [[0], ...selectedKeys.map(() => [null])] as uPlot.AlignedData;
     }
-
-    const indices = Array.from({ length: maxLen }, (_, index) => index);
 
     const longest = allSamples.reduce(
       (acc, samples) => (samples.length >= acc.length ? samples : acc),
       allSamples[0] ?? [],
     );
 
+    const longestOffset = maxLen - longest.length;
+    const firstTs = longest[0]?.sessionTimeUs ?? 0;
+    const xValues = Array.from({ length: maxLen }, (_, index) => {
+      const j = index - longestOffset;
+      return j >= 0 ? (longest[j]?.sessionTimeUs ?? firstTs) : firstTs;
+    });
+
     const valueCols = allSamples.map((samples) => {
       const offset = maxLen - samples.length;
-      return indices.map((i) => {
+      return xValues.map((_, i) => {
         const j = i - offset;
         return j < 0 ? null : (samples[j]?.value ?? null);
       });
     });
 
-    return {
-      data: [indices, ...valueCols] as uPlot.AlignedData,
-      timeLabels: longest.map((sample) =>
-        formatChartTimeFromUs(sample.sessionTimeUs),
-      ),
-    };
+    return [xValues, ...valueCols] as uPlot.AlignedData;
   }, [selectedKeys, statusMetricSamples, filterIdx, maxPoints]);
 
-  return { series, data, timeLabels };
+  return { series, data };
 }

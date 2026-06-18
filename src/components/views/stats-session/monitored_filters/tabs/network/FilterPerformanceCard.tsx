@@ -8,7 +8,7 @@ import {
   BANDWIDTH_SERIES,
   formatBw,
 } from '../../charts/config/bandwidthCombinedUplotConfig';
-import { formatMicroseconds, formatChartTimeFromUs } from '@/utils/formatting';
+import { formatMicroseconds, formatCompactTime } from '@/utils/formatting';
 import { useAdaptiveChartHeight } from '@/shared/hooks';
 import LineHistoryChart from '../../charts/LineHistoryChart';
 
@@ -40,34 +40,24 @@ export const FilterPerformanceCard = memo(
     const { outbandPoints, inbandPoints, lastTaskTimePoints } =
       useFilterPerformanceChartData({ filterId });
 
-    const { data, timeLabels } = useMemo(() => {
+    const data = useMemo((): uPlot.AlignedData => {
       const maxLength = Math.max(outbandPoints.length, inbandPoints.length);
-      const indices = Array.from(
-        { length: maxLength },
-        (_unused, index) => index,
-      );
-
-      const labels = indices.map((index) => {
-        const ts =
-          outbandPoints[index]?.timestamp ?? inbandPoints[index]?.timestamp;
-        return ts ? formatChartTimeFromUs(ts) : '';
+      const xValues = Array.from({ length: maxLength }, (_, index) => {
+        return (
+          outbandPoints[index]?.timestamp ?? inbandPoints[index]?.timestamp ?? 0
+        );
       });
 
       const pointsMap: Record<SeriesKey, (number | null)[]> = {
-        outband: indices.map((index) => outbandPoints[index]?.value ?? 0),
-        inband: indices.map((index) => inbandPoints[index]?.value ?? 0),
-        lastTaskTime: indices.map(
-          (index) => lastTaskTimePoints[index]?.value ?? 0,
+        outband: xValues.map((_, index) => outbandPoints[index]?.value ?? 0),
+        inband: xValues.map((_, index) => inbandPoints[index]?.value ?? 0),
+        lastTaskTime: xValues.map(
+          (_, index) => lastTaskTimePoints[index]?.value ?? 0,
         ),
       };
 
       const visibleKeys = SERIES_ORDER.filter((key) => visible[key]);
-      const filteredData: uPlot.AlignedData = [
-        indices,
-        ...visibleKeys.map((key) => pointsMap[key]),
-      ];
-
-      return { data: filteredData, timeLabels: labels };
+      return [xValues, ...visibleKeys.map((key) => pointsMap[key])];
     }, [outbandPoints, inbandPoints, lastTaskTimePoints, visible]);
 
     const filteredSeries = useMemo(
@@ -77,6 +67,9 @@ export const FilterPerformanceCard = memo(
         ),
       [visible],
     );
+
+    const lastTs =
+      outbandPoints.at(-1)?.timestamp ?? inbandPoints.at(-1)?.timestamp;
 
     return (
       <Card className="bg-monitor-panel border-transparent">
@@ -93,9 +86,9 @@ export const FilterPerformanceCard = memo(
                   setVisible((prev) => ({ ...prev, [key]: !prev[key] })),
               }))}
             />
-            {showCurrentTime && timeLabels.length > 0 && (
+            {showCurrentTime && lastTs != null && (
               <span className="ml-auto font-mono normal-case opacity-60 text-xs">
-                {timeLabels[timeLabels.length - 1]}
+                {formatCompactTime(lastTs)}
               </span>
             )}
           </CardTitle>
@@ -104,7 +97,7 @@ export const FilterPerformanceCard = memo(
           <LineHistoryChart
             series={filteredSeries}
             data={data}
-            timeLabels={timeLabels}
+            formatX={formatCompactTime}
             leftAxisFormat={formatBw}
             rightAxisFormat={formatMicroseconds}
             showCurrentTime={false}

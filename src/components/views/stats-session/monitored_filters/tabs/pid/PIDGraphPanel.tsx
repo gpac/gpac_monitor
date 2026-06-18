@@ -9,6 +9,7 @@ import {
   type PIDSeriesEntry,
 } from '../../charts/hooks/usePIDChartData';
 import { MODE_FORMATTERS } from '../../charts/config/pidHistoryChartConfig';
+import { formatCompactTime } from '@/utils/formatting';
 import LineHistoryChart from '../../charts/LineHistoryChart';
 
 const MODE_LABELS: Record<PIDMetricMode, string> = {
@@ -51,7 +52,7 @@ const PIDGraphPanel = memo(
     );
 
     const chartHeight = useAdaptiveChartHeight();
-    const { series, data, timeLabels } = usePIDChartData(entries, mode);
+    const { series, data } = usePIDChartData(entries, mode);
 
     if (entries.length === 0) return null;
 
@@ -60,7 +61,7 @@ const PIDGraphPanel = memo(
         <LineHistoryChart
           series={series}
           data={data}
-          timeLabels={timeLabels}
+          formatX={formatCompactTime}
           leftAxisFormat={MODE_FORMATTERS[mode]}
           showCurrentTime
           showEndLabels={showEndLabels}
