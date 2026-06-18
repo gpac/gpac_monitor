@@ -115,7 +115,7 @@ function SessionStatsManager(client) {
                 message: 'session_metrics',
                 data: sessionMetrics
             }));
-            print('Sent session_metrics to client');
+           
         }
     };
 

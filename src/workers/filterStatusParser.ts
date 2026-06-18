@@ -29,6 +29,25 @@ export interface ParsedFilterStatus {
   entries: StatusEntry[];
 }
 
+// GPAC emits nan/inf via C printf on division by zero (e.g. total_samples=0);
+// keep them typed as non-finite numbers instead of degrading to strings.
+function parseNonFiniteToken(rawValue: string): number | null {
+  switch (rawValue.toLowerCase()) {
+    case 'nan':
+    case '-nan':
+      return NaN;
+    case 'inf':
+    case '+inf':
+    case 'infinity':
+      return Infinity;
+    case '-inf':
+    case '-infinity':
+      return -Infinity;
+    default:
+      return null;
+  }
+}
+
 function parseScalarToken(
   token: string,
   definitions?: MetricDefinitionMap,
@@ -53,8 +72,6 @@ function parseScalarToken(
     return { type: 'str', key, value: rawValue, quoted: false };
   }
 
-  const defUnit = definitions?.[key]?.unit;
-
   const fractionMatch = rawValue.match(/^(\d+)\/(\d+)$/);
   if (fractionMatch) {
     const numerator = Number(fractionMatch[1]);
@@ -65,18 +82,17 @@ function parseScalarToken(
       key,
       value,
       fraction: { num: numerator, den: denominator },
-      ...(defUnit && { unit: defUnit }),
     };
+  }
+
+  const nonFiniteValue = parseNonFiniteToken(rawValue);
+  if (nonFiniteValue !== null) {
+    return { type: 'num', key, value: nonFiniteValue };
   }
 
   const numericValue = Number(rawValue);
   if (!isNaN(numericValue) && rawValue !== '') {
-    return {
-      type: 'num',
-      key,
-      value: numericValue,
-      ...(defUnit && { unit: defUnit }),
-    };
+    return { type: 'num', key, value: numericValue };
   }
 
   return { type: 'str', key, value: rawValue, quoted: false };
@@ -119,6 +135,20 @@ function parseArrayItem(
   }
 
   return { name: parts[0], entries };
+}
+
+// Definition unit is a fallback only: a runtime unit token already folded onto
+// an entry during tokenisation (e.g. "B/sample", "%") always takes precedence.
+function applyDefinitionUnits(
+  entries: StatusEntry[],
+  definitions?: MetricDefinitionMap,
+): void {
+  if (!definitions) return;
+  for (const entry of entries) {
+    if (entry.type !== 'num' || entry.unit) continue;
+    const defUnit = definitions[entry.key]?.unit;
+    if (defUnit) entry.unit = defUnit;
+  }
 }
 
 export function parseFilterStatus(
@@ -193,6 +223,8 @@ export function parseFilterStatus(
     if (infoEntry) infoEntry.value = `${infoEntry.value} ${text}`;
     else entries.push({ type: 'str', key: 'info', value: text, quoted: false });
   }
+
+  applyDefinitionUnits(entries, definitions);
 
   if (arrayEntry) entries.push(arrayEntry);
 
