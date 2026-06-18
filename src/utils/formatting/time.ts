@@ -89,13 +89,14 @@ export const formatChartTime = (): string => {
   });
 };
 
-export const formatChartTimeFromUs = (microseconds: number): string =>
-  new Date(microseconds / 1000).toLocaleTimeString('en-US', {
-    hour12: false,
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  });
+export const formatChartTimeFromUs = (microseconds: number): string => {
+  const totalSeconds = Math.floor(microseconds / 1_000_000);
+  const ss = String(totalSeconds % 60).padStart(2, '0');
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const mm = String(totalMinutes % 60).padStart(2, '0');
+  const hh = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+  return `${hh}:${mm}:${ss}`;
+};
 
 export const formatCompactTime = (us: number): string => {
   const totalSeconds = Math.floor(us / 1_000_000);
