@@ -25,10 +25,15 @@ const SERIES_META: Record<SeriesKey, { label: string; color: string }> = {
 interface FilterPerformanceCardProps {
   filterId: string;
   showCurrentTime?: boolean;
+  maxPoints?: number;
 }
 
 export const FilterPerformanceCard = memo(
-  ({ filterId, showCurrentTime = false }: FilterPerformanceCardProps) => {
+  ({
+    filterId,
+    showCurrentTime = false,
+    maxPoints,
+  }: FilterPerformanceCardProps) => {
     const chartHeight = useAdaptiveChartHeight();
 
     const [visible, setVisible] = useState<Record<SeriesKey, boolean>>({
@@ -41,24 +46,32 @@ export const FilterPerformanceCard = memo(
       useFilterPerformanceChartData({ filterId });
 
     const data = useMemo((): uPlot.AlignedData => {
-      const maxLength = Math.max(outbandPoints.length, inbandPoints.length);
+      const slicedOutband =
+        maxPoints != null ? outbandPoints.slice(-maxPoints) : outbandPoints;
+      const slicedInband =
+        maxPoints != null ? inbandPoints.slice(-maxPoints) : inbandPoints;
+      const slicedLastTask =
+        maxPoints != null
+          ? lastTaskTimePoints.slice(-maxPoints)
+          : lastTaskTimePoints;
+      const maxLength = Math.max(slicedOutband.length, slicedInband.length);
       const xValues = Array.from({ length: maxLength }, (_, index) => {
         return (
-          outbandPoints[index]?.timestamp ?? inbandPoints[index]?.timestamp ?? 0
+          slicedOutband[index]?.timestamp ?? slicedInband[index]?.timestamp ?? 0
         );
       });
 
       const pointsMap: Record<SeriesKey, (number | null)[]> = {
-        outband: xValues.map((_, index) => outbandPoints[index]?.value ?? 0),
-        inband: xValues.map((_, index) => inbandPoints[index]?.value ?? 0),
+        outband: xValues.map((_, index) => slicedOutband[index]?.value ?? 0),
+        inband: xValues.map((_, index) => slicedInband[index]?.value ?? 0),
         lastTaskTime: xValues.map(
-          (_, index) => lastTaskTimePoints[index]?.value ?? 0,
+          (_, index) => slicedLastTask[index]?.value ?? 0,
         ),
       };
 
       const visibleKeys = SERIES_ORDER.filter((key) => visible[key]);
       return [xValues, ...visibleKeys.map((key) => pointsMap[key])];
-    }, [outbandPoints, inbandPoints, lastTaskTimePoints, visible]);
+    }, [outbandPoints, inbandPoints, lastTaskTimePoints, visible, maxPoints]);
 
     const filteredSeries = useMemo(
       () =>

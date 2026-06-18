@@ -45,7 +45,7 @@ export const selectFilterLastTaskTimeData = createSelector(
 /**
  * Select max points configuration
  */
-export const selectMaxPoints = createSelector(
+export const d = createSelector(
   [selectMonitoredFilterState],
   (monitoredFilterState) => monitoredFilterState.maxPoints,
 );

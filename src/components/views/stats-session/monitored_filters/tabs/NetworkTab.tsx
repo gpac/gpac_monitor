@@ -29,7 +29,7 @@ const NetworkTab = memo(
     const isDetached = useIsDetached();
     const { formattedStats } = useNetworkMetrics(data, filterName);
 
-    const { duration, setDuration } = useChartDuration(
+    const { duration, setDuration, maxPoints } = useChartDuration(
       NETWORK_HISTORY_STORAGE_KEY,
       '1min',
       1000,
@@ -66,7 +66,11 @@ const NetworkTab = memo(
           </div>
         </div>
 
-        <FilterPerformanceCard filterId={filterId} showCurrentTime />
+        <FilterPerformanceCard
+          filterId={filterId}
+          showCurrentTime
+          maxPoints={maxPoints}
+        />
       </div>
     );
   },
