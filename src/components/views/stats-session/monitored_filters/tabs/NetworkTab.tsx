@@ -1,5 +1,4 @@
 import { memo } from 'react';
-import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { NetworkTabData } from '@/types/ui';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useChartDuration } from '@/shared/hooks';
@@ -7,7 +6,7 @@ import type { ChartDuration } from '@/utils/charts';
 import { FilterPerformanceCard } from './network/FilterPerformanceCard';
 import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 import { TAB_STYLES } from './styles';
-import { formatMicroseconds } from '@/utils/formatting/time';
+import { formatMicroseconds } from '@/utils';
 import { useIsDetached } from '../FilterViewContext';
 
 interface NetworkTabProps {
@@ -27,14 +26,10 @@ const NETWORK_HISTORY_STORAGE_KEY = 'gpac-network-history';
 
 const NetworkTab = memo(
   ({ filterId, data, filterName, lastTaskTimeUs }: NetworkTabProps) => {
-    const { isHistory } = useDataMode();
     const isDetached = useIsDetached();
-    const { currentStats, formattedStats } = useNetworkMetrics(
-      data,
-      filterName,
-    );
+    const { formattedStats } = useNetworkMetrics(data, filterName);
 
-    const { duration, setDuration, windowDuration } = useChartDuration(
+    const { duration, setDuration, maxPoints } = useChartDuration(
       NETWORK_HISTORY_STORAGE_KEY,
       '1min',
       1000,
@@ -58,7 +53,7 @@ const NetworkTab = memo(
             {formatMicroseconds(lastTaskTimeUs)}
           </span>
           <div className="ml-auto flex items-center gap-2">
-            {!isHistory && !isDetached && (
+            {!isDetached && (
               <WindowDurationBadge
                 value={duration}
                 onChange={setDuration}
@@ -66,21 +61,15 @@ const NetworkTab = memo(
               />
             )}
             <span className="text-muted-foreground/70 text-xs">
-              {isHistory ? 'History' : 'Live'}{' '}
-              <span className={isHistory ? 'text-purple-400' : 'text-error'}>
-                ⏺
-              </span>
+              Live <span className="text-error">⏺</span>
             </span>
           </div>
         </div>
 
         <FilterPerformanceCard
           filterId={filterId}
-          bytesSent={currentStats.bytesSent}
-          bytesReceived={currentStats.bytesReceived}
-          lastTaskTimeUs={lastTaskTimeUs}
-          windowDurationMs={isHistory ? undefined : windowDuration}
           showCurrentTime
+          maxPoints={maxPoints}
         />
       </div>
     );

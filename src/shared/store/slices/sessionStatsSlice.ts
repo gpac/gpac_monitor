@@ -25,6 +25,11 @@ export interface SessionFilterStats {
 
 export type StatsMode = 'session' | 'filter';
 
+export interface SessionStatsPayload {
+  stats: SessionFilterStats[];
+  ts_us?: number;
+}
+
 export interface SessionStatsState {
   mode: StatsMode;
   sessionStats: Record<string, SessionFilterStats>;
@@ -33,6 +38,7 @@ export interface SessionStatsState {
   selectedFilterId: string | null;
   lastUpdate: number | null;
   lastUpdateUs: number | null;
+  sessionStartUs: number | null;
   isLoading: boolean;
   subscribedComponents: string[];
   isSubscribed: boolean;
@@ -47,6 +53,7 @@ const initialState: SessionStatsState = {
   selectedFilterId: null,
   lastUpdate: null,
   lastUpdateUs: null,
+  sessionStartUs: null,
   isLoading: false,
   subscribedComponents: [],
   isSubscribed: false,
@@ -57,34 +64,23 @@ const sessionStatsSlice = createSlice({
   name: 'sessionStats',
   initialState,
   reducers: {
-    updateSessionStats: (
-      state,
-      action: PayloadAction<
-        SessionFilterStats[] | { stats: SessionFilterStats[]; ts_us?: number }
-      >,
-    ) => {
-      const isArray = Array.isArray(action.payload);
-      const stats = isArray
-        ? (action.payload as SessionFilterStats[])
-        : (action.payload as { stats: SessionFilterStats[]; ts_us?: number })
-            .stats;
-      const ts_us = isArray
-        ? undefined
-        : (action.payload as { stats: SessionFilterStats[]; ts_us?: number })
-            .ts_us;
+    updateSessionStats: (state, action: PayloadAction<SessionStatsPayload>) => {
+      const { stats, ts_us } = action.payload;
 
-      // Save previous stats for stall detection
-      state.previousSessionStats = { ...state.sessionStats };
+      state.previousSessionStats = state.sessionStats;
 
       const newStats: Record<string, SessionFilterStats> = {};
       stats.forEach((filter) => {
-        newStats[filter.idx.toString()] = {
-          ...filter,
-        };
+        const prevFilter = state.sessionStats[filter.idx.toString()];
+        const preservedEOS = filter.is_eos || prevFilter?.is_eos || false;
+        newStats[filter.idx.toString()] = { ...filter, is_eos: preservedEOS };
       });
       state.sessionStats = newStats;
       state.lastUpdate = Date.now();
       state.lastUpdateUs = ts_us ?? null;
+      if (state.sessionStartUs === null && ts_us != null) {
+        state.sessionStartUs = ts_us;
+      }
       state.isLoading = false;
     },
 
@@ -107,6 +103,8 @@ const sessionStatsSlice = createSlice({
     clearSessionStats: (state) => {
       state.sessionStats = {};
       state.lastUpdate = null;
+      state.lastUpdateUs = null;
+      state.sessionStartUs = null;
     },
 
     subscribeToSessionStats: (state, action: PayloadAction<string>) => {
@@ -122,16 +120,19 @@ const sessionStatsSlice = createSlice({
       );
       state.isSubscribed = state.subscribedComponents.length > 0;
 
-      // Clear stats if no components are subscribed
       if (!state.isSubscribed) {
         state.sessionStats = {};
         state.lastUpdate = null;
+        state.lastUpdateUs = null;
+        state.sessionStartUs = null;
       }
     },
 
     resetSessionStats: (state) => {
       state.sessionStats = {};
       state.lastUpdate = null;
+      state.lastUpdateUs = null;
+      state.sessionStartUs = null;
       state.isLoading = false;
     },
 

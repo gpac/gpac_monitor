@@ -128,6 +128,7 @@ export interface EdgeData extends Record<string, unknown> {
   id: string;
   source: string;
   target: string;
+  filterType: FilterType;
   bufferPercentage: number;
   pidName: string;
 }

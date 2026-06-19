@@ -100,7 +100,7 @@ function FilterManager(client) {
                         break;
                 }
 
-                return JSON.stringify({ message: 'filter_stats', ...payload });
+                return JSON.stringify({ message: 'filter_stats', ts_us: now, ...payload });
             });
 
             if (serialized && this.client.client) {

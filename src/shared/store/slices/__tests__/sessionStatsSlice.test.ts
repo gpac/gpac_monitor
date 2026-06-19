@@ -1,179 +1,120 @@
 import { describe, it, expect } from 'vitest';
 import reducer, {
   updateSessionStats,
-  setFilterPids,
-  clearFilterPids,
-  SessionStatsState,
+  clearSessionStats,
+  resetSessionStats,
+  unsubscribeFromSessionStats,
+  subscribeToSessionStats,
 } from '../sessionStatsSlice';
-import type { SessionFilterStats } from '../sessionStatsSlice';
+import type {
+  SessionStatsState,
+  SessionFilterStats,
+} from '../sessionStatsSlice';
 
-const initialState: SessionStatsState = {
-  mode: 'session',
-  sessionStats: {},
-  previousSessionStats: {},
-  pidsByFilter: {},
-  selectedFilterId: null,
-  lastUpdate: null,
-  lastUpdateUs: null,
-  isLoading: false,
-  subscribedComponents: [],
-  isSubscribed: false,
+const initialState: SessionStatsState = reducer(undefined, { type: '@@INIT' });
+
+const stat0: SessionFilterStats = {
+  idx: 0,
+  status: 'done info="dispatch canceled" prog=5000/135642397',
+  bytes_done: 0,
+  bytes_sent: 5000,
+  pck_sent: 1,
+  pck_done: 0,
+  time: 21673,
+  nb_ipid: 0,
+  nb_opid: 1,
+  is_eos: false,
+  last_ts_sent: null,
 };
 
-const makeFilter = (
-  idx: number,
-  bytes_sent = 0,
-  bytes_done = 0,
-): SessionFilterStats => ({
-  idx,
-  status: 'play',
-  bytes_done,
-  bytes_sent,
-  pck_sent: 0,
-  pck_done: 0,
-  nb_opid: 1,
+const stat3: SessionFilterStats = {
+  idx: 3,
+  status: 'fps=663.18 frames=349 time=179712/12800 Q=3304 PT=P LAT=41',
+  bytes_done: 539136000,
+  bytes_sent: 2966447,
+  pck_sent: 349,
+  pck_done: 390,
+  time: 566924,
   nb_ipid: 1,
-  time: 0,
-});
+  nb_opid: 1,
+  is_eos: false,
+  last_ts_sent: { num: 179712, den: 12800 },
+};
 
-describe('sessionStatsSlice — updateSessionStats', () => {
-  it('array form (live compat) stores null in lastUpdateUs', () => {
+const TS_FIRST = 16172920;
+const TS_SECOND = 16672920;
+
+describe('sessionStatsSlice — ts_us plumbing', () => {
+  it('initialises sessionStartUs and lastUpdateUs to null', () => {
+    expect(initialState.sessionStartUs).toBeNull();
+    expect(initialState.lastUpdateUs).toBeNull();
+  });
+
+  it('sets sessionStartUs and lastUpdateUs on first tick with ts_us', () => {
     const state = reducer(
       initialState,
-      updateSessionStats([makeFilter(0, 100)]),
+      updateSessionStats({ stats: [stat0, stat3], ts_us: TS_FIRST }),
     );
+    expect(state.sessionStartUs).toBe(TS_FIRST);
+    expect(state.lastUpdateUs).toBe(TS_FIRST);
+  });
+
+  it('advances lastUpdateUs but keeps sessionStartUs on subsequent tick', () => {
+    let state = reducer(
+      initialState,
+      updateSessionStats({ stats: [stat0, stat3], ts_us: TS_FIRST }),
+    );
+    state = reducer(
+      state,
+      updateSessionStats({ stats: [stat0, stat3], ts_us: TS_SECOND }),
+    );
+    expect(state.sessionStartUs).toBe(TS_FIRST);
+    expect(state.lastUpdateUs).toBe(TS_SECOND);
+  });
+
+  it('leaves both null when ts_us is absent from payload', () => {
+    const state = reducer(initialState, updateSessionStats({ stats: [stat0] }));
     expect(state.lastUpdateUs).toBeNull();
-    expect(state.sessionStats['0'].bytes_sent).toBe(100);
+    expect(state.sessionStartUs).toBeNull();
   });
 
-  it('object form with ts_us stores the GPAC timestamp', () => {
+  it('preserves existing stats correctly', () => {
     const state = reducer(
       initialState,
-      updateSessionStats({ stats: [makeFilter(0, 500)], ts_us: 1_500_000 }),
+      updateSessionStats({ stats: [stat0, stat3], ts_us: TS_FIRST }),
     );
-    expect(state.lastUpdateUs).toBe(1_500_000);
-    expect(state.sessionStats['0'].bytes_sent).toBe(500);
+    expect(Object.keys(state.sessionStats)).toHaveLength(2);
+    expect(state.sessionStats['3'].status).toBe(stat3.status);
   });
 
-  it('object form without ts_us stores null', () => {
-    const state = reducer(
+  it('resets both fields on clearSessionStats', () => {
+    let state = reducer(
       initialState,
-      updateSessionStats({ stats: [makeFilter(0)] }),
+      updateSessionStats({ stats: [stat0], ts_us: TS_FIRST }),
     );
+    state = reducer(state, clearSessionStats());
+    expect(state.sessionStartUs).toBeNull();
     expect(state.lastUpdateUs).toBeNull();
   });
 
-  it('saves current stats as previousSessionStats before update', () => {
-    const s1 = reducer(
+  it('resets both fields on resetSessionStats', () => {
+    let state = reducer(
       initialState,
-      updateSessionStats({ stats: [makeFilter(0, 100)], ts_us: 1_000_000 }),
+      updateSessionStats({ stats: [stat0], ts_us: TS_FIRST }),
     );
-    const s2 = reducer(
-      s1,
-      updateSessionStats({ stats: [makeFilter(0, 200)], ts_us: 2_000_000 }),
-    );
-    expect(s2.previousSessionStats['0'].bytes_sent).toBe(100);
-    expect(s2.sessionStats['0'].bytes_sent).toBe(200);
+    state = reducer(state, resetSessionStats());
+    expect(state.sessionStartUs).toBeNull();
+    expect(state.lastUpdateUs).toBeNull();
   });
 
-  it('rate formula: 1000 bytes in 1s = 1000 bytes/s (upload)', () => {
-    const s1 = reducer(
-      initialState,
-      updateSessionStats({ stats: [makeFilter(0, 0)], ts_us: 1_000_000 }),
+  it('resets both fields when last subscriber unsubscribes', () => {
+    let state = reducer(initialState, subscribeToSessionStats('comp-a'));
+    state = reducer(
+      state,
+      updateSessionStats({ stats: [stat0], ts_us: TS_FIRST }),
     );
-    const s2 = reducer(
-      s1,
-      updateSessionStats({ stats: [makeFilter(0, 1000)], ts_us: 2_000_000 }),
-    );
-    const deltaTimeSec = (s2.lastUpdateUs! - s1.lastUpdateUs!) / 1_000_000;
-    const rate =
-      (s2.sessionStats['0'].bytes_sent -
-        s2.previousSessionStats['0'].bytes_sent) /
-      deltaTimeSec;
-    expect(deltaTimeSec).toBe(1);
-    expect(rate).toBe(1000);
-  });
-
-  it('rate formula: 2000 bytes_done in 1s = 2000 bytes/s (download)', () => {
-    const s1 = reducer(
-      initialState,
-      updateSessionStats({ stats: [makeFilter(0, 0, 0)], ts_us: 1_000_000 }),
-    );
-    const s2 = reducer(
-      s1,
-      updateSessionStats({ stats: [makeFilter(0, 0, 2000)], ts_us: 2_000_000 }),
-    );
-    const deltaTimeSec = (s2.lastUpdateUs! - s1.lastUpdateUs!) / 1_000_000;
-    const rate =
-      (s2.sessionStats['0'].bytes_done -
-        s2.previousSessionStats['0'].bytes_done) /
-      deltaTimeSec;
-    expect(rate).toBe(2000);
-  });
-});
-
-describe('sessionStatsSlice — setFilterPids', () => {
-  const pid = (name: string) => ({ name }) as any;
-
-  it('merges per-entry: other filters are preserved', () => {
-    // Regression: setFilterPids used to replace the entire dict
-    const withTwo = reducer(
-      initialState,
-      setFilterPids({
-        '1': { ipids: { a: pid('a') }, opids: { x: pid('x') } },
-        '2': { ipids: { b: pid('b') }, opids: { y: pid('y') } },
-      }),
-    );
-    // Update only filter 1 ipids (simulating filter_pid_reconfigured)
-    const updated = reducer(
-      withTwo,
-      setFilterPids({ '1': { ipids: { a2: pid('a2') } } }),
-    );
-    // Filter 2 must still be there
-    expect(updated.pidsByFilter['2']).toBeDefined();
-    expect(updated.pidsByFilter['2'].ipids?.b).toBeDefined();
-  });
-
-  it('preserves opids when only ipids are updated', () => {
-    // Regression: filter_pid_reconfigured only sends ipids, must not wipe opids
-    const initial = reducer(
-      initialState,
-      setFilterPids({
-        '3': { ipids: { a: pid('a') }, opids: { x: pid('x') } },
-      }),
-    );
-    const updated = reducer(
-      initial,
-      setFilterPids({ '3': { ipids: { a2: pid('a2') } } }),
-    );
-    expect(updated.pidsByFilter['3'].opids?.x).toBeDefined();
-    expect(updated.pidsByFilter['3'].ipids?.a2).toBeDefined();
-    expect(updated.pidsByFilter['3'].ipids?.a).toBeUndefined();
-  });
-
-  it('clearFilterPids empties the dict', () => {
-    const withData = reducer(
-      initialState,
-      setFilterPids({ '1': { ipids: { a: pid('a') } } }),
-    );
-    const cleared = reducer(withData, clearFilterPids());
-    expect(withData.pidsByFilter['1']).toBeDefined();
-    expect(cleared.pidsByFilter).toEqual({});
-  });
-
-  it('clearFilterPids + setFilterPids gives clean state (hydrate pattern)', () => {
-    const stale = reducer(
-      initialState,
-      setFilterPids({ '99': { ipids: { stale: pid('stale') } } }),
-    );
-    const cleared = reducer(stale, clearFilterPids());
-    const fresh = reducer(
-      cleared,
-      setFilterPids({
-        '1': { ipids: { a: pid('a') }, opids: { x: pid('x') } },
-      }),
-    );
-    expect(fresh.pidsByFilter['99']).toBeUndefined();
-    expect(fresh.pidsByFilter['1'].ipids?.a).toBeDefined();
+    state = reducer(state, unsubscribeFromSessionStats('comp-a'));
+    expect(state.sessionStartUs).toBeNull();
+    expect(state.lastUpdateUs).toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 import type uPlot from 'uplot';
-import type { SeriesDef } from '../index';
+import type { SeriesDef } from '../chartTypes';
 
 const TOOLTIP_STYLE =
   'position:absolute;background:rgb(17 24 39);color:rgb(209 213 219);border:1px solid rgb(55 65 81);border-radius:6px;padding:8px 12px;font-size:11px;font-family:monospace;pointer-events:none;z-index:100;white-space:nowrap;box-shadow:0 4px 6px -1px rgb(0 0 0/0.3)';

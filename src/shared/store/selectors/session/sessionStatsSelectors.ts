@@ -17,6 +17,9 @@ export const selectSessionStatsState = (state: RootState) => state.sessionStats;
 export const selectFilterPids = (state: RootState, filterIdx: string) =>
   state.sessionStats.pidsByFilter[filterIdx];
 
+export const selectSessionStartUs = (state: RootState): number | null =>
+  state.sessionStats.sessionStartUs;
+
 export const selectMetricDefinitions = (state: RootState) =>
   state.sessionStats.metricDefinitions;
 

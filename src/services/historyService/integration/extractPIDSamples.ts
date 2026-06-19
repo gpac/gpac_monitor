@@ -4,7 +4,7 @@ import type {
 } from '@/types/domain/gpac/filter-stats';
 import type { PIDMetricSample } from '@/components/views/stats-session/types/pid';
 import { buildPIDKey } from '@/components/views/stats-session/types/pid';
-import { formatCompactTime, tsToSeconds } from '@/utils/formatting/time';
+import { tsToSeconds } from '@/utils/formatting/time';
 
 export type PIDSample = { key: string; sample: PIDMetricSample };
 export type PIDDynamicByFilter = Record<
@@ -21,8 +21,7 @@ export function extractPIDSamples(
   tsUs: number,
   sessionStartUs: number,
 ): PIDSample[] {
-  const sessionTimestampUs = tsUs - sessionStartUs;
-  const time = formatCompactTime(sessionTimestampUs);
+  const sessionTimeUs = tsUs - sessionStartUs;
   const samples: PIDSample[] = [];
 
   for (const stat of stats) {
@@ -31,8 +30,7 @@ export function extractPIDSamples(
         samples.push({
           key: buildPIDKey(stat.idx, 'input', pidIndex),
           sample: {
-            sessionTimestampUs,
-            time,
+            sessionTimeUs,
             averageBitrate: pid.stats?.average_bitrate ?? null,
             bufferTime: pid.stats?.buffer_time ?? null,
             processTime: pid.stats?.average_process_time ?? null,
@@ -47,8 +45,7 @@ export function extractPIDSamples(
         samples.push({
           key: buildPIDKey(stat.idx, 'output', pidIndex),
           sample: {
-            sessionTimestampUs,
-            time,
+            sessionTimeUs,
             averageBitrate: pid.stats?.average_bitrate ?? null,
             bufferTime: pid.stats?.buffer_time ?? null,
             processTime: pid.stats?.average_process_time ?? null,

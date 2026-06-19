@@ -1,30 +1,35 @@
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
-import type { CPUStats } from '@/types/domain/system';
-import type { GraphFilterData } from '@/types/domain/gpac';
-import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
-import type { GpacMessage } from '@/types/communication/shared';
+import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { FilterStatusInput } from '@/services/gpacService/liveAdapter/extractParsedStatuses';
+import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
+
+export interface FilterStatsPayload {
+  idx: number;
+  ts_us?: number;
+  ipids?: Record<string, PIDproperties>;
+  opids?: Record<string, PIDproperties>;
+  bytes_sent: number;
+  bytes_done: number;
+  last_task_time?: number;
+}
 
 export interface MessageHandlerCallbacks {
-  onUpdateGraphData: (data: GraphFilterData[]) => void;
+  onUpdateGraphData: (data: any) => void;
   onSetLoading: (loading: boolean) => void;
-  onUpdateSessionStats: (
-    stats:
-      | SessionFilterStats[]
-      | { stats: SessionFilterStats[]; ts_us?: number },
-  ) => void;
+  onUpdateSessionStats: (stats: any) => void;
   onLogsUpdate: (logs: GpacLogEntry[]) => void;
   onLogSubscriptionChange: (isSubscribed: boolean) => void;
-  onSessionEnd?: (data: unknown) => void;
-  onUpdateCpuStats?: (stats: CPUStats) => void;
-  onUpdateCommandLine?: (commandLine: string | null) => void;
   onPidReconfigured: (indexes: number[]) => void;
   onArgUpdated: (indexes: number[]) => void;
-  onSetMetricDefinitions: (raw: string) => void;
+  onSetMetricDefinitions: (definitions: MetricDefinitionMap) => void;
+  onFilterStatuses: (entries: FilterStatusInput[]) => void;
+  onUpdateFilterStats: (payload: FilterStatsPayload) => void;
+  onSessionEnd?: (data: any) => void;
 }
 
 export interface MessageHandlerDependencies {
   isConnected: () => boolean;
-  send: (message: GpacMessage) => Promise<void>;
+  send: (message: any) => Promise<void>;
   stopReconnection: () => void;
   markEndOfSession: () => void;
 }

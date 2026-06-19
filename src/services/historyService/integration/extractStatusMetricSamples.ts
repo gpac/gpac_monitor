@@ -15,7 +15,7 @@ export function extractStatusMetricSamples(
   tsUs: number,
   sessionStartUs: number,
 ): StatusMetricSampleEntry[] {
-  const sessionTimestampUs = tsUs - sessionStartUs;
+  const sessionTimeUs = tsUs - sessionStartUs;
   const samples: StatusMetricSampleEntry[] = [];
 
   for (const stat of stats) {
@@ -25,7 +25,7 @@ export function extractStatusMetricSamples(
     for (const metric of metrics) {
       samples.push({
         key: buildStatusMetricKey(stat.idx, metric.key),
-        sample: { sessionTimestampUs, value: metric.value },
+        sample: { sessionTimeUs, value: metric.value },
       });
     }
   }

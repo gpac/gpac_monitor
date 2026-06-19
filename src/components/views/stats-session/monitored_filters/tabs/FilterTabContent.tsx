@@ -13,7 +13,6 @@ interface FilterTabContentProps {
   onBack: () => void;
   onOpenProperties: () => void;
   initialTab?: InitialTabType;
-  onTabChange?: (tab: string) => void;
   isLoading?: boolean;
   isDetached?: boolean;
 }
@@ -27,7 +26,6 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
   onBack,
   onOpenProperties,
   initialTab,
-  onTabChange,
   isLoading = false,
   isDetached = false,
 }) => {
@@ -39,7 +37,6 @@ export const FilterTabContent: React.FC<FilterTabContentProps> = ({
     onBack,
     onOpenProperties,
     initialTab,
-    onTabChange,
     isLoading,
     isDetached,
     ...(filterData && { filterData }),

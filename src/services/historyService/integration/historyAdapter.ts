@@ -222,7 +222,9 @@ export class HistoryAdapter {
     dispatch(clearGraph());
     dispatch(filtersUpdated(snapshot.filters.map(toGraphFilterData)));
     dispatch(setCommandLine(snapshot.command_line));
-    dispatch(updateSessionStats(snapshot.filters.map(toSessionFilterStats)));
+    dispatch(
+      updateSessionStats({ stats: snapshot.filters.map(toSessionFilterStats) }),
+    );
     dispatch(clearFilterPids());
     dispatch(setFilterPids(buildPidsByFilter(snapshot.filters)));
     dispatch(clearFilterArgs());

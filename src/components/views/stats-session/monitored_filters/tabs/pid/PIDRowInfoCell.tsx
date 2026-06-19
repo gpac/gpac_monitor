@@ -47,7 +47,6 @@ const PIDRowInfoCell = memo(
           pidIndex: pid.pidIdx,
           label: buildPIDDisplayLabel(pid),
           streamTypeLabel: STREAM_TYPE_SHORT_LABEL[pid.type],
-          streamType: pid.type,
         }),
       );
     }, [dispatch, filterIdx, variant, pid.pidIdx, pid]);

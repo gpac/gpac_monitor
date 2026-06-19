@@ -98,6 +98,7 @@ export interface CpuStatsMessage {
 
 export interface FilterStatsMessage extends MonitoredFilterStats {
   message: 'filter_stats';
+  ts_us?: number;
 }
 
 export interface IpidPropsResponseMessage {

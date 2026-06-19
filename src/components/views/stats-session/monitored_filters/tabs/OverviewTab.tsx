@@ -1,7 +1,6 @@
-import { memo, useEffect, useMemo } from 'react';
-import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { memo, useMemo } from 'react';
+import { useAppSelector } from '@/shared/hooks/redux';
 import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
-import { clearStatusMetricsByFilter } from '@/shared/store/slices/monitoredFilterSlice';
 import { OverviewTabData } from '@/types/ui';
 import {
   formatBytes,
@@ -11,7 +10,6 @@ import {
 import { getFilterHealthInfo, type FilterAlerts } from '../utils/statusHelpers';
 import { buildFilterStatusViewModel } from '../utils/statusViewModel';
 import { useIsDetached } from '../FilterViewContext';
-import { useDataMode } from '@/shared/hooks';
 import { selectMetricDefinitions } from '@/shared/store/selectors';
 import { MetricRow, TableSection } from './shared/tableLayout';
 import FilterIdentityStrip from './FilterIdentityStrip';
@@ -28,9 +26,7 @@ interface OverviewTabProps {
 const OverviewTab = memo(
   ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
     const { parsedStatus, type, filterIdx, time, name } = filter;
-    const dispatch = useAppDispatch();
     const isDetached = useIsDetached();
-    const { isHistory } = useDataMode();
 
     const isStalled = useAppSelector(
       selectIsFilterStalled(filterIdx.toString()),
@@ -54,13 +50,6 @@ const OverviewTab = memo(
           .map((metric) => ({ key: metric.key, rawValue: metric.rawValue })),
       [statusGroups.numericMetrics],
     );
-    useEffect(
-      () => () => {
-        if (!isHistory) dispatch(clearStatusMetricsByFilter(filterIdx));
-      },
-      [dispatch, filterIdx, isHistory],
-    );
-
     const processing = useMemo(() => {
       const secs = microsecondsToSeconds(time);
       return {

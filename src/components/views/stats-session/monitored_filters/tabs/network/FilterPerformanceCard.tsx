@@ -3,12 +3,12 @@ import { LuArrowUpDown } from 'react-icons/lu';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type uPlot from 'uplot';
 import { SeriesLegend } from '@/components/common/charts';
-import { useBandwidthChart } from '../../charts/hooks/useBandwidthChart';
+import { useFilterPerformanceChartData } from '../../charts/hooks/useFilterPerformanceChartData';
 import {
   BANDWIDTH_SERIES,
   formatBw,
 } from '../../charts/config/bandwidthCombinedUplotConfig';
-import { formatMicroseconds } from '@/utils/formatting';
+import { formatMicroseconds, formatCompactTime } from '@/utils/formatting';
 import { useAdaptiveChartHeight } from '@/shared/hooks';
 import LineHistoryChart from '../../charts/LineHistoryChart';
 
@@ -24,21 +24,15 @@ const SERIES_META: Record<SeriesKey, { label: string; color: string }> = {
 
 interface FilterPerformanceCardProps {
   filterId: string;
-  bytesSent: number;
-  bytesReceived: number;
-  lastTaskTimeUs?: number;
-  windowDurationMs?: number;
   showCurrentTime?: boolean;
+  maxPoints?: number;
 }
 
 export const FilterPerformanceCard = memo(
   ({
     filterId,
-    bytesSent,
-    bytesReceived,
-    lastTaskTimeUs = 0,
-    windowDurationMs,
     showCurrentTime = false,
+    maxPoints,
   }: FilterPerformanceCardProps) => {
     const chartHeight = useAdaptiveChartHeight();
 
@@ -49,42 +43,35 @@ export const FilterPerformanceCard = memo(
     });
 
     const { outbandPoints, inbandPoints, lastTaskTimePoints } =
-      useBandwidthChart({
-        filterId,
-        bytesSent,
-        bytesReceived,
-        lastTaskTimeUs,
-        windowDurationMs,
+      useFilterPerformanceChartData({ filterId });
+
+    const data = useMemo((): uPlot.AlignedData => {
+      const slicedOutband =
+        maxPoints != null ? outbandPoints.slice(-maxPoints) : outbandPoints;
+      const slicedInband =
+        maxPoints != null ? inbandPoints.slice(-maxPoints) : inbandPoints;
+      const slicedLastTask =
+        maxPoints != null
+          ? lastTaskTimePoints.slice(-maxPoints)
+          : lastTaskTimePoints;
+      const maxLength = Math.max(slicedOutband.length, slicedInband.length);
+      const xValues = Array.from({ length: maxLength }, (_, index) => {
+        return (
+          slicedOutband[index]?.timestamp ?? slicedInband[index]?.timestamp ?? 0
+        );
       });
 
-    const { data, timeLabels } = useMemo(() => {
-      const maxLength = Math.max(outbandPoints.length, inbandPoints.length);
-      const indices = Array.from(
-        { length: maxLength },
-        (_unused, index) => index,
-      );
-
-      const labels = indices.map(
-        (index) =>
-          outbandPoints[index]?.time || inbandPoints[index]?.time || '',
-      );
-
       const pointsMap: Record<SeriesKey, (number | null)[]> = {
-        outband: indices.map((index) => outbandPoints[index]?.value ?? 0),
-        inband: indices.map((index) => inbandPoints[index]?.value ?? 0),
-        lastTaskTime: indices.map(
-          (index) => lastTaskTimePoints[index]?.value ?? 0,
+        outband: xValues.map((_, index) => slicedOutband[index]?.value ?? 0),
+        inband: xValues.map((_, index) => slicedInband[index]?.value ?? 0),
+        lastTaskTime: xValues.map(
+          (_, index) => slicedLastTask[index]?.value ?? 0,
         ),
       };
 
       const visibleKeys = SERIES_ORDER.filter((key) => visible[key]);
-      const filteredData: uPlot.AlignedData = [
-        indices,
-        ...visibleKeys.map((key) => pointsMap[key]),
-      ];
-
-      return { data: filteredData, timeLabels: labels };
-    }, [outbandPoints, inbandPoints, lastTaskTimePoints, visible]);
+      return [xValues, ...visibleKeys.map((key) => pointsMap[key])];
+    }, [outbandPoints, inbandPoints, lastTaskTimePoints, visible, maxPoints]);
 
     const filteredSeries = useMemo(
       () =>
@@ -93,6 +80,9 @@ export const FilterPerformanceCard = memo(
         ),
       [visible],
     );
+
+    const lastTs =
+      outbandPoints.at(-1)?.timestamp ?? inbandPoints.at(-1)?.timestamp;
 
     return (
       <Card className="bg-monitor-panel border-transparent">
@@ -109,9 +99,9 @@ export const FilterPerformanceCard = memo(
                   setVisible((prev) => ({ ...prev, [key]: !prev[key] })),
               }))}
             />
-            {showCurrentTime && timeLabels.length > 0 && (
+            {showCurrentTime && lastTs != null && (
               <span className="ml-auto font-mono normal-case opacity-60 text-xs">
-                {timeLabels[timeLabels.length - 1]}
+                {formatCompactTime(lastTs)}
               </span>
             )}
           </CardTitle>
@@ -120,7 +110,7 @@ export const FilterPerformanceCard = memo(
           <LineHistoryChart
             series={filteredSeries}
             data={data}
-            timeLabels={timeLabels}
+            formatX={formatCompactTime}
             leftAxisFormat={formatBw}
             rightAxisFormat={formatMicroseconds}
             showCurrentTime={false}

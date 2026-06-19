@@ -1,5 +1,4 @@
 import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
-import { formatCompactTime } from '@/utils/formatting';
 import type { SessionStatsEvent } from '../types';
 
 type BandwidthRef = { bytes_sent: number; bytes_done: number; ts_us: number };
@@ -19,7 +18,7 @@ export function computeBandwidthPoints(
   sessionStartUs: number,
   prevBandwidth: Record<string, BandwidthRef>,
 ): BandwidthPoint[] {
-  const time = formatCompactTime(event.ts_us - sessionStartUs);
+  const sessionTimeUs = event.ts_us - sessionStartUs;
   const points: BandwidthPoint[] = [];
 
   for (const filter of event.stats) {
@@ -50,11 +49,10 @@ export function computeBandwidthPoints(
 
     points.push({
       filterId,
-      outband: { time, timestamp: event.ts_us, value: outbandValue },
-      inband: { time, timestamp: event.ts_us, value: inbandValue },
+      outband: { timestamp: sessionTimeUs, value: outbandValue },
+      inband: { timestamp: sessionTimeUs, value: inbandValue },
       lastTaskTime: {
-        time,
-        timestamp: event.ts_us,
+        timestamp: sessionTimeUs,
         value: filter.last_task_time ?? 0,
       },
     });

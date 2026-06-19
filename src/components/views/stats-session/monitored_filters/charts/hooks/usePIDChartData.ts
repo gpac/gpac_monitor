@@ -1,7 +1,6 @@
 import { useMemo, useRef } from 'react';
 import type uPlot from 'uplot';
 import { type SeriesDef } from '@/components/common/charts';
-import { formatChartTimeFromUs } from '@/utils/formatting';
 import type { PIDMetricMode, PIDMetricSample } from '../../../types/pid';
 import { MODE_FORMATTERS, extractValue } from '../config/pidHistoryChartConfig';
 
@@ -45,42 +44,40 @@ export function usePIDChartData(
 
   const series = seriesCacheRef.current.value;
 
-  const { data, timeLabels } = useMemo(() => {
+  const data = useMemo((): uPlot.AlignedData => {
     const maxLen = Math.max(
       ...entries.map((entry) => entry.pidHistory.length),
       0,
     );
     if (maxLen === 0) {
-      return {
-        data: [[0], ...entries.map(() => [null])] as uPlot.AlignedData,
-        timeLabels: [] as string[],
-      };
+      return [[0], ...entries.map(() => [null])] as uPlot.AlignedData;
     }
 
-    const indices = Array.from({ length: maxLen }, (_, idx) => idx);
     const longest = entries.reduce(
       (acc, entry) =>
         entry.pidHistory.length >= acc.pidHistory.length ? entry : acc,
       entries[0],
     );
-    const labels = longest.pidHistory.map(
-      (sample) =>
-        sample.time ?? formatChartTimeFromUs(sample.sessionTimestampUs),
-    );
+
+    const longestOffset = maxLen - longest.pidHistory.length;
+    const firstTs = longest.pidHistory[0]?.sessionTimeUs ?? 0;
+    const xValues = Array.from({ length: maxLen }, (_, index) => {
+      const j = index - longestOffset;
+      return j >= 0
+        ? (longest.pidHistory[j]?.sessionTimeUs ?? firstTs)
+        : firstTs;
+    });
 
     const valueCols = entries.map((entry) => {
       const offset = maxLen - entry.pidHistory.length;
-      return indices.map((idx) => {
+      return xValues.map((_, idx) => {
         const j = idx - offset;
         return j < 0 ? null : extractValue(entry.pidHistory[j], mode);
       });
     });
 
-    return {
-      data: [indices, ...valueCols] as uPlot.AlignedData,
-      timeLabels: labels,
-    };
+    return [xValues, ...valueCols] as uPlot.AlignedData;
   }, [entries, mode]);
 
-  return { series, data, timeLabels };
+  return { series, data };
 }

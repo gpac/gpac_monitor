@@ -8,7 +8,6 @@ import React, {
 import { useOptimizedResize } from '@/shared/hooks/ui/useOptimizedResize';
 import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
 import { useStatsCalculations } from '../hooks/stats/useStatsCalculations';
-import { useEnrichedStats } from '../hooks/stats/useEnrichedStats';
 import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { clearPendingFilterOpen } from '@/shared/store/slices/graphSlice';
@@ -55,15 +54,12 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       return enrichFiltersWithStats(staticFilters, sessionStats);
     }, [staticFilters, sessionStats, isResizing]);
 
-    const filtersWithComputedMetrics = useEnrichedStats(
-      filtersWithSessionStats,
-    );
     const { statsCounters, systemStats } = useStatsCalculations(
-      filtersWithComputedMetrics,
+      filtersWithSessionStats,
       sessionStats,
     );
     const { monitoredFilterMap, inlineFilterMap } = useMonitoredFilters(
-      filtersWithComputedMetrics,
+      filtersWithSessionStats,
     );
 
     // User Actions
@@ -115,7 +111,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     // Detached Mode (Overlay Widget)
 
     if (isDetached && detachedFilterIdx !== undefined) {
-      const filter = filtersWithComputedMetrics.find(
+      const filter = filtersWithSessionStats.find(
         (f) => f.idx === detachedFilterIdx,
       );
 
@@ -179,7 +175,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
             <StatsTabs
               activeTab={activeTab}
               onValueChange={setActiveTab}
-              allFilters={filtersWithComputedMetrics}
+              allFilters={filtersWithSessionStats}
               onCloseTab={handleCloseTab}
               onDetachTab={handleDetachTab}
               tabsRef={tabsRef}
@@ -192,8 +188,8 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
               <DashboardTabContent
                 systemStats={systemStats}
                 statsCounters={statsCounters}
-                filtersWithLiveStats={filtersWithComputedMetrics}
-                filtersMatchingCriteria={filtersWithComputedMetrics}
+                filtersWithLiveStats={filtersWithSessionStats}
+                filtersMatchingCriteria={filtersWithSessionStats}
                 loading={isLoading || isResizing}
                 monitoredFilters={monitoredFilterMap}
                 onCardClick={safeOnCardClick}

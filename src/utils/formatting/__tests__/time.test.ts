@@ -1,106 +1,42 @@
 import { describe, it, expect } from 'vitest';
 import {
-  formatTime,
-  microsecondsToSeconds,
-  formatBufferTime,
-  formatChartSeconds,
-  formatCompactTime,
   formatFractionAsTimeWithRaw,
+  formatCompactTime,
+  formatChartTimeFromUs,
 } from '../time';
 
-describe('formatTime', () => {
-  it('returns 0 ms for undefined', () => {
-    expect(formatTime(undefined)).toBe('0 ms');
-  });
-
-  it('formats microseconds', () => {
-    expect(formatTime(500)).toBe('500 μs');
-  });
-
-  it('formats milliseconds', () => {
-    expect(formatTime(5000)).toBe('5.00 ms');
-  });
-
-  it('formats seconds', () => {
-    expect(formatTime(5_000_000)).toBe('5.00 s');
-  });
-
-  it('formats minutes + seconds', () => {
-    expect(formatTime(90_000_000)).toBe('1m 30s');
-  });
-
-  it('formats hours', () => {
-    expect(formatTime(3_660_000_000)).toBe('1h 1m 0s');
-  });
-});
-
-describe('microsecondsToSeconds', () => {
-  it('converts correctly', () => {
-    expect(microsecondsToSeconds(1_000_000)).toBe(1);
-    expect(microsecondsToSeconds(500_000)).toBe(0.5);
-  });
-});
-
-describe('formatBufferTime', () => {
-  it('returns 0 ms for zero', () => {
-    expect(formatBufferTime(0)).toBe('0 ms');
-  });
-
-  it('formats milliseconds', () => {
-    expect(formatBufferTime(500_000)).toBe('500 ms');
-  });
-
-  it('formats seconds when >= 1000ms', () => {
-    expect(formatBufferTime(2_000_000)).toBe('2.0 s');
-  });
-});
-
-describe('formatChartSeconds', () => {
-  it('formats under 60s', () => {
-    expect(formatChartSeconds(30)).toBe('30s');
-  });
-
-  it('formats minutes with remaining seconds', () => {
-    expect(formatChartSeconds(90)).toBe('1m 30s');
-  });
-
-  it('formats exact minutes without seconds', () => {
-    expect(formatChartSeconds(120)).toBe('2m');
-  });
-
-  it('formats hours with remaining minutes', () => {
-    expect(formatChartSeconds(3900)).toBe('1h 5m');
-  });
-
-  it('formats exact hours', () => {
-    expect(formatChartSeconds(3600)).toBe('1h');
-  });
-});
-
 describe('formatCompactTime', () => {
-  it('returns 0ms for undefined or zero', () => {
-    expect(formatCompactTime(undefined)).toBe('0ms');
-    expect(formatCompactTime(0)).toBe('0ms');
+  it('formats 0 µs as 00:00', () => {
+    expect(formatCompactTime(0)).toBe('00:00');
   });
-
-  it('formats microseconds', () => {
-    expect(formatCompactTime(500)).toBe('500μs');
+  it('formats 8s as 00:08', () => {
+    expect(formatCompactTime(8_000_000)).toBe('00:08');
   });
-
-  it('formats milliseconds', () => {
-    expect(formatCompactTime(5000)).toBe('5ms');
+  it('formats 65s as 01:05', () => {
+    expect(formatCompactTime(65_000_000)).toBe('01:05');
   });
-
-  it('formats seconds with decimal', () => {
-    expect(formatCompactTime(5_500_000)).toBe('5.5s');
+  it('formats 1h1m1s as 01:01:01', () => {
+    expect(formatCompactTime(3_661_000_000)).toBe('01:01:01');
   });
-
-  it('formats mm:ss', () => {
-    expect(formatCompactTime(90_000_000)).toBe('01:30');
+  it('truncates sub-second µs', () => {
+    expect(formatCompactTime(8_500_000)).toBe('00:08');
   });
+  it('formats 59m59s without hours', () => {
+    expect(formatCompactTime(3_599_000_000)).toBe('59:59');
+  });
+});
 
-  it('formats h:mm for >= 1 hour', () => {
-    expect(formatCompactTime(3_660_000_000)).toBe('1:01h');
+describe('formatChartTimeFromUs (regression: timezone offset)', () => {
+  it('formats 8 seconds as 00:00:08 (not 01:00:08 with UTC+1)', () => {
+    expect(formatChartTimeFromUs(8_000_000)).toBe('00:00:08');
+  });
+  it('formats 1h8s as 01:00:08 (not 02:00:08)', () => {
+    expect(formatChartTimeFromUs(3_608_000_000)).toBe('01:00:08');
+  });
+  it('uses pure arithmetic, no locale dependency', () => {
+    expect(formatChartTimeFromUs(0)).toBe('00:00:00');
+    expect(formatChartTimeFromUs(1_000_000)).toBe('00:00:01');
+    expect(formatChartTimeFromUs(65_000_000)).toBe('00:01:05');
   });
 });
 

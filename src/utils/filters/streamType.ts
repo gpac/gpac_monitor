@@ -4,8 +4,14 @@ import {
   GpacStreamType,
 } from '@/types/domain/gpac';
 
+/**
+ * Default color when stream type is unknown
+ */
 export const DEFAULT_STREAM_COLOR = '#E11D48';
 
+/**
+ * Color constants for filter types — single source of truth for all stream type colors
+ */
 export const FILTER_COLORS: Record<FilterType, string> = {
   video: '#3b82f6',
   audio: '#10b981',
@@ -13,13 +19,46 @@ export const FILTER_COLORS: Record<FilterType, string> = {
   file: DEFAULT_STREAM_COLOR,
 };
 
+/**
+ * Labels for filter types
+ */
 export const FILTER_LABELS: Record<FilterType, string> = {
-  video: 'Visual',
+  video: 'Video',
   audio: 'Audio',
   text: 'Text',
   file: 'File',
 };
 
+/**
+ * Icon color classes for filter types (Tailwind CSS classes for text color)
+ */
+export const FILTER_ICON_COLORS: Record<FilterType, string> = {
+  video: 'text-debug',
+  audio: 'text-info',
+  text: 'text-warning',
+  file: 'text-danger',
+};
+
+/**
+ * Border color classes for media types (used in PID cards)
+ */
+export const MEDIA_BORDER_COLORS: Record<FilterType, string> = {
+  video: 'border-l-blue-500/60',
+  audio: 'border-l-emerald-500/60',
+  text: 'border-l-amber-500/60',
+  file: 'border-l-rose-500/60',
+};
+
+/**
+ * Get color for a filter type
+ */
+export const getFilterColor = (filterType: FilterType): string => {
+  return FILTER_COLORS[filterType];
+};
+
+/**
+ * Tailwind badge classes (bg + text + border) for each filter type
+ */
 export const BADGE_CLASSES: Record<FilterType, string> = {
   video: 'bg-blue-900/40 text-blue-300 border-blue-700/50',
   audio: 'bg-emerald-900/40 text-emerald-300 border-emerald-700/50',
@@ -27,6 +66,9 @@ export const BADGE_CLASSES: Record<FilterType, string> = {
   file: 'bg-rose-900/40 text-rose-300 border-rose-700/50',
 };
 
+/**
+ * Short label (single letter) per GPAC stream type — used in PID type badges
+ */
 export const STREAM_TYPE_SHORT_LABEL: Partial<Record<GpacStreamType, string>> =
   {
     [GpacStreamType.Visual]: 'V',
@@ -36,6 +78,22 @@ export const STREAM_TYPE_SHORT_LABEL: Partial<Record<GpacStreamType, string>> =
     [GpacStreamType.File]: 'F',
   };
 
+/**
+ * Returns the badge label + Tailwind className for a given GPAC stream type
+ */
+export const getStreamTypeBadgeConfig = (
+  type: GpacStreamType,
+): { label: string; className: string } => {
+  const filterType = mapStreamTypeToFilterType(type);
+  return {
+    label: STREAM_TYPE_SHORT_LABEL[type] ?? type?.[0]?.toUpperCase() ?? '?',
+    className: BADGE_CLASSES[filterType],
+  };
+};
+
+/**
+ * Map string stream type to FilterType (case-insensitive, handles 'Visual', 'Video', etc.)
+ */
 export const STREAM_TYPE_TO_FILTER: Partial<
   Record<GpacStreamType, FilterType>
 > = {
@@ -45,34 +103,48 @@ export const STREAM_TYPE_TO_FILTER: Partial<
   [GpacStreamType.File]: 'file',
 };
 
-const toFilterType = (type: FilterType | GpacStreamType): FilterType =>
-  (type in FILTER_COLORS
-    ? (type as FilterType)
-    : STREAM_TYPE_TO_FILTER[type as GpacStreamType]) ?? 'file';
+const mapStreamTypeToFilterType = (type: string): FilterType => {
+  return STREAM_TYPE_TO_FILTER[type as GpacStreamType] ?? 'file';
+};
 
-export const getFilterColor = (type: FilterType | GpacStreamType): string =>
-  FILTER_COLORS[toFilterType(type)];
+/**
+ * Get border color class for media type (from GPAC stream_type)
+ */
+export const getBorderColorForMediaType = (type: string): string => {
+  const filterType = mapStreamTypeToFilterType(type);
+  return MEDIA_BORDER_COLORS[filterType];
+};
 
-export const getStreamTypeBadgeConfig = (
-  type: GpacStreamType,
-): { label: string; className: string } => ({
-  label: STREAM_TYPE_SHORT_LABEL[type] ?? type?.[0]?.toUpperCase() ?? '?',
-  className: BADGE_CLASSES[toFilterType(type)],
-});
+/**
+ * Get icon color class for media type (case-insensitive, handles 'Visual', 'Video', etc.)
+ */
+export const getIconColorForMediaType = (type: string): string => {
+  const filterType = mapStreamTypeToFilterType(type);
+  return FILTER_ICON_COLORS[filterType];
+};
 
+/**
+ * Determine filter type based on PID stream types
+ * Extracted from GraphOperations for reusability
+ */
 const determineFilterType = (filter: GraphFilterData): FilterType => {
   // Collect stream types from output PIDs, fallback to input PIDs
   const pids = filter.opid.length > 0 ? filter.opid : (filter.ipid ?? []);
 
   for (const pid of pids) {
-    const mapped = STREAM_TYPE_TO_FILTER[pid.stream_type];
-    if (mapped) return mapped;
+    if (pid.stream_type) {
+      const mapped = STREAM_TYPE_TO_FILTER[pid.stream_type];
+      if (mapped) return mapped;
+    }
   }
   return 'file';
 };
 
 export { determineFilterType };
 
+/**
+ * Get filter info by idx from filters array
+ */
 export const getFilterInfoByIdx = (
   filters: GraphFilterData[],
   filterIdx: number,

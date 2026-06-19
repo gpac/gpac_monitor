@@ -9,10 +9,7 @@ import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useIsDetached } from '../../FilterViewContext';
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import type { PIDMetricMode } from '../../../types/pid';
-import {
-  getFilterColor,
-  DEFAULT_STREAM_COLOR,
-} from '@/utils/filters/streamType';
+import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { CLICKABLE_METRICS } from './PIDTable';
 import PIDGraphPanel from './PIDGraphPanel';
 
@@ -52,11 +49,9 @@ const PIDGraphSection = memo(
     const pidLabels = useMemo(
       () =>
         targets.length >= 1
-          ? targets.map((target) => ({
+          ? targets.map((target, index) => ({
               target,
-              color: target.streamType
-                ? getFilterColor(target.streamType)
-                : DEFAULT_STREAM_COLOR,
+              color: PID_SELECTION_COLORS[index],
               label: target.label ?? `#${target.pidIndex}`,
             }))
           : null,

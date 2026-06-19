@@ -1,4 +1,5 @@
 import { WebSocketBase } from '../../../ws/WebSocketBase';
+import { GpacNodeData } from '../../../../types/domain/gpac/model';
 import { GpacNotificationHandlers } from '../../types';
 import { generateID } from '@/utils/core';
 import { SessionStatsHandler } from './sessionStatsHandler';
@@ -7,6 +8,7 @@ import { FilterStatsHandler } from './filterStatsHandler';
 import { WSMessageBatcher } from '../../../utils/WSMessageBatcher';
 
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
+import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
@@ -17,15 +19,6 @@ import {
   LogHistoryResponse,
   LogStatusResponse,
   LogConfigChangedResponse,
-  IncomingWsMessage,
-  FiltersMessage,
-  UpdateMessage,
-  DetailsMessage,
-  SessionStatsMessage,
-  CpuStatsMessage,
-  FilterStatsMessage,
-  IpidPropsResponseMessage,
-  SessionEndMessage,
 } from '@/services/ws/types';
 
 export type { MessageHandlerCallbacks, MessageHandlerDependencies };
@@ -44,7 +37,7 @@ export class BaseMessageHandler {
     private notificationHandlers: GpacNotificationHandlers,
     private callbacks: MessageHandlerCallbacks,
     private dependencies: MessageHandlerDependencies,
-    private onMessage?: (message: IncomingWsMessage) => void,
+    private onMessage?: (message: any) => void,
   ) {
     // Initialize message batcher (RAF-based batching for logs only)
     this.messageBatcher = new WSMessageBatcher();
@@ -93,7 +86,7 @@ export class BaseMessageHandler {
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
     try {
       const text = new TextDecoder().decode(dataView.buffer);
-      const data = JSON.parse(text) as IncomingWsMessage;
+      const data = JSON.parse(text);
       this.processGpacMessage(data);
     } catch (error) {
       // Error handling
@@ -104,7 +97,7 @@ export class BaseMessageHandler {
     try {
       const text = new TextDecoder().decode(dataView.buffer);
       if (text.startsWith('{')) {
-        const data = JSON.parse(text) as IncomingWsMessage;
+        const data = JSON.parse(text);
         this.processGpacMessage(data);
       }
     } catch (error) {
@@ -112,7 +105,7 @@ export class BaseMessageHandler {
     }
   }
 
-  private processGpacMessage(data: IncomingWsMessage): void {
+  private processGpacMessage(data: any): void {
     if (!data.message) {
       return;
     }
@@ -153,7 +146,6 @@ export class BaseMessageHandler {
         break;
       case 'command_line_response':
         this.commandLineHandler.handleCommandLineResponse(data);
-        this.callbacks.onUpdateCommandLine?.(data.commandLine ?? null);
         break;
       case 'filter_pid_reconfigured':
         this.callbacks.onPidReconfigured(data.indexes);
@@ -162,7 +154,9 @@ export class BaseMessageHandler {
         this.callbacks.onArgUpdated(data.indexes);
         break;
       case 'session_metrics':
-        this.callbacks.onSetMetricDefinitions(data.data);
+        this.callbacks.onSetMetricDefinitions(
+          parseMetricDefinitions(data.data),
+        );
         break;
       case 'session_end':
         this.handleSessionEnd(data);
@@ -180,30 +174,39 @@ export class BaseMessageHandler {
     this.onMessage?.(data);
   }
 
-  private handleFiltersMessage(data: FiltersMessage): void {
+  private handleFiltersMessage(data: any): void {
     this.callbacks.onSetLoading(false);
     this.callbacks.onUpdateGraphData(data.filters);
 
     if (data.filters) {
-      data.filters.forEach((filter) => {
+      this.callbacks.onFilterStatuses(
+        data.filters.map((filter: GpacNodeData) => ({
+          idx: filter.idx,
+          status: filter.status,
+        })),
+      );
+      data.filters.forEach((filter: GpacNodeData) => {
         this.notificationHandlers.onFilterUpdate?.(filter);
       });
     }
   }
 
-  private handleUpdateMessage(data: UpdateMessage): void {
+  private handleUpdateMessage(data: any): void {
     if (Array.isArray(data.filters)) {
       this.callbacks.onUpdateGraphData(data.filters);
     }
   }
 
-  private handleDetailsMessage(data: DetailsMessage): void {
+  private handleDetailsMessage(data: any): void {
     if (!data.filter) return;
     this.filterArgsHandler.handleFilterArgs(data);
   }
 
-  private handleSessionStatsMessage(data: SessionStatsMessage): void {
+  private handleSessionStatsMessage(data: any): void {
     if (data.stats && Array.isArray(data.stats)) {
+      this.callbacks.onFilterStatuses(
+        data.stats.map((stat: any) => ({ idx: stat.idx, status: stat.status })),
+      );
       this.sessionStatsHandler.handleSessionStats(data.stats);
       this.callbacks.onUpdateSessionStats({
         stats: data.stats,
@@ -212,15 +215,26 @@ export class BaseMessageHandler {
     }
   }
 
-  private handleCpuStatsMessage(data: CpuStatsMessage): void {
+  private handleCpuStatsMessage(data: any): void {
     if (data.stats) {
+      // Process immediately (low frequency: ~6 msgs/sec)
       this.cpuStatsHandler.handleCPUStats(data.stats);
-      this.callbacks.onUpdateCpuStats?.(data.stats);
     }
   }
 
-  private handleFilterStatsMessage(data: FilterStatsMessage): void {
+  private handleFilterStatsMessage(data: any): void {
     if (data.idx !== undefined) {
+      this.callbacks.onFilterStatuses([{ idx: data.idx, status: data.status }]);
+      this.callbacks.onUpdateFilterStats({
+        idx: data.idx,
+        ts_us: data.ts_us,
+        ipids: data.ipids,
+        opids: data.opids,
+        bytes_sent: data.bytes_sent ?? 0,
+        bytes_done: data.bytes_done ?? 0,
+        last_task_time: data.last_task_time,
+      });
+      // Process immediately (low frequency: ~1 msg/sec per filter)
       this.filterStatsHandler.handleFilterStatsUpdate(data);
     }
   }
@@ -249,11 +263,11 @@ export class BaseMessageHandler {
     }
   }
 
-  private handleIpidPropsResponseMessage(data: IpidPropsResponseMessage): void {
+  private handleIpidPropsResponseMessage(data: any): void {
     this.pidPropsHandler.handleIpidPropsResponse(data);
   }
 
-  private handleSessionEnd(data: SessionEndMessage): void {
+  private handleSessionEnd(data: any): void {
     // Mark as normal end of session (to avoid showing error message)
     this.dependencies.markEndOfSession();
 

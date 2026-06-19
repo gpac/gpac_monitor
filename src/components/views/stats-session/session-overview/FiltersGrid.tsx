@@ -5,7 +5,6 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import FilterStatCard from './FilterStatCard';
 import { Widget } from '@/types/ui/widget';
-import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
 import {
   isFilterDetached,
   isFilterMonitored,
@@ -13,8 +12,8 @@ import {
 import { selectStalledFilters } from '@/shared/store/selectors';
 
 interface FiltersGridProps {
-  filtersWithLiveStats: EnrichedFilterData[];
-  filtersMatchingCriteria: EnrichedFilterData[];
+  filtersWithLiveStats: EnrichedFilterOverview[];
+  filtersMatchingCriteria: EnrichedFilterOverview[];
   loading: boolean;
   monitoredFilters: Map<number, EnrichedFilterOverview>;
   onCardClick: (filterIndex: number) => void;

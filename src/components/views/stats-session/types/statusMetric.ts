@@ -1,5 +1,7 @@
+export type SessionTimeUs = number;
+
 export interface StatusMetricSample {
-  sessionTimestampUs: number;
+  sessionTimeUs: number;
   value: number | null;
   time?: string;
 }

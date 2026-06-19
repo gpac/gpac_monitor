@@ -3,16 +3,14 @@ import { Checkbox } from '../../ui/checkbox';
 import { SearchBar } from '../../ui/search-bar';
 import {
   getFilterColor,
-  FILTER_LABELS,
   DEFAULT_STREAM_COLOR,
 } from '@/utils/filters/streamType';
-import { useDataMode } from '@/shared/hooks/data/useDataMode';
-import { FilterType, GpacStreamType } from '@/types';
+import { FilterType } from '@/types';
 
 interface PropertiesHeaderProps {
   filterName: string;
   filterIdx: number;
-  streamType?: FilterType | GpacStreamType;
+  streamType?: FilterType;
   onClose: () => void;
   showExpert?: boolean;
   showAdvanced?: boolean;
@@ -33,13 +31,9 @@ const PropertiesHeader = ({
   mode = 'filter',
   onSearchChange,
 }: PropertiesHeaderProps) => {
-  const { isHistory } = useDataMode();
   const borderColor = streamType
     ? getFilterColor(streamType)
     : DEFAULT_STREAM_COLOR;
-  const label = streamType
-    ? (FILTER_LABELS[streamType as FilterType] ?? streamType)
-    : undefined;
 
   return (
     <div className="bg-monitor-surface border-b border-monitor-line">
@@ -47,13 +41,15 @@ const PropertiesHeader = ({
       <div className="px-3 pt-3 pb-2 flex items-center justify-between">
         <div className="flex-1 min-w-0">
           <h3
-            className={`text-sm font-semibold truncate pb-1 border-b-2 inline-block ${isHistory ? 'text-purple-400' : 'text-monitor-active-filter'}`}
+            className="text-sm font-semibold text-monitor-active-filter truncate pb-1 border-b-2 inline-block"
             style={{ borderBottomColor: borderColor }}
           >
             {filterName}
           </h3>
-          {label && (
-            <p className="text-xs text-monitor-text-muted mt-0.5">({label})</p>
+          {streamType && (
+            <p className="text-xs text-monitor-text-muted mt-0.5">
+              ({streamType})
+            </p>
           )}
 
           <div className="flex gap-2 mt-1 text-xs text-monitor-text-muted">

@@ -1,6 +1,5 @@
-import React, { useMemo, useEffect, useRef, useCallback } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
-import { parseFilterStatus } from '@/workers/filterStatusParser';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
 import { useFilterStats } from '@/components/views/stats-session/hooks/stats/useFilterStats';
@@ -14,10 +13,8 @@ import {
   FilterStatsResponse,
   PIDproperties,
 } from '@/types/domain/gpac/filter-stats';
-import {
-  selectActiveConnection,
-  selectMetricDefinitions,
-} from '@/shared/store/selectors';
+import { selectActiveConnection } from '@/shared/store/selectors';
+import { selectParsedStatus } from '@/shared/store/selectors/monitoredFilter';
 import { ConnectionStatus } from '@/types/communication/shared';
 
 interface MonitoredFilterTabsProps {
@@ -33,12 +30,6 @@ export const MonitoredFilterTabs: React.FC<MonitoredFilterTabsProps> = ({
   onCardClick,
   onOpenProperties,
 }) => {
-  const lastInnerTabByFilter = useRef<Record<number, string>>({});
-
-  const handleInnerTabChange = useCallback((filterIdx: number, tab: string) => {
-    lastInnerTabByFilter.current[filterIdx] = tab;
-  }, []);
-
   return (
     <>
       {Array.from(monitoredFilters.entries()).map(([idx, filter]) => {
@@ -50,8 +41,6 @@ export const MonitoredFilterTabs: React.FC<MonitoredFilterTabsProps> = ({
             idx={idx}
             filter={filter}
             isActive={isActive}
-            lastTab={lastInnerTabByFilter.current[idx]}
-            onInnerTabChange={(tab) => handleInnerTabChange(idx, tab)}
             onCardClick={onCardClick}
             onOpenProperties={onOpenProperties}
           />
@@ -66,8 +55,6 @@ interface MonitoredFilterTabProps {
   filter: EnrichedFilterOverview;
   isActive: boolean;
   isDetached?: boolean;
-  lastTab?: string;
-  onInnerTabChange?: (tab: string) => void;
   onCardClick: (idx: number) => void;
   onOpenProperties: (filter: EnrichedFilterOverview) => void;
 }
@@ -77,8 +64,6 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   filter,
   isActive,
   isDetached = false,
-  lastTab,
-  onInnerTabChange,
   onCardClick,
   onOpenProperties,
 }) => {
@@ -110,7 +95,9 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
   // Subscribe to live stats when tab is active
   const { stats, isLoading } = useFilterStats(filter.idx, isActive, 1000);
 
-  const definitions = useAppSelector(selectMetricDefinitions);
+  const parsedStatus = useAppSelector((state) =>
+    selectParsedStatus(state, filter.idx),
+  );
 
   const isConnected = useAppSelector(
     (state) =>
@@ -135,10 +122,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         name: filterWithStats.name,
         type: filterWithStats.type,
         status: filterWithStats.status,
-        parsedStatus: parseFilterStatus(
-          filterWithStats.status ?? '',
-          definitions,
-        ),
+        parsedStatus,
         time: filterWithStats.time,
         last_task_time: filterWithStats.last_task_time,
         pck_done: filterWithStats.pck_done,
@@ -171,7 +155,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
           )
         : [],
     };
-  }, [filterWithStats, stats, definitions]);
+  }, [filterWithStats, stats, parsedStatus]);
 
   const handleBack = () => {
     // Navigate back to the main dashboard view
@@ -189,10 +173,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         filterData={stats as FilterStatsResponse | undefined}
         onBack={handleBack}
         onOpenProperties={handleOpenProperties}
-        initialTab={
-          (initialTabRef.current || lastTab) as InitialTabType | undefined
-        }
-        onTabChange={onInnerTabChange}
+        initialTab={initialTabRef.current || undefined}
         isLoading={effectiveIsLoading}
         isDetached={isDetached}
       />

@@ -1,40 +1,14 @@
 import uPlot from 'uplot';
-import type React from 'react';
 import { createTooltipPlugin } from './plugins/createTooltipPlugin';
+import type { SeriesDef, AxisConfig, EndLabelInfo } from './chartTypes';
 
-export interface SeriesDef {
-  label: string;
-  color: string;
-  formatValue?: (value: number) => string;
-  yAxis?: 'left' | 'right';
-  fill?: string;
-  strokeWidth?: number;
-  metricLabel?: string;
-}
-
-export interface AxisConfig {
-  formatY: (value: number) => string;
-  color?: string;
-  gridStroke?: string;
-  range?: [number, number];
-  size?: number;
-}
-
-export interface EndLabelInfo {
-  top: number;
-  value: string;
-  color: string;
-  label: string;
-}
+export type { SeriesDef, AxisConfig, EndLabelInfo };
 
 export interface LineChartConfigOptions {
   series: SeriesDef[];
   leftAxis?: AxisConfig;
   rightAxis?: AxisConfig;
-  /** index-based x-axis: labels come from this ref */
-  timeLabelsRef?: React.MutableRefObject<string[]>;
-  /** real-timestamp x-axis: formats raw x values directly */
-  formatX?: (v: number) => string;
+  formatX: (v: number) => string;
   /** @deprecated use leftAxis.formatY */
   formatY?: (v: number) => string;
   onEndLabels?: (labels: EndLabelInfo[]) => void;
@@ -49,7 +23,6 @@ export const createLineChartConfig = ({
   leftAxis,
   rightAxis,
   formatY = String,
-  timeLabelsRef,
   formatX,
   onEndLabels,
   width,
@@ -64,11 +37,8 @@ export const createLineChartConfig = ({
   const leftFmt = leftAxis?.formatY ?? formatY;
   const leftColor = leftAxis?.color ?? '#6ee7b7';
 
-  const getTimeLabel = (u: uPlot, idx: number): string => {
-    if (formatX) return formatX(u.data[0][idx] as number);
-    if (timeLabelsRef) return timeLabelsRef.current[idx] ?? '--';
-    return '--';
-  };
+  const getTimeLabel = (u: uPlot, idx: number): string =>
+    formatX(u.data[0][idx] as number);
 
   return {
     width,
@@ -127,7 +97,7 @@ export const createLineChartConfig = ({
       })),
     ],
     scales: {
-      x: { time: false, ...(timeLabelsRef ? { distr: 2 } : {}) },
+      x: { time: false },
       y: { ...(leftAxis?.range ? { range: leftAxis.range } : {}) },
       ...(hasRightAxis
         ? { right: { ...(rightAxis?.range ? { range: rightAxis.range } : {}) } }
@@ -140,18 +110,7 @@ export const createLineChartConfig = ({
         ticks: { stroke: '#6ee7b7', size: 5, width: 1 },
         font: '10px monospace',
         size: 50,
-        values: formatX
-          ? (_u: uPlot, vals: number[]) => vals.map((v) => formatX(v as number))
-          : (_u: uPlot, vals: number[]) => {
-              const total = timeLabelsRef?.current.length ?? 0;
-              const maxLabels = Math.floor(width / 60);
-              const stride = Math.max(1, Math.ceil(total / maxLabels));
-              return vals.map((v) => {
-                const tickIdx = v as number;
-                if (tickIdx % stride !== 0) return '';
-                return timeLabelsRef?.current[tickIdx] ?? '';
-              });
-            },
+        values: (_u: uPlot, vals: number[]) => vals.map((v) => formatX(v)),
       },
       {
         stroke: leftColor,

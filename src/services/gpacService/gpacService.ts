@@ -9,7 +9,7 @@ import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './infrastructure/connectionManager';
 import { BaseMessageHandler } from './infrastructure/messageHandler/baseMessageHandler';
 import { GpacCoreService } from './core/gpacCore';
-import { createStoreCallbacks } from './integration/liveAdapter';
+import { createStoreCallbacks } from './liveAdapter/storeIntegration';
 import {
   SubscriptionCallback,
   SubscriptionConfig,
@@ -64,7 +64,7 @@ export class GpacService implements IGpacCommunication {
       {} as GpacNotificationHandlers,
       storeCallbacks,
       dependencies,
-      (message) => {
+      (message: any) => {
         coreService.notifyHandlers(message);
       },
     );

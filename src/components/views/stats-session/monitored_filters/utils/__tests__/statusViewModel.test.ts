@@ -266,6 +266,26 @@ describe('buildFilterStatusViewModel', () => {
       expect(metric).toBeDefined();
       expect(metric?.value).toBe('25%');
     });
+
+    it('a runtime "%" unit token is rendered as a percent', () => {
+      const metric = build('over=2.34 %').numericMetrics.find(
+        (m) => m.key === 'over',
+      );
+      expect(metric?.value).toBe('2.3%');
+    });
+  });
+
+  describe('non-finite numeric values', () => {
+    it('a nan-valued num is dropped from numericMetrics (never shown as "NaN")', () => {
+      const vm = build('rate=nan B/sample');
+      expect(vm.numericMetrics.find((m) => m.key === 'rate')).toBeUndefined();
+    });
+
+    it('finite metrics still render alongside a dropped non-finite one', () => {
+      const vm = build('rate=nan good=12');
+      expect(vm.numericMetrics.find((m) => m.key === 'rate')).toBeUndefined();
+      expect(vm.numericMetrics.find((m) => m.key === 'good')?.value).toBe('12');
+    });
   });
 });
 

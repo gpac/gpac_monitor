@@ -4,12 +4,12 @@ import type {
   PIDGraphTarget,
 } from '@/components/views/stats-session/types/pid';
 import type { StatusMetricSample } from '@/components/views/stats-session/types/statusMetric';
+import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
 
 /**
  * Generic data point for charts (time-series data)
  */
 export interface ChartDataPoint {
-  time: string;
   timestamp: number;
   value: number;
 }
@@ -42,6 +42,7 @@ export interface MonitoredFilterState {
   maxPidSamples: number;
   statusMetricSamples: Record<string, StatusMetricSample[]>;
   selectedStatusMetricByFilter: Record<number, string[]>;
+  parsedStatusByFilterIdx: Record<number, ParsedFilterStatus>;
 }
 
 const initialState: MonitoredFilterState = {
@@ -52,6 +53,7 @@ const initialState: MonitoredFilterState = {
   maxPidSamples: 300,
   statusMetricSamples: {},
   selectedStatusMetricByFilter: {},
+  parsedStatusByFilterIdx: {},
 };
 
 const monitoredFilterSlice = createSlice({
@@ -214,7 +216,7 @@ const monitoredFilterSlice = createSlice({
 
       if (
         lastSample &&
-        lastSample.sessionTimestampUs === sample.sessionTimestampUs &&
+        lastSample.sessionTimeUs === sample.sessionTimeUs &&
         lastSample.averageBitrate === sample.averageBitrate &&
         lastSample.bufferTime === sample.bufferTime &&
         lastSample.processTime === sample.processTime &&
@@ -241,7 +243,7 @@ const monitoredFilterSlice = createSlice({
         const last = samples[samples.length - 1];
         if (
           last &&
-          last.sessionTimestampUs === sample.sessionTimestampUs &&
+          last.sessionTimeUs === sample.sessionTimeUs &&
           last.averageBitrate === sample.averageBitrate &&
           last.bufferTime === sample.bufferTime &&
           last.processTime === sample.processTime &&
@@ -277,7 +279,7 @@ const monitoredFilterSlice = createSlice({
         const last = samples[samples.length - 1];
         if (
           last &&
-          last.sessionTimestampUs === sample.sessionTimestampUs &&
+          last.sessionTimeUs === sample.sessionTimeUs &&
           last.value === sample.value
         )
           continue;
@@ -300,6 +302,19 @@ const monitoredFilterSlice = createSlice({
         current.push(metricKey);
       }
       state.selectedStatusMetricByFilter[filterIdx] = current;
+    },
+
+    setParsedStatuses: (
+      state,
+      action: PayloadAction<
+        Array<{ filterIdx: number; parsedStatus: ParsedFilterStatus }>
+      >,
+    ) => {
+      for (const { filterIdx, parsedStatus } of action.payload) {
+        const existing = state.parsedStatusByFilterIdx[filterIdx];
+        if (existing?.raw === parsedStatus.raw) continue;
+        state.parsedStatusByFilterIdx[filterIdx] = parsedStatus;
+      }
     },
 
     clearStatusMetricsByFilter: (state, action: PayloadAction<number>) => {
@@ -337,6 +352,7 @@ export const {
   clearAllStatusMetricSamples,
   setSelectedStatusMetric,
   clearStatusMetricsByFilter,
+  setParsedStatuses,
 } = monitoredFilterSlice.actions;
 
 export default monitoredFilterSlice.reducer;

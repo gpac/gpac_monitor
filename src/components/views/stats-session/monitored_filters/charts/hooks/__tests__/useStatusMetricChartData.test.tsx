@@ -22,7 +22,7 @@ describe('useStatusMetricChartData — series stability', () => {
     const store = makeStore();
     store.dispatch(
       addStatusMetricSamples([
-        { key: '0:fps', sample: { sessionTimestampUs: 1000, value: 30 } },
+        { key: '0:fps', sample: { sessionTimeUs: 1000, value: 30 } },
       ]),
     );
 
@@ -38,7 +38,7 @@ describe('useStatusMetricChartData — series stability', () => {
     void act(() => {
       store.dispatch(
         addStatusMetricSamples([
-          { key: '0:fps', sample: { sessionTimestampUs: 2000, value: 35 } },
+          { key: '0:fps', sample: { sessionTimeUs: 2000, value: 35 } },
         ]),
       );
     });
@@ -51,8 +51,8 @@ describe('useStatusMetricChartData — series stability', () => {
     const store = makeStore();
     store.dispatch(
       addStatusMetricSamples([
-        { key: '0:fps', sample: { sessionTimestampUs: 1000, value: 30 } },
-        { key: '0:frames', sample: { sessionTimestampUs: 1000, value: 10 } },
+        { key: '0:fps', sample: { sessionTimeUs: 1000, value: 30 } },
+        { key: '0:frames', sample: { sessionTimeUs: 1000, value: 10 } },
       ]),
     );
 

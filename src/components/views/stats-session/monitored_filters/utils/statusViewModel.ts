@@ -101,7 +101,12 @@ function isProgressEntry(entry: StatusEntry): entry is StatusNum {
 }
 
 function isExplicitPercentEntry(entry: StatusNum): boolean {
-  return entry.key === 'pc' || entry.unit === 'pc' || entry.unit === 'percent';
+  return (
+    entry.key === 'pc' ||
+    entry.unit === 'pc' ||
+    entry.unit === 'percent' ||
+    entry.unit === '%'
+  );
 }
 
 function isBufferEntry(entry: StatusEntry): entry is StatusNum {
@@ -283,7 +288,9 @@ export function buildFilterStatusViewModel(
   const numericMetrics = entries
     .filter(
       (entry): entry is StatusNum =>
-        entry.type === 'num' && !excludedEntries.has(entry),
+        entry.type === 'num' &&
+        !excludedEntries.has(entry) &&
+        (Number.isFinite(entry.value) || Boolean(entry.fraction)),
     )
     .map((entry) => ({
       ...toNumericMetric(entry),

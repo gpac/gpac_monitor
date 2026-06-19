@@ -9,9 +9,8 @@ import {
 import { getPIDStatusBadge } from '@/utils/gpac';
 import { buildPIDKey } from '../../../types/pid';
 import type { PIDWithIndex } from '../../../types';
-import { getFilterColor } from '@/utils/filters/streamType';
+import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { usePIDMetricsRow } from '../hooks/usePIDMetricsRow';
-import { usePIDSample } from '../hooks/usePIDSample';
 import { buildBufferTooltipRows } from './utils/pidTooltipRows';
 import PIDMetricTooltip from './PIDMetricTooltip';
 import PIDRowInfoCell from './PIDRowInfoCell';
@@ -41,25 +40,15 @@ const PIDTableRow = memo(
     );
 
     const pidKey = buildPIDKey(filterIdx, variant, pid.pidIdx);
-    const { infoStats, bufferStats, perfStats, isSelected } = usePIDMetricsRow(
-      pid,
-      pidKey,
-    );
-
-    usePIDSample(pidKey, {
-      averageBitrate: perfStats.average_bitrate,
-      bufferTime: bufferStats.displayBuffer,
-      processTime: perfStats.average_process_time,
-      processRate: perfStats.average_process_rate,
-      ts: perfStats.last_process_time,
-    });
+    const { infoStats, bufferStats, perfStats, colorIndex, isSelected } =
+      usePIDMetricsRow(pid, pidKey);
 
     const statusBadge = getPIDStatusBadge(pid);
     const bgClass = 'bg-monitor-panel';
     const rowStyle = isSelected
       ? {
-          borderLeft: `3px solid ${getFilterColor(pid.type)}`,
-          background: `${getFilterColor(pid.type)}12`,
+          borderLeft: `3px solid ${PID_SELECTION_COLORS[colorIndex]}`,
+          background: `${PID_SELECTION_COLORS[colorIndex]}12`,
         }
       : { borderLeft: '3px solid transparent' };
 

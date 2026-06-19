@@ -5,21 +5,18 @@ exports[`HistoryAdapter silent mode > buffers bandwidth when silent, dispatches 
   "0": {
     "inband": [
       {
-        "time": "1.2s",
         "timestamp": 1237805,
         "value": 0,
       },
     ],
     "lastTaskTime": [
       {
-        "time": "1.2s",
         "timestamp": 1237805,
         "value": 0,
       },
     ],
     "outband": [
       {
-        "time": "1.2s",
         "timestamp": 1237805,
         "value": 0,
       },
@@ -28,21 +25,18 @@ exports[`HistoryAdapter silent mode > buffers bandwidth when silent, dispatches 
   "4": {
     "inband": [
       {
-        "time": "1.2s",
         "timestamp": 1237805,
         "value": 0,
       },
     ],
     "lastTaskTime": [
       {
-        "time": "1.2s",
         "timestamp": 1237805,
         "value": 0,
       },
     ],
     "outband": [
       {
-        "time": "1.2s",
         "timestamp": 1237805,
         "value": 0,
       },

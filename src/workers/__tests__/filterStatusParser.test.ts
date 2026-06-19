@@ -375,7 +375,7 @@ describe('parseFilterStatus', () => {
       expect(result.entries).toHaveLength(1);
     });
 
-    it('skips % token when unit pc already set by definition', () => {
+    it('runtime % token wins over a definition unit (definition unit is only a fallback)', () => {
       const definitions = {
         ohead: {
           type: 'num' as const,
@@ -385,8 +385,71 @@ describe('parseFilterStatus', () => {
         },
       };
       const result = parseFilterStatus('ohead=2.5 %', definitions);
-      expect(result.entries[0]).toMatchObject({ unit: 'pc' });
+      expect(result.entries[0]).toMatchObject({ unit: '%' });
       expect(result.entries).toHaveLength(1);
+    });
+  });
+
+  describe('definition unit is a fallback — runtime unit token always wins', () => {
+    it('non-identifier unit token (with slash) folds onto preceding num over a definition unit', () => {
+      const defs: MetricDefinitionMap = {
+        rate: { type: 'num', unit: 'bytes', label: 'Rate', freg: '*' },
+      };
+      const result = parseFilterStatus('rate=0.80 B/sample', defs);
+      expect(result.entries).toHaveLength(1);
+      const entry = result.entries[0];
+      expect(entry.type).toBe('num');
+      if (entry.type === 'num') {
+        expect(entry.value).toBeCloseTo(0.8);
+        expect(entry.unit).toBe('B/sample');
+      }
+      expect(
+        result.entries.find((e) => e.key === 'info'),
+      ).toBeUndefined();
+    });
+
+    it('definition unit applied when no runtime unit token is present', () => {
+      const defs: MetricDefinitionMap = {
+        rate: { type: 'num', unit: 'bytes', label: 'Rate', freg: '*' },
+      };
+      const result = parseFilterStatus('rate=12', defs);
+      expect(result.entries[0]).toMatchObject({
+        type: 'num',
+        key: 'rate',
+        value: 12,
+        unit: 'bytes',
+      });
+    });
+  });
+
+  describe('non-finite numeric values (nan/inf from division by zero)', () => {
+    it('parses nan as a non-finite num, not a string', () => {
+      const result = parseFilterStatus('rate=nan');
+      const entry = result.entries[0];
+      expect(entry.type).toBe('num');
+      if (entry.type === 'num') expect(Number.isNaN(entry.value)).toBe(true);
+    });
+
+    it('parses inf / -inf as non-finite num', () => {
+      const result = parseFilterStatus('hi=inf lo=-inf');
+      expect(result.entries[0]).toMatchObject({ type: 'num', key: 'hi' });
+      expect(result.entries[1]).toMatchObject({ type: 'num', key: 'lo' });
+      if (result.entries[0].type === 'num')
+        expect(result.entries[0].value).toBe(Infinity);
+      if (result.entries[1].type === 'num')
+        expect(result.entries[1].value).toBe(-Infinity);
+    });
+
+    it('a unit token still folds onto a non-finite num', () => {
+      const result = parseFilterStatus('rate=nan B/sample');
+      expect(result.entries).toHaveLength(1);
+      const entry = result.entries[0];
+      expect(entry.type).toBe('num');
+      if (entry.type === 'num') {
+        expect(Number.isNaN(entry.value)).toBe(true);
+        expect(entry.unit).toBe('B/sample');
+      }
+      expect(result.entries.find((e) => e.key === 'info')).toBeUndefined();
     });
   });
 

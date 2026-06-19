@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import monitoredFilterReducer, {
   setSelectedStatusMetric,
+  setParsedStatuses,
 } from '../monitoredFilterSlice';
 
 describe('setSelectedStatusMetric', () => {
@@ -41,5 +42,58 @@ describe('setSelectedStatusMetric', () => {
       'buffer',
       'frames',
     ]);
+  });
+});
+
+describe('setParsedStatuses', () => {
+  it('keeps the same reference when raw status is unchanged', () => {
+    let state = monitoredFilterReducer(undefined, { type: '@@INIT' });
+
+    state = monitoredFilterReducer(
+      state,
+      setParsedStatuses([
+        {
+          filterIdx: 3,
+          parsedStatus: { raw: 'fps=30 buffer=120', entries: [] },
+        },
+      ]),
+    );
+    const firstReference = state.parsedStatusByFilterIdx[3];
+
+    state = monitoredFilterReducer(
+      state,
+      setParsedStatuses([
+        {
+          filterIdx: 3,
+          parsedStatus: { raw: 'fps=30 buffer=120', entries: [] },
+        },
+      ]),
+    );
+    const secondReference = state.parsedStatusByFilterIdx[3];
+
+    expect(secondReference).toBe(firstReference);
+  });
+
+  it('writes a new reference when raw status changes', () => {
+    let state = monitoredFilterReducer(undefined, { type: '@@INIT' });
+
+    state = monitoredFilterReducer(
+      state,
+      setParsedStatuses([
+        { filterIdx: 3, parsedStatus: { raw: 'fps=30', entries: [] } },
+      ]),
+    );
+    const firstReference = state.parsedStatusByFilterIdx[3];
+
+    state = monitoredFilterReducer(
+      state,
+      setParsedStatuses([
+        { filterIdx: 3, parsedStatus: { raw: 'fps=60', entries: [] } },
+      ]),
+    );
+    const secondReference = state.parsedStatusByFilterIdx[3];
+
+    expect(secondReference).not.toBe(firstReference);
+    expect(secondReference.raw).toBe('fps=60');
   });
 });
