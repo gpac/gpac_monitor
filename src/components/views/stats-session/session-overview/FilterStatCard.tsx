@@ -2,14 +2,18 @@ import React, { useCallback, useMemo, memo } from 'react';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import { Badge } from '@/components/ui/badge';
 import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
-import { EnrichedFilterData } from '@/workers/enrichedStatsWorker';
+import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
+import { formatBytes } from '@/utils/formatting/bytes';
+import { formatTime } from '@/utils/formatting/time';
+import { formatNumber, formatPacketRate } from '@/utils/formatting/numbers';
+import { microsecondsToSeconds } from '@/utils/formatting/time';
 
 interface FilterStatCardProps {
-  filter: EnrichedFilterData;
+  filter: EnrichedFilterOverview;
   onClick?: (idx: number) => void;
   isMonitored?: boolean;
   isDetached?: boolean;
@@ -37,16 +41,24 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       }
     }, [filter.idx, onClick]);
 
-    const {
-      sessionType,
-      formattedBytes,
-      formattedTime,
-      formattedPackets,
-      formattedPacketRate,
-    } = filter.computed;
-
     const hasPackets = Boolean(filter.pck_done && filter.pck_done > 0);
     const hasTime = Boolean(filter.time && filter.time > 0);
+
+    const sessionType =
+      !filter.nb_ipid && filter.nb_opid
+        ? 'source'
+        : filter.nb_ipid && !filter.nb_opid
+          ? 'sink'
+          : 'process';
+
+    const formattedBytes = formatBytes(filter.bytes_done ?? 0);
+    const formattedTime = formatTime(filter.time);
+    const formattedPackets = formatNumber(filter.pck_done ?? 0);
+    const formattedPacketRate = formatPacketRate(
+      microsecondsToSeconds(filter.time ?? 0) > 0
+        ? (filter.pck_done ?? 0) / microsecondsToSeconds(filter.time ?? 0)
+        : 0,
+    );
 
     const isMonitoredOrDetached = useMemo(
       () => isMonitored || isDetached,

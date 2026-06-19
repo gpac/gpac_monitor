@@ -38,6 +38,9 @@ export interface EnrichedFilterOverview extends Record<string, unknown> {
   streamtype?: string;
   last_ts_sent?: TimeFraction;
 
+  // Parsed version of status (set by enrichedStatsWorker)
+  parsedStatus?: import('@/workers/filterStatusParser').ParsedFilterStatus;
+
   // Dynamic session data (updated from SessionFilterStatistics)
   status: string;
   bytes_done: number;
@@ -125,6 +128,7 @@ export interface EdgeData extends Record<string, unknown> {
   id: string;
   source: string;
   target: string;
+  filterType: FilterType;
   bufferPercentage: number;
   pidName: string;
 }

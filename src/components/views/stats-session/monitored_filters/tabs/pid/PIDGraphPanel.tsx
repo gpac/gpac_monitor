@@ -1,14 +1,16 @@
 import { memo, useMemo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
+import { useAdaptiveChartHeight } from '@/shared/hooks';
 import { selectAllSelectedPidSamplesByFilter } from '@/shared/store/selectors';
 import type { PIDMetricMode } from '../../../types/pid';
+import { PID_SELECTION_COLORS } from './utils/pidColors';
 import {
-  getFilterColor,
-  DEFAULT_STREAM_COLOR,
-} from '@/utils/filters/streamType';
-import PIDHistoryChart, {
+  usePIDChartData,
   type PIDSeriesEntry,
-} from '../../charts/PIDHistoryChart';
+} from '../../charts/hooks/usePIDChartData';
+import { MODE_FORMATTERS } from '../../charts/config/pidHistoryChartConfig';
+import { formatCompactTime } from '@/utils/formatting';
+import LineHistoryChart from '../../charts/LineHistoryChart';
 
 const MODE_LABELS: Record<PIDMetricMode, string> = {
   bitrate: 'Avg Bitrate',
@@ -33,7 +35,7 @@ const PIDGraphPanel = memo(
 
     const entries = useMemo<PIDSeriesEntry[]>(
       () =>
-        allSamples.map(({ target, pidHistory }) => {
+        allSamples.map(({ target, pidHistory }, index) => {
           const typeStr = target.streamTypeLabel
             ? ` (${target.streamTypeLabel})`
             : '';
@@ -43,23 +45,27 @@ const PIDGraphPanel = memo(
             pidHistory: sliced,
             label: `PID ${target.pidIndex}${typeStr}`,
             metricLabel: MODE_LABELS[mode],
-            color: target.streamType
-              ? getFilterColor(target.streamType)
-              : DEFAULT_STREAM_COLOR,
+            color: PID_SELECTION_COLORS[index],
           };
         }),
       [allSamples, mode, maxPoints],
     );
 
+    const chartHeight = useAdaptiveChartHeight();
+    const { series, data } = usePIDChartData(entries, mode);
+
     if (entries.length === 0) return null;
 
     return (
       <div className="p-2">
-        <PIDHistoryChart
-          entries={entries}
-          mode={mode}
-          showEndLabels={showEndLabels}
+        <LineHistoryChart
+          series={series}
+          data={data}
+          formatX={formatCompactTime}
+          leftAxisFormat={MODE_FORMATTERS[mode]}
           showCurrentTime
+          showEndLabels={showEndLabels}
+          height={chartHeight}
         />
       </div>
     );

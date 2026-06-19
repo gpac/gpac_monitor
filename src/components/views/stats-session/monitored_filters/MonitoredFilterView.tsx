@@ -38,7 +38,6 @@ interface MonitoredFilterViewProps {
   onBack: () => void;
   onOpenProperties: () => void;
   initialTab?: InitialTabType;
-  onTabChange?: (tab: string) => void;
   isLoading?: boolean;
   isDetached?: boolean;
 }
@@ -57,7 +56,6 @@ const MonitoredFilterView = memo(
     filterData = EMPTY_FILTER_DATA,
     onOpenProperties,
     initialTab,
-    onTabChange,
     isLoading = false,
     isDetached = false,
   }: MonitoredFilterViewProps) => {
@@ -65,15 +63,10 @@ const MonitoredFilterView = memo(
       initialTab || 'overview',
     );
 
-    const handleTabChange = (tab: string) => {
-      setActiveTab(tab);
-      onTabChange?.(tab);
-    };
-
     // Get log alerts for this filter
     const alerts = useAppSelector((state) =>
-      overviewData.idx !== undefined
-        ? selectFilterAlerts(String(overviewData.idx))(state)
+      overviewData.filterIdx !== undefined
+        ? selectFilterAlerts(String(overviewData.filterIdx))(state)
         : null,
     );
 
@@ -93,18 +86,22 @@ const MonitoredFilterView = memo(
     );
     const openLogsWidget = useOpenLogsWidget();
     const filterKey =
-      overviewData.idx !== undefined ? String(overviewData.idx) : null;
+      overviewData.filterIdx !== undefined
+        ? String(overviewData.filterIdx)
+        : null;
     return (
       <FilterViewProvider value={isDetached}>
         <div className="flex flex-col gap-2">
           <Tabs
             value={activeTab}
-            onValueChange={handleTabChange}
+            onValueChange={setActiveTab}
             className="w-full"
           >
-            <div className="sticky backdrop-blur-sm top-0 z-10 bg-background/60 space-y-1 px-1 py-2">
+            <div
+              className={`sticky ${isDetached ? 'top-0' : 'top-10'} z-10 bg-monitor-surface space-y-1 px-1 py-2`}
+            >
               <div className="flex justify-stretch items-center gap-4">
-                <FilterChangeBadges filterIdx={overviewData.idx} />
+                <FilterChangeBadges filterIdx={overviewData.filterIdx} />
                 <StatusBadge
                   label={`${alerts?.errors} ERR`}
                   colorScheme="red"
@@ -177,7 +174,7 @@ const MonitoredFilterView = memo(
               className="data-[state=inactive]:hidden"
             >
               <MemoizedNetworkTab
-                filterId={overviewData.idx.toString()}
+                filterId={overviewData.filterIdx.toString()}
                 data={networkData}
                 filterName={overviewData.name}
                 lastTaskTimeUs={overviewData.last_task_time}
@@ -211,7 +208,7 @@ const MonitoredFilterView = memo(
     // Overview data contains frequently changing metrics
     const overviewUnchanged =
       prevProps.overviewData.name === nextProps.overviewData.name &&
-      prevProps.overviewData.idx === nextProps.overviewData.idx;
+      prevProps.overviewData.filterIdx === nextProps.overviewData.filterIdx;
 
     // Network data changes frequently (bytes_sent/received)
     const networkUnchanged =

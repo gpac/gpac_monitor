@@ -1,4 +1,5 @@
 import type { PIDproperties } from '../domain/gpac/filter-stats';
+import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
 
 /**
  * Data structure specifically for Overview Tab
@@ -7,8 +8,9 @@ export interface OverviewTabData {
   // Filter identification
   name: string;
   type: string;
-  idx: number;
+  filterIdx: number;
   status: string;
+  parsedStatus: ParsedFilterStatus;
 
   // Processing metrics
   tasks?: number;
@@ -31,31 +33,6 @@ export interface OverviewTabData {
   // Error tracking
   errors?: number;
   current_errors?: number;
-}
-
-/**
- * Buffer information for a single PID
- */
-export interface PIDBufferInfo {
-  name: string;
-  buffer: number;
-  bufferTotal: number;
-  usage: number; // percentage
-  sourceIdx?: number;
-  color: string;
-}
-
-/**
- * Data structure specifically for Buffers Tab
- */
-export interface BuffersTabData {
-  name: string;
-  inputBuffers: PIDBufferInfo[];
-  totalBufferInfo: {
-    totalBuffer: number;
-    totalCapacity: number;
-    averageUsage: number;
-  };
 }
 
 /**

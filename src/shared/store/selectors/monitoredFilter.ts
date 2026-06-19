@@ -1,5 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
+import { buildStatusMetricKey } from '@/components/views/stats-session/types/statusMetric';
+import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
 
 /**
  * Base selector - get monitored filter state
@@ -43,7 +45,7 @@ export const selectFilterLastTaskTimeData = createSelector(
 /**
  * Select max points configuration
  */
-export const selectMaxPoints = createSelector(
+export const d = createSelector(
   [selectMonitoredFilterState],
   (monitoredFilterState) => monitoredFilterState.maxPoints,
 );
@@ -105,4 +107,32 @@ export const selectAllSelectedPidSamplesByFilter = createSelector(
             `${target.filterIdx}:${target.direction}:${target.pidIndex}`
           ] ?? [],
       })),
+);
+
+const EMPTY_METRIC_KEYS: string[] = [];
+
+export const selectSelectedStatusMetric = (
+  state: RootState,
+  filterIdx: number,
+): string[] =>
+  state.monitoredFilter.selectedStatusMetricByFilter[filterIdx] ??
+  EMPTY_METRIC_KEYS;
+
+const EMPTY_PARSED_STATUS: ParsedFilterStatus = { raw: '', entries: [] };
+
+export const selectParsedStatus = (
+  state: RootState,
+  filterIdx: number,
+): ParsedFilterStatus =>
+  state.monitoredFilter.parsedStatusByFilterIdx[filterIdx] ??
+  EMPTY_PARSED_STATUS;
+
+export const selectStatusMetricSamples = createSelector(
+  [
+    selectMonitoredFilterState,
+    (_state: RootState, filterIdx: number) => filterIdx,
+    (_state: RootState, _filterIdx: number, metricKey: string) => metricKey,
+  ],
+  (state, filterIdx, metricKey) =>
+    state.statusMetricSamples[buildStatusMetricKey(filterIdx, metricKey)] ?? [],
 );

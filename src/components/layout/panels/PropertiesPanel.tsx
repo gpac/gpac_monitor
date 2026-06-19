@@ -7,7 +7,11 @@ import IPIDPropertiesContent from '../../ipid-properties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';
 import { useFetchIPIDProperties } from '../../ipid-properties/hooks/useFetchIPIDProperties';
 import { useFilterArgsSubscription } from '../../filters-args/hooks/useFilterArgsSubscription';
-import { getFilterInfoByIdx } from '@/utils/filters/streamType';
+import {
+  getFilterInfoByIdx,
+  STREAM_TYPE_TO_FILTER,
+} from '@/utils/filters/streamType';
+import type { FilterType } from '@/types';
 
 const PropertiesPanel = () => {
   const { sidebarContent, closeSidebar } = useSidebar();
@@ -18,14 +22,15 @@ const PropertiesPanel = () => {
     return getFilterInfoByIdx(filters, sidebarContent.filterIdx);
   }, [filters, sidebarContent]);
 
-  const pidStreamType = useMemo(() => {
+  const pidStreamType = useMemo((): FilterType | undefined => {
     if (sidebarContent?.type !== 'pid-props') return undefined;
     const filter = filters.find((f) => f.idx === sidebarContent.filterIdx);
-    return Object.values(filter?.ipid ?? {})[sidebarContent.ipidIdx]
-      ?.stream_type;
+    const pid = filter?.ipid[sidebarContent.ipidIdx];
+    if (!pid?.stream_type) return undefined;
+    return STREAM_TYPE_TO_FILTER[pid.stream_type] ?? undefined;
   }, [filters, sidebarContent]);
 
-  // Local state
+  // Local state for filter args visibility options
   const [showExpert, setShowExpert] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -76,6 +81,7 @@ const PropertiesPanel = () => {
   // Render based on content type
   return (
     <div className="flex flex-col mt-4 flex-1 bg-monitor-surface border border-monitor-line">
+      {/* Header - sticky */}
       <div className="sticky top-0 z-20 bg-monitor-surface border-b border-monitor-line">
         {sidebarContent.type === 'pid-props' ? (
           <PropertiesHeader
@@ -101,6 +107,8 @@ const PropertiesPanel = () => {
           />
         ) : null}
       </div>
+
+      {/* Content - scrollable */}
       <div className="flex-1 overflow-y-auto">
         {sidebarContent.type === 'pid-props' ? (
           <IPIDPropertiesContent

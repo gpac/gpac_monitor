@@ -2,8 +2,12 @@ import { describe, it, expect } from 'vitest';
 import {
   selectSelectedPidTargetsByFilter,
   selectAllSelectedPidSamplesByFilter,
+  selectParsedStatus,
 } from '../monitoredFilter';
-import { clearSelectedPidsByFilter } from '../../slices/monitoredFilterSlice';
+import {
+  clearSelectedPidsByFilter,
+  setParsedStatuses,
+} from '../../slices/monitoredFilterSlice';
 import monitoredFilterReducer, {
   type MonitoredFilterState,
 } from '../../slices/monitoredFilterSlice';
@@ -75,14 +79,14 @@ describe('selectSelectedPidTargetsByFilter', () => {
 describe('selectAllSelectedPidSamplesByFilter', () => {
   it('returns only samples for the given filterIdx', () => {
     const sample0 = {
-      sessionTimestampUs: 1000,
+      sessionTimeUs: 1000,
       averageBitrate: 100,
       bufferTime: 0,
       processTime: 0,
       processRate: 0,
     };
     const sample1 = {
-      sessionTimestampUs: 2000,
+      sessionTimeUs: 2000,
       averageBitrate: 200,
       bufferTime: 0,
       processTime: 0,
@@ -108,14 +112,14 @@ describe('selectAllSelectedPidSamplesByFilter', () => {
 
   it('chart for filter A is not polluted by PIDs selected in filter B', () => {
     const sampleA = {
-      sessionTimestampUs: 1000,
+      sessionTimeUs: 1000,
       averageBitrate: 500,
       bufferTime: 0,
       processTime: 10,
       processRate: 0,
     };
     const sampleB = {
-      sessionTimestampUs: 1000,
+      sessionTimeUs: 1000,
       averageBitrate: 800,
       bufferTime: 0,
       processTime: 5,
@@ -212,5 +216,33 @@ describe('clearSelectedPidsByFilter reducer', () => {
 
     expect(next.selectedPidTargets).toHaveLength(1);
     expect(next.selectedPidTargets[0].filterIdx).toBe(0);
+  });
+});
+
+describe('selectParsedStatus', () => {
+  it('returns the parsed status stored for a filter idx', () => {
+    const parsed = {
+      raw: 'seg=7',
+      entries: [{ type: 'num' as const, key: 'seg', value: 7 }],
+    };
+
+    const state = monitoredFilterReducer(
+      undefined,
+      setParsedStatuses([{ filterIdx: 6, parsedStatus: parsed }]),
+    );
+    const root = { monitoredFilter: state } as unknown as RootState;
+
+    expect(selectParsedStatus(root, 6)).toEqual(parsed);
+  });
+
+  it('returns a stable empty reference for an unknown filter idx', () => {
+    const state = monitoredFilterReducer(undefined, { type: '@@INIT' });
+    const root = { monitoredFilter: state } as unknown as RootState;
+
+    const first = selectParsedStatus(root, 99);
+    const second = selectParsedStatus(root, 99);
+
+    expect(first.entries).toHaveLength(0);
+    expect(first).toBe(second);
   });
 });

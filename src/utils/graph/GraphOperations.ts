@@ -1,9 +1,10 @@
-import { GraphFilterData } from '@/types/domain/gpac';
+import { FilterType, GraphFilterData } from '@/types/domain/gpac';
 import { Node, Edge, MarkerType } from '@xyflow/react';
 import { isSource } from './filterType';
 import {
   determineFilterType,
   getFilterColor,
+  STREAM_TYPE_TO_FILTER,
 } from '@/utils/filters/streamType';
 
 // Create a node from a filter object
@@ -101,7 +102,9 @@ export function createEdgesFromFilters(
       const edgeId = `edge:${pid.source_idx}->${filter.idx}:ipid:${pid.pid_index}`;
       const existingEdge = existingEdges.find((e) => e.id === edgeId);
 
-      const filterColor = getFilterColor(pid.stream_type);
+      const filterType: FilterType =
+        STREAM_TYPE_TO_FILTER[pid.stream_type] ?? 'file';
+      const filterColor = getFilterColor(filterType);
 
       // Match source opid by stream_type, fallback to first
       const sourceFilter = filters.find((f) => f.idx === pid.source_idx);
@@ -120,7 +123,7 @@ export function createEdgesFromFilters(
         sourceHandle,
         targetHandle: `ipid-${pid.pid_index}`,
         type: 'simplebezier',
-        data: {},
+        data: { filterType },
         animated: true,
         style: { stroke: filterColor, strokeWidth: 3, opacity: 0.9 },
         markerEnd: { type: MarkerType.ArrowClosed, color: filterColor },

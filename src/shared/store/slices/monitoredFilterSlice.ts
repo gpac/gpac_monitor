@@ -3,12 +3,13 @@ import type {
   PIDMetricSample,
   PIDGraphTarget,
 } from '@/components/views/stats-session/types/pid';
+import type { StatusMetricSample } from '@/components/views/stats-session/types/statusMetric';
+import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
 
 /**
  * Generic data point for charts (time-series data)
  */
 export interface ChartDataPoint {
-  time: string;
   timestamp: number;
   value: number;
 }
@@ -39,6 +40,9 @@ export interface MonitoredFilterState {
   selectedPidTargets: PIDGraphTarget[];
   pidSamples: Record<string, PIDMetricSample[]>;
   maxPidSamples: number;
+  statusMetricSamples: Record<string, StatusMetricSample[]>;
+  selectedStatusMetricByFilter: Record<number, string[]>;
+  parsedStatusByFilterIdx: Record<number, ParsedFilterStatus>;
 }
 
 const initialState: MonitoredFilterState = {
@@ -47,6 +51,9 @@ const initialState: MonitoredFilterState = {
   selectedPidTargets: [],
   pidSamples: {},
   maxPidSamples: 300,
+  statusMetricSamples: {},
+  selectedStatusMetricByFilter: {},
+  parsedStatusByFilterIdx: {},
 };
 
 const monitoredFilterSlice = createSlice({
@@ -168,7 +175,7 @@ const monitoredFilterSlice = createSlice({
 
       if (
         lastSample &&
-        lastSample.sessionTimestampUs === sample.sessionTimestampUs &&
+        lastSample.sessionTimeUs === sample.sessionTimeUs &&
         lastSample.averageBitrate === sample.averageBitrate &&
         lastSample.bufferTime === sample.bufferTime &&
         lastSample.processTime === sample.processTime &&
@@ -195,7 +202,7 @@ const monitoredFilterSlice = createSlice({
         const last = samples[samples.length - 1];
         if (
           last &&
-          last.sessionTimestampUs === sample.sessionTimestampUs &&
+          last.sessionTimeUs === sample.sessionTimeUs &&
           last.averageBitrate === sample.averageBitrate &&
           last.bufferTime === sample.bufferTime &&
           last.processTime === sample.processTime &&
@@ -214,6 +221,63 @@ const monitoredFilterSlice = createSlice({
 
     clearAllPIDSamples: (state) => {
       state.pidSamples = {};
+    },
+
+    addStatusMetricSamples: (
+      state,
+      action: PayloadAction<Array<{ key: string; sample: StatusMetricSample }>>,
+    ) => {
+      for (const { key, sample } of action.payload) {
+        if (!state.statusMetricSamples[key])
+          state.statusMetricSamples[key] = [];
+        const samples = state.statusMetricSamples[key];
+        const last = samples[samples.length - 1];
+        if (
+          last &&
+          last.sessionTimeUs === sample.sessionTimeUs &&
+          last.value === sample.value
+        )
+          continue;
+        samples.push(sample);
+        if (samples.length > state.maxPidSamples) samples.shift();
+      }
+    },
+
+    setSelectedStatusMetric: (
+      state,
+      action: PayloadAction<{ filterIdx: number; metricKey: string }>,
+    ) => {
+      const { filterIdx, metricKey } = action.payload;
+      const current = state.selectedStatusMetricByFilter[filterIdx] ?? [];
+      const index = current.indexOf(metricKey);
+      if (index !== -1) {
+        current.splice(index, 1);
+      } else {
+        if (current.length >= 4) current.shift();
+        current.push(metricKey);
+      }
+      state.selectedStatusMetricByFilter[filterIdx] = current;
+    },
+
+    setParsedStatuses: (
+      state,
+      action: PayloadAction<
+        Array<{ filterIdx: number; parsedStatus: ParsedFilterStatus }>
+      >,
+    ) => {
+      for (const { filterIdx, parsedStatus } of action.payload) {
+        const existing = state.parsedStatusByFilterIdx[filterIdx];
+        if (existing?.raw === parsedStatus.raw) continue;
+        state.parsedStatusByFilterIdx[filterIdx] = parsedStatus;
+      }
+    },
+
+    clearStatusMetricsByFilter: (state, action: PayloadAction<number>) => {
+      const prefix = `${action.payload}:`;
+      for (const key of Object.keys(state.statusMetricSamples)) {
+        if (key.startsWith(prefix)) delete state.statusMetricSamples[key];
+      }
+      delete state.selectedStatusMetricByFilter[action.payload];
     },
 
     /**
@@ -238,6 +302,10 @@ export const {
   addPIDSamples,
   clearPIDSamples,
   clearAllPIDSamples,
+  addStatusMetricSamples,
+  setSelectedStatusMetric,
+  clearStatusMetricsByFilter,
+  setParsedStatuses,
 } = monitoredFilterSlice.actions;
 
 export default monitoredFilterSlice.reducer;

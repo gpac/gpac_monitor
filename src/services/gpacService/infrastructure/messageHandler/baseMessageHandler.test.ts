@@ -12,6 +12,8 @@ function createMockCallbacks(): MessageHandlerCallbacks {
     onLogSubscriptionChange: vi.fn(),
     onPidReconfigured: vi.fn(),
     onArgUpdated: vi.fn(),
+    onSetMetricDefinitions: vi.fn(),
+    onFilterStatuses: vi.fn(),
   };
 }
 
@@ -96,6 +98,70 @@ describe('BaseMessageHandler', () => {
       });
 
       expect(callbacks.onArgUpdated).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('session_metrics', () => {
+    it('should call onSetMetricDefinitions with data', () => {
+      simulateMessage(handler, {
+        message: 'session_metrics',
+        data: 'freg=*;done=Done;u=bool\nfreg=rfnalu;NALU=NAL Units',
+      });
+
+      expect(callbacks.onSetMetricDefinitions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          done: expect.any(Object),
+          NALU: expect.any(Object),
+        }),
+      );
+    });
+  });
+
+  describe('filter_stats → status ingestion', () => {
+    it('forwards filter idx and raw status for parsing', () => {
+      simulateMessage(handler, {
+        message: 'filter_stats',
+        idx: 6,
+        status: 'seg=7',
+      });
+
+      expect(callbacks.onFilterStatuses).toHaveBeenCalledWith([
+        { idx: 6, status: 'seg=7' },
+      ]);
+    });
+  });
+
+  describe('session_stats → status ingestion', () => {
+    it('forwards every filter idx and raw status for parsing', () => {
+      simulateMessage(handler, {
+        message: 'session_stats',
+        stats: [
+          { idx: 6, status: 'seg=7' },
+          { idx: 2, status: 'fps=30' },
+        ],
+      });
+
+      expect(callbacks.onFilterStatuses).toHaveBeenCalledWith([
+        { idx: 6, status: 'seg=7' },
+        { idx: 2, status: 'fps=30' },
+      ]);
+    });
+  });
+
+  describe('filters → status ingestion', () => {
+    it('forwards every filter idx and raw status for parsing', () => {
+      simulateMessage(handler, {
+        message: 'filters',
+        filters: [
+          { idx: 6, status: 'seg=7' },
+          { idx: 2, status: 'fps=30' },
+        ],
+      });
+
+      expect(callbacks.onFilterStatuses).toHaveBeenCalledWith([
+        { idx: 6, status: 'seg=7' },
+        { idx: 2, status: 'fps=30' },
+      ]);
     });
   });
 
