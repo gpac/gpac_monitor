@@ -3,13 +3,17 @@ import type { CPUStats } from '@/types/domain/system';
 import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
 import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 import type { SessionStatsEvent, CpuStatsEvent } from '../../types';
-import type { PIDSample, PIDDynamicByFilter } from '../extractPIDSamples';
+import type { PIDDynamicByFilter } from '../extractPIDDynamic';
+import type { PIDMetricSample } from '@/components/views/stats-session/types/pid';
+import type { StatusMetricSample } from '@/components/views/stats-session/types/statusMetric';
 import {
   addCombinedNetworkPoint,
   bulkAddNetworkData,
   addPIDSamples,
   addStatusMetricSamples,
+  setParsedStatuses,
 } from '@/shared/store/slices/monitoredFilterSlice';
+import { parseFilterStatus } from '@/workers/filterStatusParser';
 import {
   updateSessionStats,
   setFilterPids,
@@ -19,13 +23,14 @@ import {
   setSystemStats,
   bulkAddSystemStats,
 } from '@/shared/store/slices/sessionDetailsSlice';
-import { computeBandwidthPoints } from '../computeBandwidth';
 import { formatCompactTime } from '@/utils/formatting/time';
-import { extractPIDSamples, extractPIDDynamic } from '../extractPIDSamples';
+import { extractPIDDynamic } from '../extractPIDDynamic';
+import { buildStatusSamplesFromStats } from '@/utils/metrics/statusMetricGraph';
+import { buildPIDSamplesFromFilterStats } from '@/utils/metrics/pidMetricGraph';
 import {
-  extractStatusMetricSamples,
-  type StatusMetricSamplesBuffer,
-} from '../extractStatusMetricSamples';
+  buildPerfSamplesFromStats,
+  type PerfStatEntry,
+} from '@/utils/metrics/perfMetricGraph';
 
 export type CombinedBandwidthBuffer = Record<
   string,
@@ -41,8 +46,11 @@ export type PrevBandwidthState = Record<
   { bytes_sent: number; bytes_done: number; ts_us: number }
 >;
 
-export type PIDSamplesBuffer = PIDSample[];
-export type { StatusMetricSamplesBuffer };
+export type PIDSamplesBuffer = Array<{ key: string; sample: PIDMetricSample }>;
+export type StatusMetricSamplesBuffer = Array<{
+  key: string;
+  sample: StatusMetricSample;
+}>;
 
 export function mapCpuStatsEvent(event: CpuStatsEvent): CPUStats {
   return {
@@ -77,17 +85,20 @@ export function dispatchSessionStats(
     stats: event.stats as SessionFilterStats[],
     ts_us: event.ts_us,
   };
-  const pidSamples = extractPIDSamples(
-    event.stats,
-    event.ts_us,
-    sessionStartUs,
+  const pidSamples = event.stats.flatMap((stat) =>
+    buildPIDSamplesFromFilterStats(stat, event.ts_us, sessionStartUs),
   );
   const pidDynamic = extractPIDDynamic(event.stats);
-  const statusSamples = extractStatusMetricSamples(
+  const statusSamples = buildStatusSamplesFromStats(
     event.stats,
     event.ts_us,
     sessionStartUs,
   );
+  const parsedStatusEntries = event.stats.map((stat) => ({
+    filterIdx: stat.idx,
+    parsedStatus: parseFilterStatus(stat.status ?? ''),
+  }));
+  dispatch(setParsedStatuses(parsedStatusEntries));
 
   if (silent) {
     pendingStats = statsPayload;
@@ -102,7 +113,30 @@ export function dispatchSessionStats(
     if (statusSamples.length) dispatch(addStatusMetricSamples(statusSamples));
   }
 
-  const points = computeBandwidthPoints(event, sessionStartUs, prevBandwidth);
+  const prevStats: Record<string, PerfStatEntry> = {};
+  let prevTsUs: number | null = null;
+  for (const [filterId, prev] of Object.entries(prevBandwidth)) {
+    prevStats[filterId] = {
+      idx: Number(filterId),
+      bytes_sent: prev.bytes_sent,
+      bytes_done: prev.bytes_done,
+    };
+    prevTsUs = prev.ts_us;
+  }
+  const points = buildPerfSamplesFromStats(
+    event.stats as PerfStatEntry[],
+    prevStats,
+    event.ts_us,
+    prevTsUs,
+    sessionStartUs,
+  );
+  for (const stat of event.stats) {
+    prevBandwidth[String(stat.idx)] = {
+      bytes_sent: stat.bytes_sent,
+      bytes_done: stat.bytes_done,
+      ts_us: event.ts_us,
+    };
+  }
 
   if (silent) {
     for (const point of points) {

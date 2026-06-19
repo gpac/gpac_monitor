@@ -42,6 +42,42 @@ const sessionStatsEvent: SessionStatsEvent = {
   ],
 };
 
+/** Second tick — bandwidth is a rate, so it needs a previous reference. */
+const sessionStatsEvent2: SessionStatsEvent = {
+  version: 1,
+  message: 'session_stats',
+  ts_us: 2237805,
+  all_packets_done: false,
+  stats: [
+    {
+      idx: 0,
+      status: '',
+      bytes_done: 1455056,
+      bytes_sent: 1455056,
+      pck_sent: 334,
+      pck_done: 334,
+      time: 9934,
+      nb_ipid: 2,
+      nb_opid: 2,
+      is_eos: false,
+      last_ts_sent: { n: 146, d: 30 },
+    },
+    {
+      idx: 4,
+      status: '',
+      bytes_done: 10000,
+      bytes_sent: 1514352,
+      pck_sent: 338,
+      pck_done: 4,
+      time: 6156,
+      nb_ipid: 1,
+      nb_opid: 2,
+      is_eos: true,
+      last_ts_sent: { n: 156, d: 30 },
+    },
+  ],
+};
+
 const cpuStatsEvent: CpuStatsEvent = {
   version: 1,
   message: 'cpu_stats',
@@ -72,19 +108,21 @@ describe('HistoryAdapter silent mode', () => {
   });
 
   it('dispatches bandwidth immediately when not silent', () => {
-    adapter.handleEvent(sessionStatsEvent);
+    adapter.handleEvent(sessionStatsEvent); // seeds prev (no delta yet)
+    adapter.handleEvent(sessionStatsEvent2); // now has a previous reference
 
     const bandwidthDispatches = dispatch.mock.calls.filter(
       ([action]: any) =>
         action.type === 'monitoredFilter/addCombinedNetworkPoint',
     );
-    // 2 filters × 1 combined dispatch = 2 dispatches
+    // 2 filters × 1 combined dispatch = 2 dispatches (from the second event)
     expect(bandwidthDispatches).toHaveLength(2);
   });
 
   it('buffers bandwidth when silent, dispatches bulk on flush', () => {
     adapter.setSilent(true);
-    adapter.handleEvent(sessionStatsEvent);
+    adapter.handleEvent(sessionStatsEvent); // seeds prev
+    adapter.handleEvent(sessionStatsEvent2); // produces buffered bandwidth
 
     const bandwidthDispatches = dispatch.mock.calls.filter(
       ([action]: any) =>
@@ -175,10 +213,11 @@ describe('HistoryAdapter silent mode', () => {
 
   it('resets silent mode after flush', () => {
     adapter.setSilent(true);
+    adapter.handleEvent(sessionStatsEvent); // buffered, seeds prev
     adapter.flush();
 
     dispatch.mockClear();
-    adapter.handleEvent(sessionStatsEvent);
+    adapter.handleEvent(sessionStatsEvent2); // non-silent, prev exists → dispatches
 
     const bandwidthDispatches = dispatch.mock.calls.filter(
       ([action]: any) =>

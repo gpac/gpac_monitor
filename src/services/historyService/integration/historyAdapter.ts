@@ -64,7 +64,7 @@ import type {
   PIDSamplesBuffer,
   StatusMetricSamplesBuffer,
 } from './handlers/statsHandler';
-import type { PIDDynamicByFilter } from './extractPIDSamples';
+import type { PIDDynamicByFilter } from './extractPIDDynamic';
 import { dispatchLogEvent } from './handlers/logHandler';
 import {
   MAX_LOGS_ON_SEEK,
