@@ -13,6 +13,7 @@ function SessionStatsManager(client) {
     this.isSubscribed = false;
     this.interval = UPDATE_INTERVALS.SESSION_STATS;
     this.fields = [];
+    this.lastSentMetrics = '';
 
     this.subscribe = function(interval, fields) {
         this.isSubscribed = true;
@@ -98,6 +99,7 @@ function SessionStatsManager(client) {
             return JSON.stringify({
                 message: 'session_stats',
                 all_packets_done,
+                ts_us: now,
                 stats
             });
         });
@@ -105,10 +107,21 @@ function SessionStatsManager(client) {
         if (this.client.client) {
             this.client.client.send(serialized);
         }
+
+        const sessionMetrics = session.session_metrics;
+        if (sessionMetrics && sessionMetrics !== this.lastSentMetrics && this.client.client) {
+            this.lastSentMetrics = sessionMetrics;
+            this.client.client.send(JSON.stringify({
+                message: 'session_metrics',
+                data: sessionMetrics
+            }));
+           
+        }
     };
 
     this.cleanup = function() {
         this.isSubscribed = false;
+        this.lastSentMetrics = '';
     };
 
     this.handleSessionEnd = function() {

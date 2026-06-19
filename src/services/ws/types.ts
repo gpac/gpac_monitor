@@ -49,6 +49,20 @@ enum WSResponseType {
   SESSION_END = 'session_end',
 }
 
+export interface SessionStatsMessage {
+  message: 'session_stats';
+  all_packets_done: boolean;
+  ts_us?: number;
+  stats: any[];
+}
+
+export interface FilterStatsMessage {
+  message: 'filter_stats';
+  ts_us?: number;
+  idx: number;
+  [key: string]: unknown;
+}
+
 export interface LogBatchResponse extends BaseWSResponse {
   message: 'log_batch';
   logs: GpacLogEntry[];

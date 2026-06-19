@@ -7,7 +7,11 @@ import IPIDPropertiesContent from '../../ipid-properties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';
 import { useFetchIPIDProperties } from '../../ipid-properties/hooks/useFetchIPIDProperties';
 import { useFilterArgsSubscription } from '../../filters-args/hooks/useFilterArgsSubscription';
-import { getFilterInfoByIdx } from '@/utils/filters/streamType';
+import {
+  getFilterInfoByIdx,
+  STREAM_TYPE_TO_FILTER,
+} from '@/utils/filters/streamType';
+import type { FilterType } from '@/types';
 
 const PropertiesPanel = () => {
   const { sidebarContent, closeSidebar } = useSidebar();
@@ -16,6 +20,14 @@ const PropertiesPanel = () => {
   const filterInfo = useMemo(() => {
     if (!sidebarContent) return null;
     return getFilterInfoByIdx(filters, sidebarContent.filterIdx);
+  }, [filters, sidebarContent]);
+
+  const pidStreamType = useMemo((): FilterType | undefined => {
+    if (sidebarContent?.type !== 'pid-props') return undefined;
+    const filter = filters.find((f) => f.idx === sidebarContent.filterIdx);
+    const pid = filter?.ipid[sidebarContent.ipidIdx];
+    if (!pid?.stream_type) return undefined;
+    return STREAM_TYPE_TO_FILTER[pid.stream_type] ?? undefined;
   }, [filters, sidebarContent]);
 
   // Local state for filter args visibility options
@@ -75,7 +87,7 @@ const PropertiesPanel = () => {
           <PropertiesHeader
             filterName={`${filterInfo?.name || 'Filter'} IPIDs`}
             filterIdx={sidebarContent.filterIdx}
-            streamType={filterInfo?.streamType}
+            streamType={pidStreamType ?? filterInfo?.streamType}
             mode="ipid"
             onClose={closeSidebar}
             onSearchChange={handleSearchChange}

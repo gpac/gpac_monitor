@@ -10,6 +10,7 @@ import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
+import { GraphRadio } from '@/components/common/charts';
 import type { PIDWithIndex } from '../../../types';
 
 interface PIDRowInfoCellProps {
@@ -52,18 +53,11 @@ const PIDRowInfoCell = memo(
 
     return (
       <div className="min-w-0 flex items-center gap-1.5">
-        <input
-          type="radio"
-          checked={isSelected}
-          readOnly
+        <GraphRadio
+          active={isSelected}
           onClick={handleToggleSelect}
-          title="Select PID for temporal graph"
-          className="flex-shrink-1 cursor-pointer"
-          style={
-            isSelected
-              ? { accentColor: PID_SELECTION_COLORS[colorIndex] }
-              : undefined
-          }
+          label={buildPIDDisplayLabel(pid)}
+          color={isSelected ? PID_SELECTION_COLORS[colorIndex] : undefined}
         />
         {variant === 'input' && (
           <button

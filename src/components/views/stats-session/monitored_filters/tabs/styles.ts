@@ -40,7 +40,7 @@ export const TAB_STYLES = {
     'px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide',
 
   // Status badges
-  STATUS_BAR_CONTAINER: 'bg-background/30 rounded-lg px-3 py-2',
+  FILTER_STATUS_WIDGET: 'bg-background/30 rounded-lg px-3 py-2',
   STATUS_BAR_CONTENT: 'flex items-center justify-between',
   STATUS_BAR_LEFT: 'flex items-center gap-3',
   STATUS_BAR_RIGHT: 'flex items-center gap-1.5',

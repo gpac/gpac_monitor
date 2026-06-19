@@ -38,6 +38,9 @@ export interface EnrichedFilterOverview extends Record<string, unknown> {
   streamtype?: string;
   last_ts_sent?: TimeFraction;
 
+  // Parsed version of status (set by enrichedStatsWorker)
+  parsedStatus?: import('@/workers/filterStatusParser').ParsedFilterStatus;
+
   // Dynamic session data (updated from SessionFilterStatistics)
   status: string;
   bytes_done: number;
@@ -94,6 +97,19 @@ export interface TimeFraction {
 
 // GRAPH
 
+export interface GraphInputPid {
+  pid_index: number;
+  name: string;
+  source_idx: number;
+  stream_type: GpacStreamType;
+}
+
+export interface GraphOutputPid {
+  pid_index: number;
+  name: string;
+  stream_type: GpacStreamType;
+}
+
 export interface GraphFilterData {
   idx: number;
   name: string;
@@ -103,8 +119,8 @@ export interface GraphFilterData {
   ID: string | null;
   nb_ipid: number;
   nb_opid: number;
-  ipid: Record<string, { source_idx: number; stream_type: GpacStreamType }>;
-  opid: Record<string, { stream_type: GpacStreamType }>;
+  ipid: GraphInputPid[];
+  opid: GraphOutputPid[];
 }
 export type FilterType = 'video' | 'audio' | 'text' | 'file';
 

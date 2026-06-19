@@ -67,13 +67,12 @@ const TableCore = ({
       </tr>
     </thead>
     <tbody>
-      {pids.map((pid, index) => (
+      {pids.map((pid) => (
         <PIDTableRow
           key={`${pid.name}-${pid.pidIdx}`}
           pid={pid}
           filterIdx={filterIdx}
           onOpenProps={onOpenProps}
-          isEven={index % 2 === 0}
           variant={variant}
           hoveredPidKey={hoveredPidKey}
         />

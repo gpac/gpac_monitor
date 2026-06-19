@@ -1,6 +1,6 @@
 import { memo, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UplotChart } from '@/components/common/UplotChart';
+import { UplotChart } from '@/components/common/charts/UplotChart';
 import { useContainerSize } from '@/components/common/charts';
 import { useChartData } from '../hooks/useChartData';
 import { createCpuMemoryUplotConfig } from './uplotConfig';

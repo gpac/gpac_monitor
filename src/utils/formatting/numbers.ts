@@ -41,3 +41,10 @@ export const formatBps = (value: number | null | undefined): string =>
 
 export const formatSamplerate = (value: number): string =>
   `${(value / 1000).toFixed(1)} kHz`;
+
+export const formatFps = (value: number): string => {
+  if (!isFinite(value) || value < 0) return '—';
+  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M fps`;
+  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}K fps`;
+  return `${value.toFixed(2)} fps`;
+};

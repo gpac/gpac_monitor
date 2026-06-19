@@ -1,7 +1,7 @@
-import { type ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { TAB_STYLES } from '../styles';
 export { default as PIDTable } from './PIDTable';
+export { MetricRow, TableSection } from '../shared/tableLayout';
 
 interface PIDStatusBarProps {
   totalPids: number;
@@ -18,7 +18,7 @@ export const PIDStatusBar = ({
   eos,
   blocked,
 }: PIDStatusBarProps) => (
-  <div className={`${TAB_STYLES.STATUS_BAR_CONTAINER} w-[60%]`}>
+  <div className={`${TAB_STYLES.FILTER_STATUS_WIDGET} w-[60%]`}>
     <div className={TAB_STYLES.STATUS_BAR_CONTENT}>
       <div className={TAB_STYLES.STATUS_BAR_LEFT}>
         <span className="text-xs font-medium">Status</span>
@@ -53,60 +53,5 @@ export const PIDStatusBar = ({
         )}
       </div>
     </div>
-  </div>
-);
-
-export const MetricRow = ({
-  label,
-  value,
-  isEven,
-  valueClassName = 'text-info',
-}: {
-  label: string;
-  value: string;
-  isEven: boolean;
-  valueClassName?: string;
-}) => (
-  <tr
-    className={`${isEven ? 'bg-black/10' : 'bg-black/20'} border-b border-white/5`}
-  >
-    <td className="px-2 py-2 align-middle text-xs text-muted-foreground">
-      {label}
-    </td>
-    <td
-      className={`px-2 py-2 align-middle text-xs font-medium tabular-nums text-right w-28 whitespace-nowrap ${valueClassName}`}
-    >
-      {value}
-    </td>
-  </tr>
-);
-
-export const TableSection = ({
-  title,
-  badge,
-  children,
-}: {
-  title: string;
-  badge?: ReactNode;
-  children: ReactNode;
-}) => (
-  <div className="bg-monitor-app">
-    <table className="w-full text-left table-fixed">
-      <colgroup>
-        <col />
-        <col className="w-28" />
-      </colgroup>
-      <thead>
-        <tr className="bg-monitor-panel border-b border-white/10">
-          <th colSpan={2} className={TAB_STYLES.TABLE_HEADER}>
-            <div className="flex items-center justify-between">
-              <span>{title}</span>
-              {badge}
-            </div>
-          </th>
-        </tr>
-      </thead>
-      <tbody>{children}</tbody>
-    </table>
   </div>
 );

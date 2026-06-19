@@ -8,6 +8,7 @@ import { FilterStatsHandler } from './filterStatsHandler';
 import { WSMessageBatcher } from '../../../utils/WSMessageBatcher';
 
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
+import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
@@ -152,6 +153,11 @@ export class BaseMessageHandler {
       case 'filter_arg_updated':
         this.callbacks.onArgUpdated(data.indexes);
         break;
+      case 'session_metrics':
+        this.callbacks.onSetMetricDefinitions(
+          parseMetricDefinitions(data.data),
+        );
+        break;
       case 'session_end':
         this.handleSessionEnd(data);
         break;
@@ -173,6 +179,12 @@ export class BaseMessageHandler {
     this.callbacks.onUpdateGraphData(data.filters);
 
     if (data.filters) {
+      this.callbacks.onFilterStatuses(
+        data.filters.map((filter: GpacNodeData) => ({
+          idx: filter.idx,
+          status: filter.status,
+        })),
+      );
       data.filters.forEach((filter: GpacNodeData) => {
         this.notificationHandlers.onFilterUpdate?.(filter);
       });
@@ -192,10 +204,14 @@ export class BaseMessageHandler {
 
   private handleSessionStatsMessage(data: any): void {
     if (data.stats && Array.isArray(data.stats)) {
-      // Process immediately (low frequency: ~1 msg/sec)
+      this.callbacks.onFilterStatuses(
+        data.stats.map((stat: any) => ({ idx: stat.idx, status: stat.status })),
+      );
       this.sessionStatsHandler.handleSessionStats(data.stats);
-      // Dispatch to Redux for stall detection
-      this.callbacks.onUpdateSessionStats(data.stats);
+      this.callbacks.onUpdateSessionStats({
+        stats: data.stats,
+        ts_us: data.ts_us,
+      });
     }
   }
 
@@ -208,6 +224,16 @@ export class BaseMessageHandler {
 
   private handleFilterStatsMessage(data: any): void {
     if (data.idx !== undefined) {
+      this.callbacks.onFilterStatuses([{ idx: data.idx, status: data.status }]);
+      this.callbacks.onUpdateFilterStats({
+        idx: data.idx,
+        ts_us: data.ts_us,
+        ipids: data.ipids,
+        opids: data.opids,
+        bytes_sent: data.bytes_sent ?? 0,
+        bytes_done: data.bytes_done ?? 0,
+        last_task_time: data.last_task_time,
+      });
       // Process immediately (low frequency: ~1 msg/sec per filter)
       this.filterStatsHandler.handleFilterStatsUpdate(data);
     }

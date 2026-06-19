@@ -22,7 +22,6 @@ interface PIDTableRowProps {
   pid: PIDWithIndex;
   filterIdx: number;
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
-  isEven: boolean;
   variant?: PIDTableRowVariant;
   hoveredPidKey?: string | null;
 }
@@ -32,7 +31,6 @@ const PIDTableRow = memo(
     pid,
     filterIdx,
     onOpenProps,
-    isEven,
     variant = 'input',
     hoveredPidKey = null,
   }: PIDTableRowProps) => {
@@ -46,7 +44,7 @@ const PIDTableRow = memo(
       usePIDMetricsRow(pid, pidKey);
 
     const statusBadge = getPIDStatusBadge(pid);
-    const bgClass = isEven ? 'bg-black/10' : 'bg-black/20';
+    const bgClass = 'bg-monitor-panel';
     const rowStyle = isSelected
       ? {
           borderLeft: `3px solid ${PID_SELECTION_COLORS[colorIndex]}`,

@@ -3,7 +3,7 @@ import { NetworkTabData } from '@/types/ui';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useChartDuration } from '@/shared/hooks';
 import type { ChartDuration } from '@/utils/charts';
-import { BandwidthCombinedChart } from '../charts/BandwidthCombinedChart';
+import { FilterPerformanceCard } from './network/FilterPerformanceCard';
 import { useNetworkMetrics } from '../../hooks/data/useNetworkMetrics';
 import { TAB_STYLES } from './styles';
 import { formatMicroseconds } from '@/utils';
@@ -27,12 +27,9 @@ const NETWORK_HISTORY_STORAGE_KEY = 'gpac-network-history';
 const NetworkTab = memo(
   ({ filterId, data, filterName, lastTaskTimeUs }: NetworkTabProps) => {
     const isDetached = useIsDetached();
-    const { currentStats, formattedStats } = useNetworkMetrics(
-      data,
-      filterName,
-    );
+    const { formattedStats } = useNetworkMetrics(data, filterName);
 
-    const { duration, setDuration, windowDuration } = useChartDuration(
+    const { duration, setDuration, maxPoints } = useChartDuration(
       NETWORK_HISTORY_STORAGE_KEY,
       '1min',
       1000,
@@ -69,13 +66,10 @@ const NetworkTab = memo(
           </div>
         </div>
 
-        <BandwidthCombinedChart
+        <FilterPerformanceCard
           filterId={filterId}
-          bytesSent={currentStats.bytesSent}
-          bytesReceived={currentStats.bytesReceived}
-          lastTaskTimeUs={lastTaskTimeUs}
-          windowDurationMs={windowDuration}
           showCurrentTime
+          maxPoints={maxPoints}
         />
       </div>
     );

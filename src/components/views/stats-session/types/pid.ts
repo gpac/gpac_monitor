@@ -1,4 +1,5 @@
 import type { FilterStatsResponse, TabPIDData } from '@/types';
+import type { GpacStreamType } from '@/types/domain/gpac';
 
 export type PIDMetricMode =
   | 'bitrate'
@@ -8,7 +9,7 @@ export type PIDMetricMode =
   | 'ts';
 
 export interface PIDMetricSample {
-  sessionTimestampUs: number;
+  sessionTimeUs: number;
   averageBitrate?: number | null;
   bufferTime?: number | null;
   processTime?: number | null;
@@ -22,6 +23,7 @@ export interface PIDGraphTarget {
   pidIndex: number;
   label?: string;
   streamTypeLabel?: string;
+  streamType?: GpacStreamType;
 }
 
 export const buildPIDKey = (
