@@ -163,17 +163,19 @@ export class HistoryController {
     const chunkIndex = findEventChunkIndex(manifest, tsUs);
     const cp = findNearestCheckpoint(manifest, chunkIndex);
     adapter.resetTemporalState();
-    adapter.clearTimeSeriesData();
     if (cp) {
       const checkpoint = await loader.loadCheckpoint(cp.file);
       if (version !== preloader.getVersion()) return;
-      console.log(checkpoint);
+      adapter.clearTimeSeriesData();
       if (checkpoint) adapter.hydrateCheckpoint(checkpoint);
     }
     this.badgeExpiration.reset();
 
     const currentChunk = await loader.loadEventChunk(chunkIndex);
     if (version !== preloader.getVersion()) return;
+    if (!cp) {
+      adapter.clearTimeSeriesData();
+    }
 
     await this.loadLogsForChunk(currentChunk);
     this.nextLogIndex = this.getNextLogIndexFromTimestamp(tsUs);
