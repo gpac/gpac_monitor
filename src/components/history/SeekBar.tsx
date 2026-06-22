@@ -1,5 +1,5 @@
 import * as Slider from '@radix-ui/react-slider';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface SeekBarProps {
   progressPercent: number;
@@ -18,9 +18,22 @@ const SeekBar = ({
   segmentMarkers,
 }: SeekBarProps) => {
   const [previewPercent, setPreviewPercent] = useState<number | null>(null);
+  const [pendingSeekPercent, setPendingSeekPercent] = useState<number | null>(
+    null,
+  );
   const [hoverPercent, setHoverPercent] = useState<number | null>(null);
 
-  const displayPercent = previewPercent ?? progressPercent;
+  useEffect(() => {
+    if (
+      pendingSeekPercent !== null &&
+      Math.abs(progressPercent - pendingSeekPercent) < 0.05
+    ) {
+      setPendingSeekPercent(null);
+    }
+  }, [progressPercent, pendingSeekPercent]);
+
+  const displayPercent =
+    previewPercent ?? pendingSeekPercent ?? progressPercent;
   const tooltipPercent = previewPercent ?? hoverPercent;
 
   return (
@@ -40,8 +53,9 @@ const SeekBar = ({
         value={[displayPercent]}
         onValueChange={([value]) => setPreviewPercent(value)}
         onValueCommit={([value]) => {
-          onSeekPositionChange(value);
           setPreviewPercent(null);
+          setPendingSeekPercent(value);
+          onSeekPositionChange(value);
         }}
         disabled={disabled}
         onMouseMove={(event) => {
