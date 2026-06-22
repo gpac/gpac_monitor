@@ -64,7 +64,7 @@ export const LogEntryItem = React.memo<LogEntryItemProps>(
     // Pre-compute CSS classes to avoid string concatenation on each render
     const containerClass = useMemo(() => {
       const baseClasses =
-        'flex items-start gap-2 mb-1 p-1 rounded hover:bg-gray-800/30  cursor-pointer';
+        'flex items-start gap-2 mb-1 p-1 rounded hover:bg-gray-800/30 cursor-pointer overflow-hidden';
       const highlightClasses = isHighlighted
         ? ' border-l-4 border-yellow-500 bg-yellow-900/70'
         : '';

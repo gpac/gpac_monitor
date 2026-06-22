@@ -274,6 +274,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
               fontFamily: "'Roboto Mono', 'Courier New', monospace",
               willChange: 'transform',
               contain: 'strict',
+              overflowX: 'hidden',
             }}
             className="rounded px-2 py-1 text-sm bg-stat stat"
             itemContent={renderLogItem}
