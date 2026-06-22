@@ -82,7 +82,7 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div className="h-screen bg-main">
+    <div className="h-screen bg-main overflow-x-hidden">
       <div className="fixed top-0 left-0 right-0 h-16 z-20">
         <Header />
       </div>
