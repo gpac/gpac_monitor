@@ -94,8 +94,9 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     useEffect(() => {
       if (isDetached) {
         requestAnimationFrame(() => {
-          window.scrollTo({
-            top: document.body.scrollHeight,
+          const scroller = document.querySelector('main');
+          scroller?.scrollTo({
+            top: scroller.scrollHeight,
             behavior: 'smooth',
           });
         });
