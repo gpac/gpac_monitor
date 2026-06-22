@@ -1,4 +1,5 @@
-import { useRef, useCallback, useState } from 'react';
+import * as Slider from '@radix-ui/react-slider';
+import { useState } from 'react';
 
 interface SeekBarProps {
   progressPercent: number;
@@ -9,11 +10,6 @@ interface SeekBarProps {
   segmentMarkers?: number[];
 }
 
-function pointerXToPercent(trackRect: DOMRect, clientX: number): number {
-  const ratio = (clientX - trackRect.left) / trackRect.width;
-  return Math.max(0, Math.min(100, ratio * 100));
-}
-
 const SeekBar = ({
   progressPercent,
   onSeekPositionChange,
@@ -21,81 +17,57 @@ const SeekBar = ({
   disabled,
   segmentMarkers,
 }: SeekBarProps) => {
-  const trackRef = useRef<HTMLDivElement>(null);
+  const [previewPercent, setPreviewPercent] = useState<number | null>(null);
   const [hoverPercent, setHoverPercent] = useState<number | null>(null);
 
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (disabled || !trackRef.current) return;
-      e.preventDefault();
-      const track = trackRef.current;
-      track.setPointerCapture(e.pointerId);
-
-      const rect = track.getBoundingClientRect();
-      onSeekPositionChange(pointerXToPercent(rect, e.clientX));
-
-      const onMove = (ev: PointerEvent) => {
-        onSeekPositionChange(pointerXToPercent(rect, ev.clientX));
-      };
-      const onUp = () => {
-        track.removeEventListener('pointermove', onMove);
-        track.removeEventListener('pointerup', onUp);
-      };
-      track.addEventListener('pointermove', onMove);
-      track.addEventListener('pointerup', onUp);
-    },
-    [disabled, onSeekPositionChange],
-  );
-
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLDivElement>) => {
-      if (!trackRef.current) return;
-      setHoverPercent(
-        pointerXToPercent(trackRef.current.getBoundingClientRect(), e.clientX),
-      );
-    },
-    [],
-  );
+  const displayPercent = previewPercent ?? progressPercent;
+  const tooltipPercent = previewPercent ?? hoverPercent;
 
   return (
     <div className="relative flex-1">
-      {hoverPercent !== null && (
+      {tooltipPercent !== null && (
         <div
-          className="absolute -top-5 -translate-x-1/2 bg-gray-800 text-gray-200 text-[10px]  py-0.5 rounded pointer-events-none whitespace-nowrap z-10"
-          style={{ left: `${hoverPercent}%` }}
+          className="absolute -top-5 -translate-x-1/2 bg-gray-800 text-gray-200 text-[10px] py-0.5 rounded pointer-events-none whitespace-nowrap z-10"
+          style={{ left: `${tooltipPercent}%` }}
         >
-          {formatTooltip(hoverPercent)}
+          {formatTooltip(tooltipPercent)}
         </div>
       )}
-      <div
-        ref={trackRef}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerLeave={() => setHoverPercent(null)}
-        className={`relative h-2 w-full rounded-full bg-secondary overflow-hidden ${
-          disabled ? 'opacity-40' : 'cursor-pointer'
-        }`}
-        role="slider"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(progressPercent)}
+      <Slider.Root
+        min={0}
+        max={100}
+        step={0.01}
+        value={[displayPercent]}
+        onValueChange={([value]) => setPreviewPercent(value)}
+        onValueCommit={([value]) => {
+          onSeekPositionChange(value);
+          setPreviewPercent(null);
+        }}
+        disabled={disabled}
+        onMouseMove={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          setHoverPercent(
+            Math.max(
+              0,
+              Math.min(100, ((event.clientX - rect.left) / rect.width) * 100),
+            ),
+          );
+        }}
+        onMouseLeave={() => setHoverPercent(null)}
+        className={`relative flex items-center w-full h-6 ${disabled ? 'opacity-40' : 'cursor-pointer'}`}
       >
-        <div
-          className="h-full transition-[width] duration-75 bg-purple-400"
-          style={{ width: `${progressPercent}%` }}
-        />
-        {segmentMarkers?.map((pct) => (
-          <div
-            key={pct}
-            className="absolute top-0 bottom-0 w-px bg-white/60 pointer-events-none"
-            style={{ left: `${pct}%` }}
-          />
-        ))}
-        <div
-          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1 h-6 rounded-full bg-white shadow border border-purple-400/70 transition-[left] duration-75 pointer-events-none"
-          style={{ left: `${progressPercent}%` }}
-        />
-      </div>
+        <Slider.Track className="relative flex-1 h-2 rounded-full bg-secondary overflow-hidden">
+          <Slider.Range className="absolute h-full bg-purple-400" />
+          {segmentMarkers?.map((pct) => (
+            <div
+              key={pct}
+              className="absolute top-0 bottom-0 w-px bg-white/60 pointer-events-none"
+              style={{ left: `${pct}%` }}
+            />
+          ))}
+        </Slider.Track>
+        <Slider.Thumb className="block w-1 h-6 rounded-full bg-white shadow border border-purple-400/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400" />
+      </Slider.Root>
     </div>
   );
 };

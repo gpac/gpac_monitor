@@ -181,11 +181,28 @@ export class HistoryController {
     this.nextLogIndex = this.getNextLogIndexFromTimestamp(tsUs);
     adapter.hydrateLogsForSeek(this.sessionLogs, tsUs);
 
+    const prevChunkStats: HistoryEvent[] = [];
+    if (chunkIndex > 0) {
+      const prevChunk = await loader.loadEventChunk(chunkIndex - 1);
+      if (version !== preloader.getVersion()) return;
+      for (const event of prevChunk.events) {
+        if (
+          event.message === 'session_stats' ||
+          event.message === 'cpu_stats'
+        ) {
+          prevChunkStats.push(event);
+        }
+      }
+    }
+
     const eventsBeforeSeek = currentChunk.events.filter(
-      (event) => event.ts_us < tsUs,
+      (event) => event.ts_us <= tsUs,
     );
-    if (eventsBeforeSeek.length > 0) {
+    if (prevChunkStats.length > 0 || eventsBeforeSeek.length > 0) {
       adapter.setSilent(true);
+      for (const event of prevChunkStats) {
+        adapter.handleEvent(event);
+      }
       for (const event of eventsBeforeSeek) {
         adapter.handleEvent(event);
       }
@@ -200,7 +217,7 @@ export class HistoryController {
     }
 
     this.player.load(
-      currentChunk.events.filter((event) => event.ts_us >= tsUs),
+      currentChunk.events.filter((event) => event.ts_us > tsUs),
       this.handleReplayEvent,
       this.handlePlaybackTick,
       tsUs,
