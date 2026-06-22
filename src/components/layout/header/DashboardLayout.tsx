@@ -82,15 +82,13 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div className="h-screen bg-main overflow-x-hidden">
-      <div className="fixed top-0 left-0 right-0 h-16 z-20">
-        <Header />
-      </div>
+    <div className="grid grid-rows-[auto_auto_1fr] h-screen bg-main overflow-x-hidden">
+      <Header />
       <SessionPicker />
-      <div className="flex pt-8 h-[calc(100vh-4rem)]">
+      <div className="flex relative min-h-0 overflow-hidden">
         <div
           id="app-sidebar"
-          className="fixed top-16 bottom-0 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
+          className="fixed top-14 bottom-0 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
           }}
@@ -102,7 +100,7 @@ const DashboardLayout = () => {
         )}
 
         <main
-          className="flex-1 h-full pb-4 pt-4 pl-0 transition-transform duration-300 will-change-transform"
+          className="flex-1 h-full min-h-0 overflow-y-auto pb-4 pt-2 pl-0 transition-transform duration-300 will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(256px)' : 'translateX(0)',
             paddingRight: isSidebarOpen ? '272px' : '16px',
