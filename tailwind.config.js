@@ -19,6 +19,7 @@ export default {
           app: "#0c1117",
 
           surface: "#0b1016",
+          timelineSurface: "#070B10",
           selection: "#121826",
 
           panel: "#0f141b",

@@ -21,7 +21,7 @@ const HistoryControls = () => {
 
   return (
     <div
-      className="grid items-center w-full px-4 border-t border-purple-800/70 bg-monitor-surface"
+      className="grid items-center w-full px-4 border-t border-purple-800/70 bg-monitor-timelineSurface"
       style={{
         height: TIMELINE_DOCK_HEIGHT_PX,
         gridTemplateColumns: '280px minmax(220px, 1fr) 320px',
