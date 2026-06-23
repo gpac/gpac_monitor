@@ -73,7 +73,7 @@ const Timeline = ({
         </span>
       </div>
 
-      <div className="flex items-center px-2 rounded-lg border border-timeline-premium bg-monitor-timeline-bg shadow-timeline-premium">
+      <div className="flex items-center px-2 rounded-lg border border-timeline-premium bg-monitor-timeline-bg shadow-timeline-premium mx-auto w-full max-w-[900px]">
         <SeekBar
           progressPercent={progressPercent}
           onSeekPositionChange={handleSeekPositionChange}

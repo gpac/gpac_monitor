@@ -32,7 +32,6 @@ const DashboardLayout = () => {
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const isDraggingRef = useRef(false);
   const { isHistory } = useDataMode();
-
   const rowHeight = useMemo(() => {
     const headerHeight = isHistory ? HISTORY_HEADER_HEIGHT_PX : 64;
     const dockHeight = isHistory ? TIMELINE_DOCK_HEIGHT_PX : 0;
