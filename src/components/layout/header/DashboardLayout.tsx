@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import {
   Responsive,
   WidthProvider,
@@ -19,20 +20,21 @@ import SidebarCloseButton from '../sidebar/SidebarCloseButton';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
+const TIMELINE_DOCK_HEIGHT = 72;
+
 const DashboardLayout = () => {
   const dispatch = useAppDispatch();
   const activeWidgets = useAppSelector((state) => state.widgets.activeWidgets);
   const configs = useAppSelector((state) => state.widgets.configs);
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const isDraggingRef = useRef(false);
+  const { isHistory } = useDataMode();
 
-  // Calculate rowHeight once based on available height
-  // No state, no listeners, just initial calculation
   const rowHeight = useMemo(() => {
-    const availableHeight = window.innerHeight - 64; // minus header
-    // Divide by fewer rows to make widgets larger and fill space
+    const availableHeight =
+      window.innerHeight - 64 - (isHistory ? TIMELINE_DOCK_HEIGHT : 0);
     return Math.floor(availableHeight / 14.8);
-  }, []);
+  }, [isHistory]);
 
   // Memoize layouts object - only recreate if widget positions/sizes change
   const layouts: RGLLayouts = useMemo(
