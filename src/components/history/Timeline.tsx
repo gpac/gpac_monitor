@@ -1,15 +1,14 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { LuPause } from 'react-icons/lu';
 import SeekBar from './SeekBar';
 import { formatCompactTime } from '@/utils/formatting/time';
+import { generateTimeTicks } from '@/utils/history/generateTimeTicks';
 import { FaCirclePlay } from 'react-icons/fa6';
-import type { TimeSegment } from '@/utils/history/mapManifestToSegments';
 
 interface TimelineProps {
   currentTimeUs: number;
   durationUs: number;
   sessionStartUs: number;
-  segments: TimeSegment[];
   isPlaying?: boolean;
   canPlay?: boolean;
   onPlay: () => void;
@@ -21,7 +20,6 @@ const Timeline = ({
   currentTimeUs,
   durationUs,
   sessionStartUs,
-  segments,
   isPlaying = false,
   canPlay = true,
   onPlay,
@@ -31,12 +29,7 @@ const Timeline = ({
   const relativeTimeUs = currentTimeUs - sessionStartUs;
   const elapsedUs = Math.max(0, Math.min(relativeTimeUs, durationUs));
   const progressPercent = durationUs > 0 ? (elapsedUs / durationUs) * 100 : 0;
-  const segmentMarkers =
-    durationUs > 0
-      ? segments
-          .slice(1)
-          .map((seg) => ((seg.fromUs - sessionStartUs) / durationUs) * 100)
-      : [];
+  const timeTicks = useMemo(() => generateTimeTicks(durationUs), [durationUs]);
 
   const handleSeekPositionChange = useCallback(
     (positionPercent: number) => {
@@ -55,7 +48,7 @@ const Timeline = ({
 
   return (
     <div className="contents">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center justify-end gap-2">
         <button
           onClick={isPlaying ? onPause : onPlay}
           disabled={!canPlay}
@@ -79,7 +72,7 @@ const Timeline = ({
           onSeekPositionChange={handleSeekPositionChange}
           formatTooltip={formatTooltip}
           disabled={!canPlay}
-          segmentMarkers={segmentMarkers}
+          timeTicks={timeTicks}
         />
       </div>
 

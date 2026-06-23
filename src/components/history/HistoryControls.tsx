@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Resizable, ResizeCallbackData } from 'react-resizable';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { usePlayerState } from '@/services/historyService/usePlayerState';
-import { mapManifestToSegments } from '@/utils/history/mapManifestToSegments';
 import { getDuration } from '@/services/historyService/manifestParser';
 import { TIMELINE_DOCK_HEIGHT_PX } from './historyLayout';
 import Timeline from './Timeline';
@@ -22,10 +21,6 @@ const HistoryControls = () => {
   const { state, currentTimeUs, play, pause, seek } = usePlayerState();
   const [dockHeight, setDockHeight] = useState(TIMELINE_DOCK_HEIGHT_PX);
 
-  const segments = useMemo(
-    () => (manifest ? mapManifestToSegments(manifest) : []),
-    [manifest],
-  );
   const maxDockHeight = useMemo(() => Math.round(window.innerHeight * 0.6), []);
   const durationUs = manifest ? getDuration(manifest) : 0;
   const sessionStartUs = manifest?.startUs ?? 0;
@@ -57,7 +52,6 @@ const HistoryControls = () => {
             currentTimeUs={currentTimeUs}
             durationUs={durationUs}
             sessionStartUs={sessionStartUs}
-            segments={segments}
             isPlaying={state === 'playing'}
             onPlay={play}
             onPause={pause}

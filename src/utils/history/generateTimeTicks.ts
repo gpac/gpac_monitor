@@ -12,7 +12,7 @@ const NICE_INTERVALS_US = [
   86400,
 ].map((seconds) => seconds * US);
 
-const MAX_TICKS = 8;
+const MAX_TICKS = 16;
 
 export function generateTimeTicks(durationUs: number): TimeTick[] {
   if (durationUs <= 0) return [];
