@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { LuClapperboard } from 'react-icons/lu';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { usePlayerState } from '@/services/historyService/usePlayerState';
 import { mapManifestToSegments } from '@/utils/history/mapManifestToSegments';
@@ -22,14 +21,12 @@ const HistoryControls = () => {
 
   return (
     <div
-      className="flex items-center gap-2 w-full px-4 border-t border-purple-800/70 bg-monitor-app"
-      style={{ height: TIMELINE_DOCK_HEIGHT_PX }}
+      className="grid items-center w-full px-4 border-t border-purple-800/70 bg-monitor-surface"
+      style={{
+        height: TIMELINE_DOCK_HEIGHT_PX,
+        gridTemplateColumns: '280px minmax(220px, 1fr) 320px',
+      }}
     >
-      <span className="flex items-center gap-1 text-xs text-purple-400 font-ui whitespace-nowrap">
-        <LuClapperboard className="w-3.5 h-3.5" />
-        Timeline
-      </span>
-      <div className="w-px h-4 bg-purple-500/40" />
       <Timeline
         currentTimeUs={currentTimeUs}
         durationUs={durationUs}

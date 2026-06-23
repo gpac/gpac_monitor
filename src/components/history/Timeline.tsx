@@ -54,33 +54,36 @@ const Timeline = ({
   );
 
   return (
-    <div className="flex items-center gap-3 w-full rounded-xl border border-timeline-premium bg-timeline-premium   shadow-timeline-premium">
-      <button
-        onClick={isPlaying ? onPause : onPlay}
-        disabled={!canPlay}
-        className="p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
-        aria-label={isPlaying ? 'Pause' : 'Play'}
-      >
-        {isPlaying ? (
-          <LuPause className="w-5 h-5" />
-        ) : (
-          <FaCirclePlay className="w-5 h-5" />
-        )}
-      </button>
-
-      <SeekBar
-        progressPercent={progressPercent}
-        onSeekPositionChange={handleSeekPositionChange}
-        formatTooltip={formatTooltip}
-        disabled={!canPlay}
-        segmentMarkers={segmentMarkers}
-      />
-
-      <span className="text-xs font-mono tabular-nums whitespace-nowrap">
-        <span className="text-gray-400">
+    <div className="contents">
+      <div className="flex items-center gap-2">
+        <button
+          onClick={isPlaying ? onPause : onPlay}
+          disabled={!canPlay}
+          className="p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
+          aria-label={isPlaying ? 'Pause' : 'Play'}
+        >
+          {isPlaying ? (
+            <LuPause className="w-5 h-5" />
+          ) : (
+            <FaCirclePlay className="w-5 h-5" />
+          )}
+        </button>
+        <span className="text-xs font-mono tabular-nums whitespace-nowrap text-gray-400">
           {formatCompactTime(elapsedUs)} / {formatCompactTime(durationUs)}
         </span>
-      </span>
+      </div>
+
+      <div className="flex items-center px-2 rounded-lg border border-timeline-premium bg-monitor-timeline-bg shadow-timeline-premium">
+        <SeekBar
+          progressPercent={progressPercent}
+          onSeekPositionChange={handleSeekPositionChange}
+          formatTooltip={formatTooltip}
+          disabled={!canPlay}
+          segmentMarkers={segmentMarkers}
+        />
+      </div>
+
+      <div aria-hidden="true" />
     </div>
   );
 };
