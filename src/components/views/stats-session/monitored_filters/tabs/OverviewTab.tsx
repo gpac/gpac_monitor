@@ -13,6 +13,7 @@ import { useIsDetached } from '../FilterViewContext';
 import { selectMetricDefinitions } from '@/shared/store/selectors';
 import { MetricRow, TableSection } from './shared/tableLayout';
 import FilterIdentityStrip from './FilterIdentityStrip';
+import { useSessionSourceIndicator } from '@/shared/hooks/ui/useSessionSourceIndicator';
 import OverviewContentGrid from './OverviewContentGrid';
 import RuntimeDetailsSection from './RuntimeDetailsSection';
 import StatusGraphCard from './status/StatusGraphCard';
@@ -27,6 +28,7 @@ const OverviewTab = memo(
   ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
     const { parsedStatus, type, filterIdx, time, name } = filter;
     const isDetached = useIsDetached();
+    const sourceIndicator = useSessionSourceIndicator();
 
     const isStalled = useAppSelector(
       selectIsFilterStalled(filterIdx.toString()),
@@ -83,6 +85,7 @@ const OverviewTab = memo(
           healthLabel={healthInfo.label}
           healthVariant={healthInfo.variant}
           onOpenProperties={onOpenProperties}
+          sourceIndicator={sourceIndicator}
         />
         {graphableMetrics.length > 0 && (
           <StatusGraphCard
