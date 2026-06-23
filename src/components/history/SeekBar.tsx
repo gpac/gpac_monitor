@@ -40,7 +40,7 @@ const SeekBar = ({
     <div className="relative flex-1">
       {tooltipPercent !== null && (
         <div
-          className="absolute -top-5 -translate-x-1/2 bg-gray-800 text-gray-200 text-[10px] py-0.5 rounded pointer-events-none whitespace-nowrap z-10"
+          className="absolute -top-5 -translate-x-1/2 bg-gray-800 text-gray-200 text-[10px] py-3 rounded pointer-events-none whitespace-nowrap z-10"
           style={{ left: `${tooltipPercent}%` }}
         >
           {formatTooltip(tooltipPercent)}
@@ -68,7 +68,7 @@ const SeekBar = ({
           );
         }}
         onMouseLeave={() => setHoverPercent(null)}
-        className={`relative flex items-center w-full h-6 ${disabled ? 'opacity-40' : 'cursor-pointer'}`}
+        className={`relative flex items-center w-full h-10o ${disabled ? 'opacity-40' : 'cursor-pointer'}`}
       >
         <Slider.Track className="relative flex-1 h-2 rounded-full bg-secondary overflow-hidden">
           <Slider.Range className="absolute h-full bg-purple-400" />
