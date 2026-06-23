@@ -2,6 +2,10 @@ import { useCallback, useMemo, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import {
+  HISTORY_HEADER_HEIGHT_PX,
+  TIMELINE_DOCK_HEIGHT_PX,
+} from '@/components/history/historyLayout';
+import {
   Responsive,
   WidthProvider,
   Layout,
@@ -14,13 +18,12 @@ import { closeSidebar } from '@/shared/store/slices/layoutSlice';
 import Header from './Header';
 import Sidebar from '../sidebar/Sidebar';
 import SessionPicker from '@/components/history/SessionPicker';
+import HistoryControls from '@/components/history/HistoryControls';
 import { Widget } from '@/types/ui/widget';
 import { getWidgetDefinition } from '../../widget/registry';
 import SidebarCloseButton from '../sidebar/SidebarCloseButton';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
-
-const TIMELINE_DOCK_HEIGHT = 72;
 
 const DashboardLayout = () => {
   const dispatch = useAppDispatch();
@@ -31,8 +34,9 @@ const DashboardLayout = () => {
   const { isHistory } = useDataMode();
 
   const rowHeight = useMemo(() => {
-    const availableHeight =
-      window.innerHeight - 64 - (isHistory ? TIMELINE_DOCK_HEIGHT : 0);
+    const headerHeight = isHistory ? HISTORY_HEADER_HEIGHT_PX : 64;
+    const dockHeight = isHistory ? TIMELINE_DOCK_HEIGHT_PX : 0;
+    const availableHeight = window.innerHeight - headerHeight - dockHeight;
     return Math.floor(availableHeight / 14.8);
   }, [isHistory]);
 
@@ -84,7 +88,7 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div className="grid grid-rows-[auto_auto_1fr] h-screen bg-main overflow-x-hidden">
+    <div className="grid grid-rows-[auto_auto_1fr_auto] h-screen bg-main overflow-x-hidden">
       <Header />
       <SessionPicker />
       <div className="flex relative min-h-0 overflow-hidden">
@@ -164,6 +168,7 @@ const DashboardLayout = () => {
           </ResponsiveGridLayout>
         </main>
       </div>
+      <HistoryControls />
     </div>
   );
 };

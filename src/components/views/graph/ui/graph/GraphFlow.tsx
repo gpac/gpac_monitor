@@ -65,7 +65,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         onNodeClick={isResizing ? undefined : onNodeClick}
         onPaneClick={isResizing ? undefined : handlePaneClick}
         fitView={!isResizing}
-        minZoom={0.01}
+        minZoom={0.1}
         maxZoom={2}
         defaultEdgeOptions={{
           type: 'simplebezier',
@@ -92,6 +92,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           onDrag={isResizing ? undefined : handleMiniMapDrag}
           pannable={!isResizing}
           zoomable={!isResizing}
+          position="top-right"
           ariaLabel="Minimap for graph navigation"
         />
         <Controls

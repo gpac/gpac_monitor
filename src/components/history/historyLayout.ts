@@ -1,0 +1,3 @@
+export const HISTORY_HEADER_HEIGHT_PX = 30;
+
+export const TIMELINE_DOCK_HEIGHT_PX = 80;

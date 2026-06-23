@@ -11,7 +11,7 @@ import { LayoutManager } from '../header/LayoutManager';
 import WidgetSelector from '../../widget/WidgetSelector';
 import ConnectionSelector from '../connection/ConnectionSelector';
 import LogCounters from './LogCounters';
-import HistoryControls from '@/components/history/HistoryControls';
+import { HISTORY_HEADER_HEIGHT_PX } from '@/components/history/historyLayout';
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
@@ -52,7 +52,8 @@ const Header = () => {
 
   return (
     <header
-      className={`relative h-14 bg-monitor-app px-4 text-white/80 border-b ${isHistory ? 'border-purple-800/70' : 'border-white/10'}`}
+      className={`relative ${isHistory ? '' : 'h-14'} bg-monitor-app px-4 text-white/80 border-b ${isHistory ? 'border-purple-800/70' : 'border-white/10'}`}
+      style={isHistory ? { height: HISTORY_HEADER_HEIGHT_PX } : undefined}
     >
       <div className="h-full flex items-center justify-between gap-4">
         <div className="flex items-center gap-6 min-w-0 flex-1">
@@ -106,9 +107,6 @@ const Header = () => {
               History
             </button>
           )}
-          <div className="min-w-0 flex-1 max-w-[520px]">
-            <HistoryControls />
-          </div>
           {sessionName && (
             <span className="flex items-center gap-1.5 text-xs text-gray-400 font-ui shrink-0">
               <LuClock className="w-4 h-4 text-purple-400 shrink-0" />

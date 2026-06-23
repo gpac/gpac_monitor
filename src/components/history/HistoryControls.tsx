@@ -4,6 +4,7 @@ import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { usePlayerState } from '@/services/historyService/usePlayerState';
 import { mapManifestToSegments } from '@/utils/history/mapManifestToSegments';
 import { getDuration } from '@/services/historyService/manifestParser';
+import { TIMELINE_DOCK_HEIGHT_PX } from './historyLayout';
 import Timeline from './Timeline';
 
 const HistoryControls = () => {
@@ -20,7 +21,10 @@ const HistoryControls = () => {
   if (mode !== 'history') return null;
 
   return (
-    <div className="flex items-center gap-2 w-full px-4 py-2 border-t border-purple-800/70 bg-monitor-app">
+    <div
+      className="flex items-center gap-2 w-full px-4 border-t border-purple-800/70 bg-monitor-app"
+      style={{ height: TIMELINE_DOCK_HEIGHT_PX }}
+    >
       <span className="flex items-center gap-1 text-xs text-purple-400 font-ui whitespace-nowrap">
         <LuClapperboard className="w-3.5 h-3.5" />
         Timeline
