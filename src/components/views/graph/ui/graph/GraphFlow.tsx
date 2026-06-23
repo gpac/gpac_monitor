@@ -98,6 +98,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         <Controls
           showInteractive={false}
           className="[&_button]:bg-gray-800 [&_button]:border-gray-700 [&_button]:text-white [&_button:hover]:bg-gray-700"
+          position="center-left"
         />
 
         <GraphLegend />
