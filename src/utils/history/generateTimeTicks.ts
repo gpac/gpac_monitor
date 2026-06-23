@@ -5,6 +5,11 @@ export interface TimeTick {
   label: string;
 }
 
+export interface TimeRuler {
+  major: TimeTick[];
+  minor: Array<{ positionPercent: number }>;
+}
+
 const US = 1_000_000;
 
 const NICE_INTERVALS_US = [
@@ -14,20 +19,37 @@ const NICE_INTERVALS_US = [
 
 const MAX_TICKS = 16;
 
-export function generateTimeTicks(durationUs: number): TimeTick[] {
-  if (durationUs <= 0) return [];
+export function generateTimeTicks(durationUs: number): TimeRuler {
+  if (durationUs <= 0) return { major: [], minor: [] };
 
-  const intervalUs =
+  const majorIntervalUs =
     NICE_INTERVALS_US.find(
       (candidate) => durationUs / candidate <= MAX_TICKS,
     ) ?? NICE_INTERVALS_US[NICE_INTERVALS_US.length - 1];
 
-  const ticks: TimeTick[] = [];
-  for (let tickUs = 0; tickUs <= durationUs; tickUs += intervalUs) {
-    ticks.push({
+  const minorIntervalUs = majorIntervalUs / 5;
+  const hasMinor = minorIntervalUs >= US;
+
+  const major: TimeTick[] = [];
+  for (let tickUs = 0; tickUs <= durationUs; tickUs += majorIntervalUs) {
+    major.push({
       positionPercent: (tickUs / durationUs) * 100,
       label: formatCompactTime(tickUs),
     });
   }
-  return ticks;
+
+  const minor: Array<{ positionPercent: number }> = [];
+  if (hasMinor) {
+    for (
+      let tickUs = minorIntervalUs;
+      tickUs < durationUs;
+      tickUs += minorIntervalUs
+    ) {
+      if (tickUs % majorIntervalUs !== 0) {
+        minor.push({ positionPercent: (tickUs / durationUs) * 100 });
+      }
+    }
+  }
+
+  return { major, minor };
 }

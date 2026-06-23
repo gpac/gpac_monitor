@@ -1,13 +1,13 @@
 import * as Slider from '@radix-ui/react-slider';
 import { useEffect, useState } from 'react';
-import type { TimeTick } from '@/utils/history/generateTimeTicks';
+import type { TimeRuler } from '@/utils/history/generateTimeTicks';
 
 interface SeekBarProps {
   progressPercent: number;
   onSeekPositionChange: (positionPercent: number) => void;
   formatTooltip: (positionPercent: number) => string;
   disabled?: boolean;
-  timeTicks?: TimeTick[];
+  timeRuler?: TimeRuler;
 }
 
 const SeekBar = ({
@@ -15,7 +15,7 @@ const SeekBar = ({
   onSeekPositionChange,
   formatTooltip,
   disabled,
-  timeTicks,
+  timeRuler,
 }: SeekBarProps) => {
   const [previewPercent, setPreviewPercent] = useState<number | null>(null);
   const [pendingSeekPercent, setPendingSeekPercent] = useState<number | null>(
@@ -37,10 +37,10 @@ const SeekBar = ({
   const tooltipPercent = previewPercent ?? hoverPercent;
 
   return (
-    <div className="relative flex-1">
+    <div className="relative flex-1 bg-white/[0.04] rounded-sm">
       {tooltipPercent !== null && (
         <div
-          className="absolute -top-5 -translate-x-1/2 bg-monitor-surface text-gray-200 text-[10px] py-3 rounded pointer-events-none whitespace-nowrap z-10"
+          className="absolute -top-5 -translate-x-1/2 text-gray-200 text-[10px] py-3 rounded pointer-events-none whitespace-nowrap z-10"
           style={{ left: `${tooltipPercent}%` }}
         >
           {formatTooltip(tooltipPercent)}
@@ -68,26 +68,39 @@ const SeekBar = ({
           );
         }}
         onMouseLeave={() => setHoverPercent(null)}
-        className={`relative flex items-center w-full h-10 ${disabled ? 'opacity-40' : 'cursor-pointer'}`}
+        className={`relative flex items-center w-full h-8 ${disabled ? 'opacity-40' : 'cursor-pointer'}`}
       >
-        <Slider.Track className="relative flex-1 h-2 rounded-full bg-secondary overflow-hidden">
-          <Slider.Range className="absolute h-full bg-purple-400" />
-          {timeTicks?.map((tick) => (
+        <Slider.Track className="relative flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+          <Slider.Range className="absolute h-full bg-purple-400/70" />
+        </Slider.Track>
+        <Slider.Thumb className="block w-0.5 h-5 rounded-full bg-white shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400" />
+      </Slider.Root>
+
+      {timeRuler && (
+        <div className="relative h-3">
+          {timeRuler.minor.map((tick) => (
             <div
               key={tick.positionPercent}
-              className="absolute top-0 bottom-0 w-px bg-white/20 pointer-events-none"
+              className="absolute bottom-0 w-px h-1.5 bg-white/20 pointer-events-none"
               style={{ left: `${tick.positionPercent}%` }}
             />
           ))}
-        </Slider.Track>
-        <Slider.Thumb className="block w-1 h-6 rounded-full bg-white shadow border border-purple-400/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400" />
-      </Slider.Root>
-      {timeTicks && timeTicks.length > 0 && (
-        <div className="relative h-4 mt-0.5">
-          {timeTicks.map((tick, index) => (
+          {timeRuler.major.map((tick) => (
+            <div
+              key={tick.positionPercent}
+              className="absolute bottom-0 w-px h-3 bg-white/35 pointer-events-none"
+              style={{ left: `${tick.positionPercent}%` }}
+            />
+          ))}
+        </div>
+      )}
+
+      {timeRuler && timeRuler.major.length > 0 && (
+        <div className="relative h-4">
+          {timeRuler.major.map((tick, index) => (
             <span
               key={tick.positionPercent}
-              className={`absolute text-[9px] tabular-nums text-gray-500 pointer-events-none select-none ${index === 0 ? '' : '-translate-x-1/2'}`}
+              className={`absolute text-[9px] tabular-nums text-gray-300 pointer-events-none select-none ${index === 0 ? '' : '-translate-x-1/2'}`}
               style={{ left: `${tick.positionPercent}%` }}
             >
               {tick.label}

@@ -45,7 +45,7 @@ const HistoryControls = () => {
           className="absolute bottom-0 left-0 right-0 z-20 grid items-center px-4 border-t border-purple-800/70 bg-monitor-timelineSurface"
           style={{
             height: dockHeight,
-            gridTemplateColumns: '280px minmax(220px, 1fr) 320px',
+            gridTemplateColumns: 'auto 1fr auto',
           }}
         >
           <Timeline

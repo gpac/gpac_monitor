@@ -29,7 +29,7 @@ const Timeline = ({
   const relativeTimeUs = currentTimeUs - sessionStartUs;
   const elapsedUs = Math.max(0, Math.min(relativeTimeUs, durationUs));
   const progressPercent = durationUs > 0 ? (elapsedUs / durationUs) * 100 : 0;
-  const timeTicks = useMemo(() => generateTimeTicks(durationUs), [durationUs]);
+  const timeRuler = useMemo(() => generateTimeTicks(durationUs), [durationUs]);
 
   const handleSeekPositionChange = useCallback(
     (positionPercent: number) => {
@@ -48,31 +48,32 @@ const Timeline = ({
 
   return (
     <div className="contents">
-      <div className="flex items-center justify-end gap-2">
-        <button
-          onClick={isPlaying ? onPause : onPlay}
-          disabled={!canPlay}
-          className="p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
-          aria-label={isPlaying ? 'Pause' : 'Play'}
-        >
-          {isPlaying ? (
-            <LuPause className="w-5 h-5" />
-          ) : (
-            <FaCirclePlay className="w-5 h-5" />
-          )}
-        </button>
-        <span className="text-xs font-mono tabular-nums whitespace-nowrap text-gray-400">
-          {formatCompactTime(elapsedUs)} / {formatCompactTime(durationUs)}
-        </span>
-      </div>
+      <div aria-hidden="true" />
 
-      <div className="flex items-center px-2 rounded-lg border border-timeline-premium bg-monitor-timeline-bg shadow-timeline-premium mx-auto w-full max-w-[900px]">
+      <div className="flex items-center gap-2 px-2 mx-auto w-full max-w-[900px]">
+        <section className="flex items-center gap-2 shrink-0 px-6">
+          <span className="shrink-0 text-sm font-mono tabular-nums whitespace-nowrap text-gray-300">
+            {formatCompactTime(elapsedUs)} / {formatCompactTime(durationUs)}
+          </span>
+          <button
+            onClick={isPlaying ? onPause : onPlay}
+            disabled={!canPlay}
+            className="shrink-0 p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <LuPause className="w-8 h-8" />
+            ) : (
+              <FaCirclePlay className="w-8 h-8" />
+            )}
+          </button>
+        </section>
         <SeekBar
           progressPercent={progressPercent}
           onSeekPositionChange={handleSeekPositionChange}
           formatTooltip={formatTooltip}
           disabled={!canPlay}
-          timeTicks={timeTicks}
+          timeRuler={timeRuler}
         />
       </div>
 
