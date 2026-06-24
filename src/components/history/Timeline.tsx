@@ -17,6 +17,7 @@ interface TimelineProps {
   onPause: () => void;
   onSeek: (targetTimestampUs: number) => void;
   markers?: TimelineMarker[];
+  startContent?: ReactNode;
   endContent?: ReactNode;
 }
 
@@ -30,6 +31,7 @@ const Timeline = ({
   onPause,
   onSeek,
   markers,
+  startContent,
   endContent,
 }: TimelineProps) => {
   const relativeTimeUs = currentTimeUs - sessionStartUs;
@@ -53,27 +55,26 @@ const Timeline = ({
   );
 
   return (
-    <div className="contents">
-      {endContent ?? <div aria-hidden="true" />}
-
-      <div className="flex items-center gap-2 px-2 mx-auto w-full max-w-[900px]">
-        <section className="flex items-center gap-2 shrink-0 px-6">
-          <span className="shrink-0 text-sm font-mono tabular-nums whitespace-nowrap text-gray-300">
-            {formatCompactTime(elapsedUs)} / {formatCompactTime(durationUs)}
-          </span>
-          <button
-            onClick={isPlaying ? onPause : onPlay}
-            disabled={!canPlay}
-            className="shrink-0 p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
-            aria-label={isPlaying ? 'Pause' : 'Play'}
-          >
-            {isPlaying ? (
-              <LuPause className="w-8 h-8" />
-            ) : (
-              <FaCirclePlay className="w-8 h-8" />
-            )}
-          </button>
-        </section>
+    <div className="flex items-center gap-2 w-full">
+      {startContent && <div className="shrink-0">{startContent}</div>}
+      <section className="flex items-center gap-2 shrink-0 px-6">
+        <span className="shrink-0 text-sm font-mono tabular-nums whitespace-nowrap text-gray-300">
+          {formatCompactTime(elapsedUs)} / {formatCompactTime(durationUs)}
+        </span>
+        <button
+          onClick={isPlaying ? onPause : onPlay}
+          disabled={!canPlay}
+          className="shrink-0 p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
+          aria-label={isPlaying ? 'Pause' : 'Play'}
+        >
+          {isPlaying ? (
+            <LuPause className="w-8 h-8" />
+          ) : (
+            <FaCirclePlay className="w-8 h-8" />
+          )}
+        </button>
+      </section>
+      <div className="flex-1 min-w-0">
         <SeekBar
           progressPercent={progressPercent}
           onSeekPositionChange={handleSeekPositionChange}
@@ -83,8 +84,7 @@ const Timeline = ({
           markers={markers}
         />
       </div>
-
-      <div aria-hidden="true" />
+      <div className="shrink-0 min-w-64">{endContent}</div>
     </div>
   );
 };
