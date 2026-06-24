@@ -98,7 +98,6 @@ export function dispatchSessionStats(
     filterIdx: stat.idx,
     parsedStatus: parseFilterStatus(stat.status ?? ''),
   }));
-  dispatch(setParsedStatuses(parsedStatusEntries));
 
   if (silent) {
     pendingStats = statsPayload;
@@ -107,6 +106,7 @@ export function dispatchSessionStats(
     pendingStatusMetricSamples.push(...statusSamples);
   } else {
     dispatch(updateSessionStats(statsPayload));
+    dispatch(setParsedStatuses(parsedStatusEntries));
     if (pidSamples.length) dispatch(addPIDSamples(pidSamples));
     if (Object.keys(pidDynamic).length)
       dispatch(setFilterPids(pidDynamic as Record<string, FilterPids>));
@@ -199,7 +199,17 @@ export function flushStats(
   pendingPIDDynamic: PIDDynamicByFilter,
   pendingStatusMetricSamples: StatusMetricSamplesBuffer,
 ): void {
-  if (pendingStats) dispatch(updateSessionStats(pendingStats));
+  if (pendingStats) {
+    dispatch(updateSessionStats(pendingStats));
+    dispatch(
+      setParsedStatuses(
+        pendingStats.stats.map((stat) => ({
+          filterIdx: stat.idx,
+          parsedStatus: parseFilterStatus(stat.status ?? ''),
+        })),
+      ),
+    );
+  }
   if (Object.keys(pendingBandwidth).length)
     dispatch(bulkAddNetworkData(pendingBandwidth));
   if (pendingCpuStats.length) dispatch(bulkAddSystemStats(pendingCpuStats));

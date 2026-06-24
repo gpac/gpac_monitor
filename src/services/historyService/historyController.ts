@@ -183,6 +183,7 @@ export class HistoryController {
     if (version !== preloader.getVersion()) return;
     if (!cp) {
       adapter.clearTimeSeriesData();
+      if (this.snapshot) adapter.hydrate(this.snapshot, this.sessionStartUs);
     }
 
     await this.loadLogsForChunk(currentChunk);

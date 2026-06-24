@@ -17,6 +17,7 @@ import {
   resetAllData,
   clearAllPIDSamples,
   clearAllStatusMetricSamples,
+  setParsedStatuses,
 } from '@/shared/store/slices/monitoredFilterSlice';
 import {
   setCommandLine,
@@ -41,10 +42,12 @@ import type {
   HistoryEvent,
   HistorySnapshot,
   HistoryCheckpoint,
+  HistoryFilter,
   FiltersEvent,
   FilterArgsUpdateEvent,
   LogEvent,
 } from '../types';
+import { parseFilterStatus } from '@/workers/filterStatusParser';
 import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
 import type { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import {
@@ -163,6 +166,17 @@ export class HistoryAdapter {
     this.pendingStatusMetricSamples = [];
   }
 
+  private rebuildParsedStatuses(filters: HistoryFilter[]): void {
+    this.dispatch(
+      setParsedStatuses(
+        filters.map((filter) => ({
+          filterIdx: filter.idx,
+          parsedStatus: parseFilterStatus(filter.status ?? ''),
+        })),
+      ),
+    );
+  }
+
   clearTimeSeriesData(): void {
     this.dispatch(resetSystemStatsHistory());
     this.dispatch(resetAllData());
@@ -207,6 +221,7 @@ export class HistoryAdapter {
     if (checkpoint.arg_state) {
       dispatch(hydrateFilterArgs(checkpoint.arg_state));
     }
+    this.rebuildParsedStatuses(checkpoint.filters);
   }
 
   hydrate(snapshot: HistorySnapshot, sessionStartUs: number): void {
@@ -229,6 +244,7 @@ export class HistoryAdapter {
     dispatch(setFilterPids(buildPidsByFilter(snapshot.filters)));
     dispatch(clearFilterArgs());
     dispatch(hydrateFilterArgs(this.baseArgs));
+    this.rebuildParsedStatuses(snapshot.filters);
     dispatch(setLoading(false));
   }
 
