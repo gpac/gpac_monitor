@@ -23,6 +23,7 @@ function HistoryWriter(historyDir, sessionId) {
     this._sessionStartUs = null;
     this._lastEventUs = null;
     this._checkpoints = [];
+    this._eventsIndex = [];
 
     this._init = function() {
         if (this._initialized) return;
@@ -42,6 +43,11 @@ function HistoryWriter(historyDir, sessionId) {
         this._lastEventUs = tsUs;
     };
 
+    this.addEventIndex = function(tsUs, type, metadata) {
+        if (!Number.isFinite(tsUs)) return;
+        this._eventsIndex.push(metadata ? { ts_us: tsUs, type, ...metadata } : { ts_us: tsUs, type });
+    };
+
     this._writeManifest = function() {
         const manifest = {
             version: 1,
@@ -52,6 +58,7 @@ function HistoryWriter(historyDir, sessionId) {
             snapshot: 'snapshot.json',
             checkpoints: this._checkpoints,
             logChunks: this._logs ? this._logs.getAllChunks() : [],
+            eventsIndex: [...this._eventsIndex].sort((a, b) => a.ts_us - b.ts_us),
         };
         const manifestFile = std.open(`${dir}/manifest.json`, 'w');
         if (!manifestFile) { print(`[HistoryWriter] Failed to write manifest`); return; }

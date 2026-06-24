@@ -6,6 +6,8 @@ import { logHub } from '../JSClient/Sys/Utils/LogHub.js';
 const RATE_LIMIT_US = 1000 * 1000;
 const EVENT_VERSION = 1;
 const LOG_ID = '_hist_';
+const LOG_LEVEL_ERROR = 1;
+const LOG_LEVEL_WARNING = 2;
 
 function HistoryCollector(historyDir) {
     this.writer = new HistoryWriter(historyDir);
@@ -95,6 +97,7 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
     });
 
     const filtersTsUs = sys.clock_us();
+    this.writer.addEventIndex(filtersTsUs, 'graph-change');
 
     // Writes the initial full snapshot once.
     if (!this.snapshotWritten) {
@@ -190,8 +193,8 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
 
     this.recordPidReconfigured = function(indexes, pidsByFilter) {
         const tsUs = sys.clock_us();
+        this.writer.addEventIndex(tsUs, 'pid-reconfig');
 
- 
         if (!this._currentPidState) {
             this._currentPidState = {};
         }
@@ -223,6 +226,7 @@ this.recordGraph = function(filters, filterInstances, graphVersion) {
 
 this.recordArgUpdated = function(indexes, argsByFilter) {
     const tsUs = sys.clock_us();
+    this.writer.addEventIndex(tsUs, 'args-change');
 
     for (const idx of indexes) {
         if (argsByFilter[idx]) {
@@ -247,6 +251,7 @@ this.recordArgUpdated = function(indexes, argsByFilter) {
 
     this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
         const argsTsUs = sys.clock_us();
+        this.writer.addEventIndex(argsTsUs, 'args-change');
         const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filter_args_update',
@@ -285,12 +290,22 @@ this.recordArgUpdated = function(indexes, argsByFilter) {
     this.flushLogs = function() {
         if (this.pendingLogs.length) {
             const tsUs = sys.clock_us();
+            let errorCount = 0, warningCount = 0;
+            for (const log of this.pendingLogs) {
+                if (log.level === LOG_LEVEL_ERROR) errorCount++;
+                else if (log.level === LOG_LEVEL_WARNING) warningCount++;
+            }
             this.writer.writeLog(JSON.stringify({
                 version: EVENT_VERSION,
                 message: 'log_batch',
                 ts_us: tsUs,
                 logs: this.pendingLogs,
             }), tsUs);
+            if (errorCount > 0) {
+                this.writer.addEventIndex(tsUs, 'error', { count: errorCount });
+            } else if (warningCount > 0) {
+                this.writer.addEventIndex(tsUs, 'warning', { count: warningCount });
+            }
             this.pendingLogs = [];
         }
         this.logBatchTimer = null;
