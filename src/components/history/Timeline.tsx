@@ -1,6 +1,8 @@
 import { useCallback, useMemo } from 'react';
+import type { ReactNode } from 'react';
 import { LuPause } from 'react-icons/lu';
 import SeekBar from './SeekBar';
+import type { TimelineMarker } from './SeekBar';
 import { formatCompactTime } from '@/utils/formatting/time';
 import { generateTimeTicks } from '@/utils/history/generateTimeTicks';
 import { FaCirclePlay } from 'react-icons/fa6';
@@ -14,6 +16,8 @@ interface TimelineProps {
   onPlay: () => void;
   onPause: () => void;
   onSeek: (targetTimestampUs: number) => void;
+  markers?: TimelineMarker[];
+  endContent?: ReactNode;
 }
 
 const Timeline = ({
@@ -25,6 +29,8 @@ const Timeline = ({
   onPlay,
   onPause,
   onSeek,
+  markers,
+  endContent,
 }: TimelineProps) => {
   const relativeTimeUs = currentTimeUs - sessionStartUs;
   const elapsedUs = Math.max(0, Math.min(relativeTimeUs, durationUs));
@@ -48,7 +54,7 @@ const Timeline = ({
 
   return (
     <div className="contents">
-      <div aria-hidden="true" />
+      {endContent ?? <div aria-hidden="true" />}
 
       <div className="flex items-center gap-2 px-2 mx-auto w-full max-w-[900px]">
         <section className="flex items-center gap-2 shrink-0 px-6">
@@ -74,6 +80,7 @@ const Timeline = ({
           formatTooltip={formatTooltip}
           disabled={!canPlay}
           timeRuler={timeRuler}
+          markers={markers}
         />
       </div>
 
