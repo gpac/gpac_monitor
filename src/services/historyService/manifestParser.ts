@@ -2,7 +2,9 @@ import type {
   HistoryManifest,
   HistoryManifestCheckpoint,
   HistoryManifestChunk,
+  ManifestEventEntry,
 } from './source/types';
+import type { TimelineEventType } from './types';
 
 export function parseManifest(raw: unknown): HistoryManifest {
   if (!raw || typeof raw !== 'object') {
@@ -61,15 +63,38 @@ export function parseManifest(raw: unknown): HistoryManifest {
       )
     : [];
 
+  const VALID_EVENT_TYPES = new Set<TimelineEventType>([
+    'graph-change',
+    'pid-reconfig',
+    'args-change',
+    'error',
+    'warning',
+  ]);
+  const eventsIndex: ManifestEventEntry[] = Array.isArray(data['eventsIndex'])
+    ? (data['eventsIndex'] as unknown[]).filter(
+        (entry): entry is ManifestEventEntry => {
+          if (!entry || typeof entry !== 'object') return false;
+          const rawEntry = entry as Record<string, unknown>;
+          return (
+            typeof rawEntry['ts_us'] === 'number' &&
+            typeof rawEntry['type'] === 'string' &&
+            VALID_EVENT_TYPES.has(rawEntry['type'] as TimelineEventType)
+          );
+        },
+      )
+    : [];
+
   return {
     version: 1,
     startUs: data['startUs'] as number,
     endUs: data['endUs'] as number,
     chunkDurationUs: data['chunkDurationUs'] as number,
     chunkCount: data['chunkCount'] as number,
-    snapshot: typeof data['snapshot'] === 'string' ? data['snapshot'] : undefined,
+    snapshot:
+      typeof data['snapshot'] === 'string' ? data['snapshot'] : undefined,
     logChunks,
     checkpoints,
+    eventsIndex,
   };
 }
 

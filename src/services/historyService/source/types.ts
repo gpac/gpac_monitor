@@ -1,4 +1,9 @@
-import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
+import type {
+  HistorySnapshot,
+  HistoryEvent,
+  LogEvent,
+  TimelineEventType,
+} from '../types';
 import type { SessionInfo } from '../sessionFileReader/types';
 
 /** Base chunk — shared by event and log chunks. */
@@ -21,6 +26,12 @@ export interface HistoryManifestCheckpoint {
   file: string;
 }
 
+export interface ManifestEventEntry {
+  ts_us: number;
+  type: TimelineEventType;
+  count?: number;
+}
+
 export interface HistoryManifest {
   version: number;
   startUs: number;
@@ -30,6 +41,7 @@ export interface HistoryManifest {
   snapshot?: string;
   logChunks?: HistoryManifestChunk[];
   checkpoints?: HistoryManifestCheckpoint[];
+  eventsIndex?: ManifestEventEntry[];
 }
 
 /** Low-level chunk I/O — implemented by both File and Remote sources. */

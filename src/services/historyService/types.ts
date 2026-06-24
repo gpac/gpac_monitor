@@ -2,10 +2,7 @@ import type {
   GpacArgument,
   GpacArgumentValue,
 } from '@/types/domain/gpac/gpac_args';
-import type {
-  GraphInputPid,
-  GraphOutputPid,
-} from '@/types/domain/gpac/model';
+import type { GraphInputPid, GraphOutputPid } from '@/types/domain/gpac/model';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { SessionFilterStatistics } from '@/types/domain/gpac/filter-stats';
 import type { PidPropsMap } from '@/types/domain/gpac/pid_props';
@@ -144,3 +141,17 @@ export type HistoryCheckpoint = Pick<
   pid_state?: Record<string, Record<string, PidPropsMap>>;
   arg_state?: Record<string, GpacArgument[]>;
 };
+
+export type TimelineEventType =
+  | 'graph-change'
+  | 'pid-reconfig'
+  | 'args-change'
+  | 'error'
+  | 'warning';
+
+export interface TimelineEvent {
+  id: string;
+  sessionTimeUs: number;
+  type: TimelineEventType;
+  title: string;
+}
