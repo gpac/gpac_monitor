@@ -1,6 +1,12 @@
 import type { AppDispatch } from '@/shared/store';
-import type { HistorySnapshot, HistoryEvent, LogEvent } from './types';
+import type {
+  HistorySnapshot,
+  HistoryEvent,
+  LogEvent,
+  TimelineEvent,
+} from './types';
 import { HistoryAdapter } from './integration/historyAdapter';
+import { deriveTimelineEvents } from './integration/deriveTimelineEvents';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
 import {
@@ -30,6 +36,7 @@ export class HistoryController {
   private manifest: HistoryManifest | null = null;
   private loadedChunkIndex: number | null = null;
   private preloader: ChunkPreloadController | null = null;
+  private timelineEvents: TimelineEvent[] = [];
 
   setListener(listener: PlayerListener) {
     this.player.setListener(listener);
@@ -132,6 +139,7 @@ export class HistoryController {
       throw new Error('[HistoryController] No manifest for session');
 
     this.manifest = manifest;
+    this.timelineEvents = deriveTimelineEvents(manifest);
     this.loader = new ChunkLoader(source, manifest);
     this.preloader = new ChunkPreloadController(
       this.loader,
@@ -267,6 +275,10 @@ export class HistoryController {
 
   getSessionStartUs(): number {
     return this.sessionStartUs;
+  }
+
+  getTimelineEvents(): TimelineEvent[] {
+    return this.timelineEvents;
   }
 
   private getNextLogIndexFromTimestamp(timestampUs: number): number {
