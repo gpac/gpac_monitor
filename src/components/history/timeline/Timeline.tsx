@@ -5,7 +5,7 @@ import SeekBar from './SeekBar';
 import type { TimelineMarker } from './SeekBar';
 import SessionTimeIndicator from '@/components/common/SessionTimeIndicator';
 import { formatCompactTime } from '@/utils/formatting/time';
-import { generateTimeTicks } from '@/utils/history/generateTimeTicks';
+import { generateWindowTimeTicks } from '@/utils/history/generateTimeTicks';
 import { getCursorPercent } from '@/utils/history/timelineViewportView';
 import type { TimelineViewport } from '@/utils/history/timelineViewport';
 import { FaCirclePlay } from 'react-icons/fa6';
@@ -42,7 +42,14 @@ const Timeline = ({
   const relativeTimeUs = currentTimeUs - sessionStartUs;
   const elapsedUs = Math.max(0, Math.min(relativeTimeUs, durationUs));
   const progressPercent = getCursorPercent(viewport, elapsedUs);
-  const timeRuler = useMemo(() => generateTimeTicks(durationUs), [durationUs]);
+  const timeRuler = useMemo(
+    () =>
+      generateWindowTimeTicks(
+        viewport.visibleStartUs,
+        viewport.visibleDurationUs,
+      ),
+    [viewport],
+  );
 
   const percentToSessionUs = useCallback(
     (positionPercent: number) =>
