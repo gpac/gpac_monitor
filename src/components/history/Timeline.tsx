@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { LuPause } from 'react-icons/lu';
 import SeekBar from './SeekBar';
 import type { TimelineMarker } from './SeekBar';
+import SessionTimeIndicator from '@/components/common/SessionTimeIndicator';
 import { formatCompactTime } from '@/utils/formatting/time';
 import { generateTimeTicks } from '@/utils/history/generateTimeTicks';
 import { FaCirclePlay } from 'react-icons/fa6';
@@ -55,12 +56,11 @@ const Timeline = ({
   );
 
   return (
-    <div className="flex items-center gap-2 w-full">
-      {startContent && <div className="shrink-0">{startContent}</div>}
-      <section className="flex items-center gap-2 shrink-0 px-6">
-        <span className="shrink-0 text-sm font-mono tabular-nums whitespace-nowrap text-gray-300">
-          {formatCompactTime(elapsedUs)} / {formatCompactTime(durationUs)}
-        </span>
+    <div className="flex items-start gap-2 w-full">
+      {startContent && (
+        <div className="shrink-0 h-8 flex items-center">{startContent}</div>
+      )}
+      <section className="flex items-center gap-2 shrink-0 px-6 h-8">
         <button
           onClick={isPlaying ? onPause : onPlay}
           disabled={!canPlay}
@@ -84,7 +84,10 @@ const Timeline = ({
           markers={markers}
         />
       </div>
-      <div className="shrink-0 min-w-64">{endContent}</div>
+      <div className="flex items-center gap-2 shrink-0 min-w-64 justify-end">
+        {endContent}
+        <SessionTimeIndicator elapsedUs={elapsedUs} durationUs={durationUs} />
+      </div>
     </div>
   );
 };

@@ -14,9 +14,9 @@ const SessionTimeIndicator = ({
   className = '',
 }: SessionTimeIndicatorProps) => (
   <div
-    className={`flex flex-col items-start gap-0.5 px-3 py-1.5 2xl:px-4 2xl:py-2 rounded-md border border-white/10 bg-white/[0.03] ${className}`}
+    className={`flex flex-col items-start gap-0.5 px-3 py-1.5 2xl:px-4 2xl:py-2  border border-white/10 bg-white/[0.03] ${className}`}
   >
-    <span className="text-xs 2xl:text-sm uppercase tracking-wide text-gray-400">
+    <span className="text-xs 2xl:text-sm capitalize tracking-wide text-gray-500">
       {label}
     </span>
     <span className="flex items-baseline gap-1 font-mono tabular-nums">
