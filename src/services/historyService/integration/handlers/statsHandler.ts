@@ -1,4 +1,5 @@
 import type { AppDispatch } from '@/shared/store';
+import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
 import type { CPUStats } from '@/types/domain/system';
 import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
 import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
@@ -74,6 +75,7 @@ export function dispatchSessionStats(
   pendingPIDSamples: PIDSamplesBuffer,
   pendingPIDDynamic: PIDDynamicByFilter,
   pendingStatusMetricSamples: StatusMetricSamplesBuffer,
+  definitions?: MetricDefinitionMap,
 ): {
   pendingStats: typeof pendingStats;
   pendingBandwidth: CombinedBandwidthBuffer;
@@ -93,10 +95,11 @@ export function dispatchSessionStats(
     event.stats,
     event.ts_us,
     sessionStartUs,
+    definitions,
   );
   const parsedStatusEntries = event.stats.map((stat) => ({
     filterIdx: stat.idx,
-    parsedStatus: parseFilterStatus(stat.status ?? ''),
+    parsedStatus: parseFilterStatus(stat.status ?? '', definitions),
   }));
 
   if (silent) {
@@ -198,6 +201,7 @@ export function flushStats(
   pendingPIDSamples: PIDSamplesBuffer,
   pendingPIDDynamic: PIDDynamicByFilter,
   pendingStatusMetricSamples: StatusMetricSamplesBuffer,
+  definitions?: MetricDefinitionMap,
 ): void {
   if (pendingStats) {
     dispatch(updateSessionStats(pendingStats));
@@ -205,7 +209,7 @@ export function flushStats(
       setParsedStatuses(
         pendingStats.stats.map((stat) => ({
           filterIdx: stat.idx,
-          parsedStatus: parseFilterStatus(stat.status ?? ''),
+          parsedStatus: parseFilterStatus(stat.status ?? '', definitions),
         })),
       ),
     );

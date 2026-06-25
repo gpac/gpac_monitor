@@ -30,7 +30,10 @@ import {
   clearFilterPids,
   setMetricDefinitions,
 } from '@/shared/store/slices/sessionStatsSlice';
-import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
+import {
+  parseMetricDefinitions,
+  type MetricDefinitionMap,
+} from '@/workers/metricDefinitionParser';
 import {
   applyArgUpdate,
   hydrateFilterArgs,
@@ -100,6 +103,8 @@ export class HistoryAdapter {
   private pendingPIDDynamic: PIDDynamicByFilter = {};
   private pendingStatusMetricSamples: StatusMetricSamplesBuffer = [];
 
+  private localMetricDefinitions: MetricDefinitionMap = {};
+
   constructor(private dispatch: AppDispatch) {}
 
   setSilent(on: boolean): void {
@@ -132,6 +137,7 @@ export class HistoryAdapter {
       this.pendingPIDSamples,
       this.pendingPIDDynamic,
       this.pendingStatusMetricSamples,
+      this.localMetricDefinitions,
     );
     const badgeMinUs = targetUs !== undefined ? targetUs - BADGE_WINDOW_US : 0;
     const recentPidIndexes = filterRecentIndexes(
@@ -173,7 +179,10 @@ export class HistoryAdapter {
       setParsedStatuses(
         filters.map((filter) => ({
           filterIdx: filter.idx,
-          parsedStatus: parseFilterStatus(filter.status ?? ''),
+          parsedStatus: parseFilterStatus(
+            filter.status ?? '',
+            this.localMetricDefinitions,
+          ),
         })),
       ),
     );
@@ -195,7 +204,8 @@ export class HistoryAdapter {
 
   private applyMetricDefinitions(raw: string | null | undefined): void {
     if (!raw) return;
-    this.dispatch(setMetricDefinitions(parseMetricDefinitions(raw)));
+    this.localMetricDefinitions = parseMetricDefinitions(raw);
+    this.dispatch(setMetricDefinitions(this.localMetricDefinitions));
   }
 
   hydrateCheckpoint(checkpoint: HistoryCheckpoint): void {
@@ -274,6 +284,7 @@ export class HistoryAdapter {
           this.pendingPIDSamples,
           this.pendingPIDDynamic,
           this.pendingStatusMetricSamples,
+          this.localMetricDefinitions,
         );
         this.pendingLastStats = result.pendingStats;
         this.pendingBandwidth = result.pendingBandwidth;
