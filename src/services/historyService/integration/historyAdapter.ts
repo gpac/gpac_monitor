@@ -28,7 +28,9 @@ import {
   updateSessionStats,
   setFilterPids,
   clearFilterPids,
+  setMetricDefinitions,
 } from '@/shared/store/slices/sessionStatsSlice';
+import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
 import {
   applyArgUpdate,
   hydrateFilterArgs,
@@ -191,6 +193,11 @@ export class HistoryAdapter {
     this.pendingLastStats = null;
   }
 
+  private applyMetricDefinitions(raw: string | null | undefined): void {
+    if (!raw) return;
+    this.dispatch(setMetricDefinitions(parseMetricDefinitions(raw)));
+  }
+
   hydrateCheckpoint(checkpoint: HistoryCheckpoint): void {
     this.resetTemporalState();
     const { dispatch } = this;
@@ -221,6 +228,7 @@ export class HistoryAdapter {
     if (checkpoint.arg_state) {
       dispatch(hydrateFilterArgs(checkpoint.arg_state));
     }
+    this.applyMetricDefinitions(checkpoint.metric_defs);
     this.rebuildParsedStatuses(checkpoint.filters);
   }
 
@@ -244,6 +252,7 @@ export class HistoryAdapter {
     dispatch(setFilterPids(buildPidsByFilter(snapshot.filters)));
     dispatch(clearFilterArgs());
     dispatch(hydrateFilterArgs(this.baseArgs));
+    this.applyMetricDefinitions(snapshot.session_metrics);
     this.rebuildParsedStatuses(snapshot.filters);
     dispatch(setLoading(false));
   }
