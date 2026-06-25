@@ -86,6 +86,22 @@ describe('BadgeExpirationController', () => {
     expect(controller.tick(EXPIRES_AT + 10_000_000)).toEqual([]);
   });
 
+  it('does not expire badge early when same (filterIdx, type) scheduled twice', () => {
+    controller.schedule(5, 'pid', 30_000_000);
+    controller.schedule(5, 'pid', 30_500_000);
+
+    expect(controller.tick(33_000_000)).toEqual([]);
+  });
+
+  it('expires badge once at max expiry when same (filterIdx, type) scheduled twice', () => {
+    controller.schedule(5, 'pid', 30_000_000);
+    controller.schedule(5, 'pid', 30_500_000);
+
+    const expired = controller.tick(33_500_000);
+    expect(expired).toEqual([{ filterIdx: 5, type: 'pid' }]);
+    expect(controller.tick(34_000_000)).toEqual([]);
+  });
+
   it('handles same filter with both pid and arg badges', () => {
     controller.schedule(9, 'pid', 30_000_000);
     controller.schedule(9, 'arg', 30_500_000);

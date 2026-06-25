@@ -17,11 +17,15 @@ export class BadgeExpirationController {
   private pending: PendingExpiration[] = [];
 
   schedule(filterIdx: number, type: BadgeType, eventTsUs: number): void {
-    this.pending.push({
-      filterIdx,
-      type,
-      expiresAtUs: eventTsUs + BADGE_DURATION_US,
-    });
+    const expiresAtUs = eventTsUs + BADGE_DURATION_US;
+    const existing = this.pending.find(
+      (entry) => entry.filterIdx === filterIdx && entry.type === type,
+    );
+    if (existing) {
+      existing.expiresAtUs = Math.max(existing.expiresAtUs, expiresAtUs);
+    } else {
+      this.pending.push({ filterIdx, type, expiresAtUs });
+    }
   }
 
   tick(currentTimeUs: number): ExpiredBadge[] {
