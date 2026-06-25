@@ -6,12 +6,15 @@ import type { TimelineMarker } from './SeekBar';
 import SessionTimeIndicator from '@/components/common/SessionTimeIndicator';
 import { formatCompactTime } from '@/utils/formatting/time';
 import { generateTimeTicks } from '@/utils/history/generateTimeTicks';
+import { getCursorPercent } from '@/utils/history/timelineViewportView';
+import type { TimelineViewport } from '@/utils/history/timelineViewport';
 import { FaCirclePlay } from 'react-icons/fa6';
 
 interface TimelineProps {
   currentTimeUs: number;
   durationUs: number;
   sessionStartUs: number;
+  viewport: TimelineViewport;
   isPlaying?: boolean;
   canPlay?: boolean;
   onPlay: () => void;
@@ -26,6 +29,7 @@ const Timeline = ({
   currentTimeUs,
   durationUs,
   sessionStartUs,
+  viewport,
   isPlaying = false,
   canPlay = true,
   onPlay,
@@ -37,22 +41,27 @@ const Timeline = ({
 }: TimelineProps) => {
   const relativeTimeUs = currentTimeUs - sessionStartUs;
   const elapsedUs = Math.max(0, Math.min(relativeTimeUs, durationUs));
-  const progressPercent = durationUs > 0 ? (elapsedUs / durationUs) * 100 : 0;
+  const progressPercent = getCursorPercent(viewport, elapsedUs);
   const timeRuler = useMemo(() => generateTimeTicks(durationUs), [durationUs]);
+
+  const percentToSessionUs = useCallback(
+    (positionPercent: number) =>
+      viewport.visibleStartUs +
+      (positionPercent / 100) * viewport.visibleDurationUs,
+    [viewport],
+  );
 
   const handleSeekPositionChange = useCallback(
     (positionPercent: number) => {
-      const targetTimestampUs =
-        sessionStartUs + (positionPercent / 100) * durationUs;
-      onSeek(targetTimestampUs);
+      onSeek(sessionStartUs + percentToSessionUs(positionPercent));
     },
-    [sessionStartUs, durationUs, onSeek],
+    [sessionStartUs, percentToSessionUs, onSeek],
   );
 
   const formatTooltip = useCallback(
     (positionPercent: number) =>
-      formatCompactTime((positionPercent / 100) * durationUs),
-    [durationUs],
+      formatCompactTime(percentToSessionUs(positionPercent)),
+    [percentToSessionUs],
   );
 
   return (

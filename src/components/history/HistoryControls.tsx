@@ -6,8 +6,12 @@ import { useTimelineEvents } from '@/services/historyService/useTimelineEvents';
 import { getDuration } from '@/services/historyService/manifestParser';
 import { TIMELINE_DOCK_HEIGHT_PX } from './historyLayout';
 import Timeline from './Timeline';
+import TimelineZoomControls from './TimelineZoomControls';
 import EventsFilter from './EventsFilter';
 import type { TimelineFilter } from './EventsFilter';
+import { useTimelineViewport } from './hooks/useTimelineViewport';
+import { getVisibleEvents } from '@/utils/history/timelineViewportView';
+import { MIN_VISIBLE_DURATION_US } from '@/utils/history/timelineViewport';
 
 const renderResizeHandle = (
   _resizeHandleAxis: string,
@@ -29,18 +33,22 @@ const HistoryControls = () => {
   const sessionStartUs = manifest?.startUs ?? 0;
   const [activeFilter, setActiveFilter] = useState<TimelineFilter>('all');
   const allEvents = useTimelineEvents();
+  const { viewport, zoomAround } = useTimelineViewport(durationUs);
   const markers = useMemo(() => {
     const filteredEvents =
       activeFilter === 'all'
         ? allEvents
         : allEvents.filter((event) => event.type === activeFilter);
-    return filteredEvents.map((event) => ({
-      id: event.id,
-      positionPercent:
-        durationUs > 0 ? (event.sessionTimeUs / durationUs) * 100 : 0,
-      type: event.type,
-    }));
-  }, [allEvents, activeFilter, durationUs]);
+    return getVisibleEvents(viewport, filteredEvents).map(
+      ({ event, positionPercent }) => ({
+        id: event.id,
+        positionPercent,
+        type: event.type,
+      }),
+    );
+  }, [allEvents, activeFilter, viewport]);
+
+  const playheadSessionUs = currentTimeUs - sessionStartUs;
 
   if (mode !== 'history') return null;
 
@@ -72,6 +80,7 @@ const HistoryControls = () => {
             currentTimeUs={currentTimeUs}
             durationUs={durationUs}
             sessionStartUs={sessionStartUs}
+            viewport={viewport}
             isPlaying={state === 'playing'}
             onPlay={play}
             onPause={pause}
@@ -79,6 +88,16 @@ const HistoryControls = () => {
             markers={markers}
             startContent={
               <EventsFilter active={activeFilter} onChange={setActiveFilter} />
+            }
+            endContent={
+              <TimelineZoomControls
+                onZoomIn={() => zoomAround(playheadSessionUs, 0.5)}
+                onZoomOut={() => zoomAround(playheadSessionUs, 2)}
+                canZoomIn={viewport.visibleDurationUs > MIN_VISIBLE_DURATION_US}
+                canZoomOut={
+                  viewport.visibleDurationUs < viewport.sessionDurationUs
+                }
+              />
             }
           />
         </div>
