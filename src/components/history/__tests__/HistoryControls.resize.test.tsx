@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render } from '@testing-library/react';
-import HistoryControls from '../HistoryControls';
+import HistoryControls from '../timeline/HistoryControls';
 
 vi.mock('@/services/dataSource/DataSourceContext', () => ({
   useDataSource: () => ({ mode: 'history', manifest: null }),

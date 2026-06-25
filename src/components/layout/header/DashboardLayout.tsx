@@ -18,7 +18,7 @@ import { closeSidebar } from '@/shared/store/slices/layoutSlice';
 import Header from './Header';
 import Sidebar from '../sidebar/Sidebar';
 import SessionPicker from '@/components/history/SessionPicker';
-import HistoryControls from '@/components/history/HistoryControls';
+import HistoryControls from '@/components/history/timeline/HistoryControls';
 import { Widget } from '@/types/ui/widget';
 import { getWidgetDefinition } from '../../widget/registry';
 import SidebarCloseButton from '../sidebar/SidebarCloseButton';

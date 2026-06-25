@@ -4,12 +4,12 @@ import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { usePlayerState } from '@/services/historyService/usePlayerState';
 import { useTimelineEvents } from '@/services/historyService/useTimelineEvents';
 import { getDuration } from '@/services/historyService/manifestParser';
-import { TIMELINE_DOCK_HEIGHT_PX } from './historyLayout';
+import { TIMELINE_DOCK_HEIGHT_PX } from '../historyLayout';
 import Timeline from './Timeline';
 import TimelineZoomControls from './TimelineZoomControls';
-import EventsFilter from './EventsFilter';
-import type { TimelineFilter } from './EventsFilter';
-import { useTimelineViewport } from './hooks/useTimelineViewport';
+import EventsFilter from '../EventsFilter';
+import type { TimelineFilter } from '../EventsFilter';
+import { useTimelineViewport } from '../hooks/useTimelineViewport';
 import { getVisibleEvents } from '@/utils/history/timelineViewportView';
 import { MIN_VISIBLE_DURATION_US } from '@/utils/history/timelineViewport';
 
