@@ -132,6 +132,7 @@ export interface HistorySnapshot {
   command_line: string | null;
   graph_v: number;
   filters: HistoryFilter[];
+  session_metrics?: string | null;
 }
 
 export type HistoryCheckpoint = Pick<
@@ -140,6 +141,7 @@ export type HistoryCheckpoint = Pick<
 > & {
   pid_state?: Record<string, Record<string, PidPropsMap>>;
   arg_state?: Record<string, GpacArgument[]>;
+  metric_defs?: string | null;
 };
 
 export type TimelineEventType =

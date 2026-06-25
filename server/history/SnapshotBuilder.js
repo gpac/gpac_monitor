@@ -51,6 +51,7 @@ function SnapshotBuilder() {
             command_line: commandLine,
             graph_v: graphVersion,
             filters,
+            session_metrics: session.session_metrics || null,
         };
     };
 }

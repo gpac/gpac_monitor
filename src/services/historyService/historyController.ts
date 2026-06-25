@@ -216,7 +216,7 @@ export class HistoryController {
         adapter.handleEvent(event);
       }
       adapter.flush(tsUs);
-      // Re-schedule expiry for events inside the badge window so ticks can clear them.
+      // Re-schedule expiry for events inside the pc window so ticks can clear them.
       const badgeWindowStart = tsUs - BADGE_DURATION_US;
       for (const event of eventsBeforeSeek) {
         if (event.ts_us >= badgeWindowStart) {

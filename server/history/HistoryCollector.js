@@ -37,6 +37,7 @@ function HistoryCollector(historyDir) {
         graph_v: this._latestStructural.graph_v,
         filters: this._latestStructural.filters,
         pid_state: this._currentPidState,
+        metric_defs: session.session_metrics || null,
     };
 
     if (Object.keys(this._currentArgState).length > 0) {
