@@ -59,8 +59,14 @@ const HistoryControls = () => {
         }
       >
         <div
-          className="absolute bottom-0 left-0 right-0 z-20 flex items-center px-4 border-t border-purple-800/70 bg-monitor-timelineSurface"
-          style={{ height: dockHeight }}
+          className="z-20 flex items-center px-4 border-t border-purple-800/70 bg-monitor-timelineSurface"
+          style={{
+            height: dockHeight,
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+          }}
         >
           <Timeline
             currentTimeUs={currentTimeUs}
