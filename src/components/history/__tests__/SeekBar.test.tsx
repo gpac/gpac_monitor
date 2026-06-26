@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import SeekBar from '../SeekBar';
+import SeekBar from '../timeline/SeekBar';
 
 vi.mock('@radix-ui/react-slider', () => ({
   Root: ({

@@ -19,37 +19,56 @@ const NICE_INTERVALS_US = [
 
 const MAX_TICKS = 16;
 
-export function generateTimeTicks(durationUs: number): TimeRuler {
-  if (durationUs <= 0) return { major: [], minor: [] };
+/** Ticks for an arbitrary visible window; labels are absolute session time. */
+export function generateWindowTimeTicks(
+  visibleStartUs: number,
+  visibleDurationUs: number,
+): TimeRuler {
+  if (visibleDurationUs <= 0) return { major: [], minor: [] };
 
+  const visibleEndUs = visibleStartUs + visibleDurationUs;
   const majorIntervalUs =
     NICE_INTERVALS_US.find(
-      (candidate) => durationUs / candidate <= MAX_TICKS,
+      (candidate) => visibleDurationUs / candidate <= MAX_TICKS,
     ) ?? NICE_INTERVALS_US[NICE_INTERVALS_US.length - 1];
 
   const minorIntervalUs = majorIntervalUs / 5;
   const hasMinor = minorIntervalUs >= US;
+  const toPercent = (tickUs: number) =>
+    ((tickUs - visibleStartUs) / visibleDurationUs) * 100;
 
   const major: TimeTick[] = [];
-  for (let tickUs = 0; tickUs <= durationUs; tickUs += majorIntervalUs) {
+  const firstMajor =
+    Math.ceil(visibleStartUs / majorIntervalUs) * majorIntervalUs;
+  for (
+    let tickUs = firstMajor;
+    tickUs <= visibleEndUs;
+    tickUs += majorIntervalUs
+  ) {
     major.push({
-      positionPercent: (tickUs / durationUs) * 100,
+      positionPercent: toPercent(tickUs),
       label: formatCompactTime(tickUs),
     });
   }
 
   const minor: Array<{ positionPercent: number }> = [];
   if (hasMinor) {
+    const firstMinor =
+      Math.ceil(visibleStartUs / minorIntervalUs) * minorIntervalUs;
     for (
-      let tickUs = minorIntervalUs;
-      tickUs < durationUs;
+      let tickUs = firstMinor;
+      tickUs < visibleEndUs;
       tickUs += minorIntervalUs
     ) {
       if (tickUs % majorIntervalUs !== 0) {
-        minor.push({ positionPercent: (tickUs / durationUs) * 100 });
+        minor.push({ positionPercent: toPercent(tickUs) });
       }
     }
   }
 
   return { major, minor };
+}
+
+export function generateTimeTicks(durationUs: number): TimeRuler {
+  return generateWindowTimeTicks(0, durationUs);
 }
