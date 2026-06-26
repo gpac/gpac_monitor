@@ -1,4 +1,5 @@
 import { useMemo, useCallback, useRef } from 'react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import {
   Responsive,
@@ -97,8 +98,10 @@ const DashboardLayout = () => {
           <SidebarCloseButton onClose={() => dispatch(closeSidebar())} />
         )}
 
-        <main
-          className="flex-1 h-full min-h-0 overflow-y-auto pb-4 pt-2 pl-0 transition-transform duration-300 will-change-transform"
+        <OverlayScrollbarsComponent
+          element="main"
+          options={{ scrollbars: { autoHide: 'leave', autoHideDelay: 400 } }}
+          className="flex-1 h-full min-h-0 pb-4 pt-2 pl-0 transition-transform duration-300 will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(256px)' : 'translateX(0)',
             paddingRight: isSidebarOpen ? '272px' : '16px',
@@ -158,7 +161,7 @@ const DashboardLayout = () => {
           >
             {activeWidgets.map(renderWidget)}
           </ResponsiveGridLayout>
-        </main>
+        </OverlayScrollbarsComponent>
       </div>
     </div>
   );

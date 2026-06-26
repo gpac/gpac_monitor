@@ -8,9 +8,9 @@ const source = readFileSync(
 );
 
 describe('DashboardLayout app-shell — scroll ownership regression', () => {
-  it('owns the scroll on <main> (overflow-y-auto), never on the page body', () => {
-    const mainTag = source.match(/<main[\s\S]*?>/)?.[0] ?? '';
-    expect(mainTag).toContain('overflow-y-auto');
+  it('owns the scroll on <main> via OverlayScrollbarsComponent, never on the page body', () => {
+    expect(source).toContain('element="main"');
+    expect(source).not.toContain('overflow-y-auto');
   });
 
   it('clips the middle row so body never scrolls and the header stays pinned', () => {

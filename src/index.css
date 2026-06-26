@@ -215,7 +215,18 @@ html {
   }
 }
 
-/* Custom scrollbar styles */
+/* OverlayScrollbars dark theme */
+.os-scrollbar {
+  --os-size: 5px;
+  --os-padding-perpendicular: 2px;
+  --os-track-bg: transparent;
+  --os-handle-bg: rgba(255, 255, 255, 0.15);
+  --os-handle-bg-hover: rgba(255, 255, 255, 0.3);
+  --os-handle-bg-active: rgba(255, 255, 255, 0.4);
+  --os-handle-border-radius: 10px;
+}
+
+/* Native scrollbar fallback (dropdowns, tooltips, <pre>) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

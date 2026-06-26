@@ -1,3 +1,4 @@
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import PropertiesPanel from '../panels/PropertiesPanel';
 
 const Sidebar = () => {
@@ -7,9 +8,13 @@ const Sidebar = () => {
       role="complementary"
       aria-label="Dashboard widgets sidebar"
     >
-      <div className="flex-1 overflow-y-auto px-4 pb-4">
+      <OverlayScrollbarsComponent
+        element="div"
+        options={{ scrollbars: { autoHide: 'leave', autoHideDelay: 400 } }}
+        className="flex-1 px-4 pb-4"
+      >
         <PropertiesPanel />
-      </div>
+      </OverlayScrollbarsComponent>
     </aside>
   );
 };
