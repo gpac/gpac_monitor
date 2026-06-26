@@ -7,8 +7,8 @@ import { getDuration } from '@/services/historyService/manifestParser';
 import { TIMELINE_DOCK_HEIGHT_PX } from '../historyLayout';
 import Timeline from './Timeline';
 import TimelineZoomControls from './TimelineZoomControls';
-import EventsFilter from '../EventsFilter';
-import type { TimelineFilter } from '../EventsFilter';
+import EventsFilter from './EventsFilter';
+import type { TimelineFilter } from './EventsFilter';
 import { useTimelineViewport } from '../hooks/useTimelineViewport';
 import { getVisibleEvents } from '@/utils/history/timelineViewportView';
 import { MIN_VISIBLE_DURATION_US } from '@/utils/history/timelineViewport';
@@ -19,7 +19,7 @@ const renderResizeHandle = (
 ) => (
   <div
     ref={ref}
-    className="absolute -top-1 left-0 right-0 z-30 h-2 cursor-ns-resize hover:bg-purple-500/40"
+    className="absolute -top-1 left-0 right-0 z-30 h-2 cursor-ns-resize hover:bg-history-muted"
   />
 );
 
@@ -67,7 +67,7 @@ const HistoryControls = () => {
         }
       >
         <div
-          className="z-20 flex items-center px-4 border-t border-purple-800/70 bg-monitor-timelineSurface"
+          className="z-20 flex items-center px-4 border-t border-history-border bg-monitor-timelineSurface"
           style={{
             height: dockHeight,
             position: 'absolute',

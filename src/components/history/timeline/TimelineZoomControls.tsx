@@ -8,7 +8,7 @@ interface TimelineZoomControlsProps {
 }
 
 const buttonClass =
-  'shrink-0 p-1 2xl:p-1.5 text-gray-300 hover:text-white hover:bg-white/10 disabled:opacity-40 disabled:pointer-events-none';
+  'shrink-0 p-1 2xl:p-1.5 text-gray-300 hover:text-white hover:bg-history-muted disabled:opacity-40 disabled:pointer-events-none';
 
 const TimelineZoomControls = ({
   onZoomIn,
@@ -16,7 +16,7 @@ const TimelineZoomControls = ({
   canZoomIn = true,
   canZoomOut = true,
 }: TimelineZoomControlsProps) => (
-  <div className="flex flex-col items-start gap-0.5 px-3 py-1.5 2xl:px-4 2xl:py-2 border border-white/10 bg-white/[0.03]">
+  <div className="flex flex-col items-start gap-0.5 px-3 py-1.5 2xl:px-4 2xl:py-2 border border-history-border bg-white/[0.03]">
     <span className="text-xs 2xl:text-sm capitalize tracking-wide text-gray-500">
       Zoom
     </span>

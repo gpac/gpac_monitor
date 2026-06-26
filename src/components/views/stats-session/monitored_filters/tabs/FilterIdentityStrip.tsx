@@ -56,9 +56,7 @@ const FilterIdentityStrip = memo(
           {sourceIndicator.label}{' '}
           <span
             className={
-              sourceIndicator.tone === 'replay'
-                ? 'text-purple-400'
-                : 'text-error'
+              sourceIndicator.tone === 'replay' ? 'text-history' : 'text-error'
             }
           >
             ⏺

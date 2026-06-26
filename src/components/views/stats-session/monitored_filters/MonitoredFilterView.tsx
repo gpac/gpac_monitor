@@ -88,7 +88,7 @@ const MonitoredFilterView = memo(
     const { isHistory } = useDataMode();
     const openLogsWidget = useOpenLogsWidget();
     const activeTabClass = isHistory
-      ? 'h-7 px-3 font-medium data-[state=active]:text-purple-400 data-[state=active]:border-b-2 data-[state=active]:border-purple-400'
+      ? 'h-7 px-3 font-medium data-[state=active]:border-b-2 data-[state=active]:border-history'
       : 'h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab';
     const filterKey =
       overviewData.filterIdx !== undefined

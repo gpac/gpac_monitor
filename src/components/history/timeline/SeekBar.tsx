@@ -87,9 +87,9 @@ const SeekBar = ({
         className={`relative flex items-center w-full h-8 ${disabled ? 'opacity-40' : 'cursor-pointer'}`}
       >
         <Slider.Track className="relative flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
-          <Slider.Range className="absolute h-full bg-purple-400/70" />
+          <Slider.Range className="absolute h-full bg-history" />
         </Slider.Track>
-        <Slider.Thumb className="block w-0.5 h-5 rounded-full bg-white shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400" />
+        <Slider.Thumb className="block w-0.5 h-5 rounded-full bg-white shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-history" />
       </Slider.Root>
 
       {markers && markers.length > 0 && (

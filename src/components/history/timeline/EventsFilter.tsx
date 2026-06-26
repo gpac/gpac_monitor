@@ -50,7 +50,7 @@ const EventsFilter = ({ active, onChange }: EventsFilterProps) => (
         <ToggleGroupItem
           key={value}
           value={value}
-          className="data-[state=on]:bg-purple-400/50 data-[state=on]:text-white flex items-center gap-1"
+          className="data-[state=on]:bg-history-activeBg data-[state=on]:text-history-activeText data-[state=on]:border data-[state=on]:border-history-activeBorder flex items-center gap-1"
         >
           {icon && <span className={iconColor}>{icon}</span>}
           {label}
