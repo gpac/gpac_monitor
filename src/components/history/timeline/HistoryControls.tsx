@@ -43,6 +43,7 @@ const HistoryControls = () => {
       ({ event, positionPercent }) => ({
         id: event.id,
         positionPercent,
+        sessionTimeUs: event.sessionTimeUs,
         type: event.type,
       }),
     );

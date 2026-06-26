@@ -65,6 +65,13 @@ const Timeline = ({
     [sessionStartUs, percentToSessionUs, onSeek],
   );
 
+  const handleMarkerSeek = useCallback(
+    (sessionTimeUs: number) => {
+      onSeek(sessionStartUs + sessionTimeUs);
+    },
+    [sessionStartUs, onSeek],
+  );
+
   const formatTooltip = useCallback(
     (positionPercent: number) =>
       formatCompactTime(percentToSessionUs(positionPercent)),
@@ -94,6 +101,7 @@ const Timeline = ({
         <SeekBar
           progressPercent={progressPercent}
           onSeekPositionChange={handleSeekPositionChange}
+          onMarkerSeek={handleMarkerSeek}
           formatTooltip={formatTooltip}
           disabled={!canPlay}
           timeRuler={timeRuler}

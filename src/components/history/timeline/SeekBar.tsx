@@ -5,6 +5,7 @@ import type { TimeRuler } from '@/utils/history/generateTimeTicks';
 export interface TimelineMarker {
   id: string;
   positionPercent: number;
+  sessionTimeUs: number;
   type: 'graph-change' | 'pid-reconfig' | 'args-change' | 'error' | 'warning';
 }
 
@@ -19,6 +20,7 @@ const MARKER_COLORS: Record<TimelineMarker['type'], string> = {
 interface SeekBarProps {
   progressPercent: number;
   onSeekPositionChange: (positionPercent: number) => void;
+  onMarkerSeek: (sessionTimeUs: number) => void;
   formatTooltip: (positionPercent: number) => string;
   disabled?: boolean;
   timeRuler?: TimeRuler;
@@ -28,6 +30,7 @@ interface SeekBarProps {
 const SeekBar = ({
   progressPercent,
   onSeekPositionChange,
+  onMarkerSeek,
   formatTooltip,
   disabled,
   timeRuler,
@@ -99,7 +102,7 @@ const SeekBar = ({
               key={marker.id}
               className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-2 h-2 rounded-full pointer-events-auto ${MARKER_COLORS[marker.type]}`}
               style={{ left: `${marker.positionPercent}%` }}
-              onClick={() => onSeekPositionChange(marker.positionPercent)}
+              onClick={() => onMarkerSeek(marker.sessionTimeUs)}
               aria-label={`Seek to ${marker.type}`}
             />
           ))}
