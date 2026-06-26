@@ -13,6 +13,15 @@ export default {
           coralD: "#E64545",
           wine: "#8E1E2D",
         },
+        history: {
+          DEFAULT: "var(--history-color)",
+          muted: "var(--history-color-muted)",
+          border: "var(--history-color-border)",
+          activeBg: "var(--history-active-bg)",
+          activeBorder: "var(--history-active-border)",
+          activeText: "var(--history-active-text)",
+        },
+
         monitor: {
           main: "#0E1420",
           app: "#0c1117",
