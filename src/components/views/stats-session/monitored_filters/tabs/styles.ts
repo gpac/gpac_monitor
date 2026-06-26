@@ -35,9 +35,9 @@ export const TAB_STYLES = {
   SPACE_Y_2: 'space-y-2',
 
   // Badges
-  BADGE_TINY: 'text-[10px] px-1.5 py-0 h-5 tabular-nums',
+  BADGE_TINY: 'text-[0.714rem] px-1.5 py-0 h-5 tabular-nums',
   TABLE_HEADER:
-    'px-2 py-1.5 text-[10px] font-medium text-muted-foreground uppercase tracking-wide',
+    'px-2 py-1.5 text-[0.714rem] font-medium text-muted-foreground uppercase tracking-wide',
 
   // Status badges
   FILTER_STATUS_WIDGET: 'bg-background/30 rounded-lg px-3 py-2',

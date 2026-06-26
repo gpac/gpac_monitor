@@ -85,7 +85,7 @@ const PIDGraphSection = memo(
                       key={metric}
                       value={metric}
                       aria-pressed={mode === metric}
-                      className="h-auto px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                      className="h-auto px-1.5 py-0.5 text-[0.714rem] font-medium uppercase tracking-wide"
                     >
                       {label}
                     </ToggleGroupItem>
@@ -117,7 +117,7 @@ const PIDGraphSection = memo(
                     key={index}
                     value={String(index)}
                     onClick={() => dispatch(toggleSelectedPid(item.target))}
-                    className="flex items-center gap-1 h-auto px-1.5 py-0.5 text-[10px] font-mono"
+                    className="flex items-center gap-1 h-auto px-1.5 py-0.5 text-[0.714rem] font-mono"
                     style={{
                       borderColor: `${item.color}60`,
                       background: `${item.color}15`,

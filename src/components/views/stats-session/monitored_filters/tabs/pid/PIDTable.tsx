@@ -54,7 +54,7 @@ const TableCore = ({
             <button
               onClick={() => onMetricClick?.(metric)}
               className={cn(
-                'text-[10px] font-medium uppercase tracking-wide transition-colors',
+                'text-[0.714rem] font-medium uppercase tracking-wide transition-colors',
                 activeMetric === metric
                   ? 'text-monitor-active-tab border-b border-monitor-active-tab pb-0.5'
                   : 'text-muted-foreground hover:text-foreground cursor-pointer',

@@ -120,7 +120,7 @@ const ConnectionSelector = memo(() => {
                   {activeConnection?.id === conn.id && (
                     <Badge
                       variant="success"
-                      className="text-[8px] px-1.5 py-0 h-4"
+                      className="text-[0.571rem] px-1.5 py-0 h-4"
                     >
                       ✓
                     </Badge>

@@ -145,7 +145,7 @@ export const ToolSettingsDropdown = memo(
                 </div>
                 <DropdownMenuSeparator />
                 <div
-                  className="flex items-center justify-between px-8 py-2 text-[11px] font-medium text-slate-400"
+                  className="flex items-center justify-between px-8 py-2 text-[0.786rem] font-medium text-slate-400"
                   style={{
                     background:
                       'linear-gradient(to right, transparent 49%, rgba(148,163,184,.6) 49%, rgba(148,163,184,.6) 51%, transparent 51%)',

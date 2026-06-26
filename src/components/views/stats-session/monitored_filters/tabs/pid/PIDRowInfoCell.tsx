@@ -70,7 +70,7 @@ const PIDRowInfoCell = memo(
         )}
         <Badge
           variant="outline"
-          className={`px-1.5 py-0 h-5 font-mono font-bold text-[10px] flex-shrink-0 ${isSelected ? '' : badgeConfig.className}`}
+          className={`px-1.5 py-0 h-5 font-mono font-bold text-[0.714rem] flex-shrink-0 ${isSelected ? '' : badgeConfig.className}`}
           style={
             isSelected
               ? {

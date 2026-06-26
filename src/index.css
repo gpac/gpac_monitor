@@ -59,6 +59,12 @@ html {
   font-optical-sizing: auto; /* active les axes optiques des variables */
 }
 
+@media (min-width: 2560px) {
+  html {
+    font-size: 18px;
+  }
+}
+
 .metrics,
 .table td,
 .gauge .value {

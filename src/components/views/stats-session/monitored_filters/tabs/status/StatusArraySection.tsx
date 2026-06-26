@@ -31,7 +31,7 @@ function StatusArraySection({ array, definitions }: StatusArraySectionProps) {
               <div className="w-5 shrink-0">
                 {item.type && <StreamTypeBadge label={item.type} />}
               </div>
-              <span className="text-[10px] font-mono text-muted-foreground truncate">
+              <span className="text-[0.714rem] font-mono text-muted-foreground truncate">
                 {item.name}
               </span>
             </div>
@@ -41,7 +41,7 @@ function StatusArraySection({ array, definitions }: StatusArraySectionProps) {
                 return (
                   <span
                     key={metric.key}
-                    className="text-[10px] font-mono whitespace-nowrap inline-flex items-center gap-0.5"
+                    className="text-[0.714rem] font-mono whitespace-nowrap inline-flex items-center gap-0.5"
                   >
                     {def && (
                       <MetricTooltip def={def}>
@@ -63,7 +63,7 @@ function StatusArraySection({ array, definitions }: StatusArraySectionProps) {
                 );
               })}
             </div>
-            <span className="text-[10px] font-mono tabular-nums text-info text-right">
+            <span className="text-[0.714rem] font-mono tabular-nums text-info text-right">
               {item.progress !== undefined ? formatPercent(item.progress) : ''}
             </span>
             <div>
