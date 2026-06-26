@@ -91,7 +91,7 @@ export const CpuMemoryChartUplot = memo(
     }, [dataPoints]);
 
     return (
-      <Card className="bg-stat border-transparent h-full flex flex-col">
+      <Card className="bg-monitor-panel border-transparent h-full flex flex-col">
         <CardHeader className="pb-2 flex-shrink-0">
           <CardTitle className="flex justify-center items-center gap-2 text-sm stat stat-label">
             <span className="flex items-center gap-1.5">

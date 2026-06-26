@@ -22,7 +22,7 @@ const CPU_DURATION_OPTIONS: ChartDuration[] = [
   'unlimited',
 ];
 
-const BASE_CONTAINER_CLASS = 'container mx-auto flex flex-col gap-2 p-2 h-full';
+const BASE_CONTAINER_CLASS = 'flex flex-col gap-2 p-2 h-full';
 const RESIZING_CLASS = 'contain-layout contain-style';
 
 interface MetricsMonitorProps {

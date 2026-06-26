@@ -14,7 +14,7 @@ export const CpuMemoryOverview = memo<CpuMemoryOverviewProps>(
     const memoryMB = useMemo(() => memoryBytes / (1024 * 1024), [memoryBytes]);
     return (
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-        <Card className="bg-stat border-0">
+        <Card className="bg-monitor-panel border-0">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
               CPU
@@ -29,7 +29,7 @@ export const CpuMemoryOverview = memo<CpuMemoryOverviewProps>(
           </CardContent>
         </Card>
 
-        <Card className="bg-stat border-0">
+        <Card className="bg-monitor-panel border-0">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
               Memory
@@ -45,7 +45,7 @@ export const CpuMemoryOverview = memo<CpuMemoryOverviewProps>(
           </CardContent>
         </Card>
 
-        <Card className="bg-stat border-0">
+        <Card className="bg-monitor-panel border-0">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2 text-sm stat stat-label">
               System
