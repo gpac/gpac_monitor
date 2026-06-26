@@ -7,6 +7,20 @@ export default {
         gray: {
           750: "#2D3748",
         },
+        gpac: {
+          navy: "#151B3A",
+          coral: "#FF5A5F",
+          coralD: "#E64545",
+          wine: "#8E1E2D",
+        },
+        history: {
+          DEFAULT: "var(--history-color)",
+          muted: "var(--history-color-muted)",
+          border: "var(--history-color-border)",
+          activeBg: "var(--history-active-bg)",
+          activeBorder: "var(--history-active-border)",
+          activeText: "var(--history-active-text)",
+        },
 
         monitor: {
           timeline: {

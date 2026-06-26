@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import { ReactFlowProvider } from '@xyflow/react';
 import App from './App';
+import 'overlayscrollbars/overlayscrollbars.css';
 import './index.css';
 import './styles/performance.css';
 import { StrictMode } from 'react';

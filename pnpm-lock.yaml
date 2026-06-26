@@ -86,6 +86,12 @@ importers:
       nanoid:
         specifier: ^5.1.5
         version: 5.1.5
+      overlayscrollbars:
+        specifier: ^2.16.0
+        version: 2.16.0
+      overlayscrollbars-react:
+        specifier: ^0.5.6
+        version: 0.5.6(overlayscrollbars@2.16.0)(react@18.3.1)
       randomcolor:
         specifier: ^0.6.2
         version: 0.6.2
@@ -3338,6 +3344,15 @@ packages:
 
   outvariant@1.4.3:
     resolution: {integrity: sha512-+Sl2UErvtsoajRDKCE5/dBz4DIvHXQQnAxtQTF04OJxY0+DyZXSo5P5Bb7XYWOh81syohlYL24hbDwxedPUJCA==}
+
+  overlayscrollbars-react@0.5.6:
+    resolution: {integrity: sha512-E5To04bL5brn9GVCZ36SnfGanxa2I2MDkWoa4Cjo5wol7l+diAgi4DBc983V7l2nOk/OLJ6Feg4kySspQEGDBw==}
+    peerDependencies:
+      overlayscrollbars: ^2.0.0
+      react: '>=16.8.0'
+
+  overlayscrollbars@2.16.0:
+    resolution: {integrity: sha512-N03oje/q7j93D0aLZtoCdsDSYLmhheSsv8H7oSLE7HhdV9P/bmCURtLV/KbPye7P/bpfyt/obSfDpGUYoJ0OWg==}
 
   own-keys@1.0.1:
     resolution: {integrity: sha512-qFOyK5PjiWZd+QQIh+1jhdb9LpxTF0qs7Pm8o5QHYZ0M3vKqSqzsZaEB6oWlxZ+q2sJBMI/Ktgd2N5ZwQoRHfg==}
@@ -7775,6 +7790,13 @@ snapshots:
       wcwidth: 1.0.1
 
   outvariant@1.4.3: {}
+
+  overlayscrollbars-react@0.5.6(overlayscrollbars@2.16.0)(react@18.3.1):
+    dependencies:
+      overlayscrollbars: 2.16.0
+      react: 18.3.1
+
+  overlayscrollbars@2.16.0: {}
 
   own-keys@1.0.1:
     dependencies:

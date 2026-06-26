@@ -1,4 +1,5 @@
 import React, { useCallback, useState, useMemo } from 'react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { useOptimizedResize } from '@/shared/hooks/ui/useOptimizedResize';
 import { widgetIcons } from './widgetIcons';
@@ -191,11 +192,13 @@ const WidgetWrapper = ({
       </div>
 
       {!isMinimized && (
-        <div
-          className={`flex-1 bg-monitor-surface overflow-auto no-drag gpu-optimized ${isResizing ? 'contain-layout contain-style' : ''}`}
+        <OverlayScrollbarsComponent
+          element="div"
+          options={{ scrollbars: { autoHide: 'leave', autoHideDelay: 400 } }}
+          className={`flex-1 bg-monitor-surface no-drag gpu-optimized ${isResizing ? 'contain-layout contain-style' : ''}`}
         >
           {children}
-        </div>
+        </OverlayScrollbarsComponent>
       )}
     </div>
   );
