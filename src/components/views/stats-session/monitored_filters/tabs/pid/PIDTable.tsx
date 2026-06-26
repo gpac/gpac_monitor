@@ -46,7 +46,7 @@ const TableCore = ({
   onMetricClick,
 }: TableCoreProps) => (
   <table className="w-full text-left table-fixed">
-    <thead className="sticky top-0 z-10">
+    <thead>
       <tr className="border-b border-white/10 bg-monitor-panel">
         <th className={TAB_STYLES.TABLE_HEADER}>Infos</th>
         {CLICKABLE_METRICS.map(({ metric, label }) => (
@@ -93,7 +93,7 @@ const PIDTable = memo(
   }: PIDTableProps) => {
     return (
       <TooltipProvider delayDuration={200}>
-        <div className="bg-monitor-app overflow-hidden">
+        <div className="bg-monitor-app">
           <TableCore
             pids={pids}
             filterIdx={filterIdx}
