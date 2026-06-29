@@ -17,7 +17,7 @@ export const formatMicroseconds = (
   return `${(value / 1_000_000).toFixed(2)}s`;
 };
 
-export const tsToSeconds = (
+export const tsFractionToSeconds = (
   ts: TsFraction | number | null | undefined,
 ): number | null => {
   if (ts == null) return null;
@@ -31,7 +31,7 @@ export const tsToSeconds = (
 export const formatLastTsSent = (
   ts: TsFraction | number | null | undefined,
 ): string => {
-  const seconds = tsToSeconds(ts);
+  const seconds = tsFractionToSeconds(ts);
   return seconds != null ? `${seconds.toFixed(2)}s` : '—';
 };
 

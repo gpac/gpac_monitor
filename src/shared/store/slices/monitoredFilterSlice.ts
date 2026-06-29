@@ -214,15 +214,7 @@ const monitoredFilterSlice = createSlice({
       const samples = state.pidSamples[key];
       const lastSample = samples[samples.length - 1];
 
-      if (
-        lastSample &&
-        lastSample.sessionTimeUs === sample.sessionTimeUs &&
-        lastSample.averageBitrate === sample.averageBitrate &&
-        lastSample.bufferTime === sample.bufferTime &&
-        lastSample.processTime === sample.processTime &&
-        lastSample.processRate === sample.processRate &&
-        lastSample.ts === sample.ts
-      ) {
+      if (lastSample && lastSample.sessionTimeUs === sample.sessionTimeUs) {
         return;
       }
 
@@ -241,16 +233,7 @@ const monitoredFilterSlice = createSlice({
         if (!state.pidSamples[key]) state.pidSamples[key] = [];
         const samples = state.pidSamples[key];
         const last = samples[samples.length - 1];
-        if (
-          last &&
-          last.sessionTimeUs === sample.sessionTimeUs &&
-          last.averageBitrate === sample.averageBitrate &&
-          last.bufferTime === sample.bufferTime &&
-          last.processTime === sample.processTime &&
-          last.processRate === sample.processRate &&
-          last.ts === sample.ts
-        )
-          continue;
+        if (last && last.sessionTimeUs === sample.sessionTimeUs) continue;
         samples.push(sample);
         if (samples.length > state.maxPidSamples) samples.shift();
       }

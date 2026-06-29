@@ -21,7 +21,7 @@ export interface StatusBadgeProps {
 }
 
 const BASE_CLASS =
-  'h-5 px-1.5 text-[10px] uppercase tracking-wide border rounded-sm font-semibold transition-opacity duration-300';
+  'h-5 px-1.5 text-[0.714rem] uppercase tracking-wide border rounded-sm font-semibold transition-opacity duration-300';
 
 export const StatusBadge = memo(
   ({

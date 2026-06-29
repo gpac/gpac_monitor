@@ -75,7 +75,7 @@ const ArgumentItem = memo(
                 <TooltipContent
                   side="left"
                   sideOffset={8}
-                  className="max-w-xs z-[100] rounded bg-gray-900 px-2 py-1 text-[10px] text-gray-200 border border-gray-700"
+                  className="max-w-xs z-[100] rounded bg-gray-900 px-2 py-1 text-[0.714rem] text-gray-200 border border-gray-700"
                 >
                   <p>{arg.desc}</p>
                   <TooltipArrow className="fill-gray-900" />
@@ -87,7 +87,10 @@ const ArgumentItem = memo(
           {/* Status indicators */}
           <div className="flex gap-1 shrink-0 items-center">
             {isSuccess && (
-              <Badge variant="success" className="text-[8px] px-1.5 py-0 h-4">
+              <Badge
+                variant="success"
+                className="text-[0.571rem] px-1.5 py-0 h-4"
+              >
                 ✓
               </Badge>
             )}

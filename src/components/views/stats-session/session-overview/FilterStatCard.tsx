@@ -34,8 +34,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
         : null,
     );
 
-
-
     const handleClick = useCallback(() => {
       if (onClick && filter.idx !== undefined) {
         onClick(filter.idx);
@@ -186,7 +184,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
 
         {/* Line 3: PIDs */}
         <div
-          className="flex items-center justify-end gap-1 text-[8px] font-mono tabular-nums text-monitor-text-muted"
+          className="flex items-center justify-end gap-1 text-[0.571rem] font-mono tabular-nums text-monitor-text-muted"
           title="Input PIDs / Output PIDs"
         >
           <span className="uppercase tracking-wider">PIDs</span>
@@ -197,7 +195,6 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       </div>
     );
   },
- 
 );
 
 FilterStatCard.displayName = 'FilterStatCard';

@@ -8,6 +8,7 @@ import {
 } from '@/utils/formatting';
 import { getPIDStatusBadge } from '@/utils/gpac';
 import { buildPIDKey } from '../../../types/pid';
+import type { PIDMetricMode } from '../../../types/pid';
 import type { PIDWithIndex } from '../../../types';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { usePIDMetricsRow } from '../hooks/usePIDMetricsRow';
@@ -24,6 +25,8 @@ interface PIDTableRowProps {
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
   variant?: PIDTableRowVariant;
   hoveredPidKey?: string | null;
+  activeMetric?: PIDMetricMode;
+  onMetricClick?: (metric: PIDMetricMode) => void;
 }
 
 const PIDTableRow = memo(
@@ -33,6 +36,8 @@ const PIDTableRow = memo(
     onOpenProps,
     variant = 'input',
     hoveredPidKey = null,
+    activeMetric,
+    onMetricClick,
   }: PIDTableRowProps) => {
     const handleOpenProps = useCallback(
       () => onOpenProps(filterIdx, pid.pidIdx),
@@ -76,7 +81,11 @@ const PIDTableRow = memo(
         <td className="px-2 py-2 align-middle text-xs tabular-nums whitespace-nowrap">
           <PIDMetricTooltip
             rows={[
-              ...buildBufferTooltipRows(bufferStats),
+              ...buildBufferTooltipRows(
+                bufferStats,
+                onMetricClick,
+                activeMetric,
+              ),
               {
                 label: 'playout min',
                 value:
@@ -115,10 +124,17 @@ const PIDTableRow = memo(
               {
                 label: 'average_bitrate',
                 value: formatBps(perfStats.average_bitrate),
-                active: true,
+                active: activeMetric === 'bitrate',
+                onChart: () => onMetricClick?.('bitrate'),
               },
-              { label: 'bitrate', value: formatBps(perfStats.bitrate) },
-              { label: 'max_bitrate', value: formatBps(perfStats.max_bitrate) },
+              {
+                label: 'bitrate',
+                value: formatBps(perfStats.bitrate),
+              },
+              {
+                label: 'max_bitrate',
+                value: formatBps(perfStats.max_bitrate),
+              },
             ]}
           >
             <span className="text-info cursor-default">
@@ -136,7 +152,8 @@ const PIDTableRow = memo(
                   perfStats.average_process_time != null
                     ? formatMicroseconds(perfStats.average_process_time)
                     : null,
-                active: true,
+                active: activeMetric === 'processTime',
+                onChart: () => onMetricClick?.('processTime'),
               },
               {
                 label: 'max_process_time',
@@ -172,7 +189,8 @@ const PIDTableRow = memo(
               {
                 label: 'avg process rate',
                 value: formatBps(perfStats.average_process_rate),
-                active: true,
+                active: activeMetric === 'processRate',
+                onChart: () => onMetricClick?.('processRate'),
               },
               {
                 label: 'max process rate',
@@ -196,11 +214,17 @@ const PIDTableRow = memo(
                     perfStats.last_process_time != null
                       ? formatMicroseconds(perfStats.last_process_time)
                       : null,
-                  active: true,
+                  active: activeMetric === 'ts',
+                  onChart: () => onMetricClick?.('ts'),
                 },
                 {
                   label: 'last_ts_sent',
                   value: formatLastTsSent(perfStats.last_ts_sent),
+                  active: activeMetric === 'lastTsSent',
+                  onChart:
+                    perfStats.last_ts_sent != null
+                      ? () => onMetricClick?.('lastTsSent')
+                      : undefined,
                 },
                 {
                   label: 'first_process_time',

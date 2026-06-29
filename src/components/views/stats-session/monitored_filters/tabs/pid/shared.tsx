@@ -35,7 +35,7 @@ export const PIDStatusBar = ({
         {(blocked ?? 0) > 0 && (
           <Badge
             variant="destructive"
-            className="text-[10px] px-1.5 py-0 h-5 tabular-nums bg-amber-900/40 text-amber-300 border-amber-700/60"
+            className="text-[0.714rem] px-1.5 py-0 h-5 tabular-nums bg-amber-900/40 text-amber-300 border-amber-700/60"
             title="Output PIDs blocked - backpressure active"
           >
             {blocked} Blocked

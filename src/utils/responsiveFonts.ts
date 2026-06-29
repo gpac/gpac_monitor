@@ -13,13 +13,14 @@ export const metricValueFont = 'text-xs md:text-sm lg:text-sm';
  * Metric label font size (stat names)
  * Mobile: text-[10px] → Tablet: md:text-xs (12px) → Desktop: lg:text-xs (12px)
  */
-export const metricLabelFont = 'text-[10px] md:text-xs lg:text-xs';
+export const metricLabelFont = 'text-[0.714rem] md:text-xs lg:text-xs';
 
 /**
  * Technical details/small text font size
  * Mobile: text-[9px] → Tablet: md:text-[10px] → Desktop: lg:text-[11px] (11px)
  */
-export const technicalDetailsFont = 'text-[9px] md:text-[10px] lg:text-[11px]';
+export const technicalDetailsFont =
+  'text-[0.643rem] md:text-[0.714rem] lg:text-[0.786rem]';
 
 /**
  * Header/name font size (PID names)
@@ -31,10 +32,10 @@ export const headerFont = 'text-sm md:text-base lg:text-base';
  * Codec/format identifier font size
  * Mobile: text-[10px] → Tablet: md:text-xs (12px) → Desktop: lg:text-xs (12px)
  */
-export const formatIdentifierFont = 'text-[10px] md:text-xs lg:text-xs';
+export const formatIdentifierFont = 'text-[0.714rem] md:text-xs lg:text-xs';
 
 /**
  * Small badge text font size
  * Mobile: text-[10px] → Tablet: md:text-xs (12px) → Desktop: lg:text-xs (12px)
  */
-export const badgeFont = 'text-[10px] md:text-xs lg:text-xs';
+export const badgeFont = 'text-[0.714rem] md:text-xs lg:text-xs';

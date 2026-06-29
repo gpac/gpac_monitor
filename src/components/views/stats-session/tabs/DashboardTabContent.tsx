@@ -73,7 +73,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
       <CardContent className="p-4 h-full flex flex-col justify-between">
         {/* Top row: title + icon */}
         <div className="flex items-center justify-between mb-1">
-          <CardTitle className="text-[11px] font-medium text-monitor-text-muted/60 uppercase tracking-wider">
+          <CardTitle className="text-[0.786rem] font-medium text-monitor-text-muted/60 uppercase tracking-wider">
             {title}
           </CardTitle>
           <div className="flex items-center gap-2 opacity-30">
@@ -94,7 +94,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
 
         {/* Bottom row: description or badge */}
         {description && (
-          <p className="text-[11px] text-monitor-text-muted/50 leading-tight">
+          <p className="text-[0.786rem] text-monitor-text-muted/50 leading-tight">
             {description}
           </p>
         )}

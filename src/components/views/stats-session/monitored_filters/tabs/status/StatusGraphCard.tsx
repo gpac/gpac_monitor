@@ -40,7 +40,7 @@ const StatusGraphCard = memo(
       <Card className="bg-monitor-panel border-t-monitor-line border-transparent">
         <CardHeader className="pb-1 px-3 pt-2">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+            <p className="text-[0.786rem] font-semibold uppercase tracking-wide text-muted-foreground">
               Status
               <span className="mx-1 opacity-50">·</span>
               <span className="normal-case font-normal">{filterName}</span>
