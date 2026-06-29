@@ -8,17 +8,12 @@ import {
   usePIDChartData,
   type PIDSeriesEntry,
 } from '../../charts/hooks/usePIDChartData';
-import { MODE_FORMATTERS } from '../../charts/config/pidHistoryChartConfig';
+import {
+  MODE_FORMATTERS,
+  PID_METRICS_BY_KEY,
+} from '../../charts/config/pidHistoryChartConfig';
 import { formatCompactTime } from '@/utils/formatting';
 import LineHistoryChart from '../../charts/LineHistoryChart';
-
-const MODE_LABELS: Record<PIDMetricMode, string> = {
-  bitrate: 'Avg Bitrate',
-  bufferTime: 'Buffer',
-  processTime: 'Proc.',
-  processRate: 'Proc. Rate',
-  ts: 'Last Proc.',
-};
 
 interface PIDGraphPanelProps {
   filterIdx: number;
@@ -44,7 +39,7 @@ const PIDGraphPanel = memo(
           return {
             pidHistory: sliced,
             label: `PID ${target.pidIndex}${typeStr}`,
-            metricLabel: MODE_LABELS[mode],
+            metricLabel: PID_METRICS_BY_KEY[mode].label,
             color: PID_SELECTION_COLORS[index],
           };
         }),

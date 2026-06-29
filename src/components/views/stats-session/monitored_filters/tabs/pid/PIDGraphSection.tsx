@@ -8,17 +8,12 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useIsDetached } from '../../FilterViewContext';
 import type { PIDMetricMode } from '../../../types/pid';
+import {
+  PID_METRICS,
+  PID_METRICS_BY_KEY,
+} from '../../charts/config/pidHistoryChartConfig';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
-import { CLICKABLE_METRICS } from './PIDTable';
 import PIDGraphPanel from './PIDGraphPanel';
-
-const METRIC_LABELS: Record<PIDMetricMode, string> = {
-  bitrate: 'Avg Bitrate',
-  bufferTime: 'Buffer',
-  processTime: 'Proc. Time',
-  processRate: 'Proc. Rate',
-  ts: 'Last Proc.',
-};
 
 interface PIDGraphSectionProps {
   filterIdx: number;
@@ -63,7 +58,7 @@ const PIDGraphSection = memo(
         <CardHeader className="pb-1 px-3 pt-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-foreground">
-              {METRIC_LABELS[mode]}
+              {PID_METRICS_BY_KEY[mode].label}
             </p>
             <div className="flex items-center gap-1">
               {!isDetached && (
@@ -80,7 +75,7 @@ const PIDGraphSection = memo(
                   onValueChange={(v) => v && onModeChange(v as PIDMetricMode)}
                   className="flex gap-0.5 p-0 bg-transparent border-0"
                 >
-                  {CLICKABLE_METRICS.map(({ metric, label }) => (
+                  {PID_METRICS.map(({ key: metric, label }) => (
                     <ToggleGroupItem
                       key={metric}
                       value={metric}

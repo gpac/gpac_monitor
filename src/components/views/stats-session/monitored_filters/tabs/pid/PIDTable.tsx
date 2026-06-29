@@ -3,18 +3,11 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/utils/core';
 import type { PIDWithIndex } from '../../../types';
 import type { PIDMetricMode } from '../../../types/pid';
+import { PID_METRICS } from '../../charts/config/pidHistoryChartConfig';
 import PIDTableRow from './PIDTableRow';
 import { TAB_STYLES } from '../styles';
 
 type PIDTableVariant = 'input' | 'output';
-
-export const CLICKABLE_METRICS: { metric: PIDMetricMode; label: string }[] = [
-  { metric: 'bufferTime', label: 'Buffer' },
-  { metric: 'bitrate', label: 'Avg Bitrate' },
-  { metric: 'processTime', label: 'Proc.' },
-  { metric: 'processRate', label: 'Proc. Rate' },
-  { metric: 'ts', label: 'Last Proc.' },
-];
 
 interface PIDTableProps {
   pids: PIDWithIndex[];
@@ -49,7 +42,7 @@ const TableCore = ({
     <thead>
       <tr className="border-b border-white/10 bg-monitor-panel">
         <th className={TAB_STYLES.TABLE_HEADER}>Infos</th>
-        {CLICKABLE_METRICS.map(({ metric, label }) => (
+        {PID_METRICS.map(({ key: metric, label }) => (
           <th key={metric} className="px-2 py-1.5">
             <button
               onClick={() => onMetricClick?.(metric)}
