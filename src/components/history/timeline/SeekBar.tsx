@@ -59,7 +59,7 @@ const SeekBar = ({
     <div className="relative flex-1 bg-white/[0.04] rounded-sm">
       {tooltipPercent !== null && (
         <div
-          className="absolute -top-5 -translate-x-1/2 text-gray-200 text-[10px] py-3 rounded pointer-events-none whitespace-nowrap z-10"
+          className="absolute -top-5 -translate-x-1/2 text-gray-200 text-[0.714rem] py-3 rounded pointer-events-none whitespace-nowrap z-10"
           style={{ left: `${tooltipPercent}%` }}
         >
           {formatTooltip(tooltipPercent)}
@@ -133,7 +133,7 @@ const SeekBar = ({
           {timeRuler.major.map((tick, index) => (
             <span
               key={tick.positionPercent}
-              className={`absolute text-[9px] tabular-nums text-gray-300 pointer-events-none select-none ${index === 0 ? '' : '-translate-x-1/2'}`}
+              className={`absolute text-[0.643rem] tabular-nums text-gray-300 pointer-events-none select-none ${index === 0 ? '' : '-translate-x-1/2'}`}
               style={{ left: `${tick.positionPercent}%` }}
             >
               {tick.label}
