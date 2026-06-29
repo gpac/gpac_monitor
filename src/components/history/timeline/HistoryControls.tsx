@@ -68,7 +68,7 @@ const HistoryControls = () => {
         }
       >
         <div
-          className="z-20 flex items-center px-4 border-t border-history-border bg-monitor-timelineSurface"
+          className="z-50 flex items-center px-4 border-t border-history-border bg-monitor-timelineSurface"
           style={{
             height: dockHeight,
             position: 'absolute',

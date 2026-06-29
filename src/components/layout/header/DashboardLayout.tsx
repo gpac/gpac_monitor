@@ -88,15 +88,16 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div className="grid grid-rows-[auto_auto_1fr_auto] h-screen bg-main overflow-x-hidden">
+    <div className="grid grid-rows-[auto_1fr_auto] h-screen bg-main overflow-x-hidden">
       <Header />
       <SessionPicker />
       <div className="flex relative min-h-0 overflow-hidden">
         <div
           id="app-sidebar"
-          className="fixed top-14 bottom-0 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
+          className="fixed top-14 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+            bottom: isHistory ? TIMELINE_DOCK_HEIGHT_PX : 0,
           }}
         >
           <Sidebar />

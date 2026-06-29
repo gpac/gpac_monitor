@@ -18,11 +18,11 @@ describe('DashboardLayout app-shell — scroll ownership regression', () => {
   });
 
   it('uses a CSS grid shell, not the old fixed-header height hack', () => {
-    expect(source).toContain('grid-rows-[auto_auto_1fr_auto]');
+    expect(source).toContain('grid-rows-[auto_1fr_auto]');
     expect(source).not.toContain('h-[calc(100vh-4rem)]');
   });
 
-  it('keeps SessionPicker as a dedicated band between header and content', () => {
+  it('keeps SessionPicker rendered (fixed overlay, not a grid row)', () => {
     expect(source).toContain('<SessionPicker />');
   });
 });
