@@ -3,7 +3,10 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/utils/core';
 import type { PIDWithIndex } from '../../../types';
 import type { PIDMetricMode } from '../../../types/pid';
-import { PID_METRICS } from '../../charts/config/pidHistoryChartConfig';
+import {
+  PID_METRIC_GROUPS,
+  PID_METRICS_BY_KEY,
+} from '../../charts/config/pidHistoryChartConfig';
 import PIDTableRow from './PIDTableRow';
 import { TAB_STYLES } from '../styles';
 
@@ -42,21 +45,31 @@ const TableCore = ({
     <thead>
       <tr className="border-b border-white/10 bg-monitor-panel">
         <th className={TAB_STYLES.TABLE_HEADER}>Infos</th>
-        {PID_METRICS.map(({ key: metric, label }) => (
-          <th key={metric} className="px-2 py-1.5">
-            <button
-              onClick={() => onMetricClick?.(metric)}
-              className={cn(
-                'text-[0.714rem] font-medium uppercase tracking-wide transition-colors',
-                activeMetric === metric
-                  ? 'text-monitor-active-tab border-b border-monitor-active-tab pb-0.5'
-                  : 'text-muted-foreground hover:text-foreground cursor-pointer',
-              )}
-            >
-              {label}
-            </button>
-          </th>
-        ))}
+        {PID_METRIC_GROUPS.map(({ key: metric, label }) => {
+          const isGroupActive =
+            activeMetric === metric ||
+            PID_METRICS_BY_KEY[activeMetric as PIDMetricMode]?.group === metric;
+          const displayLabel =
+            isGroupActive && activeMetric !== metric
+              ? (PID_METRICS_BY_KEY[activeMetric as PIDMetricMode]?.label ??
+                label)
+              : label;
+          return (
+            <th key={metric} className="px-2 py-1.5">
+              <button
+                onClick={() => onMetricClick?.(metric)}
+                className={cn(
+                  'text-[0.714rem] font-medium uppercase tracking-wide transition-colors',
+                  isGroupActive
+                    ? 'text-monitor-active-tab border-b border-monitor-active-tab pb-0.5'
+                    : 'text-muted-foreground hover:text-foreground cursor-pointer',
+                )}
+              >
+                {displayLabel}
+              </button>
+            </th>
+          );
+        })}
       </tr>
     </thead>
     <tbody>
@@ -68,6 +81,8 @@ const TableCore = ({
           onOpenProps={onOpenProps}
           variant={variant}
           hoveredPidKey={hoveredPidKey}
+          activeMetric={activeMetric}
+          onMetricClick={onMetricClick}
         />
       ))}
     </tbody>

@@ -9,7 +9,7 @@ import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useIsDetached } from '../../FilterViewContext';
 import type { PIDMetricMode } from '../../../types/pid';
 import {
-  PID_METRICS,
+  PID_METRIC_GROUPS,
   PID_METRICS_BY_KEY,
 } from '../../charts/config/pidHistoryChartConfig';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
@@ -75,11 +75,14 @@ const PIDGraphSection = memo(
                   onValueChange={(v) => v && onModeChange(v as PIDMetricMode)}
                   className="flex gap-0.5 p-0 bg-transparent border-0"
                 >
-                  {PID_METRICS.map(({ key: metric, label }) => (
+                  {PID_METRIC_GROUPS.map(({ key: metric, label }) => (
                     <ToggleGroupItem
                       key={metric}
                       value={metric}
-                      aria-pressed={mode === metric}
+                      aria-pressed={
+                        mode === metric ||
+                        PID_METRICS_BY_KEY[mode].group === metric
+                      }
                       className="h-auto px-1.5 py-0.5 text-[0.714rem] font-medium uppercase tracking-wide"
                     >
                       {label}

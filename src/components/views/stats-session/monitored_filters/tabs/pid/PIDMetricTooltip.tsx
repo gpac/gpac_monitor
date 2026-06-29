@@ -10,9 +10,10 @@ export type TooltipRowData = {
   label: string;
   value: string | null;
   active?: boolean;
+  onChart?: () => void;
 };
 
-const TooltipRow = ({ label, value, active }: TooltipRowData) => (
+const TooltipRow = ({ label, value, active, onChart }: TooltipRowData) => (
   <div className="flex justify-between gap-4 text-xs">
     <span
       className={
@@ -23,11 +24,22 @@ const TooltipRow = ({ label, value, active }: TooltipRowData) => (
     >
       {label}
     </span>
-    <span
-      className={`tabular-nums font-mono ${active ? 'text-monitor-active-filter font-medium' : 'text-info'}`}
-    >
-      {value ?? '—'}
-    </span>
+    <div className="flex items-center gap-1">
+      <span
+        className={`tabular-nums font-mono ${active ? 'text-monitor-active-filter font-medium' : 'text-info'}`}
+      >
+        {value ?? '—'}
+      </span>
+      {onChart && (
+        <button
+          onClick={onChart}
+          className="text-muted-foreground hover:text-monitor-active-filter opacity-60 hover:opacity-100 transition-opacity leading-none"
+          title="Chart this metric"
+        >
+          +
+        </button>
+      )}
+    </div>
   </div>
 );
 
