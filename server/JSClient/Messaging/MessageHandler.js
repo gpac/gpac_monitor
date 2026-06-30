@@ -60,8 +60,12 @@ function MessageHandler(client) {
                     
                     
 
-                    'get_png': () => {
-                        this.client.filterManager.addPngProbe(jtext['idx'], jtext['name']);
+                    'start_pid_preview': () => {
+                        this.client.previewManager.startPreview(jtext['idx'], jtext['name']);
+                    },
+
+                    'stop_pid_preview': () => {
+                        this.client.previewManager.stopPreview(jtext['idx']);
                     },
 
                     'subscribe_cpu_stats': () => {

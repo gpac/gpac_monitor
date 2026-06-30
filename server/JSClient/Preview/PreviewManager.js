@@ -43,7 +43,7 @@ function PreviewManager(client) {
     // Inserts a probe on the filter to capture one PNG frame.
     this.startPreview = function (filterIdx, filterName) {
         const filter = session.get_filter(String(filterIdx));
-        if (!filter || filter.name !== filterName) {
+        if (!filter || filter.type !== filterName) {
             this.send({ message: 'preview_error', filterIdx, error: 'filter not found' });
             return;
         }
