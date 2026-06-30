@@ -205,7 +205,7 @@ export const detachFilterReducer = (
 
   // Position in grid at bottom, with smart layout
   const cols = 24;
-  const widgetWidth = 6;
+  const widgetWidth = 8; // 1/3 of 24 cols
   const widgetHeight = 6;
   const maxWidgetsPerRow = Math.floor(cols / widgetWidth);
 

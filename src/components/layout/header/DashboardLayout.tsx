@@ -49,7 +49,7 @@ const DashboardLayout = () => {
         y: widget.y,
         w: widget.w,
         h: widget.h,
-        minW: 2,
+        minW: widget.isDetached ? 8 : 2,
         minH: 2,
       })),
     }),
