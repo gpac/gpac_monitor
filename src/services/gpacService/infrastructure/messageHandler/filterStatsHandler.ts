@@ -48,7 +48,6 @@ export class FilterStatsHandler {
     // Create and store the promise
     const promise = (async () => {
       try {
-        // Don't send interval - let server use its config
         await this.dependencies.send({
           type: WSMessageType.SUBSCRIBE_FILTER_STATS,
           id: generateID(),
