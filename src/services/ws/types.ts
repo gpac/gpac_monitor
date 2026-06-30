@@ -30,6 +30,8 @@ export enum WSMessageType {
   GET_LOG_STATUS = 'get_log_status',
   GET_PNG = 'get_png',
   GET_COMMAND_LINE = 'get_command_line',
+  START_PID_PREVIEW = 'start_pid_preview',
+  STOP_PID_PREVIEW = 'stop_pid_preview',
 }
 
 // Types of messages we receive from the server
@@ -47,6 +49,9 @@ enum WSResponseType {
   LOG_CONFIG_CHANGED = 'log_config_changed',
   COMMAND_LINE_RESPONSE = 'command_line_response',
   SESSION_END = 'session_end',
+  PREVIEW_FRAME = 'preview_frame',
+  PREVIEW_ERROR = 'preview_error',
+  PREVIEW_STOPPED = 'preview_stopped',
 }
 
 export interface SessionStatsMessage {
@@ -81,4 +86,21 @@ export interface LogStatusResponse extends BaseWSResponse {
 export interface LogConfigChangedResponse extends BaseWSResponse {
   message: 'log_config_changed';
   logLevel: GpacLogConfig;
+}
+
+export interface PreviewFrameMessage {
+  message: 'preview_frame';
+  filterIdx: number;
+  dataBase64: string;
+}
+
+export interface PreviewErrorMessage {
+  message: 'preview_error';
+  filterIdx: number;
+  error: string;
+}
+
+export interface PreviewStoppedMessage {
+  message: 'preview_stopped';
+  filterIdx: number;
 }
