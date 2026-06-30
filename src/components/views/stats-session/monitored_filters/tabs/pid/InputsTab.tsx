@@ -7,7 +7,7 @@ import { TAB_STYLES } from '../styles';
 import PIDInlineLayout from './PIDInlineLayout';
 
 const InputsTab = memo(
-  ({ filterData, filterName, isLoading = false }: InputsTabProps) => {
+  ({ filterData, filterName, filterType, isLoading = false }: InputsTabProps) => {
     const { openPIDProps } = useSidebar();
 
     const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
@@ -41,6 +41,7 @@ const InputsTab = memo(
           <PIDInlineLayout
             pids={inputPidsWithIndices}
             filterIdx={filterData.idx}
+            filterType={filterType}
             onOpenProps={handleOpenProps}
             hoveredPidKey={null}
           />

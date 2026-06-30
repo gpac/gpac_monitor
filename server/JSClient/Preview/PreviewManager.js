@@ -22,10 +22,15 @@ function PreviewManager(client) {
     // Builds the FileIO instance with named callbacks for a given filterIdx.
     this.createPreviewFileIO = function (filterIdx) {
         const chunks = [];
+        let closed = false;
         const previewManager = this;
 
         function openPreviewFile() { return true; }
-        function closePreviewFile() { previewManager.onCaptureClose(filterIdx, chunks); }
+        function closePreviewFile() {
+            if (closed) return;
+            closed = true;
+            previewManager.onCaptureClose(filterIdx, chunks);
+        }
         function writePreviewChunk(buffer) { chunks.push(new Uint8Array(buffer)); return buffer.byteLength; }
         function readDisabled() { return 0; }
         function seekDisabled() { return 0; }
@@ -54,16 +59,23 @@ function PreviewManager(client) {
         this.removePreview(filterIdx);
 
         const fileIO = this.createPreviewFileIO(filterIdx);
-        const probe = filter.insert(`dst=${fileIO.url}:osize=128x128:ITAG=NODISPLAY`);
+        const probe = filter.insert(`dst=${fileIO.url}:osize=128x128:pfmt=rgb:ITAG=NODISPLAY`);
         this.activePreviews.set(filterIdx, { probe, fileIO });
     };
 
-    // Called when the FileIO closes — assembles chunks, sends Base64 frame, defers probe removal.
+    // Called when the FileIO closes — assembles chunks, sends Base64 frame, marks entry for removal.
     this.onCaptureClose = function (filterIdx, chunks) {
         const dataBase64 = base64ArrayBuffer(concatUint8Arrays(chunks));
         this.send({ message: 'preview_frame', filterIdx, dataBase64 });
-        const previewManager = this;
-        session.post_task(function () { previewManager.removePreview(filterIdx); return false; });
+        const entry = this.activePreviews.get(filterIdx);
+        if (entry) entry.done = true;
+    };
+
+    // Called by SessionManager.tick — removes probes that have completed capture.
+    this.tick = function () {
+        for (const [filterIdx, entry] of this.activePreviews) {
+            if (entry.done) this.removePreview(filterIdx);
+        }
     };
 
     // Removes the probe and FileIO for a given filterIdx.

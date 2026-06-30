@@ -15,6 +15,7 @@ type PIDTableVariant = 'input' | 'output';
 interface PIDTableProps {
   pids: PIDWithIndex[];
   filterIdx: number;
+  filterType: string;
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
   variant?: PIDTableVariant;
   hoveredPidKey?: string | null;
@@ -25,6 +26,7 @@ interface PIDTableProps {
 interface TableCoreProps {
   pids: PIDWithIndex[];
   filterIdx: number;
+  filterType: string;
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
   variant: PIDTableVariant;
   hoveredPidKey: string | null;
@@ -35,6 +37,7 @@ interface TableCoreProps {
 const TableCore = ({
   pids,
   filterIdx,
+  filterType,
   onOpenProps,
   variant,
   hoveredPidKey,
@@ -78,6 +81,7 @@ const TableCore = ({
           key={`${pid.name}-${pid.pidIdx}`}
           pid={pid}
           filterIdx={filterIdx}
+          filterType={filterType}
           onOpenProps={onOpenProps}
           variant={variant}
           hoveredPidKey={hoveredPidKey}
@@ -93,6 +97,7 @@ const PIDTable = memo(
   ({
     pids,
     filterIdx,
+    filterType,
     onOpenProps,
     variant = 'input',
     hoveredPidKey = null,
@@ -105,6 +110,7 @@ const PIDTable = memo(
           <TableCore
             pids={pids}
             filterIdx={filterIdx}
+            filterType={filterType}
             onOpenProps={onOpenProps}
             variant={variant}
             hoveredPidKey={hoveredPidKey}

@@ -1,5 +1,8 @@
 import { memo, useCallback } from 'react';
-import { LuEye } from 'react-icons/lu';
+import { LuEye, LuCamera } from 'react-icons/lu';
+import { GpacStreamType } from '@/types/domain/gpac/stream-types';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import PIDPreviewPanel from './PIDPreviewPanel';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -16,6 +19,7 @@ import type { PIDWithIndex } from '../../../types';
 interface PIDRowInfoCellProps {
   pid: PIDWithIndex;
   filterIdx: number;
+  filterType: string;
   variant: 'input' | 'output';
   pidKey: string;
   infoLine: string;
@@ -26,6 +30,7 @@ const PIDRowInfoCell = memo(
   ({
     pid,
     filterIdx,
+    filterType,
     variant,
     pidKey,
     infoLine,
@@ -67,6 +72,21 @@ const PIDRowInfoCell = memo(
           >
             <LuEye className="h-4 w-5" />
           </button>
+        )}
+        {pid.type === GpacStreamType.Visual && (
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className="rounded bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-700/80 flex-shrink-0"
+                title="Preview frame"
+              >
+                <LuCamera className="h-4 w-5" />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2">
+              <PIDPreviewPanel filterIdx={filterIdx} filterType={filterType} />
+            </PopoverContent>
+          </Popover>
         )}
         <Badge
           variant="outline"

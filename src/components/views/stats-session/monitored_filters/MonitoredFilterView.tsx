@@ -184,6 +184,7 @@ const MonitoredFilterView = memo(
               <MemoizedInputsTab
                 filterData={filterData}
                 filterName={overviewData.name}
+                filterType={overviewData.type}
                 isLoading={isLoading}
               />
             </TabsContent>
@@ -191,6 +192,7 @@ const MonitoredFilterView = memo(
               <MemoizedOutputsTab
                 filterData={filterData}
                 filterName={overviewData.name}
+                filterType={overviewData.type}
                 isLoading={isLoading}
               />
             </TabsContent>

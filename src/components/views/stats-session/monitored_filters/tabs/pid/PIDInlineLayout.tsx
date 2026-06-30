@@ -9,6 +9,7 @@ import PIDGraphSection from './PIDGraphSection';
 interface PIDInlineLayoutProps {
   pids: PIDWithIndex[];
   filterIdx: number;
+  filterType: string;
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
   hoveredPidKey: string | null;
   variant?: 'input' | 'output';
@@ -18,6 +19,7 @@ const PIDInlineLayout = memo(
   ({
     pids,
     filterIdx,
+    filterType,
     onOpenProps,
     hoveredPidKey,
     variant = 'input',
@@ -37,6 +39,7 @@ const PIDInlineLayout = memo(
         <PIDTable
           pids={pids}
           filterIdx={filterIdx}
+          filterType={filterType}
           onOpenProps={onOpenProps}
           variant={variant}
           hoveredPidKey={hoveredPidKey}

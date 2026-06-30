@@ -8,11 +8,12 @@ import PIDInlineLayout from './PIDInlineLayout';
 interface OutputsTabProps {
   filterData: FilterStatsResponse;
   filterName: string;
+  filterType: string;
   isLoading?: boolean;
 }
 
 const OutputsTab = memo(
-  ({ filterData, filterName, isLoading = false }: OutputsTabProps) => {
+  ({ filterData, filterName, filterType, isLoading = false }: OutputsTabProps) => {
     const { pidsWithIndices, globalStatus } = useOutputsTabData(filterData);
 
     return (
@@ -31,6 +32,7 @@ const OutputsTab = memo(
           <PIDInlineLayout
             pids={pidsWithIndices}
             filterIdx={filterData.idx}
+            filterType={filterType}
             onOpenProps={() => {}}
             hoveredPidKey={null}
             variant="output"

@@ -28,6 +28,7 @@ function SessionManager(client) {
         this.client.logManager.tick(now);
         this.client.filterManager.tick(now);
         this.client.sessionStatsManager.tick(now);
+        this.client.previewManager.tick();
     };
 
     this.handleSessionEnd = function(now) {
