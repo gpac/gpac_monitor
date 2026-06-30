@@ -14,6 +14,7 @@ import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
 import { PidPropsHandler } from './pidPropsHandler';
 import { CommandLineHandler } from './commandLineHandler';
+import { PreviewHandler } from './previewHandler';
 import {
   LogBatchResponse,
   LogHistoryResponse,
@@ -31,6 +32,7 @@ export class BaseMessageHandler {
   private logHandler: LogHandler;
   private pidPropsHandler: PidPropsHandler;
   private commandLineHandler: CommandLineHandler;
+  private previewHandler: PreviewHandler;
   private messageBatcher: WSMessageBatcher;
 
   constructor(
@@ -53,6 +55,7 @@ export class BaseMessageHandler {
     this.logHandler = new LogHandler(dependencies, () => true, callbacks);
     this.pidPropsHandler = new PidPropsHandler(dependencies);
     this.commandLineHandler = new CommandLineHandler(dependencies);
+    this.previewHandler = new PreviewHandler(dependencies);
 
     // Register log batch handler (only high-frequency message type)
     this.messageBatcher.registerLogHandler((logs) => {
@@ -81,6 +84,9 @@ export class BaseMessageHandler {
   }
   public getCommandLineHandler(): CommandLineHandler {
     return this.commandLineHandler;
+  }
+  public getPreviewHandler(): PreviewHandler {
+    return this.previewHandler;
   }
 
   public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
@@ -146,6 +152,15 @@ export class BaseMessageHandler {
         break;
       case 'command_line_response':
         this.commandLineHandler.handleCommandLineResponse(data);
+        break;
+      case 'preview_frame':
+        this.previewHandler.handlePreviewFrame(data);
+        break;
+      case 'preview_error':
+        this.previewHandler.handlePreviewError(data);
+        break;
+      case 'preview_stopped':
+        this.previewHandler.handlePreviewStopped();
         break;
       case 'filter_pid_reconfigured':
         this.callbacks.onPidReconfigured(data.indexes);
@@ -316,5 +331,6 @@ export class BaseMessageHandler {
     this.filterStatsHandler.cleanup();
     this.logHandler.cleanup();
     this.pidPropsHandler.cleanup();
+    this.previewHandler.cleanup();
   }
 }

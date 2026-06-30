@@ -223,6 +223,19 @@ export class GpacService implements IGpacCommunication {
   public async getCommandLine(): Promise<string | null> {
     return filterMethods.getCommandLine(this.state, () => this.isLoaded());
   }
+  public get preview() {
+    return this.state.messageHandler.getPreviewHandler();
+  }
+
+  public requestPidPreview(filterIdx: number, filterName: string): void {
+    this.state.messageHandler
+      .getPreviewHandler()
+      .requestPreview(filterIdx, filterName);
+  }
+
+  public stopPidPreview(filterIdx: number): void {
+    this.state.messageHandler.getPreviewHandler().stopPreview(filterIdx);
+  }
 
   // ============================================================================
   // LOGS
