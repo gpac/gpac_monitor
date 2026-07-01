@@ -33,7 +33,7 @@ import {
 import {
   parseMetricDefinitions,
   type MetricDefinitionMap,
-} from '@/workers/metricDefinitionParser';
+} from '@/utils/metrics/metricDefinitionParser';
 import {
   applyArgUpdate,
   hydrateFilterArgs,
@@ -52,7 +52,7 @@ import type {
   FilterArgsUpdateEvent,
   LogEvent,
 } from '../types';
-import { parseFilterStatus } from '@/workers/filterStatusParser';
+import { parseFilterStatus } from '@/utils/metrics/filterStatusParser';
 import type { GpacArgument } from '@/types/domain/gpac/gpac_args';
 import type { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import {

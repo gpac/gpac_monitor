@@ -8,7 +8,7 @@ import { FilterStatsHandler } from './filterStatsHandler';
 import { WSMessageBatcher } from '../../../utils/WSMessageBatcher';
 
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
-import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
+import { parseMetricDefinitions } from '@/utils/metrics/metricDefinitionParser';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';

@@ -6,7 +6,7 @@ import type {
   StatusStr,
   StatusBool,
   StatusArray,
-} from '@/workers/filterStatusParser';
+} from '@/utils/metrics/filterStatusParser';
 import { formatFps, formatFractionAsTimeWithRaw } from '@/utils/formatting';
 import { isGraphableStatusMetric } from '@/utils/metrics/statusMetricGraph';
 

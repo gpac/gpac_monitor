@@ -1,6 +1,6 @@
 import { LuInfo } from 'react-icons/lu';
 import MetricTooltip from './MetricTooltip';
-import type { MetricDef } from '@/workers/metricDefinitionParser';
+import type { MetricDef } from '@/utils/metrics/metricDefinitionParser';
 
 const MetricInfoIcon = ({ def }: { def?: MetricDef }) => {
   if (!def) return null;

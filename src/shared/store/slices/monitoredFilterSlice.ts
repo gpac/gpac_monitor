@@ -4,7 +4,7 @@ import type {
   PIDGraphTarget,
 } from '@/components/views/stats-session/types/pid';
 import type { StatusMetricSample } from '@/components/views/stats-session/types/statusMetric';
-import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
+import type { ParsedFilterStatus } from '@/utils/metrics/filterStatusParser';
 
 /**
  * Generic data point for charts (time-series data)

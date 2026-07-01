@@ -3,7 +3,7 @@ import { LuInfo } from 'react-icons/lu';
 import { formatPercent } from '@/utils/formatting';
 import { TAB_STYLES } from '../styles';
 import type { ArrayGroup } from '../../utils/statusViewModel';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 import { StreamTypeBadge } from './StatusStateBadges';
 import MetricTooltip from '../shared/MetricTooltip';
 

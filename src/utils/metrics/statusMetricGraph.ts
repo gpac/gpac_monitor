@@ -1,9 +1,9 @@
 import type {
   StatusNum,
   ParsedFilterStatus,
-} from '@/workers/filterStatusParser';
-import { parseFilterStatus } from '@/workers/filterStatusParser';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+} from '@/utils/metrics/filterStatusParser';
+import { parseFilterStatus } from '@/utils/metrics/filterStatusParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 
 export function isGraphableStatusMetric(entry: StatusNum): boolean {
   if (entry.fraction) return false;

@@ -1,5 +1,5 @@
 import type { AppDispatch } from '@/shared/store';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 import type { CPUStats } from '@/types/domain/system';
 import type { ChartDataPoint } from '@/shared/store/slices/monitoredFilterSlice';
 import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
@@ -14,7 +14,7 @@ import {
   addStatusMetricSamples,
   setParsedStatuses,
 } from '@/shared/store/slices/monitoredFilterSlice';
-import { parseFilterStatus } from '@/workers/filterStatusParser';
+import { parseFilterStatus } from '@/utils/metrics/filterStatusParser';
 import {
   updateSessionStats,
   setFilterPids,

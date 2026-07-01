@@ -5,7 +5,7 @@ import {
   TooltipContent,
   TooltipArrow,
 } from '@/components/ui/tooltip';
-import type { MetricDef } from '@/workers/metricDefinitionParser';
+import type { MetricDef } from '@/utils/metrics/metricDefinitionParser';
 
 interface MetricTooltipProps {
   def: MetricDef;

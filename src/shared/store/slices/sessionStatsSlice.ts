@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TimeFraction } from '../../../types/domain/gpac/model';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 
 export interface FilterPids {
   ipids?: Record<string, PIDproperties>;
