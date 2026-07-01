@@ -8,6 +8,7 @@ import {
   NodeChange,
   EdgeChange,
   NodeMouseHandler,
+  EdgeMouseHandler,
   Controls,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -24,6 +25,7 @@ interface GraphFlowProps {
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onNodeClick?: NodeMouseHandler;
+  onEdgeClick?: EdgeMouseHandler;
   isResizing?: boolean;
 }
 
@@ -43,6 +45,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   onNodesChange,
   onEdgesChange,
   onNodeClick,
+  onEdgeClick,
   isResizing = false,
 }) => {
   const dispatch = useAppDispatch();
@@ -63,6 +66,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         onNodesChange={isResizing ? () => {} : onNodesChange}
         onEdgesChange={isResizing ? () => {} : onEdgesChange}
         onNodeClick={isResizing ? undefined : onNodeClick}
+        onEdgeClick={isResizing ? undefined : onEdgeClick}
         onPaneClick={isResizing ? undefined : handlePaneClick}
         fitView={!isResizing}
         minZoom={0.1}
@@ -72,6 +76,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           animated: false,
           style: { stroke: '#6b7280', strokeWidth: 3 },
           ariaLabel: 'Clickable edge to see IPID properties',
+          interactionWidth: 20,
         }}
         defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
         proOptions={{ hideAttribution: true }}
