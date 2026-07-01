@@ -25,7 +25,7 @@ const EventJournal = memo(
     if (events.length === 0) return null;
 
     return (
-      <div className="flex flex-col h-full min-w-44 max-w-52 shrink-0 border-r border-history-border overflow-hidden">
+      <div className="flex flex-col flex-1 overflow-hidden">
         <div className="px-3 py-1 text-xs font-medium text-gray-400 shrink-0">
           Event Journal
         </div>

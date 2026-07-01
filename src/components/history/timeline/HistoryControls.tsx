@@ -85,13 +85,21 @@ const HistoryControls = () => {
             right: 0,
           }}
         >
-          {dockHeight > TIMELINE_DOCK_HEIGHT_PX && (
-            <EventJournal
-              events={filteredEvents}
-              sessionStartUs={sessionStartUs}
-              onSeek={seek}
-            />
-          )}
+          <div className="shrink-0 flex flex-col border-r border-history-border overflow-hidden">
+            <div
+              className="shrink-0 flex items-center"
+              style={{ height: TIMELINE_DOCK_HEIGHT_PX }}
+            >
+              <EventsFilter active={activeFilter} onChange={setActiveFilter} />
+            </div>
+            {dockHeight > TIMELINE_DOCK_HEIGHT_PX && (
+              <EventJournal
+                events={filteredEvents}
+                sessionStartUs={sessionStartUs}
+                onSeek={seek}
+              />
+            )}
+          </div>
           <div className="flex-1 flex items-center px-4 min-w-0">
             <Timeline
               currentTimeUs={currentTimeUs}
@@ -103,12 +111,6 @@ const HistoryControls = () => {
               onPause={pause}
               onSeek={seek}
               markers={markers}
-              startContent={
-                <EventsFilter
-                  active={activeFilter}
-                  onChange={setActiveFilter}
-                />
-              }
               endContent={
                 <TimelineZoomControls
                   onZoomIn={() => zoomAround(playheadSessionUs, 0.5)}
