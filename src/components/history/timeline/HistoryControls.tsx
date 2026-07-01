@@ -85,7 +85,7 @@ const HistoryControls = () => {
             right: 0,
           }}
         >
-          <div className="shrink-0 flex flex-col border-r border-history-border overflow-hidden">
+          <div className="w-72 shrink-0 flex flex-col border-r border-history-border overflow-hidden">
             <div
               className="shrink-0 flex items-center"
               style={{ height: TIMELINE_DOCK_HEIGHT_PX }}
