@@ -1,7 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { RootState } from '../index';
 import { buildStatusMetricKey } from '@/components/views/stats-session/types/statusMetric';
-import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
+import type { ParsedFilterStatus } from '@/utils/metrics/filterStatusParser';
 
 /**
  * Base selector - get monitored filter state

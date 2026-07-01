@@ -403,9 +403,7 @@ describe('parseFilterStatus', () => {
         expect(entry.value).toBeCloseTo(0.8);
         expect(entry.unit).toBe('B/sample');
       }
-      expect(
-        result.entries.find((e) => e.key === 'info'),
-      ).toBeUndefined();
+      expect(result.entries.find((e) => e.key === 'info')).toBeUndefined();
     });
 
     it('definition unit applied when no runtime unit token is present', () => {

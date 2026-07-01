@@ -1,4 +1,4 @@
-import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
+import type { ParsedFilterStatus } from '@/utils/metrics/filterStatusParser';
 
 export interface FilterAlerts {
   errors: number;

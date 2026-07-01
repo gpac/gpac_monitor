@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TimeFraction } from '../../../types/domain/gpac/model';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 
 export interface SessionFilterStats {
   status: string;

@@ -1,5 +1,5 @@
 import type { PIDproperties } from '../domain/gpac/filter-stats';
-import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
+import type { ParsedFilterStatus } from '@/utils/metrics/filterStatusParser';
 
 /**
  * Data structure specifically for Overview Tab

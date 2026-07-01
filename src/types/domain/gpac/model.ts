@@ -39,7 +39,7 @@ export interface EnrichedFilterOverview extends Record<string, unknown> {
   last_ts_sent?: TimeFraction;
 
   // Parsed version of status (set by enrichedStatsWorker)
-  parsedStatus?: import('@/workers/filterStatusParser').ParsedFilterStatus;
+  parsedStatus?: import('@/utils/metrics/filterStatusParser').ParsedFilterStatus;
 
   // Dynamic session data (updated from SessionFilterStatistics)
   status: string;

@@ -3,7 +3,7 @@ import { LuInfo } from 'react-icons/lu';
 import { MetricRow, TableSection } from './shared/tableLayout';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { FilterStatusViewModel } from '../utils/statusViewModel';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 import StatusArraySection from './status/StatusArraySection';
 import StatusStateBadges from './status/StatusStateBadges';
 import { StatusProgressRow, StatusBufferRow } from './status/StatusProgress';
