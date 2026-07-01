@@ -131,6 +131,8 @@ export interface EdgeData extends Record<string, unknown> {
   filterType: FilterType;
   bufferPercentage: number;
   pidName: string;
+  sourceFilterIdx: number;
+  targetFilterIdx: number;
 }
 
 export type GpacEdge = Edge<EdgeData>;

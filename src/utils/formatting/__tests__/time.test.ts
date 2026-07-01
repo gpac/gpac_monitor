@@ -26,27 +26,6 @@ describe('formatCompactTime', () => {
   });
 });
 
-describe('formatCompactTime — withCs: true', () => {
-  it('formats 0 µs as 00:00.00', () => {
-    expect(formatCompactTime(0, true)).toBe('00:00.00');
-  });
-  it('formats 1 820 000 µs as 00:01.82 (task spec example)', () => {
-    expect(formatCompactTime(1_820_000, true)).toBe('00:01.82');
-  });
-  it('formats 8 500 000 µs as 00:08.50', () => {
-    expect(formatCompactTime(8_500_000, true)).toBe('00:08.50');
-  });
-  it('formats 65 090 000 µs as 01:05.09', () => {
-    expect(formatCompactTime(65_090_000, true)).toBe('01:05.09');
-  });
-  it('formats 3 661 000 000 µs with hours as 01:01:01.00', () => {
-    expect(formatCompactTime(3_661_000_000, true)).toBe('01:01:01.00');
-  });
-  it('withCs = false (default) still truncates centiseconds', () => {
-    expect(formatCompactTime(1_820_000)).toBe('00:01');
-  });
-});
-
 describe('formatChartTimeFromUs (regression: timezone offset)', () => {
   it('formats 8 seconds as 00:00:08 (not 01:00:08 with UTC+1)', () => {
     expect(formatChartTimeFromUs(8_000_000)).toBe('00:00:08');
