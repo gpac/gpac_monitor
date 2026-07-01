@@ -5,6 +5,7 @@ import {
   useNodesState,
   useEdgesState,
   useNodesInitialized,
+  EdgeMouseHandler,
 } from '@xyflow/react';
 import {
   useAppDispatch,
@@ -75,6 +76,15 @@ const useGraphMonitor = () => {
     (filterIdx: number) => {
       dispatch(setSelectedNode(String(filterIdx)));
       dispatch(requestFilterOpen({ filterIdx, initialTab: 'overview' }));
+    },
+    [dispatch],
+  );
+
+  const handleEdgeClick: EdgeMouseHandler = useCallback(
+    (_mouseEvent, clickedEdge) => {
+      const filterIdx = parseInt(clickedEdge.target);
+      dispatch(setSelectedNode(clickedEdge.target));
+      dispatch(requestFilterOpen({ filterIdx, initialTab: 'inputs' }));
     },
     [dispatch],
   );
@@ -188,6 +198,7 @@ const useGraphMonitor = () => {
     handleNodesChange,
     handleEdgesChange,
     handleNodeClick,
+    handleEdgeClick,
     layoutOptions,
     handleLayoutChange,
     autoLayout,
