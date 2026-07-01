@@ -57,6 +57,7 @@ export default {
             secondary: "#c7c7c7",
             muted: "#9aa3ae",
           },
+          meta: "rgba(96, 165, 250, 0.8)",
         },
       },
       boxShadow: {

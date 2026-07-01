@@ -9,6 +9,7 @@ import Timeline from './Timeline';
 import TimelineZoomControls from './TimelineZoomControls';
 import EventsFilter from './EventsFilter';
 import type { TimelineFilter } from './EventsFilter';
+import EventJournal from './EventJournal';
 import { useTimelineViewport } from '../hooks/useTimelineViewport';
 import { getVisibleEvents } from '@/utils/history/timelineViewportView';
 import { MIN_VISIBLE_DURATION_US } from '@/utils/history/timelineViewport';
@@ -34,20 +35,27 @@ const HistoryControls = () => {
   const [activeFilter, setActiveFilter] = useState<TimelineFilter>('all');
   const allEvents = useTimelineEvents();
   const { viewport, zoomAround } = useTimelineViewport(durationUs);
-  const markers = useMemo(() => {
-    const filteredEvents =
+
+  const filteredEvents = useMemo(
+    () =>
       activeFilter === 'all'
         ? allEvents
-        : allEvents.filter((event) => event.type === activeFilter);
-    return getVisibleEvents(viewport, filteredEvents).map(
-      ({ event, positionPercent }) => ({
-        id: event.id,
-        positionPercent,
-        sessionTimeUs: event.sessionTimeUs,
-        type: event.type,
-      }),
-    );
-  }, [allEvents, activeFilter, viewport]);
+        : allEvents.filter((event) => event.type === activeFilter),
+    [allEvents, activeFilter],
+  );
+
+  const markers = useMemo(
+    () =>
+      getVisibleEvents(viewport, filteredEvents).map(
+        ({ event, positionPercent }) => ({
+          id: event.id,
+          positionPercent,
+          sessionTimeUs: event.sessionTimeUs,
+          type: event.type,
+        }),
+      ),
+    [filteredEvents, viewport],
+  );
 
   const playheadSessionUs = currentTimeUs - sessionStartUs;
 
@@ -68,7 +76,7 @@ const HistoryControls = () => {
         }
       >
         <div
-          className="z-50 flex items-center px-4 border-t border-history-border bg-monitor-timelineSurface"
+          className="z-50 flex flex-row items-stretch border-t border-history-border bg-monitor-timelineSurface"
           style={{
             height: dockHeight,
             position: 'absolute',
@@ -77,30 +85,44 @@ const HistoryControls = () => {
             right: 0,
           }}
         >
-          <Timeline
-            currentTimeUs={currentTimeUs}
-            durationUs={durationUs}
-            sessionStartUs={sessionStartUs}
-            viewport={viewport}
-            isPlaying={state === 'playing'}
-            onPlay={play}
-            onPause={pause}
-            onSeek={seek}
-            markers={markers}
-            startContent={
-              <EventsFilter active={activeFilter} onChange={setActiveFilter} />
-            }
-            endContent={
-              <TimelineZoomControls
-                onZoomIn={() => zoomAround(playheadSessionUs, 0.5)}
-                onZoomOut={() => zoomAround(playheadSessionUs, 2)}
-                canZoomIn={viewport.visibleDurationUs > MIN_VISIBLE_DURATION_US}
-                canZoomOut={
-                  viewport.visibleDurationUs < viewport.sessionDurationUs
-                }
-              />
-            }
-          />
+          {dockHeight > TIMELINE_DOCK_HEIGHT_PX && (
+            <EventJournal
+              events={filteredEvents}
+              sessionStartUs={sessionStartUs}
+              onSeek={seek}
+            />
+          )}
+          <div className="flex-1 flex items-center px-4 min-w-0">
+            <Timeline
+              currentTimeUs={currentTimeUs}
+              durationUs={durationUs}
+              sessionStartUs={sessionStartUs}
+              viewport={viewport}
+              isPlaying={state === 'playing'}
+              onPlay={play}
+              onPause={pause}
+              onSeek={seek}
+              markers={markers}
+              startContent={
+                <EventsFilter
+                  active={activeFilter}
+                  onChange={setActiveFilter}
+                />
+              }
+              endContent={
+                <TimelineZoomControls
+                  onZoomIn={() => zoomAround(playheadSessionUs, 0.5)}
+                  onZoomOut={() => zoomAround(playheadSessionUs, 2)}
+                  canZoomIn={
+                    viewport.visibleDurationUs > MIN_VISIBLE_DURATION_US
+                  }
+                  canZoomOut={
+                    viewport.visibleDurationUs < viewport.sessionDurationUs
+                  }
+                />
+              }
+            />
+          </div>
         </div>
       </Resizable>
     </div>

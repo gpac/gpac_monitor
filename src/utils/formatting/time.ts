@@ -117,7 +117,7 @@ export const formatChartTimeFromUs = (microseconds: number): string => {
   return `${hh}:${mm}:${ss}`;
 };
 
-export const formatCompactTime = (us: number): string => {
+export const formatCompactTime = (us: number, withCs = false): string => {
   const totalSeconds = Math.floor(us / 1_000_000);
   const seconds = totalSeconds % 60;
   const totalMinutes = Math.floor(totalSeconds / 60);
@@ -125,8 +125,11 @@ export const formatCompactTime = (us: number): string => {
   const hours = Math.floor(totalMinutes / 60);
   const ss = String(seconds).padStart(2, '0');
   const mm = String(minutes).padStart(2, '0');
-  if (hours > 0) return `${String(hours).padStart(2, '0')}:${mm}:${ss}`;
-  return `${mm}:${ss}`;
+  const cs = withCs
+    ? `.${String(Math.floor((us % 1_000_000) / 10_000)).padStart(2, '0')}`
+    : '';
+  if (hours > 0) return `${String(hours).padStart(2, '0')}:${mm}:${ss}${cs}`;
+  return `${mm}:${ss}${cs}`;
 };
 
 export const formatBufferTime = (microseconds: number): string => {
