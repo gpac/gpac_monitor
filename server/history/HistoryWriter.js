@@ -24,6 +24,12 @@ function HistoryWriter(historyDir, sessionId) {
     this._lastEventUs = null;
     this._checkpoints = [];
     this._eventsIndex = [];
+    this._journalTsUs = [];
+    this._journalTypes = [];
+    this._journalLevels = [];
+    this._journalChunkIndexes = [];
+    this._journalBatchTsUs = [];
+    this._journalIndexInBatch = [];
 
     this._init = function() {
         if (this._initialized) return;
@@ -48,6 +54,49 @@ function HistoryWriter(historyDir, sessionId) {
         this._eventsIndex.push(metadata ? { ts_us: tsUs, type, ...metadata } : { ts_us: tsUs, type });
     };
 
+    // error/warning facts: columnar (parallel arrays), not an array of objects,
+    // so manifest/journal stay cheap to re-serialize even rewritten in full.
+    this.recordJournalFact = function(tsUs, type, level, chunkIndex, batchTsUs, indexInBatch) {
+        if (!Number.isFinite(tsUs)) return;
+        this._journalTsUs.push(tsUs);
+        this._journalTypes.push(type);
+        this._journalLevels.push(level);
+        this._journalChunkIndexes.push(chunkIndex);
+        this._journalBatchTsUs.push(batchTsUs);
+        this._journalIndexInBatch.push(indexInBatch);
+    };
+
+    this._writeJournalIndex = function() {
+        if (this._journalTsUs.length === 0) return;
+        const baseTsUs = this._journalTsUs[0];
+        const journalIndex = {
+            baseTsUs,
+            tsDeltaUs: this._journalTsUs.map((tsUs) => tsUs - baseTsUs),
+            types: this._journalTypes,
+            levels: this._journalLevels,
+            chunkIndexes: this._journalChunkIndexes,
+            batchTsUs: this._journalBatchTsUs,
+            indexInBatch: this._journalIndexInBatch,
+        };
+        const journalFile = std.open(`${dir}/journal_index.json`, 'w');
+        if (!journalFile) { print(`[HistoryWriter] Failed to write journal index`); return; }
+        journalFile.puts(JSON.stringify(journalIndex) + '\n');
+        journalFile.close();
+    };
+
+    this._getJournalPointer = function() {
+        if (this._journalTsUs.length === 0) return undefined;
+        const errorCount = this._journalTypes.filter((type) => type === 1).length;
+        const warningCount = this._journalTypes.filter((type) => type === 2).length;
+        return {
+            file: 'journal_index.json',
+            format: 'columnar-delta-v1',
+            eventCount: this._journalTsUs.length,
+            errorCount,
+            warningCount,
+        };
+    };
+
     this._writeManifest = function() {
         const manifest = {
             version: 1,
@@ -59,7 +108,9 @@ function HistoryWriter(historyDir, sessionId) {
             checkpoints: this._checkpoints,
             logChunks: this._logs ? this._logs.getAllChunks() : [],
             eventsIndex: [...this._eventsIndex].sort((a, b) => a.ts_us - b.ts_us),
+            journalIndex: this._getJournalPointer(),
         };
+        this._writeJournalIndex();
         const manifestFile = std.open(`${dir}/manifest.json`, 'w');
         if (!manifestFile) { print(`[HistoryWriter] Failed to write manifest`); return; }
         manifestFile.puts(JSON.stringify(manifest) + '\n');
@@ -101,6 +152,10 @@ function HistoryWriter(historyDir, sessionId) {
 
     this.getCurrentChunkIndex = function() {
         return this._events ? this._events._index : 0;
+    };
+
+    this.getCurrentLogChunkIndex = function() {
+        return this._logs ? this._logs._index : 0;
     };
 
     this.close = function() {
