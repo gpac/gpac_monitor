@@ -8,10 +8,6 @@ describe('deriveErrorWarningEvents', () => {
       baseTsUs: 1523463,
       tsDeltaUs: [0],
       types: [1],
-      levels: [1],
-      chunkIndexes: [0],
-      batchTsUs: [1533744],
-      indexInBatch: [0],
     };
 
     const [event] = deriveErrorWarningEvents(journalIndex, 835061);
@@ -26,10 +22,6 @@ describe('deriveErrorWarningEvents', () => {
       baseTsUs: 1523463,
       tsDeltaUs: [0, 15, 4222],
       types: [1, 2, 1],
-      levels: [1, 2, 1],
-      chunkIndexes: [0, 0, 0],
-      batchTsUs: [1533744, 1533744, 1533744],
-      indexInBatch: [0, 1, 2],
     };
 
     const events = deriveErrorWarningEvents(journalIndex, 835061);

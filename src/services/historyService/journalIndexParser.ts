@@ -36,11 +36,7 @@ export function parseJournalIndex(raw: unknown): JournalIndex | null {
   if (
     typeof data['baseTsUs'] !== 'number' ||
     !isNumberArray(data['tsDeltaUs']) ||
-    !isNumberArray(data['types']) ||
-    !isNumberArray(data['levels']) ||
-    !isNumberArray(data['chunkIndexes']) ||
-    !isNumberArray(data['batchTsUs']) ||
-    !isNumberArray(data['indexInBatch'])
+    !isNumberArray(data['types'])
   ) {
     return null;
   }
@@ -49,9 +45,5 @@ export function parseJournalIndex(raw: unknown): JournalIndex | null {
     baseTsUs: data['baseTsUs'],
     tsDeltaUs: data['tsDeltaUs'],
     types: data['types'],
-    levels: data['levels'],
-    chunkIndexes: data['chunkIndexes'],
-    batchTsUs: data['batchTsUs'],
-    indexInBatch: data['indexInBatch'],
   };
 }

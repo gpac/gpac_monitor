@@ -79,7 +79,7 @@ const Timeline = ({
   );
 
   return (
-    <div className="flex items-start gap-2 w-full">
+    <div className="flex items-center gap-2 w-full">
       {startContent && (
         <div className="shrink-0 h-8 flex items-center">{startContent}</div>
       )}
@@ -97,7 +97,7 @@ const Timeline = ({
           )}
         </button>
       </section>
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 items-center min-w-0">
         <SeekBar
           progressPercent={progressPercent}
           onSeekPositionChange={handleSeekPositionChange}

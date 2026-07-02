@@ -43,10 +43,6 @@ describe('parseJournalIndex', () => {
       baseTsUs: 1523463,
       tsDeltaUs: [0, 15, 4222],
       types: [1, 2, 1],
-      levels: [1, 2, 1],
-      chunkIndexes: [0, 0, 0],
-      batchTsUs: [1533744, 1533744, 1533744],
-      indexInBatch: [0, 1, 2],
     };
 
     expect(parseJournalIndex(raw)).toEqual(raw);
@@ -60,5 +56,23 @@ describe('parseJournalIndex', () => {
 
   it('returns null for non-object input', () => {
     expect(parseJournalIndex(null)).toBeNull();
+  });
+
+  it('still parses a legacy 6-column recording, ignoring the retired extra fields', () => {
+    const raw = {
+      baseTsUs: 1523463,
+      tsDeltaUs: [0, 15],
+      types: [1, 2],
+      levels: [1, 2],
+      chunkIndexes: [0, 0],
+      batchTsUs: [1533744, 1533744],
+      indexInBatch: [0, 1],
+    };
+
+    expect(parseJournalIndex(raw)).toEqual({
+      baseTsUs: 1523463,
+      tsDeltaUs: [0, 15],
+      types: [1, 2],
+    });
   });
 });

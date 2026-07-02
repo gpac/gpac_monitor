@@ -291,18 +291,15 @@ this.recordArgUpdated = function(indexes, argsByFilter) {
     this.flushLogs = function() {
         if (this.pendingLogs.length) {
             const tsUs = sys.clock_us();
-            // read before writeLog(): a rotation triggered by this write would
-            // otherwise make chunkIndex point at the next chunk, not this one
-            const chunkIndex = this.writer.getCurrentLogChunkIndex();
             this.writer.writeLog(JSON.stringify({
                 version: EVENT_VERSION,
                 message: 'log_batch',
                 ts_us: tsUs,
                 logs: this.pendingLogs,
             }), tsUs);
-            this.pendingLogs.forEach((log, indexInBatch) => {
+            this.pendingLogs.forEach((log) => {
                 if (log.level !== LOG_LEVEL_ERROR && log.level !== LOG_LEVEL_WARNING) return;
-                this.writer.recordJournalFact(log.timestamp, log.level, log.level, chunkIndex, tsUs, indexInBatch);
+                this.writer.recordJournalFact(log.timestamp, log.level);
             });
             this.pendingLogs = [];
         }

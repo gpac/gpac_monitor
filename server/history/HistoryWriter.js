@@ -26,10 +26,6 @@ function HistoryWriter(historyDir, sessionId) {
     this._eventsIndex = [];
     this._journalTsUs = [];
     this._journalTypes = [];
-    this._journalLevels = [];
-    this._journalChunkIndexes = [];
-    this._journalBatchTsUs = [];
-    this._journalIndexInBatch = [];
 
     this._init = function() {
         if (this._initialized) return;
@@ -56,14 +52,10 @@ function HistoryWriter(historyDir, sessionId) {
 
     // error/warning facts: columnar (parallel arrays), not an array of objects,
     // so manifest/journal stay cheap to re-serialize even rewritten in full.
-    this.recordJournalFact = function(tsUs, type, level, chunkIndex, batchTsUs, indexInBatch) {
+    this.recordJournalFact = function(tsUs, type) {
         if (!Number.isFinite(tsUs)) return;
         this._journalTsUs.push(tsUs);
         this._journalTypes.push(type);
-        this._journalLevels.push(level);
-        this._journalChunkIndexes.push(chunkIndex);
-        this._journalBatchTsUs.push(batchTsUs);
-        this._journalIndexInBatch.push(indexInBatch);
     };
 
     this._writeJournalIndex = function() {
@@ -73,10 +65,6 @@ function HistoryWriter(historyDir, sessionId) {
             baseTsUs,
             tsDeltaUs: this._journalTsUs.map((tsUs) => tsUs - baseTsUs),
             types: this._journalTypes,
-            levels: this._journalLevels,
-            chunkIndexes: this._journalChunkIndexes,
-            batchTsUs: this._journalBatchTsUs,
-            indexInBatch: this._journalIndexInBatch,
         };
         const journalFile = std.open(`${dir}/journal_index.json`, 'w');
         if (!journalFile) { print(`[HistoryWriter] Failed to write journal index`); return; }

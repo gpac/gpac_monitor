@@ -164,8 +164,4 @@ export interface JournalIndex {
   baseTsUs: number;
   tsDeltaUs: number[];
   types: number[]; // 1 = error, 2 = warning
-  levels: number[];
-  chunkIndexes: number[];
-  batchTsUs: number[];
-  indexInBatch: number[];
 }

@@ -35,7 +35,7 @@ export function deriveErrorWarningEvents(
     const tsUs = journalIndex.baseTsUs + deltaUs;
     const type = JOURNAL_TYPE_CODES[journalIndex.types[index]];
     return {
-      id: `${type}_${tsUs}_${journalIndex.indexInBatch[index]}`,
+      id: `${type}_${tsUs}_${index}`,
       sessionTimeUs: tsUs - startUs,
       loggerTimeUs: tsUs,
       type,

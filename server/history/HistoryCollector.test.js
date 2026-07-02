@@ -5,7 +5,6 @@ function makeCollector() {
   const collector = new HistoryCollector('test-history');
   collector.writer.writeLog = vi.fn();
   collector.writer.recordJournalFact = vi.fn();
-  collector.writer.getCurrentLogChunkIndex = vi.fn(() => 0);
   return collector;
 }
 
@@ -21,7 +20,7 @@ describe('HistoryCollector flushLogs', () => {
 
     collector.flushLogs();
 
-    expect(collector.writer.recordJournalFact).toHaveBeenCalledWith(1523463, 1, 1, 0, expect.any(Number), 0);
+    expect(collector.writer.recordJournalFact).toHaveBeenCalledWith(1523463, 1);
   });
 
   it('records each error/warning individually when a batch holds several, no aggregation', () => {
@@ -37,26 +36,9 @@ describe('HistoryCollector flushLogs', () => {
     collector.flushLogs();
 
     expect(collector.writer.recordJournalFact).toHaveBeenCalledTimes(3);
-    expect(collector.writer.recordJournalFact).toHaveBeenNthCalledWith(1, 1523463, 1, 1, 0, expect.any(Number), 0);
-    expect(collector.writer.recordJournalFact).toHaveBeenNthCalledWith(2, 1523478, 2, 2, 0, expect.any(Number), 1);
-    expect(collector.writer.recordJournalFact).toHaveBeenNthCalledWith(3, 1527685, 1, 1, 0, expect.any(Number), 2);
-  });
-
-  it('reads the log chunk index before writing, so a rotation triggered by this write doesn\'t affect it', () => {
-    const collector = makeCollector();
-    collector.writer.writeLog = vi.fn(() => {
-      // simulate rotation happening as a side effect of this write
-      collector.writer.getCurrentLogChunkIndex = vi.fn(() => 7);
-    });
-    collector.writer.getCurrentLogChunkIndex = vi.fn(() => 3);
-
-    collector.pendingLogs = [
-      { timestamp: 1523463, tool: 'core', level: 1, message: 'Unsupported audio format 0', thread_id: -680877248, caller: null },
-    ];
-
-    collector.flushLogs();
-
-    expect(collector.writer.recordJournalFact).toHaveBeenCalledWith(1523463, 1, 1, 3, expect.any(Number), 0);
+    expect(collector.writer.recordJournalFact).toHaveBeenNthCalledWith(1, 1523463, 1);
+    expect(collector.writer.recordJournalFact).toHaveBeenNthCalledWith(2, 1523478, 2);
+    expect(collector.writer.recordJournalFact).toHaveBeenNthCalledWith(3, 1527685, 1);
   });
 
   it('ignores info-level logs, never recording a journal fact for them', () => {

@@ -11,9 +11,9 @@ describe('HistoryWriter journal index', () => {
   it('summarizes recorded facts into a journal pointer with error/warning counts', () => {
     const writer = new HistoryWriter('test-history');
 
-    writer.recordJournalFact(1523463, 1, 1, 0, 1533744, 0);
-    writer.recordJournalFact(1523478, 2, 2, 0, 1533744, 1);
-    writer.recordJournalFact(1527685, 1, 1, 0, 1533744, 2);
+    writer.recordJournalFact(1523463, 1);
+    writer.recordJournalFact(1523478, 2);
+    writer.recordJournalFact(1527685, 1);
 
     expect(writer._getJournalPointer()).toEqual({
       file: 'journal_index.json',
