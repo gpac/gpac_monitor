@@ -156,4 +156,16 @@ export interface TimelineEvent {
   sessionTimeUs: number;
   type: TimelineEventType;
   title: string;
+  loggerTimeUs?: number;
+}
+
+/** Columnar, delta-encoded index of error/warning facts — see journal_index.json. */
+export interface JournalIndex {
+  baseTsUs: number;
+  tsDeltaUs: number[];
+  types: number[]; // 1 = error, 2 = warning
+  levels: number[];
+  chunkIndexes: number[];
+  batchTsUs: number[];
+  indexInBatch: number[];
 }

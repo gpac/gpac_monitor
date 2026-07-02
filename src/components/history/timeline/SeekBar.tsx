@@ -110,7 +110,7 @@ const SeekBar = ({
       )}
 
       {timeRuler && (
-        <div className="relative h-3">
+        <div className="relative h-14">
           {timeRuler.minor.map((tick) => (
             <div
               key={tick.positionPercent}

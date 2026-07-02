@@ -5,6 +5,7 @@ import type {
   ManifestEventEntry,
 } from './source/types';
 import type { TimelineEventType } from './types';
+import { parseJournalIndexPointer } from './journalIndexParser';
 
 export function parseManifest(raw: unknown): HistoryManifest {
   if (!raw || typeof raw !== 'object') {
@@ -95,6 +96,7 @@ export function parseManifest(raw: unknown): HistoryManifest {
     logChunks,
     checkpoints,
     eventsIndex,
+    journalIndex: parseJournalIndexPointer(data),
   };
 }
 

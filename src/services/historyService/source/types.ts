@@ -3,6 +3,7 @@ import type {
   HistoryEvent,
   LogEvent,
   TimelineEventType,
+  JournalIndex,
 } from '../types';
 import type { SessionInfo } from '../sessionFileReader/types';
 
@@ -32,6 +33,15 @@ export interface ManifestEventEntry {
   count?: number;
 }
 
+/** Pointer to the columnar error/warning index — see JournalIndex in ../types. */
+export interface JournalIndexPointer {
+  file: string;
+  format: string;
+  eventCount: number;
+  errorCount: number;
+  warningCount: number;
+}
+
 export interface HistoryManifest {
   version: number;
   startUs: number;
@@ -42,6 +52,7 @@ export interface HistoryManifest {
   logChunks?: HistoryManifestChunk[];
   checkpoints?: HistoryManifestCheckpoint[];
   eventsIndex?: ManifestEventEntry[];
+  journalIndex?: JournalIndexPointer;
 }
 
 /** Low-level chunk I/O — implemented by both File and Remote sources. */
@@ -56,6 +67,7 @@ export interface HistorySource extends IChunkReader {
   readonly sessionId: string;
   loadSnapshot(): Promise<HistorySnapshot>;
   getManifest(): Promise<HistoryManifest | null>;
+  loadJournalIndex(): Promise<JournalIndex | null>;
 }
 
 /** Session listing (UI picker side)  */

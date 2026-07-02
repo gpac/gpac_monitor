@@ -6,7 +6,10 @@ import type {
   TimelineEvent,
 } from './types';
 import { HistoryAdapter } from './integration/historyAdapter';
-import { deriveTimelineEvents } from './integration/deriveTimelineEvents';
+import {
+  deriveTimelineEvents,
+  deriveErrorWarningEvents,
+} from './integration/deriveTimelineEvents';
 import { EventPlayer } from './replay/eventPlayer';
 import type { PlayerState, PlayerListener } from './replay/eventPlayer';
 import {
@@ -139,7 +142,13 @@ export class HistoryController {
       throw new Error('[HistoryController] No manifest for session');
 
     this.manifest = manifest;
-    this.timelineEvents = deriveTimelineEvents(manifest);
+    const journalIndex = manifest.journalIndex
+      ? await source.loadJournalIndex()
+      : null;
+    this.timelineEvents = [
+      ...deriveTimelineEvents(manifest),
+      ...deriveErrorWarningEvents(journalIndex, manifest.startUs),
+    ].sort((left, right) => left.sessionTimeUs - right.sessionTimeUs);
     this.loader = new ChunkLoader(source, manifest);
     this.preloader = new ChunkPreloadController(
       this.loader,

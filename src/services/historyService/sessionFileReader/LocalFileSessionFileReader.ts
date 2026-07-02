@@ -1,8 +1,9 @@
-import type { HistorySnapshot, LogEvent } from '../types';
+import type { HistorySnapshot, LogEvent, JournalIndex } from '../types';
 import type { SessionInfo } from './types';
 import type { HistoryManifest } from '../source/types';
 import { parseEventsJsonl } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
+import { parseJournalIndex } from '../journalIndexParser';
 
 const emptyEntry = (): SessionEntry => ({
   done: false,
@@ -15,6 +16,7 @@ interface SessionEntry {
   snapshot?: File;
   events?: File;
   manifest?: File;
+  journalIndex?: File;
   chunks: Map<number, File>;
   logChunks: Map<number, File>;
   checkpoints: Map<number, File>;
@@ -73,6 +75,7 @@ export class LocalFileSessionFileReader {
         if (fileName === 'snapshot.json') entry.snapshot = file;
         else if (fileName === 'events.jsonl') entry.events = file;
         else if (fileName === 'manifest.json') entry.manifest = file;
+        else if (fileName === 'journal_index.json') entry.journalIndex = file;
         else if (fileName === 'done') entry.done = true;
       }
     }
@@ -120,6 +123,16 @@ export class LocalFileSessionFileReader {
     if (!file) return null;
     try {
       return parseManifest(JSON.parse(await file.text()));
+    } catch {
+      return null;
+    }
+  }
+
+  async readJournalIndex(sessionId: string): Promise<JournalIndex | null> {
+    const file = this.sessionMap.get(sessionId)?.journalIndex;
+    if (!file) return null;
+    try {
+      return parseJournalIndex(JSON.parse(await file.text()));
     } catch {
       return null;
     }

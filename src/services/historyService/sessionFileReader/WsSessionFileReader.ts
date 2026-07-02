@@ -1,8 +1,14 @@
-import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
+import type {
+  HistorySnapshot,
+  HistoryEvent,
+  LogEvent,
+  JournalIndex,
+} from '../types';
 import type { HistoryManifest } from '../source/types';
 import type { SessionInfo } from './types';
 import { parseEventsJsonl } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
+import { parseJournalIndex } from '../journalIndexParser';
 
 /**
  * WsSessionFileReader — reads history sessions from a remote GPAC server over WebSocket.
@@ -71,6 +77,20 @@ export class WsSessionFileReader {
         file: 'manifest.json',
       });
       return parseManifest(JSON.parse(response.content as string));
+    } catch {
+      return null;
+    }
+  }
+
+  async readJournalIndex(sessionId: string): Promise<JournalIndex | null> {
+    await this.ensureConnected();
+    try {
+      const response = await this.sendCommand({
+        message: 'read_file',
+        sessionId,
+        file: 'journal_index.json',
+      });
+      return parseJournalIndex(JSON.parse(response.content as string));
     } catch {
       return null;
     }

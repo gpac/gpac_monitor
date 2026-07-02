@@ -24,6 +24,7 @@ function makeSource(): HistorySource {
     sessionId: 'test-session',
     getManifest: vi.fn().mockResolvedValue(makeManifest()),
     loadSnapshot: vi.fn().mockResolvedValue(makeSnapshot()),
+    loadJournalIndex: vi.fn().mockResolvedValue(null),
     readChunk: vi.fn(),
     readLogChunk: vi.fn(),
     readCheckpoint: vi.fn(),

@@ -1,5 +1,5 @@
 import type { HistoryManifest } from '../source/types';
-import type { TimelineEvent, TimelineEventType } from '../types';
+import type { JournalIndex, TimelineEvent, TimelineEventType } from '../types';
 
 const TITLES: Record<TimelineEventType, string> = {
   'graph-change': 'Graph changed',
@@ -7,6 +7,11 @@ const TITLES: Record<TimelineEventType, string> = {
   'args-change': 'Args changed',
   error: 'Errors',
   warning: 'Warnings',
+};
+
+const JOURNAL_TYPE_CODES: Record<number, TimelineEventType> = {
+  1: 'error',
+  2: 'warning',
 };
 
 export function deriveTimelineEvents(
@@ -18,4 +23,23 @@ export function deriveTimelineEvents(
     type: entry.type,
     title: TITLES[entry.type],
   }));
+}
+
+/** Decodes error/warning facts from the columnar journal index (see journal_index.json). */
+export function deriveErrorWarningEvents(
+  journalIndex: JournalIndex | null,
+  startUs: number,
+): TimelineEvent[] {
+  if (!journalIndex) return [];
+  return journalIndex.tsDeltaUs.map((deltaUs, index) => {
+    const tsUs = journalIndex.baseTsUs + deltaUs;
+    const type = JOURNAL_TYPE_CODES[journalIndex.types[index]];
+    return {
+      id: `${type}_${tsUs}_${journalIndex.indexInBatch[index]}`,
+      sessionTimeUs: tsUs - startUs,
+      loggerTimeUs: tsUs,
+      type,
+      title: TITLES[type],
+    };
+  });
 }

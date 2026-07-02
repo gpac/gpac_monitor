@@ -1,4 +1,9 @@
-import type { HistorySnapshot, HistoryEvent, LogEvent } from '../types';
+import type {
+  HistorySnapshot,
+  HistoryEvent,
+  LogEvent,
+  JournalIndex,
+} from '../types';
 import type { HistorySource, HistoryManifest } from './types';
 import { WsSessionFileReader } from '../sessionFileReader/WsSessionFileReader';
 
@@ -29,6 +34,10 @@ export class RemoteHistorySource implements HistorySource {
 
   async readCheckpoint(chunkIndex: number): Promise<unknown> {
     return this.reader.readCheckpoint(this.sessionId, chunkIndex);
+  }
+
+  async loadJournalIndex(): Promise<JournalIndex | null> {
+    return this.reader.readJournalIndex(this.sessionId);
   }
 
   private loadManifest(): Promise<HistoryManifest | null> {
