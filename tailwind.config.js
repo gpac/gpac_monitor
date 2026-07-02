@@ -27,8 +27,8 @@ export default {
 
         monitor: {
           timeline: {
-            premiumFrom: "#131A2A",
-            premiumTo: "#101624",
+            premiumFrom: "#121C28",
+            premiumTo: "#0D1621",
             bg: "#1a1a1a",
             subtle: "#121826",
           },
@@ -65,7 +65,7 @@ export default {
           "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 1px rgba(139,92,246,0.08), 0 8px 24px rgba(0,0,0,0.28)",
       },
       borderColor: {
-        "timeline-premium": "rgba(139,92,246,0.20)",
+        "timeline-premium": "rgba(38,54,75,0.9)",
       },
       backgroundImage: {
         "timeline-premium": "linear-gradient(180deg, #131A2A 0%, #101624 100%)",

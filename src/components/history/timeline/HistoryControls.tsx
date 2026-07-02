@@ -76,7 +76,7 @@ const HistoryControls = () => {
         }
       >
         <div
-          className="z-50 flex flex-row items-stretch border-t border-history-border bg-monitor-timelineSurface"
+          className="z-50 flex flex-row items-stretch border-t border-t-timeline-premium bg-gradient-to-b from-monitor-timeline-premiumFrom to-monitor-timeline-premiumTo"
           style={{
             height: dockHeight,
             position: 'absolute',
@@ -119,7 +119,7 @@ const HistoryControls = () => {
               )}
             </div>
           </Resizable>
-          <div className="flex-1 flex items-center px-4 min-w-0">
+          <div className="flex-1 flex items-start px-4 min-w-0">
             <Timeline
               currentTimeUs={currentTimeUs}
               durationUs={durationUs}
