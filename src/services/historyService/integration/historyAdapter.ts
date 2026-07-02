@@ -73,7 +73,7 @@ import type {
   StatusMetricSamplesBuffer,
 } from './handlers/statsHandler';
 import type { PIDDynamicByFilter } from './extractPIDDynamic';
-import { dispatchLogEvent } from './handlers/logHandler';
+import { dispatchLogEvent, dispatchLogEvents } from './handlers/logHandler';
 import {
   MAX_LOGS_ON_SEEK,
   BADGE_WINDOW_US,
@@ -348,8 +348,8 @@ export class HistoryAdapter {
     }
   }
 
-  handleLogEvent(event: LogEvent): void {
-    dispatchLogEvent(this.dispatch, event);
+  handleLogEvents(events: LogEvent[]): void {
+    dispatchLogEvents(this.dispatch, events);
   }
 
   /** Dispatch the last N logs before targetUs (used by seek). */

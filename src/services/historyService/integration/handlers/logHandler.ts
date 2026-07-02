@@ -1,6 +1,10 @@
 import type { AppDispatch } from '@/shared/store';
 import type { LogEvent } from '../../types';
-import type { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
+import type {
+  GpacLogEntry,
+  GpacLogLevel,
+  GpacLogTool,
+} from '@/types/domain/gpac/log-types';
 import {
   appendLogsForAllTools,
   restoreConfig,
@@ -16,6 +20,34 @@ export function dispatchLogEvent(dispatch: AppDispatch, event: LogEvent): void {
       applyLogConfig(dispatch, event.logLevel);
       break;
   }
+}
+
+/** Dispatches a run of due LogEvents as one appendLogsForAllTools call per
+ *  contiguous log_batch run, instead of one dispatch per line. */
+export function dispatchLogEvents(
+  dispatch: AppDispatch,
+  events: LogEvent[],
+): void {
+  let accumulatedLogs: GpacLogEntry[] = [];
+
+  function flushLogs(): void {
+    if (accumulatedLogs.length === 0) return;
+
+    dispatch(appendLogsForAllTools(accumulatedLogs));
+    accumulatedLogs = [];
+  }
+
+  for (const event of events) {
+    if (event.message === 'log_batch') {
+      accumulatedLogs.push(...event.logs);
+      continue;
+    }
+
+    flushLogs();
+    dispatchLogEvent(dispatch, event);
+  }
+
+  flushLogs();
 }
 
 function applyLogConfig(dispatch: AppDispatch, logLevel: string): void {

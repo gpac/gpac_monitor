@@ -53,16 +53,15 @@ export class HistoryController {
 
   private flushVisibleLogs(currentTimeUs: number): void {
     if (!this.adapter) return;
-    let dispatched = 0;
+    const dueLogEvents: LogEvent[] = [];
     while (
-      dispatched < 50 &&
       this.nextLogIndex < this.sessionLogs.length &&
       this.sessionLogs[this.nextLogIndex].ts_us <= currentTimeUs
     ) {
-      this.adapter.handleLogEvent(this.sessionLogs[this.nextLogIndex]);
+      dueLogEvents.push(this.sessionLogs[this.nextLogIndex]);
       this.nextLogIndex++;
-      dispatched++;
     }
+    if (dueLogEvents.length > 0) this.adapter.handleLogEvents(dueLogEvents);
   }
 
   private handlePlaybackTick = (currentTimeUs: number): void => {
