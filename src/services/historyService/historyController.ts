@@ -18,6 +18,7 @@ import {
 } from './replay/badgeExpirationController';
 import { ChunkPreloadController } from './replay/chunkPreloadController';
 import type { AppendLogsCallback } from './replay/chunkPreloadController';
+import { flattenLogEvents } from './replay/flattenLogEvents';
 import type { HistoryManifest, HistorySource } from './source/types';
 import { ChunkLoader } from './chunkLoader';
 import type { EventChunk } from './chunkLoader';
@@ -91,8 +92,9 @@ export class HistoryController {
         this.sessionLogs.length > 0
           ? this.sessionLogs[this.sessionLogs.length - 1].ts_us
           : 0;
-      const nextLogs = logChunks
-        .flatMap((logChunk) => logChunk.logs)
+      const nextLogs = flattenLogEvents(
+        logChunks.flatMap((logChunk) => logChunk.logs),
+      )
         .filter((log) => log.ts_us > lastTs)
         .sort((leftLog, rightLog) => leftLog.ts_us - rightLog.ts_us);
       this.sessionLogs = [...this.sessionLogs, ...nextLogs];
@@ -110,9 +112,9 @@ export class HistoryController {
       chunk.toUs,
     );
 
-    this.sessionLogs = logChunks
-      .flatMap((logChunk) => logChunk.logs)
-      .sort((leftLog, rightLog) => leftLog.ts_us - rightLog.ts_us);
+    this.sessionLogs = flattenLogEvents(
+      logChunks.flatMap((logChunk) => logChunk.logs),
+    ).sort((leftLog, rightLog) => leftLog.ts_us - rightLog.ts_us);
 
     this.nextLogIndex = 0;
   }
