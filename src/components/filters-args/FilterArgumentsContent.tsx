@@ -5,6 +5,7 @@ import {
 } from '@/shared/store/slices/filterArgumentSlice';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { useSearchFilter } from '@/shared/hooks/filters/useSearchFilter';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import ArgumentItem from './arguments/ArgumentItem';
 import { GpacArgument, GPACTypes } from './types';
 
@@ -31,6 +32,7 @@ const FilterArgumentsContent = ({
   searchQuery = '',
 }: FilterArgumentsContentProps) => {
   const dispatch = useAppDispatch();
+  const { isHistory } = useDataMode();
 
   const selectArgumentUpdates = useMemo(
     () => makeSelectArgumentUpdatesForFilter(),
@@ -90,6 +92,7 @@ const FilterArgumentsContent = ({
           arg={arg}
           updateStatus={argumentUpdates?.[arg.name]}
           onValueChange={handleValueChange}
+          isHistory={isHistory}
         />
       ))}
     </div>

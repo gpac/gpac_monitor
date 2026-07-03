@@ -20,14 +20,20 @@ interface ArgumentItemProps {
   arg: GpacArgument;
   updateStatus?: ArgumentUpdate;
   onValueChange: (argName: string, newValue: GPACValue) => void;
+  isHistory?: boolean;
 }
 
 const ArgumentItem = memo(
-  ({ arg, updateStatus, onValueChange }: ArgumentItemProps) => {
+  ({
+    arg,
+    updateStatus,
+    onValueChange,
+    isHistory = false,
+  }: ArgumentItemProps) => {
     const type = arg.type || typeof arg.value;
     const isPending = updateStatus?.status === 'pending';
     const isSuccess = updateStatus?.status === 'success';
-    const isUpdatable = !!arg.update;
+    const isUpdatable = !!arg.update && !isHistory;
 
     const handleChange = useCallback(
       (newValue: GPACValue) => {
@@ -113,7 +119,7 @@ const ArgumentItem = memo(
             value={updateStatus?.value ?? arg.value}
             onChange={handleChange}
             rules={{
-              disabled: !arg.update || isPending,
+              disabled: !arg.update || isPending || isHistory,
               min: arg.min,
               max: arg.max,
               step: arg.step,
