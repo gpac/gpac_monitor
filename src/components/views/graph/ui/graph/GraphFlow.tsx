@@ -14,6 +14,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import CustomNode from '../nodes/CustomNode';
 import GraphLegend from './GraphLegend';
+import FitGraphOnLoad from './utils/FitGraphOnLoad';
 import { useMinimapNavigation } from '../../hooks/layout/useMinimapNavigation';
 import { getImmediateGraphColor } from '../../hooks/layout/useGraphColors';
 import { useAppDispatch } from '@/shared/hooks/redux';
@@ -68,7 +69,6 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         onNodeClick={isResizing ? undefined : onNodeClick}
         onEdgeClick={isResizing ? undefined : onEdgeClick}
         onPaneClick={isResizing ? undefined : handlePaneClick}
-        fitView={!isResizing}
         minZoom={0.01}
         maxZoom={2}
         defaultEdgeOptions={{
@@ -82,6 +82,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         proOptions={{ hideAttribution: true }}
         selectionKeyCode={null}
       >
+        <FitGraphOnLoad nodeCount={nodes.length} disabled={isResizing} />
         <Background color="#4b5563" gap={16} />
         <MiniMap
           nodeColor={(node) => getImmediateGraphColor(node)}
