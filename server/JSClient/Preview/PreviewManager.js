@@ -12,12 +12,18 @@ function PreviewManager(client) {
         this.client.client.send(JSON.stringify(payload));
     };
 
-    // Returns true if the filter has at least one visual output PID.
-    this.hasVisualOutput = function (filter) {
+    // Returns the filter carrying the visual PID to probe: the filter itself if it
+    // has a visual output, else the source filter of its first visual input (sinks).
+    this.findPreviewTarget = function (filter) {
         for (let outputIndex = 0; outputIndex < filter.nb_opid; outputIndex++) {
-            if (filter.opid_props(outputIndex, "StreamType") === "Visual") return true;
+            if (filter.opid_props(outputIndex, "StreamType") === "Visual") return filter;
         }
-        return false;
+        for (let inputIndex = 0; inputIndex < filter.nb_ipid; inputIndex++) {
+            if (filter.ipid_props(inputIndex, "StreamType") === "Visual") {
+                return filter.ipid_source(inputIndex);
+            }
+        }
+        return null;
     };
 
     // Builds the FileIO instance with named callbacks for a given filterIdx.
@@ -65,14 +71,15 @@ function PreviewManager(client) {
             this.send({ message: 'preview_error', filterIdx, error: 'filter not found' });
             return;
         }
-        if (!this.hasVisualOutput(filter)) {
+        const target = this.findPreviewTarget(filter);
+        if (!target) {
             this.send({ message: 'preview_error', filterIdx, error: 'not a video PID' });
             return;
         }
         this.removePreview(filterIdx);
 
         const fileIO = this.createPreviewFileIO(filterIdx);
-        const probe = filter.insert(`dst=${fileIO.url}:osize=128x128:pfmt=rgb:ITAG=NODISPLAY`);
+        const probe = target.insert(`dst=${fileIO.url}:osize=128x128:pfmt=rgb:ITAG=NODISPLAY`);
         this.activePreviews.set(filterIdx, { probe, fileIO });
     };
 
