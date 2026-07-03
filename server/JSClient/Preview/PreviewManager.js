@@ -8,6 +8,7 @@ function PreviewManager(client) {
 
     // Sends a JSON message to the dashboard client.
     this.send = function (payload) {
+        if (!this.client.client) return;
         this.client.client.send(JSON.stringify(payload));
     };
 
@@ -45,8 +46,20 @@ function PreviewManager(client) {
         );
     };
 
-    // Inserts a probe on the filter to capture one PNG frame.
+    this.postTask = function (taskFn) {
+        session.post_task(() => {
+            if (session.last_task) return false;
+            taskFn();
+            return false;
+        });
+    };
+
     this.startPreview = function (filterIdx, filterName) {
+        this.postTask(() => this.doStartPreview(filterIdx, filterName));
+    };
+
+    // Inserts a probe on the filter to capture one PNG frame.
+    this.doStartPreview = function (filterIdx, filterName) {
         const filter = session.get_filter(String(filterIdx));
         if (!filter || filter.type !== filterName) {
             this.send({ message: 'preview_error', filterIdx, error: 'filter not found' });
@@ -86,14 +99,22 @@ function PreviewManager(client) {
         this.activePreviews.delete(filterIdx);
     };
 
-    // Stops the preview and notifies the dashboard.
     this.stopPreview = function (filterIdx) {
+        this.postTask(() => this.doStopPreview(filterIdx));
+    };
+
+    // Stops the preview and notifies the dashboard.
+    this.doStopPreview = function (filterIdx) {
         this.removePreview(filterIdx);
         this.send({ message: 'preview_stopped', filterIdx });
     };
 
-    // Removes all active previews on client disconnect.
     this.cleanup = function () {
+        this.postTask(() => this.doCleanup());
+    };
+
+    // Removes all active previews on client disconnect.
+    this.doCleanup = function () {
         const indexes = Array.from(this.activePreviews.keys());
         for (const filterIdx of indexes) this.removePreview(filterIdx);
     };
