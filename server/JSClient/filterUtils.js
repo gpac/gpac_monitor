@@ -108,6 +108,11 @@ function filter_pid_stats_object(f) {
     return pidsFilters;
 }
 
+function is_hidden_filter(f) {
+    if (f.itag === 'NODISPLAY') return true;
+    return typeof f.name === 'string' && f.name.startsWith('PreviewSink');
+}
+
 function on_all_connected(cb) {
     session.post_task(() => {
         let all_filters_instances = [];
@@ -115,7 +120,7 @@ function on_all_connected(cb) {
         session.lock_filters(true);
         for (let i = 0; i < session.nb_filters; i++) {
             const f = session.get_filter(i);
-            if (!f.is_destroyed()) all_filters_instances.push(f);
+            if (!f.is_destroyed() && !is_hidden_filter(f)) all_filters_instances.push(f);
         }
         session.lock_filters(false);
 
@@ -127,5 +132,6 @@ function on_all_connected(cb) {
 export {
     gpac_filter_to_object,
     gpac_filter_to_minimal_object,
+    is_hidden_filter,
     on_all_connected
 };

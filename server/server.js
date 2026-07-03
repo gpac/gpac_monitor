@@ -1,6 +1,6 @@
 import { Sys as sys } from 'gpaccore';
 import { JSClient } from './JSClient/index.js';
-import { gpac_filter_to_minimal_object } from './JSClient/filterUtils.js';
+import { gpac_filter_to_minimal_object, is_hidden_filter } from './JSClient/filterUtils.js';
 
 // GLOBAL STATE
 
@@ -52,7 +52,7 @@ function stabilizeGraph() {
     const filters = [];
     for (let i = 0; i < session.nb_filters; i++) {
         const f = session.get_filter(i);
-        if (!f.is_destroyed()) {
+        if (!f.is_destroyed() && !is_hidden_filter(f)) {
             filters.push(gpac_filter_to_minimal_object(f));
         }
     }
@@ -121,7 +121,7 @@ session.set_new_filter_fun((f) => {
     f.idx = filter_uid++;
     f.iname = '' + f.idx;
     all_filters.push(f);
-    if (f.itag == "NODISPLAY") return;
+    if (is_hidden_filter(f)) return;
     onGraphEvent();
 });
 
@@ -129,7 +129,7 @@ session.set_del_filter_fun((f) => {
 
     let idx = all_filters.indexOf(f);
     if (idx >= 0) all_filters.splice(idx, 1);
-    if (f.itag == "NODISPLAY") return;
+    if (is_hidden_filter(f)) return;
     onGraphEvent();
 });
 

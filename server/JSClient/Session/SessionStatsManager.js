@@ -1,5 +1,6 @@
 import { DEFAULT_FILTER_FIELDS, UPDATE_INTERVALS } from '../config.js';
 import { cacheManager } from '../Cache/CacheManager.js';
+import { is_hidden_filter } from '../filterUtils.js';
 
 /**
  * SessionStatsManager - Manages session statistics collection
@@ -65,6 +66,7 @@ function SessionStatsManager(client) {
             for (let i = 0; i < session.nb_filters; i++) {
                 const f = session.get_filter(i);
                 if (f.is_destroyed()) continue;
+                if (is_hidden_filter(f)) continue;
 
                 filters.push(f);
                 const obj = {};

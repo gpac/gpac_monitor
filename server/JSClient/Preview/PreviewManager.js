@@ -1,19 +1,24 @@
-import { FileIO } from 'gpaccore';
-import { base64ArrayBuffer, concatUint8Arrays } from './base64.js';
+import { Sys as sys } from 'gpaccore';
+import { base64ArrayBuffer } from './base64.js';
+import { PREVIEW } from '../config.js';
 
-// Manages on-demand PNG snapshot captures from GPAC filter outputs.
 function PreviewManager(client) {
     this.client = client;
     this.activePreviews = new Map();
 
-    // Sends a JSON message to the dashboard client.
     this.send = function (payload) {
         if (!this.client.client) return;
         this.client.client.send(JSON.stringify(payload));
     };
 
-    // Returns the filter carrying the visual PID to probe: the filter itself if it
-    // has a visual output, else the source filter of its first visual input (sinks).
+    this.postTask = function (taskFn) {
+        session.post_task(() => {
+            if (session.last_task) return false;
+            taskFn();
+            return false;
+        });
+    };
+
     this.findPreviewTarget = function (filter) {
         for (let outputIndex = 0; outputIndex < filter.nb_opid; outputIndex++) {
             if (filter.opid_props(outputIndex, "StreamType") === "Visual") return filter;
@@ -26,45 +31,10 @@ function PreviewManager(client) {
         return null;
     };
 
-    // Builds the FileIO instance with named callbacks for a given filterIdx.
-    this.createPreviewFileIO = function (filterIdx) {
-        const chunks = [];
-        let closed = false;
-        const previewManager = this;
-
-        function openPreviewFile() { return true; }
-        function closePreviewFile() {
-            if (closed) return;
-            closed = true;
-            previewManager.onCaptureClose(filterIdx, chunks);
-        }
-        function writePreviewChunk(buffer) { chunks.push(new Uint8Array(buffer)); return buffer.byteLength; }
-        function readDisabled() { return 0; }
-        function seekDisabled() { return 0; }
-        function tellDisabled() { return 0; }
-        function eofDisabled() { return false; }
-        function existsDisabled() { return false; }
-
-        return new FileIO(
-            `preview_${filterIdx}.png`,
-            openPreviewFile, closePreviewFile, writePreviewChunk,
-            readDisabled, seekDisabled, tellDisabled, eofDisabled, existsDisabled
-        );
-    };
-
-    this.postTask = function (taskFn) {
-        session.post_task(() => {
-            if (session.last_task) return false;
-            taskFn();
-            return false;
-        });
-    };
-
     this.startPreview = function (filterIdx, filterName) {
         this.postTask(() => this.doStartPreview(filterIdx, filterName));
     };
 
-    // Inserts a probe on the filter to capture one PNG frame.
     this.doStartPreview = function (filterIdx, filterName) {
         const filter = session.get_filter(String(filterIdx));
         if (!filter || filter.type !== filterName) {
@@ -78,39 +48,102 @@ function PreviewManager(client) {
         }
         this.removePreview(filterIdx);
 
-        const fileIO = this.createPreviewFileIO(filterIdx);
-        const probe = target.insert(`dst=${fileIO.url}:osize=128x128:pfmt=rgb:ITAG=NODISPLAY`);
-        this.activePreviews.set(filterIdx, { probe, fileIO });
-    };
+        const entry = {
+            ffsws: null,
+            sink: null,
+            pid: null,
+            width: 0,
+            height: 0,
+            lastEmitUs: 0,
+            cachedPacket: null,
+        };
+        this.activePreviews.set(filterIdx, entry);
+        try {
+            entry.ffsws = session.add_filter(
+                `ffsws:osize=${PREVIEW.OSIZE}:ofmt=${PREVIEW.OFMT}:ITAG=NODISPLAY`,
+                target
+            );
+            entry.sink = this.createPreviewSink(filterIdx, entry);
+            entry.sink.set_source(entry.ffsws);
+        } catch (error) {
 
-    // Called when the FileIO closes — assembles chunks, sends Base64 frame, marks entry for removal.
-    this.onCaptureClose = function (filterIdx, chunks) {
-        const dataBase64 = base64ArrayBuffer(concatUint8Arrays(chunks));
-        this.send({ message: 'preview_frame', filterIdx, dataBase64 });
-        const entry = this.activePreviews.get(filterIdx);
-        if (entry) entry.done = true;
-    };
 
-    // Called by SessionManager.tick — removes probes that have completed capture.
-    this.tick = function () {
-        for (const [filterIdx, entry] of this.activePreviews) {
-            if (entry.done) this.removePreview(filterIdx);
+            this.removePreview(filterIdx);
+            this.send({ message: 'preview_error', filterIdx, error: String(error) });
         }
     };
 
-    // Removes the probe and FileIO for a given filterIdx.
+    this.createPreviewSink = function (filterIdx, entry) {
+        const previewManager = this;
+        const sink = session.new_filter(`PreviewSink_${filterIdx}`);
+        sink.set_cap({ id: 'StreamType', value: 'Video', in: true });
+        sink.set_cap({ id: 'CodecID', value: 'raw', in: true });
+        sink.configure_pid = function (pid) {
+            if (entry.pid !== pid) {
+                entry.pid = pid;
+                pid.send_event(new FilterEvent(GF_FEVT_PLAY));
+            }
+            entry.width = pid.get_prop('Width');
+            entry.height = pid.get_prop('Height');
+        };
+        sink.process = function () {
+            previewManager.drainPreviewPackets(filterIdx, entry);
+        };
+        return sink;
+    };
+
+    this.drainPreviewPackets = function (filterIdx, entry) {
+        if (!entry.pid) return;
+        while (true) {
+            const packet = entry.pid.get_packet();
+            if (!packet) return;
+            const nowUs = sys.clock_us();
+            if (nowUs - entry.lastEmitUs >= PREVIEW.INTERVAL_US) {
+                entry.lastEmitUs = nowUs;
+                this.sendFrame(filterIdx, entry, packet);
+            }
+            entry.pid.drop_packet();
+        }
+    };
+
+    this.sendFrame = function (filterIdx, entry, packet) {
+        try {
+            let data;
+            if (packet.frame_ifce) {
+                entry.cachedPacket = packet.clone(entry.cachedPacket);
+                data = entry.cachedPacket.data;
+            } else {
+                data = packet.data;
+            }
+            this.send({
+                message: 'preview_frame',
+                filterIdx,
+                width: entry.width,
+                height: entry.height,
+                dataBase64: base64ArrayBuffer(data),
+            });
+        } catch (error) {
+            this.send({ message: 'preview_error', filterIdx, error: String(error) });
+        }
+    };
+
     this.removePreview = function (filterIdx) {
         const entry = this.activePreviews.get(filterIdx);
         if (!entry) return;
-        try { entry.probe.remove(); } catch (e) {}
         this.activePreviews.delete(filterIdx);
+        entry.pid = null;
+        if (entry.sink) {
+            try { session.remove_filter(entry.sink); } catch (error) {}
+        }
+        if (entry.ffsws) {
+            try { entry.ffsws.remove(); } catch (error) {}
+        }
     };
 
     this.stopPreview = function (filterIdx) {
         this.postTask(() => this.doStopPreview(filterIdx));
     };
 
-    // Stops the preview and notifies the dashboard.
     this.doStopPreview = function (filterIdx) {
         this.removePreview(filterIdx);
         this.send({ message: 'preview_stopped', filterIdx });
@@ -120,7 +153,6 @@ function PreviewManager(client) {
         this.postTask(() => this.doCleanup());
     };
 
-    // Removes all active previews on client disconnect.
     this.doCleanup = function () {
         const indexes = Array.from(this.activePreviews.keys());
         for (const filterIdx of indexes) this.removePreview(filterIdx);

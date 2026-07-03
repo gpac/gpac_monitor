@@ -26,6 +26,12 @@ const UPDATE_INTERVALS = {
     CPU_STATS: 500,
 };
 
+const PREVIEW = {
+    OSIZE: '128x128',
+    OFMT: 'rgba',
+    INTERVAL_US: 1000000,
+};
+
 // Log retention strategy: preserve errors (100%), prioritize warnings (80%), sample info/debug (20%/5%)
 const LOG_RETENTION = {
     maxHistorySize: 500,
@@ -46,5 +52,6 @@ export {
     PID_PROPS_LITE,
     FILTER_SUBSCRIPTION_FIELDS,
     UPDATE_INTERVALS,
+    PREVIEW,
     LOG_RETENTION,
 };
