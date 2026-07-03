@@ -3,7 +3,7 @@ import { MetricRow } from '../shared/tableLayout';
 import MetricInfoIcon from '../shared/MetricInfoIcon';
 import { TAB_STYLES } from '../styles';
 import type { NumericMetric } from '../../utils/statusViewModel';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 
 interface ReportSectionProps {
   metrics: NumericMetric[];

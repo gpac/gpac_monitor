@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
-import { parseFilterStatus } from '@/workers/filterStatusParser';
+import { parseMetricDefinitions } from '@/utils/metrics/metricDefinitionParser';
+import { parseFilterStatus } from '@/utils/metrics/filterStatusParser';
 import {
   buildFilterStatusViewModel,
   type FilterStatusViewModel,

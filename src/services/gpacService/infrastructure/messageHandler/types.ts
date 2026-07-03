@@ -1,5 +1,5 @@
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 import type { FilterStatusInput } from '@/services/gpacService/liveAdapter/extractParsedStatuses';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 

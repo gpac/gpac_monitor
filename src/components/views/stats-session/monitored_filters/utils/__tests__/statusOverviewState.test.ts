@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseFilterStatus } from '@/workers/filterStatusParser';
+import { parseFilterStatus } from '@/utils/metrics/filterStatusParser';
 import { buildFilterStatusViewModel } from '../statusViewModel';
 import { getStatusOverviewState } from '../statusOverviewState';
 
