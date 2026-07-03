@@ -33,7 +33,7 @@ function JSClient(id, client, all_clients, ensureMonitoringLoop) {
             this.filterManager.cleanup();
             this.previewManager.cleanup();
         } catch (error) {
-            console.error(`JSClient ${this.id}: Error during cleanup:`, error);
+            print(`JSClient ${this.id}: Error during cleanup: ${error}`);
         }
     };
 }

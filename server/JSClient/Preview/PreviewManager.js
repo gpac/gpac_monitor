@@ -12,11 +12,15 @@ function PreviewManager(client) {
     };
 
     this.postTask = function (taskFn) {
-        session.post_task(() => {
-            if (session.last_task) return false;
-            taskFn();
-            return false;
-        });
+        try {
+            session.post_task(() => {
+                if (session.last_task) return false;
+                taskFn();
+                return false;
+            });
+        } catch (error) {
+            print(`[Preview] postTask failed: ${error}`);
+        }
     };
 
     this.findPreviewTarget = function (filter) {
@@ -46,6 +50,7 @@ function PreviewManager(client) {
             this.send({ message: 'preview_error', filterIdx, error: 'not a video PID' });
             return;
         }
+      
         this.removePreview(filterIdx);
 
         const entry = {
@@ -55,7 +60,6 @@ function PreviewManager(client) {
             width: 0,
             height: 0,
             lastEmitUs: 0,
-            cachedPacket: null,
         };
         this.activePreviews.set(filterIdx, entry);
         try {
@@ -63,11 +67,14 @@ function PreviewManager(client) {
                 `ffsws:osize=${PREVIEW.OSIZE}:ofmt=${PREVIEW.OFMT}:ITAG=NODISPLAY`,
                 target
             );
+     
             entry.sink = this.createPreviewSink(filterIdx, entry);
             entry.sink.set_source(entry.ffsws);
+         
+            target.reconnect();
+     
         } catch (error) {
-
-
+         
             this.removePreview(filterIdx);
             this.send({ message: 'preview_error', filterIdx, error: String(error) });
         }
@@ -76,18 +83,28 @@ function PreviewManager(client) {
     this.createPreviewSink = function (filterIdx, entry) {
         const previewManager = this;
         const sink = session.new_filter(`PreviewSink_${filterIdx}`);
-        sink.set_cap({ id: 'StreamType', value: 'Video', in: true });
+        sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
         sink.set_cap({ id: 'CodecID', value: 'raw', in: true });
         sink.configure_pid = function (pid) {
-            if (entry.pid !== pid) {
-                entry.pid = pid;
-                pid.send_event(new FilterEvent(GF_FEVT_PLAY));
+            try {
+                if (entry.pid !== pid) {
+                    entry.pid = pid;
+                    pid.send_event(new FilterEvent(GF_FEVT_PLAY));
+               
+                }
+                entry.width = pid.get_prop('Width');
+                entry.height = pid.get_prop('Height');
+            
+            } catch (error) {
+                print(`[Preview] configure_pid error: ${error}`);
             }
-            entry.width = pid.get_prop('Width');
-            entry.height = pid.get_prop('Height');
         };
         sink.process = function () {
-            previewManager.drainPreviewPackets(filterIdx, entry);
+            try {
+                previewManager.drainPreviewPackets(filterIdx, entry);
+            } catch (error) {
+                print(`[Preview] process error: ${error}`);
+            }
         };
         return sink;
     };
@@ -108,13 +125,11 @@ function PreviewManager(client) {
 
     this.sendFrame = function (filterIdx, entry, packet) {
         try {
-            let data;
             if (packet.frame_ifce) {
-                entry.cachedPacket = packet.clone(entry.cachedPacket);
-                data = entry.cachedPacket.data;
-            } else {
-                data = packet.data;
+                this.send({ message: 'preview_error', filterIdx, error: 'GPU frame preview not supported yet' });
+                return;
             }
+            const data = packet.data;
             this.send({
                 message: 'preview_frame',
                 filterIdx,
@@ -122,7 +137,9 @@ function PreviewManager(client) {
                 height: entry.height,
                 dataBase64: base64ArrayBuffer(data),
             });
+         
         } catch (error) {
+            print(`[Preview] sendFrame error: ${error}`);
             this.send({ message: 'preview_error', filterIdx, error: String(error) });
         }
     };
@@ -133,11 +150,12 @@ function PreviewManager(client) {
         this.activePreviews.delete(filterIdx);
         entry.pid = null;
         if (entry.sink) {
-            try { session.remove_filter(entry.sink); } catch (error) {}
+            try { session.remove_filter(entry.sink); } catch (error) { print(`[Preview] sink remove error: ${error}`); }
         }
         if (entry.ffsws) {
-            try { entry.ffsws.remove(); } catch (error) {}
+            try { entry.ffsws.remove(); } catch (error) { print(`[Preview] ffsws remove error: ${error}`); }
         }
+       
     };
 
     this.stopPreview = function (filterIdx) {
