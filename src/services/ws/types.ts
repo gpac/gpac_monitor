@@ -91,6 +91,8 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
 export interface PreviewFrameMessage {
   message: 'preview_frame';
   filterIdx: number;
+  width: number;
+  height: number;
   dataBase64: string;
 }
 

@@ -6,16 +6,22 @@ import type {
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import type { MessageHandlerDependencies } from './types';
 
+export interface PreviewFrame {
+  width: number;
+  height: number;
+  dataBase64: string;
+}
+
 export interface PreviewHandlerState {
   filterIdx: number | null;
-  dataBase64: string | null;
+  frame: PreviewFrame | null;
   loading: boolean;
   error: string | null;
 }
 
 const EMPTY_PREVIEW_STATE: PreviewHandlerState = {
   filterIdx: null,
-  dataBase64: null,
+  frame: null,
   loading: false,
   error: null,
 };
@@ -34,7 +40,7 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     });
     this.updateDataAndNotify({
       filterIdx,
-      dataBase64: null,
+      frame: null,
       loading: true,
       error: null,
     });
@@ -53,7 +59,11 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   public handlePreviewFrame(data: PreviewFrameMessage): void {
     this.updateDataAndNotify({
       filterIdx: data.filterIdx,
-      dataBase64: data.dataBase64,
+      frame: {
+        width: data.width,
+        height: data.height,
+        dataBase64: data.dataBase64,
+      },
       loading: false,
       error: null,
     });
@@ -63,7 +73,7 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   public handlePreviewError(data: PreviewErrorMessage): void {
     this.updateDataAndNotify({
       filterIdx: data.filterIdx,
-      dataBase64: null,
+      frame: null,
       loading: false,
       error: data.error,
     });
