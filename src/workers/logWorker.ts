@@ -21,7 +21,7 @@ const BATCH_SIZE = 500; // Max logs per batch sent to the UI (reduced for debug)
 const FLUSH_INTERVAL = 200; // Flush interval in ms (increased for debug)
 const MAX_BUFFER_SIZE = 5000; // Circuit breaker - drop logs if buffer too big
 
-class LogProcessor {
+export class LogProcessor {
   private buffer: GpacLogEntry[] = [];
   private flushTimeout: ReturnType<typeof setTimeout> | null = null;
   private totalProcessed = 0;
