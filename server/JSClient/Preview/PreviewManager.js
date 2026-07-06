@@ -83,6 +83,7 @@ function PreviewManager(client) {
     this.createPreviewSink = function (filterIdx, entry) {
         const previewManager = this;
         const sink = session.new_filter(`PreviewSink_${filterIdx}`);
+        sink.require_source_id = true;
         sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
         sink.set_cap({ id: 'CodecID', value: 'raw', in: true });
         sink.configure_pid = function (pid) {
