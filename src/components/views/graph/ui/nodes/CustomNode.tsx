@@ -26,14 +26,10 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   const { label, ipid, opid, nb_ipid, nb_opid } = data;
   const { hasError, hasWarning } = useFilterAlerts(data.idx);
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
-  const node = useMemo(
-    () => ({
-      data,
-      position: { x: 0, y: 0 },
-      ...nodeProps,
-    }),
-    [data, nodeProps],
-  );
+  const [textColor, backgroundColor] = useGraphColors({
+    id: nodeProps.id,
+    data,
+  } as unknown as Parameters<typeof useGraphColors>[0]);
 
   // Compute display label (basename + truncate)
   const { fullLabel, displayLabel } = useMemo(() => {
@@ -49,7 +45,6 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
     return truncateMiddle(base, 18);
   };
 
-  const [textColor, backgroundColor] = useGraphColors(node);
   const isMonitored = data.isMonitored;
   const borderClass = isMonitored
     ? 'ring-4 ring-red-700/90'

@@ -77,12 +77,12 @@ describe('selectVisibleLogs', () => {
       [GpacLogTool.FILTER]: [makeLog(1, GpacLogTool.FILTER, GpacLogLevel.INFO)],
     } as Record<GpacLogTool, GpacLogEntry[]>;
 
-    const state1 = makeState(
-      makeLogsState({ buffers, highlightedLogId: null }),
-    );
-    const state2 = makeState(
-      makeLogsState({ buffers, highlightedLogId: 'some-log-id' }),
-    );
+    const baseLogsState = makeLogsState({ buffers });
+    const state1 = makeState(baseLogsState);
+    const state2 = makeState({
+      ...baseLogsState,
+      highlightedLogId: 'some-log-id',
+    });
 
     const result1 = selectVisibleLogs(state1);
     const recomputationsBefore = selectVisibleLogs.recomputations();
