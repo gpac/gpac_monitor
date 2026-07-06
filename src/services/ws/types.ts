@@ -3,6 +3,7 @@ import {
   LogManagerStatus,
   GpacLogConfig,
 } from '@/types/domain/gpac/log-types';
+import type { FilterArgument } from '@/types/domain/gpac/gpac_args';
 
 // Base interface for all responses
 interface BaseWSResponse {
@@ -47,6 +48,14 @@ enum WSResponseType {
   LOG_CONFIG_CHANGED = 'log_config_changed',
   COMMAND_LINE_RESPONSE = 'command_line_response',
   SESSION_END = 'session_end',
+}
+
+export interface DetailsMessage {
+  message: 'details';
+  filter: {
+    idx: number;
+    gpac_args?: FilterArgument[];
+  };
 }
 
 export interface SessionStatsMessage {
