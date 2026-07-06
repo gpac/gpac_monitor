@@ -4,12 +4,13 @@ import { Badge } from '@/components/ui/badge';
 import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
-import { StatusBadge } from '@/components/common/StatusBadge';
+import { selectAllFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { formatBytes } from '@/utils/formatting/bytes';
-import { formatTime, microsecondsToSeconds } from '@/utils/formatting/time';
+import { formatTime } from '@/utils/formatting/time';
 import { formatNumber, formatPacketRate } from '@/utils/formatting/numbers';
+import { microsecondsToSeconds } from '@/utils/formatting/time';
 
 interface FilterStatCardProps {
   filter: EnrichedFilterOverview;
@@ -30,7 +31,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
     // Get log alerts for this filter by idx (unique identifier)
     const alerts = useAppSelector((state) =>
       filter.idx !== undefined
-        ? selectFilterAlerts(String(filter.idx))(state)
+        ? (selectAllFilterAlerts(state)[String(filter.idx)] ?? null)
         : null,
     );
 
@@ -118,28 +119,23 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
             >
               {sessionTypeLabel}
             </Badge>
-            {/* PID/Arg reconfiguration badges */}
-            {filter.idx !== undefined && (
-              <FilterChangeBadges filterIdx={filter.idx} />
-            )}
-            {/* Log Alerts Badges */}
+            <FilterChangeBadges filterIdx={filter.idx ?? -1} />
             <StatusBadge
-              label={`${alerts?.errors ?? 0} ERR`}
+              label={`${alerts?.errors} ERR`}
               colorScheme="red"
-              visible={!!alerts && alerts.errors > 0}
-              title={`${alerts?.errors ?? 0} error(s) in logs`}
+              visible={Boolean(alerts && alerts.errors > 0)}
+              title={`${alerts?.errors} error(s) in logs`}
             />
             <StatusBadge
-              label={`${alerts?.warnings ?? 0} WARN`}
+              label={`${alerts?.warnings} WARN`}
               colorScheme="amber"
-              visible={!!alerts && alerts.warnings > 0}
-              title={`${alerts?.warnings ?? 0} warning(s) in logs`}
+              visible={Boolean(alerts && alerts.warnings > 0)}
+              title={`${alerts?.warnings} warning(s) in logs`}
             />
             <StatusBadge
               label="EOS"
               colorScheme="emerald"
-              visible={!!(filter.is_eos || filter.status?.includes('EOS'))}
-              title="End of stream"
+              visible={Boolean(filter.is_eos || filter.status?.includes('EOS'))}
             />
           </div>
         </div>
@@ -195,6 +191,8 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
       </div>
     );
   },
+  // Note: memo comparison removed to allow alerts updates
+  // Alerts come from Redux and need to trigger re-renders
 );
 
 FilterStatCard.displayName = 'FilterStatCard';

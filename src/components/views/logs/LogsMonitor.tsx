@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { RiScrollToBottomLine, RiFilterOffLine } from 'react-icons/ri';
-import { LuClock } from 'react-icons/lu';
+import { MdOutlineTimer } from 'react-icons/md';
 import WidgetWrapper from '../../widget/WidgetWrapper';
 import { useLogs } from './hooks/useLogs';
 import { useLogsRedux } from './hooks/useLogsRedux';
@@ -191,52 +191,67 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
     selectAllTools,
   ]);
 
+  const customActions = useMemo(
+    () => (
+      <div className="flex items-center gap-2">
+        {isUIFilterActive && (
+          <CustomTooltip content="Clear UI filter" side="bottom">
+            <button
+              onClick={() => dispatch(clearUIFilter())}
+              className="px-2 py-1 text-xs rounded bg-red-900/50 border border-red-800/50 text-red-200 hover:bg-red-900/50"
+            >
+              <RiFilterOffLine className="w-4 h-4" />
+            </button>
+          </CustomTooltip>
+        )}
+        <CustomTooltip
+          content={
+            timestampMode === 'relative'
+              ? 'Switch to absolute time'
+              : 'Switch to relative time'
+          }
+          side="bottom"
+        >
+          <button
+            onClick={() => dispatch(toggleTimestampMode())}
+            className="px-2 py-1 text-xs rounded bg-gray-700/50 border border-gray-600/50 text-gray-200 hover:bg-gray-700/80"
+          >
+            <MdOutlineTimer className="w-4 h-4" />
+          </button>
+        </CustomTooltip>
+        <CustomTooltip
+          content="Configure log levels for each tool"
+          side="bottom"
+        >
+          <ToolSettingsDropdown
+            levelsByTool={levelsByTool}
+            defaultAllLevel={defaultAllLevel}
+            currentTool={currentTool}
+            onToolLevelChange={setToolLevel}
+            onDefaultAllLevelChange={setDefaultLevel}
+            onToolNavigate={setTool}
+          />
+        </CustomTooltip>
+      </div>
+    ),
+    [
+      isUIFilterActive,
+      timestampMode,
+      levelsByTool,
+      defaultAllLevel,
+      currentTool,
+      setToolLevel,
+      setDefaultLevel,
+      setTool,
+      dispatch,
+    ],
+  );
+
   return (
     <WidgetWrapper
       id={id}
       statusBadge={statusBadge}
-      customActions={
-        <div className="flex items-center gap-2">
-          {isUIFilterActive && (
-            <CustomTooltip content="Clear UI filter" side="bottom">
-              <button
-                onClick={() => dispatch(clearUIFilter())}
-                className="px-2 py-1 text-xs rounded bg-red-900/50 border border-red-800/50 text-red-200 hover:bg-red-900/50"
-              >
-                <RiFilterOffLine className="w-4 h-4" />
-              </button>
-            </CustomTooltip>
-          )}
-          <CustomTooltip
-            content={
-              timestampMode === 'relative'
-                ? 'Switch to absolute time'
-                : 'Switch to relative time'
-            }
-            side="bottom"
-          >
-            <button
-              onClick={() => dispatch(toggleTimestampMode())}
-              className="px-2 py-1 text-xs rounded bg-gray-700/50 border border-gray-600/50 text-gray-200 hover:bg-gray-700/80"
-            >
-              <LuClock className="w-4 h-4" />
-            </button>
-          </CustomTooltip>
-          <CustomTooltip
-            content="Configure log levels for each tool"
-            side="bottom"
-          >
-            <ToolSettingsDropdown
-              levelsByTool={levelsByTool}
-              defaultAllLevel={defaultAllLevel}
-              currentTool={currentTool}
-              onToolLevelChange={setToolLevel}
-              onDefaultAllLevelChange={setDefaultLevel}
-              onToolNavigate={setTool}
-            />
-          </CustomTooltip>
-        </div>
-      }
+      customActions={customActions}
     >
       <div className="flex flex-col h-full bg-stat stat">
         {/* Logs */}

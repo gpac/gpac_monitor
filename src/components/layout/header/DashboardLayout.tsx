@@ -26,6 +26,12 @@ import SidebarCloseButton from '../sidebar/SidebarCloseButton';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
+const EMPTY_WIDGET_CONFIG = {
+  isMaximized: false,
+  isMinimized: false,
+  settings: {},
+};
+
 const DashboardLayout = () => {
   const dispatch = useAppDispatch();
   const activeWidgets = useAppSelector((state) => state.widgets.activeWidgets);
@@ -71,13 +77,7 @@ const DashboardLayout = () => {
         <div key={widget.id}>
           <Component
             id={widget.id}
-            config={
-              configs[widget.id] || {
-                isMaximized: false,
-                isMinimized: false,
-                settings: {},
-              }
-            }
+            config={configs[widget.id] || EMPTY_WIDGET_CONFIG}
             isDetached={widget.isDetached}
             detachedFilterIdx={widget.detachedFilterIdx}
           />

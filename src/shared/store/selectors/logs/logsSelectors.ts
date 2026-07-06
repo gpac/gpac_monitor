@@ -12,6 +12,12 @@ export const selectCurrentTool = createSelector(
   (logsState) => logsState.currentTool,
 );
 
+/** Get the log buffers (keyed by tool) */
+export const selectLogBuffers = createSelector(
+  [selectLogsState],
+  (logsState) => logsState.buffers,
+);
+
 /** Get the levels by tool mapping */
 export const selectLevelsByTool = createSelector(
   [selectLogsState],

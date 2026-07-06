@@ -4,11 +4,10 @@ import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
-import { useDataMode } from '@/shared/hooks/data/useDataMode';
-import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
+import { selectAllFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
-import { StatusBadge } from '@/components/common/StatusBadge';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
+import { StatusBadge } from '@/components/common/StatusBadge';
 import { FilterViewProvider } from './FilterViewContext';
 import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
@@ -67,7 +66,7 @@ const MonitoredFilterView = memo(
     // Get log alerts for this filter
     const alerts = useAppSelector((state) =>
       overviewData.filterIdx !== undefined
-        ? selectFilterAlerts(String(overviewData.filterIdx))(state)
+        ? (selectAllFilterAlerts(state)[String(overviewData.filterIdx)] ?? null)
         : null,
     );
 
@@ -85,11 +84,7 @@ const MonitoredFilterView = memo(
       }),
       [inputPids.length, outputPids.length],
     );
-    const { isHistory } = useDataMode();
     const openLogsWidget = useOpenLogsWidget();
-    const activeTabClass = isHistory
-      ? 'h-7 px-3 font-medium data-[state=active]:border-b-2 data-[state=active]:border-history'
-      : 'h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab';
     const filterKey =
       overviewData.filterIdx !== undefined
         ? String(overviewData.filterIdx)
@@ -108,10 +103,10 @@ const MonitoredFilterView = memo(
               <div className="flex justify-stretch items-center gap-4">
                 <FilterChangeBadges filterIdx={overviewData.filterIdx} />
                 <StatusBadge
-                  label={`${alerts?.errors ?? 0} ERR`}
+                  label={`${alerts?.errors} ERR`}
                   colorScheme="red"
                   visible={Boolean(alerts && alerts.errors > 0)}
-                  title={`${alerts?.errors ?? 0} error(s) in logs`}
+                  title={`${alerts?.errors} error(s) in logs`}
                   onClick={
                     filterKey
                       ? () =>
@@ -123,10 +118,10 @@ const MonitoredFilterView = memo(
                   }
                 />
                 <StatusBadge
-                  label={`${alerts?.warnings ?? 0} WARN`}
+                  label={`${alerts?.warnings} WARN`}
                   colorScheme="amber"
                   visible={Boolean(alerts && alerts.warnings > 0)}
-                  title={`${alerts?.warnings ?? 0} warning(s) in logs`}
+                  title={`${alerts?.warnings} warning(s) in logs`}
                   onClick={
                     filterKey
                       ? () =>
@@ -139,17 +134,29 @@ const MonitoredFilterView = memo(
                 />
               </div>
 
-              <TabsList className="h-8 justify-start w-full">
-                <TabsTrigger value="overview" className={activeTabClass}>
+              <TabsList className="h-8 justify-start  w-full">
+                <TabsTrigger
+                  value="overview"
+                  className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
+                >
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="network" className={activeTabClass}>
+                <TabsTrigger
+                  value="network"
+                  className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
+                >
                   Stats
                 </TabsTrigger>
-                <TabsTrigger value="inputs" className={activeTabClass}>
+                <TabsTrigger
+                  value="inputs"
+                  className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
+                >
                   Inputs ({counts.inputs})
                 </TabsTrigger>
-                <TabsTrigger value="outputs" className={activeTabClass}>
+                <TabsTrigger
+                  value="outputs"
+                  className="h-7 px-3 font-medium data-[state=active]:text-monitor-active-tab data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-tab"
+                >
                   Outputs ({counts.outputs})
                 </TabsTrigger>
               </TabsList>
