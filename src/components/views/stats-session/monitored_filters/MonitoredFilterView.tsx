@@ -4,7 +4,7 @@ import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
-import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
+import { selectAllFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
@@ -66,7 +66,7 @@ const MonitoredFilterView = memo(
     // Get log alerts for this filter
     const alerts = useAppSelector((state) =>
       overviewData.filterIdx !== undefined
-        ? selectFilterAlerts(String(overviewData.filterIdx))(state)
+        ? (selectAllFilterAlerts(state)[String(overviewData.filterIdx)] ?? null)
         : null,
     );
 

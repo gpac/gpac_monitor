@@ -1,5 +1,5 @@
 import { useAppSelector } from './redux';
-import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
+import { selectAllFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 
 export interface FilterAlertStatus {
   hasError: boolean;
@@ -7,8 +7,8 @@ export interface FilterAlertStatus {
 }
 
 export function useFilterAlerts(filterIdx: number): FilterAlertStatus {
-  const alerts = useAppSelector((state) =>
-    selectFilterAlerts(String(filterIdx))(state),
+  const alerts = useAppSelector(
+    (state) => selectAllFilterAlerts(state)[String(filterIdx)] ?? null,
   );
   return {
     hasError: (alerts?.errors ?? 0) > 0,
