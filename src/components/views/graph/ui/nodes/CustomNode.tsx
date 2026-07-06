@@ -7,6 +7,7 @@ import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { useFilterAlerts } from '@/shared/hooks';
 import { getBasename, truncateMiddle } from '../../utils/labelUtils';
+import { arePidListsEqual } from '../../utils/pidComparator';
 import NodeToolbarActions from './NodeToolbarActions';
 
 interface CustomNodeProps extends NodeProps {
@@ -281,9 +282,8 @@ const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
     prevProps.selected === nextProps.selected &&
     prevProps.data.isMonitored === nextProps.data.isMonitored &&
     prevProps.data.isStalled === nextProps.data.isStalled &&
-    JSON.stringify(prevProps.data.ipid) ===
-      JSON.stringify(nextProps.data.ipid) &&
-    JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)
+    arePidListsEqual(prevProps.data.ipid, nextProps.data.ipid) &&
+    arePidListsEqual(prevProps.data.opid, nextProps.data.opid)
   );
 });
 
