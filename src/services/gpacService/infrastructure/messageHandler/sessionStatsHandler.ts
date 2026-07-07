@@ -1,5 +1,6 @@
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { MessageThrottler } from '@/services/utils/MessageThrottler';
+import { SubscriptionLifecycle } from '@/services/utils/SubscriptionLifecycle';
 import { WSMessageType } from '@/services/ws/types';
 import { SessionFilterStatistics } from '@/types/domain/gpac/index';
 import { generateID } from '@/utils/core';
@@ -12,71 +13,37 @@ export class SessionStatsHandler {
     private dependencies: MessageHandlerDependencies,
     private isLoaded: () => boolean,
   ) {}
-  // Maps to track pending subscription/unsubscription requests
-  private pendingSessionSubscribe: Promise<void> | null = null;
-  private pendingSessionUnsubscribe: Promise<void> | null = null;
 
-  // Timeouts for delayed auto-unsubscription to avoid premature cleanup during React re-renders
-  private sessionAutoUnsubscribeTimeout: NodeJS.Timeout | null = null;
+  private lifecycle = new SubscriptionLifecycle();
   private messageThrottler = new MessageThrottler();
-
   private sessionStatsSubscribable = new UpdatableSubscribable<
     SessionFilterStatistics[]
   >([]);
 
-  private ensureLoaded(): boolean {
+  private ensureLoaded(): void {
     if (!this.isLoaded()) {
-      const error = new Error('Service not loaded');
-      throw error;
+      throw new Error('Service not loaded');
     }
-    return true;
   }
 
-  public async subscribeToSession(): Promise<void> {
+  public subscribeToSession(): Promise<void> {
     this.ensureLoaded();
-
-    if (this.pendingSessionSubscribe) {
-      return this.pendingSessionSubscribe;
-    }
-
-    // Create and store the promise
-    this.pendingSessionSubscribe = (async () => {
-      try {
-        await this.dependencies.send({
-          type: WSMessageType.SUBSCRIBE_SESSION,
-          id: generateID(),
-        });
-      } finally {
-        // Clear the pending request when done
-        this.pendingSessionSubscribe = null;
-      }
-    })();
-
-    return this.pendingSessionSubscribe;
+    return this.lifecycle.subscribe(undefined, () =>
+      this.dependencies.send({
+        type: WSMessageType.SUBSCRIBE_SESSION,
+        id: generateID(),
+      }),
+    );
   }
 
-  public async unsubscribeFromSession(): Promise<void> {
+  public unsubscribeFromSession(): Promise<void> {
     this.ensureLoaded();
-
-    // Check if there's already a pending unsubscribe request
-    if (this.pendingSessionUnsubscribe) {
-      return this.pendingSessionUnsubscribe;
-    }
-
-    // Create and store the promise
-    this.pendingSessionUnsubscribe = (async () => {
-      try {
-        await this.dependencies.send({
-          type: WSMessageType.UNSUBSCRIBE_SESSION,
-          id: generateID(),
-        });
-      } finally {
-        // Clear the pending request when done (success or failure)
-        this.pendingSessionUnsubscribe = null;
-      }
-    })();
-
-    return this.pendingSessionUnsubscribe;
+    return this.lifecycle.unsubscribe(undefined, () =>
+      this.dependencies.send({
+        type: WSMessageType.UNSUBSCRIBE_SESSION,
+        id: generateID(),
+      }),
+    );
   }
 
   public handleSessionStats(stats: SessionFilterStatistics[]): void {
@@ -93,11 +60,7 @@ export class SessionStatsHandler {
   public subscribeToSessionStats(
     callback: (stats: SessionFilterStatistics[]) => void,
   ): () => void {
-    // Cancel any pending auto-unsubscribe since we have a new subscriber
-    if (this.sessionAutoUnsubscribeTimeout) {
-      clearTimeout(this.sessionAutoUnsubscribeTimeout);
-      this.sessionAutoUnsubscribeTimeout = null;
-    }
+    this.lifecycle.cancelAutoUnsubscribe(undefined);
 
     const isFirstSubscriber = !this.sessionStatsSubscribable.hasSubscribers;
 
@@ -108,40 +71,25 @@ export class SessionStatsHandler {
       { immediate: true },
     );
 
-    // If this is the first subscriber, automatically subscribe to server
-    // Server will use its configured interval
     if (isFirstSubscriber) {
-      this.subscribeToSession().catch((_error) => {});
+      this.subscribeToSession().catch(() => {});
     }
 
     return () => {
       unsubscribe();
 
-      // If no more subscribers, schedule delayed auto-unsubscribe to avoid premature cleanup
       if (!this.sessionStatsSubscribable.hasSubscribers) {
-        // Cancel any existing timeout
-        if (this.sessionAutoUnsubscribeTimeout) {
-          clearTimeout(this.sessionAutoUnsubscribeTimeout);
-        }
-
-        // Schedule unsubscribe after a delay to allow for React re-renders
-        this.sessionAutoUnsubscribeTimeout = setTimeout(() => {
-          this.sessionAutoUnsubscribeTimeout = null;
-
-          // Double-check there are still no subscribers before unsubscribing
+        this.lifecycle.scheduleAutoUnsubscribe(undefined, () => {
           if (!this.sessionStatsSubscribable.hasSubscribers) {
-            this.unsubscribeFromSession().catch((_error) => {});
+            this.unsubscribeFromSession().catch(() => {});
           }
-        }, 100); // 100ms delay to handle React re-renders
+        });
       }
     };
   }
 
   public cleanup(): void {
     this.messageThrottler.clear();
-    if (this.sessionAutoUnsubscribeTimeout) {
-      clearTimeout(this.sessionAutoUnsubscribeTimeout);
-      this.sessionAutoUnsubscribeTimeout = null;
-    }
+    this.lifecycle.cleanup();
   }
 }

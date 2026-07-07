@@ -19,33 +19,30 @@ export interface LogWorkerResponse {
 // Worker configuration
 const BATCH_SIZE = 500; // Max logs per batch sent to the UI (reduced for debug)
 const FLUSH_INTERVAL = 200; // Flush interval in ms (increased for debug)
-const MAX_BUFFER_SIZE = 100; // Circuit breaker - drop logs if buffer too big
+const MAX_BUFFER_SIZE = 5000; // Circuit breaker - drop logs if buffer too big
 
-class LogProcessor {
+export class LogProcessor {
   private buffer: GpacLogEntry[] = [];
-  private flushTimeout: NodeJS.Timeout | null = null;
+  private flushTimeout: ReturnType<typeof setTimeout> | null = null;
   private totalProcessed = 0;
   private totalSent = 0;
-
-  constructor() {
-    this.startFlushTimer();
-  }
 
   addLogs(logs: GpacLogEntry[]) {
     this.totalProcessed += logs.length;
 
+    this.buffer.push(...logs);
+
     // Circuit breaker - drop logs if buffer is too full (keep for safety)
     if (this.buffer.length > MAX_BUFFER_SIZE) {
       // Keep only the most recent logs
-      this.buffer = this.buffer.slice(-MAX_BUFFER_SIZE / 2);
-      return;
+      this.buffer = this.buffer.slice(-MAX_BUFFER_SIZE);
     }
-
-    this.buffer.push(...logs);
 
     // If the buffer exceeds the max size, flush immediately
     if (this.buffer.length >= BATCH_SIZE) {
       this.flush();
+    } else {
+      this.scheduleFlush();
     }
   }
 
@@ -73,27 +70,12 @@ class LogProcessor {
     if (this.flushTimeout) return;
 
     this.flushTimeout = setTimeout(() => {
-      this.flush();
       this.flushTimeout = null;
-    }, FLUSH_INTERVAL);
-  }
-
-  private flushIntervalId: NodeJS.Timeout | null = null;
-
-  private startFlushTimer() {
-    // Periodic flush to avoid logs getting stuck
-    this.flushIntervalId = setInterval(() => {
-      if (this.buffer.length > 0 && !this.flushTimeout) {
-        this.flush();
-      }
+      this.flush();
     }, FLUSH_INTERVAL);
   }
 
   public cleanup() {
-    if (this.flushIntervalId) {
-      clearInterval(this.flushIntervalId);
-      this.flushIntervalId = null;
-    }
     if (this.flushTimeout) {
       clearTimeout(this.flushTimeout);
       this.flushTimeout = null;

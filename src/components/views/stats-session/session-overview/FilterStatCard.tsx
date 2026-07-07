@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { MonitoredBadge } from '@/components/ui/MonitoredBadge';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
+import { selectAllFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { formatBytes } from '@/utils/formatting/bytes';
@@ -31,7 +31,7 @@ const FilterStatCard: React.FC<FilterStatCardProps> = memo(
     // Get log alerts for this filter by idx (unique identifier)
     const alerts = useAppSelector((state) =>
       filter.idx !== undefined
-        ? selectFilterAlerts(String(filter.idx))(state)
+        ? (selectAllFilterAlerts(state)[String(filter.idx)] ?? null)
         : null,
     );
 

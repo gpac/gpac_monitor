@@ -6,7 +6,6 @@ import {
 } from '../logs/logsSelectors';
 import { GpacLogLevel, LOG_LEVEL_VALUES } from '@/types/domain/gpac/log-types';
 
-
 export interface HeaderLogCounts {
   error: number;
   warning: number;
@@ -84,16 +83,6 @@ export const selectAllFilterAlerts = createSelector(
   [selectLogsState],
   (logsState) => logsState.alertsByFilterKey,
 );
-
-/**
- * Get alerts for a specific filter by key
- * Returns null if no alerts for this filter
- */
-export const selectFilterAlerts = (filterKey: string) =>
-  createSelector(
-    [selectAllFilterAlerts],
-    (alerts) => alerts[filterKey] || null,
-  );
 
 /**
  * Extract threads with alerts from alertsByFilterKey

@@ -1,4 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { shallowEqual } from 'react-redux';
 import { RootState } from '../../types';
 import { TimeFraction } from '../../../../types/domain/gpac/model';
 
@@ -85,6 +86,11 @@ export const selectStalledFilters = createSelector(
     });
 
     return stalled;
+  },
+  {
+    memoizeOptions: {
+      resultEqualityCheck: shallowEqual,
+    },
   },
 );
 

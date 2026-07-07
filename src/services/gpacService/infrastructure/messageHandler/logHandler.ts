@@ -1,4 +1,5 @@
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
+import { SubscriptionLifecycle } from '@/services/utils/SubscriptionLifecycle';
 import { WSMessageType } from '@/services/ws/types';
 import {
   GpacLogEntry,
@@ -17,106 +18,51 @@ export class LogHandler {
     private callbacks?: MessageHandlerCallbacks,
   ) {}
 
-  // Maps to track pending subscription/unsubscription requests
-  private pendingLogSubscribe: Promise<void> | null = null;
-  private pendingLogUnsubscribe: Promise<void> | null = null;
-
-  // Timeouts for delayed auto-unsubscription to avoid premature cleanup during React re-renders
-  private logAutoUnsubscribeTimeout: NodeJS.Timeout | null = null;
-
-  // Track if we're currently subscribed
+  private lifecycle = new SubscriptionLifecycle();
   private isSubscribed = false;
-
-  // Property and methods for log management
   private logEntriesSubscribable = new UpdatableSubscribable<GpacLogEntry[]>(
     [],
   );
   private logStatusSubscribable =
     new UpdatableSubscribable<LogManagerStatus | null>(null);
-
-  // Worker subscription cleanup
   private workerUnsubscribe: (() => void) | null = null;
 
-  // Logic for subscribing and unsubscribing to logs
-  private ensureLoaded(): boolean {
+  private ensureLoaded(): void {
     if (!this.isLoaded()) {
-      const error = new Error('Service not loaded');
-      throw error;
+      throw new Error('Service not loaded');
     }
-    return true;
   }
 
   public async subscribeToLogs(
     logLevel: GpacLogConfig = 'all@quiet',
   ): Promise<void> {
     this.ensureLoaded();
-
-    // If already subscribed, update log level instead
-    if (this.isSubscribed) {
-      return this.updateLogLevel(logLevel);
-    }
-
-    // Check if there's already a pending subscribe request
-    if (this.pendingLogSubscribe) {
-      return this.pendingLogSubscribe;
-    }
-
-    // Create and store the promise
-    this.pendingLogSubscribe = (async () => {
-      try {
-        await this.dependencies.send({
-          type: WSMessageType.SUBSCRIBE_LOGS,
-          id: generateID(),
-          logLevel,
-        });
-        this.isSubscribed = true;
-
-        // Notify Redux of subscription status
-        if (this.callbacks?.onLogSubscriptionChange) {
-          this.callbacks.onLogSubscriptionChange(true);
-        }
-      } finally {
-        // Clear the pending request when done (success or failure)
-        this.pendingLogSubscribe = null;
-      }
-    })();
-
-    return this.pendingLogSubscribe;
+    if (this.isSubscribed) return this.updateLogLevel(logLevel);
+    return this.lifecycle.subscribe(undefined, async () => {
+      await this.dependencies.send({
+        type: WSMessageType.SUBSCRIBE_LOGS,
+        id: generateID(),
+        logLevel,
+      });
+      this.isSubscribed = true;
+      this.callbacks?.onLogSubscriptionChange?.(true);
+    });
   }
 
-  public async unsubscribeFromLogs(): Promise<void> {
+  public unsubscribeFromLogs(): Promise<void> {
     this.ensureLoaded();
-
-    // Check if there's already a pending unsubscribe request
-    if (this.pendingLogUnsubscribe) {
-      return this.pendingLogUnsubscribe;
-    }
-
-    // Create and store the promise
-    this.pendingLogUnsubscribe = (async () => {
-      try {
-        await this.dependencies.send({
-          type: WSMessageType.UNSUBSCRIBE_LOGS,
-          id: generateID(),
-        });
-        this.isSubscribed = false;
-
-        // Notify Redux of subscription status
-        if (this.callbacks?.onLogSubscriptionChange) {
-          this.callbacks.onLogSubscriptionChange(false);
-        }
-      } finally {
-        // Clear the pending request when done (success or failure)
-        this.pendingLogUnsubscribe = null;
-      }
-    })();
-
-    return this.pendingLogUnsubscribe;
+    return this.lifecycle.unsubscribe(undefined, async () => {
+      await this.dependencies.send({
+        type: WSMessageType.UNSUBSCRIBE_LOGS,
+        id: generateID(),
+      });
+      this.isSubscribed = false;
+      this.callbacks?.onLogSubscriptionChange?.(false);
+    });
   }
 
   public async updateLogLevel(logLevel: GpacLogConfigString): Promise<void> {
     this.ensureLoaded();
-
     await this.dependencies.send({
       type: WSMessageType.UPDATE_LOG_LEVEL,
       id: generateID(),
@@ -131,10 +77,7 @@ export class LogHandler {
   }
 
   public handleLogHistory(logs: GpacLogEntry[]): void {
-    // Keep the existing subscribable for backward compatibility
     this.logEntriesSubscribable.updateDataAndNotify(logs);
-
-    // Send to Redux for immediate UI update
     if (this.callbacks?.onLogsUpdate) {
       this.callbacks.onLogsUpdate(logs);
     } else {
@@ -149,14 +92,12 @@ export class LogHandler {
   }
 
   public handleLogConfigChanged(logLevel: GpacLogConfig): void {
-    // Update status if we have one
     const currentStatus = this.logStatusSubscribable.getSnapshot();
     if (currentStatus) {
-      const updatedStatus = {
+      this.logStatusSubscribable.updateDataAndNotify({
         ...currentStatus,
         logLevel,
-      };
-      this.logStatusSubscribable.updateDataAndNotify(updatedStatus);
+      });
     }
   }
 
@@ -164,15 +105,10 @@ export class LogHandler {
     callback: (logs: GpacLogEntry[]) => void,
     logLevel: GpacLogConfig = 'all@warning',
   ): () => void {
-    // Cancel any pending auto-unsubscribe since we have a new subscriber
-    if (this.logAutoUnsubscribeTimeout) {
-      clearTimeout(this.logAutoUnsubscribeTimeout);
-      this.logAutoUnsubscribeTimeout = null;
-    }
+    this.lifecycle.cancelAutoUnsubscribe(undefined);
 
     const isFirstSubscriber = !this.logEntriesSubscribable.hasSubscribers;
 
-    // Subscribe to logs processed by the Worker
     if (!this.workerUnsubscribe) {
       this.workerUnsubscribe = logWorkerService.subscribe((processedLogs) => {
         this.logEntriesSubscribable.updateDataAndNotify(processedLogs);
@@ -186,49 +122,33 @@ export class LogHandler {
       { immediate: true },
     );
 
-    // If this is the first subscriber, automatically subscribe to server
     if (isFirstSubscriber) {
-      this.subscribeToLogs(logLevel).catch((_error) => {});
+      this.subscribeToLogs(logLevel).catch(() => {});
     }
 
     return () => {
       unsubscribe();
 
-      // If no more subscribers, schedule delayed auto-unsubscribe to avoid premature cleanup
       if (!this.logEntriesSubscribable.hasSubscribers) {
-        // Cancel any existing timeout
-        if (this.logAutoUnsubscribeTimeout) {
-          clearTimeout(this.logAutoUnsubscribeTimeout);
-        }
-        // Clean up the Worker subscription
         if (this.workerUnsubscribe) {
           this.workerUnsubscribe();
           this.workerUnsubscribe = null;
         }
-
-        // Schedule unsubscribe after a delay to allow for React re-renders
-        this.logAutoUnsubscribeTimeout = setTimeout(() => {
-          this.logAutoUnsubscribeTimeout = null;
-
-          // Double-check there are still no subscribers before unsubscribing
+        this.lifecycle.scheduleAutoUnsubscribe(undefined, () => {
           if (!this.logEntriesSubscribable.hasSubscribers) {
-            this.unsubscribeFromLogs().catch((_error) => {});
+            this.unsubscribeFromLogs().catch(() => {});
           }
-        }, 100); // 100ms delay to handle React re-renders
+        });
       }
     };
   }
 
   public cleanup(): void {
-    if (this.logAutoUnsubscribeTimeout) {
-      clearTimeout(this.logAutoUnsubscribeTimeout);
-      this.logAutoUnsubscribeTimeout = null;
-    }
+    this.lifecycle.cleanup();
     if (this.workerUnsubscribe) {
       this.workerUnsubscribe();
       this.workerUnsubscribe = null;
     }
-    // Cleanup worker intervals
     logWorkerService.cleanup();
   }
 }
