@@ -3,6 +3,7 @@ import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { SessionFilterStatistics } from '../../../../../types/domain/gpac/filter-stats';
 import { useServiceReady } from '@/shared/hooks/useServiceReady';
+import { sessionStatsEqual } from '../../utils/sessionStatsEqual';
 
 export function useSessionStats(enabled = true, interval = 1000) {
   const [stats, setStats] = useState<SessionFilterStatistics[]>([]);
@@ -10,7 +11,7 @@ export function useSessionStats(enabled = true, interval = 1000) {
 
   const handleSessionStatsUpdate = useCallback(
     (newStats: SessionFilterStatistics[]) => {
-      setStats(newStats);
+      setStats((prev) => (sessionStatsEqual(prev, newStats) ? prev : newStats));
     },
     [],
   );
