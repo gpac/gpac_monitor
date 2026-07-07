@@ -199,36 +199,6 @@ const MonitoredFilterView = memo(
       </FilterViewProvider>
     );
   },
-  (prevProps, nextProps) => {
-    const filterDataUnchanged =
-      prevProps.filterData?.idx === nextProps.filterData?.idx &&
-      prevProps.filterData?.status === nextProps.filterData?.status &&
-      prevProps.filterData?.time === nextProps.filterData?.time;
-
-    // Overview data contains frequently changing metrics
-    const overviewUnchanged =
-      prevProps.overviewData.name === nextProps.overviewData.name &&
-      prevProps.overviewData.filterIdx === nextProps.overviewData.filterIdx;
-
-    // Network data changes frequently (bytes_sent/received)
-    const networkUnchanged =
-      prevProps.networkData === nextProps.networkData ||
-      (prevProps.networkData.bytesSent === nextProps.networkData.bytesSent &&
-        prevProps.networkData.bytesReceived ===
-          nextProps.networkData.bytesReceived);
-
-    // Arrays of PIDs - compare lengths (cheap) rather than deep comparison
-    const pidsUnchanged =
-      prevProps.inputPids.length === nextProps.inputPids.length &&
-      prevProps.outputPids.length === nextProps.outputPids.length;
-
-    return (
-      filterDataUnchanged &&
-      overviewUnchanged &&
-      networkUnchanged &&
-      pidsUnchanged
-    );
-  },
 );
 
 MonitoredFilterView.displayName = 'MonitoredFilterView';

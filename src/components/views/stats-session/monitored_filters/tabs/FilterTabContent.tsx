@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { OverviewTabData, TabPIDData, NetworkTabData } from '@/types/ui';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
@@ -17,30 +17,32 @@ interface FilterTabContentProps {
   isDetached?: boolean;
 }
 
-export const FilterTabContent: React.FC<FilterTabContentProps> = ({
-  overviewData,
-  networkData,
-  inputPids,
-  outputPids,
-  filterData,
-  onBack,
-  onOpenProperties,
-  initialTab,
-  isLoading = false,
-  isDetached = false,
-}) => {
-  const props = {
+export const FilterTabContent: React.FC<FilterTabContentProps> = memo(
+  ({
     overviewData,
     networkData,
     inputPids,
     outputPids,
+    filterData,
     onBack,
     onOpenProperties,
     initialTab,
-    isLoading,
-    isDetached,
-    ...(filterData && { filterData }),
-  };
+    isLoading = false,
+    isDetached = false,
+  }) => (
+    <MonitoredFilterView
+      overviewData={overviewData}
+      networkData={networkData}
+      inputPids={inputPids}
+      outputPids={outputPids}
+      filterData={filterData}
+      onBack={onBack}
+      onOpenProperties={onOpenProperties}
+      initialTab={initialTab}
+      isLoading={isLoading}
+      isDetached={isDetached}
+    />
+  ),
+);
 
-  return <MonitoredFilterView {...props} />;
-};
+FilterTabContent.displayName = 'FilterTabContent';

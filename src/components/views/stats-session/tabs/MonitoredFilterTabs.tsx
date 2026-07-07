@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef, useCallback } from 'react';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsContent } from '@/components/ui/tabs';
 import { FilterTabContent } from '../monitored_filters/tabs/FilterTabContent';
@@ -157,14 +157,14 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
     };
   }, [filterWithStats, stats, parsedStatus]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     // back to the main dashboard view
     onCardClick(-1);
-  };
+  }, [onCardClick]);
 
-  const handleOpenProperties = () => {
+  const handleOpenProperties = useCallback(() => {
     onOpenProperties(filter);
-  };
+  }, [onOpenProperties, filter]);
 
   return (
     <div className="flex-1 px-4">
