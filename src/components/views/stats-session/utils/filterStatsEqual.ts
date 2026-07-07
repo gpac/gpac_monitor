@@ -36,7 +36,7 @@ const pidStatsEqual = (prev: PIDStats, next: PIDStats): boolean =>
   (prev.max_playout_time ?? null) === (next.max_playout_time ?? null) &&
   (prev.min_playout_time ?? null) === (next.min_playout_time ?? null);
 
-const pidPropertiesEqual = (
+export const pidPropertiesEqual = (
   prev: PIDproperties,
   next: PIDproperties,
 ): boolean =>

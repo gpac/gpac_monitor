@@ -16,6 +16,7 @@ import {
 import { selectActiveConnection } from '@/shared/store/selectors';
 import { selectParsedStatus } from '@/shared/store/selectors/monitoredFilter';
 import { ConnectionStatus } from '@/types/communication/shared';
+import { stablePidList, type PidCache } from '../utils/stablePidList';
 
 interface MonitoredFilterTabsProps {
   monitoredFilters: Map<number, EnrichedFilterOverview>;
@@ -115,6 +116,9 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
     [filter, stats],
   );
 
+  const inputPidCacheRef = useRef<PidCache>(new Map());
+  const outputPidCacheRef = useRef<PidCache>(new Map());
+
   const tabsData = useMemo(() => {
     return {
       overviewData: {
@@ -138,22 +142,18 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
         packetsSent: filterWithStats.pck_sent || 0,
         packetsReceived: filterWithStats.pck_done || 0,
       },
-      inputPids: (stats as FilterStatsResponse)?.ipids
-        ? Object.values(
-            (stats as FilterStatsResponse).ipids as Record<
-              string,
-              PIDproperties
-            >,
-          )
-        : [],
-      outputPids: (stats as FilterStatsResponse)?.opids
-        ? Object.values(
-            (stats as FilterStatsResponse).opids as Record<
-              string,
-              PIDproperties
-            >,
-          )
-        : [],
+      inputPids: stablePidList(
+        inputPidCacheRef.current,
+        (stats as FilterStatsResponse)?.ipids as
+          | Record<string, PIDproperties>
+          | undefined,
+      ),
+      outputPids: stablePidList(
+        outputPidCacheRef.current,
+        (stats as FilterStatsResponse)?.opids as
+          | Record<string, PIDproperties>
+          | undefined,
+      ),
     };
   }, [filterWithStats, stats, parsedStatus]);
 

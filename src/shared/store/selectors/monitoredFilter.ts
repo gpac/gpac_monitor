@@ -42,14 +42,6 @@ export const selectFilterLastTaskTimeData = createSelector(
     monitoredFilterState.dataByFilter[filterId]?.lastTaskTime ?? [],
 );
 
-/**
- * Select max points configuration
- */
-export const d = createSelector(
-  [selectMonitoredFilterState],
-  (monitoredFilterState) => monitoredFilterState.maxPoints,
-);
-
 export const selectSelectedPidTargets = createSelector(
   [selectMonitoredFilterState],
   (state) => state.selectedPidTargets,
