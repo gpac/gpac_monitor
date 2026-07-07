@@ -12,6 +12,7 @@ function PreviewManager(client) {
     };
 
     this.postTask = function (taskFn) {
+        if (!session) return;
         try {
             session.post_task(() => {
                 if (session.last_task) return false;
@@ -67,12 +68,11 @@ function PreviewManager(client) {
                 `ffsws:osize=${PREVIEW.OSIZE}:ofmt=${PREVIEW.OFMT}:ITAG=NODISPLAY`,
                 target
             );
-     
+
             entry.sink = this.createPreviewSink(filterIdx, entry);
             entry.sink.set_source(entry.ffsws);
-         
+
             target.reconnect();
-     
         } catch (error) {
          
             this.removePreview(filterIdx);
@@ -91,11 +91,10 @@ function PreviewManager(client) {
                 if (entry.pid !== pid) {
                     entry.pid = pid;
                     pid.send_event(new FilterEvent(GF_FEVT_PLAY));
-               
+
                 }
                 entry.width = pid.get_prop('Width');
                 entry.height = pid.get_prop('Height');
-            
             } catch (error) {
                 print(`[Preview] configure_pid error: ${error}`);
             }
@@ -138,7 +137,6 @@ function PreviewManager(client) {
                 height: entry.height,
                 dataBase64: base64ArrayBuffer(data),
             });
-         
         } catch (error) {
             print(`[Preview] sendFrame error: ${error}`);
             this.send({ message: 'preview_error', filterIdx, error: String(error) });
