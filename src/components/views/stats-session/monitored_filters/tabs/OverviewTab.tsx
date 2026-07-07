@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
+import { selectStalledFilters } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import { OverviewTabData } from '@/types/ui';
 import {
   formatBytes,
@@ -31,7 +31,7 @@ const OverviewTab = memo(
     const sourceIndicator = useSessionSourceIndicator();
 
     const isStalled = useAppSelector(
-      selectIsFilterStalled(filterIdx.toString()),
+      (state) => selectStalledFilters(state)[String(filterIdx)] ?? false,
     );
     const definitions = useAppSelector(selectMetricDefinitions);
     const healthInfo = getFilterHealthInfo(

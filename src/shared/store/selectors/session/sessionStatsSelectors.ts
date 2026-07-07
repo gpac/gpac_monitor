@@ -96,11 +96,3 @@ export const selectStalledFilters = createSelector(
     },
   },
 );
-
-/**
- * Selector to check if a specific filter is stalled
- */
-export const selectIsFilterStalled = (filterId: string) =>
-  createSelector([selectStalledFilters], (stalledFilters) => {
-    return stalledFilters[filterId] ?? false;
-  });

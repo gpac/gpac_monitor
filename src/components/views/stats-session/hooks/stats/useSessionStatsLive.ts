@@ -5,6 +5,7 @@ import { SubscriptionType } from '@/types/communication/subscription';
 import { SessionFilterStatistics } from '@/types/domain/gpac/filter-stats';
 import { useServiceReady } from '@/shared/hooks/connection/useServiceReady';
 import { selectSessionStats } from '@/shared/store/selectors/session/sessionStatsSelectors';
+import { sessionStatsEqual } from '../../utils/sessionStatsEqual';
 import type { SessionStatsResult } from './types';
 
 export function useSessionStatsLive(
@@ -12,10 +13,15 @@ export function useSessionStatsLive(
   interval = 1000,
 ): SessionStatsResult {
   const sessionStatsMap = useSelector(selectSessionStats);
-  const stats = useMemo(
-    () => Object.values(sessionStatsMap) as SessionFilterStatistics[],
-    [sessionStatsMap],
-  );
+  const prevStatsRef = useRef<SessionFilterStatistics[]>([]);
+  const stats = useMemo(() => {
+    const next = Object.values(sessionStatsMap) as SessionFilterStatistics[];
+    if (sessionStatsEqual(prevStatsRef.current, next)) {
+      return prevStatsRef.current;
+    }
+    prevStatsRef.current = next;
+    return next;
+  }, [sessionStatsMap]);
 
   const { isReady } = useServiceReady({ enabled });
   const unsubscribeRef = useRef<(() => void) | null>(null);
