@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { selectLogCounts, selectThreadAlerts } from '../headerSelectors';
 import type { RootState } from '../../../index';
 import type { LogsState } from '../../../slices/logs/logs.types';
-import { GpacLogLevel } from '@/types/domain/gpac/log-types';
+import { GpacLogLevel, LOG_LEVEL_VALUES } from '@/types/domain/gpac/log-types';
+
+const ERROR_LEVEL = LOG_LEVEL_VALUES[GpacLogLevel.ERROR];
 
 const makeLogsState = (overrides: Partial<LogsState> = {}): LogsState => ({
   currentTool: 'core',
@@ -36,7 +38,7 @@ describe('selectLogCounts', () => {
             {
               timestamp: 0,
               tool: 'core',
-              level: GpacLogLevel.ERROR,
+              level: ERROR_LEVEL,
               message: 'a',
             },
           ],
@@ -51,7 +53,7 @@ describe('selectLogCounts', () => {
             {
               timestamp: 1,
               tool: 'core',
-              level: GpacLogLevel.ERROR,
+              level: ERROR_LEVEL,
               message: 'a',
             },
           ],
@@ -74,7 +76,7 @@ describe('selectLogCounts', () => {
             {
               timestamp: 0,
               tool: 'core',
-              level: GpacLogLevel.ERROR,
+              level: ERROR_LEVEL,
               message: 'a',
             },
           ],
