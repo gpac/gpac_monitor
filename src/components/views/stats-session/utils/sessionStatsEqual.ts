@@ -1,6 +1,6 @@
 import type { SessionFilterStatistics } from '@/types/domain/gpac/filter-stats';
 
-const filterStatEqual = (
+export const sessionFilterStatEqual = (
   prev: SessionFilterStatistics,
   next: SessionFilterStatistics,
 ): boolean =>
@@ -26,5 +26,5 @@ export const sessionStatsEqual = (
   if (prev === next) return true;
   if (prev.length !== next.length) return false;
 
-  return prev.every((stat, index) => filterStatEqual(stat, next[index]));
+  return prev.every((stat, index) => sessionFilterStatEqual(stat, next[index]));
 };
