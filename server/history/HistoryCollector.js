@@ -2,8 +2,8 @@ import { Sys as sys } from 'gpaccore';
 import { HistoryWriter } from './HistoryWriter.js';
 import { PidDataCollector } from '../JSClient/Filters/PID/PidDataCollector.js';
 import { logHub } from '../JSClient/Sys/Utils/LogHub.js';
+import { RATE_LIMIT_US, MAX_LOG_MESSAGE_LENGTH } from '../config/history.config.js';
 
-const RATE_LIMIT_US = 1000 * 1000;
 const EVENT_VERSION = 1;
 const LOG_ID = '_hist_';
 const LOG_LEVEL_ERROR = 1;
@@ -278,7 +278,9 @@ this.recordArgUpdated = function(indexes, argsByFilter) {
         this.pendingLogs.push({
             timestamp: sys.clock_us(),
             tool, level,
-            message: message?.length > 500 ? message.substring(0, 500) + '...' : message,
+            message: message?.length > MAX_LOG_MESSAGE_LENGTH
+                ? message.substring(0, MAX_LOG_MESSAGE_LENGTH) + '...'
+                : message,
             thread_id,
             caller: caller?.idx !== undefined ? caller.idx : (caller?.name || null),
         });

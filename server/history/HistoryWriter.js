@@ -1,9 +1,7 @@
 import * as std from 'std';
 import * as os from 'os';
 import { ChunkStream } from './helpers/ChunkStream.js';
-
-const CHUNK_DURATION_US = 10 * 1000 * 1000;
-const MAX_LOG_PER_CHUNK = 5000;
+import { CHUNK_DURATION_US, MAX_LOG_PER_CHUNK } from '../config/history.config.js';
 
 function HistoryWriter(historyDir, sessionId) {
     const baseDir = historyDir || 'history';
