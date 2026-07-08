@@ -7,13 +7,10 @@ import { CpuMemoryOverview } from './components/CpuMemoryOverview';
 import { useCPUStats } from './hooks/useCPUStats';
 import WidgetWrapper from '@/components/widget/WidgetWrapper';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
-import { useChartDuration } from '@/shared/hooks';
+import { useChartDuration, useAppSelector } from '@/shared/hooks';
+import { selectCpuStatsInterval } from '@/shared/store/selectors';
 import type { ChartDuration } from '@/utils/charts';
-import {
-  CPU_SERVER_INTERVAL,
-  DEFAULT_CPU_HISTORY,
-  CPU_HISTORY_STORAGE_KEY,
-} from './constants';
+import { DEFAULT_CPU_HISTORY, CPU_HISTORY_STORAGE_KEY } from './constants';
 
 const CPU_DURATION_OPTIONS: ChartDuration[] = [
   '20s',
@@ -32,11 +29,13 @@ interface MetricsMonitorProps {
 const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   const [isResizing, setIsResizing] = useState(false);
 
-  // Chart duration management
+  const cpuStatsInterval = useAppSelector(selectCpuStatsInterval);
+
+  // Chart duration management (encapsulated logic)
   const { duration, setDuration, windowDuration, maxPoints } = useChartDuration(
     CPU_HISTORY_STORAGE_KEY,
     DEFAULT_CPU_HISTORY,
-    CPU_SERVER_INTERVAL,
+    cpuStatsInterval,
   );
 
   // Optimize resize performance
@@ -50,7 +49,10 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
 
   const { isHistory } = useDataMode();
 
-  const { isSubscribed, currentCPU, currentMemory, totalCores } = useCPUStats();
+  const { isSubscribed, currentCPU, currentMemory, totalCores } = useCPUStats(
+    true,
+    cpuStatsInterval,
+  );
 
   const metricsValues = useMemo(
     () => ({

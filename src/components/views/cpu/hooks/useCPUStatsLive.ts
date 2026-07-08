@@ -5,7 +5,10 @@ import { SubscriptionType } from '@/types/communication/subscription';
 import { useServiceReady } from '@/shared/hooks/connection/useServiceReady';
 import type { CPUStatsResult } from './useCPUStatsHistory';
 
-export function useCPUStatsLive(enabled = true): CPUStatsResult {
+export function useCPUStatsLive(
+  enabled: boolean,
+  interval: number,
+): CPUStatsResult {
   const [stats, setStats] = useState<CPUStats[]>([]);
   const [currentCPU, setCurrentCPU] = useState(0);
   const [currentMemory, setCurrentMemory] = useState(0);
@@ -40,7 +43,7 @@ export function useCPUStatsLive(enabled = true): CPUStatsResult {
     const setup = async () => {
       try {
         const unsub = await gpacService.subscribe(
-          { type: SubscriptionType.CPU_STATS },
+          { type: SubscriptionType.CPU_STATS, interval },
           (result) => {
             if (result.data && isMounted) {
               handleUpdate(result.data as CPUStats);
@@ -63,7 +66,7 @@ export function useCPUStatsLive(enabled = true): CPUStatsResult {
       isMounted = false;
       if (unsubscribe) unsubscribe();
     };
-  }, [enabled, isReady, handleUpdate]);
+  }, [enabled, isReady, interval, handleUpdate]);
 
   return {
     stats,

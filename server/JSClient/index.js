@@ -5,6 +5,7 @@ import { FilterManager } from './Filters/FilterManager.js';
 import { CpuStatsManager } from './Sys/CpuStatsManager.js';
 import { LogManager } from './Sys/LogManager.js';
 import { CommandLineManager } from './CommandLineManager.js';
+import { UPDATE_INTERVALS, LOG_RETENTION } from './config.js';
 
 function JSClient(id, client, all_clients, ensureMonitoringLoop, historyCollector) {
     this.id = id;
@@ -22,6 +23,14 @@ function JSClient(id, client, all_clients, ensureMonitoringLoop, historyCollecto
 
     this.on_client_data = function(msg) {
         this.messageHandler.handleMessage(msg, all_clients);
+    };
+
+    this.sendMonitorConfig = function() {
+        this.client.send(JSON.stringify({
+            message: 'monitor_config',
+            intervals: UPDATE_INTERVALS,
+            logRetention: LOG_RETENTION,
+        }));
     };
 
     this.cleanup = function() {

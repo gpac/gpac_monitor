@@ -137,6 +137,7 @@ session.set_filter_arg_updated_fun((f) => {
 sys.rmt_on_new_client = function(client) {
     let js_client = new JSClient(++cid, client, all_clients, ensureMonitoringLoop, historyCollector);
     all_clients.push(js_client);
+    js_client.sendMonitorConfig();
 
     js_client.client.on_data = (msg) => {
         if (typeof(msg) == "string")
