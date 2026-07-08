@@ -1,4 +1,5 @@
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { EVENT_TYPE_COLOR } from './utils/eventTypeColors';
 import type { TimelineEventType } from '@/services/historyService/types';
 
 export type TimelineFilter = 'all' | TimelineEventType;
@@ -6,28 +7,24 @@ export type TimelineFilter = 'all' | TimelineEventType;
 const CHIPS: Array<{
   value: TimelineFilter;
   label: string;
-  icon?: string;
-  iconColor?: string;
+  color?: string;
 }> = [
   { value: 'all', label: 'All' },
-  { value: 'error', label: 'Errors', icon: '▲', iconColor: 'text-red-500' },
+  { value: 'error', label: 'Errors', color: EVENT_TYPE_COLOR.error },
   {
     value: 'graph-change',
     label: 'Graph',
-    icon: '◆',
-    iconColor: 'text-purple-400',
+    color: EVENT_TYPE_COLOR['graph-change'],
   },
   {
     value: 'pid-reconfig',
     label: 'PIDs',
-    icon: '⚑',
-    iconColor: 'text-cyan-400',
+    color: EVENT_TYPE_COLOR['pid-reconfig'],
   },
   {
     value: 'args-change',
     label: 'Args',
-    icon: '∥',
-    iconColor: 'text-yellow-400',
+    color: EVENT_TYPE_COLOR['args-change'],
   },
 ];
 
@@ -46,13 +43,13 @@ const EventsFilter = ({ active, onChange }: EventsFilterProps) => (
         if (value) onChange(value as TimelineFilter);
       }}
     >
-      {CHIPS.map(({ value, label, icon, iconColor }) => (
+      {CHIPS.map(({ value, label, color }) => (
         <ToggleGroupItem
           key={value}
           value={value}
-          className="data-[state=on]:bg-history-activeBg data-[state=on]:text-history-activeText data-[state=on]:border data-[state=on]:border-history-activeBorder flex items-center gap-1"
+          className="data-[state=on]:bg-history-activeBg data-[state=on]:text-history-activeText data-[state=on]:border data-[state=on]:border-history-activeBorder flex items-center gap-1.5"
         >
-          {icon && <span className={iconColor}>{icon}</span>}
+          {color && <span className={`${color} w-1.5 h-1.5 rounded-full`} />}
           {label}
         </ToggleGroupItem>
       ))}

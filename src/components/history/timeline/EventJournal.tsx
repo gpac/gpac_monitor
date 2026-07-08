@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import { formatCompactTime } from '@/utils/formatting/time';
 import { formatLogTimestampRelative } from '@/components/views/logs/utils/timestampFormatters';
+import { EVENT_TYPE_COLOR } from './utils/eventTypeColors';
 import {
   Tooltip,
   TooltipTrigger,
@@ -17,14 +18,6 @@ const LOG_LINKED_TYPES: ReadonlySet<TimelineEventType> = new Set([
   'error',
   'warning',
 ]);
-
-const ICON_MAP: Record<TimelineEventType, { icon: string; color: string }> = {
-  error: { icon: '▲', color: 'text-red-500' },
-  warning: { icon: '▲', color: 'text-yellow-400' },
-  'graph-change': { icon: '◆', color: 'text-purple-400' },
-  'pid-reconfig': { icon: '⚑', color: 'text-cyan-400' },
-  'args-change': { icon: '∥', color: 'text-yellow-400' },
-};
 
 interface EventJournalProps {
   events: TimelineEvent[];
@@ -48,7 +41,7 @@ const EventJournal = memo(
             className="flex-1 min-h-0"
           >
             {events.map((event) => {
-              const { icon, color } = ICON_MAP[event.type];
+              const color = EVENT_TYPE_COLOR[event.type];
               const isLogLinked =
                 LOG_LINKED_TYPES.has(event.type) &&
                 event.loggerTimeUs !== undefined;
@@ -78,7 +71,7 @@ const EventJournal = memo(
                   ) : (
                     timeButton
                   )}
-                  <span className={`${color} text-xs shrink-0`}>{icon}</span>
+                  <span className={`${color} w-3 h-0.5 rounded-sm shrink-0`} />
                   <span className="text-xs text-gray-300 truncate">
                     {event.title}
                   </span>
