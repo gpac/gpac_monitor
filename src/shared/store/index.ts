@@ -11,6 +11,7 @@ import monitoredFilterReducer from './slices/monitoredFilterSlice';
 import connectionsReducer, {
   connectionsListenerMiddleware,
 } from './slices/connectionsSlice';
+import monitorConfigReducer from './slices/monitorConfigSlice';
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     layout: layoutReducer,
     monitoredFilter: monitoredFilterReducer,
     connections: connectionsReducer,
+    monitorConfig: monitorConfigReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

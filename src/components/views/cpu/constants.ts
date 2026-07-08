@@ -3,12 +3,6 @@
  */
 
 /**
- * CPU chart update interval in milliseconds
- * Used for chart data collection frequency
- */
-export const CHART_CPU_UPDATE_INTERVAL = 250;
-
-/**
  * Default chart history duration
  */
 export const DEFAULT_CPU_HISTORY = '1min' as const;

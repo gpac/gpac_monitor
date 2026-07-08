@@ -14,6 +14,7 @@ function createMockCallbacks(): MessageHandlerCallbacks {
     onArgUpdated: vi.fn(),
     onSetMetricDefinitions: vi.fn(),
     onFilterStatuses: vi.fn(),
+    onSetMonitorConfig: vi.fn(),
   };
 }
 

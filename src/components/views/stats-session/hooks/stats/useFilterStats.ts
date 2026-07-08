@@ -2,6 +2,7 @@ import type { MonitoredFilterStats } from '@/types/domain/gpac';
 import { useState, useEffect, useCallback } from 'react';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
+import { filterStatsEqual } from '../../utils/filterStatsEqual';
 
 export function useFilterStats(
   filterId: number | undefined,
@@ -13,7 +14,7 @@ export function useFilterStats(
 
   const handleStatsUpdate = useCallback(
     (newStats: MonitoredFilterStats) => {
-      setStats(newStats);
+      setStats((prev) => (filterStatsEqual(prev, newStats) ? prev : newStats));
       setIsLoading(false);
     },
     [filterId],

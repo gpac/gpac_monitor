@@ -21,3 +21,6 @@ export * from './widgets';
 
 // Connections selectors
 export * from './header/connectionsSelectors';
+
+// Monitor config selectors
+export * from './selectMonitorConfig';

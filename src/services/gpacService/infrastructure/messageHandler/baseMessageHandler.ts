@@ -173,6 +173,9 @@ export class BaseMessageHandler {
           parseMetricDefinitions(data.data),
         );
         break;
+      case 'monitor_config':
+        this.callbacks.onSetMonitorConfig(data.intervals);
+        break;
       case 'session_end':
         this.handleSessionEnd(data);
         break;

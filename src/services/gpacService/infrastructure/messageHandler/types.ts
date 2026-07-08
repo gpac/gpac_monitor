@@ -2,6 +2,7 @@ import { GpacLogEntry } from '@/types/domain/gpac/log-types';
 import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 import type { FilterStatusInput } from '@/services/gpacService/liveAdapter/extractParsedStatuses';
 import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
+import type { MonitorIntervals } from '@/shared/store/slices/monitorConfigSlice';
 
 export interface FilterStatsPayload {
   idx: number;
@@ -24,6 +25,7 @@ export interface MessageHandlerCallbacks {
   onSetMetricDefinitions: (definitions: MetricDefinitionMap) => void;
   onFilterStatuses: (entries: FilterStatusInput[]) => void;
   onUpdateFilterStats: (payload: FilterStatsPayload) => void;
+  onSetMonitorConfig: (intervals: MonitorIntervals) => void;
   onSessionEnd?: (data: any) => void;
 }
 
