@@ -4,14 +4,32 @@ import type { TimelinePlayhead } from './timelineViewModel.types';
 interface HistoryTimeRulerProps {
   rulerTicks: TimeRuler;
   playhead: TimelinePlayhead;
+  onSeek?: (positionPercent: number) => void;
 }
 
-const HistoryTimeRuler = ({ rulerTicks, playhead }: HistoryTimeRulerProps) => {
+const HistoryTimeRuler = ({
+  rulerTicks,
+  playhead,
+  onSeek,
+}: HistoryTimeRulerProps) => {
   const showPlayhead =
     playhead.positionPercent >= 0 && playhead.positionPercent <= 100;
 
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!onSeek) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    const positionPercent = Math.max(
+      0,
+      Math.min(100, ((event.clientX - rect.left) / rect.width) * 100),
+    );
+    onSeek(positionPercent);
+  };
+
   return (
-    <div className="relative h-9 select-none">
+    <div
+      className={`relative h-9 select-none ${onSeek ? 'cursor-pointer' : ''}`}
+      onClick={handleClick}
+    >
       <div className="relative h-4">
         {rulerTicks.minor.map((tick) => (
           <div
