@@ -4,7 +4,7 @@ import type { TimelineEventType } from '@/services/historyService/types';
 
 export type TimelineFilter = 'all' | TimelineEventType;
 
-const CHIPS: Array<{
+export const EVENT_FILTER_CHIPS: Array<{
   value: TimelineFilter;
   label: string;
   color?: string;
@@ -43,7 +43,7 @@ const EventsFilter = ({ active, onChange }: EventsFilterProps) => (
         if (value) onChange(value as TimelineFilter);
       }}
     >
-      {CHIPS.map(({ value, label, color }) => (
+      {EVENT_FILTER_CHIPS.map(({ value, label, color }) => (
         <ToggleGroupItem
           key={value}
           value={value}
