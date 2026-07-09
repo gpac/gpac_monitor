@@ -31,7 +31,7 @@ const EventJournal = memo(
 
     return (
       <div className="flex flex-col flex-1 overflow-hidden">
-        <div className="px-3 py-1 text-xs font-medium text-gray-400 shrink-0">
+        <div className="px-3 pt-1 pb-0.5 text-[0.688rem] font-medium uppercase tracking-wide text-gray-500 shrink-0">
           Event Journal
         </div>
         <TooltipProvider delayDuration={200}>
@@ -51,7 +51,7 @@ const EventJournal = memo(
               const timeButton = (
                 <button
                   onClick={() => onSeek(sessionStartUs + event.sessionTimeUs)}
-                  className="text-monitor-meta font-mono tabular-nums text-xs shrink-0 hover:brightness-125"
+                  className="text-monitor-meta font-mono tabular-nums text-xs shrink-0 w-14 text-right hover:brightness-125"
                 >
                   {primaryLabel}
                 </button>

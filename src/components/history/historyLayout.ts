@@ -1,6 +1,9 @@
 export const HISTORY_HEADER_HEIGHT_PX = 30;
 
-export const TIMELINE_DOCK_HEIGHT_PX = 80;
+export const TIMELINE_DOCK_HEIGHT_PX = 70;
+export const TIMELINE_DOCK_DEFAULT_HEIGHT_PX = 156;
+
+export const LANE_GUTTER_WIDTH_PX = 64;
 
 export const EVENTS_PANEL_WIDTH_PX = 288;
 export const EVENTS_PANEL_MIN_WIDTH_PX = 288;

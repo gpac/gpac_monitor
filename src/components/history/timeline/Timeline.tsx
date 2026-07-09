@@ -2,8 +2,7 @@ import { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { LuPause } from 'react-icons/lu';
 import SeekBar from './SeekBar';
-import type { TimelineMarker } from './SeekBar';
-import SessionTimeIndicator from '@/components/common/SessionTimeIndicator';
+import { LANE_GUTTER_WIDTH_PX } from '../historyLayout';
 import { formatCompactTime } from '@/utils/formatting/time';
 import { generateWindowTimeTicks } from '@/utils/history/generateTimeTicks';
 import { getCursorPercent } from '@/utils/history/timelineViewportView';
@@ -20,9 +19,7 @@ interface TimelineProps {
   onPlay: () => void;
   onPause: () => void;
   onSeek: (targetTimestampUs: number) => void;
-  markers?: TimelineMarker[];
-  startContent?: ReactNode;
-  endContent?: ReactNode;
+  belowRailContent?: ReactNode;
 }
 
 const Timeline = ({
@@ -35,9 +32,7 @@ const Timeline = ({
   onPlay,
   onPause,
   onSeek,
-  markers,
-  startContent,
-  endContent,
+  belowRailContent,
 }: TimelineProps) => {
   const relativeTimeUs = currentTimeUs - sessionStartUs;
   const elapsedUs = Math.max(0, Math.min(relativeTimeUs, durationUs));
@@ -65,53 +60,43 @@ const Timeline = ({
     [sessionStartUs, percentToSessionUs, onSeek],
   );
 
-  const handleMarkerSeek = useCallback(
-    (sessionTimeUs: number) => {
-      onSeek(sessionStartUs + sessionTimeUs);
-    },
-    [sessionStartUs, onSeek],
-  );
-
   const formatTooltip = useCallback(
     (positionPercent: number) =>
-      formatCompactTime(percentToSessionUs(positionPercent)),
+      formatCompactTime(percentToSessionUs(positionPercent), true),
     [percentToSessionUs],
   );
 
   return (
-    <div className="flex items-center gap-2 w-full">
-      {startContent && (
-        <div className="shrink-0 h-8 flex items-center">{startContent}</div>
-      )}
-      <section className="flex items-center gap-2 shrink-0 px-6 h-8">
-        <button
-          onClick={isPlaying ? onPause : onPlay}
-          disabled={!canPlay}
-          className="shrink-0 p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
-          aria-label={isPlaying ? 'Pause' : 'Play'}
+    <div className="w-full">
+      <div className="flex items-start">
+        <div
+          className="shrink-0 flex items-center justify-center h-8"
+          style={{ width: LANE_GUTTER_WIDTH_PX }}
         >
-          {isPlaying ? (
-            <LuPause className="w-8 h-8" />
-          ) : (
-            <FaCirclePlay className="w-8 h-8" />
-          )}
-        </button>
-      </section>
-      <div className="flex-1 items-center min-w-0">
-        <SeekBar
-          progressPercent={progressPercent}
-          onSeekPositionChange={handleSeekPositionChange}
-          onMarkerSeek={handleMarkerSeek}
-          formatTooltip={formatTooltip}
-          disabled={!canPlay}
-          timeRuler={timeRuler}
-          markers={markers}
-        />
+          <button
+            onClick={isPlaying ? onPause : onPlay}
+            disabled={!canPlay}
+            className="p-1 text-gray-300 hover:text-white disabled:opacity-40 disabled:pointer-events-none"
+            aria-label={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <LuPause className="w-6 h-6" />
+            ) : (
+              <FaCirclePlay className="w-6 h-6" />
+            )}
+          </button>
+        </div>
+        <div className="flex-1 min-w-0">
+          <SeekBar
+            progressPercent={progressPercent}
+            onSeekPositionChange={handleSeekPositionChange}
+            formatTooltip={formatTooltip}
+            disabled={!canPlay}
+            timeRuler={timeRuler}
+          />
+        </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0 min-w-64 justify-end">
-        {endContent}
-        <SessionTimeIndicator elapsedUs={elapsedUs} durationUs={durationUs} />
-      </div>
+      {belowRailContent}
     </div>
   );
 };
