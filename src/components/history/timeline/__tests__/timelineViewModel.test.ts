@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { buildTimelineViewModel } from '../timelineViewModel';
+import {
+  buildTimelineSessionView,
+  buildTimelinePlayhead,
+} from '../timelineViewModel';
 import type { TimelineViewport } from '@/utils/history/timelineViewport';
 import type {
   TimelineEvent,
@@ -27,34 +30,35 @@ const events: TimelineEvent[] = [
   event('a1', 52_000_000, 'args-change'),
 ];
 
-describe('buildTimelineViewModel — lanes', () => {
+describe('buildTimelineSessionView — lanes', () => {
   it('partitions events into errors, graph and config lanes only', () => {
-    const model = buildTimelineViewModel({
-      events,
-      viewport,
-      currentSessionTimeUs: 0,
-    });
-    expect(model.lanes.map((lane) => lane.id)).toEqual([
+    const sessionView = buildTimelineSessionView({ events, viewport });
+    expect(sessionView.lanes.map((lane) => lane.id)).toEqual([
       'errors',
       'graph',
       'config',
     ]);
-    const errorsLane = model.lanes.find((lane) => lane.id === 'errors')!;
+    const errorsLane = sessionView.lanes.find((lane) => lane.id === 'errors')!;
     expect(errorsLane.items).toHaveLength(2);
   });
 
   it('groups pid-reconfig and args-change under the config lane', () => {
-    const model = buildTimelineViewModel({
-      events,
-      viewport,
-      currentSessionTimeUs: 0,
-    });
-    const configLane = model.lanes.find((lane) => lane.id === 'config')!;
+    const sessionView = buildTimelineSessionView({ events, viewport });
+    const configLane = sessionView.lanes.find((lane) => lane.id === 'config')!;
     expect(configLane.items).toHaveLength(2);
+  });
+
+  it('does not depend on playback time — same inputs always produce the same lanes', () => {
+    const first = buildTimelineSessionView({ events, viewport });
+    const second = buildTimelineSessionView({ events, viewport });
+    expect(second.lanes).toEqual(first.lanes);
+    expect(buildTimelineSessionView({ events, viewport })).not.toHaveProperty(
+      'playhead',
+    );
   });
 });
 
-describe('buildTimelineViewModel — chunkSegments', () => {
+describe('buildTimelineSessionView — chunkSegments', () => {
   const segments: TimeSegment[] = [
     { fromUs: 0, toUs: 10_000_000 },
     { fromUs: 10_000_000, toUs: 20_000_000 },
@@ -66,31 +70,29 @@ describe('buildTimelineViewModel — chunkSegments', () => {
       visibleStartUs: 15_000_000,
       visibleDurationUs: 10_000_000,
     };
-    const model = buildTimelineViewModel({
+    const sessionView = buildTimelineSessionView({
       events: [],
       viewport: narrowViewport,
-      currentSessionTimeUs: 0,
       chunkSegments: segments,
     });
-    expect(model.chunkSegments).toHaveLength(1);
-    expect(model.chunkSegments[0].index).toBe(1);
+    expect(sessionView.chunkSegments).toHaveLength(1);
+    expect(sessionView.chunkSegments[0].index).toBe(1);
   });
 });
 
-describe('buildTimelineViewModel — overviewBins', () => {
+describe('buildTimelineSessionView — overviewBins', () => {
   it('bins events over the full session duration, not the visible window', () => {
     const zoomedViewport: TimelineViewport = {
       sessionDurationUs: 100_000_000,
       visibleStartUs: 0,
       visibleDurationUs: 5_000_000,
     };
-    const model = buildTimelineViewModel({
+    const sessionView = buildTimelineSessionView({
       events,
       viewport: zoomedViewport,
-      currentSessionTimeUs: 0,
       overviewBinCount: 10,
     });
-    const totalCount = model.overviewBins.reduce(
+    const totalCount = sessionView.overviewBins.reduce(
       (sum, bin) => sum + bin.count,
       0,
     );
@@ -98,49 +100,57 @@ describe('buildTimelineViewModel — overviewBins', () => {
   });
 });
 
-describe('buildTimelineViewModel — playhead', () => {
-  it('clamps the playhead position to the visible window', () => {
-    const model = buildTimelineViewModel({
-      events: [],
-      viewport: { ...viewport, visibleDurationUs: 50_000_000 },
-      currentSessionTimeUs: 90_000_000,
-    });
-    expect(model.playhead.positionPercent).toBe(100);
-  });
-});
-
-describe('buildTimelineViewModel — selectedEventDetail', () => {
+describe('buildTimelineSessionView — selectedEventDetail', () => {
   it('is null when no selection is provided', () => {
-    const model = buildTimelineViewModel({
-      events,
-      viewport,
-      currentSessionTimeUs: 0,
-    });
-    expect(model.selectedEventDetail).toBeNull();
+    const sessionView = buildTimelineSessionView({ events, viewport });
+    expect(sessionView.selectedEventDetail).toBeNull();
   });
 
   it('is null when the selected id does not match any event', () => {
-    const model = buildTimelineViewModel({
+    const sessionView = buildTimelineSessionView({
       events,
       viewport,
-      currentSessionTimeUs: 0,
       selectedEventId: 'missing',
     });
-    expect(model.selectedEventDetail).toBeNull();
+    expect(sessionView.selectedEventDetail).toBeNull();
   });
 
   it('returns the matching event fields only', () => {
-    const model = buildTimelineViewModel({
+    const sessionView = buildTimelineSessionView({
       events,
       viewport,
-      currentSessionTimeUs: 0,
       selectedEventId: 'g1',
     });
-    expect(model.selectedEventDetail).toEqual({
+    expect(sessionView.selectedEventDetail).toEqual({
       id: 'g1',
       type: 'graph-change',
       sessionTimeUs: 30_000_000,
       title: 'event g1',
     });
+  });
+});
+
+describe('buildTimelinePlayhead', () => {
+  it('clamps the playhead position to the visible window', () => {
+    const model = buildTimelinePlayhead(
+      { ...viewport, visibleDurationUs: 50_000_000 },
+      90_000_000,
+    );
+    expect(model.positionPercent).toBe(100);
+  });
+
+  it('varies with currentSessionTimeUs while the session view stays identical', () => {
+    const sessionView = buildTimelineSessionView({ events, viewport });
+    const early = buildTimelinePlayhead(viewport, 0);
+    const late = buildTimelinePlayhead(viewport, 90_000_000);
+    expect(early.positionPercent).not.toBe(late.positionPercent);
+    expect(buildTimelineSessionView({ events, viewport }).lanes).toEqual(
+      sessionView.lanes,
+    );
+  });
+
+  it('formats a compact time label', () => {
+    const model = buildTimelinePlayhead(viewport, 65_000_000);
+    expect(model.label).toBe('01:05');
   });
 });

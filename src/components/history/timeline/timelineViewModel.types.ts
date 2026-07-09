@@ -23,11 +23,6 @@ export interface PositionedChunkSegment {
   widthPercent: number;
 }
 
-export interface TimelinePlayhead {
-  positionPercent: number;
-  sessionTimeUs: number;
-}
-
 export interface OverviewBin {
   positionPercent: number;
   count: number;
@@ -40,20 +35,26 @@ export interface SelectedEventDetail {
   title: string;
 }
 
-export interface TimelineViewModelInput {
+/** Session-derived: recompute only when events/viewport/chunks/selection change. */
+export interface TimelineSessionViewInput {
   events: TimelineEvent[];
   viewport: TimelineViewport;
-  currentSessionTimeUs: number;
   chunkSegments?: TimeSegment[];
   selectedEventId?: string | null;
   overviewBinCount?: number;
 }
 
-export interface TimelineViewModel {
+export interface TimelineSessionView {
   rulerTicks: TimeRuler;
   lanes: TimelineLaneView[];
   chunkSegments: PositionedChunkSegment[];
-  playhead: TimelinePlayhead;
   overviewBins: OverviewBin[];
   selectedEventDetail: SelectedEventDetail | null;
+}
+
+/** Frame-derived: cheap enough to recompute every player tick without touching the session view. */
+export interface TimelinePlayhead {
+  positionPercent: number;
+  sessionTimeUs: number;
+  label: string;
 }
