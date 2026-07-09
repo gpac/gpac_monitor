@@ -16,7 +16,10 @@ export type TimelineItem =
       positionPercent: number;
     };
 
-const toPercent = (sessionTimeUs: number, viewport: TimelineViewport): number =>
+export const toPercent = (
+  sessionTimeUs: number,
+  viewport: TimelineViewport,
+): number =>
   ((sessionTimeUs - viewport.visibleStartUs) / viewport.visibleDurationUs) *
   100;
 
