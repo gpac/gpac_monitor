@@ -8,6 +8,34 @@ function makeCollector() {
   return collector;
 }
 
+describe('HistoryCollector args-change indexing', () => {
+  it('emits a single args-change index when one live arg update goes through both record paths', () => {
+    const collector = makeCollector();
+    collector.writer.addEventIndex = vi.fn();
+    collector.writer.writeEvent = vi.fn(() => false);
+
+    collector.recordFilterArgsUpdate(3, 'fullscreen', 'true');
+    collector.recordArgUpdated([3], { 3: [{ name: 'fullscreen', value: 'true' }] });
+
+    expect(collector.writer.addEventIndex).toHaveBeenCalledTimes(1);
+    expect(collector.writer.addEventIndex).toHaveBeenCalledWith(expect.any(Number), 'args-change');
+  });
+
+  it('still writes the filter_args_update event on the command path, without indexing it', () => {
+    const collector = makeCollector();
+    collector.writer.addEventIndex = vi.fn();
+    collector.writer.writeEvent = vi.fn(() => false);
+
+    collector.recordFilterArgsUpdate(3, 'fullscreen', 'true');
+
+    expect(collector.writer.addEventIndex).not.toHaveBeenCalled();
+    expect(collector.writer.writeEvent).toHaveBeenCalledTimes(1);
+    const payload = JSON.parse(collector.writer.writeEvent.mock.calls[0][0]);
+    expect(payload.message).toBe('filter_args_update');
+    expect(payload.payload).toEqual({ filter_idx: 3, arg_name: 'fullscreen', value: 'true' });
+  });
+});
+
 describe('HistoryCollector flushLogs', () => {
   it('records an error fact using the log line\'s own timestamp, not the flush-time clock', () => {
     const collector = makeCollector();
