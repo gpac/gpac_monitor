@@ -11,6 +11,7 @@ const PID_EVENT_TS_US = 31110525;
 const pidEvent: TimelineEvent = {
   id: `pid-reconfig_${PID_EVENT_TS_US}`,
   sessionTimeUs: PID_EVENT_TS_US - SESSION_START_US,
+  absoluteTimeUs: PID_EVENT_TS_US,
   type: 'pid-reconfig',
   title: 'PID reconfigured',
 };

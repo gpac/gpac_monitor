@@ -20,6 +20,7 @@ export function deriveTimelineEvents(
   return (manifest.eventsIndex ?? []).map((entry) => ({
     id: `${entry.type}_${entry.ts_us}`,
     sessionTimeUs: entry.ts_us - manifest.startUs,
+    absoluteTimeUs: entry.ts_us,
     type: entry.type,
     title: TITLES[entry.type],
   }));
@@ -37,7 +38,7 @@ export function deriveErrorWarningEvents(
     return {
       id: `${type}_${tsUs}_${index}`,
       sessionTimeUs: tsUs - startUs,
-      loggerTimeUs: tsUs,
+      absoluteTimeUs: tsUs,
       type,
       title: TITLES[type],
     };

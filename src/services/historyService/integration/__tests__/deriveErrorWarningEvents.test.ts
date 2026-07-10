@@ -14,7 +14,7 @@ describe('deriveErrorWarningEvents', () => {
 
     expect(event.type).toBe('error');
     expect(event.sessionTimeUs).toBe(688402);
-    expect(event.loggerTimeUs).toBe(1523463);
+    expect(event.absoluteTimeUs).toBe(1523463);
   });
 
   it('decodes multiple facts at their own deltas, in order', () => {
@@ -26,7 +26,7 @@ describe('deriveErrorWarningEvents', () => {
 
     const events = deriveErrorWarningEvents(journalIndex, 835061);
 
-    expect(events.map((event) => event.loggerTimeUs)).toEqual([
+    expect(events.map((event) => event.absoluteTimeUs)).toEqual([
       1523463, 1523478, 1527685,
     ]);
     expect(events.map((event) => event.type)).toEqual([

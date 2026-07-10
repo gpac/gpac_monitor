@@ -17,6 +17,7 @@ const viewport: TimelineViewport = {
 const event = (id: string, sessionTimeUs: number): TimelineEvent => ({
   id,
   sessionTimeUs,
+  absoluteTimeUs: sessionTimeUs,
   type: 'pid-reconfig',
   title: 'PID reconfigured',
 });
