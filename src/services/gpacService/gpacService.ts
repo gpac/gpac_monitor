@@ -1,4 +1,5 @@
 import { WebSocketBase } from '../ws/WebSocketBase';
+import { GpacTransport } from '../ws/GpacTransport';
 import {
   IGpacCommunication,
   GpacMessage,
@@ -45,8 +46,8 @@ export class GpacService implements IGpacCommunication {
   // ============================================================================
   // INITIALIZATION
   // ============================================================================
-  private constructor() {
-    const ws = new WebSocketBase();
+  private constructor(transport: GpacTransport = new WebSocketBase()) {
+    const ws = transport;
     const coreService = new GpacCoreService();
     const connectionManager = new ConnectionManager(ws);
     const filterSubscriptionsStore = new FilterSubscriptionsStore();
@@ -88,9 +89,9 @@ export class GpacService implements IGpacCommunication {
     );
   }
 
-  public static getInstance(): GpacService {
+  public static getInstance(transport?: GpacTransport): GpacService {
     if (!GpacService.instance) {
-      GpacService.instance = new GpacService();
+      GpacService.instance = new GpacService(transport);
     }
     return GpacService.instance;
   }
@@ -118,6 +119,10 @@ export class GpacService implements IGpacCommunication {
 
   public isConnected(): boolean {
     return connectionMethods.isConnected(this.state);
+  }
+
+  public getConnectedAddress(): string | null {
+    return connectionMethods.getAddress(this.state);
   }
 
   public isLoaded(): boolean {

@@ -1,5 +1,6 @@
 import { MessageFormatter } from './formatters/messageFormatters';
 import WsParserWorker from './workers/wsParserWorker?worker&inline';
+import { GpacTransport, TransportMessageHandler } from './GpacTransport';
 
 interface WorkerResponse {
   id: number;
@@ -8,10 +9,10 @@ interface WorkerResponse {
   error?: string;
 }
 
-export class WebSocketBase {
+export class WebSocketBase implements GpacTransport {
   private socket: WebSocket | null = null;
   private messageHandlers: {
-    [key: string]: ((connection: WebSocketBase, dataView: DataView) => void)[];
+    [key: string]: TransportMessageHandler[];
   } = {};
   private parserWorker: Worker | null = null;
   private messageId = 0;
@@ -198,34 +199,26 @@ export class WebSocketBase {
     }
   }
 
-  public addConnectHandler(
-    handler: (connection: WebSocketBase, dataView: DataView) => void,
-  ): void {
+  public addConnectHandler(handler: TransportMessageHandler): void {
     this.addMessageHandler('__OnConnect__', handler);
   }
 
-  public addDisconnectHandler(
-    handler: (connection: WebSocketBase, dataView: DataView) => void,
-  ): void {
+  public addDisconnectHandler(handler: TransportMessageHandler): void {
     this.addMessageHandler('__OnDisconnect__', handler);
   }
 
-  public addDefaultMessageHandler(
-    handler: (connection: WebSocketBase, dataView: DataView) => void,
-  ): void {
+  public addDefaultMessageHandler(handler: TransportMessageHandler): void {
     this.addMessageHandler('__default__', handler);
   }
 
-  public addJsonMessageHandler(
-    handler: (connection: WebSocketBase, dataView: DataView) => void,
-  ): void {
+  public addJsonMessageHandler(handler: TransportMessageHandler): void {
     this.addMessageHandler('json:', handler);
     this.addMessageHandler('json', handler);
   }
 
   public addMessageHandler(
     messageName: string,
-    handler: (connection: WebSocketBase, dataView: DataView) => void,
+    handler: TransportMessageHandler,
   ): void {
     if (!(messageName in this.messageHandlers)) {
       this.messageHandlers[messageName] = [];

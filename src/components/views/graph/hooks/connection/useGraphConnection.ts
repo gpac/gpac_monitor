@@ -81,11 +81,14 @@ export const useGraphConnection = ({
       try {
         // Check if already connected to avoid multiple connections
         if (service.isConnected()) {
-          if (isMounted) {
-            setConnectionError(null);
-            setIsConnected(true);
+          if (service.getConnectedAddress() === connectionAddress) {
+            if (isMounted) {
+              setConnectionError(null);
+              setIsConnected(true);
+            }
+            return;
           }
-          return;
+          service.disconnect();
         }
 
         await service.connectService(connectionAddress);
@@ -108,14 +111,6 @@ export const useGraphConnection = ({
     // Cleanup function
     return () => {
       isMounted = false;
-
-      if (service.isConnected()) {
-        try {
-          service.disconnect();
-        } catch (err) {
-          console.error(err);
-        }
-      }
     };
   }, [service, setConnectionError, connectionId, connectionAddress, isLive]);
 
