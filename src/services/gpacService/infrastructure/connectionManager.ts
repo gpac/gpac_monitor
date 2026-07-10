@@ -20,6 +20,10 @@ export class ConnectionManager {
     this.address = address;
   }
 
+  public getAddress(): string | null {
+    return this.address;
+  }
+
   public async connect(address?: string): Promise<void> {
     const targetAddress = address || this.address;
 
