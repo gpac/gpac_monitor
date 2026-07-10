@@ -1,4 +1,4 @@
-import { WebSocketBase } from '../../../ws/WebSocketBase';
+import { GpacTransport } from '../../../ws/GpacTransport';
 import { GpacNodeData } from '../../../../types/domain/gpac/model';
 import { GpacNotificationHandlers } from '../../types';
 import { generateID } from '@/utils/core';
@@ -83,7 +83,7 @@ export class BaseMessageHandler {
     return this.commandLineHandler;
   }
 
-  public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
+  public handleJsonMessage(_: GpacTransport, dataView: DataView): void {
     try {
       const text = new TextDecoder().decode(dataView.buffer);
       const data = JSON.parse(text);
@@ -93,7 +93,7 @@ export class BaseMessageHandler {
     }
   }
 
-  public handleDefaultMessage(_: WebSocketBase, dataView: DataView): void {
+  public handleDefaultMessage(_: GpacTransport, dataView: DataView): void {
     try {
       const text = new TextDecoder().decode(dataView.buffer);
       if (text.startsWith('{')) {

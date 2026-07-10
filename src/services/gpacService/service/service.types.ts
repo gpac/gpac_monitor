@@ -1,4 +1,4 @@
-import { WebSocketBase } from '../../ws/WebSocketBase';
+import { GpacTransport } from '../../ws/GpacTransport';
 import { ConnectionStatus } from '../../../types/communication/IgpacCommunication';
 import { GpacNotificationHandlers } from '../types';
 import { ConnectionManager } from '../infrastructure/connectionManager';
@@ -8,7 +8,7 @@ import { FilterSubscriptionsStore } from '../monitored-filter/FilterSubscription
 
 /** Internal state for GpacService */
 export interface GpacServiceState {
-  ws: WebSocketBase;
+  ws: GpacTransport;
   coreService: GpacCoreService;
   connectionManager: ConnectionManager;
   messageHandler: BaseMessageHandler;
