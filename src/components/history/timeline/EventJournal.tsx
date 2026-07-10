@@ -1,7 +1,6 @@
 import { memo } from 'react';
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import { formatCompactTime } from '@/utils/formatting/time';
-import { formatLogTimestampRelative } from '@/components/views/logs/utils/timestampFormatters';
 import { EVENT_TYPE_COLOR } from './utils/eventTypeColors';
 import {
   Tooltip,
@@ -9,15 +8,7 @@ import {
   TooltipContent,
   TooltipProvider,
 } from '@/components/ui/tooltip';
-import type {
-  TimelineEvent,
-  TimelineEventType,
-} from '@/services/historyService/types';
-
-const LOG_LINKED_TYPES: ReadonlySet<TimelineEventType> = new Set([
-  'error',
-  'warning',
-]);
+import type { TimelineEvent } from '@/services/historyService/types';
 
 interface EventJournalProps {
   events: TimelineEvent[];
@@ -42,35 +33,26 @@ const EventJournal = memo(
           >
             {events.map((event) => {
               const color = EVENT_TYPE_COLOR[event.type];
-              const isLogLinked =
-                LOG_LINKED_TYPES.has(event.type) &&
-                event.loggerTimeUs !== undefined;
-              const primaryLabel = isLogLinked
-                ? formatLogTimestampRelative(event.loggerTimeUs!)
-                : formatCompactTime(event.sessionTimeUs, true);
-              const timeButton = (
-                <button
-                  onClick={() => onSeek(sessionStartUs + event.sessionTimeUs)}
-                  className="text-monitor-meta font-mono tabular-nums text-xs shrink-0 w-14 text-right hover:brightness-125"
-                >
-                  {primaryLabel}
-                </button>
-              );
               return (
                 <div
                   key={event.id}
                   className="flex items-center gap-2 px-3 py-0.5 hover:bg-white/5"
                 >
-                  {isLogLinked ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>{timeButton}</TooltipTrigger>
-                      <TooltipContent side="top">
-                        session {formatCompactTime(event.sessionTimeUs, true)}
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    timeButton
-                  )}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() =>
+                          onSeek(sessionStartUs + event.sessionTimeUs)
+                        }
+                        className="text-monitor-meta font-mono tabular-nums text-xs shrink-0 hover:brightness-125"
+                      >
+                        {formatCompactTime(event.sessionTimeUs, true)}
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      Absolute: {formatCompactTime(event.absoluteTimeUs, true)}
+                    </TooltipContent>
+                  </Tooltip>
                   <span className={`${color} w-3 h-0.5 rounded-sm shrink-0`} />
                   <span className="text-xs text-gray-300 truncate">
                     {event.title}

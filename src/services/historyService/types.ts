@@ -156,7 +156,7 @@ export interface TimelineEvent {
   sessionTimeUs: number;
   type: TimelineEventType;
   title: string;
-  loggerTimeUs?: number;
+  absoluteTimeUs: number;
 }
 
 /** Columnar, delta-encoded index of error/warning facts — see journal_index.json. */
