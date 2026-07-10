@@ -1,4 +1,4 @@
-import { WebSocketBase } from '../../ws/WebSocketBase';
+import { GpacTransport } from '../../ws/GpacTransport';
 import { store } from '@/shared/store';
 import { setLoading, setError } from '@/shared/store/slices/graphSlice';
 import { GpacNotificationHandlers } from '../types';
@@ -10,7 +10,7 @@ export class ConnectionManager {
   private address: string | null = null;
   private endOfSession: boolean = false;
 
-  constructor(private ws: WebSocketBase) {}
+  constructor(private ws: GpacTransport) {}
 
   public setNotificationHandlers(handlers: GpacNotificationHandlers): void {
     this.notificationHandlers = handlers;
