@@ -121,6 +121,10 @@ export class GpacService implements IGpacCommunication {
     return connectionMethods.isConnected(this.state);
   }
 
+  public getConnectedAddress(): string | null {
+    return connectionMethods.getAddress(this.state);
+  }
+
   public isLoaded(): boolean {
     return connectionMethods.isLoaded(this.state);
   }

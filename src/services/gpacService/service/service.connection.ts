@@ -16,6 +16,10 @@ export const connectionMethods = {
     return state.connectionManager.isConnected();
   },
 
+  getAddress(state: GpacServiceState): string | null {
+    return state.connectionManager.getAddress();
+  },
+
   /**
    * Check if service is loaded and connected
    */
