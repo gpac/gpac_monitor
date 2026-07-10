@@ -170,7 +170,7 @@ export const MonitoredFilterContent: React.FC<MonitoredFilterTabProps> = ({
     <div className="flex-1 px-4">
       <FilterTabContent
         {...tabsData}
-        filterData={stats as FilterStatsResponse | undefined}
+        filterData={(stats ?? undefined) as FilterStatsResponse | undefined}
         onBack={handleBack}
         onOpenProperties={handleOpenProperties}
         initialTab={initialTabRef.current || undefined}
