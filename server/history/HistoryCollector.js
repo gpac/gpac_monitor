@@ -252,7 +252,6 @@ this.recordArgUpdated = function(indexes, argsByFilter) {
 
     this.recordFilterArgsUpdate = function(filterIdx, argName, newValue) {
         const argsTsUs = sys.clock_us();
-        this.writer.addEventIndex(argsTsUs, 'args-change');
         const rotated = this.writer.writeEvent(JSON.stringify({
             version: EVENT_VERSION,
             message: 'filter_args_update',
