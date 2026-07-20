@@ -31,7 +31,7 @@ pnpm-debug.log*
 *.pdf
 *.txt
 doc
+docs
 tasks
-test
 dash
 

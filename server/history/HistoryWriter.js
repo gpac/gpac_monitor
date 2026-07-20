@@ -3,6 +3,16 @@ import * as os from 'os';
 import { ChunkStream } from './helpers/ChunkStream.js';
 import { CHUNK_DURATION_US, MAX_LOG_PER_CHUNK } from '../config/history.config.js';
 
+function writeFileAtomic(path, content) {
+    const tmpPath = `${path}.tmp`;
+    const tmpFile = std.open(tmpPath, 'w');
+    if (!tmpFile) { print(`[HistoryWriter] Failed to write ${tmpPath}`); return; }
+    tmpFile.puts(content);
+    tmpFile.close();
+    const err = os.rename(tmpPath, path);
+    if (err !== 0) { print(`[HistoryWriter] Failed to rename ${tmpPath} to ${path} (errno ${err})`); }
+}
+
 function HistoryWriter(historyDir, sessionId) {
     const baseDir = historyDir || 'history';
     const id = sessionId || String(Date.now());
@@ -64,10 +74,7 @@ function HistoryWriter(historyDir, sessionId) {
             tsDeltaUs: this._journalTsUs.map((tsUs) => tsUs - baseTsUs),
             types: this._journalTypes,
         };
-        const journalFile = std.open(`${dir}/journal_index.json`, 'w');
-        if (!journalFile) { print(`[HistoryWriter] Failed to write journal index`); return; }
-        journalFile.puts(JSON.stringify(journalIndex) + '\n');
-        journalFile.close();
+        writeFileAtomic(`${dir}/journal_index.json`, JSON.stringify(journalIndex) + '\n');
     };
 
     this._getJournalPointer = function() {
@@ -97,10 +104,7 @@ function HistoryWriter(historyDir, sessionId) {
             journalIndex: this._getJournalPointer(),
         };
         this._writeJournalIndex();
-        const manifestFile = std.open(`${dir}/manifest.json`, 'w');
-        if (!manifestFile) { print(`[HistoryWriter] Failed to write manifest`); return; }
-        manifestFile.puts(JSON.stringify(manifest) + '\n');
-        manifestFile.close();
+        writeFileAtomic(`${dir}/manifest.json`, JSON.stringify(manifest) + '\n');
     };
 
     this.writeSnapshot = function(obj) {
@@ -145,9 +149,9 @@ function HistoryWriter(historyDir, sessionId) {
     };
 
     this.close = function() {
-        this._writeManifest();
         if (this._events) this._events.close();
         if (this._logs) this._logs.close();
+        this._writeManifest();
         const doneFile = std.open(`${dir}/done`, 'w');
         if (doneFile) doneFile.close();
     };

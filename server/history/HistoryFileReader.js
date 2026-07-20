@@ -75,7 +75,13 @@ function HistoryFileReader(historyDir) {
 }
 
 function readEventsFromChunks(reader, sessionId, manifestContent, fromUs, toUs) {
-    const manifest = JSON.parse(manifestContent);
+    let manifest;
+    try {
+        manifest = JSON.parse(manifestContent);
+    } catch (e) {
+        print(`[HistoryFileReader] Failed to parse manifest for session ${sessionId}: ${e}`);
+        return [];
+    }
     const { startUs, chunkCount, chunkDurationUs } = manifest;
     const fromChunk = fromUs !== undefined
         ? Math.max(0, Math.floor((fromUs - startUs) / chunkDurationUs))

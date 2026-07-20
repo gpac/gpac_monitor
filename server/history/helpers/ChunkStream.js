@@ -31,6 +31,16 @@ function ChunkStream(dir, prefix, maxDuration, maxCount) {
         this._startUs = null;
     };
 
+    this._finalizeCurrentChunk = function() {
+        const dirName = this._dir.split('/').pop();
+        return {
+            file: `${dirName}/${this._prefix}_${String(this._index).padStart(4, '0')}.jsonl`,
+            fromUs: this._startUs,
+            toUs: this._lastUs,
+            count: this._count,
+        };
+    };
+
     this.write = function(line, tsUs) {
         if (!this._file) this._open();
         if (this._startUs === null) this._startUs = tsUs;
@@ -44,13 +54,7 @@ function ChunkStream(dir, prefix, maxDuration, maxCount) {
             (this._count >= this._maxCount);
 
         if (shouldRotate) {
-            const dirName = this._dir.split('/').pop();
-            this._completed.push({
-                file: `${dirName}/${this._prefix}_${String(this._index).padStart(4, '0')}.jsonl`,
-                fromUs: this._startUs,
-                toUs: this._lastUs,
-                count: this._count,
-            });
+            this._completed.push(this._finalizeCurrentChunk());
             this._index++;
             this._open();
             return true;
@@ -64,21 +68,12 @@ function ChunkStream(dir, prefix, maxDuration, maxCount) {
     };
 
     this.getAllChunks = function() {
-        const all = this._completed.slice();
-        if (this._file && this._count > 0) {
-            const dirName = this._dir.split('/').pop();
-            all.push({
-                file: `${dirName}/${this._prefix}_${String(this._index).padStart(4, '0')}.jsonl`,
-                fromUs: this._startUs,
-                toUs: this._lastUs,
-                count: this._count,
-            });
-        }
-        return all;
+        return this._completed.slice();
     };
 
     this.close = function() {
         if (this._file) {
+            if (this._count > 0) this._completed.push(this._finalizeCurrentChunk());
             this._file.close();
             this._file = null;
         }
