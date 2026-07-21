@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import * as std from 'std';
 import { ChunkStream } from './ChunkStream.js';
 
 describe('ChunkStream open chunk visibility', () => {
@@ -40,5 +41,15 @@ describe('ChunkStream open chunk visibility', () => {
     stream.close();
 
     expect(stream.getAllChunks()).toHaveLength(1);
+  });
+
+  it('does not throw when the underlying directory cannot be opened (bad -rmt-log path)', () => {
+    const openSpy = vi.spyOn(std, 'open').mockReturnValue(null);
+    const stream = new ChunkStream('missing/dir', 'chunk', 1000);
+
+    expect(() => stream.write('{"a":1}', 0)).not.toThrow();
+    expect(stream.getAllChunks()).toEqual([]);
+
+    openSpy.mockRestore();
   });
 });

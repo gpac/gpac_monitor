@@ -43,7 +43,9 @@ function HistoryWriter(historyDir, sessionId) {
         try { os.mkdir(chunksDir); } catch (_e) {}
         try { os.mkdir(logsDir); } catch (_e) {}
         try { os.mkdir(checkpointsDir); } catch (_e) {}
-        print(`[HistoryWriter] Recording session ${id} to ${dir}/`);
+        const [, statErr] = os.stat(dir);
+        if (statErr !== 0) print(`[HistoryWriter] Cannot create ${dir} — check the -rmt-log path and permissions`);
+        else print(`[HistoryWriter] Recording session ${id} to ${dir}/`);
         this._events = new ChunkStream(chunksDir, 'chunk', CHUNK_DURATION_US);
         this._logs = new ChunkStream(logsDir, 'logs', CHUNK_DURATION_US, MAX_LOG_PER_CHUNK);
     };

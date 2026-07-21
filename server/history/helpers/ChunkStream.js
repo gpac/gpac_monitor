@@ -43,6 +43,7 @@ function ChunkStream(dir, prefix, maxDuration, maxCount) {
 
     this.write = function(line, tsUs) {
         if (!this._file) this._open();
+        if (!this._file) return false;
         if (this._startUs === null) this._startUs = tsUs;
 
         this._file.puts(line + '\n');
