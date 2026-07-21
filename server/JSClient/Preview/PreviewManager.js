@@ -64,8 +64,9 @@ function PreviewManager(client) {
         };
         this.activePreviews.set(filterIdx, entry);
         try {
+            const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY';
             entry.ffsws = session.add_filter(
-                `ffsws:osize=${PREVIEW.OSIZE}:ofmt=${PREVIEW.OFMT}:ITAG=NODISPLAY:RSID`,
+                `ffsws:osize=${PREVIEW.OSIZE}:ofmt=${PREVIEW.OFMT}${hideTag}:RSID`,
                 target
             );
 

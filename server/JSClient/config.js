@@ -24,6 +24,7 @@ const PREVIEW = {
     OSIZE: '128x128',
     OFMT: 'rgba',
     INTERVAL_US: 1000000,
+    DEBUG_SHOW_FILTERS: false,
 };
 
 export { UPDATE_INTERVALS, LOG_RETENTION } from '../config/live.config.js';
