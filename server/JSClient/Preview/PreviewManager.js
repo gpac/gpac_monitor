@@ -65,7 +65,7 @@ function PreviewManager(client) {
         this.activePreviews.set(filterIdx, entry);
         try {
             entry.ffsws = session.add_filter(
-                `ffsws:osize=${PREVIEW.OSIZE}:ofmt=${PREVIEW.OFMT}:ITAG=NODISPLAY`,
+                `ffsws:osize=${PREVIEW.OSIZE}:ofmt=${PREVIEW.OFMT}:ITAG=NODISPLAY:RSID`,
                 target
             );
 
