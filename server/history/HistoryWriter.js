@@ -13,9 +13,18 @@ function writeFileAtomic(path, content) {
     if (err !== 0) { print(`[HistoryWriter] Failed to rename ${tmpPath} to ${path} (errno ${err})`); }
 }
 
+// Zero-padded so lexicographic sort (used by HistoryFileReader.listSessions) matches
+// chronological order, unlike a raw epoch-ms folder name.
+function formatSessionId(date) {
+    const pad = (value) => String(value).padStart(2, '0');
+    const datePart = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const timePart = `${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
+    return `${datePart}_${timePart}`;
+}
+
 function HistoryWriter(historyDir, sessionId) {
     const baseDir = historyDir || 'history';
-    const id = sessionId || String(Date.now());
+    const id = sessionId || formatSessionId(new Date());
     const dir = `${baseDir}/${id}`;
     const chunksDir = `${dir}/chunks`;
     const logsDir = `${dir}/logs`;
