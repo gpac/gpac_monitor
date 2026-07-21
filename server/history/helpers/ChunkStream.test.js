@@ -43,6 +43,26 @@ describe('ChunkStream open chunk visibility', () => {
     expect(stream.getAllChunks()).toHaveLength(1);
   });
 
+  it('getAllChunksIncludingOpen lists the open chunk while recording', () => {
+    const stream = new ChunkStream('logs', 'logs', 1000000);
+    stream.write('{"a":1}', 1000);
+    stream.write('{"a":2}', 2000);
+
+    expect(stream.getAllChunks()).toEqual([]);
+    expect(stream.getAllChunksIncludingOpen()).toEqual([
+      { file: 'logs/logs_0000.jsonl', fromUs: 1000, toUs: 2000, count: 2 },
+    ]);
+  });
+
+  it('getAllChunksIncludingOpen matches getAllChunks after close (no duplicate)', () => {
+    const stream = new ChunkStream('logs', 'logs', 1000000);
+    stream.write('{"a":1}', 1000);
+    stream.close();
+
+    expect(stream.getAllChunksIncludingOpen()).toEqual(stream.getAllChunks());
+    expect(stream.getAllChunks()).toHaveLength(1);
+  });
+
   it('does not throw when the underlying directory cannot be opened (bad -rmt-log path)', () => {
     const openSpy = vi.spyOn(std, 'open').mockReturnValue(null);
     const stream = new ChunkStream('missing/dir', 'chunk', 1000);

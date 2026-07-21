@@ -1,7 +1,7 @@
 import * as std from 'std';
 import * as os from 'os';
 import { ChunkStream } from './helpers/ChunkStream.js';
-import { CHUNK_DURATION_US, MAX_LOG_PER_CHUNK } from '../config/history.config.js';
+import { CHUNK_DURATION_US, MAX_LOG_PER_CHUNK, MANIFEST_REFRESH_US } from '../config/history.config.js';
 
 function writeFileAtomic(path, content) {
     const tmpPath = `${path}.tmp`;
@@ -34,6 +34,7 @@ function HistoryWriter(historyDir, sessionId) {
     this._eventsIndex = [];
     this._journalTsUs = [];
     this._journalTypes = [];
+    this._lastManifestUs = null;
 
     this._init = function() {
         if (this._initialized) return;
@@ -101,12 +102,21 @@ function HistoryWriter(historyDir, sessionId) {
             chunkCount: this._events ? this._events.getChunkCount() : 1,
             snapshot: 'snapshot.json',
             checkpoints: this._checkpoints,
-            logChunks: this._logs ? this._logs.getAllChunks() : [],
+            logChunks: this._logs ? this._logs.getAllChunksIncludingOpen() : [],
             eventsIndex: [...this._eventsIndex].sort((a, b) => a.ts_us - b.ts_us),
             journalIndex: this._getJournalPointer(),
         };
         this._writeJournalIndex();
         writeFileAtomic(`${dir}/manifest.json`, JSON.stringify(manifest) + '\n');
+        this._lastManifestUs = this._lastEventUs;
+    };
+
+    // Torn-session safety: a killed GPAC never reaches close(), so the manifest
+    // must exist on disk before the first chunk rotation.
+    this._maybeWriteManifest = function() {
+        if (this._lastManifestUs !== null &&
+            this._lastEventUs - this._lastManifestUs < MANIFEST_REFRESH_US) return;
+        this._writeManifest();
     };
 
     this.writeSnapshot = function(obj) {
@@ -121,6 +131,7 @@ function HistoryWriter(historyDir, sessionId) {
         this._init();
         this._updateTimestamps(tsUs);
         if (this._logs.write(jsonString, tsUs)) this._writeManifest();
+        else this._maybeWriteManifest();
     };
 
     this.writeEvent = function(jsonString, tsUs) {
@@ -128,6 +139,7 @@ function HistoryWriter(historyDir, sessionId) {
         this._updateTimestamps(tsUs);
         const rotated = this._events.write(jsonString, tsUs);
         if (rotated) this._writeManifest();
+        else this._maybeWriteManifest();
         return rotated;
     };
 

@@ -72,6 +72,13 @@ function ChunkStream(dir, prefix, maxDuration, maxCount) {
         return this._completed.slice();
     };
 
+    // Sealed chunks + the open one — for mid-session manifests of torn sessions
+    this.getAllChunksIncludingOpen = function() {
+        const all = this._completed.slice();
+        if (this._file && this._count > 0) all.push(this._finalizeCurrentChunk());
+        return all;
+    };
+
     this.close = function() {
         if (this._file) {
             if (this._count > 0) this._completed.push(this._finalizeCurrentChunk());
