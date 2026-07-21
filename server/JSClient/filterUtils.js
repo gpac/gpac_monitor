@@ -1,4 +1,4 @@
-import { FILTER_PROPS_LITE, FILTER_ARGS_LITE, PID_PROPS_LITE } from './config.js';
+import { FILTER_PROPS_LITE, FILTER_ARGS_LITE, PID_PROPS_LITE, PREVIEW } from './config.js';
 
 function gpac_filter_to_object(f, full = false) {
     let jsf = {};
@@ -109,6 +109,7 @@ function filter_pid_stats_object(f) {
 }
 
 function is_hidden_filter(f) {
+    if (PREVIEW.DEBUG_SHOW_FILTERS) return false;
     if (f.itag === 'NODISPLAY') return true;
     return typeof f.name === 'string' && f.name.startsWith('PreviewSink');
 }
