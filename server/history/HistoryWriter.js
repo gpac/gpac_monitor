@@ -123,6 +123,7 @@ function HistoryWriter(historyDir, sessionId) {
     // Torn-session safety: a killed GPAC never reaches close(), so the manifest
     // must exist on disk before the first chunk rotation.
     this._maybeWriteManifest = function() {
+        if (this.getCurrentChunkIndex() !== 0) return;
         if (this._lastManifestUs !== null &&
             this._lastEventUs - this._lastManifestUs < MANIFEST_REFRESH_US) return;
         this._writeManifest();

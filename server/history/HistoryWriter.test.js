@@ -86,6 +86,23 @@ describe('HistoryWriter torn-session manifest', () => {
     renameSpy.mockRestore();
   });
 
+  it('stops refreshing the manifest mid-chunk once the first rotation has happened', () => {
+    const renameSpy = vi.spyOn(os, 'rename');
+    const writer = new HistoryWriter('test-history', 'torn4');
+
+    writer.writeEvent('{"a":1}', 1000);
+    writer.writeEvent('{"a":2}', 10 * 1000 * 1000 + 1000);
+
+    expect(writer.getCurrentChunkIndex()).toBe(1);
+    expect(countManifestWrites(renameSpy)).toBe(2);
+
+    writer.writeEvent('{"a":3}', 10 * 1000 * 1000 + 4 * 1000 * 1000);
+    writer.writeEvent('{"a":4}', 10 * 1000 * 1000 + 8 * 1000 * 1000);
+
+    expect(countManifestWrites(renameSpy)).toBe(2);
+    renameSpy.mockRestore();
+  });
+
   it('lists the open log chunk in a mid-session manifest', () => {
     const written = {};
     const openSpy = vi.spyOn(std, 'open').mockImplementation((path) => ({
