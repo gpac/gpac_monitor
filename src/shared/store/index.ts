@@ -11,6 +11,7 @@ import monitoredFilterReducer from './slices/monitoredFilterSlice';
 import connectionsReducer, {
   connectionsListenerMiddleware,
 } from './slices/connectionsSlice';
+import sessionDetailsReducer from './slices/sessionDetailsSlice';
 import monitorConfigReducer from './slices/monitorConfigSlice';
 
 export const store = configureStore({
@@ -20,6 +21,7 @@ export const store = configureStore({
     logs: logsReducer,
     widgets: widgetsReducer,
     sessionStats: sessionStatsReducer,
+    sessionDetails: sessionDetailsReducer,
     layout: layoutReducer,
     monitoredFilter: monitoredFilterReducer,
     connections: connectionsReducer,

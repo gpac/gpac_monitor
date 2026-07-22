@@ -8,6 +8,14 @@ import { GpacStreamType } from './stream-types';
 /**
  * Session filter statistics (from GPAC session)
  */
+/** Compact per-PID dynamic data recorded in session_stats history events */
+export interface PIDDynamicData {
+  buffer: number;
+  max_buffer?: number;
+  bitrate: number | null;
+  stats?: PIDStats;
+}
+
 export interface SessionFilterStatistics extends Record<string, unknown> {
   idx: number;
   status: string;
@@ -16,9 +24,12 @@ export interface SessionFilterStatistics extends Record<string, unknown> {
   pck_sent: number;
   pck_done: number;
   time: number;
+  last_task_time?: number;
   nb_ipid: number;
   nb_opid: number;
   is_eos?: boolean;
+  ipids?: Record<string, PIDDynamicData>;
+  opids?: Record<string, PIDDynamicData>;
 }
 
 /**

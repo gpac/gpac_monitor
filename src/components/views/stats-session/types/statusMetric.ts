@@ -3,6 +3,7 @@ export type SessionTimeUs = number;
 export interface StatusMetricSample {
   sessionTimeUs: number;
   value: number | null;
+  time?: string;
 }
 
 export const buildStatusMetricKey = (

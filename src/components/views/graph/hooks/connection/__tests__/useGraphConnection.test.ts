@@ -24,8 +24,12 @@ vi.mock('@/shared/hooks/redux', () => ({
   useAppSelector: () => activeConnectionRef.current,
 }));
 
-vi.mock('@/shared/hooks/useGpacService', () => ({
+vi.mock('@/shared/hooks/connection/useGpacService', () => ({
   useGpacService: () => mockService,
+}));
+
+vi.mock('@/shared/hooks/data/useDataMode', () => ({
+  useDataMode: () => ({ isLive: true }),
 }));
 
 describe('useGraphConnection', () => {

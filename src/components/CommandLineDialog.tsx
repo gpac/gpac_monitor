@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { CustomTooltip } from '@/components/ui/tooltip';
-import { useCommandLine } from '@/shared/hooks/useCommandLine';
+import { useCommandLine } from '@/shared/hooks/data/useCommandLine';
 
 export const CommandLineInfo = () => {
   const { commandLine, isLoading } = useCommandLine();

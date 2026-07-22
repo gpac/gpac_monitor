@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useGpacService } from '@/shared/hooks/useGpacService';
+import { useGpacService } from '@/shared/hooks/connection/useGpacService';
+import { useAppSelector } from '@/shared/hooks/redux';
 import { FilterArgument } from '@/types';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
+import { selectFilterArgs } from '@/shared/store/selectors/session';
 
 /**
- * Subscribe to filter arguments updates via UpdatableSubscribable
- * Returns live filter arguments when they arrive from server
+ * Subscribe to filter arguments updates via UpdatableSubscribable (live)
+ * or read from Redux (history).
  */
 export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
   const gpacService = useGpacService();
+  const { isHistory } = useDataMode();
+  const cachedArgs = useAppSelector((state) =>
+    filterIdx !== undefined
+      ? selectFilterArgs(state, filterIdx.toString())
+      : undefined,
+  );
   const [args, setArgs] = useState<FilterArgument[]>([]);
 
   useEffect(() => {
@@ -16,7 +25,11 @@ export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
       return;
     }
 
-    // Subscribe to filter args updates via UpdatableSubscribable
+    if (isHistory) {
+      setArgs((cachedArgs as unknown as FilterArgument[]) ?? []);
+      return;
+    }
+
     const unsubscribe = gpacService
       .getFilterArgsHandler()
       .subscribeToFilterArgsDetails(filterIdx, (newArgs) => {
@@ -24,7 +37,7 @@ export const useFilterArgsSubscription = (filterIdx: number | undefined) => {
       });
 
     return unsubscribe;
-  }, [filterIdx, gpacService]);
+  }, [filterIdx, gpacService, isHistory, cachedArgs]);
 
   return args;
 };

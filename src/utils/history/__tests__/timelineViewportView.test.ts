@@ -1,0 +1,81 @@
+import { describe, it, expect } from 'vitest';
+import {
+  getVisibleEvents,
+  getCursorPercent,
+  clusterVisibleEvents,
+  type PositionedEvent,
+} from '../timelineViewportView';
+import type { TimelineViewport } from '../timelineViewport';
+import type { TimelineEvent } from '@/services/historyService/types';
+
+const viewport: TimelineViewport = {
+  sessionDurationUs: 100_000_000,
+  visibleStartUs: 40_000_000,
+  visibleDurationUs: 40_000_000, // window [40s, 80s]
+};
+
+const event = (id: string, sessionTimeUs: number): TimelineEvent => ({
+  id,
+  sessionTimeUs,
+  absoluteTimeUs: sessionTimeUs,
+  type: 'pid-reconfig',
+  title: 'PID reconfigured',
+});
+
+describe('getVisibleEvents', () => {
+  it('excludes events outside the window', () => {
+    const result = getVisibleEvents(viewport, [
+      event('before', 30_000_000),
+      event('inside', 60_000_000),
+      event('after', 90_000_000),
+    ]);
+    expect(result.map((entry) => entry.event.id)).toEqual(['inside']);
+  });
+
+  it('maps the window bounds to 0% and 100%', () => {
+    const result = getVisibleEvents(viewport, [
+      event('start', 40_000_000),
+      event('end', 80_000_000),
+    ]);
+    expect(result[0].positionPercent).toBe(0);
+    expect(result[1].positionPercent).toBe(100);
+  });
+});
+
+describe('getCursorPercent', () => {
+  it('returns the ratio inside the window', () => {
+    expect(getCursorPercent(viewport, 60_000_000)).toBe(50);
+  });
+
+  it('clamps a playhead outside the window', () => {
+    expect(getCursorPercent(viewport, 10_000_000)).toBe(0);
+    expect(getCursorPercent(viewport, 95_000_000)).toBe(100);
+  });
+});
+
+describe('clusterVisibleEvents', () => {
+  it('groups events closer than the gap into one cluster', () => {
+    const visible: PositionedEvent[] = [
+      { event: event('a', 50_000_000), positionPercent: 25 },
+      { event: event('b', 50_400_000), positionPercent: 26 },
+      { event: event('c', 50_800_000), positionPercent: 27 },
+    ];
+    const items = clusterVisibleEvents(visible, 5);
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      kind: 'cluster',
+      count: 3,
+      fromUs: 50_000_000,
+      toUs: 50_800_000,
+    });
+  });
+
+  it('keeps well-spaced events individual', () => {
+    const visible: PositionedEvent[] = [
+      { event: event('a', 44_000_000), positionPercent: 10 },
+      { event: event('b', 72_000_000), positionPercent: 80 },
+    ];
+    const items = clusterVisibleEvents(visible, 5);
+    expect(items.map((item) => item.kind)).toEqual(['event', 'event']);
+  });
+});

@@ -3,6 +3,7 @@ import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 interface StatsTabsProps {
   activeTab: string;
@@ -24,6 +25,7 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
   onDetachTab,
   tabsRef,
 }) => {
+  const { isHistory } = useDataMode();
   // Read viewByFilter from Redux (single source of truth)
   const viewByFilter = useAppSelector((state) => state.widgets.viewByFilter);
 
@@ -34,12 +36,12 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
 
   return (
     <TabsList
-      className="sticky top-0 z-50 w-full justify-start rounded-none bg-monitor-surface"
+      className="sticky top-0 z-50   w-full justify-start border-none bg-monitor-surface"
       ref={tabsRef}
     >
       <TabsTrigger
         value="main"
-        className="flex items-center gap-1 data-[state=active]:text-monitor-active-filter data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-filter"
+        className={`flex items-center gap-1 data-[state=active]:border-b-2 ${isHistory ? 'data-[state=active]:border-history' : 'data-[state=active]:text-monitor-active-filter data-[state=active]:border-monitor-active-filter'}`}
         data-value="main"
         onClick={() => onValueChange('main')}
       >
@@ -56,7 +58,7 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
           <TabsTrigger
             key={`tab-${filterIdx}`}
             value={`filter-${filterIdx}`}
-            className="flex items-center gap-1 data-[state=active]:text-monitor-active-filter data-[state=active]:border-b-2 data-[state=active]:border-monitor-active-filter"
+            className={`flex items-center gap-1 data-[state=active]:border-b-2 ${isHistory ? 'data-[state=active]:border-history' : 'data-[state=active]:text-monitor-active-filter data-[state=active]:border-monitor-active-filter'}`}
             data-value={`filter-${filterIdx}`}
             onClick={() => onValueChange(`filter-${filterIdx}`)}
           >

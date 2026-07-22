@@ -14,6 +14,9 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
+      'std': resolve(__dirname, './src/test/stubs/gpac-std.js'),
+      'os': resolve(__dirname, './src/test/stubs/gpac-os.js'),
+      'gpaccore': resolve(__dirname, './src/test/stubs/gpac-core.js'),
     },
   },
 });

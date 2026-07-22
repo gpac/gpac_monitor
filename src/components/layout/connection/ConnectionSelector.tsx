@@ -8,9 +8,10 @@ import {
 } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
-import { useConnectionStatusSync } from '@/shared/hooks/useConnectionStatusSync';
-import { useWebSocketNotifications } from '@/shared/hooks/useWebSocketNotifications';
+import { useConnectionStatusSync } from '@/shared/hooks/connection/useConnectionStatusSync';
+import { useWebSocketNotifications } from '@/shared/hooks/connection/useWebSocketNotifications';
 import { useToast } from '@/shared/hooks';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import {
   selectAllConnections,
   selectActiveConnection,
@@ -28,8 +29,9 @@ const ConnectionSelector = memo(() => {
   const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
 
   const { toast } = useToast();
+  const { mode } = useDataSource();
   useConnectionStatusSync();
-  useWebSocketNotifications({ toast });
+  useWebSocketNotifications({ toast, disabled: mode === 'history' });
 
   const isConnected = useMemo(
     () => activeConnection?.status === ConnectionStatus.CONNECTED,

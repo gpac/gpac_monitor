@@ -12,10 +12,7 @@ import {
   GpacLogLevel,
   GpacLogEntry,
 } from '../../../../types/domain/gpac/log-types';
-import graphReducer from '../graphSlice';
-import widgetsReducer from '../widgetsSlice';
-import filterArgumentReducer from '../filterArgumentSlice';
-import sessionStatsReducer from '../sessionStatsSlice';
+const mockReducer = (state = {}) => state;
 
 // Mock localStorage
 let localStorageMock: { [key: string]: string };
@@ -41,12 +38,12 @@ beforeEach(() => {
 const createTestStore = () =>
   configureStore({
     reducer: {
-      graph: graphReducer,
-      filterArgument: filterArgumentReducer,
+      graph: mockReducer,
+      filterArgument: mockReducer,
       logs: logsReducer,
-      widgets: widgetsReducer,
-      sessionStats: sessionStatsReducer,
-    },
+      widgets: mockReducer,
+      sessionStats: mockReducer,
+    } as any,
   });
 
 const createLogEntry = (

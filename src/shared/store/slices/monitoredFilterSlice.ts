@@ -135,6 +135,47 @@ const monitoredFilterSlice = createSlice({
       state.dataByFilter = {};
     },
 
+    /** Bulk-add network data (used by seek flush). */
+    bulkAddNetworkData: (
+      state,
+      action: PayloadAction<
+        Record<
+          string,
+          {
+            outband: ChartDataPoint[];
+            inband: ChartDataPoint[];
+            lastTaskTime: ChartDataPoint[];
+          }
+        >
+      >,
+    ) => {
+      for (const [filterId, data] of Object.entries(action.payload)) {
+        if (!state.dataByFilter[filterId]) state.dataByFilter[filterId] = {};
+        if (!state.dataByFilter[filterId].network)
+          state.dataByFilter[filterId].network = { outband: [], inband: [] };
+        const network = state.dataByFilter[filterId].network!;
+        for (const direction of ['outband', 'inband'] as const) {
+          network[direction].push(...data[direction]);
+          if (network[direction].length > state.maxPoints)
+            network[direction].splice(
+              0,
+              network[direction].length - state.maxPoints,
+            );
+        }
+        if (data.lastTaskTime.length) {
+          if (!state.dataByFilter[filterId].lastTaskTime)
+            state.dataByFilter[filterId].lastTaskTime = [];
+          const lastTaskTimePoints = state.dataByFilter[filterId].lastTaskTime!;
+          lastTaskTimePoints.push(...data.lastTaskTime);
+          if (lastTaskTimePoints.length > state.maxPoints)
+            lastTaskTimePoints.splice(
+              0,
+              lastTaskTimePoints.length - state.maxPoints,
+            );
+        }
+      }
+    },
+
     toggleSelectedPid: (state, action: PayloadAction<PIDGraphTarget>) => {
       const incoming = action.payload;
       const existingIndex = state.selectedPidTargets.findIndex(
@@ -206,6 +247,10 @@ const monitoredFilterSlice = createSlice({
       state.pidSamples = {};
     },
 
+    clearAllStatusMetricSamples: (state) => {
+      state.statusMetricSamples = {};
+    },
+
     addStatusMetricSamples: (
       state,
       action: PayloadAction<Array<{ key: string; sample: StatusMetricSample }>>,
@@ -274,6 +319,7 @@ const monitoredFilterSlice = createSlice({
 
 export const {
   addNetworkDataPoint,
+  bulkAddNetworkData,
   addCombinedNetworkPoint,
   clearFilterData,
   resetAllData,
@@ -286,6 +332,7 @@ export const {
   clearPIDSamples,
   clearAllPIDSamples,
   addStatusMetricSamples,
+  clearAllStatusMetricSamples,
   setSelectedStatusMetric,
   clearStatusMetricsByFilter,
   setParsedStatuses,

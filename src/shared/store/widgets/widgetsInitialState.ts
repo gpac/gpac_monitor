@@ -1,6 +1,6 @@
 import { createWidgetInstance } from '@/components/widget/registry';
 import { widgetRegistry } from '@/components/widget/registry';
-import { WidgetConfig, Widget } from '@/types';
+import { WidgetConfig, Widget } from '@/types/ui/widget';
 import { WidgetsState } from './types';
 import { loadLayoutFromStorage, loadLastUsedLayout } from './layoutStorage';
 

@@ -5,7 +5,7 @@ import {
   detachFilter,
   closeFilter,
 } from '@/shared/store/slices/widgetsSlice';
-import { useSidebar } from '@/shared/hooks/useSidebar';
+import { useSidebar } from '@/shared/hooks/ui/useSidebar';
 
 /**
  * Hook to provide filter action handlers

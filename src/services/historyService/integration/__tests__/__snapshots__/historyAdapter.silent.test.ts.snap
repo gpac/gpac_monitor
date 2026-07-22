@@ -1,0 +1,66 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`HistoryAdapter silent mode > buffers bandwidth when silent, dispatches bulk on flush 1`] = `
+{
+  "0": {
+    "inband": [
+      {
+        "timestamp": 2237805,
+        "value": 727528,
+      },
+    ],
+    "lastTaskTime": [
+      {
+        "timestamp": 2237805,
+        "value": 0,
+      },
+    ],
+    "outband": [
+      {
+        "timestamp": 2237805,
+        "value": 727528,
+      },
+    ],
+  },
+  "4": {
+    "inband": [
+      {
+        "timestamp": 2237805,
+        "value": 5000,
+      },
+    ],
+    "lastTaskTime": [
+      {
+        "timestamp": 2237805,
+        "value": 0,
+      },
+    ],
+    "outband": [
+      {
+        "timestamp": 2237805,
+        "value": 757176,
+      },
+    ],
+  },
+}
+`;
+
+exports[`HistoryAdapter silent mode > buffers cpu stats when silent, dispatches bulk on flush 1`] = `
+[
+  {
+    "cpu_efficiency": 0,
+    "gpac_memory": 0,
+    "gpac_memory_percent": 0,
+    "memory_usage_percent": 59.33,
+    "nb_cores": 20,
+    "physical_memory": 66624581632,
+    "physical_memory_avail": 27096256512,
+    "process_cpu_usage": 8,
+    "process_memory": 102359040,
+    "process_memory_percent": 0.15,
+    "thread_count": 0,
+    "timestamp": 237464,
+    "total_cpu_usage": 0,
+  },
+]
+`;

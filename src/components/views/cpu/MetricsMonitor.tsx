@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
+import { useOptimizedResize } from '@/shared/hooks/ui/useOptimizedResize';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 import { CpuMemoryChartUplot } from './components/CpuMemoryChartUplot';
 import { CpuMemoryOverview } from './components/CpuMemoryOverview';
@@ -46,6 +47,8 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   }) as { ref: React.RefObject<HTMLElement> };
   const containerRef = ref as React.RefObject<HTMLDivElement>;
 
+  const { isHistory } = useDataMode();
+
   const { isSubscribed, currentCPU, currentMemory, totalCores } = useCPUStats(
     true,
     cpuStatsInterval,
@@ -54,7 +57,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   const metricsValues = useMemo(
     () => ({
       currentCPUPercent: currentCPU,
-      currentMemoryPercent: 0, // Not used, keeping for compatibility
+      currentMemoryPercent: 0,
       currentMemoryProcess: currentMemory,
       totalCores,
       isLoading: !isSubscribed,
@@ -68,14 +71,15 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   );
 
   const statusBadge = useMemo(
-    () => (
-      <WindowDurationBadge
-        value={duration}
-        onChange={setDuration}
-        options={CPU_DURATION_OPTIONS}
-      />
-    ),
-    [duration, setDuration],
+    () =>
+      isHistory ? null : (
+        <WindowDurationBadge
+          value={duration}
+          onChange={setDuration}
+          options={CPU_DURATION_OPTIONS}
+        />
+      ),
+    [isHistory, duration, setDuration],
   );
 
   return (
@@ -94,7 +98,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
           <CpuMemoryChartUplot
             currentCPUPercent={metricsValues.currentCPUPercent}
             currentMemoryBytes={metricsValues.currentMemoryProcess}
-            animating={!isResizing}
+            animating={!isResizing && !isHistory}
             maxPoints={maxPoints}
             windowDuration={windowDuration}
           />

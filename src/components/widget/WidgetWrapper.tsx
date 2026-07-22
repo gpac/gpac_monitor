@@ -1,7 +1,7 @@
 import React, { useCallback, useState, useMemo } from 'react';
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
-import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
+import { useOptimizedResize } from '@/shared/hooks/ui/useOptimizedResize';
 import { widgetIcons } from './widgetIcons';
 
 import { LuX, LuRotateCcw } from 'react-icons/lu';

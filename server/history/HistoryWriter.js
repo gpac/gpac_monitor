@@ -1,0 +1,185 @@
+import * as std from 'std';
+import * as os from 'os';
+import { ChunkStream } from './helpers/ChunkStream.js';
+import { CHUNK_DURATION_US, MAX_LOG_PER_CHUNK, MANIFEST_REFRESH_US } from '../config/history.config.js';
+
+function writeFileAtomic(path, content) {
+    const tmpPath = `${path}.tmp`;
+    const tmpFile = std.open(tmpPath, 'w');
+    if (!tmpFile) { print(`[HistoryWriter] Failed to write ${tmpPath}`); return; }
+    tmpFile.puts(content);
+    tmpFile.close();
+    const err = os.rename(tmpPath, path);
+    if (err !== 0) { print(`[HistoryWriter] Failed to rename ${tmpPath} to ${path} (errno ${err})`); }
+}
+
+// Zero-padded so lexicographic sort (used by HistoryFileReader.listSessions) matches
+// chronological order, unlike a raw epoch-ms folder name.
+function formatSessionId(date) {
+    const pad = (value) => String(value).padStart(2, '0');
+    const datePart = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    const timePart = `${pad(date.getHours())}-${pad(date.getMinutes())}-${pad(date.getSeconds())}`;
+    return `${datePart}_${timePart}`;
+}
+
+function HistoryWriter(historyDir, sessionId) {
+    const baseDir = historyDir || 'history';
+    const id = sessionId || formatSessionId(new Date());
+    const dir = `${baseDir}/${id}`;
+    const chunksDir = `${dir}/chunks`;
+    const logsDir = `${dir}/logs`;
+    const checkpointsDir = `${dir}/checkpoints`;
+
+    this.sessionId = id;
+    this.sessionDir = dir;
+    this.snapshotPath = `${dir}/snapshot.json`;
+
+    this._initialized = false;
+    this._events = null;
+    this._logs = null;
+    this._sessionStartUs = null;
+    this._lastEventUs = null;
+    this._checkpoints = [];
+    this._eventsIndex = [];
+    this._journalTsUs = [];
+    this._journalTypes = [];
+    this._lastManifestUs = null;
+
+    this._init = function() {
+        if (this._initialized) return;
+        this._initialized = true;
+        try { os.mkdir(baseDir); } catch (_e) {}
+        try { os.mkdir(dir); } catch (_e) {}
+        try { os.mkdir(chunksDir); } catch (_e) {}
+        try { os.mkdir(logsDir); } catch (_e) {}
+        try { os.mkdir(checkpointsDir); } catch (_e) {}
+        const [, statErr] = os.stat(dir);
+        if (statErr !== 0) print(`[HistoryWriter] Cannot create ${dir} — check the -rmt-log path and permissions`);
+        else print(`[HistoryWriter] Recording session ${id} to ${dir}/`);
+        this._events = new ChunkStream(chunksDir, 'chunk', CHUNK_DURATION_US);
+        this._logs = new ChunkStream(logsDir, 'logs', CHUNK_DURATION_US, MAX_LOG_PER_CHUNK);
+    };
+
+    this._updateTimestamps = function(tsUs) {
+        if (this._sessionStartUs === null) this._sessionStartUs = tsUs;
+        this._lastEventUs = tsUs;
+    };
+
+    this.addEventIndex = function(tsUs, type, metadata) {
+        if (!Number.isFinite(tsUs)) return;
+        this._eventsIndex.push(metadata ? { ts_us: tsUs, type, ...metadata } : { ts_us: tsUs, type });
+    };
+
+    // error/warning facts: columnar (parallel arrays), not an array of objects,
+    // so manifest/journal stay cheap to re-serialize even rewritten in full.
+    this.recordJournalFact = function(tsUs, type) {
+        if (!Number.isFinite(tsUs)) return;
+        this._journalTsUs.push(tsUs);
+        this._journalTypes.push(type);
+    };
+
+    this._writeJournalIndex = function() {
+        if (this._journalTsUs.length === 0) return;
+        const baseTsUs = this._journalTsUs[0];
+        const journalIndex = {
+            baseTsUs,
+            tsDeltaUs: this._journalTsUs.map((tsUs) => tsUs - baseTsUs),
+            types: this._journalTypes,
+        };
+        writeFileAtomic(`${dir}/journal_index.json`, JSON.stringify(journalIndex) + '\n');
+    };
+
+    this._getJournalPointer = function() {
+        if (this._journalTsUs.length === 0) return undefined;
+        const errorCount = this._journalTypes.filter((type) => type === 1).length;
+        const warningCount = this._journalTypes.filter((type) => type === 2).length;
+        return {
+            file: 'journal_index.json',
+            format: 'columnar-delta-v1',
+            eventCount: this._journalTsUs.length,
+            errorCount,
+            warningCount,
+        };
+    };
+
+    this._writeManifest = function() {
+        const manifest = {
+            version: 1,
+            startUs: this._sessionStartUs,
+            endUs: this._lastEventUs,
+            chunkDurationUs: CHUNK_DURATION_US,
+            chunkCount: this._events ? this._events.getChunkCount() : 1,
+            snapshot: 'snapshot.json',
+            checkpoints: this._checkpoints,
+            eventChunks: this._events ? this._events.getAllChunksIncludingOpen() : [],
+            logChunks: this._logs ? this._logs.getAllChunksIncludingOpen() : [],
+            eventsIndex: [...this._eventsIndex].sort((a, b) => a.ts_us - b.ts_us),
+            journalIndex: this._getJournalPointer(),
+        };
+        this._writeJournalIndex();
+        writeFileAtomic(`${dir}/manifest.json`, JSON.stringify(manifest) + '\n');
+        this._lastManifestUs = this._lastEventUs;
+    };
+
+    // Torn-session safety: a killed GPAC never reaches close(), so the manifest
+    // must exist on disk before the first chunk rotation.
+    this._maybeWriteManifest = function() {
+        if (this.getCurrentChunkIndex() !== 0) return;
+        if (this._lastManifestUs !== null &&
+            this._lastEventUs - this._lastManifestUs < MANIFEST_REFRESH_US) return;
+        this._writeManifest();
+    };
+
+    this.writeSnapshot = function(obj) {
+        this._init();
+        const snapshotFile = std.open(this.snapshotPath, 'w');
+        if (!snapshotFile) { print(`[HistoryWriter] Failed to write snapshot`); return; }
+        snapshotFile.puts(JSON.stringify(obj) + '\n');
+        snapshotFile.close();
+    };
+
+    this.writeLog = function(jsonString, tsUs) {
+        this._init();
+        this._updateTimestamps(tsUs);
+        if (this._logs.write(jsonString, tsUs)) this._writeManifest();
+        else this._maybeWriteManifest();
+    };
+
+    this.writeEvent = function(jsonString, tsUs) {
+        this._init();
+        this._updateTimestamps(tsUs);
+        const rotated = this._events.write(jsonString, tsUs);
+        if (rotated) this._writeManifest();
+        else this._maybeWriteManifest();
+        return rotated;
+    };
+
+    this.writeCheckpoint = function(chunkIndex, obj) {
+        const padded = String(chunkIndex).padStart(4, '0');
+        const file = `checkpoints/cp_${padded}.json`;
+        const cpFile = std.open(`${dir}/${file}`, 'w');
+        if (!cpFile) { print(`[HistoryWriter] Failed to write checkpoint ${file}`); return; }
+        cpFile.puts(JSON.stringify(obj) + '\n');
+        cpFile.close();
+        this._checkpoints.push({ chunkIndex, file });
+        this._writeManifest();
+    };
+
+    this.getCurrentChunkIndex = function() {
+        return this._events ? this._events._index : 0;
+    };
+
+    this.getCurrentLogChunkIndex = function() {
+        return this._logs ? this._logs._index : 0;
+    };
+
+    this.close = function() {
+        if (this._events) this._events.close();
+        if (this._logs) this._logs.close();
+        this._writeManifest();
+        const doneFile = std.open(`${dir}/done`, 'w');
+        if (doneFile) doneFile.close();
+    };
+}
+
+export { HistoryWriter };

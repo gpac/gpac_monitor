@@ -104,6 +104,13 @@ export const buffersReducers = {
     }
   },
 
+  clearLogs: (state: LogsState) => {
+    Object.values(GpacLogTool).forEach((tool) => {
+      state.buffers[tool] = [];
+    });
+    state.alertsByFilterKey = {};
+  },
+
   /** Update buffer size limit and truncate existing buffers if needed */
   setMaxEntriesPerTool: (state: LogsState, action: PayloadAction<number>) => {
     state.maxEntriesPerTool = action.payload;

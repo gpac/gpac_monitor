@@ -18,7 +18,7 @@ import {
   selectAllToolsInFilter,
 } from '@/shared/store/slices/logsSlice';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
-import { toast } from '@/shared/hooks/useToast';
+import { toast } from '@/shared/hooks/ui/useToast';
 
 const STORAGE_KEY = 'gpac-logs-config';
 

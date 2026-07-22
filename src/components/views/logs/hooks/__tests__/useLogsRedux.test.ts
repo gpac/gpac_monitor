@@ -29,7 +29,7 @@ interface LogsState {
 }
 
 // Mock toast
-vi.mock('@/shared/hooks/useToast', () => ({
+vi.mock('@/shared/hooks/ui/useToast', () => ({
   toast: vi.fn(),
 }));
 

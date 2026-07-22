@@ -1,6 +1,11 @@
 import { useMemo, useCallback, useRef } from 'react';
 import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
+import {
+  HISTORY_HEADER_HEIGHT_PX,
+  TIMELINE_DOCK_HEIGHT_PX,
+} from '@/components/history/historyLayout';
 import {
   Responsive,
   WidthProvider,
@@ -13,6 +18,8 @@ import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
 import { closeSidebar } from '@/shared/store/slices/layoutSlice';
 import Header from './Header';
 import Sidebar from '../sidebar/Sidebar';
+import SessionPicker from '@/components/history/SessionPicker';
+import HistoryControls from '@/components/history/timeline/HistoryControls';
 import { Widget } from '@/types/ui/widget';
 import { getWidgetDefinition } from '../../widget/registry';
 import SidebarCloseButton from '../sidebar/SidebarCloseButton';
@@ -31,14 +38,13 @@ const DashboardLayout = () => {
   const configs = useAppSelector((state) => state.widgets.configs);
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const isDraggingRef = useRef(false);
-
-  // Calculate rowHeight once based on available height
-  // No state, no listeners, just initial calculation
+  const { isHistory } = useDataMode();
   const rowHeight = useMemo(() => {
-    const availableHeight = window.innerHeight - 64; // minus header
-    // Divide by fewer rows to make widgets larger and fill space
+    const headerHeight = isHistory ? HISTORY_HEADER_HEIGHT_PX : 64;
+    const dockHeight = isHistory ? TIMELINE_DOCK_HEIGHT_PX : 0;
+    const availableHeight = window.innerHeight - headerHeight - dockHeight;
     return Math.floor(availableHeight / 14.8);
-  }, []);
+  }, [isHistory]);
 
   // Memoize layouts object - only recreate if widget positions/sizes change
   const layouts: RGLLayouts = useMemo(
@@ -82,14 +88,16 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div className="grid grid-rows-[auto_1fr] h-screen bg-main overflow-x-hidden">
+    <div className="grid grid-rows-[auto_1fr_auto] h-screen bg-main overflow-x-hidden">
       <Header />
+      <SessionPicker />
       <div className="flex relative min-h-0 overflow-hidden">
         <div
           id="app-sidebar"
-          className="fixed top-14 bottom-0 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
+          className="fixed top-14 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+            bottom: isHistory ? TIMELINE_DOCK_HEIGHT_PX : 0,
           }}
         >
           <Sidebar />
@@ -163,6 +171,7 @@ const DashboardLayout = () => {
           </ResponsiveGridLayout>
         </OverlayScrollbarsComponent>
       </div>
+      <HistoryControls />
     </div>
   );
 };
