@@ -1,18 +1,16 @@
 import React, { useState, useMemo } from 'react';
-import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
+import { useOptimizedResize } from '@/shared/hooks/ui/useOptimizedResize';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 import { CpuMemoryChartUplot } from './components/CpuMemoryChartUplot';
 import { CpuMemoryOverview } from './components/CpuMemoryOverview';
 import { useCPUStats } from './hooks/useCPUStats';
 import WidgetWrapper from '@/components/widget/WidgetWrapper';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
-import { useChartDuration } from '@/shared/hooks';
+import { useChartDuration, useAppSelector } from '@/shared/hooks';
+import { selectCpuStatsInterval } from '@/shared/store/selectors';
 import type { ChartDuration } from '@/utils/charts';
-import {
-  CHART_CPU_UPDATE_INTERVAL,
-  DEFAULT_CPU_HISTORY,
-  CPU_HISTORY_STORAGE_KEY,
-} from './constants';
+import { DEFAULT_CPU_HISTORY, CPU_HISTORY_STORAGE_KEY } from './constants';
 
 const CPU_DURATION_OPTIONS: ChartDuration[] = [
   '20s',
@@ -21,7 +19,7 @@ const CPU_DURATION_OPTIONS: ChartDuration[] = [
   'unlimited',
 ];
 
-const BASE_CONTAINER_CLASS = 'container mx-auto flex flex-col gap-2 p-2 h-full';
+const BASE_CONTAINER_CLASS = 'flex flex-col gap-2 p-2 h-full';
 const RESIZING_CLASS = 'contain-layout contain-style';
 
 interface MetricsMonitorProps {
@@ -31,11 +29,13 @@ interface MetricsMonitorProps {
 const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   const [isResizing, setIsResizing] = useState(false);
 
+  const cpuStatsInterval = useAppSelector(selectCpuStatsInterval);
+
   // Chart duration management (encapsulated logic)
   const { duration, setDuration, windowDuration, maxPoints } = useChartDuration(
     CPU_HISTORY_STORAGE_KEY,
     DEFAULT_CPU_HISTORY,
-    CHART_CPU_UPDATE_INTERVAL,
+    cpuStatsInterval,
   );
 
   // Optimize resize performance
@@ -47,15 +47,17 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   }) as { ref: React.RefObject<HTMLElement> };
   const containerRef = ref as React.RefObject<HTMLDivElement>;
 
+  const { isHistory } = useDataMode();
+
   const { isSubscribed, currentCPU, currentMemory, totalCores } = useCPUStats(
     true,
-    CHART_CPU_UPDATE_INTERVAL,
+    cpuStatsInterval,
   );
 
   const metricsValues = useMemo(
     () => ({
       currentCPUPercent: currentCPU,
-      currentMemoryPercent: 0, // Not used, keeping for compatibility
+      currentMemoryPercent: 0,
       currentMemoryProcess: currentMemory,
       totalCores,
       isLoading: !isSubscribed,
@@ -69,14 +71,15 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
   );
 
   const statusBadge = useMemo(
-    () => (
-      <WindowDurationBadge
-        value={duration}
-        onChange={setDuration}
-        options={CPU_DURATION_OPTIONS}
-      />
-    ),
-    [duration, setDuration],
+    () =>
+      isHistory ? null : (
+        <WindowDurationBadge
+          value={duration}
+          onChange={setDuration}
+          options={CPU_DURATION_OPTIONS}
+        />
+      ),
+    [isHistory, duration, setDuration],
   );
 
   return (
@@ -95,7 +98,7 @@ const MetricsMonitor: React.FC<MetricsMonitorProps> = React.memo(({ id }) => {
           <CpuMemoryChartUplot
             currentCPUPercent={metricsValues.currentCPUPercent}
             currentMemoryBytes={metricsValues.currentMemoryProcess}
-            animating={!isResizing}
+            animating={!isResizing && !isHistory}
             maxPoints={maxPoints}
             windowDuration={windowDuration}
           />

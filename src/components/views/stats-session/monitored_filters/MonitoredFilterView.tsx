@@ -4,7 +4,7 @@ import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
-import { selectFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
+import { selectAllFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
@@ -66,7 +66,7 @@ const MonitoredFilterView = memo(
     // Get log alerts for this filter
     const alerts = useAppSelector((state) =>
       overviewData.filterIdx !== undefined
-        ? selectFilterAlerts(String(overviewData.filterIdx))(state)
+        ? (selectAllFilterAlerts(state)[String(overviewData.filterIdx)] ?? null)
         : null,
     );
 
@@ -197,36 +197,6 @@ const MonitoredFilterView = memo(
           </Tabs>
         </div>
       </FilterViewProvider>
-    );
-  },
-  (prevProps, nextProps) => {
-    const filterDataUnchanged =
-      prevProps.filterData?.idx === nextProps.filterData?.idx &&
-      prevProps.filterData?.status === nextProps.filterData?.status &&
-      prevProps.filterData?.time === nextProps.filterData?.time;
-
-    // Overview data contains frequently changing metrics
-    const overviewUnchanged =
-      prevProps.overviewData.name === nextProps.overviewData.name &&
-      prevProps.overviewData.filterIdx === nextProps.overviewData.filterIdx;
-
-    // Network data changes frequently (bytes_sent/received)
-    const networkUnchanged =
-      prevProps.networkData === nextProps.networkData ||
-      (prevProps.networkData.bytesSent === nextProps.networkData.bytesSent &&
-        prevProps.networkData.bytesReceived ===
-          nextProps.networkData.bytesReceived);
-
-    // Arrays of PIDs - compare lengths (cheap) rather than deep comparison
-    const pidsUnchanged =
-      prevProps.inputPids.length === nextProps.inputPids.length &&
-      prevProps.outputPids.length === nextProps.outputPids.length;
-
-    return (
-      filterDataUnchanged &&
-      overviewUnchanged &&
-      networkUnchanged &&
-      pidsUnchanged
     );
   },
 );

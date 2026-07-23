@@ -1,51 +1,24 @@
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useDeferredValue,
-  useMemo,
-} from 'react';
-import { GpacLogEntry } from '@/types/domain/gpac/log-types';
+import { useState, useEffect } from 'react';
 import { gpacService } from '@/services/gpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectLogsConfigString } from '@/shared/store/selectors/logs/logsConfigSelectors';
-import { useServiceReady } from '@/shared/hooks/useServiceReady';
+import { useServiceReady } from '@/shared/hooks/connection/useServiceReady';
 
 interface UseLogsOptions {
   enabled?: boolean;
-  maxEntries?: number;
 }
 
 export function useLogs(options: UseLogsOptions = {}) {
-  const { enabled = true, maxEntries = 2000 } = options;
+  const { enabled = true } = options;
 
-  const [logs, setLogs] = useState<GpacLogEntry[]>([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   const { isReady } = useServiceReady({ enabled });
   const initialLogConfig = useAppSelector(selectLogsConfigString);
 
-  const handleLogsUpdate = useCallback(
-    (newLogs: GpacLogEntry[]) => {
-      if (newLogs.length === 0) return;
-
-      setLogs((currentLogs) => {
-        const allLogs = currentLogs.concat(newLogs);
-
-        if (allLogs.length <= maxEntries) {
-          return allLogs;
-        }
-
-        return allLogs.slice(-maxEntries);
-      });
-    },
-    [maxEntries],
-  );
-
   useEffect(() => {
     if (!enabled || !isReady) {
-      setLogs([]);
       setIsSubscribed(false);
       return;
     }
@@ -59,11 +32,7 @@ export function useLogs(options: UseLogsOptions = {}) {
             type: SubscriptionType.LOGS,
             logLevel: initialLogConfig,
           },
-          (result) => {
-            if (result.data && isMounted) {
-              handleLogsUpdate(result.data as GpacLogEntry[]);
-            }
-          },
+          () => {},
         );
 
         if (isMounted) {
@@ -74,7 +43,6 @@ export function useLogs(options: UseLogsOptions = {}) {
       } catch (error) {
         console.error('[useLogs] Subscription failed:', error);
         if (isMounted) {
-          setLogs([]);
           setIsSubscribed(false);
         }
       }
@@ -86,13 +54,7 @@ export function useLogs(options: UseLogsOptions = {}) {
       isMounted = false;
       setIsSubscribed(false);
     };
-  }, [enabled, isReady, handleLogsUpdate, initialLogConfig]);
+  }, [enabled, isReady, initialLogConfig]);
 
-  const memoizedLogs = useMemo(() => logs, [logs]);
-  const optimizedLogs = useDeferredValue(memoizedLogs);
-
-  return {
-    logs: optimizedLogs,
-    isSubscribed,
-  };
+  return { isSubscribed };
 }

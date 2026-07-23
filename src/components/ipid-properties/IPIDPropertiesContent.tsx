@@ -1,6 +1,6 @@
 import { memo, useCallback } from 'react';
 import { PidProperty } from '@/types';
-import { useSearchFilter } from '@/shared/hooks/useSearchFilter';
+import { useSearchFilter } from '@/shared/hooks/filters/useSearchFilter';
 import PropertyItem from './PropertyItem';
 
 interface IPIDPropertiesContentProps {

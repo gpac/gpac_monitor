@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { selectIsFilterStalled } from '@/shared/store/selectors/session/sessionStatsSelectors';
+import { selectStalledFilters } from '@/shared/store/selectors/session/sessionStatsSelectors';
 import { OverviewTabData } from '@/types/ui';
 import {
   formatBytes,
@@ -13,6 +13,7 @@ import { useIsDetached } from '../FilterViewContext';
 import { selectMetricDefinitions } from '@/shared/store/selectors';
 import { MetricRow, TableSection } from './shared/tableLayout';
 import FilterIdentityStrip from './FilterIdentityStrip';
+import { useSessionSourceIndicator } from '@/shared/hooks/ui/useSessionSourceIndicator';
 import OverviewContentGrid from './OverviewContentGrid';
 import RuntimeDetailsSection from './RuntimeDetailsSection';
 import StatusGraphCard from './status/StatusGraphCard';
@@ -27,9 +28,10 @@ const OverviewTab = memo(
   ({ filter, alerts, onOpenProperties }: OverviewTabProps) => {
     const { parsedStatus, type, filterIdx, time, name } = filter;
     const isDetached = useIsDetached();
+    const sourceIndicator = useSessionSourceIndicator();
 
     const isStalled = useAppSelector(
-      selectIsFilterStalled(filterIdx.toString()),
+      (state) => selectStalledFilters(state)[String(filterIdx)] ?? false,
     );
     const definitions = useAppSelector(selectMetricDefinitions);
     const healthInfo = getFilterHealthInfo(
@@ -83,6 +85,7 @@ const OverviewTab = memo(
           healthLabel={healthInfo.label}
           healthVariant={healthInfo.variant}
           onOpenProperties={onOpenProperties}
+          sourceIndicator={sourceIndicator}
         />
         {graphableMetrics.length > 0 && (
           <StatusGraphCard

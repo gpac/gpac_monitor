@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { buildFilterStatusViewModel, hasDoneFlag } from '../statusViewModel';
-import { parseFilterStatus } from '@/workers/filterStatusParser';
+import { parseFilterStatus } from '@/utils/metrics/filterStatusParser';
 import { formatFractionAsTimeWithRaw } from '@/utils/formatting';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 
 function build(raw: string) {
   return buildFilterStatusViewModel(parseFilterStatus(raw));

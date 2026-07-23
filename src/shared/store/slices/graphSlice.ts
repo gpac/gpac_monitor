@@ -28,6 +28,8 @@ export interface GraphState {
   pidReconfiguredFilters: string[];
   argUpdatedFilters: string[];
   lastUpdate: number;
+  pidReconfiguredCounts: Record<string, number>;
+  argUpdatedCounts: Record<string, number>;
 }
 
 const initialState: GraphState = {
@@ -43,6 +45,8 @@ const initialState: GraphState = {
   pidReconfiguredFilters: [],
   argUpdatedFilters: [],
   lastUpdate: Date.now(),
+  pidReconfiguredCounts: {},
+  argUpdatedCounts: {},
 };
 
 const graphSlice = createSlice({
@@ -85,8 +89,8 @@ const graphSlice = createSlice({
       state.isLoading = false;
       state.pendingFilterOpen = null;
       state.initialTab = null;
-      state.pidReconfiguredFilters = [];
-      state.argUpdatedFilters = [];
+      state.pidReconfiguredCounts = {};
+      state.argUpdatedCounts = {};
     },
     setInitialTab: (state, action: PayloadAction<InitialTabType | null>) => {
       state.initialTab = action.payload;
@@ -103,33 +107,24 @@ const graphSlice = createSlice({
     clearPendingFilterOpen: (state) => {
       state.pendingFilterOpen = null;
     },
-    markPidReconfigured: (state, action: PayloadAction<number[]>) => {
+    markPidReconfigured(state, action: PayloadAction<number[]>) {
       for (const idx of action.payload) {
         const key = idx.toString();
-        if (!state.pidReconfiguredFilters.includes(key)) {
-          state.pidReconfiguredFilters.push(key);
-        }
+        state.pidReconfiguredCounts[key] =
+          (state.pidReconfiguredCounts[key] ?? 0) + 1;
       }
     },
-    markArgUpdated: (state, action: PayloadAction<number[]>) => {
+    markArgUpdated(state, action: PayloadAction<number[]>) {
       for (const idx of action.payload) {
         const key = idx.toString();
-        if (!state.argUpdatedFilters.includes(key)) {
-          state.argUpdatedFilters.push(key);
-        }
+        state.argUpdatedCounts[key] = (state.argUpdatedCounts[key] ?? 0) + 1;
       }
     },
-    clearPidReconfigured: (state, action: PayloadAction<number>) => {
-      const key = action.payload.toString();
-      state.pidReconfiguredFilters = state.pidReconfiguredFilters.filter(
-        (k) => k !== key,
-      );
+    clearPidReconfigured(state, action: PayloadAction<number>) {
+      delete state.pidReconfiguredCounts[action.payload.toString()];
     },
-    clearArgUpdated: (state, action: PayloadAction<number>) => {
-      const key = action.payload.toString();
-      state.argUpdatedFilters = state.argUpdatedFilters.filter(
-        (k) => k !== key,
-      );
+    clearArgUpdated(state, action: PayloadAction<number>) {
+      delete state.argUpdatedCounts[action.payload.toString()];
     },
   },
   extraReducers: (builder) => {

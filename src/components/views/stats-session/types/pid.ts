@@ -2,19 +2,33 @@ import type { FilterStatsResponse, TabPIDData } from '@/types';
 import type { GpacStreamType } from '@/types/domain/gpac';
 
 export type PIDMetricMode =
-  | 'bitrate'
+  // Buffer group
   | 'bufferTime'
+  | 'buffer'
+  // Bitrate group
+  | 'bitrate'
+  // Process time group
   | 'processTime'
+  // Process rate group
   | 'processRate'
-  | 'ts';
+  // Last proc group
+  | 'ts'
+  | 'lastTsSent';
 
 export interface PIDMetricSample {
   sessionTimeUs: number;
-  averageBitrate?: number | null;
+  // Buffer column
   bufferTime?: number | null;
+  buffer?: number | null;
+  // Bitrate column
+  averageBitrate?: number | null;
+  // Process time column
   processTime?: number | null;
+  // Process rate column
   processRate?: number | null;
+  // Last proc column
   ts?: number | null;
+  lastTsSent?: number | null;
 }
 
 export interface PIDGraphTarget {

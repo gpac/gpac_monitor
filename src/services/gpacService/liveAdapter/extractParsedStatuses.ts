@@ -1,8 +1,8 @@
 import {
   parseFilterStatus,
   ParsedFilterStatus,
-} from '@/workers/filterStatusParser';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+} from '@/utils/metrics/filterStatusParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 
 export interface FilterStatusInput {
   idx: number;

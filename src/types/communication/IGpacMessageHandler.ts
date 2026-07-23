@@ -1,8 +1,5 @@
-import {
-  ConnectionStatus,
-  GpacMessage,
-  GpacCommunicationError,
-} from './shared';
+import { ConnectionStatus, GpacCommunicationError } from './shared';
+import type { IncomingWsMessage } from '@/services/ws/types';
 
 /**
  * Handler interface for GPAC communication events.
@@ -13,7 +10,7 @@ export interface IGpacMessageHandler {
    * Processes incoming GPAC messages
    * @param message Typed GPAC message
    */
-  onMessage(message: GpacMessage): void;
+  onMessage(message: IncomingWsMessage): void;
 
   /**
    * Handles communication errors

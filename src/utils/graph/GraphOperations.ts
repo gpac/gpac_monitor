@@ -123,7 +123,11 @@ export function createEdgesFromFilters(
         sourceHandle,
         targetHandle: `ipid-${pid.pid_index}`,
         type: 'simplebezier',
-        data: { filterType },
+        data: {
+          filterType,
+          sourceFilterIdx: pid.source_idx,
+          targetFilterIdx: filter.idx,
+        },
         animated: true,
         style: { stroke: filterColor, strokeWidth: 3, opacity: 0.9 },
         markerEnd: { type: MarkerType.ArrowClosed, color: filterColor },

@@ -1,5 +1,10 @@
+import { Sys as sys } from 'gpaccore';
 import { DEFAULT_FILTER_FIELDS, UPDATE_INTERVALS } from '../config.js';
 import { cacheManager } from '../Cache/CacheManager.js';
+import { HistoryFileReader } from '../../history/HistoryFileReader.js';
+
+// Read from the same directory HistoryCollector writes to (-rmt-log)
+const historyReader = new HistoryFileReader(sys.get_opt('core', 'rmt-log') || 'history');
 
 function MessageHandler(client) {
     this.client = client;
@@ -39,12 +44,11 @@ function MessageHandler(client) {
 
                     'subscribe_filter': () => {
                         const idx = jtext.idx;
-                        let interval = jtext.interval || UPDATE_INTERVALS.FILTER_STATS;
                         let pidScope = jtext.pidScope || 'both';
                         if(!pidScope) {
                             pidScope = 'both';
                         }
-                        this.client.filterManager.subscribeToFilter(idx, interval, pidScope);
+                        this.client.filterManager.subscribeToFilter(idx, pidScope);
                         this.client.ensureMonitoringLoop();
                     },
                     
@@ -121,6 +125,47 @@ function MessageHandler(client) {
                             message: 'cache_stats',
                             stats: stats
                         }));
+                    },
+
+                    'list_sessions': () => {
+                        const sessions = historyReader.listSessions();
+                        this.client.client.send(JSON.stringify({
+                            command: 'list_sessions',
+                            status: 'ok',
+                            sessions
+                        }));
+                    },
+
+                    'read_events_range': () => {
+                        const { sessionId, fromUs, toUs } = jtext;
+                        const events = historyReader.readEventsRange(sessionId, fromUs, toUs);
+                        this.client.client.send(JSON.stringify({
+                            command: 'events_range',
+                            status: 'ok',
+                            sessionId,
+                            events,
+                        }));
+                    },
+
+                    'read_file': () => {
+                        const { sessionId, file } = jtext;
+                        const result = historyReader.readFile(sessionId, file);
+                        if (result.ok) {
+                            this.client.client.send(JSON.stringify({
+                                command: 'read_file',
+                                status: 'ok',
+                                sessionId,
+                                file,
+                                content: result.content
+                            }));
+                        } else {
+                            this.client.client.send(JSON.stringify({
+                                command: 'read_file',
+                                status: 'error',
+                                error: result.error,
+                                detail: result.detail
+                            }));
+                        }
                     }
                 };
 

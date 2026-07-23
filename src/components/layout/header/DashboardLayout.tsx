@@ -1,5 +1,11 @@
 import { useMemo, useCallback, useRef } from 'react';
+import { OverlayScrollbarsComponent } from 'overlayscrollbars-react';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
+import {
+  HISTORY_HEADER_HEIGHT_PX,
+  TIMELINE_DOCK_HEIGHT_PX,
+} from '@/components/history/historyLayout';
 import {
   Responsive,
   WidthProvider,
@@ -12,11 +18,19 @@ import { updateWidgetPosition } from '@/shared/store/slices/widgetsSlice';
 import { closeSidebar } from '@/shared/store/slices/layoutSlice';
 import Header from './Header';
 import Sidebar from '../sidebar/Sidebar';
+import SessionPicker from '@/components/history/SessionPicker';
+import HistoryControls from '@/components/history/timeline/HistoryControls';
 import { Widget } from '@/types/ui/widget';
 import { getWidgetDefinition } from '../../widget/registry';
 import SidebarCloseButton from '../sidebar/SidebarCloseButton';
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
+
+const EMPTY_WIDGET_CONFIG = {
+  isMaximized: false,
+  isMinimized: false,
+  settings: {},
+};
 
 const DashboardLayout = () => {
   const dispatch = useAppDispatch();
@@ -24,14 +38,13 @@ const DashboardLayout = () => {
   const configs = useAppSelector((state) => state.widgets.configs);
   const isSidebarOpen = useAppSelector((state) => state.layout.isSidebarOpen);
   const isDraggingRef = useRef(false);
-
-  // Calculate rowHeight once based on available height
-  // No state, no listeners, just initial calculation
+  const { isHistory } = useDataMode();
   const rowHeight = useMemo(() => {
-    const availableHeight = window.innerHeight - 64; // minus header
-    // Divide by fewer rows to make widgets larger and fill space
+    const headerHeight = isHistory ? HISTORY_HEADER_HEIGHT_PX : 64;
+    const dockHeight = isHistory ? TIMELINE_DOCK_HEIGHT_PX : 0;
+    const availableHeight = window.innerHeight - headerHeight - dockHeight;
     return Math.floor(availableHeight / 14.8);
-  }, []);
+  }, [isHistory]);
 
   // Memoize layouts object - only recreate if widget positions/sizes change
   const layouts: RGLLayouts = useMemo(
@@ -42,7 +55,7 @@ const DashboardLayout = () => {
         y: widget.y,
         w: widget.w,
         h: widget.h,
-        minW: 2,
+        minW: widget.isDetached ? 8 : 2,
         minH: 2,
       })),
     }),
@@ -64,13 +77,7 @@ const DashboardLayout = () => {
         <div key={widget.id}>
           <Component
             id={widget.id}
-            config={
-              configs[widget.id] || {
-                isMaximized: false,
-                isMinimized: false,
-                settings: {},
-              }
-            }
+            config={configs[widget.id] || EMPTY_WIDGET_CONFIG}
             isDetached={widget.isDetached}
             detachedFilterIdx={widget.detachedFilterIdx}
           />
@@ -81,16 +88,16 @@ const DashboardLayout = () => {
   );
 
   return (
-    <div className="h-screen bg-main">
-      <div className="fixed top-0 left-0 right-0 h-16 z-20">
-        <Header />
-      </div>
-      <div className="flex pt-8 h-[calc(100vh-4rem)]">
+    <div className="grid grid-rows-[auto_1fr_auto] h-screen bg-main overflow-x-hidden">
+      <Header />
+      <SessionPicker />
+      <div className="flex relative min-h-0 overflow-hidden">
         <div
           id="app-sidebar"
-          className="fixed top-16 bottom-0 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
+          className="fixed top-14 left-0 w-72 z-10 bg-slate-800/95 transition-transform duration-300 ease-in-out will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+            bottom: isHistory ? TIMELINE_DOCK_HEIGHT_PX : 0,
           }}
         >
           <Sidebar />
@@ -99,8 +106,10 @@ const DashboardLayout = () => {
           <SidebarCloseButton onClose={() => dispatch(closeSidebar())} />
         )}
 
-        <main
-          className="flex-1 h-full pb-4 pt-4 pl-0 transition-transform duration-300 will-change-transform"
+        <OverlayScrollbarsComponent
+          element="main"
+          options={{ scrollbars: { autoHide: 'leave', autoHideDelay: 400 } }}
+          className="flex-1 h-full min-h-0 pb-4 pt-2 pl-0 transition-transform duration-300 will-change-transform"
           style={{
             transform: isSidebarOpen ? 'translateX(256px)' : 'translateX(0)',
             paddingRight: isSidebarOpen ? '272px' : '16px',
@@ -160,8 +169,9 @@ const DashboardLayout = () => {
           >
             {activeWidgets.map(renderWidget)}
           </ResponsiveGridLayout>
-        </main>
+        </OverlayScrollbarsComponent>
       </div>
+      <HistoryControls />
     </div>
   );
 };

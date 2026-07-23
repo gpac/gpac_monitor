@@ -1,11 +1,11 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { shallowEqual } from 'react-redux';
 import {
   selectLogsState,
   selectLevelsByTool,
   selectDefaultAllLevel,
 } from '../logs/logsSelectors';
 import { GpacLogLevel, LOG_LEVEL_VALUES } from '@/types/domain/gpac/log-types';
-
 
 export interface HeaderLogCounts {
   error: number;
@@ -74,6 +74,7 @@ export const selectLogCounts = createSelector(
       info: totalInfo,
     };
   },
+  { memoizeOptions: { resultEqualityCheck: shallowEqual } },
 );
 
 /**
@@ -85,15 +86,24 @@ export const selectAllFilterAlerts = createSelector(
   (logsState) => logsState.alertsByFilterKey,
 );
 
-/**
- * Get alerts for a specific filter by key
- * Returns null if no alerts for this filter
- */
-export const selectFilterAlerts = (filterKey: string) =>
-  createSelector(
-    [selectAllFilterAlerts],
-    (alerts) => alerts[filterKey] || null,
-  );
+const threadAlertsEqual = (
+  prev: ThreadAlert[],
+  next: ThreadAlert[],
+): boolean => {
+  if (prev === next) return true;
+  if (prev.length !== next.length) return false;
+
+  return prev.every((alert, index) => {
+    const other = next[index];
+    return (
+      alert.threadId === other.threadId &&
+      alert.errors === other.errors &&
+      alert.warnings === other.warnings &&
+      alert.info === other.info &&
+      alert.total === other.total
+    );
+  });
+};
 
 /**
  * Extract threads with alerts from alertsByFilterKey
@@ -132,4 +142,5 @@ export const selectThreadAlerts = createSelector(
     // Sort by total alerts descending (most problematic first)
     return threads.sort((a, b) => b.total - a.total);
   },
+  { memoizeOptions: { resultEqualityCheck: threadAlertsEqual } },
 );

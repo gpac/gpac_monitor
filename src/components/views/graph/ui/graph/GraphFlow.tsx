@@ -8,11 +8,13 @@ import {
   NodeChange,
   EdgeChange,
   NodeMouseHandler,
+  EdgeMouseHandler,
   Controls,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import CustomNode from '../nodes/CustomNode';
 import GraphLegend from './GraphLegend';
+import FitGraphOnLoad from './utils/FitGraphOnLoad';
 import { useMinimapNavigation } from '../../hooks/layout/useMinimapNavigation';
 import { getImmediateGraphColor } from '../../hooks/layout/useGraphColors';
 import { useAppDispatch } from '@/shared/hooks/redux';
@@ -24,6 +26,7 @@ interface GraphFlowProps {
   onNodesChange: (changes: NodeChange[]) => void;
   onEdgesChange: (changes: EdgeChange[]) => void;
   onNodeClick?: NodeMouseHandler;
+  onEdgeClick?: EdgeMouseHandler;
   isResizing?: boolean;
 }
 
@@ -43,6 +46,7 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
   onNodesChange,
   onEdgesChange,
   onNodeClick,
+  onEdgeClick,
   isResizing = false,
 }) => {
   const dispatch = useAppDispatch();
@@ -63,8 +67,8 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
         onNodesChange={isResizing ? () => {} : onNodesChange}
         onEdgesChange={isResizing ? () => {} : onEdgesChange}
         onNodeClick={isResizing ? undefined : onNodeClick}
+        onEdgeClick={isResizing ? undefined : onEdgeClick}
         onPaneClick={isResizing ? undefined : handlePaneClick}
-        fitView={!isResizing}
         minZoom={0.01}
         maxZoom={2}
         defaultEdgeOptions={{
@@ -72,11 +76,13 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           animated: false,
           style: { stroke: '#6b7280', strokeWidth: 3 },
           ariaLabel: 'Clickable edge to see IPID properties',
+          interactionWidth: 20,
         }}
         defaultViewport={{ x: 0, y: 0, zoom: 0.5 }}
         proOptions={{ hideAttribution: true }}
         selectionKeyCode={null}
       >
+        <FitGraphOnLoad nodeCount={nodes.length} disabled={isResizing} />
         <Background color="#4b5563" gap={16} />
         <MiniMap
           nodeColor={(node) => getImmediateGraphColor(node)}
@@ -92,11 +98,13 @@ const GraphFlow: React.FC<GraphFlowProps> = ({
           onDrag={isResizing ? undefined : handleMiniMapDrag}
           pannable={!isResizing}
           zoomable={!isResizing}
+          position="bottom-left"
           ariaLabel="Minimap for graph navigation"
         />
         <Controls
           showInteractive={false}
           className="[&_button]:bg-gray-800 [&_button]:border-gray-700 [&_button]:text-white [&_button:hover]:bg-gray-700"
+          position="center-left"
         />
 
         <GraphLegend />

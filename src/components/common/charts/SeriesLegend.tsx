@@ -42,7 +42,7 @@ function SeriesLegend({ items }: SeriesLegendProps) {
             type="button"
             onClick={item.disabled ? undefined : item.onToggle}
             disabled={item.disabled}
-            className={`text-[11px] font-mono leading-none transition-colors capitalize text-muted-foreground ${
+            className={`text-[0.786rem] font-mono leading-none transition-colors capitalize text-muted-foreground ${
               !item.disabled ? 'hover:text-info' : ''
             }`}
           >

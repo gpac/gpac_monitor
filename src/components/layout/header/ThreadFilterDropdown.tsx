@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/popover';
 import { useAppSelector } from '@/shared/hooks/redux';
 import { selectThreadAlerts } from '@/shared/store/selectors/header/headerSelectors';
-import { useOpenLogsWidget } from '@/shared/hooks/useOpenLogsWidget';
+import { useOpenLogsWidget } from '@/shared/hooks/ui/useOpenLogsWidget';
 import { getThreadColor } from '@/components/views/logs/utils/logxUtils';
 import { StableNumber } from '@/utils/performance/StableNumber';
 
@@ -50,10 +50,10 @@ export const ThreadFilterDropdown = memo(() => {
           title={`${totalThreadAlerts} alert(s) across ${threadAlerts.length} thread(s)`}
           aria-label="Filter logs by thread"
         >
-          <FaStream className="w-3.5 h-3.5 text-blue-400 transition-none" />
+          <FaStream className="w-3.5 h-3.5 text-blue-400/80 transition-none" />
           <StableNumber
             value={threadAlerts.length}
-            className="font-medium text-blue-400"
+            className="font-medium text-blue-400/80"
           />
         </button>
       </PopoverTrigger>

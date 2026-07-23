@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import ReportSection from '../ReportSection';
 import type { NumericMetric } from '../../../utils/statusViewModel';
-import type { MetricDefinitionMap } from '@/workers/metricDefinitionParser';
+import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
 
 function makeMetric(key: string, value: string): NumericMetric {
   return {

@@ -3,18 +3,14 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { cn } from '@/utils/core';
 import type { PIDWithIndex } from '../../../types';
 import type { PIDMetricMode } from '../../../types/pid';
+import {
+  PID_METRIC_GROUPS,
+  PID_METRICS_BY_KEY,
+} from '../../charts/config/pidHistoryChartConfig';
 import PIDTableRow from './PIDTableRow';
 import { TAB_STYLES } from '../styles';
 
 type PIDTableVariant = 'input' | 'output';
-
-export const CLICKABLE_METRICS: { metric: PIDMetricMode; label: string }[] = [
-  { metric: 'bufferTime', label: 'Buffer' },
-  { metric: 'bitrate', label: 'Avg Bitrate' },
-  { metric: 'processTime', label: 'Proc.' },
-  { metric: 'processRate', label: 'Proc. Rate' },
-  { metric: 'ts', label: 'Last Proc.' },
-];
 
 interface PIDTableProps {
   pids: PIDWithIndex[];
@@ -46,24 +42,34 @@ const TableCore = ({
   onMetricClick,
 }: TableCoreProps) => (
   <table className="w-full text-left table-fixed">
-    <thead className="sticky top-0 z-10">
+    <thead>
       <tr className="border-b border-white/10 bg-monitor-panel">
         <th className={TAB_STYLES.TABLE_HEADER}>Infos</th>
-        {CLICKABLE_METRICS.map(({ metric, label }) => (
-          <th key={metric} className="px-2 py-1.5">
-            <button
-              onClick={() => onMetricClick?.(metric)}
-              className={cn(
-                'text-[10px] font-medium uppercase tracking-wide transition-colors',
-                activeMetric === metric
-                  ? 'text-monitor-active-tab border-b border-monitor-active-tab pb-0.5'
-                  : 'text-muted-foreground hover:text-foreground cursor-pointer',
-              )}
-            >
-              {label}
-            </button>
-          </th>
-        ))}
+        {PID_METRIC_GROUPS.map(({ key: metric, label }) => {
+          const isGroupActive =
+            activeMetric === metric ||
+            PID_METRICS_BY_KEY[activeMetric as PIDMetricMode]?.group === metric;
+          const displayLabel =
+            isGroupActive && activeMetric !== metric
+              ? (PID_METRICS_BY_KEY[activeMetric as PIDMetricMode]?.label ??
+                label)
+              : label;
+          return (
+            <th key={metric} className="px-2 py-1.5">
+              <button
+                onClick={() => onMetricClick?.(metric)}
+                className={cn(
+                  'text-[0.714rem] font-medium uppercase tracking-wide transition-colors',
+                  isGroupActive
+                    ? 'text-monitor-active-tab border-b border-monitor-active-tab pb-0.5'
+                    : 'text-muted-foreground hover:text-foreground cursor-pointer',
+                )}
+              >
+                {displayLabel}
+              </button>
+            </th>
+          );
+        })}
       </tr>
     </thead>
     <tbody>
@@ -75,6 +81,8 @@ const TableCore = ({
           onOpenProps={onOpenProps}
           variant={variant}
           hoveredPidKey={hoveredPidKey}
+          activeMetric={activeMetric}
+          onMetricClick={onMetricClick}
         />
       ))}
     </tbody>
@@ -93,7 +101,7 @@ const PIDTable = memo(
   }: PIDTableProps) => {
     return (
       <TooltipProvider delayDuration={200}>
-        <div className="bg-monitor-app overflow-hidden">
+        <div className="bg-monitor-app">
           <TableCore
             pids={pids}
             filterIdx={filterIdx}

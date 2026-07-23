@@ -3,6 +3,9 @@ export default {
   content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      screens: {
+        "3xl": "2560px",
+      },
       colors: {
         gray: {
           750: "#2D3748",
@@ -13,11 +16,28 @@ export default {
           coralD: "#E64545",
           wine: "#8E1E2D",
         },
+        history: {
+          DEFAULT: "var(--history-color)",
+          muted: "var(--history-color-muted)",
+          border: "var(--history-color-border)",
+          activeBg: "var(--history-active-bg)",
+          activeBorder: "var(--history-active-border)",
+          activeText: "var(--history-active-text)",
+        },
+
         monitor: {
+          timeline: {
+            premiumFrom: "#121C28",
+            premiumTo: "#0D1621",
+            bg: "#1a1a1a",
+            subtle: "#121826",
+          },
           main: "#0E1420",
           app: "#0c1117",
 
           surface: "#0b1016",
+          timelineSurface: "#070B10",
+          selection: "#121826",
 
           panel: "#0f141b",
           dropdown: "#0f141b",
@@ -37,7 +57,18 @@ export default {
             secondary: "#c7c7c7",
             muted: "#9aa3ae",
           },
+          meta: "rgba(96, 165, 250, 0.8)",
         },
+      },
+      boxShadow: {
+        "timeline-premium":
+          "inset 0 1px 0 rgba(255,255,255,0.04), 0 0 0 1px rgba(139,92,246,0.08), 0 8px 24px rgba(0,0,0,0.28)",
+      },
+      borderColor: {
+        "timeline-premium": "rgba(38,54,75,0.9)",
+      },
+      backgroundImage: {
+        "timeline-premium": "linear-gradient(180deg, #131A2A 0%, #101624 100%)",
       },
       spacing: {
         "widget-sm": "300px",

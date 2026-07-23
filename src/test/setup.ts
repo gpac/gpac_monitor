@@ -8,12 +8,12 @@ afterEach(() => {
 });
 
 // Mock widget icons to prevent module evaluation issues
-vi.mock('@/components/Widget/widgetIcons', () => ({
+vi.mock('@/components/widget/widgetIcons', () => ({
   widgetIcons: {},
 }));
 
 // Mock widget registry to prevent WidgetType enum evaluation issues
-vi.mock('@/components/Widget/registry', () => ({
+vi.mock('@/components/widget/registry', () => ({
   widgetRegistry: {},
   createWidgetInstance: vi.fn(() => null),
   getAllWidgets: vi.fn(() => []),

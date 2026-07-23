@@ -91,4 +91,4 @@ export type FilterProcessingStatus =
 
 export type PIDDirection = 'input' | 'output';
 
-export type NetworkMetricType = 'upload' | 'download' | 'total';
+export type NetworkMetricType = 'outband' | 'inband' | 'total';

@@ -1,4 +1,4 @@
-import { Widget, WidgetType } from '@/types';
+import { Widget, WidgetType } from '@/types/ui/widget';
 import { IconType } from 'react-icons';
 import LogsMonitor from '../views/logs/LogsMonitor';
 import MetricsMonitor from '../views/cpu/MetricsMonitor';
@@ -60,7 +60,7 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     icon: widgetIcons[WidgetType.LOGS],
     component: LogsMonitor,
     defaultSize: { w: 8, h: 6 },
-    defaultPosition: { x: 16, y: 5 },
+    defaultPosition: { x: 16, y: 6 },
     defaultZIndex: 1002,
     description: 'View and filter system logs.',
     enabled: true,

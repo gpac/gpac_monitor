@@ -102,7 +102,7 @@ export const ToolRow = memo(function ToolRow({
                     />
                     <span className="capitalize font-cond">{level}</span>
                     {isSelected && (
-                      <span className="ml-auto text-[11px] text-slate-400">
+                      <span className="ml-auto text-[0.786rem] text-slate-400">
                         Current
                       </span>
                     )}

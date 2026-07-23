@@ -1,4 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { shallowEqual } from 'react-redux';
 import { RootState } from '../../types';
 import { TimeFraction } from '../../../../types/domain/gpac/model';
 
@@ -14,11 +15,11 @@ const timeFractionChanged = (
 // Base selector
 export const selectSessionStatsState = (state: RootState) => state.sessionStats;
 
+export const selectFilterPids = (state: RootState, filterIdx: string) =>
+  state.sessionStats.pidsByFilter[filterIdx];
+
 export const selectSessionStartUs = (state: RootState): number | null =>
   state.sessionStats.sessionStartUs;
-
-export const selectLastUpdateUs = (state: RootState): number | null =>
-  state.sessionStats.lastUpdateUs;
 
 export const selectMetricDefinitions = (state: RootState) =>
   state.sessionStats.metricDefinitions;
@@ -32,6 +33,9 @@ export const selectPreviousSessionStats = createSelector(
   [selectSessionStatsState],
   (sessionStatsState) => sessionStatsState.previousSessionStats,
 );
+
+export const selectLastUpdateUs = (state: RootState): number | null =>
+  state.sessionStats.lastUpdateUs;
 
 /**
  * A filter is stalled if it's not EOS and shows no activity.
@@ -86,12 +90,9 @@ export const selectStalledFilters = createSelector(
 
     return stalled;
   },
+  {
+    memoizeOptions: {
+      resultEqualityCheck: shallowEqual,
+    },
+  },
 );
-
-/**
- * Selector to check if a specific filter is stalled
- */
-export const selectIsFilterStalled = (filterId: string) =>
-  createSelector([selectStalledFilters], (stalledFilters) => {
-    return stalledFilters[filterId] ?? false;
-  });

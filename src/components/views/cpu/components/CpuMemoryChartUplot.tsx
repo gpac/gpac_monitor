@@ -1,13 +1,17 @@
-import { memo, useMemo, useRef } from 'react';
+import { memo, useMemo, useState, useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UplotChart } from '@/components/common/charts/UplotChart';
 import { useContainerSize } from '@/components/common/charts';
 import { useChartData } from '../hooks/useChartData';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { createCpuMemoryUplotConfig } from './uplotConfig';
 import {
   prepareCpuMemoryData,
   calculateMemoryYMax,
+  type CpuMemoryDataPoint,
 } from '@/utils/charts/cpuMemory';
+import { selectSystemStatsHistory } from '@/shared/store/selectors/sessionDetails/sessionDetailsSelectors';
 
 interface CpuMemoryChartUplotProps {
   currentCPUPercent: number;
@@ -25,6 +29,9 @@ export const CpuMemoryChartUplot = memo(
     maxPoints = 400,
     windowDuration,
   }: CpuMemoryChartUplotProps) => {
+    const { isHistory } = useDataMode();
+    const systemStatsHistory = useSelector(selectSystemStatsHistory);
+    const timeLabelsRef = useRef<string[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
     const dimensions = useContainerSize(containerRef);
 
@@ -33,12 +40,20 @@ export const CpuMemoryChartUplot = memo(
       [currentMemoryBytes],
     );
 
-    const memoryYAxisMax = useMemo(
-      () => calculateMemoryYMax(currentMemoryMB),
-      [currentMemoryMB],
+    const [stableYMax, setStableYMax] = useState(() =>
+      calculateMemoryYMax(currentMemoryMB),
     );
 
-    const { dataPoints } = useChartData(
+    useEffect(() => {
+      setStableYMax(calculateMemoryYMax(currentMemoryMB));
+    }, [isHistory]);
+
+    useEffect(() => {
+      const next = calculateMemoryYMax(currentMemoryMB);
+      if (next > stableYMax) setStableYMax(next);
+    }, [currentMemoryMB, stableYMax]);
+
+    const { dataPoints: liveDataPoints } = useChartData(
       currentCPUPercent,
       currentMemoryMB,
       animating,
@@ -47,23 +62,36 @@ export const CpuMemoryChartUplot = memo(
       150,
     );
 
+    const historyDataPoints = useMemo((): CpuMemoryDataPoint[] => {
+      return systemStatsHistory.map((s) => ({
+        timestamp: s.timestamp / 1000,
+        time: s.time,
+        cpu_percent: s.process_cpu_usage,
+        memory_mb: s.process_memory / (1024 * 1024),
+      }));
+    }, [systemStatsHistory]);
+
+    const dataPoints = isHistory ? historyDataPoints : liveDataPoints;
+
     const options = useMemo(
       () =>
         createCpuMemoryUplotConfig({
-          memoryYAxisMax,
+          memoryYAxisMax: stableYMax,
+          timeLabelsRef,
           width: dimensions.width,
           height: dimensions.height,
         }),
-      [memoryYAxisMax, dimensions],
+      [stableYMax, dimensions],
     );
 
     const data = useMemo(() => {
-      const { alignedData } = prepareCpuMemoryData(dataPoints);
+      const { alignedData, timeLabels } = prepareCpuMemoryData(dataPoints);
+      timeLabelsRef.current = timeLabels;
       return alignedData;
     }, [dataPoints]);
 
     return (
-      <Card className="bg-stat border-transparent h-full flex flex-col">
+      <Card className="bg-monitor-panel border-transparent h-full flex flex-col">
         <CardHeader className="pb-2 flex-shrink-0">
           <CardTitle className="flex justify-center items-center gap-2 text-sm stat stat-label">
             <span className="flex items-center gap-1.5">

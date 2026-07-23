@@ -4,7 +4,7 @@ import type {
   PIDGraphTarget,
 } from '@/components/views/stats-session/types/pid';
 import type { StatusMetricSample } from '@/components/views/stats-session/types/statusMetric';
-import type { ParsedFilterStatus } from '@/workers/filterStatusParser';
+import type { ParsedFilterStatus } from '@/utils/metrics/filterStatusParser';
 
 /**
  * Generic data point for charts (time-series data)
@@ -135,6 +135,47 @@ const monitoredFilterSlice = createSlice({
       state.dataByFilter = {};
     },
 
+    /** Bulk-add network data (used by seek flush). */
+    bulkAddNetworkData: (
+      state,
+      action: PayloadAction<
+        Record<
+          string,
+          {
+            outband: ChartDataPoint[];
+            inband: ChartDataPoint[];
+            lastTaskTime: ChartDataPoint[];
+          }
+        >
+      >,
+    ) => {
+      for (const [filterId, data] of Object.entries(action.payload)) {
+        if (!state.dataByFilter[filterId]) state.dataByFilter[filterId] = {};
+        if (!state.dataByFilter[filterId].network)
+          state.dataByFilter[filterId].network = { outband: [], inband: [] };
+        const network = state.dataByFilter[filterId].network!;
+        for (const direction of ['outband', 'inband'] as const) {
+          network[direction].push(...data[direction]);
+          if (network[direction].length > state.maxPoints)
+            network[direction].splice(
+              0,
+              network[direction].length - state.maxPoints,
+            );
+        }
+        if (data.lastTaskTime.length) {
+          if (!state.dataByFilter[filterId].lastTaskTime)
+            state.dataByFilter[filterId].lastTaskTime = [];
+          const lastTaskTimePoints = state.dataByFilter[filterId].lastTaskTime!;
+          lastTaskTimePoints.push(...data.lastTaskTime);
+          if (lastTaskTimePoints.length > state.maxPoints)
+            lastTaskTimePoints.splice(
+              0,
+              lastTaskTimePoints.length - state.maxPoints,
+            );
+        }
+      }
+    },
+
     toggleSelectedPid: (state, action: PayloadAction<PIDGraphTarget>) => {
       const incoming = action.payload;
       const existingIndex = state.selectedPidTargets.findIndex(
@@ -173,15 +214,7 @@ const monitoredFilterSlice = createSlice({
       const samples = state.pidSamples[key];
       const lastSample = samples[samples.length - 1];
 
-      if (
-        lastSample &&
-        lastSample.sessionTimeUs === sample.sessionTimeUs &&
-        lastSample.averageBitrate === sample.averageBitrate &&
-        lastSample.bufferTime === sample.bufferTime &&
-        lastSample.processTime === sample.processTime &&
-        lastSample.processRate === sample.processRate &&
-        lastSample.ts === sample.ts
-      ) {
+      if (lastSample && lastSample.sessionTimeUs === sample.sessionTimeUs) {
         return;
       }
 
@@ -200,16 +233,7 @@ const monitoredFilterSlice = createSlice({
         if (!state.pidSamples[key]) state.pidSamples[key] = [];
         const samples = state.pidSamples[key];
         const last = samples[samples.length - 1];
-        if (
-          last &&
-          last.sessionTimeUs === sample.sessionTimeUs &&
-          last.averageBitrate === sample.averageBitrate &&
-          last.bufferTime === sample.bufferTime &&
-          last.processTime === sample.processTime &&
-          last.processRate === sample.processRate &&
-          last.ts === sample.ts
-        )
-          continue;
+        if (last && last.sessionTimeUs === sample.sessionTimeUs) continue;
         samples.push(sample);
         if (samples.length > state.maxPidSamples) samples.shift();
       }
@@ -221,6 +245,10 @@ const monitoredFilterSlice = createSlice({
 
     clearAllPIDSamples: (state) => {
       state.pidSamples = {};
+    },
+
+    clearAllStatusMetricSamples: (state) => {
+      state.statusMetricSamples = {};
     },
 
     addStatusMetricSamples: (
@@ -291,6 +319,7 @@ const monitoredFilterSlice = createSlice({
 
 export const {
   addNetworkDataPoint,
+  bulkAddNetworkData,
   addCombinedNetworkPoint,
   clearFilterData,
   resetAllData,
@@ -303,6 +332,7 @@ export const {
   clearPIDSamples,
   clearAllPIDSamples,
   addStatusMetricSamples,
+  clearAllStatusMetricSamples,
   setSelectedStatusMetric,
   clearStatusMetricsByFilter,
   setParsedStatuses,

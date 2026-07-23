@@ -7,8 +7,9 @@ import {
 import { IGpacMessageHandler } from '@/types/communication';
 import { setError, setLoading } from '@/shared/store/slices/graphSlice';
 import { clearAllSessionData } from '@/shared/store/actions/globalActions';
-import { useGpacService } from '@/shared/hooks/useGpacService';
+import { useGpacService } from '@/shared/hooks/connection/useGpacService';
 import { selectActiveConnection } from '@/shared/store/selectors';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 
 interface UseGraphConnectionProps {
   setConnectionError: (error: string | null) => void;
@@ -24,6 +25,7 @@ export const useGraphConnection = ({
   const dispatch = useAppDispatch();
   const service = useGpacService();
   const activeConnection = useAppSelector(selectActiveConnection);
+  const { isLive } = useDataMode();
   // Track connection state internally
   const [isConnected, setIsConnected] = useState(false);
 
@@ -63,6 +65,10 @@ export const useGraphConnection = ({
 
   // Separate effect for establishing connection
   useEffect(() => {
+    if (!isLive) {
+      return;
+    }
+
     if (!connectionAddress) {
       setConnectionError('No active connection selected');
       return;
@@ -75,11 +81,14 @@ export const useGraphConnection = ({
       try {
         // Check if already connected to avoid multiple connections
         if (service.isConnected()) {
-          if (isMounted) {
-            setConnectionError(null);
-            setIsConnected(true);
+          if (service.getConnectedAddress() === connectionAddress) {
+            if (isMounted) {
+              setConnectionError(null);
+              setIsConnected(true);
+            }
+            return;
           }
-          return;
+          service.disconnect();
         }
 
         await service.connectService(connectionAddress);
@@ -102,16 +111,8 @@ export const useGraphConnection = ({
     // Cleanup function
     return () => {
       isMounted = false;
-
-      if (service.isConnected()) {
-        try {
-          service.disconnect();
-        } catch (err) {
-          console.error(err);
-        }
-      }
     };
-  }, [service, setConnectionError, connectionId, connectionAddress]);
+  }, [service, setConnectionError, connectionId, connectionAddress, isLive]);
 
   // Function to retry connection
   const retryConnection = useCallback(() => {

@@ -5,6 +5,7 @@ import {
   useNodesState,
   useEdgesState,
   useNodesInitialized,
+  EdgeMouseHandler,
 } from '@xyflow/react';
 import {
   useAppDispatch,
@@ -24,11 +25,13 @@ import { useGraphState } from './useGraphState';
 import { useGraphConnection } from '../connection/useGraphConnection';
 import { useGraphHandlers } from '../interaction/useGraphHandlers';
 import { useGraphNotifications } from '../interaction/useGraphNotifications';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useFilterArgs } from '../interaction/useFilterArgs';
 
 const useGraphMonitor = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const { mode } = useDataSource();
 
   // Refs to track component state
   const nodesRef = useRef<Node[]>([]);
@@ -79,6 +82,15 @@ const useGraphMonitor = () => {
     [dispatch],
   );
 
+  const handleEdgeClick: EdgeMouseHandler = useCallback(
+    (_mouseEvent, clickedEdge) => {
+      const filterIdx = parseInt(clickedEdge.target);
+      dispatch(setSelectedNode(clickedEdge.target));
+      dispatch(requestFilterOpen({ filterIdx, initialTab: 'inputs' }));
+    },
+    [dispatch],
+  );
+
   const { handleNodesChange, handleEdgesChange, handleNodeClick } =
     useGraphHandlers({
       onNodesChange,
@@ -97,6 +109,7 @@ const useGraphMonitor = () => {
     error,
     isLoading,
     toast,
+    disabled: mode === 'history',
   });
 
   // Effect to update local nodes and edges from Redux
@@ -188,6 +201,7 @@ const useGraphMonitor = () => {
     handleNodesChange,
     handleEdgesChange,
     handleNodeClick,
+    handleEdgeClick,
     layoutOptions,
     handleLayoutChange,
     autoLayout,

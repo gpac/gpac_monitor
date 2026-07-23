@@ -7,6 +7,7 @@ import FilterChangeBadges from '@/components/common/FilterChangeBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { useFilterAlerts } from '@/shared/hooks';
 import { getBasename, truncateMiddle } from '../../utils/labelUtils';
+import { arePidListsEqual } from '../../utils/pidComparator';
 import NodeToolbarActions from './NodeToolbarActions';
 
 interface CustomNodeProps extends NodeProps {
@@ -25,14 +26,10 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
   const { label, ipid, opid, nb_ipid, nb_opid } = data;
   const { hasError, hasWarning } = useFilterAlerts(data.idx);
   const sessionType = useMemo(() => determineFilterSessionType(data), [data]);
-  const node = useMemo(
-    () => ({
-      data,
-      position: { x: 0, y: 0 },
-      ...nodeProps,
-    }),
-    [data, nodeProps],
-  );
+  const [textColor, backgroundColor] = useGraphColors({
+    id: nodeProps.id,
+    data,
+  } as unknown as Parameters<typeof useGraphColors>[0]);
 
   // Compute display label (basename + truncate)
   const { fullLabel, displayLabel } = useMemo(() => {
@@ -48,7 +45,6 @@ const CustomNodeBase: React.FC<CustomNodeProps> = ({
     return truncateMiddle(base, 18);
   };
 
-  const [textColor, backgroundColor] = useGraphColors(node);
   const isMonitored = data.isMonitored;
   const borderClass = isMonitored
     ? 'ring-4 ring-red-700/90'
@@ -281,9 +277,8 @@ const CustomNode = memo(CustomNodeBase, (prevProps, nextProps) => {
     prevProps.selected === nextProps.selected &&
     prevProps.data.isMonitored === nextProps.data.isMonitored &&
     prevProps.data.isStalled === nextProps.data.isStalled &&
-    JSON.stringify(prevProps.data.ipid) ===
-      JSON.stringify(nextProps.data.ipid) &&
-    JSON.stringify(prevProps.data.opid) === JSON.stringify(nextProps.data.opid)
+    arePidListsEqual(prevProps.data.ipid, nextProps.data.ipid) &&
+    arePidListsEqual(prevProps.data.opid, nextProps.data.opid)
   );
 });
 

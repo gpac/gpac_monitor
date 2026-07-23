@@ -42,6 +42,13 @@
     --media-audio: 162 84% 39%; /* #10b981 */
     --media-text: 36 92% 53%; /* #f59e0b */
     --media-file: 350 82% 50%; /* #E11D48 */
+
+    --history-color: #7c6aa6;
+    --history-color-muted: rgba(124, 106, 166, 0.18);
+    --history-color-border: rgba(124, 106, 166, 0.35);
+    --history-active-bg: rgba(124, 106, 166, 0.22);
+    --history-active-border: rgba(124, 106, 166, 0.45);
+    --history-active-text: #c8bdf0;
   }
 }
 
@@ -50,6 +57,12 @@ html {
   font-size: 14px; /* 13–14px pour dashboards denses */
   line-height: 1.35;
   font-optical-sizing: auto; /* active les axes optiques des variables */
+}
+
+@media (min-width: 2560px) {
+  html {
+    font-size: 18px;
+  }
 }
 
 .metrics,
@@ -208,7 +221,18 @@ html {
   }
 }
 
-/* Custom scrollbar styles */
+/* OverlayScrollbars dark theme */
+.os-scrollbar {
+  --os-size: 5px;
+  --os-padding-perpendicular: 2px;
+  --os-track-bg: transparent;
+  --os-handle-bg: rgba(255, 255, 255, 0.15);
+  --os-handle-bg-hover: rgba(255, 255, 255, 0.3);
+  --os-handle-bg-active: rgba(255, 255, 255, 0.4);
+  --os-handle-border-radius: 10px;
+}
+
+/* Native scrollbar fallback (dropdowns, tooltips, <pre>) */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;

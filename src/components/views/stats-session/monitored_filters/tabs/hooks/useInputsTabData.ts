@@ -9,13 +9,13 @@ import { getGlobalStatus } from '@/utils/gpac';
 export const useInputsTabData = (filterData: FilterStatsResponse) => {
   // Convert ipids to array with position indices (0, 1, 2...)
   const inputPidsWithIndices = useMemo((): PIDWithIndex[] => {
-    if (!filterData.ipids) return [];
+    if (!filterData?.ipids) return [];
 
     return Object.entries(filterData.ipids).map(([_pidName, pid], pidIdx) => ({
       ...pid,
       pidIdx,
     }));
-  }, [filterData.ipids]);
+  }, [filterData?.ipids]);
 
   // Group PIDs by input source and media type
   const groupedInputs = useMemo(() => {

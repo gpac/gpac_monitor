@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type {
   StatusNum,
   ParsedFilterStatus,
-} from '@/workers/filterStatusParser';
+} from '@/utils/metrics/filterStatusParser';
 import {
   isGraphableStatusMetric,
   buildStatusSamplesFromStats,

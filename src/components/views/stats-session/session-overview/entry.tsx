@@ -5,9 +5,10 @@ import React, {
   useCallback,
   useEffect,
 } from 'react';
-import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
+import { useOptimizedResize } from '@/shared/hooks/ui/useOptimizedResize';
 import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
 import { useStatsCalculations } from '../hooks/stats/useStatsCalculations';
+import { useEnrichedFilters } from '../hooks/stats/useEnrichedFilters';
 import { useMonitoredFilters, useFilterHandlers } from '../hooks/filters';
 import { useAppSelector, useAppDispatch } from '@/shared/hooks/redux';
 import { clearPendingFilterOpen } from '@/shared/store/slices/graphSlice';
@@ -21,7 +22,6 @@ import {
   MonitoredFilterTabs,
   MonitoredFilterContent,
 } from '../tabs/MonitoredFilterTabs';
-import { enrichFiltersWithStats } from '../utils/filterEnrichment';
 import { getFilterIdxFromTab } from '../utils/filterMonitoringUtils';
 import { Widget } from '@/types/ui/widget';
 
@@ -49,10 +49,11 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     const { isLoading, sessionStats, staticFilters } =
       useMultiFilterMonitor(isDashboardActive);
 
-    const filtersWithSessionStats = useMemo(() => {
-      if (staticFilters.length === 0 || isResizing) return [];
-      return enrichFiltersWithStats(staticFilters, sessionStats);
-    }, [staticFilters, sessionStats, isResizing]);
+    const filtersWithSessionStats = useEnrichedFilters(
+      staticFilters,
+      sessionStats,
+      isResizing,
+    );
 
     const { statsCounters, systemStats } = useStatsCalculations(
       filtersWithSessionStats,
@@ -94,14 +95,16 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
     useEffect(() => {
       if (isDetached) {
         requestAnimationFrame(() => {
-          window.scrollTo({
-            top: document.body.scrollHeight,
+          const scroller = document.querySelector('main');
+          scroller?.scrollTo({
+            top: scroller.scrollHeight,
             behavior: 'smooth',
           });
         });
       }
     }, [isDetached]);
 
+    // Disable callbacks during resize to avoid expensive re-renders
     const noopTabChange = useCallback(() => {}, []);
     const noopCardClick = useCallback(() => {}, []);
     const safeOnTabChange = isResizing ? noopTabChange : setActiveTab;

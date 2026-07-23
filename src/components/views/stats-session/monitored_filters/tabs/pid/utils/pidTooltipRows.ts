@@ -1,19 +1,26 @@
 import { formatMicroseconds, formatNumber } from '@/utils/formatting';
 import type { PIDBufferStats } from '../../hooks/usePIDBufferStats';
+import type { PIDMetricMode } from '../../../../types/pid';
 
-export const buildBufferTooltipRows = (bufferStats: PIDBufferStats) => [
+export const buildBufferTooltipRows = (
+  bufferStats: PIDBufferStats,
+  onMetricClick?: (metric: PIDMetricMode) => void,
+  activeMetric?: PIDMetricMode,
+) => [
   {
     label: 'buffer_time',
     value:
       bufferStats.buffer_time != null
         ? formatMicroseconds(bufferStats.buffer_time)
         : null,
-    active: bufferStats.buffer_time != null,
+    active: activeMetric === 'bufferTime',
+    onChart: onMetricClick ? () => onMetricClick('bufferTime') : undefined,
   },
   {
     label: 'buffer',
     value: formatMicroseconds(bufferStats.buffer),
-    active: bufferStats.buffer_time == null,
+    active: activeMetric === 'buffer',
+    onChart: onMetricClick ? () => onMetricClick('buffer') : undefined,
   },
   {
     label: 'max_buffer',

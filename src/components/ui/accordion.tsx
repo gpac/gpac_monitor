@@ -61,7 +61,7 @@ export const AccordionItem = ({
     <div className="rounded-lg">
       <button
         onClick={() => toggleExpanded(value)}
-        className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:text-ui"
+        className="w-full flex items-center justify-between px-3 py-1.5 text-[0.714rem] font-medium text-muted-foreground hover:text-ui"
       >
         {title}
         <LuChevronDown

@@ -1,4 +1,4 @@
-import { WebSocketBase } from '../../../ws/WebSocketBase';
+import { GpacTransport } from '../../../ws/GpacTransport';
 import { GpacNodeData } from '../../../../types/domain/gpac/model';
 import { GpacNotificationHandlers } from '../../types';
 import { generateID } from '@/utils/core';
@@ -8,7 +8,7 @@ import { FilterStatsHandler } from './filterStatsHandler';
 import { WSMessageBatcher } from '../../../utils/WSMessageBatcher';
 
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
-import { parseMetricDefinitions } from '@/workers/metricDefinitionParser';
+import { parseMetricDefinitions } from '@/utils/metrics/metricDefinitionParser';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
@@ -83,7 +83,7 @@ export class BaseMessageHandler {
     return this.commandLineHandler;
   }
 
-  public handleJsonMessage(_: WebSocketBase, dataView: DataView): void {
+  public handleJsonMessage(_: GpacTransport, dataView: DataView): void {
     try {
       const text = new TextDecoder().decode(dataView.buffer);
       const data = JSON.parse(text);
@@ -93,7 +93,7 @@ export class BaseMessageHandler {
     }
   }
 
-  public handleDefaultMessage(_: WebSocketBase, dataView: DataView): void {
+  public handleDefaultMessage(_: GpacTransport, dataView: DataView): void {
     try {
       const text = new TextDecoder().decode(dataView.buffer);
       if (text.startsWith('{')) {
@@ -157,6 +157,9 @@ export class BaseMessageHandler {
         this.callbacks.onSetMetricDefinitions(
           parseMetricDefinitions(data.data),
         );
+        break;
+      case 'monitor_config':
+        this.callbacks.onSetMonitorConfig(data.intervals);
         break;
       case 'session_end':
         this.handleSessionEnd(data);

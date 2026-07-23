@@ -19,7 +19,7 @@ function GraphRadio({ active, onClick, label, color }: GraphRadioProps) {
       aria-label={`Graph ${label}`}
       title="Select for temporal graph"
       style={style}
-      className={`align-middle text-[11px] leading-none transition-colors ${
+      className={`align-middle text-[0.786rem] leading-none transition-colors ${
         active ? 'text-info' : 'text-muted-foreground/50 hover:text-info'
       }`}
     >

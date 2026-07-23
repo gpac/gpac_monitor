@@ -1,4 +1,5 @@
 import uPlot from 'uplot';
+import { formatChartSeconds } from '@/utils/formatting/time';
 
 export interface CpuMemoryDataPoint {
   timestamp: number;
@@ -9,31 +10,33 @@ export interface CpuMemoryDataPoint {
 
 export interface PreparedCpuMemoryData {
   alignedData: uPlot.AlignedData;
-  relativeSeconds: number[];
+  timeLabels: string[];
   memoryData: number[];
   cpuData: number[];
 }
 
 /**
- * Prepare CPU/Memory chart data for uPlot
- * Pure utility function - no side effects, fully memoizable
+ * Prepare CPU/Memory chart data for uPlot.
+ * x-axis = integer indices [0, 1, ..., n-1] — stable range regardless of time span.
+ * timeLabels = formatted relative-second strings for axis/tooltip display.
  */
 export function prepareCpuMemoryData(
   dataPoints: CpuMemoryDataPoint[],
 ): PreparedCpuMemoryData {
   const firstTimestamp = dataPoints.length > 0 ? dataPoints[0].timestamp : 0;
 
-  const relativeSeconds = dataPoints.map(
-    (p) => (p.timestamp - firstTimestamp) / 1000,
+  const indices = dataPoints.map((_, i) => i);
+  const timeLabels = dataPoints.map(
+    (p) => p.time ?? formatChartSeconds((p.timestamp - firstTimestamp) / 1000),
   );
   const memoryData = dataPoints.map((p) => p.memory_mb);
   const cpuData = dataPoints.map((p) => p.cpu_percent);
 
-  const alignedData: uPlot.AlignedData = [relativeSeconds, memoryData, cpuData];
+  const alignedData: uPlot.AlignedData = [indices, memoryData, cpuData];
 
   return {
     alignedData,
-    relativeSeconds,
+    timeLabels,
     memoryData,
     cpuData,
   };

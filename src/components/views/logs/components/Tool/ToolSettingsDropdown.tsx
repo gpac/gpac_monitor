@@ -11,7 +11,7 @@ import { IoSettings } from 'react-icons/io5';
 import { GpacLogLevel, GpacLogTool } from '@/types/domain/gpac/log-types';
 import { TOOL_DISPLAY_NAMES } from '../../utils/constants';
 import { getEffectiveLevel, sortTools } from '../../utils/toolUtils';
-import { useSearchFilter } from '@/shared/hooks/useSearchFilter';
+import { useSearchFilter } from '@/shared/hooks/filters/useSearchFilter';
 import { ToolRow } from './ToolRow';
 
 interface ToolSettingsDropdownProps {
@@ -81,7 +81,6 @@ export const ToolSettingsDropdown = memo(
 
       const handleLevelSelect = useCallback(
         (tool: GpacLogTool, level: GpacLogLevel) => {
-          // Always trigger the change to allow cleanup of redundant configs
           // Even if the effective level is the same, we need to clean levelsByTool
           handleLevelChange(tool, level);
         },
@@ -145,7 +144,7 @@ export const ToolSettingsDropdown = memo(
                 </div>
                 <DropdownMenuSeparator />
                 <div
-                  className="flex items-center justify-between px-8 py-2 text-[11px] font-medium text-slate-400"
+                  className="flex items-center justify-between px-8 py-2 text-[0.786rem] font-medium text-slate-400"
                   style={{
                     background:
                       'linear-gradient(to right, transparent 49%, rgba(148,163,184,.6) 49%, rgba(148,163,184,.6) 51%, transparent 51%)',

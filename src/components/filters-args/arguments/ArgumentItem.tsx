@@ -20,14 +20,20 @@ interface ArgumentItemProps {
   arg: GpacArgument;
   updateStatus?: ArgumentUpdate;
   onValueChange: (argName: string, newValue: GPACValue) => void;
+  isHistory?: boolean;
 }
 
 const ArgumentItem = memo(
-  ({ arg, updateStatus, onValueChange }: ArgumentItemProps) => {
+  ({
+    arg,
+    updateStatus,
+    onValueChange,
+    isHistory = false,
+  }: ArgumentItemProps) => {
     const type = arg.type || typeof arg.value;
     const isPending = updateStatus?.status === 'pending';
     const isSuccess = updateStatus?.status === 'success';
-    const isUpdatable = !!arg.update;
+    const isUpdatable = !!arg.update && !isHistory;
 
     const handleChange = useCallback(
       (newValue: GPACValue) => {
@@ -75,7 +81,7 @@ const ArgumentItem = memo(
                 <TooltipContent
                   side="left"
                   sideOffset={8}
-                  className="max-w-xs z-[100] rounded bg-gray-900 px-2 py-1 text-[10px] text-gray-200 border border-gray-700"
+                  className="max-w-xs z-[100] rounded bg-gray-900 px-2 py-1 text-[0.714rem] text-gray-200 border border-gray-700"
                 >
                   <p>{arg.desc}</p>
                   <TooltipArrow className="fill-gray-900" />
@@ -87,7 +93,10 @@ const ArgumentItem = memo(
           {/* Status indicators */}
           <div className="flex gap-1 shrink-0 items-center">
             {isSuccess && (
-              <Badge variant="success" className="text-[8px] px-1.5 py-0 h-4">
+              <Badge
+                variant="success"
+                className="text-[0.571rem] px-1.5 py-0 h-4"
+              >
                 ✓
               </Badge>
             )}
@@ -110,7 +119,7 @@ const ArgumentItem = memo(
             value={updateStatus?.value ?? arg.value}
             onChange={handleChange}
             rules={{
-              disabled: !arg.update || isPending,
+              disabled: !arg.update || isPending || isHistory,
               min: arg.min,
               max: arg.max,
               step: arg.step,

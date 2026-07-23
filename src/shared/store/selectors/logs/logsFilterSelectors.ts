@@ -5,7 +5,8 @@ import {
   LOG_LEVEL_VALUES,
 } from '@/types/domain/gpac/log-types';
 import {
-  selectLogsState,
+  selectLogBuffers,
+  selectCurrentTool,
   selectLevelsByTool,
   selectDefaultAllLevel,
   selectVisibleToolsFilter,
@@ -39,7 +40,8 @@ const filterLogsByLevel = (
 /** Get logs visible in UI, filtered by selected tool and its effective level */
 export const selectVisibleLogs = createSelector(
   [
-    selectLogsState,
+    selectLogBuffers,
+    selectCurrentTool,
     selectLevelsByTool,
     selectDefaultAllLevel,
     selectVisibleToolsFilter,
@@ -47,7 +49,8 @@ export const selectVisibleLogs = createSelector(
     selectTimestampMode,
   ],
   (
-    logsState,
+    buffers,
+    currentTool,
     levelsByTool,
     defaultAllLevel,
     visibleToolsFilter,
@@ -66,14 +69,11 @@ export const selectVisibleLogs = createSelector(
 
     if (isAllMode) {
       // ALL mode: show logs from all tools
-      const toolsToInclude = Object.keys(logsState.buffers);
+      const toolsToInclude = Object.keys(buffers);
 
       // Get logs from all tools and sort by chosen timestamp mode
       rawLogs = toolsToInclude
-        .map(
-          (tool) =>
-            logsState.buffers[tool as keyof typeof logsState.buffers] || [],
-        )
+        .map((tool) => buffers[tool as keyof typeof buffers] || [])
         .flat()
         .sort((a, b) => {
           const timeA =
@@ -88,12 +88,11 @@ export const selectVisibleLogs = createSelector(
         });
     } else {
       // Single tool selected - get only logs from that tool
-      rawLogs = logsState.buffers[logsState.currentTool] || [];
+      rawLogs = buffers[currentTool] || [];
 
       // For specific tools, get effective level and filter
       // Use the tool's configured level if it exists, otherwise use the default
-      const effectiveLevel =
-        levelsByTool[logsState.currentTool] ?? defaultAllLevel;
+      const effectiveLevel = levelsByTool[currentTool] ?? defaultAllLevel;
 
       // Filter by effective level (preserving history in buffers)
       rawLogs = filterLogsByLevel(rawLogs, effectiveLevel);

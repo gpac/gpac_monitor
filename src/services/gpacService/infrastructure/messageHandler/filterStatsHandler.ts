@@ -2,13 +2,11 @@ import type { MonitoredFilterStats } from '@/types/domain/gpac';
 import { WSMessageType } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { MessageThrottler } from '@/services/utils/MessageThrottler';
+import { SubscriptionLifecycle } from '@/services/utils/SubscriptionLifecycle';
 import { hydrateIpidFields } from '@/services/utils/hydrateIpidFields';
 import { generateID } from '@/utils/core';
 import { MessageHandlerDependencies } from './types';
 
-// Throttle interval for filter stats updates (ms)
-// Server sends every 1000ms, but we throttle UI updates to 500ms (2 fps)
-// to reduce main thread contention during video playback
 const FILTER_STATS_THROTTLE_MS = 500;
 
 export class FilterStatsHandler {
@@ -16,94 +14,47 @@ export class FilterStatsHandler {
     private dependencies: MessageHandlerDependencies,
     private isLoaded: () => boolean,
   ) {}
-  private pendingFilterSubscribeRequests = new Map<number, Promise<void>>();
-  private pendingFilterUnsubscribeRequests = new Map<number, Promise<void>>();
-  private messageThrottler = new MessageThrottler();
 
-  // Timeouts for delayed auto-unsubscription to avoid premature cleanup during React re-renders
-  private filterAutoUnsubscribeTimeouts = new Map<number, NodeJS.Timeout>();
+  private lifecycle = new SubscriptionLifecycle<number>();
+  private messageThrottler = new MessageThrottler();
   private filterStatsSubscribableMap = new Map<
     number,
     UpdatableSubscribable<MonitoredFilterStats>
   >();
-  private ensureLoaded(): boolean {
+
+  private ensureLoaded(): void {
     if (!this.isLoaded()) {
-      const error = new Error('Service not loaded');
-      throw error;
+      throw new Error('Service not loaded');
     }
-    return true;
   }
-  /**
-   * Subscribes to filter statistics updates
-   */
-  public async subscribeToFilterStats(idx: number): Promise<void> {
+
+  public subscribeToFilterStats(idx: number): Promise<void> {
     this.ensureLoaded();
-
-    // Check if there's already a pending subscribe request for this filter
-    const existingRequest = this.pendingFilterSubscribeRequests.get(idx);
-    if (existingRequest) {
-      return existingRequest;
-    }
-
-    // Create and store the promise
-    const promise = (async () => {
-      try {
-        // Don't send interval - let server use its config
-        await this.dependencies.send({
-          type: WSMessageType.SUBSCRIBE_FILTER_STATS,
-          id: generateID(),
-          idx,
-        });
-      } finally {
-        // Clear the pending request when done (success or failure)
-        this.pendingFilterSubscribeRequests.delete(idx);
-      }
-    })();
-
-    this.pendingFilterSubscribeRequests.set(idx, promise);
-    return promise;
+    return this.lifecycle.subscribe(idx, () =>
+      this.dependencies.send({
+        type: WSMessageType.SUBSCRIBE_FILTER_STATS,
+        id: generateID(),
+        idx,
+      }),
+    );
   }
 
-  /**
-   * Unsubscribes from filter statistics updates
-   */
-  public async unsubscribeFromFilterStats(idx: number): Promise<void> {
+  public unsubscribeFromFilterStats(idx: number): Promise<void> {
     this.ensureLoaded();
-
-    // Check if there's already a pending unsubscribe request for this filter
-    const existingRequest = this.pendingFilterUnsubscribeRequests.get(idx);
-    if (existingRequest) {
-      return existingRequest;
-    }
-
-    // Create and store the promise
-    const promise = (async () => {
-      try {
-        await this.dependencies.send({
-          type: WSMessageType.UNSUBSCRIBE_FILTER_STATS,
-          id: generateID(),
-          idx,
-        });
-      } finally {
-        // Clear the pending request when done (success or failure)
-        this.pendingFilterUnsubscribeRequests.delete(idx);
-      }
-    })();
-
-    this.pendingFilterUnsubscribeRequests.set(idx, promise);
-    return promise;
+    return this.lifecycle.unsubscribe(idx, () =>
+      this.dependencies.send({
+        type: WSMessageType.UNSUBSCRIBE_FILTER_STATS,
+        id: generateID(),
+        idx,
+      }),
+    );
   }
 
-  /**
-   * Handles filter statistics updates from the server
-   * Throttled to reduce main thread load during video playback
-   */
   public handleFilterStatsUpdate(filter: MonitoredFilterStats): void {
     const idx = filter.idx;
     const subscribable = this.filterStatsSubscribableMap.get(idx);
     if (!subscribable) return;
 
-    // Preserve properties from previous stats when server omits them (diff optimization)
     const prev = subscribable.getSnapshot();
     if (prev?.ipids && filter.ipids) {
       for (const k of Object.keys(filter.ipids)) {
@@ -113,12 +64,10 @@ export class FilterStatsHandler {
       }
     }
 
-    // Hydrate named format fields from properties (server sends them only via delta)
     if (filter.ipids) {
       hydrateIpidFields(filter.ipids);
     }
 
-    // Throttle updates to reduce UI repaints
     this.messageThrottler.throttle(
       `filter_stats_${idx}`,
       (data: MonitoredFilterStats) => {
@@ -129,23 +78,11 @@ export class FilterStatsHandler {
     );
   }
 
-  /**
-   * Subscribe to filter statistics updates for a specific filter
-   * @param idx Filter index to subscribe to
-   * @param callback Function called when that filter's stats are updated
-   * @param interval Polling interval for server subscription (default: 1000ms)
-   * @returns Function to unsubscribe
-   */
   public subscribeToFilterStatsUpdates(
     idx: number,
     callback: (filter: MonitoredFilterStats) => void,
   ): () => void {
-    // Cancel any pending auto-unsubscribe for this filter since we have a new subscriber
-    const existingTimeout = this.filterAutoUnsubscribeTimeouts.get(idx);
-    if (existingTimeout) {
-      clearTimeout(existingTimeout);
-      this.filterAutoUnsubscribeTimeouts.delete(idx);
-    }
+    this.lifecycle.cancelAutoUnsubscribe(idx);
 
     let subscribable = this.filterStatsSubscribableMap.get(idx);
     const isFirstSubscriber = !subscribable;
@@ -173,8 +110,6 @@ export class FilterStatsHandler {
       { immediate: false },
     );
 
-    // If this is the first subscriber, automatically subscribe to server
-    // Server will use its configured interval
     if (isFirstSubscriber) {
       this.subscribeToFilterStats(idx).catch(() => {});
     }
@@ -183,34 +118,18 @@ export class FilterStatsHandler {
       unsubscribe();
       const currentSubscribable = this.filterStatsSubscribableMap.get(idx);
       if (currentSubscribable && !currentSubscribable.hasSubscribers) {
-        // Cancel any existing timeout for this filter
-        const existingTimeout = this.filterAutoUnsubscribeTimeouts.get(idx);
-        if (existingTimeout) {
-          clearTimeout(existingTimeout);
-        }
-
-        // Schedule unsubscribe after a delay to allow for React re-renders
-        const timeoutId = setTimeout(() => {
-          this.filterAutoUnsubscribeTimeouts.delete(idx);
-
-          // Double-check there are still no subscribers before unsubscribing
+        this.lifecycle.scheduleAutoUnsubscribe(idx, () => {
           const subscribable = this.filterStatsSubscribableMap.get(idx);
           if (subscribable && !subscribable.hasSubscribers) {
             this.filterStatsSubscribableMap.delete(idx);
-
             this.unsubscribeFromFilterStats(idx).catch(() => {});
           }
-        }, 100); // 100ms delay to handle React re-renders
-
-        this.filterAutoUnsubscribeTimeouts.set(idx, timeoutId);
+        });
       }
     };
   }
 
   public cleanup(): void {
-    this.filterAutoUnsubscribeTimeouts.forEach((timeout) =>
-      clearTimeout(timeout),
-    );
-    this.filterAutoUnsubscribeTimeouts.clear();
+    this.lifecycle.cleanup();
   }
 }

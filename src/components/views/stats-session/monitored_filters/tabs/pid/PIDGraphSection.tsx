@@ -7,18 +7,14 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { WindowDurationBadge } from '@/components/common/WindowDurationBadge';
 import { useIsDetached } from '../../FilterViewContext';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import type { PIDMetricMode } from '../../../types/pid';
+import {
+  PID_METRIC_GROUPS,
+  PID_METRICS_BY_KEY,
+} from '../../charts/config/pidHistoryChartConfig';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
-import { CLICKABLE_METRICS } from './PIDTable';
 import PIDGraphPanel from './PIDGraphPanel';
-
-const METRIC_LABELS: Record<PIDMetricMode, string> = {
-  bitrate: 'Avg Bitrate',
-  bufferTime: 'Buffer',
-  processTime: 'Proc. Time',
-  processRate: 'Proc. Rate',
-  ts: 'Last Proc.',
-};
 
 interface PIDGraphSectionProps {
   filterIdx: number;
@@ -35,6 +31,7 @@ const PIDGraphSection = memo(
     );
 
     const isDetached = useIsDetached();
+    const { isHistory } = useDataMode();
     const { duration, setDuration, maxPoints } = useChartDuration(
       'pid_graph_duration',
       '5min',
@@ -63,7 +60,7 @@ const PIDGraphSection = memo(
         <CardHeader className="pb-1 px-3 pt-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-foreground">
-              {METRIC_LABELS[mode]}
+              {PID_METRICS_BY_KEY[mode].label}
             </p>
             <div className="flex items-center gap-1">
               {!isDetached && (
@@ -80,12 +77,15 @@ const PIDGraphSection = memo(
                   onValueChange={(v) => v && onModeChange(v as PIDMetricMode)}
                   className="flex gap-0.5 p-0 bg-transparent border-0"
                 >
-                  {CLICKABLE_METRICS.map(({ metric, label }) => (
+                  {PID_METRIC_GROUPS.map(({ key: metric, label }) => (
                     <ToggleGroupItem
                       key={metric}
                       value={metric}
-                      aria-pressed={mode === metric}
-                      className="h-auto px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide"
+                      aria-pressed={
+                        mode === metric ||
+                        PID_METRICS_BY_KEY[mode].group === metric
+                      }
+                      className="h-auto px-1.5 py-0.5 text-[0.714rem] font-medium uppercase tracking-wide"
                     >
                       {label}
                     </ToggleGroupItem>
@@ -117,7 +117,7 @@ const PIDGraphSection = memo(
                     key={index}
                     value={String(index)}
                     onClick={() => dispatch(toggleSelectedPid(item.target))}
-                    className="flex items-center gap-1 h-auto px-1.5 py-0.5 text-[10px] font-mono"
+                    className="flex items-center gap-1 h-auto px-1.5 py-0.5 text-[0.714rem] font-mono"
                     style={{
                       borderColor: `${item.color}60`,
                       background: `${item.color}15`,
@@ -141,6 +141,7 @@ const PIDGraphSection = memo(
             mode={mode}
             showEndLabels={shouldShowEndLabels}
             maxPoints={maxPoints}
+            showSessionTimeLabel={isHistory}
           />
         </CardContent>
       </Card>

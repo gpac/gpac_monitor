@@ -19,6 +19,7 @@ import {
 } from '@/shared/store/slices/logsSlice';
 import { selectTimestampMode } from '@/shared/store/selectors/logs/logsSelectors';
 import { useLogsService } from './hooks/useLogsService';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/Tool/ToolSettingsDropdown';
 import { ToolSwitcher } from './components/Tool/ToolSwitcher';
@@ -42,6 +43,7 @@ const LogsFooter = React.memo(({ count }: { count: number }) => (
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const dispatch = useAppDispatch();
+  const { isLive } = useDataMode();
 
   const {
     currentTool,
@@ -82,9 +84,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
     ((uiFilter.levels && uiFilter.levels.length > 0) ||
       (uiFilter.filterKeys && uiFilter.filterKeys.length > 0));
 
-  // Initialize logs subscription (uses config from Redux store via useLogsService)
+  // Initialize logs subscription — disabled in history mode
   useLogs({
-    enabled: true,
+    enabled: isLive,
   });
 
   // Auto-sync per-tool configuration with backend
@@ -189,37 +191,35 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
     selectAllTools,
   ]);
 
-  return (
-    <WidgetWrapper
-      id={id}
-      statusBadge={statusBadge}
-      customActions={
-        <div className="flex items-center gap-2">
-          {isUIFilterActive && (
-            <CustomTooltip content="Clear UI filter" side="bottom">
-              <button
-                onClick={() => dispatch(clearUIFilter())}
-                className="px-2 py-1 text-xs rounded bg-red-900/50 border border-red-800/50 text-red-200 hover:bg-red-900/50"
-              >
-                <RiFilterOffLine className="w-4 h-4" />
-              </button>
-            </CustomTooltip>
-          )}
-          <CustomTooltip
-            content={
-              timestampMode === 'relative'
-                ? 'Switch to absolute time'
-                : 'Switch to relative time'
-            }
-            side="bottom"
-          >
+  const customActions = useMemo(
+    () => (
+      <div className="flex items-center gap-2">
+        {isUIFilterActive && (
+          <CustomTooltip content="Clear UI filter" side="bottom">
             <button
-              onClick={() => dispatch(toggleTimestampMode())}
-              className="px-2 py-1 text-xs rounded bg-gray-700/50 border border-gray-600/50 text-gray-200 hover:bg-gray-700/80"
+              onClick={() => dispatch(clearUIFilter())}
+              className="px-2 py-1 text-xs rounded bg-red-900/50 border border-red-800/50 text-red-200 hover:bg-red-900/50"
             >
-              <MdOutlineTimer className="w-4 h-4" />
+              <RiFilterOffLine className="w-4 h-4" />
             </button>
           </CustomTooltip>
+        )}
+        <CustomTooltip
+          content={
+            timestampMode === 'relative'
+              ? 'Switch to absolute time'
+              : 'Switch to relative time'
+          }
+          side="bottom"
+        >
+          <button
+            onClick={() => dispatch(toggleTimestampMode())}
+            className="px-2 py-1 text-xs rounded bg-gray-700/50 border border-gray-600/50 text-gray-200 hover:bg-gray-700/80"
+          >
+            <MdOutlineTimer className="w-4 h-4" />
+          </button>
+        </CustomTooltip>
+        {isLive && (
           <CustomTooltip
             content="Configure log levels for each tool"
             side="bottom"
@@ -233,8 +233,28 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
               onToolNavigate={setTool}
             />
           </CustomTooltip>
-        </div>
-      }
+        )}
+      </div>
+    ),
+    [
+      isUIFilterActive,
+      isLive,
+      timestampMode,
+      levelsByTool,
+      defaultAllLevel,
+      currentTool,
+      setToolLevel,
+      setDefaultLevel,
+      setTool,
+      dispatch,
+    ],
+  );
+
+  return (
+    <WidgetWrapper
+      id={id}
+      statusBadge={statusBadge}
+      customActions={customActions}
     >
       <div className="flex flex-col h-full bg-stat stat">
         {/* Logs */}
@@ -274,6 +294,7 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
               fontFamily: "'Roboto Mono', 'Courier New', monospace",
               willChange: 'transform',
               contain: 'strict',
+              overflowX: 'hidden',
             }}
             className="rounded px-2 py-1 text-sm bg-stat stat"
             itemContent={renderLogItem}

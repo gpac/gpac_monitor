@@ -2,6 +2,13 @@
  * Time formatting utilities
  */
 
+/** Formats a session id (`YYYY-MM-DD_HH-MM-SS`) for display, e.g. "2026-07-21 14:32:05". */
+export const formatSessionId = (sessionId: string): string => {
+  const [datePart, timePart] = sessionId.split('_');
+  if (!datePart || !timePart) return sessionId;
+  return `${datePart} ${timePart.replace(/-/g, ':')}`;
+};
+
 type TsFraction = { n: number; d: number } | { num: number; den: number };
 
 /** Formats a µs duration to a human-readable string. Returns '—' for invalid values. */
@@ -14,19 +21,21 @@ export const formatMicroseconds = (
   return `${(value / 1_000_000).toFixed(2)}s`;
 };
 
+export const tsFractionToSeconds = (
+  ts: TsFraction | number | null | undefined,
+): number | null => {
+  if (ts == null) return null;
+  if (typeof ts === 'number') return ts > 0 ? ts : null;
+  const num = 'n' in ts ? ts.n : ts.num;
+  const den = 'n' in ts ? ts.d : ts.den;
+  return den ? num / den : null;
+};
+
 /** Formats a GPAC last_ts_sent value ({n,d}, {num,den} or raw seconds). */
 export const formatLastTsSent = (
   ts: TsFraction | number | null | undefined,
 ): string => {
-  if (ts == null) return '—';
-  let seconds: number | null;
-  if (typeof ts === 'number') {
-    seconds = ts > 0 ? ts : null;
-  } else {
-    const num = 'n' in ts ? ts.n : ts.num;
-    const den = 'n' in ts ? ts.d : ts.den;
-    seconds = den ? num / den : null;
-  }
+  const seconds = tsFractionToSeconds(ts);
   return seconds != null ? `${seconds.toFixed(2)}s` : '—';
 };
 
@@ -51,6 +60,20 @@ export const formatTime = (microseconds?: number): string => {
 
 export const microsecondsToSeconds = (microseconds: number): number => {
   return microseconds / 1_000_000;
+};
+
+export const formatMMSS = (microseconds: number): string => {
+  const totalSeconds = Math.floor(microseconds / 1_000_000);
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+export const parseMMSS = (str: string, maxUs: number): number | null => {
+  const match = str.match(/^(\d{1,3}):(\d{2})$/);
+  if (!match) return null;
+  const us = (parseInt(match[1], 10) * 60 + parseInt(match[2], 10)) * 1_000_000;
+  return us >= 0 && us <= maxUs ? us : null;
 };
 
 /** Formats a GPAC status time fraction (num/den) as a human-readable duration. */
@@ -98,7 +121,7 @@ export const formatChartTimeFromUs = (microseconds: number): string => {
   return `${hh}:${mm}:${ss}`;
 };
 
-export const formatCompactTime = (us: number): string => {
+export const formatCompactTime = (us: number, withCs = false): string => {
   const totalSeconds = Math.floor(us / 1_000_000);
   const seconds = totalSeconds % 60;
   const totalMinutes = Math.floor(totalSeconds / 60);
@@ -106,8 +129,11 @@ export const formatCompactTime = (us: number): string => {
   const hours = Math.floor(totalMinutes / 60);
   const ss = String(seconds).padStart(2, '0');
   const mm = String(minutes).padStart(2, '0');
-  if (hours > 0) return `${String(hours).padStart(2, '0')}:${mm}:${ss}`;
-  return `${mm}:${ss}`;
+  const cs = withCs
+    ? `.${String(Math.floor((us % 1_000_000) / 10_000)).padStart(2, '0')}`
+    : '';
+  if (hours > 0) return `${String(hours).padStart(2, '0')}:${mm}:${ss}${cs}`;
+  return `${mm}:${ss}${cs}`;
 };
 
 export const formatBufferTime = (microseconds: number): string => {

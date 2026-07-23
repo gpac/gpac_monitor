@@ -1,5 +1,5 @@
 const DEFAULT_FILTER_FIELDS = [
-    'idx', 'status', 'bytes_done', 'bytes_sent', 'pck_sent', 'pck_done', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors',
+    'idx', 'status', 'bytes_done', 'bytes_sent', 'pck_sent', 'pck_done', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors', 'last_task_time',
 ];
 
 const CPU_STATS_FIELDS = [
@@ -8,8 +8,9 @@ const CPU_STATS_FIELDS = [
     'gpac_memory', 'thread_count',
 ];
 
+
 const FILTER_PROPS_LITE = [
-    'name', 'status', 'bytes_done', 'type', 'ID', 'nb_ipid', 'nb_opid', 'idx', 'itag', 'pck_sent', 'pck_done', 'time', 'current_errors','last_task_time'
+    'name', 'status', 'bytes_done', 'type', 'ID', 'nb_ipid', 'nb_opid', 'idx', 'itag', 'pck_sent', 'pck_done', 'time', 'current_errors','po'
 ];
 
 const FILTER_ARGS_LITE = [];
@@ -20,31 +21,12 @@ const FILTER_SUBSCRIPTION_FIELDS = [
     'status', 'bytes_done', 'bytes_sent', 'pck_done', 'pck_sent', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors','last_task_time'
 ];
 
-const UPDATE_INTERVALS = {
-    SESSION_STATS: 1000,
-    FILTER_STATS: 1000,
-    CPU_STATS: 500,
-};
-
-// Log retention strategy: preserve errors (100%), prioritize warnings (80%), sample info/debug (20%/5%)
-const LOG_RETENTION = {
-    maxHistorySize: 500,
-    maxHistorySizeVerbose: 2000,
-    keepRatio: {
-        error: 1.0,
-        warning: 0.8,
-        info: 0.2,
-        debug: 0.05
-    }
-};
+export { UPDATE_INTERVALS, LOG_RETENTION } from '../config/live.config.js';
 
 export {
     DEFAULT_FILTER_FIELDS,
-    CPU_STATS_FIELDS,
     FILTER_PROPS_LITE,
     FILTER_ARGS_LITE,
     PID_PROPS_LITE,
     FILTER_SUBSCRIPTION_FIELDS,
-    UPDATE_INTERVALS,
-    LOG_RETENTION,
 };

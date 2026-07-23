@@ -24,6 +24,10 @@ describe('formatCompactTime', () => {
   it('formats 59m59s without hours', () => {
     expect(formatCompactTime(3_599_000_000)).toBe('59:59');
   });
+  it('keeps centiseconds with withCs so tooltip matches the journal', () => {
+    expect(formatCompactTime(3_350_000, true)).toBe('00:03.35');
+    expect(formatCompactTime(3_350_000)).toBe('00:03');
+  });
 });
 
 describe('formatChartTimeFromUs (regression: timezone offset)', () => {
