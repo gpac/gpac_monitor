@@ -50,7 +50,7 @@ export function dispatchLogEvents(
   flushLogs();
 }
 
-function applyLogConfig(dispatch: AppDispatch, logLevel: string): void {
+export function applyLogConfig(dispatch: AppDispatch, logLevel: string): void {
   const changes = parseConfigChanges(logLevel);
   const allEntry = changes.find((entry) => entry.tool === 'all');
   const toolEntries = changes.filter((entry) => entry.tool !== 'all');
