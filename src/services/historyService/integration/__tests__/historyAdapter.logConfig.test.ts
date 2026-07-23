@@ -53,4 +53,27 @@ describe('HistoryAdapter.hydrate — recorded CLI log config', () => {
 
     expect(restoreConfigActions()).toHaveLength(0);
   });
+
+  // Real recorded log_config (server/rmt-log/2026-07-23_13-09-04): GPAC emits
+  // "console" without a level in sys.get_logs(true) output.
+  it('hydrates the snapshot config as a full replace, not a merge', () => {
+    adapter.hydrate(
+      makeSnapshot({ log_config: 'all@warning:console:app@info' }),
+      0,
+    );
+
+    const actions = restoreConfigActions();
+    expect(actions).toHaveLength(1);
+    expect(actions[0].payload.replace).toBe(true);
+    expect(actions[0].payload.levelsByTool).toEqual({ app: 'info' });
+  });
+
+  it('replaces levelsByTool with an empty map when the snapshot has no per-tool entry', () => {
+    adapter.hydrate(makeSnapshot({ log_config: 'all@warning' }), 0);
+
+    const actions = restoreConfigActions();
+    expect(actions).toHaveLength(1);
+    expect(actions[0].payload.replace).toBe(true);
+    expect(actions[0].payload.levelsByTool).toEqual({});
+  });
 });

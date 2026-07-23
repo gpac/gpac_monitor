@@ -256,7 +256,8 @@ export class HistoryAdapter {
     dispatch(resetAllData());
     dispatch(clearSessionDetails());
     dispatch(clearLogs());
-    if (snapshot.log_config) applyLogConfig(dispatch, snapshot.log_config);
+    if (snapshot.log_config)
+      applyLogConfig(dispatch, snapshot.log_config, true);
     dispatch(clearGraph());
     dispatch(filtersUpdated(snapshot.filters.map(toGraphFilterData)));
     dispatch(setCommandLine(snapshot.command_line));
