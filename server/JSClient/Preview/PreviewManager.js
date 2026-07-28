@@ -55,44 +55,47 @@ function PreviewManager(client) {
         this.removePreview(filterIdx);
 
         const entry = {
-            ffsws: null,
             sink: null,
             pid: null,
             width: 0,
             height: 0,
+            target: { Width: PREVIEW.WIDTH, Height: PREVIEW.HEIGHT, PixelFormat: PREVIEW.PIXEL_FORMAT },
             lastEmitUs: 0,
         };
         this.activePreviews.set(filterIdx, entry);
         try {
-            const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY';
-            entry.ffsws = session.add_filter(
-                `ffsws:osize=${PREVIEW.OSIZE}:ofmt=${PREVIEW.OFMT}${hideTag}:RSID`,
-                target
-            );
-
             entry.sink = this.createPreviewSink(filterIdx, entry);
-            entry.sink.set_source(entry.ffsws);
+            entry.sink.set_source(target);
 
             target.reconnect();
         } catch (error) {
-         
             this.removePreview(filterIdx);
             this.send({ message: 'preview_error', filterIdx, error: String(error) });
         }
     };
 
+    this.negotiateFormat = function (pid, target) {
+        for (const propName in target) {
+            if (pid.get_prop(propName) !== target[propName]) {
+                pid.negotiate_prop(propName, target[propName]);
+            }
+        }
+    };
+
     this.createPreviewSink = function (filterIdx, entry) {
         const previewManager = this;
-        const sink = session.new_filter(`PreviewSink_${filterIdx}`);
+        const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY';
+        const sink = session.new_filter(`PreviewSink_${filterIdx}${hideTag}`);
         sink.require_source_id = true;
+        print(`[Preview] sink ${filterIdx} created, itag=${sink.itag}`);
         sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
         sink.set_cap({ id: 'CodecID', value: 'raw', in: true });
         sink.configure_pid = function (pid) {
             try {
+                previewManager.negotiateFormat(pid, entry.target);
                 if (entry.pid !== pid) {
                     entry.pid = pid;
                     pid.send_event(new FilterEvent(GF_FEVT_PLAY));
-
                 }
                 entry.width = pid.get_prop('Width');
                 entry.height = pid.get_prop('Height');
@@ -152,10 +155,6 @@ function PreviewManager(client) {
         if (entry.sink) {
             try { session.remove_filter(entry.sink); } catch (error) { print(`[Preview] sink remove error: ${error}`); }
         }
-        if (entry.ffsws) {
-            try { entry.ffsws.remove(); } catch (error) { print(`[Preview] ffsws remove error: ${error}`); }
-        }
-       
     };
 
     this.stopPreview = function (filterIdx) {

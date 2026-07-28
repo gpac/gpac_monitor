@@ -22,8 +22,9 @@ const FILTER_SUBSCRIPTION_FIELDS = [
 ];
 
 const PREVIEW = {
-    OSIZE: '128x128',
-    OFMT: 'rgba',
+    WIDTH: 128,
+    HEIGHT: 128,
+    PIXEL_FORMAT: 'rgba',
     INTERVAL_US: 1000000,
     DEBUG_SHOW_FILTERS: false,
 };
