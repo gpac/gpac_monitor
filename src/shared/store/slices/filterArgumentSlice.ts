@@ -1,6 +1,10 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
 import { selectFilterNameById } from './graphSlice';
 import { gpacService } from '@/services/gpacService';
+import type {
+  GpacArgument,
+  GpacArgumentValue,
+} from '@/types/domain/gpac/gpac_args';
 
 export interface ArgumentUpdate {
   filterId: string;
@@ -12,10 +16,12 @@ export interface ArgumentUpdate {
 
 export interface FilterArgumentState {
   updates: Record<string, ArgumentUpdate>;
+  argsByFilter: Record<string, GpacArgument[]>;
 }
 
 const initialState: FilterArgumentState = {
   updates: {},
+  argsByFilter: {},
 };
 
 // Slice
@@ -37,6 +43,34 @@ export const filterArgumentSlice = createSlice({
       const key = `${action.payload.filterId}_${action.payload.name}`;
       delete state.updates[key];
     },
+    hydrateFilterArgs: (
+      state,
+      action: PayloadAction<Record<string, GpacArgument[]>>,
+    ) => {
+      state.argsByFilter = { ...state.argsByFilter, ...action.payload };
+    },
+    clearFilterArgs: (state) => {
+      state.argsByFilter = {};
+    },
+    /** Apply a single arg value change from replay (filter_args_update event) */
+    applyArgUpdate: (
+      state,
+      action: PayloadAction<{
+        filterIdx: string;
+        argName: string;
+        value: GpacArgumentValue;
+      }>,
+    ) => {
+      const { filterIdx, argName, value } = action.payload;
+      const args = state.argsByFilter[filterIdx];
+      if (!args) return;
+      const arg = args.find((a) => a.name === argName);
+      if (!arg) {
+        console.warn(`[Replay] Arg not found: ${filterIdx}.${argName}`);
+        return;
+      }
+      arg.value = value;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(updateFilterArgument.pending, (state, action) => {
@@ -53,8 +87,13 @@ export const filterArgumentSlice = createSlice({
 });
 
 // Actions
-export const { setArgumentUpdateStatus, clearArgumentUpdate } =
-  filterArgumentSlice.actions;
+export const {
+  setArgumentUpdateStatus,
+  clearArgumentUpdate,
+  hydrateFilterArgs,
+  clearFilterArgs,
+  applyArgUpdate,
+} = filterArgumentSlice.actions;
 
 // Thunk
 
@@ -82,7 +121,6 @@ export const updateFilterArgument = createAsyncThunk(
       argValue,
     );
 
-    // Mark as success immediately after sending
     dispatch(
       setArgumentUpdateStatus({
         filterId,
@@ -92,7 +130,6 @@ export const updateFilterArgument = createAsyncThunk(
       }),
     );
 
-    // Clear success status immediately (optimistic update)
     setTimeout(() => {
       dispatch(
         setArgumentUpdateStatus({
@@ -106,7 +143,6 @@ export const updateFilterArgument = createAsyncThunk(
   },
 );
 
-// Selectors are exported from selectors/gpacArgs/filterArgumentSelectors.ts
 export {
   selectArgumentUpdate,
   makeSelectArgumentUpdatesForFilter,

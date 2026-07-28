@@ -1,0 +1,38 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`logs.jsonl parsing > log_batch structure matches snapshot 1`] = `
+{
+  "logs": [
+    {
+      "caller": null,
+      "level": 1,
+      "message": "Unsupported audio format 0
+",
+      "thread_id": 761459520,
+      "timestamp": 1054016,
+      "tool": "core",
+    },
+    {
+      "caller": null,
+      "level": 2,
+      "message": "Unsupported cicp audio layout for channel layout 0
+",
+      "thread_id": 761459520,
+      "timestamp": 1054029,
+      "tool": "core",
+    },
+  ],
+  "message": "log_batch",
+  "ts_us": 1105411,
+  "version": 1,
+}
+`;
+
+exports[`logs.jsonl parsing > log_config_changed structure matches snapshot 1`] = `
+{
+  "logLevel": "all@warning",
+  "message": "log_config_changed",
+  "ts_us": 10418,
+  "version": 1,
+}
+`;

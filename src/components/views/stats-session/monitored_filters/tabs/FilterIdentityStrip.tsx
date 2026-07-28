@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { formatTime } from '@/utils/formatting';
 import type { HealthInfo } from '../utils/statusHelpers';
+import type { SessionSourceIndicator } from '@/shared/hooks/ui/useSessionSourceIndicator';
 
 interface FilterIdentityStripProps {
   type: string;
@@ -12,6 +13,7 @@ interface FilterIdentityStripProps {
   healthLabel: string;
   healthVariant: HealthInfo['variant'];
   onOpenProperties?: () => void;
+  sourceIndicator?: SessionSourceIndicator;
 }
 
 const FilterIdentityStrip = memo(
@@ -22,6 +24,7 @@ const FilterIdentityStrip = memo(
     healthLabel,
     healthVariant,
     onOpenProperties,
+    sourceIndicator,
   }: FilterIdentityStripProps) => (
     <div className="flex items-center gap-2 px-3 py-2 bg-monitor-panel/40 rounded border-b border-monitor-line/10 text-xs shrink-0">
       {onOpenProperties && (
@@ -48,9 +51,18 @@ const FilterIdentityStrip = memo(
         Uptime:{' '}
         <span className="font-medium tabular-nums">{formatTime(time)}</span>
       </span>
-      <span className="ml-auto text-muted-foreground/70">
-        Live <span className="text-error">⏺</span>
-      </span>
+      {sourceIndicator && (
+        <span className="ml-auto text-muted-foreground/70">
+          {sourceIndicator.label}{' '}
+          <span
+            className={
+              sourceIndicator.tone === 'replay' ? 'text-history' : 'text-error'
+            }
+          >
+            ⏺
+          </span>
+        </span>
+      )}
     </div>
   ),
 );

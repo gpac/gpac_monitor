@@ -20,6 +20,7 @@ interface PIDGraphPanelProps {
   mode: PIDMetricMode;
   showEndLabels: boolean;
   maxPoints?: number;
+  showSessionTimeLabel?: boolean;
 }
 
 const PIDGraphPanel = memo(

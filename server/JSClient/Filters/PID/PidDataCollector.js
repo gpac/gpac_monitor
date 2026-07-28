@@ -33,12 +33,13 @@ function _collectStats(stats, filter) {
     if (stats.max_playout_time) result.max_playout_time = stats.max_playout_time;
     if (stats.min_playout_time) result.min_playout_time = stats.min_playout_time;
     if (stats.total_process_time > 0) result.average_process_time = stats.total_process_time / stats.nb_processed;
+    if (stats.first_process_time) result.first_process_time = stats.first_process_time;
     return result;
 }
 
 function PidDataCollector() {
 
-    this.collectInputPids = function(filter, withPidProperties) {
+    this.collectInputPids = function(filter, withPidProperties, statsOnly) {
         const ipids = {};
 
         for (let i = 0; i < filter.nb_ipid; i++) {
@@ -70,13 +71,13 @@ function PidDataCollector() {
             }
 
             const key = pid.name || `ipid_${i}`;
-            ipids[key] = pid;
+            ipids[key] = statsOnly ? { buffer: pid.buffer, bitrate: pid.bitrate, ...(pid.stats && { stats: pid.stats }) } : pid;
         }
 
         return ipids;
     };
 
-    this.collectOutputPids = function(filter) {
+    this.collectOutputPids = function(filter, statsOnly) {
         const opids = {};
 
         for (let i = 0; i < filter.nb_opid; i++) {
@@ -101,13 +102,10 @@ function PidDataCollector() {
             };
 
             const stats = _collectStats(rawStats, filter);
-            if (stats) {
-                if (rawStats.first_process_time) stats.first_process_time = rawStats.first_process_time;
-                pid.stats = stats;
-            }
+            if (stats) pid.stats = stats;
 
             const key = pid.name || `opid_${i}`;
-            opids[key] = pid;
+            opids[key] = statsOnly ? { buffer: pid.buffer, max_buffer: pid.max_buffer, bitrate: pid.bitrate, ...(pid.stats && { stats: pid.stats }) } : pid;
         }
 
         return opids;

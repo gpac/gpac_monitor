@@ -19,6 +19,7 @@ import {
 } from '@/shared/store/slices/logsSlice';
 import { selectTimestampMode } from '@/shared/store/selectors/logs/logsSelectors';
 import { useLogsService } from './hooks/useLogsService';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { CustomTooltip } from '@/components/ui/tooltip';
 import { ToolSettingsDropdown } from './components/Tool/ToolSettingsDropdown';
 import { ToolSwitcher } from './components/Tool/ToolSwitcher';
@@ -42,6 +43,7 @@ const LogsFooter = React.memo(({ count }: { count: number }) => (
 const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const dispatch = useAppDispatch();
+  const { isLive } = useDataMode();
 
   const {
     currentTool,
@@ -82,9 +84,9 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
     ((uiFilter.levels && uiFilter.levels.length > 0) ||
       (uiFilter.filterKeys && uiFilter.filterKeys.length > 0));
 
-  // Initialize logs subscription (uses config from Redux store via useLogsService)
+  // Initialize logs subscription — disabled in history mode
   useLogs({
-    enabled: true,
+    enabled: isLive,
   });
 
   // Auto-sync per-tool configuration with backend
@@ -217,23 +219,26 @@ const LogsMonitor: React.FC<LogsMonitorProps> = React.memo(({ id }) => {
             <MdOutlineTimer className="w-4 h-4" />
           </button>
         </CustomTooltip>
-        <CustomTooltip
-          content="Configure log levels for each tool"
-          side="bottom"
-        >
-          <ToolSettingsDropdown
-            levelsByTool={levelsByTool}
-            defaultAllLevel={defaultAllLevel}
-            currentTool={currentTool}
-            onToolLevelChange={setToolLevel}
-            onDefaultAllLevelChange={setDefaultLevel}
-            onToolNavigate={setTool}
-          />
-        </CustomTooltip>
+        {isLive && (
+          <CustomTooltip
+            content="Configure log levels for each tool"
+            side="bottom"
+          >
+            <ToolSettingsDropdown
+              levelsByTool={levelsByTool}
+              defaultAllLevel={defaultAllLevel}
+              currentTool={currentTool}
+              onToolLevelChange={setToolLevel}
+              onDefaultAllLevelChange={setDefaultLevel}
+              onToolNavigate={setTool}
+            />
+          </CustomTooltip>
+        )}
       </div>
     ),
     [
       isUIFilterActive,
+      isLive,
       timestampMode,
       levelsByTool,
       defaultAllLevel,

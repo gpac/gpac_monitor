@@ -7,7 +7,7 @@ const mockSubscribe = vi.fn();
 const mockGetFilterDetails = vi.fn();
 const mockSubscribeToFilterArgs = vi.fn();
 
-vi.mock('@/shared/hooks/useGpacService', () => ({
+vi.mock('@/shared/hooks/connection/useGpacService', () => ({
   useGpacService: () => ({
     subscribe: mockSubscribe,
     getFilterDetails: mockGetFilterDetails,

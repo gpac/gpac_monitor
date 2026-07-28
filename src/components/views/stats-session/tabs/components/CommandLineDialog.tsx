@@ -11,7 +11,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
-import { useCommandLine } from '@/shared/hooks/useCommandLine';
+import { useCommandLine } from '@/shared/hooks/data/useCommandLine';
 
 export const CommandLineInfo = memo(() => {
   const { commandLine, isLoading } = useCommandLine();

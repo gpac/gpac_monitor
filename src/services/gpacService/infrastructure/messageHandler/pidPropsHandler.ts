@@ -96,6 +96,7 @@ export class PidPropsHandler {
 
       // Send request via dependencies
       this.dependencies.send({
+        type: 'get_ipid_props',
         message: 'get_ipid_props',
         filterIdx,
         ipidIdx,

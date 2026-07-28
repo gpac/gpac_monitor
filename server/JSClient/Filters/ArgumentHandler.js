@@ -41,6 +41,9 @@ function ArgumentHandler(client) {
 
         try {
             filter.update(argName, newValue);
+            if (this.client.historyCollector) {
+                this.client.historyCollector.recordFilterArgsUpdate(idx, argName, newValue);
+            }
         } catch (e) {
             print("Error: Failed to update argument: " + e.toString());
         }

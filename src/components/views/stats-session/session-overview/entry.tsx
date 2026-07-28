@@ -5,7 +5,7 @@ import React, {
   useCallback,
   useEffect,
 } from 'react';
-import { useOptimizedResize } from '@/shared/hooks/useOptimizedResize';
+import { useOptimizedResize } from '@/shared/hooks/ui/useOptimizedResize';
 import { useMultiFilterMonitor } from '../hooks/useMultiFilterMonitor';
 import { useStatsCalculations } from '../hooks/stats/useStatsCalculations';
 import { useEnrichedFilters } from '../hooks/stats/useEnrichedFilters';
@@ -104,6 +104,7 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       }
     }, [isDetached]);
 
+    // Disable callbacks during resize to avoid expensive re-renders
     const noopTabChange = useCallback(() => {}, []);
     const noopCardClick = useCallback(() => {}, []);
     const safeOnTabChange = isResizing ? noopTabChange : setActiveTab;

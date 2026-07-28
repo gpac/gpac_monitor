@@ -44,6 +44,7 @@ export const {
   selectAllToolsInFilter,
   appendLogs,
   appendLogsForAllTools,
+  clearLogs,
   setMaxEntriesPerTool,
   setSubscriptionStatus,
   restoreConfig,

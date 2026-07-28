@@ -4,14 +4,15 @@ import { GpacStreamType } from '@/types/domain/gpac/stream-types';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import PIDPreviewPanel from './PIDPreviewPanel';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { Badge } from '@/components/ui/badge';
 import {
   getStreamTypeBadgeConfig,
   STREAM_TYPE_SHORT_LABEL,
 } from '@/utils/filters/streamType';
+import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
-import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
 import { GraphRadio } from '@/components/common/charts';
 import type { PIDWithIndex } from '../../../types';
@@ -37,6 +38,7 @@ const PIDRowInfoCell = memo(
     onOpenProps,
   }: PIDRowInfoCellProps) => {
     const dispatch = useAppDispatch();
+    const { isLive } = useDataMode();
     const colorIndex = useAppSelector(
       (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
     );
@@ -73,7 +75,7 @@ const PIDRowInfoCell = memo(
             <LuEye className="h-4 w-5" />
           </button>
         )}
-        {pid.type === GpacStreamType.Visual && (
+        {isLive && pid.type === GpacStreamType.Visual && (
           <Popover>
             <PopoverTrigger asChild>
               <button

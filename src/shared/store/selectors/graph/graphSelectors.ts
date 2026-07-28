@@ -48,8 +48,8 @@ export const selectError = createSelector(
   (graph) => graph.error,
 );
 
-export const selectPidReconfiguredFilters = (state: RootState) =>
-  state.graph.pidReconfiguredFilters;
+export const selectPidReconfiguredCounts = (state: RootState) =>
+  state.graph.pidReconfiguredCounts;
 
-export const selectArgUpdatedFilters = (state: RootState) =>
-  state.graph.argUpdatedFilters;
+export const selectArgUpdatedCounts = (state: RootState) =>
+  state.graph.argUpdatedCounts;

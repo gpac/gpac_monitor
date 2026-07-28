@@ -1,6 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TimeFraction } from '../../../types/domain/gpac/model';
+import type { PIDproperties } from '@/types/domain/gpac/filter-stats';
 import type { MetricDefinitionMap } from '@/utils/metrics/metricDefinitionParser';
+
+export interface FilterPids {
+  ipids?: Record<string, PIDproperties>;
+  opids?: Record<string, PIDproperties>;
+}
 
 export interface SessionFilterStats {
   status: string;
@@ -28,6 +34,7 @@ export interface SessionStatsState {
   mode: StatsMode;
   sessionStats: Record<string, SessionFilterStats>;
   previousSessionStats: Record<string, SessionFilterStats>;
+  pidsByFilter: Record<string, FilterPids>;
   selectedFilterId: string | null;
   lastUpdate: number | null;
   lastUpdateUs: number | null;
@@ -42,6 +49,7 @@ const initialState: SessionStatsState = {
   mode: 'session',
   sessionStats: {},
   previousSessionStats: {},
+  pidsByFilter: {},
   selectedFilterId: null,
   lastUpdate: null,
   lastUpdateUs: null,
@@ -128,6 +136,33 @@ const sessionStatsSlice = createSlice({
       state.isLoading = false;
     },
 
+    setFilterPids: (
+      state,
+      action: PayloadAction<Record<string, FilterPids>>,
+    ) => {
+      for (const [idx, pids] of Object.entries(action.payload)) {
+        if (!state.pidsByFilter[idx]) {
+          state.pidsByFilter[idx] = pids;
+          continue;
+        }
+        const existing = state.pidsByFilter[idx];
+        for (const dir of ['ipids', 'opids'] as const) {
+          if (!pids[dir]) continue;
+          const merged: Record<string, PIDproperties> = {};
+          for (const [key, pid] of Object.entries(pids[dir]!)) {
+            merged[key] = existing[dir]?.[key]
+              ? { ...existing[dir]![key], ...pid }
+              : pid;
+          }
+          existing[dir] = merged;
+        }
+      }
+    },
+
+    clearFilterPids: (state) => {
+      state.pidsByFilter = {};
+    },
+
     setMetricDefinitions: (
       state,
       action: PayloadAction<MetricDefinitionMap>,
@@ -146,6 +181,8 @@ export const {
   subscribeToSessionStats,
   unsubscribeFromSessionStats,
   resetSessionStats,
+  setFilterPids,
+  clearFilterPids,
   setMetricDefinitions,
 } = sessionStatsSlice.actions;
 

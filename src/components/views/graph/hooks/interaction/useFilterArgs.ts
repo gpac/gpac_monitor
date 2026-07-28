@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useGpacService } from '@/shared/hooks/useGpacService';
+import { useGpacService } from '@/shared/hooks/connection/useGpacService';
 import { SubscriptionType } from '@/types/communication/subscription';
 import { FilterArgument } from '@/types';
 

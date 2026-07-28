@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { FiSettings } from 'react-icons/fi';
 import { useAppSelector } from '@/shared/hooks/redux';
-import { useSidebar } from '@/shared/hooks/useSidebar';
+import { useSidebar } from '@/shared/hooks/ui/useSidebar';
 import FilterArgumentsContent from '@/components/filters-args/FilterArgumentsContent';
 import IPIDPropertiesContent from '../../ipid-properties/IPIDPropertiesContent';
 import PropertiesHeader from './PropertiesHeader';
@@ -82,7 +82,7 @@ const PropertiesPanel = () => {
   return (
     <div className="flex flex-col mt-4 flex-1 bg-monitor-surface border border-monitor-line">
       {/* Header - sticky */}
-      <div className="sticky top-0 z-20 bg-monitor-surface border-b border-monitor-line">
+      <div className="sticky top-0  bg-monitor-surface border-b border-monitor-line">
         {sidebarContent.type === 'pid-props' ? (
           <PropertiesHeader
             filterName={`${filterInfo?.name || 'Filter'} IPIDs`}

@@ -25,11 +25,13 @@ import { useGraphState } from './useGraphState';
 import { useGraphConnection } from '../connection/useGraphConnection';
 import { useGraphHandlers } from '../interaction/useGraphHandlers';
 import { useGraphNotifications } from '../interaction/useGraphNotifications';
+import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useFilterArgs } from '../interaction/useFilterArgs';
 
 const useGraphMonitor = () => {
   const dispatch = useAppDispatch();
   const { toast } = useToast();
+  const { mode } = useDataSource();
 
   // Refs to track component state
   const nodesRef = useRef<Node[]>([]);
@@ -56,14 +58,13 @@ const useGraphMonitor = () => {
     [subscribedFilterIdxs],
   );
 
-  const { layoutOptions, handleLayoutChange, autoLayout, applyLayout } =
-    useGraphLayout({
-      localNodes,
-      localEdges,
-      setLocalNodes,
-      nodesRef,
-      isApplyingLayout,
-    });
+  const { autoLayout } = useGraphLayout({
+    localNodes,
+    localEdges,
+    setLocalNodes,
+    nodesRef,
+    isApplyingLayout,
+  });
 
   const { retryConnection } = useGraphConnection({
     setConnectionError,
@@ -107,6 +108,7 @@ const useGraphMonitor = () => {
     error,
     isLoading,
     toast,
+    disabled: mode === 'history',
   });
 
   // Effect to update local nodes and edges from Redux
@@ -184,11 +186,6 @@ const useGraphMonitor = () => {
     setHasLayoutRun(true);
   }, [nodesInitialized, localNodes, hasLayoutRun, autoLayout]);
 
-  const triggerLayout = () => {
-    setHasLayoutRun(false);
-    autoLayout();
-  };
-
   return {
     isLoading,
     connectionError,
@@ -199,11 +196,6 @@ const useGraphMonitor = () => {
     handleEdgesChange,
     handleNodeClick,
     handleEdgeClick,
-    layoutOptions,
-    handleLayoutChange,
-    autoLayout,
-    applyLayout,
-    triggerLayout,
     getFilterArgs,
     hasFilterArgs,
   };

@@ -1,5 +1,6 @@
 export interface CPUStats {
   timestamp: number;
+  time?: string;
   total_cpu_usage: number;
   process_cpu_usage: number;
   process_memory: number;
