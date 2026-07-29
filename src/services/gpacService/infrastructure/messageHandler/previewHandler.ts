@@ -46,12 +46,14 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     });
   }
 
-  // Sends stop request and resets state.
+  // Sends stop request (if still connected) and resets state.
   public stopPreview(filterIdx: number): void {
-    this.dependencies.send({
-      type: WSMessageType.STOP_PID_PREVIEW,
-      idx: filterIdx,
-    });
+    if (this.dependencies.isConnected()) {
+      this.dependencies.send({
+        type: WSMessageType.STOP_PID_PREVIEW,
+        idx: filterIdx,
+      });
+    }
     this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE });
   }
 
