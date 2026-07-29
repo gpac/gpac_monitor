@@ -12,7 +12,10 @@ function PreviewManager(client) {
     };
 
     this.postTask = function (taskFn) {
-        if (!session) return;
+        if (!session) {
+            print(`[Preview] postTask skipped: session is null`);
+            return;
+        }
         try {
             session.post_task(() => {
                 if (session.last_task) return false;
@@ -37,21 +40,25 @@ function PreviewManager(client) {
     };
 
     this.startPreview = function (filterIdx, filterName) {
+        print(`[Preview] startPreview requested idx=${filterIdx} name=${filterName}`);
         this.postTask(() => this.doStartPreview(filterIdx, filterName));
     };
 
     this.doStartPreview = function (filterIdx, filterName) {
         const filter = session.get_filter(String(filterIdx));
         if (!filter || filter.type !== filterName) {
+            print(`[Preview] filter not found idx=${filterIdx} expected=${filterName} got=${filter ? filter.type : 'null'}`);
             this.send({ message: 'preview_error', filterIdx, error: 'filter not found' });
             return;
         }
         const target = this.findPreviewTarget(filter);
         if (!target) {
+            print(`[Preview] no visual PID on idx=${filterIdx} nb_ipid=${filter.nb_ipid} nb_opid=${filter.nb_opid}`);
             this.send({ message: 'preview_error', filterIdx, error: 'not a video PID' });
             return;
         }
-      
+        print(`[Preview] target resolved idx=${filterIdx} target=${target.name} type=${target.type}`);
+
         this.removePreview(filterIdx);
 
         const entry = {
@@ -66,9 +73,9 @@ function PreviewManager(client) {
         try {
             entry.sink = this.createPreviewSink(filterIdx, entry);
             entry.sink.set_source(target);
-
             target.reconnect();
         } catch (error) {
+            print(`[Preview] doStartPreview failed idx=${filterIdx}: ${error}`);
             this.removePreview(filterIdx);
             this.send({ message: 'preview_error', filterIdx, error: String(error) });
         }
@@ -87,7 +94,6 @@ function PreviewManager(client) {
         const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY';
         const sink = session.new_filter(`PreviewSink_${filterIdx}${hideTag}`);
         sink.require_source_id = true;
-        print(`[Preview] sink ${filterIdx} created, itag=${sink.itag}`);
         sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
         sink.set_cap({ id: 'CodecID', value: 'raw', in: true });
         sink.configure_pid = function (pid) {
@@ -99,6 +105,7 @@ function PreviewManager(client) {
                 }
                 entry.width = pid.get_prop('Width');
                 entry.height = pid.get_prop('Height');
+                print(`[Preview] configured idx=${filterIdx} pid=${pid.name} ${entry.width}x${entry.height} fmt=${pid.get_prop('PixelFormat')}`);
             } catch (error) {
                 print(`[Preview] configure_pid error: ${error}`);
             }
@@ -158,6 +165,7 @@ function PreviewManager(client) {
     };
 
     this.stopPreview = function (filterIdx) {
+        print(`[Preview] stopPreview requested idx=${filterIdx}`);
         this.postTask(() => this.doStopPreview(filterIdx));
     };
 
