@@ -45,6 +45,11 @@ function PreviewManager(client) {
     };
 
     this.doStartPreview = function (filterIdx, filterName) {
+        const existingEntry = this.activePreviews.get(filterIdx);
+        if (existingEntry) {
+            this.resumePreview(filterIdx, existingEntry);
+            return;
+        }
         const filter = session.get_filter(String(filterIdx));
         if (!filter || filter.type !== filterName) {
             print(`[Preview] filter not found idx=${filterIdx} expected=${filterName} got=${filter ? filter.type : 'null'}`);
@@ -59,11 +64,10 @@ function PreviewManager(client) {
         }
         print(`[Preview] target resolved idx=${filterIdx} target=${target.name} type=${target.type}`);
 
-        this.removePreview(filterIdx);
-
         const entry = {
             sink: null,
             pid: null,
+            active: true,
             width: 0,
             height: 0,
             target: { Width: PREVIEW.WIDTH, Height: PREVIEW.HEIGHT, PixelFormat: PREVIEW.PIXEL_FORMAT },
@@ -79,6 +83,19 @@ function PreviewManager(client) {
             this.removePreview(filterIdx);
             this.send({ message: 'preview_error', filterIdx, error: String(error) });
         }
+    };
+
+    this.resumePreview = function (filterIdx, entry) {
+        entry.active = true;
+        entry.lastEmitUs = 0;
+        if (entry.pid) entry.pid.send_event(new FilterEvent(GF_FEVT_PLAY));
+        print(`[Preview] resumed idx=${filterIdx} pid=${entry.pid ? entry.pid.name : 'pending'}`);
+    };
+
+    this.pausePreview = function (filterIdx, entry) {
+        entry.active = false;
+        if (entry.pid) entry.pid.send_event(new FilterEvent(GF_FEVT_STOP));
+        print(`[Preview] paused idx=${filterIdx} pid=${entry.pid ? entry.pid.name : 'pending'}`);
     };
 
     this.negotiateFormat = function (pid, target) {
@@ -101,13 +118,19 @@ function PreviewManager(client) {
                 previewManager.negotiateFormat(pid, entry.target);
                 if (entry.pid !== pid) {
                     entry.pid = pid;
-                    pid.send_event(new FilterEvent(GF_FEVT_PLAY));
+                    if (entry.active) pid.send_event(new FilterEvent(GF_FEVT_PLAY));
                 }
                 entry.width = pid.get_prop('Width');
                 entry.height = pid.get_prop('Height');
                 print(`[Preview] configured idx=${filterIdx} pid=${pid.name} ${entry.width}x${entry.height} fmt=${pid.get_prop('PixelFormat')}`);
             } catch (error) {
                 print(`[Preview] configure_pid error: ${error}`);
+            }
+        };
+        sink.remove_pid = function (pid) {
+            if (entry.pid === pid) {
+                entry.pid = null;
+                print(`[Preview] pid removed idx=${filterIdx}`);
             }
         };
         sink.process = function () {
@@ -126,7 +149,7 @@ function PreviewManager(client) {
             const packet = entry.pid.get_packet();
             if (!packet) return;
             const nowUs = sys.clock_us();
-            if (nowUs - entry.lastEmitUs >= PREVIEW.INTERVAL_US) {
+            if (entry.active && nowUs - entry.lastEmitUs >= PREVIEW.INTERVAL_US) {
                 entry.lastEmitUs = nowUs;
                 this.sendFrame(filterIdx, entry, packet);
             }
@@ -170,7 +193,8 @@ function PreviewManager(client) {
     };
 
     this.doStopPreview = function (filterIdx) {
-        this.removePreview(filterIdx);
+        const entry = this.activePreviews.get(filterIdx);
+        if (entry) this.pausePreview(filterIdx, entry);
         this.send({ message: 'preview_stopped', filterIdx });
     };
 
