@@ -26,7 +26,9 @@ export type GpacMessageType =
   | 'log_status'
   | 'log_config_changed'
   | 'get_command_line'
-  | 'get_ipid_props';
+  | 'get_ipid_props'
+  | 'start_pid_preview'
+  | 'stop_pid_preview';
 
 /**
  * Base message structure for GPAC communication.
