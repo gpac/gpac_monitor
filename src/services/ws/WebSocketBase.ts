@@ -96,6 +96,11 @@ export class WebSocketBase implements GpacTransport {
         };
 
         this.socket.onmessage = (event: MessageEvent) => {
+          if (event.data instanceof ArrayBuffer) {
+            this.parseMessageInline(event.data);
+            return;
+          }
+
           // Use Worker if available (offloads heavy parsing)
           if (this.parserWorker) {
             const id = ++this.messageId;
