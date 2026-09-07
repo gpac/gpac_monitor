@@ -1,6 +1,8 @@
 import { Sys as sys } from 'gpaccore';
-import { base64ArrayBuffer } from './base64.js';
 import { PREVIEW } from '../config.js';
+
+const PVWF_MAGIC = 'PVWF';
+const PVWF_HEADER_SIZE = 16;
 
 function PreviewManager(client) {
     this.client = client;
@@ -159,18 +161,22 @@ function PreviewManager(client) {
 
     this.sendFrame = function (filterIdx, entry, packet) {
         try {
+            if (!this.client.client) return;
             if (packet.frame_ifce) {
                 this.send({ message: 'preview_error', filterIdx, error: 'GPU frame preview not supported yet' });
                 return;
             }
-            const data = packet.data;
-            this.send({
-                message: 'preview_frame',
-                filterIdx,
-                width: entry.width,
-                height: entry.height,
-                dataBase64: base64ArrayBuffer(data),
-            });
+            const pixels = new Uint8Array(packet.data);
+            const buffer = new ArrayBuffer(PVWF_HEADER_SIZE + pixels.byteLength);
+            const header = new DataView(buffer);
+            for (let charIndex = 0; charIndex < 4; charIndex++) {
+                header.setUint8(charIndex, PVWF_MAGIC.charCodeAt(charIndex));
+            }
+            header.setUint32(4, filterIdx, true);
+            header.setUint32(8, entry.width, true);
+            header.setUint32(12, entry.height, true);
+            new Uint8Array(buffer, PVWF_HEADER_SIZE).set(pixels);
+            this.client.client.send(buffer);
         } catch (error) {
             print(`[Preview] sendFrame error: ${error}`);
             this.send({ message: 'preview_error', filterIdx, error: String(error) });
