@@ -161,9 +161,6 @@ export class BaseMessageHandler {
       case 'command_line_response':
         this.commandLineHandler.handleCommandLineResponse(data);
         break;
-      case 'preview_frame':
-        this.previewHandler.handlePreviewFrame(data);
-        break;
       case 'preview_error':
         this.previewHandler.handlePreviewError(data);
         break;

@@ -58,7 +58,6 @@ enum WSResponseType {
   LOG_CONFIG_CHANGED = 'log_config_changed',
   COMMAND_LINE_RESPONSE = 'command_line_response',
   SESSION_END = 'session_end',
-  PREVIEW_FRAME = 'preview_frame',
   PREVIEW_ERROR = 'preview_error',
   PREVIEW_STOPPED = 'preview_stopped',
 }
@@ -164,13 +163,9 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
   logLevel: GpacLogConfig;
 }
 
-export interface PreviewFrameMessage {
-  message: 'preview_frame';
-  filterIdx: number;
-  width: number;
-  height: number;
-  dataBase64: string;
-}
+// Binary preview frame: 'PVWF' + filterIdx/width/height as u32 LE, then raw rgba pixels.
+export const PVWF_MAGIC = 'PVWF';
+export const PVWF_HEADER_SIZE = 16;
 
 export interface PreviewErrorMessage {
   message: 'preview_error';
@@ -201,7 +196,6 @@ export type IncomingWsMessage =
   | NotificationMessage
   | FilterPidReconfiguredMessage
   | FilterArgUpdatedMessage
-  | PreviewFrameMessage
   | PreviewErrorMessage
   | PreviewStoppedMessage
   | MonitorConfigMessage;

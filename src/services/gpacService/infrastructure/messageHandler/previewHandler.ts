@@ -1,15 +1,12 @@
-import { WSMessageType } from '@/services/ws/types';
-import type {
-  PreviewFrameMessage,
-  PreviewErrorMessage,
-} from '@/services/ws/types';
+import { WSMessageType, PVWF_HEADER_SIZE } from '@/services/ws/types';
+import type { PreviewErrorMessage } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import type { MessageHandlerDependencies } from './types';
 
 export interface PreviewFrame {
   width: number;
   height: number;
-  dataBase64: string;
+  pixels: Uint8ClampedArray;
 }
 
 export interface PreviewHandlerState {
@@ -57,14 +54,19 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE });
   }
 
-  // Stores the received Base64 frame.
-  public handlePreviewFrame(data: PreviewFrameMessage): void {
+  // Reads a binary PVWF frame: header fields, then a zero-copy view on the pixels.
+  public handlePreviewFrame(dataView: DataView): void {
+    if (dataView.byteLength <= PVWF_HEADER_SIZE) return;
     this.updateDataAndNotify({
-      filterIdx: data.filterIdx,
+      filterIdx: dataView.getUint32(4, true),
       frame: {
-        width: data.width,
-        height: data.height,
-        dataBase64: data.dataBase64,
+        width: dataView.getUint32(8, true),
+        height: dataView.getUint32(12, true),
+        pixels: new Uint8ClampedArray(
+          dataView.buffer,
+          dataView.byteOffset + PVWF_HEADER_SIZE,
+          dataView.byteLength - PVWF_HEADER_SIZE,
+        ),
       },
       loading: false,
       error: null,

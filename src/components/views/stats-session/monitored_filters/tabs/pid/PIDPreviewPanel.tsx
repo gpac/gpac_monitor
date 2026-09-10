@@ -1,5 +1,4 @@
 import { memo, useEffect, useRef } from 'react';
-import { base64ToUint8ClampedArray } from '@/utils/formatting';
 import { usePidPreview } from '../hooks/usePidPreview';
 
 interface PIDPreviewPanelProps {
@@ -16,7 +15,7 @@ const PIDPreviewPanel = memo(
       if (!frame || !canvasRef.current) return;
       const context = canvasRef.current.getContext('2d');
       if (!context) return;
-      const pixels = base64ToUint8ClampedArray(frame.dataBase64);
+      const { pixels } = frame;
       if (pixels.length !== frame.width * frame.height * 4) return;
       context.putImageData(
         new ImageData(pixels, frame.width, frame.height),
