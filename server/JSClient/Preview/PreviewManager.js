@@ -86,7 +86,7 @@ function PreviewManager(client) {
         try {
             entry.sink = this.createPreviewSink(filterIdx, entry);
             entry.sink.set_source(target);
-            target.reconnect();
+            target.reconnect(undefined, pidIdx);
         } catch (error) {
             print(`[Preview] doStartPreview failed idx=${filterIdx}: ${error}`);
             this.removePreview(filterIdx);
