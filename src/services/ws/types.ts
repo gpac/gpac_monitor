@@ -163,9 +163,9 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
   logLevel: GpacLogConfig;
 }
 
-// Binary preview frame: 'PVWF' + filterIdx/width/height as u32 LE, then raw rgba pixels.
+// Binary preview frame: 'PVWF' + filterIdx/width/height/pidIdx as u32 LE, then raw rgba pixels.
 export const PVWF_MAGIC = 'PVWF';
-export const PVWF_HEADER_SIZE = 16;
+export const PVWF_HEADER_SIZE = 20;
 
 export interface PreviewErrorMessage {
   message: 'preview_error';

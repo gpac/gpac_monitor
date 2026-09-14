@@ -2,7 +2,7 @@ import { Sys as sys } from 'gpaccore';
 import { PREVIEW } from '../config.js';
 
 const PVWF_MAGIC = 'PVWF';
-const PVWF_HEADER_SIZE = 16;
+const PVWF_HEADER_SIZE = 20;
 
 function PreviewManager(client) {
     this.client = client;
@@ -31,11 +31,16 @@ function PreviewManager(client) {
 
     this.findPreviewTarget = function (filter) {
         for (let outputIndex = 0; outputIndex < filter.nb_opid; outputIndex++) {
-            if (filter.opid_props(outputIndex, "StreamType") === "Visual") return filter;
+            if (filter.opid_props(outputIndex, "StreamType") === "Visual") {
+                return { target: filter, pidIdx: outputIndex };
+            }
         }
         for (let inputIndex = 0; inputIndex < filter.nb_ipid; inputIndex++) {
             if (filter.ipid_props(inputIndex, "StreamType") === "Visual") {
-                return filter.ipid_source(inputIndex);
+                return {
+                    target: filter.ipid_source(inputIndex),
+                    pidIdx: filter.ipid_source_opid_idx(inputIndex),
+                };
             }
         }
         return null;
@@ -58,17 +63,19 @@ function PreviewManager(client) {
             this.send({ message: 'preview_error', filterIdx, error: 'filter not found' });
             return;
         }
-        const target = this.findPreviewTarget(filter);
-        if (!target) {
+        const resolved = this.findPreviewTarget(filter);
+        if (!resolved || resolved.pidIdx < 0) {
             print(`[Preview] no visual PID on idx=${filterIdx} nb_ipid=${filter.nb_ipid} nb_opid=${filter.nb_opid}`);
             this.send({ message: 'preview_error', filterIdx, error: 'not a video PID' });
             return;
         }
-        print(`[Preview] target resolved idx=${filterIdx} target=${target.name} type=${target.type}`);
+        const { target, pidIdx } = resolved;
+        print(`[Preview] target resolved idx=${filterIdx} pidIdx=${pidIdx} target=${target.name} type=${target.type}`);
 
         const entry = {
             sink: null,
             pid: null,
+            pidIdx,
             active: true,
             width: 0,
             height: 0,
@@ -175,6 +182,7 @@ function PreviewManager(client) {
             header.setUint32(4, filterIdx, true);
             header.setUint32(8, entry.width, true);
             header.setUint32(12, entry.height, true);
+            header.setUint32(16, entry.pidIdx, true);
             new Uint8Array(buffer, PVWF_HEADER_SIZE).set(pixels);
             this.client.client.send(buffer);
         } catch (error) {

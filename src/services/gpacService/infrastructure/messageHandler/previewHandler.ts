@@ -11,6 +11,7 @@ export interface PreviewFrame {
 
 export interface PreviewHandlerState {
   filterIdx: number | null;
+  pidIdx: number | null;
   frame: PreviewFrame | null;
   loading: boolean;
   error: string | null;
@@ -18,6 +19,7 @@ export interface PreviewHandlerState {
 
 const EMPTY_PREVIEW_STATE: PreviewHandlerState = {
   filterIdx: null,
+  pidIdx: null,
   frame: null,
   loading: false,
   error: null,
@@ -37,6 +39,7 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     });
     this.updateDataAndNotify({
       filterIdx,
+      pidIdx: null,
       frame: null,
       loading: true,
       error: null,
@@ -59,6 +62,7 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     if (dataView.byteLength <= PVWF_HEADER_SIZE) return;
     this.updateDataAndNotify({
       filterIdx: dataView.getUint32(4, true),
+      pidIdx: dataView.getUint32(16, true),
       frame: {
         width: dataView.getUint32(8, true),
         height: dataView.getUint32(12, true),
@@ -77,6 +81,7 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   public handlePreviewError(data: PreviewErrorMessage): void {
     this.updateDataAndNotify({
       filterIdx: data.filterIdx,
+      pidIdx: null,
       frame: null,
       loading: false,
       error: data.error,
