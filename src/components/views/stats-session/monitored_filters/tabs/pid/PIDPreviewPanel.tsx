@@ -4,11 +4,13 @@ import { usePidPreview } from '../hooks/usePidPreview';
 interface PIDPreviewPanelProps {
   filterIdx: number;
   filterType: string;
+  pidIdx: number;
+  variant: 'input' | 'output';
 }
 
 const PIDPreviewPanel = memo(
-  ({ filterIdx, filterType }: PIDPreviewPanelProps) => {
-    const { frame, error } = usePidPreview(filterIdx, filterType);
+  ({ filterIdx, filterType, pidIdx, variant }: PIDPreviewPanelProps) => {
+    const { frame, error } = usePidPreview(filterIdx, pidIdx, variant, filterType);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {

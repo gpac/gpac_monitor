@@ -65,11 +65,11 @@ function MessageHandler(client) {
                     
 
                     'start_pid_preview': () => {
-                        this.client.previewManager.startPreview(jtext['idx'], jtext['name']);
+                        this.client.previewManager.startPreview(jtext['idx'], jtext['name'], jtext['direction'], jtext['pidIdx']);
                     },
 
                     'stop_pid_preview': () => {
-                        this.client.previewManager.stopPreview(jtext['idx']);
+                        this.client.previewManager.stopPreview(jtext['idx'], jtext['direction'], jtext['pidIdx']);
                     },
 
                     'subscribe_cpu_stats': () => {

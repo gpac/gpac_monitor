@@ -29,32 +29,37 @@ function PreviewManager(client) {
         }
     };
 
-    this.findPreviewTarget = function (filter) {
-        for (let outputIndex = 0; outputIndex < filter.nb_opid; outputIndex++) {
-            if (filter.opid_props(outputIndex, "StreamType") === "Visual") {
-                return { target: filter, pidIdx: outputIndex };
-            }
+    this.previewKey = function (filterIdx, direction, pidIdx) {
+        return `${filterIdx}:${direction}:${pidIdx}`;
+    };
+
+    this.findPreviewTarget = function (filter, direction, pidIdx) {
+        if (direction === 'output') {
+            if (pidIdx < 0 || pidIdx >= filter.nb_opid) return null;
+            if (filter.opid_props(pidIdx, "StreamType") !== "Visual") return null;
+            return { target: filter, pidIdx };
         }
-        for (let inputIndex = 0; inputIndex < filter.nb_ipid; inputIndex++) {
-            if (filter.ipid_props(inputIndex, "StreamType") === "Visual") {
-                return {
-                    target: filter.ipid_source(inputIndex),
-                    pidIdx: filter.ipid_source_opid_idx(inputIndex),
-                };
-            }
+        if (direction === 'input') {
+            if (pidIdx < 0 || pidIdx >= filter.nb_ipid) return null;
+            if (filter.ipid_props(pidIdx, "StreamType") !== "Visual") return null;
+            return {
+                target: filter.ipid_source(pidIdx),
+                pidIdx: filter.ipid_source_opid_idx(pidIdx),
+            };
         }
         return null;
     };
 
-    this.startPreview = function (filterIdx, filterName) {
-        print(`[Preview] startPreview requested idx=${filterIdx} name=${filterName}`);
-        this.postTask(() => this.doStartPreview(filterIdx, filterName));
+    this.startPreview = function (filterIdx, filterName, direction, pidIdx) {
+        print(`[Preview] startPreview requested idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx}`);
+        this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx));
     };
 
-    this.doStartPreview = function (filterIdx, filterName) {
-        const existingEntry = this.activePreviews.get(filterIdx);
+    this.doStartPreview = function (filterIdx, filterName, direction, pidIdx) {
+        const key = this.previewKey(filterIdx, direction, pidIdx);
+        const existingEntry = this.activePreviews.get(key);
         if (existingEntry) {
-            this.resumePreview(filterIdx, existingEntry);
+            this.resumePreview(key, existingEntry);
             return;
         }
         const filter = session.get_filter(String(filterIdx));
@@ -63,48 +68,48 @@ function PreviewManager(client) {
             this.send({ message: 'preview_error', filterIdx, error: 'filter not found' });
             return;
         }
-        const resolved = this.findPreviewTarget(filter);
+        const resolved = this.findPreviewTarget(filter, direction, pidIdx);
         if (!resolved || resolved.pidIdx < 0) {
-            print(`[Preview] no visual PID on idx=${filterIdx} nb_ipid=${filter.nb_ipid} nb_opid=${filter.nb_opid}`);
+            print(`[Preview] requested PID not visual idx=${filterIdx} direction=${direction} pidIdx=${pidIdx}`);
             this.send({ message: 'preview_error', filterIdx, error: 'not a video PID' });
             return;
         }
-        const { target, pidIdx } = resolved;
-        print(`[Preview] target resolved idx=${filterIdx} pidIdx=${pidIdx} target=${target.name} type=${target.type}`);
+        const { target, pidIdx: resolvedPidIdx } = resolved;
+        print(`[Preview] target resolved idx=${filterIdx} direction=${direction} requestedPidIdx=${pidIdx} resolvedPidIdx=${resolvedPidIdx} target=${target.name} type=${target.type}`);
 
         const entry = {
             sink: null,
             pid: null,
-            pidIdx,
+            pidIdx: resolvedPidIdx,
             active: true,
             width: 0,
             height: 0,
             target: { Width: PREVIEW.WIDTH, Height: PREVIEW.HEIGHT, PixelFormat: PREVIEW.PIXEL_FORMAT },
             lastEmitUs: 0,
         };
-        this.activePreviews.set(filterIdx, entry);
+        this.activePreviews.set(key, entry);
         try {
-            entry.sink = this.createPreviewSink(filterIdx, entry);
+            entry.sink = this.createPreviewSink(filterIdx, direction, pidIdx, entry);
             entry.sink.set_source(target);
-            target.reconnect(undefined, pidIdx);
+            target.reconnect(undefined, resolvedPidIdx);
         } catch (error) {
             print(`[Preview] doStartPreview failed idx=${filterIdx}: ${error}`);
-            this.removePreview(filterIdx);
+            this.removePreview(key);
             this.send({ message: 'preview_error', filterIdx, error: String(error) });
         }
     };
 
-    this.resumePreview = function (filterIdx, entry) {
+    this.resumePreview = function (key, entry) {
         entry.active = true;
         entry.lastEmitUs = 0;
         if (entry.pid) entry.pid.send_event(new FilterEvent(GF_FEVT_PLAY));
-        print(`[Preview] resumed idx=${filterIdx} pid=${entry.pid ? entry.pid.name : 'pending'}`);
+        print(`[Preview] resumed key=${key} pid=${entry.pid ? entry.pid.name : 'pending'}`);
     };
 
-    this.pausePreview = function (filterIdx, entry) {
+    this.pausePreview = function (key, entry) {
         entry.active = false;
         if (entry.pid) entry.pid.send_event(new FilterEvent(GF_FEVT_STOP));
-        print(`[Preview] paused idx=${filterIdx} pid=${entry.pid ? entry.pid.name : 'pending'}`);
+        print(`[Preview] paused key=${key} pid=${entry.pid ? entry.pid.name : 'pending'}`);
     };
 
     this.negotiateFormat = function (pid, target) {
@@ -115,10 +120,10 @@ function PreviewManager(client) {
         }
     };
 
-    this.createPreviewSink = function (filterIdx, entry) {
+    this.createPreviewSink = function (filterIdx, direction, pidIdx, entry) {
         const previewManager = this;
         const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY';
-        const sink = session.new_filter(`PreviewSink_${filterIdx}${hideTag}`);
+        const sink = session.new_filter(`PreviewSink_${filterIdx}_${direction}_${pidIdx}${hideTag}`);
         sink.require_source_id = true;
         sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
         sink.set_cap({ id: 'CodecID', value: 'raw', in: true });
@@ -191,24 +196,25 @@ function PreviewManager(client) {
         }
     };
 
-    this.removePreview = function (filterIdx) {
-        const entry = this.activePreviews.get(filterIdx);
+    this.removePreview = function (key) {
+        const entry = this.activePreviews.get(key);
         if (!entry) return;
-        this.activePreviews.delete(filterIdx);
+        this.activePreviews.delete(key);
         entry.pid = null;
         if (entry.sink) {
             try { session.remove_filter(entry.sink); } catch (error) { print(`[Preview] sink remove error: ${error}`); }
         }
     };
 
-    this.stopPreview = function (filterIdx) {
-        print(`[Preview] stopPreview requested idx=${filterIdx}`);
-        this.postTask(() => this.doStopPreview(filterIdx));
+    this.stopPreview = function (filterIdx, direction, pidIdx) {
+        print(`[Preview] stopPreview requested idx=${filterIdx} direction=${direction} pidIdx=${pidIdx}`);
+        this.postTask(() => this.doStopPreview(filterIdx, direction, pidIdx));
     };
 
-    this.doStopPreview = function (filterIdx) {
-        const entry = this.activePreviews.get(filterIdx);
-        if (entry) this.pausePreview(filterIdx, entry);
+    this.doStopPreview = function (filterIdx, direction, pidIdx) {
+        const key = this.previewKey(filterIdx, direction, pidIdx);
+        const entry = this.activePreviews.get(key);
+        if (entry) this.pausePreview(key, entry);
         this.send({ message: 'preview_stopped', filterIdx });
     };
 
@@ -217,8 +223,8 @@ function PreviewManager(client) {
     };
 
     this.doCleanup = function () {
-        const indexes = Array.from(this.activePreviews.keys());
-        for (const filterIdx of indexes) this.removePreview(filterIdx);
+        const keys = Array.from(this.activePreviews.keys());
+        for (const key of keys) this.removePreview(key);
     };
 }
 

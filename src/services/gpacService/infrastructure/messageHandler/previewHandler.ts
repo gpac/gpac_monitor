@@ -31,10 +31,17 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   }
 
   // Sends start request and sets loading state.
-  public requestPreview(filterIdx: number, filterName: string): void {
+  public requestPreview(
+    filterIdx: number,
+    pidIdx: number,
+    direction: 'input' | 'output',
+    filterName: string,
+  ): void {
     this.dependencies.send({
       type: WSMessageType.START_PID_PREVIEW,
       idx: filterIdx,
+      pidIdx,
+      direction,
       name: filterName,
     });
     this.updateDataAndNotify({
@@ -47,11 +54,17 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   }
 
   // Sends stop request (if still connected) and resets state.
-  public stopPreview(filterIdx: number): void {
+  public stopPreview(
+    filterIdx: number,
+    pidIdx: number,
+    direction: 'input' | 'output',
+  ): void {
     if (this.dependencies.isConnected()) {
       this.dependencies.send({
         type: WSMessageType.STOP_PID_PREVIEW,
         idx: filterIdx,
+        pidIdx,
+        direction,
       });
     }
     this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE });

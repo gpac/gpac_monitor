@@ -233,14 +233,25 @@ export class GpacService implements IGpacCommunication {
     return this.state.messageHandler.getPreviewHandler();
   }
 
-  public requestPidPreview(filterIdx: number, filterName: string): void {
+  public requestPidPreview(
+    filterIdx: number,
+    pidIdx: number,
+    direction: 'input' | 'output',
+    filterName: string,
+  ): void {
     this.state.messageHandler
       .getPreviewHandler()
-      .requestPreview(filterIdx, filterName);
+      .requestPreview(filterIdx, pidIdx, direction, filterName);
   }
 
-  public stopPidPreview(filterIdx: number): void {
-    this.state.messageHandler.getPreviewHandler().stopPreview(filterIdx);
+  public stopPidPreview(
+    filterIdx: number,
+    pidIdx: number,
+    direction: 'input' | 'output',
+  ): void {
+    this.state.messageHandler
+      .getPreviewHandler()
+      .stopPreview(filterIdx, pidIdx, direction);
   }
 
   // ============================================================================
