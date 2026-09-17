@@ -122,7 +122,7 @@ function PreviewManager(client) {
 
     this.createPreviewSink = function (filterIdx, direction, pidIdx, entry) {
         const previewManager = this;
-        const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY';
+        const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
         const sink = session.new_filter(`PreviewSink_${filterIdx}_${direction}_${pidIdx}${hideTag}`);
         sink.require_source_id = true;
         sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
