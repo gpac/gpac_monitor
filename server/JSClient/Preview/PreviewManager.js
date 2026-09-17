@@ -1,5 +1,6 @@
 import { Sys as sys } from 'gpaccore';
 import { PREVIEW } from '../config.js';
+import { quiet_hidden_chain } from '../filterUtils.js';
 
 const PVWF_MAGIC = 'PVWF';
 const PVWF_HEADER_SIZE = 20;
@@ -129,6 +130,7 @@ function PreviewManager(client) {
         sink.set_cap({ id: 'CodecID', value: 'raw', in: true });
         sink.configure_pid = function (pid) {
             try {
+                quiet_hidden_chain(sink.ipid_source(0));
                 previewManager.negotiateFormat(pid, entry.target);
                 if (entry.pid !== pid) {
                     entry.pid = pid;
