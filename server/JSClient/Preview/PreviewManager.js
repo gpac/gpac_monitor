@@ -124,13 +124,14 @@ function PreviewManager(client) {
     this.createPreviewSink = function (filterIdx, direction, pidIdx, entry) {
         const previewManager = this;
         const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
-        const sink = session.new_filter(`PreviewSink_${filterIdx}_${direction}_${pidIdx}${hideTag}`);
+        const sinkName = `PreviewSink_${filterIdx}_${direction}_${pidIdx}`;
+        const sink = session.new_filter(`${sinkName}${hideTag}`);
         sink.require_source_id = true;
         sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
         sink.set_cap({ id: 'CodecID', value: 'raw', in: true });
         sink.configure_pid = function (pid) {
             try {
-                quiet_hidden_chain(sink.ipid_source(0));
+                quiet_hidden_chain(sinkName);
                 previewManager.negotiateFormat(pid, entry.target);
                 if (entry.pid !== pid) {
                     entry.pid = pid;

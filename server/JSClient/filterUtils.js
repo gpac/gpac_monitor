@@ -115,12 +115,20 @@ function on_all_connected(cb) {
     });
 }
 
-function quiet_hidden_chain(filter) {
+function quiet_hidden_chain(sinkName) {
     session.post_task(() => {
         session.lock_filters(true);
-        let current = filter;
+        let current = null;
+        for (let i = 0; i < session.nb_filters; i++) {
+            const f = session.get_filter(i);
+            if (f.name === sinkName) {
+                current = f.nb_ipid > 0 ? f.ipid_source(0) : null;
+                break;
+            }
+        }
         while (current && is_hidden_filter(current)) {
             current.update('LT', 'all@quiet');
+            print(`[quiet_hidden_chain] quieted filter=${current.name} itag=${current.itag}`);
             current = current.nb_ipid > 0 ? current.ipid_source(0) : null;
         }
         session.lock_filters(false);
