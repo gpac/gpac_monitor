@@ -141,6 +141,7 @@ function PreviewManager(client) {
                 print(`[Preview] configured idx=${filterIdx} pid=${pid.name} ${entry.width}x${entry.height} fmt=${pid.get_prop('PixelFormat')}`);
             } catch (error) {
                 print(`[Preview] configure_pid error: ${error}`);
+                previewManager.send({ message: 'preview_error', filterIdx, error: String(error) });
             }
         };
         sink.remove_pid = function (pid) {
