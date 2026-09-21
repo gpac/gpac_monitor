@@ -22,9 +22,6 @@ const FILTER_SUBSCRIPTION_FIELDS = [
 ];
 
 const PREVIEW = {
-    WIDTH: 128,
-    HEIGHT: 128,
-    PIXEL_FORMAT: 'rgba',
     INTERVAL_US: 1000000,
     DEBUG_SHOW_FILTERS: false,
 };

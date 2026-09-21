@@ -3,7 +3,7 @@ import { PREVIEW } from '../config.js';
 import { quiet_hidden_chain } from '../filterUtils.js';
 
 const PVWF_MAGIC = 'PVWF';
-const PVWF_HEADER_SIZE = 20;
+const PVWF_HEADER_SIZE = 12;
 
 function PreviewManager(client) {
     this.client = client;
@@ -83,9 +83,6 @@ function PreviewManager(client) {
             pid: null,
             pidIdx: resolvedPidIdx,
             active: true,
-            width: 0,
-            height: 0,
-            target: { Width: PREVIEW.WIDTH, Height: PREVIEW.HEIGHT, PixelFormat: PREVIEW.PIXEL_FORMAT },
             lastEmitUs: 0,
         };
         this.activePreviews.set(key, entry);
@@ -113,14 +110,6 @@ function PreviewManager(client) {
         print(`[Preview] paused key=${key} pid=${entry.pid ? entry.pid.name : 'pending'}`);
     };
 
-    this.negotiateFormat = function (pid, target) {
-        for (const propName in target) {
-            if (pid.get_prop(propName) !== target[propName]) {
-                pid.negotiate_prop(propName, target[propName]);
-            }
-        }
-    };
-
     this.createPreviewSink = function (filterIdx, direction, pidIdx, entry) {
         const previewManager = this;
         const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
@@ -128,18 +117,15 @@ function PreviewManager(client) {
         const sink = session.new_filter(`${sinkName}${hideTag}`);
         sink.require_source_id = true;
         sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
-        sink.set_cap({ id: 'CodecID', value: 'raw', in: true });
+        sink.set_cap({ id: 'CodecID', value: 'png', in: true });
         sink.configure_pid = function (pid) {
             try {
                 quiet_hidden_chain(sinkName);
-                previewManager.negotiateFormat(pid, entry.target);
                 if (entry.pid !== pid) {
                     entry.pid = pid;
                     if (entry.active) pid.send_event(new FilterEvent(GF_FEVT_PLAY));
                 }
-                entry.width = pid.get_prop('Width');
-                entry.height = pid.get_prop('Height');
-                print(`[Preview] configured idx=${filterIdx} pid=${pid.name} ${entry.width}x${entry.height} fmt=${pid.get_prop('PixelFormat')}`);
+                print(`[Preview] configured idx=${filterIdx} pid=${pid.name} ${pid.get_prop('Width')}x${pid.get_prop('Height')} fmt=${pid.get_prop('PixelFormat')}`);
             } catch (error) {
                 print(`[Preview] configure_pid error: ${error}`);
                 previewManager.send({ message: 'preview_error', filterIdx, error: String(error) });
@@ -182,17 +168,15 @@ function PreviewManager(client) {
                 this.send({ message: 'preview_error', filterIdx, error: 'GPU frame preview not supported yet' });
                 return;
             }
-            const pixels = new Uint8Array(packet.data);
-            const buffer = new ArrayBuffer(PVWF_HEADER_SIZE + pixels.byteLength);
+            const pngBytes = new Uint8Array(packet.data);
+            const buffer = new ArrayBuffer(PVWF_HEADER_SIZE + pngBytes.byteLength);
             const header = new DataView(buffer);
             for (let charIndex = 0; charIndex < 4; charIndex++) {
                 header.setUint8(charIndex, PVWF_MAGIC.charCodeAt(charIndex));
             }
             header.setUint32(4, filterIdx, true);
-            header.setUint32(8, entry.width, true);
-            header.setUint32(12, entry.height, true);
-            header.setUint32(16, entry.pidIdx, true);
-            new Uint8Array(buffer, PVWF_HEADER_SIZE).set(pixels);
+            header.setUint32(8, entry.pidIdx, true);
+            new Uint8Array(buffer, PVWF_HEADER_SIZE).set(pngBytes);
             this.client.client.send(buffer);
         } catch (error) {
             print(`[Preview] sendFrame error: ${error}`);

@@ -4,9 +4,7 @@ import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import type { MessageHandlerDependencies } from './types';
 
 export interface PreviewFrame {
-  width: number;
-  height: number;
-  pixels: Uint8ClampedArray;
+  png: Uint8Array;
 }
 
 export interface PreviewHandlerState {
@@ -70,16 +68,14 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE });
   }
 
-  // Reads a binary PVWF frame: header fields, then a zero-copy view on the pixels.
+  // Reads a binary PVWF frame: header fields, then a zero-copy view on the PNG bytes.
   public handlePreviewFrame(dataView: DataView): void {
     if (dataView.byteLength <= PVWF_HEADER_SIZE) return;
     this.updateDataAndNotify({
       filterIdx: dataView.getUint32(4, true),
-      pidIdx: dataView.getUint32(16, true),
+      pidIdx: dataView.getUint32(8, true),
       frame: {
-        width: dataView.getUint32(8, true),
-        height: dataView.getUint32(12, true),
-        pixels: new Uint8ClampedArray(
+        png: new Uint8Array(
           dataView.buffer,
           dataView.byteOffset + PVWF_HEADER_SIZE,
           dataView.byteLength - PVWF_HEADER_SIZE,

@@ -14,25 +14,21 @@ function makeDependencies(
   };
 }
 
-// Builds a 'PVWF' frame: magic + filterIdx/width/height/pidIdx header, then width*height RGBA pixels.
+// Builds a 'PVWF' frame: magic + filterIdx/pidIdx header, then arbitrary PNG-encoded bytes.
 function makePvwfFrame(
   filterIdx: number,
   pidIdx: number,
-  width: number,
-  height: number,
+  pngByteLength: number,
 ): DataView {
-  const pixelBytes = width * height * 4;
-  const buffer = new ArrayBuffer(20 + pixelBytes);
+  const buffer = new ArrayBuffer(12 + pngByteLength);
   const view = new DataView(buffer);
   'PVWF'
     .split('')
     .forEach((char, index) => view.setUint8(index, char.charCodeAt(0)));
   view.setUint32(4, filterIdx, true);
-  view.setUint32(8, width, true);
-  view.setUint32(12, height, true);
-  view.setUint32(16, pidIdx, true);
-  for (let byteIndex = 0; byteIndex < pixelBytes; byteIndex++) {
-    view.setUint8(20 + byteIndex, byteIndex);
+  view.setUint32(8, pidIdx, true);
+  for (let byteIndex = 0; byteIndex < pngByteLength; byteIndex++) {
+    view.setUint8(12 + byteIndex, byteIndex);
   }
   return view;
 }
@@ -70,18 +66,16 @@ describe('PreviewHandler', () => {
     });
   });
 
-  it('handlePreviewFrame reads filterIdx, pidIdx, dimensions and pixels from a PVWF frame', () => {
+  it('handlePreviewFrame reads filterIdx, pidIdx and png bytes from a PVWF frame', () => {
     const handler = new PreviewHandler(makeDependencies());
     handler.requestPreview(5, 1, 'output', 'reframer');
 
-    handler.handlePreviewFrame(makePvwfFrame(5, 1, 2, 2));
+    handler.handlePreviewFrame(makePvwfFrame(5, 1, 6));
 
     const state = handler.getSnapshot();
     expect(state.filterIdx).toBe(5);
     expect(state.pidIdx).toBe(1);
-    expect(state.frame?.width).toBe(2);
-    expect(state.frame?.height).toBe(2);
-    expect(state.frame?.pixels.length).toBe(2 * 2 * 4);
+    expect(state.frame?.png.length).toBe(6);
   });
 
   // Regression: StrictMode remounts the panel, so a stop_pid_preview reply can land AFTER the
@@ -93,11 +87,11 @@ describe('PreviewHandler', () => {
     handler.requestPreview(5, 1, 'output', 'reframer');
     handler.handlePreviewStopped();
 
-    handler.handlePreviewFrame(makePvwfFrame(5, 1, 2, 2));
+    handler.handlePreviewFrame(makePvwfFrame(5, 1, 6));
 
     const state = handler.getSnapshot();
     expect(state.filterIdx).toBe(5);
     expect(state.pidIdx).toBe(1);
-    expect(state.frame?.pixels.length).toBe(2 * 2 * 4);
+    expect(state.frame?.png.length).toBe(6);
   });
 });

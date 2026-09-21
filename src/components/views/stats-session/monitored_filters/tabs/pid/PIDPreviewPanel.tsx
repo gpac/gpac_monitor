@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { usePidPreview } from '../hooks/usePidPreview';
 
 interface PIDPreviewPanelProps {
@@ -11,19 +11,20 @@ interface PIDPreviewPanelProps {
 const PIDPreviewPanel = memo(
   ({ filterIdx, filterType, pidIdx, variant }: PIDPreviewPanelProps) => {
     const { frame, error } = usePidPreview(filterIdx, pidIdx, variant, filterType);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
     useEffect(() => {
-      if (!frame || !canvasRef.current) return;
-      const context = canvasRef.current.getContext('2d');
-      if (!context) return;
-      const { pixels } = frame;
-      if (pixels.length !== frame.width * frame.height * 4) return;
-      context.putImageData(
-        new ImageData(pixels, frame.width, frame.height),
-        0,
-        0,
+      if (!frame) {
+        setPreviewUrl(null);
+        return;
+      }
+      const objectUrl = URL.createObjectURL(
+        new Blob([frame.png], { type: 'image/png' }),
       );
+      setPreviewUrl(objectUrl);
+      // Revoking on cleanup does not blank the image already on screen: revocation only
+      // prevents future loads of that URL, a decoded image stays painted.
+      return () => URL.revokeObjectURL(objectUrl);
     }, [frame]);
 
     return (
@@ -33,12 +34,13 @@ const PIDPreviewPanel = memo(
         </div>
         {error ? (
           <div className="text-xs text-destructive w-32">{error}</div>
-        ) : frame ? (
-          <canvas
-            ref={canvasRef}
-            width={frame.width}
-            height={frame.height}
-            className="h-32 w-32"
+        ) : previewUrl ? (
+          <img
+            src={previewUrl}
+            width={128}
+            height={128}
+            alt="PID preview"
+            className="h-32 w-32 object-contain"
           />
         ) : (
           <div className="h-32 w-32 bg-monitor-panel border border-white/10" />
