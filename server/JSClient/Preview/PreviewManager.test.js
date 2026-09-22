@@ -60,15 +60,18 @@ describe('PreviewManager doStartPreview reconnect targeting', () => {
             set_cap: vi.fn(),
             set_source: vi.fn(),
         };
+        const fakeFfsws = { name: 'ffsws' };
         globalThis.session = {
             get_filter: (idx) => (idx === '1' ? target : null),
             new_filter: () => fakeSink,
+            add_filter: vi.fn(() => fakeFfsws),
         };
 
         const manager = new PreviewManager(makeFakeClient());
         manager.doStartPreview(1, 'reframer', 'output', 2);
 
-        expect(fakeSink.set_source).toHaveBeenCalledWith(target);
+        expect(globalThis.session.add_filter).toHaveBeenCalledWith(expect.stringMatching(/^ffsws:.*:RSID/), target);
+        expect(fakeSink.set_source).toHaveBeenCalledWith(fakeFfsws);
         expect(target.reconnect).toHaveBeenCalledWith(undefined, 2);
     });
 
@@ -81,15 +84,18 @@ describe('PreviewManager doStartPreview reconnect targeting', () => {
             set_cap: vi.fn(),
             set_source: vi.fn(),
         };
+        const fakeFfsws = { name: 'ffsws' };
         globalThis.session = {
             get_filter: (idx) => (idx === '1' ? filter : null),
             new_filter: () => fakeSink,
+            add_filter: vi.fn(() => fakeFfsws),
         };
 
         const manager = new PreviewManager(makeFakeClient());
         manager.doStartPreview(1, 'reframer', 'input', 1);
 
-        expect(fakeSink.set_source).toHaveBeenCalledWith(sourceB);
+        expect(globalThis.session.add_filter).toHaveBeenCalledWith(expect.stringMatching(/^ffsws:.*:RSID/), sourceB);
+        expect(fakeSink.set_source).toHaveBeenCalledWith(fakeFfsws);
         expect(sourceB.reconnect).toHaveBeenCalledWith(undefined, 3);
         expect(sourceA.reconnect).not.toHaveBeenCalled();
     });
@@ -108,6 +114,7 @@ describe('PreviewManager doStartPreview reconnect targeting', () => {
                 sinks.push(sink);
                 return sink;
             },
+            add_filter: () => ({ name: 'ffsws' }),
         };
 
         const manager = new PreviewManager(makeFakeClient());

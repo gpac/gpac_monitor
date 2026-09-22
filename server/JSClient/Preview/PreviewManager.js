@@ -88,7 +88,9 @@ function PreviewManager(client) {
         this.activePreviews.set(key, entry);
         try {
             entry.sink = this.createPreviewSink(filterIdx, direction, pidIdx, entry);
-            entry.sink.set_source(target);
+            const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
+            const ffsws = session.add_filter(`ffsws:ofmt=rgb:osize=0x${PREVIEW.OUTPUT_HEIGHT}:RSID${hideTag}`, target);
+            entry.sink.set_source(ffsws);
             target.reconnect(undefined, resolvedPidIdx);
         } catch (error) {
             print(`[Preview] doStartPreview failed idx=${filterIdx}: ${error}`);
