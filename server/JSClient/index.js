@@ -6,7 +6,7 @@ import { CpuStatsManager } from './Sys/CpuStatsManager.js';
 import { LogManager } from './Sys/LogManager.js';
 import { CommandLineManager } from './CommandLineManager.js';
 import { PreviewManager } from './Preview/PreviewManager.js';
-import { UPDATE_INTERVALS, LOG_RETENTION } from './config.js';
+import { buildMonitorConfigPayload } from './buildMonitorConfigPayload.js';
 
 function JSClient(id, client, all_clients, ensureMonitoringLoop, historyCollector) {
     this.id = id;
@@ -28,11 +28,7 @@ function JSClient(id, client, all_clients, ensureMonitoringLoop, historyCollecto
     };
 
     this.sendMonitorConfig = function() {
-        this.client.send(JSON.stringify({
-            message: 'monitor_config',
-            intervals: UPDATE_INTERVALS,
-            logRetention: LOG_RETENTION,
-        }));
+        this.client.send(JSON.stringify(buildMonitorConfigPayload()));
     };
 
     this.cleanup = function() {

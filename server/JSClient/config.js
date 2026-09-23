@@ -27,7 +27,7 @@ const PREVIEW = {
     DEBUG_SHOW_FILTERS: false,
 };
 
-export { UPDATE_INTERVALS, LOG_RETENTION } from '../config/live.config.js';
+export { UPDATE_INTERVALS, LOG_RETENTION, WS_PROTOCOL_VERSION } from '../config/live.config.js';
 
 export {
     DEFAULT_FILTER_FIELDS,

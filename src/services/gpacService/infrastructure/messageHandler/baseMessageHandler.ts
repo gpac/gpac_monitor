@@ -8,6 +8,7 @@ import { WSMessageBatcher } from '../../../utils/WSMessageBatcher';
 
 import { MessageHandlerCallbacks, MessageHandlerDependencies } from './types';
 import { parseMetricDefinitions } from '@/utils/metrics/metricDefinitionParser';
+import { checkProtocolVersionMismatch } from '@/services/ws/protocolVersion';
 import { CPUStatsHandler } from './cpuStatsHandler';
 import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
@@ -69,6 +70,10 @@ export class BaseMessageHandler {
     this.messageBatcher.registerLogHandler((logs) => {
       this.logHandler.handleLogBatch(logs);
     });
+  }
+
+  public setNotificationHandlers(handlers: GpacNotificationHandlers): void {
+    this.notificationHandlers = handlers;
   }
 
   // Expose handler methods
@@ -178,9 +183,19 @@ export class BaseMessageHandler {
           parseMetricDefinitions(data.data),
         );
         break;
-      case 'monitor_config':
+      case 'monitor_config': {
         this.callbacks.onSetMonitorConfig(data.intervals);
+        const versionMismatch = checkProtocolVersionMismatch(
+          data.ws_protocol_version,
+          data.gpac_version,
+        );
+        if (versionMismatch) {
+          this.notificationHandlers.onProtocolVersionMismatch?.(
+            versionMismatch,
+          );
+        }
         break;
+      }
       case 'session_end':
         this.handleSessionEnd(data);
         break;
@@ -190,8 +205,13 @@ export class BaseMessageHandler {
           data.description ?? '',
         );
         break;
-      default:
-      // Unknown message type
+      default: {
+        const exhaustiveCheck: never = data;
+        console.warn(
+          `Unhandled message type: ${(exhaustiveCheck as IncomingWsMessage).message}`,
+        );
+        break;
+      }
     }
 
     this.onMessage?.(data);
