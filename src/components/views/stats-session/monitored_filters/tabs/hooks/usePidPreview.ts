@@ -15,8 +15,10 @@ export function usePidPreview(
   useEffect(() => {
     gpacService.requestPidPreview(filterIdx, pidIdx, variant, filterType);
     const unsubscribe = gpacService.preview.subscribe(
-      (data) => { if (data) setState(data); },
-      { immediate: true },
+      (data) => {
+        if (data) setState(data);
+      },
+      { immediate: true, debounce: 0 },
     );
     return () => {
       unsubscribe();
