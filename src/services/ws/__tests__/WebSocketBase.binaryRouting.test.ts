@@ -84,6 +84,37 @@ describe('WebSocketBase — binary messages bypass the parser worker', () => {
     expect(handler).toHaveBeenCalledTimes(1);
   });
 
+  it('does not decode a whole binary frame to text before routing it', async () => {
+    const { wsBase, socket } = await connectedWsBase();
+    const handler = vi.fn();
+    wsBase.addMessageHandler('PVWF', handler);
+    const decodeSpy = vi.spyOn(TextDecoder.prototype, 'decode');
+
+    const frame = new Uint8Array(50_000);
+    frame.set([...'PVWF'].map((char) => char.charCodeAt(0)));
+    socket.simulateMessage(frame.buffer);
+
+    const decodedLengths = decodeSpy.mock.calls.map(
+      ([input]) => (input as ArrayBufferView | ArrayBuffer).byteLength,
+    );
+    decodeSpy.mockRestore();
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(Math.max(0, ...decodedLengths)).toBeLessThanOrEqual(5);
+  });
+
+  it('still routes JSON sent as a binary frame to the json handler', async () => {
+    const { wsBase, socket } = await connectedWsBase();
+    const handler = vi.fn();
+    wsBase.addMessageHandler('json', handler);
+
+    const buffer = Uint8Array.from(
+      [...'{"message":"hello"}'].map((char) => char.charCodeAt(0)),
+    ).buffer;
+    socket.simulateMessage(buffer);
+
+    expect(handler).toHaveBeenCalledTimes(1);
+  });
+
   it('still routes string messages through the worker when one is available', async () => {
     const { socket } = await connectedWsBase();
 
