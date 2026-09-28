@@ -10,12 +10,19 @@ interface PIDPreviewPanelProps {
 
 const PIDPreviewPanel = memo(
   ({ filterIdx, filterType, pidIdx, variant }: PIDPreviewPanelProps) => {
-    const { frame, error } = usePidPreview(filterIdx, pidIdx, variant, filterType);
+    const { frame, error } = usePidPreview(
+      filterIdx,
+      pidIdx,
+      variant,
+      filterType,
+    );
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [frameSize, setFrameSize] = useState<string | null>(null);
 
     useEffect(() => {
       if (!frame) {
         setPreviewUrl(null);
+        setFrameSize(null);
         return;
       }
       const objectUrl = URL.createObjectURL(
@@ -30,20 +37,23 @@ const PIDPreviewPanel = memo(
     return (
       <div className="flex flex-col gap-1.5">
         <div className="text-xs font-medium text-muted-foreground">
-          Preview · 128×128
+          {frameSize ? `Preview · ${frameSize}` : 'Preview'}
         </div>
         {error ? (
-          <div className="text-xs text-destructive w-32">{error}</div>
+          <div className="text-xs text-destructive w-64">{error}</div>
         ) : previewUrl ? (
           <img
             src={previewUrl}
-            width={128}
-            height={128}
             alt="PID preview"
-            className="h-32 w-32 object-contain"
+            onLoad={(event) =>
+              setFrameSize(
+                `${event.currentTarget.naturalWidth}×${event.currentTarget.naturalHeight}`,
+              )
+            }
+            className="block"
           />
         ) : (
-          <div className="h-32 w-32 bg-monitor-panel border border-white/10" />
+          <div className="h-64 w-64 bg-monitor-panel border border-white/10" />
         )}
       </div>
     );
