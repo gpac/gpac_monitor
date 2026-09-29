@@ -6,10 +6,19 @@ interface PIDPreviewPanelProps {
   filterType: string;
   pidIdx: number;
   variant: 'input' | 'output';
+  width: number | null;
+  height: number | null;
 }
 
 const PIDPreviewPanel = memo(
-  ({ filterIdx, filterType, pidIdx, variant }: PIDPreviewPanelProps) => {
+  ({
+    filterIdx,
+    filterType,
+    pidIdx,
+    variant,
+    width,
+    height,
+  }: PIDPreviewPanelProps) => {
     const { frame, error } = usePidPreview(
       filterIdx,
       pidIdx,
@@ -34,13 +43,20 @@ const PIDPreviewPanel = memo(
       return () => URL.revokeObjectURL(objectUrl);
     }, [frame]);
 
+    const frameBoxStyle =
+      width && height
+        ? { aspectRatio: `${width} / ${height}` }
+        : { width: '16rem' };
+
     return (
       <div className="flex flex-col gap-1.5">
         <div className="text-xs font-medium text-muted-foreground">
           {frameSize ? `Preview · ${frameSize}` : 'Preview'}
         </div>
         {error ? (
-          <div className="text-xs text-destructive w-64">{error}</div>
+          <div className="h-64 text-xs text-destructive" style={frameBoxStyle}>
+            {error}
+          </div>
         ) : previewUrl ? (
           <img
             src={previewUrl}
@@ -50,10 +66,14 @@ const PIDPreviewPanel = memo(
                 `${event.currentTarget.naturalWidth}×${event.currentTarget.naturalHeight}`,
               )
             }
-            className="block"
+            className="block h-64 object-contain"
+            style={frameBoxStyle}
           />
         ) : (
-          <div className="h-64 w-64 bg-monitor-panel border border-white/10" />
+          <div
+            className="h-64 bg-monitor-panel border border-white/10"
+            style={frameBoxStyle}
+          />
         )}
       </div>
     );

@@ -1,7 +1,11 @@
 import { memo, useCallback } from 'react';
 import { LuEye, LuCamera } from 'react-icons/lu';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from '@/components/ui/popover';
 import PIDPreviewPanel from './PIDPreviewPanel';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
@@ -91,6 +95,8 @@ const PIDRowInfoCell = memo(
                 filterType={filterType}
                 pidIdx={pid.pidIdx}
                 variant={variant}
+                width={pid.width}
+                height={pid.height}
               />
             </PopoverContent>
           </Popover>
