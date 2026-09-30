@@ -93,6 +93,7 @@ const PIDRowInfoCell = memo(
           <Popover>
             <PopoverTrigger asChild>
               <button
+                onClick={selectIfNeeded}
                 className="rounded bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-700/80 flex-shrink-0"
                 title="Preview frame"
               >
