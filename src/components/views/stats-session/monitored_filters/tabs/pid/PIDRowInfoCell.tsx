@@ -63,6 +63,15 @@ const PIDRowInfoCell = memo(
       );
     }, [dispatch, filterIdx, variant, pid, infoLine]);
 
+    const selectIfNeeded = useCallback(() => {
+      if (!isSelected) handleToggleSelect();
+    }, [isSelected, handleToggleSelect]);
+
+    const handleOpenProps = useCallback(() => {
+      selectIfNeeded();
+      onOpenProps();
+    }, [selectIfNeeded, onOpenProps]);
+
     return (
       <div className="min-w-0 flex items-center gap-1.5">
         <GraphRadio
@@ -73,7 +82,7 @@ const PIDRowInfoCell = memo(
         />
         {variant === 'input' && (
           <button
-            onClick={onOpenProps}
+            onClick={handleOpenProps}
             className=" rounded bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-700/80 flex-shrink-0"
             title="View input properties"
           >
