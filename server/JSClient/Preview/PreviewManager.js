@@ -58,9 +58,8 @@ function PreviewManager(client) {
 
     this.doStartPreview = function (filterIdx, filterName, direction, pidIdx) {
         const key = this.previewKey(filterIdx, direction, pidIdx);
-        const existingEntry = this.activePreviews.get(key);
-        if (existingEntry) {
-            this.resumePreview(key, existingEntry);
+        if (this.activePreviews.has(key)) {
+            print(`[Preview] already open key=${key}`);
             return;
         }
         const filter = session.get_filter(String(filterIdx));
@@ -82,7 +81,6 @@ function PreviewManager(client) {
             sink: null,
             pid: null,
             pidIdx: resolvedPidIdx,
-            active: true,
             lastEmitUs: 0,
         };
         this.activePreviews.set(key, entry);
@@ -99,19 +97,6 @@ function PreviewManager(client) {
         }
     };
 
-    this.resumePreview = function (key, entry) {
-        entry.active = true;
-        entry.lastEmitUs = 0;
-        if (entry.pid) entry.pid.send_event(new FilterEvent(GF_FEVT_PLAY));
-        print(`[Preview] resumed key=${key} pid=${entry.pid ? entry.pid.name : 'pending'}`);
-    };
-
-    this.pausePreview = function (key, entry) {
-        entry.active = false;
-        if (entry.pid) entry.pid.send_event(new FilterEvent(GF_FEVT_STOP));
-        print(`[Preview] paused key=${key} pid=${entry.pid ? entry.pid.name : 'pending'}`);
-    };
-
     this.createPreviewSink = function (filterIdx, direction, pidIdx, entry) {
         const previewManager = this;
         const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
@@ -125,7 +110,7 @@ function PreviewManager(client) {
                 quiet_hidden_chain(sinkName);
                 if (entry.pid !== pid) {
                     entry.pid = pid;
-                    if (entry.active) pid.send_event(new FilterEvent(GF_FEVT_PLAY));
+                    pid.send_event(new FilterEvent(GF_FEVT_PLAY));
                 }
                 print(`[Preview] configured idx=${filterIdx} pid=${pid.name} ${pid.get_prop('Width')}x${pid.get_prop('Height')} fmt=${pid.get_prop('PixelFormat')}`);
             } catch (error) {
@@ -155,7 +140,7 @@ function PreviewManager(client) {
             const packet = entry.pid.get_packet();
             if (!packet) return;
             const nowUs = sys.clock_us();
-            if (entry.active && nowUs - entry.lastEmitUs >= PREVIEW.INTERVAL_US) {
+            if (nowUs - entry.lastEmitUs >= PREVIEW.INTERVAL_US) {
                 entry.lastEmitUs = nowUs;
                 this.sendFrame(filterIdx, entry, packet);
             }
@@ -203,8 +188,7 @@ function PreviewManager(client) {
 
     this.doStopPreview = function (filterIdx, direction, pidIdx) {
         const key = this.previewKey(filterIdx, direction, pidIdx);
-        const entry = this.activePreviews.get(key);
-        if (entry) this.pausePreview(key, entry);
+        this.removePreview(key);
         this.send({ message: 'preview_stopped', filterIdx });
     };
 

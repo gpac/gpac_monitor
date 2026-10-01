@@ -93,7 +93,7 @@ function MessageHandler(client) {
                         this.client.logManager.unsubscribe();
                     },
 
-                    'update_log_level': () => {
+                    'update_log_level': () => {             
                         const logLevel = jtext['logLevel'] || "all@warning";
                         this.client.logManager.updateLogLevel(logLevel);
                     },

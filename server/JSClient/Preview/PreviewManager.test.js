@@ -126,4 +126,29 @@ describe('PreviewManager doStartPreview reconnect targeting', () => {
         expect(target.reconnect).toHaveBeenNthCalledWith(2, undefined, 3);
         expect(manager.activePreviews.size).toBe(2);
     });
+
+    it('removes the sink on stop so reopening the same row builds a new one', () => {
+        const target = makeFakeOutputTarget(4, 2);
+        const sinks = [];
+        globalThis.session = {
+            get_filter: (idx) => (idx === '1' ? target : null),
+            new_filter: () => {
+                const sink = { require_source_id: false, set_cap: vi.fn(), set_source: vi.fn() };
+                sinks.push(sink);
+                return sink;
+            },
+            add_filter: () => ({ name: 'ffsws' }),
+            remove_filter: vi.fn(),
+        };
+
+        const manager = new PreviewManager(makeFakeClient());
+        manager.doStartPreview(1, 'reframer', 'output', 2);
+        manager.doStopPreview(1, 'output', 2);
+        manager.doStartPreview(1, 'reframer', 'output', 2);
+
+        expect(globalThis.session.remove_filter).toHaveBeenCalledTimes(1);
+        expect(globalThis.session.remove_filter).toHaveBeenCalledWith(sinks[0]);
+        expect(sinks).toHaveLength(2);
+        expect(manager.activePreviews.size).toBe(1);
+    });
 });
