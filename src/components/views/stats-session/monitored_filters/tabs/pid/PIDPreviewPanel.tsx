@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { usePidPreview } from '../hooks/usePidPreview';
 
 interface PIDPreviewPanelProps {
@@ -23,6 +23,7 @@ const PIDPreviewPanel = memo(
     codec,
     decoderConfig,
   }: PIDPreviewPanelProps) => {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const { frame, error } = usePidPreview(
       filterIdx,
       pidIdx,
@@ -30,6 +31,7 @@ const PIDPreviewPanel = memo(
       filterType,
       codec,
       decoderConfig,
+      canvasRef,
     );
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [frameSize, setFrameSize] = useState<string | null>(null);
@@ -76,8 +78,9 @@ const PIDPreviewPanel = memo(
             style={frameBoxStyle}
           />
         ) : (
-          <div
-            className="h-64 bg-monitor-panel border border-white/10"
+          <canvas
+            ref={canvasRef}
+            className="block h-64 object-contain bg-monitor-panel border border-white/10"
             style={frameBoxStyle}
           />
         )}

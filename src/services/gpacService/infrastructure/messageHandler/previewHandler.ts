@@ -2,24 +2,14 @@ import { WSMessageType, PVWF_HEADER_SIZE } from '@/services/ws/types';
 import type { PreviewErrorMessage } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { resolveWebCodecsConfig } from '@/utils/gpac';
-import type { MessageHandlerDependencies } from './types';
+import { PreviewDecoder } from './previewDecoder';
+import type {
+  MessageHandlerDependencies,
+  PreviewHandlerState,
+  PreviewSource,
+} from './types';
 
-export interface PreviewSource {
-  codec: string;
-  decoderConfig: string | null | undefined;
-}
-
-export interface PreviewFrame {
-  png: Uint8Array;
-}
-
-export interface PreviewHandlerState {
-  filterIdx: number | null;
-  pidIdx: number | null;
-  frame: PreviewFrame | null;
-  loading: boolean;
-  error: string | null;
-}
+export type { PreviewFrame, PreviewHandlerState, PreviewSource } from './types';
 
 const EMPTY_PREVIEW_STATE: PreviewHandlerState = {
   filterIdx: null,
@@ -31,6 +21,8 @@ const EMPTY_PREVIEW_STATE: PreviewHandlerState = {
 
 export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   private requestToken = 0;
+  private decoder: PreviewDecoder | null = null;
+  private frameListener: ((frame: VideoFrame) => void) | null = null;
 
   constructor(private dependencies: MessageHandlerDependencies) {
     super({ ...EMPTY_PREVIEW_STATE });
@@ -45,25 +37,32 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     source: PreviewSource,
   ): Promise<void> {
     const token = ++this.requestToken;
+    this.closeDecoder();
     this.updateDataAndNotify({
+      ...EMPTY_PREVIEW_STATE,
       filterIdx,
-      pidIdx: null,
-      frame: null,
       loading: true,
-      error: null,
     });
     const webCodecsConfig = await resolveWebCodecsConfig(
       source.codec,
       source.decoderConfig,
     );
     if (token !== this.requestToken) return;
+    if (webCodecsConfig) {
+      this.decoder = PreviewDecoder.open(
+        webCodecsConfig,
+        filterIdx,
+        (frame) => this.frameListener?.(frame),
+        (error) => this.handleDecoderError(filterIdx, error),
+      );
+    }
     this.dependencies.send({
       type: WSMessageType.START_PID_PREVIEW,
       idx: filterIdx,
       pidIdx,
       direction,
       name: filterName,
-      mode: webCodecsConfig ? 'webcodecs' : 'png',
+      mode: this.decoder ? 'webcodecs' : 'png',
     });
   }
 
@@ -82,7 +81,13 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
         direction,
       });
     }
-    this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE });
+    this.cleanup();
+  }
+
+  public setFrameListener(
+    listener: ((frame: VideoFrame) => void) | null,
+  ): void {
+    this.frameListener = listener;
   }
 
   // Reads a binary PVWF frame: header fields, then a zero-copy view on the PNG bytes.
@@ -103,6 +108,10 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     });
   }
 
+  public handleWebCodecsFrame(dataView: DataView): void {
+    this.decoder?.decodePacket(dataView);
+  }
+
   // Stores the error returned by the backend.
   public handlePreviewError(data: PreviewErrorMessage): void {
     this.updateDataAndNotify({
@@ -120,6 +129,22 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   }
 
   public cleanup(): void {
+    this.closeDecoder();
     this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE });
+  }
+
+  private handleDecoderError(filterIdx: number, error: unknown): void {
+    console.warn('[Preview] WebCodecs decoding failed', error);
+    this.closeDecoder();
+    this.updateDataAndNotify({
+      ...EMPTY_PREVIEW_STATE,
+      filterIdx,
+      error: 'WebCodecs decoding failed',
+    });
+  }
+
+  private closeDecoder(): void {
+    this.decoder?.close();
+    this.decoder = null;
   }
 }

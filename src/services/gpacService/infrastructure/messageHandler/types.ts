@@ -40,6 +40,23 @@ export interface MessageHandlerCallbacks {
   onSessionEnd?: (data: SessionEndMessage) => void;
 }
 
+export interface PreviewSource {
+  codec: string;
+  decoderConfig: string | null | undefined;
+}
+
+export interface PreviewFrame {
+  png: Uint8Array;
+}
+
+export interface PreviewHandlerState {
+  filterIdx: number | null;
+  pidIdx: number | null;
+  frame: PreviewFrame | null;
+  loading: boolean;
+  error: string | null;
+}
+
 export interface MessageHandlerDependencies {
   isConnected: () => boolean;
   send: (message: GpacMessage) => Promise<void>;

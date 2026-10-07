@@ -33,6 +33,8 @@ function makePvwfFrame(
   return view;
 }
 
+const PNG_SOURCE = { codec: 'raw', decoderConfig: null };
+
 describe('PreviewHandler', () => {
   it('stopPreview sends stop_pid_preview with the filterIdx, pidIdx and direction when connected', () => {
     const dependencies = makeDependencies();
@@ -68,7 +70,7 @@ describe('PreviewHandler', () => {
 
   it('handlePreviewFrame reads filterIdx, pidIdx and png bytes from a PVWF frame', () => {
     const handler = new PreviewHandler(makeDependencies());
-    handler.requestPreview(5, 1, 'output', 'reframer');
+    handler.requestPreview(5, 1, 'output', 'reframer', PNG_SOURCE);
 
     handler.handlePreviewFrame(makePvwfFrame(5, 1, 6));
 
@@ -82,9 +84,9 @@ describe('PreviewHandler', () => {
   // preview was re-requested. Frames must still render — never be gated on the reset state.
   it('handlePreviewFrame still renders frames after a late preview_stopped reset the state', () => {
     const handler = new PreviewHandler(makeDependencies());
-    handler.requestPreview(5, 1, 'output', 'reframer');
+    handler.requestPreview(5, 1, 'output', 'reframer', PNG_SOURCE);
     handler.stopPreview(5, 1, 'output');
-    handler.requestPreview(5, 1, 'output', 'reframer');
+    handler.requestPreview(5, 1, 'output', 'reframer', PNG_SOURCE);
     handler.handlePreviewStopped();
 
     handler.handlePreviewFrame(makePvwfFrame(5, 1, 6));
