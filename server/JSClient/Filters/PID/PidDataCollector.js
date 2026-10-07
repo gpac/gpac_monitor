@@ -1,3 +1,15 @@
+import { Sys as sys } from 'gpaccore';
+
+function _serializePropValue(pname, pval) {
+    if (!(pval instanceof ArrayBuffer)) return pval;
+    try {
+        return sys.base64enc(pval);
+    } catch (error) {
+        print(`[PidDataCollector] base64 encoding failed for ${pname}: ${error}`);
+        return null;
+    }
+}
+
 function _collectMediaProps(getProp) {
     return {
         timescale: getProp("Timescale"),
@@ -65,7 +77,7 @@ function PidDataCollector() {
             if (withPidProperties) {
                 const allProps = {};
                 filter.ipid_props(i, function(pname, ptype, pval) {
-                    allProps[pname] = { name: pname, type: ptype, value: pval };
+                    allProps[pname] = { name: pname, type: ptype, value: _serializePropValue(pname, pval) };
                 });
                 pid.properties = allProps;
             }
