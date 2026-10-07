@@ -7,13 +7,18 @@ export function usePidPreview(
   pidIdx: number,
   variant: 'input' | 'output',
   filterType: string,
+  codec: string,
+  decoderConfig: string | null | undefined,
 ): PreviewHandlerState {
   const [state, setState] = useState<PreviewHandlerState>(() =>
     gpacService.preview.getSnapshot(),
   );
 
   useEffect(() => {
-    gpacService.requestPidPreview(filterIdx, pidIdx, variant, filterType);
+    void gpacService.requestPidPreview(filterIdx, pidIdx, variant, filterType, {
+      codec,
+      decoderConfig,
+    });
     const unsubscribe = gpacService.preview.subscribe(
       (data) => {
         if (data) setState(data);
@@ -24,7 +29,7 @@ export function usePidPreview(
       unsubscribe();
       gpacService.stopPidPreview(filterIdx, pidIdx, variant);
     };
-  }, [filterIdx, pidIdx, variant, filterType]);
+  }, [filterIdx, pidIdx, variant, filterType, codec, decoderConfig]);
 
   return state;
 }

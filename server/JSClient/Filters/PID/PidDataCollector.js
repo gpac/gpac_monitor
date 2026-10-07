@@ -21,6 +21,7 @@ function _collectMediaProps(getProp) {
         bitrate: getProp("Bitrate"),
         samplerate: getProp("SampleRate"),
         channels: getProp("Channels"),
+        decoderConfig: _serializePropValue("DecoderConfig", getProp("DecoderConfig")),
     };
 }
 

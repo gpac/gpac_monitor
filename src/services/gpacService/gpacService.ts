@@ -10,6 +10,7 @@ import type { IncomingWsMessage } from '../ws/types';
 import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './infrastructure/connectionManager';
 import { BaseMessageHandler } from './infrastructure/messageHandler/baseMessageHandler';
+import type { PreviewSource } from './infrastructure/messageHandler/previewHandler';
 import { GpacCoreService } from './core/gpacCore';
 import { createStoreCallbacks } from './liveAdapter/storeIntegration';
 import {
@@ -238,10 +239,11 @@ export class GpacService implements IGpacCommunication {
     pidIdx: number,
     direction: 'input' | 'output',
     filterName: string,
-  ): void {
-    this.state.messageHandler
+    source: PreviewSource,
+  ): Promise<void> {
+    return this.state.messageHandler
       .getPreviewHandler()
-      .requestPreview(filterIdx, pidIdx, direction, filterName);
+      .requestPreview(filterIdx, pidIdx, direction, filterName, source);
   }
 
   public stopPidPreview(

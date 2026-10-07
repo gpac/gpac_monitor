@@ -1,7 +1,13 @@
 import { WSMessageType, PVWF_HEADER_SIZE } from '@/services/ws/types';
 import type { PreviewErrorMessage } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
+import { resolveWebCodecsConfig } from '@/utils/gpac';
 import type { MessageHandlerDependencies } from './types';
+
+export interface PreviewSource {
+  codec: string;
+  decoderConfig: string | null | undefined;
+}
 
 export interface PreviewFrame {
   png: Uint8Array;
@@ -24,30 +30,40 @@ const EMPTY_PREVIEW_STATE: PreviewHandlerState = {
 };
 
 export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
+  private requestToken = 0;
+
   constructor(private dependencies: MessageHandlerDependencies) {
     super({ ...EMPTY_PREVIEW_STATE });
   }
 
   // Sends start request and sets loading state.
-  public requestPreview(
+  public async requestPreview(
     filterIdx: number,
     pidIdx: number,
     direction: 'input' | 'output',
     filterName: string,
-  ): void {
-    this.dependencies.send({
-      type: WSMessageType.START_PID_PREVIEW,
-      idx: filterIdx,
-      pidIdx,
-      direction,
-      name: filterName,
-    });
+    source: PreviewSource,
+  ): Promise<void> {
+    const token = ++this.requestToken;
     this.updateDataAndNotify({
       filterIdx,
       pidIdx: null,
       frame: null,
       loading: true,
       error: null,
+    });
+    const webCodecsConfig = await resolveWebCodecsConfig(
+      source.codec,
+      source.decoderConfig,
+    );
+    if (token !== this.requestToken) return;
+    this.dependencies.send({
+      type: WSMessageType.START_PID_PREVIEW,
+      idx: filterIdx,
+      pidIdx,
+      direction,
+      name: filterName,
+      mode: webCodecsConfig ? 'webcodecs' : 'png',
     });
   }
 
@@ -57,6 +73,7 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     pidIdx: number,
     direction: 'input' | 'output',
   ): void {
+    this.requestToken++;
     if (this.dependencies.isConnected()) {
       this.dependencies.send({
         type: WSMessageType.STOP_PID_PREVIEW,

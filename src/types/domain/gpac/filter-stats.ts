@@ -109,6 +109,7 @@ export interface PIDproperties {
   pixelformat: string | null;
   samplerate: number | null;
   channels: number | null;
+  decoderConfig?: string | null;
   source_idx: number;
   stats: PIDStats;
 

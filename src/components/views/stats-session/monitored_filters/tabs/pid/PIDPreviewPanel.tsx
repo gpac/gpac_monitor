@@ -8,6 +8,8 @@ interface PIDPreviewPanelProps {
   variant: 'input' | 'output';
   width: number | null;
   height: number | null;
+  codec: string;
+  decoderConfig: string | null | undefined;
 }
 
 const PIDPreviewPanel = memo(
@@ -18,12 +20,16 @@ const PIDPreviewPanel = memo(
     variant,
     width,
     height,
+    codec,
+    decoderConfig,
   }: PIDPreviewPanelProps) => {
     const { frame, error } = usePidPreview(
       filterIdx,
       pidIdx,
       variant,
       filterType,
+      codec,
+      decoderConfig,
     );
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [frameSize, setFrameSize] = useState<string | null>(null);

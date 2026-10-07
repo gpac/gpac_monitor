@@ -108,6 +108,8 @@ const PIDRowInfoCell = memo(
                 variant={variant}
                 width={pid.width}
                 height={pid.height}
+                codec={pid.codec}
+                decoderConfig={pid.decoderConfig}
               />
             </PopoverContent>
           </Popover>
