@@ -1,6 +1,7 @@
 import { Sys as sys } from 'gpaccore';
 import { PREVIEW } from '../config.js';
 import { quiet_hidden_chain } from '../filterUtils.js';
+import { createCompressedPreviewSink } from './createCompressedPreviewSink.js';
 
 const PVWF_MAGIC = 'PVWF';
 const PVWF_HEADER_SIZE = 12;
@@ -51,12 +52,12 @@ function PreviewManager(client) {
         return null;
     };
 
-    this.startPreview = function (filterIdx, filterName, direction, pidIdx) {
-        print(`[Preview] startPreview requested idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx}`);
-        this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx));
+    this.startPreview = function (filterIdx, filterName, direction, pidIdx, mode) {
+        print(`[Preview] startPreview requested idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx} mode=${mode}`);
+        this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx, mode));
     };
 
-    this.doStartPreview = function (filterIdx, filterName, direction, pidIdx) {
+    this.doStartPreview = function (filterIdx, filterName, direction, pidIdx, mode) {
         const key = this.previewKey(filterIdx, direction, pidIdx);
         if (this.activePreviews.has(key)) {
             print(`[Preview] already open key=${key}`);
@@ -85,10 +86,16 @@ function PreviewManager(client) {
         };
         this.activePreviews.set(key, entry);
         try {
-            entry.sink = this.createPreviewSink(filterIdx, direction, pidIdx, entry);
-            const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
-            const ffsws = session.add_filter(`ffsws:ofmt=rgb:osize=0x${PREVIEW.OUTPUT_HEIGHT}:RSID${hideTag}`, target);
-            entry.sink.set_source(ffsws);
+            if (mode === 'webcodecs') {
+                const sinkName = `PreviewSink_${filterIdx}_${direction}_${pidIdx}`;
+                entry.sink = createCompressedPreviewSink(this, filterIdx, sinkName, entry);
+                entry.sink.set_source(target);
+            } else {
+                entry.sink = this.createPreviewSink(filterIdx, direction, pidIdx, entry);
+                const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
+                const ffsws = session.add_filter(`ffsws:ofmt=rgb:osize=0x${PREVIEW.OUTPUT_HEIGHT}:RSID${hideTag}`, target);
+                entry.sink.set_source(ffsws);
+            }
             target.reconnect(undefined, resolvedPidIdx);
         } catch (error) {
             print(`[Preview] doStartPreview failed idx=${filterIdx}: ${error}`);

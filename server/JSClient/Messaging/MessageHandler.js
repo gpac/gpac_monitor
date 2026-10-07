@@ -65,7 +65,7 @@ function MessageHandler(client) {
                     
 
                     'start_pid_preview': () => {
-                        this.client.previewManager.startPreview(jtext['idx'], jtext['name'], jtext['direction'], jtext['pidIdx']);
+                        this.client.previewManager.startPreview(jtext['idx'], jtext['name'], jtext['direction'], jtext['pidIdx'], jtext['mode']);
                     },
 
                     'stop_pid_preview': () => {
