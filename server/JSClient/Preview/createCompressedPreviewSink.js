@@ -1,9 +1,32 @@
 import { PREVIEW } from '../config.js';
 
+const PVWC_MAGIC = 'PVWC';
+const PVWC_HEADER_SIZE = 24;
+const PVWC_FLAG_KEYFRAME = 1;
+
+function isKeyframe(packet) {
+    return packet.sap === 1 || packet.sap === 2;
+}
+
+function buildCompressedFrame(filterIdx, pidIdx, packet, timescale) {
+    const packetBytes = new Uint8Array(packet.data);
+    const buffer = new ArrayBuffer(PVWC_HEADER_SIZE + packetBytes.byteLength);
+    const header = new DataView(buffer);
+    for (let charIndex = 0; charIndex < 4; charIndex++) {
+        header.setUint8(charIndex, PVWC_MAGIC.charCodeAt(charIndex));
+    }
+    header.setUint32(4, filterIdx, true);
+    header.setUint32(8, pidIdx, true);
+    header.setUint32(12, isKeyframe(packet) ? PVWC_FLAG_KEYFRAME : 0, true);
+    header.setFloat64(16, Math.round(packet.cts * 1e6 / timescale), true);
+    new Uint8Array(buffer, PVWC_HEADER_SIZE).set(packetBytes);
+    return buffer;
+}
+
 function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry) {
     const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
     const sink = session.new_filter(`${sinkName}${hideTag}`);
-    let firstPacketLogged = false;
+    let firstKeyframeSeen = false;
     sink.require_source_id = true;
     sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
     sink.configure_pid = function (pid) {
@@ -34,9 +57,13 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
             while (true) {
                 const packet = entry.pid.get_packet();
                 if (!packet) return;
-                if (!firstPacketLogged) {
-                    firstPacketLogged = true;
-                    print(`[Preview] compressed first packet idx=${filterIdx} sap=${packet.sap} size=${packet.size}`);
+                if (!firstKeyframeSeen && isKeyframe(packet)) {
+                    firstKeyframeSeen = true;
+                    print(`[Preview] compressed first keyframe idx=${filterIdx} sap=${packet.sap} cts=${packet.cts} size=${packet.size}`);
+                }
+                const socket = previewManager.client.client;
+                if (firstKeyframeSeen && socket) {
+                    socket.send(buildCompressedFrame(filterIdx, entry.pidIdx, packet, entry.pid.timescale));
                 }
                 entry.pid.drop_packet();
             }
