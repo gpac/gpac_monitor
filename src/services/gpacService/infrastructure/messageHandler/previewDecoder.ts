@@ -1,5 +1,5 @@
 import { PVWC_HEADER_SIZE, PVWC_FLAG_KEYFRAME } from '@/services/ws/types';
-import { hasPictureSlice } from '@/utils/gpac';
+import { hasPictureSlice } from '@/utils/gpac/webcodecs-config';
 
 const MAX_DECODE_QUEUE_SIZE = 16;
 // Reopenings allowed without any decoded frame in between before giving up.

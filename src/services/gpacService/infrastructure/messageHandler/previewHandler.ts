@@ -2,7 +2,7 @@ import { WSMessageType, PVWF_HEADER_SIZE } from '@/services/ws/types';
 import type { PreviewErrorMessage } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { resolveWebCodecsConfig } from '@/utils/gpac';
-import { PreviewDecoder } from './previewDecoder';
+import { PreviewWorker } from './previewWorker';
 import type {
   MessageHandlerDependencies,
   PreviewHandlerState,
@@ -21,7 +21,7 @@ const EMPTY_PREVIEW_STATE: PreviewHandlerState = {
 
 export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   private requestToken = 0;
-  private decoder: PreviewDecoder | null = null;
+  private decoder: PreviewWorker | null = null;
   private frameListener: ((frame: VideoFrame) => void) | null = null;
 
   constructor(private dependencies: MessageHandlerDependencies) {
@@ -49,7 +49,7 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     );
     if (token !== this.requestToken) return;
     if (webCodecsConfig) {
-      this.decoder = PreviewDecoder.open(
+      this.decoder = PreviewWorker.open(
         webCodecsConfig,
         filterIdx,
         (frame) => this.frameListener?.(frame),
