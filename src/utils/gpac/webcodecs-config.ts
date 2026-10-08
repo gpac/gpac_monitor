@@ -15,6 +15,27 @@ export function buildAvcCodecString(avcc: Uint8Array): string | null {
   return `avc1.${toHexByte(avcc[1])}${toHexByte(avcc[2])}${toHexByte(avcc[3])}`;
 }
 
+const AVCC_LENGTH_SIZE = 4;
+
+// True when an AVCC access unit holds a coded slice (NAL types 1-5); malformed data counts as one.
+export function hasPictureSlice(avccBytes: Uint8Array): boolean {
+  let offset = 0;
+  while (offset + AVCC_LENGTH_SIZE < avccBytes.length) {
+    const nalLength =
+      ((avccBytes[offset] << 24) |
+        (avccBytes[offset + 1] << 16) |
+        (avccBytes[offset + 2] << 8) |
+        avccBytes[offset + 3]) >>>
+      0;
+    const nalStart = offset + AVCC_LENGTH_SIZE;
+    if (nalLength === 0 || nalStart + nalLength > avccBytes.length) return true;
+    const nalType = avccBytes[nalStart] & 0x1f;
+    if (nalType >= 1 && nalType <= 5) return true;
+    offset = nalStart + nalLength;
+  }
+  return offset !== avccBytes.length;
+}
+
 // Returns a browser-supported decoder config, or null when the preview must use PNG.
 export async function resolveWebCodecsConfig(
   codec: string,
