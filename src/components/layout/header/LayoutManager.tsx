@@ -5,8 +5,15 @@ import { useLayoutManager } from '@/shared/hooks/ui/useLayoutManager';
 
 export const LayoutManager = () => {
   const [layoutName, setLayoutName] = useState('');
-  const { save, load, remove, getLayoutNames, currentLayout } =
-    useLayoutManager();
+  const {
+    save,
+    load,
+    remove,
+    getLayoutNames,
+    currentLayout,
+    presetNames,
+    savedLayouts,
+  } = useLayoutManager();
 
   const handleSave = () => {
     if (layoutName.trim()) {
@@ -17,6 +24,7 @@ export const LayoutManager = () => {
 
   const handleLoad = (name: string) => {
     load(name);
+    setLayoutName(name);
   };
 
   const handleDelete = (name: string) => {
@@ -35,6 +43,25 @@ export const LayoutManager = () => {
         <Button onClick={handleSave} disabled={!layoutName.trim()}>
           Save
         </Button>
+      </div>
+
+      <div className="space-y-2">
+        <h3 className="text-sm font-medium">Default layouts:</h3>
+        <p className="text-xs text-muted-foreground">
+          Load, adjust your widgets, then save to keep your own version. Delete
+          a saved version to restore its default.
+        </p>
+        {presetNames.map((name) => (
+          <div key={name} className="flex gap-2 items-center">
+            <span className="flex-1 text-sm">
+              {name}
+              {savedLayouts[name] && ' (customized)'}
+            </span>
+            <Button size="sm" onClick={() => handleLoad(name)}>
+              Load
+            </Button>
+          </div>
+        ))}
       </div>
 
       <div className="space-y-2">

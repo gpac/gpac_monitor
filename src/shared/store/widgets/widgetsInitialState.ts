@@ -3,6 +3,7 @@ import { widgetRegistry } from '@/components/widget/registry';
 import { WidgetConfig, Widget } from '@/types/ui/widget';
 import { WidgetsState } from './types';
 import { loadLayoutFromStorage, loadLastUsedLayout } from './layoutStorage';
+import { getLayoutPreset } from './layoutPresets';
 
 const defaultConfig: WidgetConfig = {
   isMaximized: false,
@@ -36,21 +37,13 @@ export const initialState: WidgetsState = (() => {
     return base;
   }
 
-  const savedLayouts = loadLayoutFromStorage();
-
-  // No saved layouts at all
-  if (!savedLayouts || Object.keys(savedLayouts).length === 0) {
-    return base;
-  }
-
-  // Try to load last used layout, fallback to 'default'
+  const savedLayouts = loadLayoutFromStorage() ?? {};
   const lastUsedLayoutName = loadLastUsedLayout();
-  const layoutNameToLoad =
-    lastUsedLayoutName && savedLayouts[lastUsedLayoutName]
-      ? lastUsedLayoutName
-      : 'default';
-
-  const layoutToLoad = savedLayouts[layoutNameToLoad];
+  const lastUsedLayout = lastUsedLayoutName
+    ? (savedLayouts[lastUsedLayoutName] ?? getLayoutPreset(lastUsedLayoutName))
+    : undefined;
+  const layoutNameToLoad = lastUsedLayout ? lastUsedLayoutName! : 'default';
+  const layoutToLoad = lastUsedLayout ?? savedLayouts.default;
 
   // No layout to load, but preserve all saved layouts
   if (!layoutToLoad) {
