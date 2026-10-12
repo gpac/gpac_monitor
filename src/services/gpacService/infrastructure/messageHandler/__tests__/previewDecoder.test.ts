@@ -30,7 +30,7 @@ class FakeVideoDecoder {
   }
 }
 
-// Builds a 'PVWC' packet: magic + filterIdx/pidIdx/flags header + µs timestamp, then AVCC bytes.
+// Builds a 'PVWC' packet: magic + previewId/pidIdx/flags header + µs timestamp, then AVCC bytes.
 function makePvwcPacket(
   filterIdx: number,
   isKeyframe: boolean,
@@ -73,7 +73,6 @@ describe('PreviewDecoder', () => {
     const onError = vi.fn();
     const decoder = PreviewDecoder.open(
       { codec: 'avc1.64002a' },
-      7,
       vi.fn(),
       onError,
     );
@@ -99,7 +98,6 @@ describe('PreviewDecoder', () => {
     const onError = vi.fn();
     const decoder = PreviewDecoder.open(
       { codec: 'avc1.64002a' },
-      7,
       vi.fn(),
       onError,
     );

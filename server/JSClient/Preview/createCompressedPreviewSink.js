@@ -8,14 +8,14 @@ function isKeyframe(packet) {
     return packet.sap === 1 || packet.sap === 2 || packet.sap === 3;
 }
 
-function buildCompressedFrame(filterIdx, pidIdx, packet, timescale) {
+function buildCompressedFrame(previewId, pidIdx, packet, timescale) {
     const packetBytes = new Uint8Array(packet.data);
     const buffer = new ArrayBuffer(PVWC_HEADER_SIZE + packetBytes.byteLength);
     const header = new DataView(buffer);
     for (let charIndex = 0; charIndex < 4; charIndex++) {
         header.setUint8(charIndex, PVWC_MAGIC.charCodeAt(charIndex));
     }
-    header.setUint32(4, filterIdx, true);
+    header.setUint32(4, previewId, true);
     header.setUint32(8, pidIdx, true);
     header.setUint32(12, isKeyframe(packet) ? PVWC_FLAG_KEYFRAME : 0, true);
     header.setFloat64(16, Math.round(packet.cts * 1e6 / timescale), true);
@@ -42,7 +42,7 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
             print(`[Preview] compressed configured idx=${filterIdx} pid=${pid.name} codec=${pid.get_prop('CodecID')}`);
         } catch (error) {
             print(`[Preview] compressed configure_pid error: ${error}`);
-            previewManager.send({ message: 'preview_error', filterIdx, error: String(error) });
+            previewManager.send({ message: 'preview_error', previewId: entry.previewId, error: String(error) });
         }
     };
     sink.remove_pid = function (pid) {
@@ -63,7 +63,7 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
                 }
                 const socket = previewManager.client.client;
                 if (firstKeyframeSeen && socket) {
-                    socket.send(buildCompressedFrame(filterIdx, entry.pidIdx, packet, entry.pid.timescale));
+                    socket.send(buildCompressedFrame(entry.previewId, entry.pidIdx, packet, entry.pid.timescale));
                 }
                 entry.pid.drop_packet();
             }

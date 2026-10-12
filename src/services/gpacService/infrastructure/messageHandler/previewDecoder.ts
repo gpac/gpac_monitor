@@ -15,7 +15,6 @@ export class PreviewDecoder {
 
   private constructor(
     private readonly config: VideoDecoderConfig,
-    private readonly filterIdx: number,
     private readonly onFrame: (frame: VideoFrame) => void,
     private readonly onError: (error: unknown) => void,
   ) {
@@ -62,12 +61,11 @@ export class PreviewDecoder {
 
   public static open(
     config: VideoDecoderConfig,
-    filterIdx: number,
     onFrame: (frame: VideoFrame) => void,
     onError: (error: unknown) => void,
   ): PreviewDecoder | null {
     try {
-      return new PreviewDecoder(config, filterIdx, onFrame, onError);
+      return new PreviewDecoder(config, onFrame, onError);
     } catch (error) {
       console.warn('[Preview] WebCodecs decoder unavailable', error);
       return null;
@@ -76,7 +74,6 @@ export class PreviewDecoder {
 
   public decodePacket(dataView: DataView): void {
     if (this.stopped || dataView.byteLength <= PVWC_HEADER_SIZE) return;
-    if (dataView.getUint32(4, true) !== this.filterIdx) return;
     const packetBytes = new Uint8Array(
       dataView.buffer,
       dataView.byteOffset + PVWC_HEADER_SIZE,

@@ -1,5 +1,8 @@
 import { WSMessageType } from '@/services/ws/types';
-import type { PreviewErrorMessage } from '@/services/ws/types';
+import type {
+  PreviewErrorMessage,
+  PreviewStoppedMessage,
+} from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { resolveWebCodecsConfig } from '@/utils/gpac';
 import { PreviewWorker } from './previewWorker';
@@ -53,7 +56,6 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     }
     this.decoder = PreviewWorker.open(
       webCodecsConfig,
-      filterIdx,
       (frame) => this.frameListener?.(frame),
       (error) => this.handleDecoderError(filterIdx, error),
     );
@@ -63,6 +65,7 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     }
     this.dependencies.send({
       type: WSMessageType.START_PID_PREVIEW,
+      previewId: token,
       idx: filterIdx,
       pidIdx,
       direction,
@@ -95,21 +98,19 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   }
 
   public handleWebCodecsFrame(dataView: DataView): void {
+    if (dataView.getUint32(4, true) !== this.requestToken) return;
     this.decoder?.decodePacket(dataView);
   }
 
   // Stores the error returned by the backend.
   public handlePreviewError(data: PreviewErrorMessage): void {
-    this.updateDataAndNotify({
-      filterIdx: data.filterIdx,
-      pidIdx: null,
-      loading: false,
-      error: data.error,
-    });
+    if (data.previewId !== this.requestToken) return;
+    this.showError(this.getSnapshot().filterIdx, data.error);
   }
 
   // Resets state on explicit stop confirmation.
-  public handlePreviewStopped(): void {
+  public handlePreviewStopped(data: PreviewStoppedMessage): void {
+    if (data.previewId !== this.requestToken) return;
     this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE });
   }
 
@@ -124,7 +125,7 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     this.showError(filterIdx, 'WebCodecs decoding failed');
   }
 
-  private showError(filterIdx: number, message: string): void {
+  private showError(filterIdx: number | null, message: string): void {
     this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE, filterIdx, error: message });
   }
 

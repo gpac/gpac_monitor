@@ -46,12 +46,12 @@ function PreviewManager(client) {
         return null;
     };
 
-    this.startPreview = function (filterIdx, filterName, direction, pidIdx) {
-        print(`[Preview] startPreview requested idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx}`);
-        this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx));
+    this.startPreview = function (filterIdx, filterName, direction, pidIdx, previewId) {
+        print(`[Preview] startPreview requested previewId=${previewId} idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx}`);
+        this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx, previewId));
     };
 
-    this.doStartPreview = function (filterIdx, filterName, direction, pidIdx) {
+    this.doStartPreview = function (filterIdx, filterName, direction, pidIdx, previewId) {
         const key = this.previewKey(filterIdx, direction, pidIdx);
         if (this.activePreviews.has(key)) {
             print(`[Preview] already open key=${key}`);
@@ -60,19 +60,20 @@ function PreviewManager(client) {
         const filter = session.get_filter(String(filterIdx));
         if (!filter || filter.type !== filterName) {
             print(`[Preview] filter not found idx=${filterIdx} expected=${filterName} got=${filter ? filter.type : 'null'}`);
-            this.send({ message: 'preview_error', filterIdx, error: 'filter not found' });
+            this.send({ message: 'preview_error', previewId, error: 'filter not found' });
             return;
         }
         const resolved = this.findPreviewTarget(filter, direction, pidIdx);
         if (!resolved || resolved.pidIdx < 0) {
             print(`[Preview] requested PID not visual idx=${filterIdx} direction=${direction} pidIdx=${pidIdx}`);
-            this.send({ message: 'preview_error', filterIdx, error: 'not a video PID' });
+            this.send({ message: 'preview_error', previewId, error: 'not a video PID' });
             return;
         }
         const { target, pidIdx: resolvedPidIdx } = resolved;
         print(`[Preview] target resolved idx=${filterIdx} direction=${direction} requestedPidIdx=${pidIdx} resolvedPidIdx=${resolvedPidIdx} target=${target.name} type=${target.type}`);
 
         const entry = {
+            previewId,
             sink: null,
             pid: null,
             pidIdx: resolvedPidIdx,
@@ -86,7 +87,7 @@ function PreviewManager(client) {
         } catch (error) {
             print(`[Preview] doStartPreview failed idx=${filterIdx}: ${error}`);
             this.removePreview(key);
-            this.send({ message: 'preview_error', filterIdx, error: String(error) });
+            this.send({ message: 'preview_error', previewId, error: String(error) });
         }
     };
 
@@ -107,8 +108,9 @@ function PreviewManager(client) {
 
     this.doStopPreview = function (filterIdx, direction, pidIdx) {
         const key = this.previewKey(filterIdx, direction, pidIdx);
+        const entry = this.activePreviews.get(key);
         this.removePreview(key);
-        this.send({ message: 'preview_stopped', filterIdx });
+        if (entry) this.send({ message: 'preview_stopped', previewId: entry.previewId });
     };
 
     this.cleanup = function () {

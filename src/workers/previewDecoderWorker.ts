@@ -1,7 +1,7 @@
 import { PreviewDecoder } from '@/services/gpacService/infrastructure/messageHandler/previewDecoder';
 
 export type PreviewWorkerMessage =
-  | { type: 'open'; config: VideoDecoderConfig; filterIdx: number }
+  | { type: 'open'; config: VideoDecoderConfig }
   | {
       type: 'packet';
       buffer: ArrayBuffer;
@@ -31,7 +31,6 @@ self.addEventListener(
     if (message.type === 'open') {
       decoder = PreviewDecoder.open(
         message.config,
-        message.filterIdx,
         (frame) => {
           const response: PreviewWorkerResponse = {
             type: 'frame',

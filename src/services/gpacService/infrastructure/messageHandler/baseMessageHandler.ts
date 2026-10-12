@@ -170,7 +170,7 @@ export class BaseMessageHandler {
         this.previewHandler.handlePreviewError(data);
         break;
       case 'preview_stopped':
-        this.previewHandler.handlePreviewStopped();
+        this.previewHandler.handlePreviewStopped(data);
         break;
       case 'filter_pid_reconfigured':
         this.callbacks.onPidReconfigured(data.indexes);

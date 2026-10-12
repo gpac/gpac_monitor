@@ -20,14 +20,13 @@ export class PreviewWorker {
 
   public static open(
     config: VideoDecoderConfig,
-    filterIdx: number,
     onFrame: (frame: VideoFrame) => void,
     onError: (error: unknown) => void,
   ): PreviewWorker | null {
     try {
       const worker = new PreviewDecoderWorker({ name: 'previewDecoderWorker' });
       const previewWorker = new PreviewWorker(worker, onFrame, onError);
-      previewWorker.post({ type: 'open', config, filterIdx });
+      previewWorker.post({ type: 'open', config });
       return previewWorker;
     } catch (error) {
       console.warn('[Preview] WebCodecs worker unavailable', error);
