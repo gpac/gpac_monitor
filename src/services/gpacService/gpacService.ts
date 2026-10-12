@@ -10,7 +10,10 @@ import type { IncomingWsMessage } from '../ws/types';
 import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './infrastructure/connectionManager';
 import { BaseMessageHandler } from './infrastructure/messageHandler/baseMessageHandler';
-import type { PreviewSource } from './infrastructure/messageHandler/previewHandler';
+import type {
+  PreviewEntry,
+  PreviewSource,
+} from './infrastructure/messageHandler/previewHandler';
 import { GpacCoreService } from './core/gpacCore';
 import { createStoreCallbacks } from './liveAdapter/storeIntegration';
 import {
@@ -230,30 +233,20 @@ export class GpacService implements IGpacCommunication {
   public async getCommandLine(): Promise<string | null> {
     return filterMethods.getCommandLine(this.state, () => this.isLoaded());
   }
-  public get preview() {
-    return this.state.messageHandler.getPreviewHandler();
-  }
-
   public requestPidPreview(
     filterIdx: number,
     pidIdx: number,
     direction: 'input' | 'output',
     filterName: string,
     source: PreviewSource,
-  ): Promise<void> {
+  ): PreviewEntry {
     return this.state.messageHandler
       .getPreviewHandler()
       .requestPreview(filterIdx, pidIdx, direction, filterName, source);
   }
 
-  public stopPidPreview(
-    filterIdx: number,
-    pidIdx: number,
-    direction: 'input' | 'output',
-  ): void {
-    this.state.messageHandler
-      .getPreviewHandler()
-      .stopPreview(filterIdx, pidIdx, direction);
+  public stopPidPreview(preview: PreviewEntry): void {
+    this.state.messageHandler.getPreviewHandler().stopPreview(preview);
   }
 
   // ============================================================================

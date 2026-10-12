@@ -12,12 +12,22 @@ export function usePidPreview(
   decoderConfig: string | null | undefined,
   canvasRef: RefObject<HTMLCanvasElement>,
 ): PreviewHandlerState {
-  const [state, setState] = useState<PreviewHandlerState>(() =>
-    gpacService.preview.getSnapshot(),
-  );
+  const [state, setState] = useState<PreviewHandlerState>(() => ({
+    filterIdx,
+    pidIdx,
+    loading: true,
+    error: null,
+  }));
 
   useEffect(() => {
-    gpacService.preview.setFrameListener((frame) => {
+    const preview = gpacService.requestPidPreview(
+      filterIdx,
+      pidIdx,
+      variant,
+      filterType,
+      { codec, decoderConfig },
+    );
+    preview.setFrameListener((frame) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
       if (canvas.width !== frame.displayWidth) {
@@ -28,15 +38,7 @@ export function usePidPreview(
       }
       canvas.getContext('2d')?.drawImage(frame, 0, 0);
     });
-    return () => gpacService.preview.setFrameListener(null);
-  }, [canvasRef]);
-
-  useEffect(() => {
-    void gpacService.requestPidPreview(filterIdx, pidIdx, variant, filterType, {
-      codec,
-      decoderConfig,
-    });
-    const unsubscribe = gpacService.preview.subscribe(
+    const unsubscribe = preview.subscribe(
       (data) => {
         if (data) setState(data);
       },
@@ -44,9 +46,9 @@ export function usePidPreview(
     );
     return () => {
       unsubscribe();
-      gpacService.stopPidPreview(filterIdx, pidIdx, variant);
+      gpacService.stopPidPreview(preview);
     };
-  }, [filterIdx, pidIdx, variant, filterType, codec, decoderConfig]);
+  }, [filterIdx, pidIdx, variant, filterType, codec, decoderConfig, canvasRef]);
 
   return state;
 }

@@ -1,136 +1,57 @@
-import { WSMessageType } from '@/services/ws/types';
 import type {
   PreviewErrorMessage,
   PreviewStoppedMessage,
 } from '@/services/ws/types';
-import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
-import { resolveWebCodecsConfig } from '@/utils/gpac';
-import { PreviewWorker } from './previewWorker';
-import type {
-  MessageHandlerDependencies,
-  PreviewHandlerState,
-  PreviewSource,
-} from './types';
+import { PreviewEntry } from './previewEntry';
+import type { MessageHandlerDependencies, PreviewSource } from './types';
 
 export type { PreviewHandlerState, PreviewSource } from './types';
+export type { PreviewEntry } from './previewEntry';
 
-const EMPTY_PREVIEW_STATE: PreviewHandlerState = {
-  filterIdx: null,
-  pidIdx: null,
-  loading: false,
-  error: null,
-};
+// Routes server preview traffic to the open previews, keyed by the previewId the client chose.
+export class PreviewHandler {
+  private nextPreviewId = 0;
+  private readonly previews = new Map<number, PreviewEntry>();
 
-export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
-  private requestToken = 0;
-  private decoder: PreviewWorker | null = null;
-  private frameListener: ((frame: VideoFrame) => void) | null = null;
+  constructor(private dependencies: MessageHandlerDependencies) {}
 
-  constructor(private dependencies: MessageHandlerDependencies) {
-    super({ ...EMPTY_PREVIEW_STATE });
-  }
-
-  // Sends start request and sets loading state.
-  public async requestPreview(
+  public requestPreview(
     filterIdx: number,
     pidIdx: number,
     direction: 'input' | 'output',
     filterName: string,
     source: PreviewSource,
-  ): Promise<void> {
-    const token = ++this.requestToken;
-    this.closeDecoder();
-    this.updateDataAndNotify({
-      ...EMPTY_PREVIEW_STATE,
-      filterIdx,
-      loading: true,
-    });
-    const webCodecsConfig = await resolveWebCodecsConfig(
-      source.codec,
-      source.decoderConfig,
+  ): PreviewEntry {
+    const preview = new PreviewEntry(
+      ++this.nextPreviewId,
+      { filterIdx, pidIdx, direction },
+      this.dependencies,
     );
-    if (token !== this.requestToken) return;
-    if (!webCodecsConfig) {
-      this.showError(filterIdx, 'Codec not supported by this browser');
-      return;
-    }
-    this.decoder = PreviewWorker.open(
-      webCodecsConfig,
-      (frame) => this.frameListener?.(frame),
-      (error) => this.handleDecoderError(filterIdx, error),
-    );
-    if (!this.decoder) {
-      this.showError(filterIdx, 'WebCodecs decoder unavailable');
-      return;
-    }
-    this.dependencies.send({
-      type: WSMessageType.START_PID_PREVIEW,
-      previewId: token,
-      idx: filterIdx,
-      pidIdx,
-      direction,
-      name: filterName,
-    });
+    this.previews.set(preview.previewId, preview);
+    void preview.start(filterName, source);
+    return preview;
   }
 
-  // Sends stop request (if still connected) and resets state.
-  public stopPreview(
-    filterIdx: number,
-    pidIdx: number,
-    direction: 'input' | 'output',
-  ): void {
-    this.requestToken++;
-    if (this.dependencies.isConnected()) {
-      this.dependencies.send({
-        type: WSMessageType.STOP_PID_PREVIEW,
-        idx: filterIdx,
-        pidIdx,
-        direction,
-      });
-    }
-    this.cleanup();
-  }
-
-  public setFrameListener(
-    listener: ((frame: VideoFrame) => void) | null,
-  ): void {
-    this.frameListener = listener;
+  public stopPreview(preview: PreviewEntry): void {
+    this.previews.delete(preview.previewId);
+    preview.stop();
   }
 
   public handleWebCodecsFrame(dataView: DataView): void {
-    if (dataView.getUint32(4, true) !== this.requestToken) return;
-    this.decoder?.decodePacket(dataView);
+    this.previews.get(dataView.getUint32(4, true))?.decodePacket(dataView);
   }
 
-  // Stores the error returned by the backend.
   public handlePreviewError(data: PreviewErrorMessage): void {
-    if (data.previewId !== this.requestToken) return;
-    this.showError(this.getSnapshot().filterIdx, data.error);
+    this.previews.get(data.previewId)?.showError(data.error);
   }
 
-  // Resets state on explicit stop confirmation.
   public handlePreviewStopped(data: PreviewStoppedMessage): void {
-    if (data.previewId !== this.requestToken) return;
-    this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE });
+    this.previews.get(data.previewId)?.close();
+    this.previews.delete(data.previewId);
   }
 
   public cleanup(): void {
-    this.closeDecoder();
-    this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE });
-  }
-
-  private handleDecoderError(filterIdx: number, error: unknown): void {
-    console.warn('[Preview] WebCodecs decoding failed', error);
-    this.closeDecoder();
-    this.showError(filterIdx, 'WebCodecs decoding failed');
-  }
-
-  private showError(filterIdx: number | null, message: string): void {
-    this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE, filterIdx, error: message });
-  }
-
-  private closeDecoder(): void {
-    this.decoder?.close();
-    this.decoder = null;
+    this.previews.forEach((preview) => preview.close());
+    this.previews.clear();
   }
 }

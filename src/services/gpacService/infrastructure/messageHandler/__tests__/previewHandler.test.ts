@@ -9,8 +9,22 @@ vi.mock('../previewWorker', () => ({
 
 vi.mock('@/utils/gpac', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@/utils/gpac')>()),
-  resolveWebCodecsConfig: vi.fn(async () => ({ codec: 'avc1.64002a' })),
+  resolveWebCodecsConfig: vi.fn(async (codec: string) =>
+    codec === 'raw' ? null : { codec: 'avc1.64002a' },
+  ),
 }));
+
+function makeDependencies(
+  overrides: Partial<MessageHandlerDependencies> = {},
+): MessageHandlerDependencies {
+  return {
+    isConnected: vi.fn(() => true),
+    send: vi.fn().mockResolvedValue(undefined),
+    stopReconnection: vi.fn(),
+    markEndOfSession: vi.fn(),
+    ...overrides,
+  };
+}
 
 function openFakeWorker() {
   const fakeWorker = { decodePacket: vi.fn(), close: vi.fn() };
@@ -26,34 +40,29 @@ function makePvwcFrame(previewId: number): DataView {
   return view;
 }
 
-function sentPreviewId(dependencies: MessageHandlerDependencies): number {
-  const lastCall = vi.mocked(dependencies.send).mock.calls.at(-1);
-  return (lastCall?.[0] as { previewId: number }).previewId;
-}
-
-function makeDependencies(
-  overrides: Partial<MessageHandlerDependencies> = {},
-): MessageHandlerDependencies {
-  return {
-    isConnected: vi.fn(() => true),
-    send: vi.fn().mockResolvedValue(undefined),
-    stopReconnection: vi.fn(),
-    markEndOfSession: vi.fn(),
-    ...overrides,
-  };
-}
+const flushCodecResolution = () =>
+  new Promise((resolve) => setTimeout(resolve));
 
 const RAW_SOURCE = { codec: 'raw', decoderConfig: null };
 const H264_SOURCE = { codec: 'avc', decoderConfig: null };
 
 describe('PreviewHandler', () => {
-  it('stopPreview sends stop_pid_preview with the filterIdx, pidIdx and direction when connected', () => {
+  it('stopPreview sends stop_pid_preview with the filterIdx, pidIdx and direction when connected', async () => {
     const dependencies = makeDependencies();
     const handler = new PreviewHandler(dependencies);
+    openFakeWorker();
+    const preview = handler.requestPreview(
+      3,
+      1,
+      'output',
+      'reframer',
+      H264_SOURCE,
+    );
+    await flushCodecResolution();
 
-    handler.stopPreview(3, 1, 'output');
+    handler.stopPreview(preview);
 
-    expect(dependencies.send).toHaveBeenCalledWith(
+    expect(dependencies.send).toHaveBeenLastCalledWith(
       expect.objectContaining({
         type: 'stop_pid_preview',
         idx: 3,
@@ -63,73 +72,107 @@ describe('PreviewHandler', () => {
     );
   });
 
-  it('stopPreview resets state without sending when the socket is already disconnected', () => {
-    const dependencies = makeDependencies({ isConnected: vi.fn(() => false) });
+  it('stopPreview closes the worker without sending when the socket is already disconnected', async () => {
+    const isConnected = vi.fn(() => true);
+    const dependencies = makeDependencies({ isConnected });
     const handler = new PreviewHandler(dependencies);
+    const worker = openFakeWorker();
+    const preview = handler.requestPreview(
+      3,
+      1,
+      'output',
+      'reframer',
+      H264_SOURCE,
+    );
+    await flushCodecResolution();
+    isConnected.mockReturnValue(false);
 
-    expect(() => handler.stopPreview(3, 1, 'output')).not.toThrow();
+    expect(() => handler.stopPreview(preview)).not.toThrow();
 
-    expect(dependencies.send).not.toHaveBeenCalled();
-    expect(handler.getSnapshot()).toEqual({
-      filterIdx: null,
-      pidIdx: null,
-      loading: false,
-      error: null,
-    });
+    expect(dependencies.send).toHaveBeenCalledTimes(1);
+    expect(worker.close).toHaveBeenCalledTimes(1);
   });
 
   it('requestPreview shows an unsupported codec error without sending start_pid_preview', async () => {
     const dependencies = makeDependencies();
     const handler = new PreviewHandler(dependencies);
 
-    await handler.requestPreview(5, 1, 'output', 'reframer', RAW_SOURCE);
+    const preview = handler.requestPreview(
+      5,
+      1,
+      'output',
+      'reframer',
+      RAW_SOURCE,
+    );
+    await flushCodecResolution();
 
     expect(dependencies.send).not.toHaveBeenCalled();
-    expect(handler.getSnapshot()).toEqual({
+    expect(preview.getSnapshot()).toEqual({
       filterIdx: 5,
-      pidIdx: null,
+      pidIdx: 1,
       loading: false,
       error: 'Codec not supported by this browser',
     });
   });
 
-  it('decodes frames of the current previewId and ignores frames of a closed one', async () => {
-    const dependencies = makeDependencies();
-    const handler = new PreviewHandler(dependencies);
-    openFakeWorker();
-    await handler.requestPreview(5, 0, 'output', 'reframer', H264_SOURCE);
-    const closedPreviewId = sentPreviewId(dependencies);
-    handler.stopPreview(5, 0, 'output');
-    const currentWorker = openFakeWorker();
-    await handler.requestPreview(5, 0, 'output', 'reframer', H264_SOURCE);
-    const currentPreviewId = sentPreviewId(dependencies);
+  it('routes each frame to its own preview and keeps the other open when one closes', async () => {
+    const handler = new PreviewHandler(makeDependencies());
+    const firstWorker = openFakeWorker();
+    const secondWorker = openFakeWorker();
+    const firstPreview = handler.requestPreview(
+      5,
+      0,
+      'output',
+      'reframer',
+      H264_SOURCE,
+    );
+    const secondPreview = handler.requestPreview(
+      5,
+      1,
+      'output',
+      'reframer',
+      H264_SOURCE,
+    );
+    await flushCodecResolution();
 
-    handler.handleWebCodecsFrame(makePvwcFrame(closedPreviewId));
-    handler.handleWebCodecsFrame(makePvwcFrame(currentPreviewId));
+    handler.handleWebCodecsFrame(makePvwcFrame(firstPreview.previewId));
+    handler.handleWebCodecsFrame(makePvwcFrame(secondPreview.previewId));
+    handler.stopPreview(firstPreview);
+    handler.handleWebCodecsFrame(makePvwcFrame(firstPreview.previewId));
+    handler.handleWebCodecsFrame(makePvwcFrame(secondPreview.previewId));
 
-    expect(currentPreviewId).not.toBe(closedPreviewId);
-    expect(currentWorker.decodePacket).toHaveBeenCalledTimes(1);
-    expect(
-      currentWorker.decodePacket.mock.calls[0][0].getUint32(4, true),
-    ).toBe(currentPreviewId);
+    expect(firstWorker.decodePacket).toHaveBeenCalledTimes(1);
+    expect(secondWorker.decodePacket).toHaveBeenCalledTimes(2);
+    expect(secondWorker.close).not.toHaveBeenCalled();
   });
 
-  it('ignores a preview_error of a closed previewId', async () => {
-    const dependencies = makeDependencies();
-    const handler = new PreviewHandler(dependencies);
+  it('shows a preview_error only on the preview it targets', async () => {
+    const handler = new PreviewHandler(makeDependencies());
     openFakeWorker();
-    await handler.requestPreview(5, 0, 'output', 'reframer', H264_SOURCE);
-    const closedPreviewId = sentPreviewId(dependencies);
-    handler.stopPreview(5, 0, 'output');
     openFakeWorker();
-    await handler.requestPreview(5, 0, 'output', 'reframer', H264_SOURCE);
+    const firstPreview = handler.requestPreview(
+      5,
+      0,
+      'output',
+      'reframer',
+      H264_SOURCE,
+    );
+    const secondPreview = handler.requestPreview(
+      5,
+      1,
+      'output',
+      'reframer',
+      H264_SOURCE,
+    );
+    await flushCodecResolution();
 
     handler.handlePreviewError({
       message: 'preview_error',
-      previewId: closedPreviewId,
-      error: 'filter not found',
+      previewId: secondPreview.previewId,
+      error: 'not a video PID',
     });
 
-    expect(handler.getSnapshot().error).toBeNull();
+    expect(firstPreview.getSnapshot().error).toBeNull();
+    expect(secondPreview.getSnapshot().error).toBe('not a video PID');
   });
 });
