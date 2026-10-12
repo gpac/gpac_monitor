@@ -182,7 +182,7 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
 export const PVWF_MAGIC = 'PVWF';
 export const PVWF_HEADER_SIZE = 12;
 
-// Binary webcodecs frame: 'PVWC' + filterIdx/pidIdx/flags u32 LE (bit 0 = key, SAP 1-2) + µs f64 LE,
+// Binary webcodecs frame: 'PVWC' + filterIdx/pidIdx/flags u32 LE (bit 0 = key, SAP 1-3) + µs f64 LE,
 // then raw avcC packet bytes; first frame sent is a keyframe.
 export const PVWC_MAGIC = 'PVWC';
 export const PVWC_HEADER_SIZE = 24;

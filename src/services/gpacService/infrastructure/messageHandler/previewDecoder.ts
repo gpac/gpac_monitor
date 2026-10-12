@@ -9,6 +9,7 @@ export class PreviewDecoder {
   private decoder: VideoDecoder;
   private waitingForKeyframe = true;
   private pendingBytes: Uint8Array | null = null;
+  private pendingIsKeyframe = false;
   private reopensWithoutFrame = 0;
   private stopped = false;
 
@@ -44,6 +45,7 @@ export class PreviewDecoder {
     if (this.decoder.state !== 'closed') this.decoder.close();
     this.waitingForKeyframe = true;
     this.pendingBytes = null;
+    this.pendingIsKeyframe = false;
     if (this.reopensWithoutFrame >= MAX_REOPENS_WITHOUT_FRAME) {
       this.stopped = true;
       this.onError(error);
@@ -80,13 +82,15 @@ export class PreviewDecoder {
       dataView.byteOffset + PVWC_HEADER_SIZE,
       dataView.byteLength - PVWC_HEADER_SIZE,
     );
+    const packetIsKeyframe =
+      (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAME) !== 0;
     if (!hasPictureSlice(packetBytes)) {
       this.pendingBytes = packetBytes;
+      this.pendingIsKeyframe = packetIsKeyframe;
       return;
     }
+    const isKeyframe = packetIsKeyframe || this.pendingIsKeyframe;
     const data = this.prependPendingBytes(packetBytes);
-    const isKeyframe =
-      (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAME) !== 0;
     try {
       if (this.decoder.decodeQueueSize > MAX_DECODE_QUEUE_SIZE) {
         this.decoder.reset();
@@ -111,6 +115,7 @@ export class PreviewDecoder {
   private prependPendingBytes(packetBytes: Uint8Array): Uint8Array {
     const pendingBytes = this.pendingBytes;
     this.pendingBytes = null;
+    this.pendingIsKeyframe = false;
     if (!pendingBytes) return packetBytes;
     const merged = new Uint8Array(pendingBytes.length + packetBytes.length);
     merged.set(pendingBytes);

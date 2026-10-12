@@ -94,4 +94,28 @@ describe('PreviewDecoder', () => {
       },
     ]);
   });
+
+  it('a SEI-only packet flagged key makes the merged chunk a keyframe', () => {
+    const onError = vi.fn();
+    const decoder = PreviewDecoder.open(
+      { codec: 'avc1.64002a' },
+      7,
+      vi.fn(),
+      onError,
+    );
+
+    decoder?.decodePacket(
+      makePvwcPacket(7, true, 6_039_367, SEI_RECOVERY_POINT),
+    );
+    decoder?.decodePacket(makePvwcPacket(7, false, 6_072_733, NON_IDR_SLICE));
+
+    expect(onError).not.toHaveBeenCalled();
+    expect(decodedChunks).toEqual([
+      {
+        type: 'key',
+        timestamp: 6_072_733,
+        bytes: [...SEI_RECOVERY_POINT, ...NON_IDR_SLICE],
+      },
+    ]);
+  });
 });

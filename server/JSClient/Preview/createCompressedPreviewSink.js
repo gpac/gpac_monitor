@@ -5,7 +5,7 @@ const PVWC_HEADER_SIZE = 24;
 const PVWC_FLAG_KEYFRAME = 1;
 
 function isKeyframe(packet) {
-    return packet.sap === 1 || packet.sap === 2;
+    return packet.sap === 1 || packet.sap === 2 || packet.sap === 3;
 }
 
 function buildCompressedFrame(filterIdx, pidIdx, packet, timescale) {
