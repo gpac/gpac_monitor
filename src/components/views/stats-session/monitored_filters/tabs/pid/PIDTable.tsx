@@ -21,6 +21,8 @@ interface PIDTableProps {
   hoveredPidKey?: string | null;
   activeMetric?: PIDMetricMode;
   onMetricClick?: (metric: PIDMetricMode) => void;
+  previewPidIdxs?: number[];
+  onTogglePreview?: (pidIdx: number) => void;
 }
 
 interface TableCoreProps {
@@ -32,6 +34,8 @@ interface TableCoreProps {
   hoveredPidKey: string | null;
   activeMetric?: PIDMetricMode;
   onMetricClick?: (metric: PIDMetricMode) => void;
+  previewPidIdxs?: number[];
+  onTogglePreview?: (pidIdx: number) => void;
 }
 
 const TableCore = ({
@@ -43,6 +47,8 @@ const TableCore = ({
   hoveredPidKey,
   activeMetric,
   onMetricClick,
+  previewPidIdxs,
+  onTogglePreview,
 }: TableCoreProps) => (
   <table className="w-full text-left table-fixed">
     <thead>
@@ -87,6 +93,8 @@ const TableCore = ({
           hoveredPidKey={hoveredPidKey}
           activeMetric={activeMetric}
           onMetricClick={onMetricClick}
+          isPreviewOpen={previewPidIdxs?.includes(pid.pidIdx)}
+          onTogglePreview={onTogglePreview}
         />
       ))}
     </tbody>
@@ -103,6 +111,8 @@ const PIDTable = memo(
     hoveredPidKey = null,
     activeMetric,
     onMetricClick,
+    previewPidIdxs,
+    onTogglePreview,
   }: PIDTableProps) => {
     return (
       <TooltipProvider delayDuration={200}>
@@ -116,6 +126,8 @@ const PIDTable = memo(
             hoveredPidKey={hoveredPidKey}
             activeMetric={activeMetric}
             onMetricClick={onMetricClick}
+            previewPidIdxs={previewPidIdxs}
+            onTogglePreview={onTogglePreview}
           />
         </div>
       </TooltipProvider>

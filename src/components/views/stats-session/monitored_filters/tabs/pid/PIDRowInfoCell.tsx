@@ -1,12 +1,7 @@
 import { memo, useCallback } from 'react';
-import { LuEye, LuCamera } from 'react-icons/lu';
+import { LuEye } from 'react-icons/lu';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from '@/components/ui/popover';
-import PIDPreviewPanel from './PIDPreviewPanel';
+import PIDPreviewButton from './preview/PIDPreviewButton';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { Badge } from '@/components/ui/badge';
@@ -29,6 +24,8 @@ interface PIDRowInfoCellProps {
   pidKey: string;
   infoLine: string;
   onOpenProps: () => void;
+  isPreviewOpen?: boolean;
+  onTogglePreview?: (pidIdx: number) => void;
 }
 
 const PIDRowInfoCell = memo(
@@ -40,6 +37,8 @@ const PIDRowInfoCell = memo(
     pidKey,
     infoLine,
     onOpenProps,
+    isPreviewOpen,
+    onTogglePreview,
   }: PIDRowInfoCellProps) => {
     const dispatch = useAppDispatch();
     const { isLive } = useDataMode();
@@ -90,29 +89,15 @@ const PIDRowInfoCell = memo(
           </button>
         )}
         {isLive && pid.type === GpacStreamType.Visual && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                onClick={selectIfNeeded}
-                className="rounded bg-gray-700/50 border border-gray-600/50 text-gray-300 hover:bg-gray-700/80 flex-shrink-0"
-                title="Preview frame"
-              >
-                <LuCamera className="h-4 w-5" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-2">
-              <PIDPreviewPanel
-                filterIdx={filterIdx}
-                filterType={filterType}
-                pidIdx={pid.pidIdx}
-                variant={variant}
-                width={pid.width}
-                height={pid.height}
-                codec={pid.codec}
-                decoderConfig={pid.decoderConfig}
-              />
-            </PopoverContent>
-          </Popover>
+          <PIDPreviewButton
+            pid={pid}
+            filterIdx={filterIdx}
+            filterType={filterType}
+            variant={variant}
+            onSelect={selectIfNeeded}
+            isPreviewOpen={isPreviewOpen}
+            onTogglePreview={onTogglePreview}
+          />
         )}
         <Badge
           variant="outline"
