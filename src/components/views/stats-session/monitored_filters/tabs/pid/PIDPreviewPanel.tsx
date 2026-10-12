@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useRef } from 'react';
 import { usePidPreview } from '../hooks/usePidPreview';
 
 interface PIDPreviewPanelProps {
@@ -24,7 +24,7 @@ const PIDPreviewPanel = memo(
     decoderConfig,
   }: PIDPreviewPanelProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const { frame, error } = usePidPreview(
+    const { error } = usePidPreview(
       filterIdx,
       pidIdx,
       variant,
@@ -33,23 +33,6 @@ const PIDPreviewPanel = memo(
       decoderConfig,
       canvasRef,
     );
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-    const [frameSize, setFrameSize] = useState<string | null>(null);
-
-    useEffect(() => {
-      if (!frame) {
-        setPreviewUrl(null);
-        setFrameSize(null);
-        return;
-      }
-      const objectUrl = URL.createObjectURL(
-        new Blob([frame.png], { type: 'image/png' }),
-      );
-      setPreviewUrl(objectUrl);
-      // Revoking on cleanup does not blank the image already on screen: revocation only
-      // prevents future loads of that URL, a decoded image stays painted.
-      return () => URL.revokeObjectURL(objectUrl);
-    }, [frame]);
 
     const frameBoxStyle =
       width && height
@@ -59,24 +42,16 @@ const PIDPreviewPanel = memo(
     return (
       <div className="flex flex-col gap-1.5">
         <div className="text-xs font-medium text-muted-foreground">
-          {frameSize ? `Preview · ${frameSize}` : 'Preview'}
+          Preview
         </div>
         {error ? (
-          <div className="h-64 text-xs text-destructive" style={frameBoxStyle}>
+          <div
+            role="alert"
+            className="flex h-64 items-center justify-center p-4 text-center font-ui text-xs text-danger bg-monitor-panel border border-white/10"
+            style={frameBoxStyle}
+          >
             {error}
           </div>
-        ) : previewUrl ? (
-          <img
-            src={previewUrl}
-            alt="PID preview"
-            onLoad={(event) =>
-              setFrameSize(
-                `${event.currentTarget.naturalWidth}×${event.currentTarget.naturalHeight}`,
-              )
-            }
-            className="block h-64 object-contain"
-            style={frameBoxStyle}
-          />
         ) : (
           <canvas
             ref={canvasRef}

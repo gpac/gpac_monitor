@@ -1,10 +1,4 @@
-import { Sys as sys } from 'gpaccore';
-import { PREVIEW } from '../config.js';
-import { quiet_hidden_chain } from '../filterUtils.js';
 import { createCompressedPreviewSink } from './createCompressedPreviewSink.js';
-
-const PVWF_MAGIC = 'PVWF';
-const PVWF_HEADER_SIZE = 12;
 
 function PreviewManager(client) {
     this.client = client;
@@ -52,12 +46,12 @@ function PreviewManager(client) {
         return null;
     };
 
-    this.startPreview = function (filterIdx, filterName, direction, pidIdx, mode) {
-        print(`[Preview] startPreview requested idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx} mode=${mode}`);
-        this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx, mode));
+    this.startPreview = function (filterIdx, filterName, direction, pidIdx) {
+        print(`[Preview] startPreview requested idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx}`);
+        this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx));
     };
 
-    this.doStartPreview = function (filterIdx, filterName, direction, pidIdx, mode) {
+    this.doStartPreview = function (filterIdx, filterName, direction, pidIdx) {
         const key = this.previewKey(filterIdx, direction, pidIdx);
         if (this.activePreviews.has(key)) {
             print(`[Preview] already open key=${key}`);
@@ -82,98 +76,16 @@ function PreviewManager(client) {
             sink: null,
             pid: null,
             pidIdx: resolvedPidIdx,
-            lastEmitUs: 0,
         };
         this.activePreviews.set(key, entry);
         try {
-            if (mode === 'webcodecs') {
-                const sinkName = `PreviewSink_${filterIdx}_${direction}_${pidIdx}`;
-                entry.sink = createCompressedPreviewSink(this, filterIdx, sinkName, entry);
-                entry.sink.set_source(target);
-            } else {
-                entry.sink = this.createPreviewSink(filterIdx, direction, pidIdx, entry);
-                const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
-                const ffsws = session.add_filter(`ffsws:ofmt=rgb:osize=0x${PREVIEW.OUTPUT_HEIGHT}:RSID${hideTag}`, target);
-                entry.sink.set_source(ffsws);
-            }
+            const sinkName = `PreviewSink_${filterIdx}_${direction}_${pidIdx}`;
+            entry.sink = createCompressedPreviewSink(this, filterIdx, sinkName, entry);
+            entry.sink.set_source(target);
             target.reconnect(undefined, resolvedPidIdx);
         } catch (error) {
             print(`[Preview] doStartPreview failed idx=${filterIdx}: ${error}`);
             this.removePreview(key);
-            this.send({ message: 'preview_error', filterIdx, error: String(error) });
-        }
-    };
-
-    this.createPreviewSink = function (filterIdx, direction, pidIdx, entry) {
-        const previewManager = this;
-        const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
-        const sinkName = `PreviewSink_${filterIdx}_${direction}_${pidIdx}`;
-        const sink = session.new_filter(`${sinkName}${hideTag}`);
-        sink.require_source_id = true;
-        sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
-        sink.set_cap({ id: 'CodecID', value: 'png', in: true });
-        sink.configure_pid = function (pid) {
-            try {
-                quiet_hidden_chain(sinkName);
-                if (entry.pid !== pid) {
-                    entry.pid = pid;
-                    pid.send_event(new FilterEvent(GF_FEVT_PLAY));
-                }
-                print(`[Preview] configured idx=${filterIdx} pid=${pid.name} ${pid.get_prop('Width')}x${pid.get_prop('Height')} fmt=${pid.get_prop('PixelFormat')}`);
-            } catch (error) {
-                print(`[Preview] configure_pid error: ${error}`);
-                previewManager.send({ message: 'preview_error', filterIdx, error: String(error) });
-            }
-        };
-        sink.remove_pid = function (pid) {
-            if (entry.pid === pid) {
-                entry.pid = null;
-                print(`[Preview] pid removed idx=${filterIdx}`);
-            }
-        };
-        sink.process = function () {
-            try {
-                previewManager.drainPreviewPackets(filterIdx, entry);
-            } catch (error) {
-                print(`[Preview] process error: ${error}`);
-            }
-        };
-        return sink;
-    };
-
-    this.drainPreviewPackets = function (filterIdx, entry) {
-        if (!entry.pid) return;
-        while (true) {
-            const packet = entry.pid.get_packet();
-            if (!packet) return;
-            const nowUs = sys.clock_us();
-            if (nowUs - entry.lastEmitUs >= PREVIEW.INTERVAL_US) {
-                entry.lastEmitUs = nowUs;
-                this.sendFrame(filterIdx, entry, packet);
-            }
-            entry.pid.drop_packet();
-        }
-    };
-
-    this.sendFrame = function (filterIdx, entry, packet) {
-        try {
-            if (!this.client.client) return;
-            if (packet.frame_ifce) {
-                this.send({ message: 'preview_error', filterIdx, error: 'GPU frame preview not supported yet' });
-                return;
-            }
-            const pngBytes = new Uint8Array(packet.data);
-            const buffer = new ArrayBuffer(PVWF_HEADER_SIZE + pngBytes.byteLength);
-            const header = new DataView(buffer);
-            for (let charIndex = 0; charIndex < 4; charIndex++) {
-                header.setUint8(charIndex, PVWF_MAGIC.charCodeAt(charIndex));
-            }
-            header.setUint32(4, filterIdx, true);
-            header.setUint32(8, entry.pidIdx, true);
-            new Uint8Array(buffer, PVWF_HEADER_SIZE).set(pngBytes);
-            this.client.client.send(buffer);
-        } catch (error) {
-            print(`[Preview] sendFrame error: ${error}`);
             this.send({ message: 'preview_error', filterIdx, error: String(error) });
         }
     };

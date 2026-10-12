@@ -22,8 +22,6 @@ const FILTER_SUBSCRIPTION_FIELDS = [
 ];
 
 const PREVIEW = {
-    INTERVAL_US: 100000,
-    OUTPUT_HEIGHT: 256,
     DEBUG_SHOW_FILTERS: false,
 };
 

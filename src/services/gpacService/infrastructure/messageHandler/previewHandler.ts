@@ -1,4 +1,4 @@
-import { WSMessageType, PVWF_HEADER_SIZE } from '@/services/ws/types';
+import { WSMessageType } from '@/services/ws/types';
 import type { PreviewErrorMessage } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { resolveWebCodecsConfig } from '@/utils/gpac';
@@ -9,12 +9,11 @@ import type {
   PreviewSource,
 } from './types';
 
-export type { PreviewFrame, PreviewHandlerState, PreviewSource } from './types';
+export type { PreviewHandlerState, PreviewSource } from './types';
 
 const EMPTY_PREVIEW_STATE: PreviewHandlerState = {
   filterIdx: null,
   pidIdx: null,
-  frame: null,
   loading: false,
   error: null,
 };
@@ -48,13 +47,19 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
       source.decoderConfig,
     );
     if (token !== this.requestToken) return;
-    if (webCodecsConfig) {
-      this.decoder = PreviewWorker.open(
-        webCodecsConfig,
-        filterIdx,
-        (frame) => this.frameListener?.(frame),
-        (error) => this.handleDecoderError(filterIdx, error),
-      );
+    if (!webCodecsConfig) {
+      this.showError(filterIdx, 'Codec not supported by this browser');
+      return;
+    }
+    this.decoder = PreviewWorker.open(
+      webCodecsConfig,
+      filterIdx,
+      (frame) => this.frameListener?.(frame),
+      (error) => this.handleDecoderError(filterIdx, error),
+    );
+    if (!this.decoder) {
+      this.showError(filterIdx, 'WebCodecs decoder unavailable');
+      return;
     }
     this.dependencies.send({
       type: WSMessageType.START_PID_PREVIEW,
@@ -62,7 +67,6 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
       pidIdx,
       direction,
       name: filterName,
-      mode: this.decoder ? 'webcodecs' : 'png',
     });
   }
 
@@ -90,24 +94,6 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     this.frameListener = listener;
   }
 
-  // Reads a binary PVWF frame: header fields, then a zero-copy view on the PNG bytes.
-  public handlePreviewFrame(dataView: DataView): void {
-    if (dataView.byteLength <= PVWF_HEADER_SIZE) return;
-    this.updateDataAndNotify({
-      filterIdx: dataView.getUint32(4, true),
-      pidIdx: dataView.getUint32(8, true),
-      frame: {
-        png: new Uint8Array(
-          dataView.buffer,
-          dataView.byteOffset + PVWF_HEADER_SIZE,
-          dataView.byteLength - PVWF_HEADER_SIZE,
-        ),
-      },
-      loading: false,
-      error: null,
-    });
-  }
-
   public handleWebCodecsFrame(dataView: DataView): void {
     this.decoder?.decodePacket(dataView);
   }
@@ -117,7 +103,6 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
     this.updateDataAndNotify({
       filterIdx: data.filterIdx,
       pidIdx: null,
-      frame: null,
       loading: false,
       error: data.error,
     });
@@ -136,11 +121,11 @@ export class PreviewHandler extends UpdatableSubscribable<PreviewHandlerState> {
   private handleDecoderError(filterIdx: number, error: unknown): void {
     console.warn('[Preview] WebCodecs decoding failed', error);
     this.closeDecoder();
-    this.updateDataAndNotify({
-      ...EMPTY_PREVIEW_STATE,
-      filterIdx,
-      error: 'WebCodecs decoding failed',
-    });
+    this.showError(filterIdx, 'WebCodecs decoding failed');
+  }
+
+  private showError(filterIdx: number, message: string): void {
+    this.updateDataAndNotify({ ...EMPTY_PREVIEW_STATE, filterIdx, error: message });
   }
 
   private closeDecoder(): void {

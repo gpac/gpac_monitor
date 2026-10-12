@@ -177,11 +177,6 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
   logLevel: GpacLogConfig;
 }
 
-// Binary preview frame: 'PVWF' + filterIdx/pidIdx as u32 LE, then PNG-encoded bytes (native source
-// resolution — width/height are not transported, they live in the PNG's own IHDR chunk).
-export const PVWF_MAGIC = 'PVWF';
-export const PVWF_HEADER_SIZE = 12;
-
 // Binary webcodecs frame: 'PVWC' + filterIdx/pidIdx/flags u32 LE (bit 0 = key, SAP 1-3) + µs f64 LE,
 // then raw avcC packet bytes; first frame sent is a keyframe.
 export const PVWC_MAGIC = 'PVWC';

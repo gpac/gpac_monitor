@@ -45,14 +45,9 @@ export interface PreviewSource {
   decoderConfig: string | null | undefined;
 }
 
-export interface PreviewFrame {
-  png: Uint8Array;
-}
-
 export interface PreviewHandlerState {
   filterIdx: number | null;
   pidIdx: number | null;
-  frame: PreviewFrame | null;
   loading: boolean;
   error: string | null;
 }

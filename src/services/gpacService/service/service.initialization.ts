@@ -1,7 +1,7 @@
 import { GpacServiceState, GpacServiceCallbacks } from './service.types';
 import { ConnectionStatus } from '../../../types/communication/IgpacCommunication';
 import type { GpacMessage } from '@/types/communication/shared';
-import { PVWF_MAGIC, PVWC_MAGIC } from '@/services/ws/types';
+import { PVWC_MAGIC } from '@/services/ws/types';
 
 export const initializationMethods = {
   /**
@@ -26,9 +26,6 @@ export const initializationMethods = {
       state.messageHandler.handleDefaultMessage.bind(state.messageHandler),
     );
 
-    state.ws.addMessageHandler(PVWF_MAGIC, (_connection, dataView) => {
-      state.messageHandler.getPreviewHandler().handlePreviewFrame(dataView);
-    });
     state.ws.addMessageHandler(PVWC_MAGIC, (_connection, dataView) => {
       state.messageHandler.getPreviewHandler().handleWebCodecsFrame(dataView);
     });

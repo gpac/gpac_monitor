@@ -87,11 +87,11 @@ describe('WebSocketBase — binary messages bypass the parser worker', () => {
   it('does not decode a whole binary frame to text before routing it', async () => {
     const { wsBase, socket } = await connectedWsBase();
     const handler = vi.fn();
-    wsBase.addMessageHandler('PVWF', handler);
+    wsBase.addMessageHandler('PVWC', handler);
     const decodeSpy = vi.spyOn(TextDecoder.prototype, 'decode');
 
     const frame = new Uint8Array(50_000);
-    frame.set([...'PVWF'].map((char) => char.charCodeAt(0)));
+    frame.set([...'PVWC'].map((char) => char.charCodeAt(0)));
     socket.simulateMessage(frame.buffer);
 
     const decodedLengths = decodeSpy.mock.calls.map(
