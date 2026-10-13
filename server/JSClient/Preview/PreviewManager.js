@@ -1,3 +1,4 @@
+import { PREVIEW } from '../config.js';
 import { createCompressedPreviewSink } from './createCompressedPreviewSink.js';
 
 function PreviewManager(client) {
@@ -55,6 +56,11 @@ function PreviewManager(client) {
         const key = this.previewKey(filterIdx, direction, pidIdx);
         if (this.activePreviews.has(key)) {
             print(`[Preview] already open key=${key}`);
+            return;
+        }
+        if (this.activePreviews.size >= PREVIEW.MAX_ACTIVE) {
+            print(`[Preview] too many previews key=${key} max=${PREVIEW.MAX_ACTIVE}`);
+            this.send({ message: 'preview_error', previewId, error: `Too many previews (max ${PREVIEW.MAX_ACTIVE})` });
             return;
         }
         const filter = session.get_filter(String(filterIdx));

@@ -23,6 +23,7 @@ const FILTER_SUBSCRIPTION_FIELDS = [
 
 const PREVIEW = {
     DEBUG_SHOW_FILTERS: false,
+    MAX_ACTIVE: 4,
 };
 
 export { UPDATE_INTERVALS, LOG_RETENTION, WS_PROTOCOL_VERSION } from '../config/live.config.js';
