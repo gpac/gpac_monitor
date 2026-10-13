@@ -45,7 +45,7 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
     }
     this.decoder = PreviewWorker.open(
       webCodecsConfig,
-      (frame) => this.frameListener?.(frame),
+      (frame) => this.handleFrame(frame),
       (error) => this.handleDecoderError(error),
     );
     if (!this.decoder) {
@@ -96,6 +96,13 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
       loading: false,
       error: message,
     });
+  }
+
+  private handleFrame(frame: VideoFrame): void {
+    if (this.getSnapshot().loading) {
+      this.updateDataAndNotify({ ...this.getSnapshot(), loading: false });
+    }
+    this.frameListener?.(frame);
   }
 
   private handleDecoderError(error: unknown): void {

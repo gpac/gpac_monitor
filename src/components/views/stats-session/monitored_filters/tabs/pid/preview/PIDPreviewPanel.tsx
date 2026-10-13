@@ -1,5 +1,6 @@
 import { memo, useRef } from 'react';
 import { LuX } from 'react-icons/lu';
+import { Spinner } from '@/components/ui/spinner';
 import { usePidPreview } from '../../hooks/usePidPreview';
 
 const FRAME_BOX_STYLE = { aspectRatio: '16 / 9', width: '100%' };
@@ -27,7 +28,7 @@ const PIDPreviewPanel = memo(
     onClose,
   }: PIDPreviewPanelProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const { error } = usePidPreview(
+    const { error, loading } = usePidPreview(
       filterIdx,
       pidIdx,
       variant,
@@ -61,11 +62,19 @@ const PIDPreviewPanel = memo(
             {error}
           </div>
         ) : (
-          <canvas
-            ref={canvasRef}
-            className="block object-contain bg-monitor-panel border border-white/10"
-            style={FRAME_BOX_STYLE}
-          />
+          <div className="relative">
+            <canvas
+              ref={canvasRef}
+              className="block object-contain bg-monitor-panel border border-white/10"
+              style={FRAME_BOX_STYLE}
+            />
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center gap-2 font-ui text-xs text-muted-foreground">
+                <Spinner size="sm" />
+                Waiting for keyframe…
+              </div>
+            )}
+          </div>
         )}
       </div>
     );
