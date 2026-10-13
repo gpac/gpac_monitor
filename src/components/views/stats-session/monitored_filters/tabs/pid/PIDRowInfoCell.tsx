@@ -19,20 +19,18 @@ import type { PIDWithIndex } from '../../../types';
 interface PIDRowInfoCellProps {
   pid: PIDWithIndex;
   filterIdx: number;
-  filterType: string;
   variant: 'input' | 'output';
   pidKey: string;
   infoLine: string;
   onOpenProps: () => void;
-  isPreviewOpen?: boolean;
-  onTogglePreview?: (pidIdx: number) => void;
+  isPreviewOpen: boolean;
+  onTogglePreview: (pidIdx: number) => void;
 }
 
 const PIDRowInfoCell = memo(
   ({
     pid,
     filterIdx,
-    filterType,
     variant,
     pidKey,
     infoLine,
@@ -91,9 +89,6 @@ const PIDRowInfoCell = memo(
         {isLive && pid.type === GpacStreamType.Visual && (
           <PIDPreviewButton
             pid={pid}
-            filterIdx={filterIdx}
-            filterType={filterType}
-            variant={variant}
             onSelect={selectIfNeeded}
             isPreviewOpen={isPreviewOpen}
             onTogglePreview={onTogglePreview}

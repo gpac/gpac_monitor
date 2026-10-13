@@ -22,21 +22,19 @@ type PIDTableRowVariant = 'input' | 'output';
 interface PIDTableRowProps {
   pid: PIDWithIndex;
   filterIdx: number;
-  filterType: string;
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
   variant?: PIDTableRowVariant;
   hoveredPidKey?: string | null;
   activeMetric?: PIDMetricMode;
   onMetricClick?: (metric: PIDMetricMode) => void;
-  isPreviewOpen?: boolean;
-  onTogglePreview?: (pidIdx: number) => void;
+  isPreviewOpen: boolean;
+  onTogglePreview: (pidIdx: number) => void;
 }
 
 const PIDTableRow = memo(
   ({
     pid,
     filterIdx,
-    filterType,
     onOpenProps,
     variant = 'input',
     hoveredPidKey = null,
@@ -77,7 +75,6 @@ const PIDTableRow = memo(
           <PIDRowInfoCell
             pid={pid}
             filterIdx={filterIdx}
-            filterType={filterType}
             variant={variant}
             pidKey={pidKey}
             infoLine={infoStats.infoLine}

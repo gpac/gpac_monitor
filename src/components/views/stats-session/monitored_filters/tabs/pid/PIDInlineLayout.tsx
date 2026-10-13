@@ -9,7 +9,6 @@ import type { PIDMetricMode } from '../../../types/pid';
 import { PIDTable } from './shared';
 import PIDGraphSection from './PIDGraphSection';
 import PIDPreviewStrip from './preview/PIDPreviewStrip';
-import { useIsDetached } from '../../FilterViewContext';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
 
 interface PIDInlineLayoutProps {
@@ -32,7 +31,6 @@ const PIDInlineLayout = memo(
   }: PIDInlineLayoutProps) => {
     const dispatch = useAppDispatch();
     const [mode, setMode] = useState<PIDMetricMode>('bitrate');
-    const isDetached = useIsDetached();
     const [previewPidIdxs, setPreviewPidIdxs] = useState<number[]>([]);
 
     const togglePreview = useCallback((pidIdx: number) => {
@@ -73,25 +71,22 @@ const PIDInlineLayout = memo(
         <PIDTable
           pids={pids}
           filterIdx={filterIdx}
-          filterType={filterType}
           onOpenProps={onOpenProps}
           variant={variant}
           hoveredPidKey={hoveredPidKey}
           activeMetric={mode}
           onMetricClick={setMode}
-          previewPidIdxs={isDetached ? previewPidIdxs : undefined}
-          onTogglePreview={isDetached ? togglePreview : undefined}
+          previewPidIdxs={previewPidIdxs}
+          onTogglePreview={togglePreview}
         />
-        {isDetached && (
-          <PIDPreviewStrip
-            pids={pids}
-            previewPidIdxs={previewPidIdxs}
-            filterIdx={filterIdx}
-            filterType={filterType}
-            variant={variant}
-            onClosePreview={togglePreview}
-          />
-        )}
+        <PIDPreviewStrip
+          pids={pids}
+          previewPidIdxs={previewPidIdxs}
+          filterIdx={filterIdx}
+          filterType={filterType}
+          variant={variant}
+          onClosePreview={togglePreview}
+        />
         <PIDGraphSection
           filterIdx={filterIdx}
           mode={mode}
