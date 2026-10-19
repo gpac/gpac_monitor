@@ -97,6 +97,27 @@ describe('updateEdgesWithState', () => {
     });
   });
 
+  describe('while a filter is monitored', () => {
+    it('animates no edge below the threshold, even with a selected node', () => {
+      const edgesRef = { current: [] as Edge[] };
+      const result = updateEdgesWithState(makeEdges(), edgesRef, '2', true);
+
+      expect(result.every((edge) => edge.animated === false)).toBe(true);
+    });
+
+    it('animates no edge above the threshold, even incident to the selection', () => {
+      const edgesRef = { current: [] as Edge[] };
+      const result = updateEdgesWithState(
+        makeLargeEdges(EDGE_ANIMATION_MAX_EDGES + 1),
+        edgesRef,
+        '2',
+        true,
+      );
+
+      expect(result.every((edge) => edge.animated === false)).toBe(true);
+    });
+  });
+
   it('preserves the selected flag reported from the existing edge', () => {
     const edgesRef = {
       current: [
