@@ -27,16 +27,33 @@ export function usePidPreview(
       filterType,
       { codec, decoderConfig },
     );
+    let tileWidth = 0;
+    let tileHeight = 0;
+    const resizeObserver = new ResizeObserver(([entry]) => {
+      tileWidth = entry.contentRect.width * window.devicePixelRatio;
+      tileHeight = entry.contentRect.height * window.devicePixelRatio;
+    });
+    if (canvasRef.current) resizeObserver.observe(canvasRef.current);
     preview.setFrameListener((frame) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      if (canvas.width !== frame.displayWidth) {
-        canvas.width = frame.displayWidth;
+      const scale =
+        tileWidth > 0 && tileHeight > 0
+          ? Math.min(
+              1,
+              tileWidth / frame.displayWidth,
+              tileHeight / frame.displayHeight,
+            )
+          : 1;
+      const drawWidth = Math.max(1, Math.round(frame.displayWidth * scale));
+      const drawHeight = Math.max(1, Math.round(frame.displayHeight * scale));
+      if (canvas.width !== drawWidth) {
+        canvas.width = drawWidth;
       }
-      if (canvas.height !== frame.displayHeight) {
-        canvas.height = frame.displayHeight;
+      if (canvas.height !== drawHeight) {
+        canvas.height = drawHeight;
       }
-      canvas.getContext('2d')?.drawImage(frame, 0, 0);
+      canvas.getContext('2d')?.drawImage(frame, 0, 0, drawWidth, drawHeight);
     });
     const unsubscribe = preview.subscribe(
       (data) => {
@@ -46,6 +63,7 @@ export function usePidPreview(
     );
     return () => {
       unsubscribe();
+      resizeObserver.disconnect();
       gpacService.stopPidPreview(preview);
     };
   }, [filterIdx, pidIdx, variant, filterType, codec, decoderConfig, canvasRef]);
