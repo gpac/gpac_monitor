@@ -2,7 +2,7 @@ import { memo } from 'react';
 import type { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import type { PIDWithIndex } from '../../../../types';
 import PIDPreviewPanel from './PIDPreviewPanel';
-import { buildPIDDisplayLabel } from '../utils/pidLabel';
+import { buildPIDPreviewHeading } from '../utils/pidLabel';
 import { useInputsTabData } from '../../hooks/useInputsTabData';
 import { useOutputsTabData } from '../../hooks/useOutputsTabData';
 
@@ -24,7 +24,6 @@ const SINGLE_PREVIEW_GRID_STYLE = { gridTemplateColumns: 'minmax(0, 1fr)' };
 const MULTI_PREVIEW_GRID_STYLE = {
   gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
 };
-const DIRECTION_PREFIX = { input: 'IN', output: 'OUT' } as const;
 
 const PIDPreviewTiles = ({
   filterData,
@@ -49,9 +48,12 @@ const PIDPreviewTiles = ({
   if (previewTiles.length === 0) return null;
 
   return (
-    <section className="flex flex-col gap-1.5">
-      <div className="text-[0.714rem] font-medium uppercase tracking-wide text-muted-foreground">
-        Previews ({previewTiles.length})
+    <section className="flex flex-col gap-2.5">
+      <div className="flex items-center gap-1.5 text-[0.714rem] font-medium uppercase tracking-wide text-muted-foreground">
+        Previews
+        <span className="rounded bg-white/10 px-1.5 text-[10px] tabular-nums">
+          {previewTiles.length}
+        </span>
       </div>
       <div
         className="grid gap-2"
@@ -61,21 +63,25 @@ const PIDPreviewTiles = ({
             : MULTI_PREVIEW_GRID_STYLE
         }
       >
-        {previewTiles.map(({ pid, variant }) => (
-          <PIDPreviewPanel
-            key={`${variant}-${pid.pidIdx}`}
-            filterIdx={filterData.idx}
-            filterType={filterType}
-            pidIdx={pid.pidIdx}
-            variant={variant}
-            codec={pid.codec}
-            decoderConfig={pid.decoderConfig}
-            title={`${DIRECTION_PREFIX[variant]} · ${buildPIDDisplayLabel(pid)}`}
-            onClose={
-              variant === 'input' ? onCloseInputPreview : onCloseOutputPreview
-            }
-          />
-        ))}
+        {previewTiles.map(({ pid, variant }) => {
+          const heading = buildPIDPreviewHeading(pid, variant, filterType);
+          return (
+            <PIDPreviewPanel
+              key={`${variant}-${pid.pidIdx}`}
+              filterIdx={filterData.idx}
+              filterType={filterType}
+              pidIdx={pid.pidIdx}
+              variant={variant}
+              codec={pid.codec}
+              decoderConfig={pid.decoderConfig}
+              title={heading.title}
+              subtitle={heading.subtitle}
+              onClose={
+                variant === 'input' ? onCloseInputPreview : onCloseOutputPreview
+              }
+            />
+          );
+        })}
       </div>
     </section>
   );

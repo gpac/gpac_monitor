@@ -17,6 +17,7 @@ interface PIDPreviewPanelProps {
   codec: string;
   decoderConfig: string | null | undefined;
   title: string;
+  subtitle: string;
   onClose: (pidIdx: number) => void;
 }
 
@@ -29,6 +30,7 @@ const PIDPreviewPanel = memo(
     codec,
     decoderConfig,
     title,
+    subtitle,
     onClose,
   }: PIDPreviewPanelProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,14 +45,25 @@ const PIDPreviewPanel = memo(
     );
 
     return (
-      <div className="flex flex-col gap-1.5">
-        <div className="flex items-center justify-between gap-2 text-xs font-medium text-muted-foreground">
-          <span className="min-w-0 truncate" title={title}>
-            {title}
-          </span>
+      <div className="flex flex-col overflow-hidden rounded border border-white/10 bg-monitor-panel">
+        <div className="flex items-start justify-between gap-2 border-b border-white/10 px-2 py-1.5">
+          <div className="flex min-w-0 flex-col">
+            <span
+              className="truncate text-[13px] font-semibold text-monitor-text-primary"
+              title={title}
+            >
+              {title}
+            </span>
+            <span
+              className="truncate text-[11px] text-muted-foreground"
+              title={subtitle}
+            >
+              {subtitle}
+            </span>
+          </div>
           <button
             onClick={() => onClose(pidIdx)}
-            className="rounded px-1 text-gray-300 hover:bg-gray-700/80"
+            className="shrink-0 rounded px-1 py-0.5 text-gray-300 hover:bg-gray-700/80"
             title="Close preview"
             aria-label="Close preview"
           >
@@ -60,7 +73,7 @@ const PIDPreviewPanel = memo(
         {error ? (
           <div
             role="alert"
-            className="flex items-center justify-center p-4 text-center font-ui text-xs text-danger bg-monitor-panel border border-white/10"
+            className="flex items-center justify-center p-4 text-center font-ui text-xs text-danger"
             style={FRAME_BOX_STYLE}
           >
             {error}
@@ -69,7 +82,7 @@ const PIDPreviewPanel = memo(
           <div className="relative">
             <canvas
               ref={canvasRef}
-              className="block object-contain bg-monitor-panel border border-white/10"
+              className="block object-contain"
               style={FRAME_BOX_STYLE}
             />
             {loading && (
