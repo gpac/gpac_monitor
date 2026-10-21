@@ -3,7 +3,11 @@ import { LuX } from 'react-icons/lu';
 import { Spinner } from '@/components/ui/spinner';
 import { usePidPreview } from '../../hooks/usePidPreview';
 
-const FRAME_BOX_STYLE = { aspectRatio: '16 / 9', width: '100%' };
+const FRAME_BOX_STYLE = {
+  aspectRatio: '16 / 9',
+  width: '100%',
+  maxHeight: '20rem',
+};
 
 interface PIDPreviewPanelProps {
   filterIdx: number;
