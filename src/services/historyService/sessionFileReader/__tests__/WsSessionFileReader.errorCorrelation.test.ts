@@ -31,14 +31,20 @@ function stubServer(reply: ServerReply): void {
 const sessionId = '2026-01-01_00-00-00';
 const legacyIndex = { baseTsUs: 12, tsDeltaUs: [0], types: [1] };
 
+const legacyServerFiles: Record<string, string> = {
+  'journal_index.json': JSON.stringify(legacyIndex),
+  'manifest.json': '{}',
+};
+
 function legacyServerReply(request: Record<string, unknown>) {
-  if (request.file === 'journal_index.json') {
+  const content = legacyServerFiles[request.file as string];
+  if (content !== undefined) {
     return {
       command: 'read_file',
       status: 'ok',
       sessionId: request.sessionId,
       file: request.file,
-      content: JSON.stringify(legacyIndex),
+      content,
     };
   }
   return { command: 'read_file', status: 'error', error: 'file_not_allowed' };
@@ -70,8 +76,9 @@ describe('WsSessionFileReader read_file error correlation', () => {
     stubServer(legacyServerReply);
     reader = new WsSessionFileReader('ws://test');
     await reader.connect();
-    const [sessionIndex, journalIndex] = await Promise.all([
+    const [sessionIndex, , journalIndex] = await Promise.all([
       reader.readSessionIndex(sessionId),
+      reader.readManifest(sessionId),
       reader.readJournalIndex(sessionId),
     ]);
     expect(sessionIndex).toBeNull();
