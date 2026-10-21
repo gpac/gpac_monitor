@@ -13,6 +13,8 @@ import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
 import InputsTab from './tabs/pid/InputsTab';
 import OutputsTab from './tabs/pid/OutputsTab';
+import PIDPreviewStrip from './tabs/pid/preview/PIDPreviewStrip';
+import { useOpenPreviews } from './tabs/hooks/useOpenPreviews';
 
 // Constant fallback
 const EMPTY_FILTER_DATA: FilterStatsResponse = {
@@ -62,6 +64,9 @@ const MonitoredFilterView = memo(
     const [activeTab, setActiveTab] = useState<string>(
       initialTab || 'overview',
     );
+    const { openPreviews, toggleInputPreview, toggleOutputPreview } =
+      useOpenPreviews();
+    const isPidTabActive = activeTab === 'inputs' || activeTab === 'outputs';
 
     // Get log alerts for this filter
     const alerts = useAppSelector((state) =>
@@ -162,6 +167,16 @@ const MonitoredFilterView = memo(
               </TabsList>
             </div>
 
+            {isPidTabActive && (
+              <PIDPreviewStrip
+                filterData={filterData}
+                filterType={overviewData.type}
+                inputPreviewPidIdxs={openPreviews.input}
+                outputPreviewPidIdxs={openPreviews.output}
+                onCloseInputPreview={toggleInputPreview}
+                onCloseOutputPreview={toggleOutputPreview}
+              />
+            )}
             <TabsContent value="overview">
               <MemoizedOverviewTab
                 filter={overviewData}
@@ -184,16 +199,18 @@ const MonitoredFilterView = memo(
               <MemoizedInputsTab
                 filterData={filterData}
                 filterName={overviewData.name}
-                filterType={overviewData.type}
                 isLoading={isLoading}
+                previewPidIdxs={openPreviews.input}
+                onTogglePreview={toggleInputPreview}
               />
             </TabsContent>
             <TabsContent value="outputs">
               <MemoizedOutputsTab
                 filterData={filterData}
                 filterName={overviewData.name}
-                filterType={overviewData.type}
                 isLoading={isLoading}
+                previewPidIdxs={openPreviews.output}
+                onTogglePreview={toggleOutputPreview}
               />
             </TabsContent>
           </Tabs>

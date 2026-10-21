@@ -7,7 +7,13 @@ import { TAB_STYLES } from '../styles';
 import PIDInlineLayout from './PIDInlineLayout';
 
 const InputsTab = memo(
-  ({ filterData, filterName, filterType, isLoading = false }: InputsTabProps) => {
+  ({
+    filterData,
+    filterName,
+    isLoading = false,
+    previewPidIdxs,
+    onTogglePreview,
+  }: InputsTabProps) => {
     const { openPIDProps } = useSidebar();
 
     const { inputPidsWithIndices, groupedInputs, inputNames, globalStatus } =
@@ -41,9 +47,10 @@ const InputsTab = memo(
           <PIDInlineLayout
             pids={inputPidsWithIndices}
             filterIdx={filterData.idx}
-            filterType={filterType}
             onOpenProps={handleOpenProps}
             hoveredPidKey={null}
+            previewPidIdxs={previewPidIdxs}
+            onTogglePreview={onTogglePreview}
           />
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">

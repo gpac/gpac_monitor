@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { useAppDispatch } from '@/shared/hooks/redux';
 import {
   clearSelectedPidsByFilter,
@@ -8,38 +8,30 @@ import type { PIDWithIndex } from '../../../types';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PIDTable } from './shared';
 import PIDGraphSection from './PIDGraphSection';
-import PIDPreviewStrip from './preview/PIDPreviewStrip';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
 
 interface PIDInlineLayoutProps {
   pids: PIDWithIndex[];
   filterIdx: number;
-  filterType: string;
   onOpenProps: (filterIdx: number, pidIdx: number) => void;
   hoveredPidKey: string | null;
   variant?: 'input' | 'output';
+  previewPidIdxs: number[];
+  onTogglePreview: (pidIdx: number) => void;
 }
 
 const PIDInlineLayout = memo(
   ({
     pids,
     filterIdx,
-    filterType,
     onOpenProps,
     hoveredPidKey,
     variant = 'input',
+    previewPidIdxs,
+    onTogglePreview,
   }: PIDInlineLayoutProps) => {
     const dispatch = useAppDispatch();
     const [mode, setMode] = useState<PIDMetricMode>('bitrate');
-    const [previewPidIdxs, setPreviewPidIdxs] = useState<number[]>([]);
-
-    const togglePreview = useCallback((pidIdx: number) => {
-      setPreviewPidIdxs((openPidIdxs) =>
-        openPidIdxs.includes(pidIdx)
-          ? openPidIdxs.filter((openPidIdx) => openPidIdx !== pidIdx)
-          : [...openPidIdxs, pidIdx],
-      );
-    }, []);
     const hasDefaultedRef = useRef(false);
 
     useEffect(
@@ -77,15 +69,7 @@ const PIDInlineLayout = memo(
           activeMetric={mode}
           onMetricClick={setMode}
           previewPidIdxs={previewPidIdxs}
-          onTogglePreview={togglePreview}
-        />
-        <PIDPreviewStrip
-          pids={pids}
-          previewPidIdxs={previewPidIdxs}
-          filterIdx={filterIdx}
-          filterType={filterType}
-          variant={variant}
-          onClosePreview={togglePreview}
+          onTogglePreview={onTogglePreview}
         />
         <PIDGraphSection
           filterIdx={filterIdx}

@@ -8,12 +8,19 @@ import PIDInlineLayout from './PIDInlineLayout';
 interface OutputsTabProps {
   filterData: FilterStatsResponse;
   filterName: string;
-  filterType: string;
   isLoading?: boolean;
+  previewPidIdxs: number[];
+  onTogglePreview: (pidIdx: number) => void;
 }
 
 const OutputsTab = memo(
-  ({ filterData, filterName, filterType, isLoading = false }: OutputsTabProps) => {
+  ({
+    filterData,
+    filterName,
+    isLoading = false,
+    previewPidIdxs,
+    onTogglePreview,
+  }: OutputsTabProps) => {
     const { pidsWithIndices, globalStatus } = useOutputsTabData(filterData);
 
     return (
@@ -32,10 +39,11 @@ const OutputsTab = memo(
           <PIDInlineLayout
             pids={pidsWithIndices}
             filterIdx={filterData.idx}
-            filterType={filterType}
             onOpenProps={() => {}}
             hoveredPidKey={null}
             variant="output"
+            previewPidIdxs={previewPidIdxs}
+            onTogglePreview={onTogglePreview}
           />
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">

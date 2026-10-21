@@ -61,8 +61,9 @@ export interface PIDWithIndex extends TabPIDData {
 export interface InputsTabProps {
   filterData: FilterStatsResponse;
   filterName: string;
-  filterType: string;
   isLoading?: boolean;
+  previewPidIdxs: number[];
+  onTogglePreview: (pidIdx: number) => void;
 }
 
 /**
