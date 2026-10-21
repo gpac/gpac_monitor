@@ -33,7 +33,13 @@ const legacyIndex = { baseTsUs: 12, tsDeltaUs: [0], types: [1] };
 
 const legacyServerFiles: Record<string, string> = {
   'journal_index.json': JSON.stringify(legacyIndex),
-  'manifest.json': '{}',
+  'manifest.json': JSON.stringify({
+    version: 1,
+    startUs: 0,
+    endUs: 10,
+    chunkDurationUs: 10,
+    chunkCount: 1,
+  }),
 };
 
 function legacyServerReply(request: Record<string, unknown>) {
@@ -76,13 +82,14 @@ describe('WsSessionFileReader read_file error correlation', () => {
     stubServer(legacyServerReply);
     reader = new WsSessionFileReader('ws://test');
     await reader.connect();
-    const [sessionIndex, , journalIndex] = await Promise.all([
+    const [sessionIndex, journalIndex, manifest] = await Promise.all([
       reader.readSessionIndex(sessionId),
-      reader.readManifest(sessionId),
       reader.readJournalIndex(sessionId),
+      reader.readManifest(sessionId),
     ]);
     expect(sessionIndex).toBeNull();
     expect(journalIndex).toEqual(legacyIndex);
+    expect(manifest).toMatchObject({ startUs: 0, endUs: 10 });
   });
 
   it('correlated error rejects the matching read', async () => {
