@@ -100,7 +100,7 @@ const MonitoredFilterView = memo(
             <div
               className={`sticky ${isDetached ? 'top-0' : 'top-10'} z-10 bg-monitor-surface space-y-1 px-1 py-2`}
             >
-              <div className="flex justify-stretch items-center gap-4">
+              <div className="flex min-h-5 justify-stretch items-center gap-4">
                 <FilterChangeBadges filterIdx={overviewData.filterIdx} />
                 <StatusBadge
                   label={`${alerts?.errors} ERR`}

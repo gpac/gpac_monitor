@@ -70,7 +70,7 @@ const PIDRowInfoCell = memo(
     }, [selectIfNeeded, onOpenProps]);
 
     return (
-      <div className="min-w-0 flex items-center gap-1.5">
+      <div className="min-w-0 flex items-center gap-1.5" title={infoLine}>
         <GraphRadio
           active={isSelected}
           onClick={handleToggleSelect}
@@ -108,10 +108,7 @@ const PIDRowInfoCell = memo(
         >
           {badgeConfig.label}
         </Badge>
-        <span
-          className="min-w-0 truncate text-muted-foreground"
-          title={infoLine}
-        >
+        <span className="min-w-0 truncate text-muted-foreground">
           {infoLine}
         </span>
       </div>
