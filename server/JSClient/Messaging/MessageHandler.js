@@ -166,6 +166,8 @@ function MessageHandler(client) {
                             this.client.client.send(JSON.stringify({
                                 command: 'read_file',
                                 status: 'error',
+                                sessionId,
+                                file,
                                 error: result.error,
                                 detail: result.detail
                             }));
