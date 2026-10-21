@@ -198,10 +198,7 @@ export const detachFilterReducer = (
   // Calculate max Y from existing grid widgets
   const maxY = gridWidgets.reduce((max, w) => Math.max(max, w.y + w.h), 0);
 
-  // Count existing detached widgets
-  const detachedCount = Object.values(state.viewByFilter).filter(
-    (v) => v?.mode === 'detached',
-  ).length;
+  const detachedWidgets = state.activeWidgets.filter((w) => w.isDetached);
 
   // Position in grid at bottom, with smart layout
   const cols = 24;
@@ -209,11 +206,19 @@ export const detachFilterReducer = (
   const widgetHeight = 6;
   const maxWidgetsPerRow = Math.floor(cols / widgetWidth);
 
-  const row = Math.floor(detachedCount / maxWidgetsPerRow);
-  const col = detachedCount % maxWidgetsPerRow;
+  const slotX = (slot: number) => (slot % maxWidgetsPerRow) * widgetWidth;
+  const slotY = (slot: number) =>
+    maxY + Math.floor(slot / maxWidgetsPerRow) * (widgetHeight + 1);
+  const isSlotTaken = (slot: number) =>
+    detachedWidgets.some(
+      (detached) => detached.x === slotX(slot) && detached.y === slotY(slot),
+    );
 
-  widget.x = col * widgetWidth;
-  widget.y = maxY + row * (widgetHeight + 1);
+  let freeSlot = 0;
+  while (isSlotTaken(freeSlot)) freeSlot++;
+
+  widget.x = slotX(freeSlot);
+  widget.y = slotY(freeSlot);
   widget.w = widgetWidth;
   widget.h = widgetHeight;
 
