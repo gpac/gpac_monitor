@@ -26,6 +26,7 @@ export function updateEdgesWithState(
   newEdges: Edge[],
   edgesRef: React.MutableRefObject<Edge[]>,
   selectedNodeId: string | null,
+  hasMonitoredFilter = false,
 ) {
   const existingById = new Map(edgesRef.current.map((edge) => [edge.id, edge]));
   const animateAllEdges = newEdges.length <= EDGE_ANIMATION_MAX_EDGES;
@@ -33,7 +34,8 @@ export function updateEdgesWithState(
     const isIncidentToSelection =
       selectedNodeId !== null &&
       (edge.source === selectedNodeId || edge.target === selectedNodeId);
-    const animated = animateAllEdges || isIncidentToSelection;
+    const animated =
+      !hasMonitoredFilter && (animateAllEdges || isIncidentToSelection);
     const existingEdge = existingById.get(edge.id);
     if (existingEdge) {
       return {

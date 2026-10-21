@@ -8,6 +8,7 @@ import useGraphMonitor from '../useGraphMonitor';
 import graphReducer, {
   setSelectedNode,
 } from '@/shared/store/slices/graphSlice';
+import widgetsReducer from '@/shared/store/widgets/widgetsSlice';
 
 vi.mock('@xyflow/react', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@xyflow/react')>();
@@ -75,7 +76,7 @@ describe('useGraphMonitor layout stability', () => {
   it('preserves Dagre positions when selecting a node changes edge state', async () => {
     const initialGraphState = graphReducer(undefined, { type: 'test/init' });
     const store = configureStore({
-      reducer: { graph: graphReducer },
+      reducer: { graph: graphReducer, widgets: widgetsReducer },
       preloadedState: {
         graph: { ...initialGraphState, nodes: graphNodes, edges: graphEdges },
       },

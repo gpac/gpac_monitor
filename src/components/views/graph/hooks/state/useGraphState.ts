@@ -8,6 +8,7 @@ import {
   selectError,
   selectSelectedNodeId,
 } from '@/shared/store/selectors/graph/graphSelectors';
+import { selectHasMonitoredFilter } from '@/shared/store/selectors/widgets';
 import {
   updateNodesWithPositions,
   updateEdgesWithState,
@@ -30,6 +31,7 @@ export const useGraphState = (
   const isLoading = useAppSelector(selectIsLoading);
   const error = useAppSelector(selectError);
   const selectedNodeId = useAppSelector(selectSelectedNodeId);
+  const hasMonitoredFilter = useAppSelector(selectHasMonitoredFilter);
 
   // Performance tracking (debug only)
   const renderCount = useRef(0);
@@ -40,8 +42,13 @@ export const useGraphState = (
   }, [reduxNodes, nodesRef]);
 
   const edges = useMemo(() => {
-    return updateEdgesWithState(reduxEdges, edgesRef, selectedNodeId);
-  }, [reduxEdges, edgesRef, selectedNodeId]);
+    return updateEdgesWithState(
+      reduxEdges,
+      edgesRef,
+      selectedNodeId,
+      hasMonitoredFilter,
+    );
+  }, [reduxEdges, edgesRef, selectedNodeId, hasMonitoredFilter]);
 
   return {
     nodes,
