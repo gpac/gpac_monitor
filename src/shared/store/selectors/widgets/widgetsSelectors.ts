@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import type { RootState } from '../../index';
+import type { RootState as WidgetsRootState } from '../../widgets/types';
 import { WidgetConfig } from '@/types/ui/widget';
 
 const defaultWidgetConfig: WidgetConfig = {
@@ -30,6 +31,15 @@ export const selectCurrentLayout = (state: RootState): string | undefined =>
  * Get widget config by ID
  */
 const selectWidgetConfigsInternal = (state: RootState) => state.widgets.configs;
+
+const selectViewByFilter = (state: WidgetsRootState) =>
+  state.widgets.viewByFilter;
+
+export const selectHasMonitoredFilter = createSelector(
+  [selectViewByFilter],
+  (viewByFilter): boolean =>
+    Object.values(viewByFilter).some((view) => view !== undefined),
+);
 
 export const makeSelectWidgetConfig = () =>
   createSelector(
