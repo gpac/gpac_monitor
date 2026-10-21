@@ -271,8 +271,17 @@ export class WsSessionFileReader {
 
   /** Maps server response command to the matching pending key */
   private responseKey(data: Record<string, unknown>): string {
-    if (data.command === 'read_file')
-      return `read_file:${data.sessionId}:${data.file}`;
-    return data.command as string;
+    if (data.command !== 'read_file') return data.command as string;
+    if (data.status === 'error' && data.file === undefined)
+      return this.oldestPendingReadFileKey();
+    return `read_file:${data.sessionId}:${data.file}`;
+  }
+
+  /** Legacy server: read_file errors without sessionId/file */
+  private oldestPendingReadFileKey(): string {
+    for (const key of this.pending.keys()) {
+      if (key.startsWith('read_file:')) return key;
+    }
+    return 'read_file:';
   }
 }
