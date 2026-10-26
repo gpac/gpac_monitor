@@ -3,6 +3,7 @@ import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
+import { selectFilterViewModes } from '@/shared/store/selectors/widgets/widgetsSelectors';
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { getFilterIdxFromTab } from '../utils/filterMonitoringUtils';
 import {
@@ -32,10 +33,10 @@ export const StatsTabs: React.FC<StatsTabsProps> = ({
   tabsRef,
 }) => {
   const { isHistory } = useDataMode();
-  const viewByFilter = useAppSelector((state) => state.widgets.viewByFilter);
+  const viewModes = useAppSelector(selectFilterViewModes);
 
-  const inlineFilters = Object.entries(viewByFilter)
-    .filter(([_, view]) => view?.mode === 'inline')
+  const inlineFilters = Object.entries(viewModes)
+    .filter(([_, mode]) => mode === 'inline')
     .map(([idx]) => Number(idx));
 
   // Active tab first

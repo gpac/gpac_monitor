@@ -67,7 +67,7 @@ const PIDPreviewPanel = memo(
             title="Close preview"
             aria-label="Close preview"
           >
-            <LuX className="h-3.5 w-3.5" />
+            <LuX className="h-4 w-4" />
           </button>
         </div>
         {error ? (

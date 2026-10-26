@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { useAppSelector } from '@/shared/hooks/redux';
+import { selectFilterViewModes } from '@/shared/store/selectors/widgets/widgetsSelectors';
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import {
   getAllMonitoredFilters,
@@ -13,16 +14,16 @@ import {
 export const useMonitoredFilters = (
   enrichedFilters: EnrichedFilterOverview[],
 ) => {
-  const viewByFilter = useAppSelector((state) => state.widgets.viewByFilter);
+  const viewModes = useAppSelector(selectFilterViewModes);
 
   const monitoredFilterMap = useMemo(
-    () => getAllMonitoredFilters(viewByFilter, enrichedFilters),
-    [viewByFilter, enrichedFilters],
+    () => getAllMonitoredFilters(viewModes, enrichedFilters),
+    [viewModes, enrichedFilters],
   );
 
   const inlineFilterMap = useMemo(
-    () => getInlineFilters(monitoredFilterMap, viewByFilter),
-    [monitoredFilterMap, viewByFilter],
+    () => getInlineFilters(monitoredFilterMap, viewModes),
+    [monitoredFilterMap, viewModes],
   );
 
   return { monitoredFilterMap, inlineFilterMap };

@@ -1,9 +1,17 @@
-import { memo, useEffect, useRef, useState } from 'react';
-import { useAppDispatch } from '@/shared/hooks/redux';
+import { memo, useCallback, useEffect, useRef } from 'react';
+import { useStore } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import type { RootState } from '@/shared/store';
 import {
   clearSelectedPidsByFilter,
   toggleSelectedPid,
 } from '@/shared/store/slices/monitoredFilterSlice';
+import { selectSelectedPidTargetsByFilter } from '@/shared/store/selectors/monitoredFilter';
+import {
+  selectFilterPidMetricMode,
+  selectFilterViewModes,
+} from '@/shared/store/selectors/widgets/widgetsSelectors';
+import { setFilterViewState } from '@/shared/store/widgets/widgetsSlice';
 import type { PIDWithIndex } from '../../../types';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PIDTable } from './shared';
@@ -31,23 +39,34 @@ const PIDInlineLayout = memo(
     onTogglePreview,
   }: PIDInlineLayoutProps) => {
     const dispatch = useAppDispatch();
-    const [mode, setMode] = useState<PIDMetricMode>('bitrate');
+    const store = useStore<RootState>();
+    const mode = useAppSelector((state) =>
+      selectFilterPidMetricMode(state, filterIdx),
+    );
+    const setMode = useCallback(
+      (pidMetricMode: PIDMetricMode) =>
+        dispatch(setFilterViewState({ filterIdx, patch: { pidMetricMode } })),
+      [dispatch, filterIdx],
+    );
     const hasDefaultedRef = useRef(false);
 
     useEffect(
       () => () => {
         hasDefaultedRef.current = false;
+        if (selectFilterViewModes(store.getState())[filterIdx]) return;
         dispatch(clearSelectedPidsByFilter(filterIdx));
       },
-      [dispatch, filterIdx],
+      [dispatch, filterIdx, store],
     );
 
-    // Selection is empty on mount (cleared on unmount above):
-    // select the first PID once so the graph shows by default.
+    // Selection survives detach/reattach; default to the first PID
+    // only when the filter has none, so the graph shows by default.
     useEffect(() => {
       const firstPid = pids[0];
       if (hasDefaultedRef.current || !firstPid) return;
       hasDefaultedRef.current = true;
+      if (selectSelectedPidTargetsByFilter(store.getState(), filterIdx).length)
+        return;
       dispatch(
         toggleSelectedPid({
           filterIdx,
@@ -56,7 +75,7 @@ const PIDInlineLayout = memo(
           label: buildPIDDisplayLabel(firstPid),
         }),
       );
-    }, [dispatch, filterIdx, variant, pids]);
+    }, [dispatch, filterIdx, variant, pids, store]);
 
     return (
       <div className="flex flex-col gap-2">

@@ -1,9 +1,10 @@
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useMemo } from 'react';
 import { OverviewTabData, TabPIDData, NetworkTabData } from '@/types/ui';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
+import { useFilterActiveTab } from '../hooks/filters/useFilterActiveTab';
 import { selectAllFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
@@ -61,8 +62,9 @@ const MonitoredFilterView = memo(
     isLoading = false,
     isDetached = false,
   }: MonitoredFilterViewProps) => {
-    const [activeTab, setActiveTab] = useState<string>(
-      initialTab || 'overview',
+    const { activeTab, handleTabChange } = useFilterActiveTab(
+      overviewData.filterIdx,
+      initialTab,
     );
     const { openPreviews, toggleInputPreview, toggleOutputPreview } =
       useOpenPreviews();
@@ -74,13 +76,6 @@ const MonitoredFilterView = memo(
         ? (selectAllFilterAlerts(state)[String(overviewData.filterIdx)] ?? null)
         : null,
     );
-
-    // Update active tab when initialTab changes
-    useEffect(() => {
-      if (initialTab) {
-        setActiveTab(initialTab);
-      }
-    }, [initialTab]);
 
     const counts = useMemo(
       () => ({
@@ -99,7 +94,7 @@ const MonitoredFilterView = memo(
         <div className="flex flex-col gap-2">
           <Tabs
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={handleTabChange}
             className="w-full"
           >
             <div

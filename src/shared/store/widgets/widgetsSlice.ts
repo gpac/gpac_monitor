@@ -5,6 +5,7 @@ import {
 } from '@reduxjs/toolkit';
 import { initialState } from './widgetsInitialState';
 import * as reducers from './widgetUtils';
+import { setFilterViewStateReducer } from './filterViewReducers';
 import { saveLayoutsToStorage, saveLastUsedLayout } from './layoutStorage';
 import { filtersUpdated } from '@/shared/store/actions/globalActions';
 
@@ -40,6 +41,7 @@ const widgetsSlice = createSlice({
     detachFilter: reducers.detachFilterReducer,
     attachFilter: reducers.attachFilterReducer,
     closeFilter: reducers.closeFilterReducer,
+    setFilterViewState: setFilterViewStateReducer,
   },
   extraReducers: (builder) => {
     builder.addCase(filtersUpdated, (state, action) => {
@@ -76,6 +78,7 @@ export const {
   detachFilter,
   attachFilter,
   closeFilter,
+  setFilterViewState,
 } = widgetsSlice.actions;
 
 export default widgetsSlice.reducer;

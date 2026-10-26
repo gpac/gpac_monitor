@@ -5,6 +5,7 @@ import {
   detachFilter,
   closeFilter,
 } from '@/shared/store/slices/widgetsSlice';
+import { clearSelectedPidsByFilter } from '@/shared/store/slices/monitoredFilterSlice';
 import { useSidebar } from '@/shared/hooks/ui/useSidebar';
 
 /**
@@ -35,6 +36,7 @@ export const useFilterHandlers = (onTabChange?: (tab: string) => void) => {
   const handleCloseTab = useCallback(
     (filterIdx: number, e: React.SyntheticEvent) => {
       e.stopPropagation();
+      dispatch(clearSelectedPidsByFilter(filterIdx));
       dispatch(closeFilter(filterIdx));
       onTabChange?.('main');
     },

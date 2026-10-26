@@ -1,16 +1,14 @@
 import { EnrichedFilterOverview } from '@/types/domain/gpac/model';
-import { FilterView } from '@/shared/store/slices/widgetsSlice';
+import { ViewMode } from '@/shared/store/slices/widgetsSlice';
 
 /**
  * Get all monitored filters (inline + detached)
  */
 export const getAllMonitoredFilters = (
-  viewByFilter: Record<number, FilterView | undefined>,
+  viewModes: Record<number, ViewMode>,
   enrichedFilters: EnrichedFilterOverview[],
 ): Map<number, EnrichedFilterOverview> => {
-  const monitoredIndexes = Object.entries(viewByFilter)
-    .filter(([_, view]) => view !== null)
-    .map(([idx]) => Number(idx));
+  const monitoredIndexes = Object.keys(viewModes).map(Number);
 
   return new Map(
     monitoredIndexes
@@ -27,11 +25,11 @@ export const getAllMonitoredFilters = (
  */
 export const getInlineFilters = (
   monitoredFilters: Map<number, EnrichedFilterOverview>,
-  viewByFilter: Record<number, FilterView | undefined>,
+  viewModes: Record<number, ViewMode>,
 ): Map<number, EnrichedFilterOverview> => {
   return new Map(
     Array.from(monitoredFilters.entries()).filter(
-      ([idx]) => viewByFilter[idx]?.mode === 'inline',
+      ([idx]) => viewModes[idx] === 'inline',
     ),
   );
 };

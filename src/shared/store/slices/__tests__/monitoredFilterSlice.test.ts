@@ -2,7 +2,43 @@ import { describe, it, expect } from 'vitest';
 import monitoredFilterReducer, {
   setSelectedStatusMetric,
   setParsedStatuses,
+  toggleSelectedPid,
 } from '../monitoredFilterSlice';
+import { filtersUpdated } from '@/shared/store/actions/globalActions';
+import type { GraphFilterData } from '@/types/domain/gpac/model';
+
+const makeGraphFilter = (idx: number): GraphFilterData => ({
+  idx,
+  name: `filter${idx}`,
+  type: 'filter',
+  status: 'running',
+  itag: null,
+  ID: null,
+  nb_ipid: 0,
+  nb_opid: 0,
+  ipid: [],
+  opid: [],
+});
+
+describe('filtersUpdated', () => {
+  it('drops selected PID targets of filters no longer in the graph', () => {
+    let state = monitoredFilterReducer(undefined, { type: '@@INIT' });
+    state = monitoredFilterReducer(
+      state,
+      toggleSelectedPid({ filterIdx: 1, direction: 'input', pidIndex: 2 }),
+    );
+    state = monitoredFilterReducer(
+      state,
+      toggleSelectedPid({ filterIdx: 3, direction: 'output', pidIndex: 0 }),
+    );
+
+    state = monitoredFilterReducer(state, filtersUpdated([makeGraphFilter(3)]));
+
+    expect(state.selectedPidTargets).toEqual([
+      { filterIdx: 3, direction: 'output', pidIndex: 0 },
+    ]);
+  });
+});
 
 describe('setSelectedStatusMetric', () => {
   it('toggles off an already-selected metric', () => {
