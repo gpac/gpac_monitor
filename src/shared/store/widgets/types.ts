@@ -1,4 +1,5 @@
 import { Widget, WidgetConfig } from '@/types/ui/widget';
+import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 
 export interface RootState {
   widgets: WidgetsState;
@@ -16,6 +17,7 @@ export type ViewMode = 'inline' | 'detached';
 export interface FilterView {
   mode: ViewMode;
   widgetId?: string;
+  activeTab?: InitialTabType;
 }
 
 export interface WidgetsState {

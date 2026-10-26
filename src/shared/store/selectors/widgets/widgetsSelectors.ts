@@ -1,7 +1,12 @@
 import { createSelector } from '@reduxjs/toolkit';
+import { shallowEqual } from 'react-redux';
 import type { RootState } from '../../index';
-import type { RootState as WidgetsRootState } from '../../widgets/types';
+import type {
+  RootState as WidgetsRootState,
+  ViewMode,
+} from '../../widgets/types';
 import { WidgetConfig } from '@/types/ui/widget';
+import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 
 const defaultWidgetConfig: WidgetConfig = {
   isMaximized: false,
@@ -40,6 +45,24 @@ export const selectHasMonitoredFilter = createSelector(
   (viewByFilter): boolean =>
     Object.values(viewByFilter).some((view) => view !== undefined),
 );
+
+export const selectFilterViewModes = createSelector(
+  [selectViewByFilter],
+  (viewByFilter): Record<number, ViewMode> => {
+    const viewModes: Record<number, ViewMode> = {};
+    for (const [filterIdx, view] of Object.entries(viewByFilter)) {
+      if (view) viewModes[Number(filterIdx)] = view.mode;
+    }
+    return viewModes;
+  },
+  { memoizeOptions: { resultEqualityCheck: shallowEqual } },
+);
+
+export const selectFilterActiveTab = (
+  state: WidgetsRootState,
+  filterIdx: number,
+): InitialTabType =>
+  state.widgets.viewByFilter[filterIdx]?.activeTab ?? 'overview';
 
 export const makeSelectWidgetConfig = () =>
   createSelector(

@@ -4,10 +4,14 @@ import widgetsReducer, {
   openFilterInline,
   attachFilter,
   closeFilter,
+  setFilterViewState,
 } from '@/shared/store/widgets/widgetsSlice';
 import type { FilterView } from '@/shared/store/widgets/widgetsSlice';
 import { filtersUpdated } from '@/shared/store/actions/globalActions';
-import { selectHasMonitoredFilter } from '../widgetsSelectors';
+import {
+  selectFilterViewModes,
+  selectHasMonitoredFilter,
+} from '../widgetsSelectors';
 
 const createStore = (
   viewByFilter: Record<number, FilterView | undefined> = {},
@@ -60,5 +64,37 @@ describe('selectHasMonitoredFilter', () => {
     store.dispatch(filtersUpdated([]));
 
     expect(selectHasMonitoredFilter(store.getState())).toBe(false);
+  });
+});
+
+describe('selectFilterViewModes', () => {
+  it('returns an empty record when no filter view is open', () => {
+    const store = createStore();
+
+    expect(selectFilterViewModes(store.getState())).toEqual({});
+  });
+
+  it('keeps the same reference when only the active tab changes', () => {
+    const store = createStore({ 2: detachedView });
+    store.dispatch(openFilterInline(1));
+    const modesBefore = selectFilterViewModes(store.getState());
+
+    store.dispatch(
+      setFilterViewState({ filterIdx: 1, patch: { activeTab: 'inputs' } }),
+    );
+
+    expect(selectFilterViewModes(store.getState())).toBe(modesBefore);
+    expect(modesBefore).toEqual({ 1: 'inline', 2: 'detached' });
+  });
+
+  it('returns a new record when a filter changes mode', () => {
+    const store = createStore({ 2: detachedView });
+    const modesBefore = selectFilterViewModes(store.getState());
+
+    store.dispatch(attachFilter(2));
+
+    const modesAfter = selectFilterViewModes(store.getState());
+    expect(modesAfter).not.toBe(modesBefore);
+    expect(modesAfter).toEqual({ 2: 'inline' });
   });
 });

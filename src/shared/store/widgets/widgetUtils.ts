@@ -2,6 +2,7 @@ import { PayloadAction } from '@reduxjs/toolkit';
 import { Widget, WidgetConfig, WidgetType } from '@/types/ui/widget';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetsState } from './types';
+import { writeFilterViewMode } from './filterViewReducers';
 
 // Basic widget management
 export const addWidgetReducer = (
@@ -177,7 +178,7 @@ export const openFilterInlineReducer = (
     delete state.configs[current.widgetId];
   }
 
-  state.viewByFilter[filterIdx] = { mode: 'inline' };
+  writeFilterViewMode(state, filterIdx, 'inline');
 };
 
 export const detachFilterReducer = (
@@ -224,7 +225,7 @@ export const detachFilterReducer = (
     settings: {},
   };
 
-  state.viewByFilter[idx] = { mode: 'detached', widgetId: widget.id };
+  writeFilterViewMode(state, idx, 'detached', widget.id);
 };
 
 export const attachFilterReducer = (
@@ -239,7 +240,7 @@ export const attachFilterReducer = (
       (w) => w.id !== view.widgetId,
     );
     delete state.configs[view.widgetId];
-    state.viewByFilter[filterIdx] = { mode: 'inline' };
+    writeFilterViewMode(state, filterIdx, 'inline');
   }
 };
 
