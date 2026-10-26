@@ -5,6 +5,7 @@ import type {
 } from '@/components/views/stats-session/types/pid';
 import type { StatusMetricSample } from '@/components/views/stats-session/types/statusMetric';
 import type { ParsedFilterStatus } from '@/utils/metrics/filterStatusParser';
+import { filtersUpdated } from '@/shared/store/actions/globalActions';
 
 /**
  * Generic data point for charts (time-series data)
@@ -315,6 +316,14 @@ const monitoredFilterSlice = createSlice({
     setMaxPoints: (state, action: PayloadAction<number>) => {
       state.maxPoints = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(filtersUpdated, (state, action) => {
+      const validIdxs = action.payload.map((filter) => filter.idx);
+      state.selectedPidTargets = state.selectedPidTargets.filter((target) =>
+        validIdxs.includes(target.filterIdx),
+      );
+    });
   },
 });
 
