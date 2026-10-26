@@ -7,6 +7,7 @@ import type {
 } from '../../widgets/types';
 import { WidgetConfig } from '@/types/ui/widget';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
+import type { PIDMetricMode } from '@/components/views/stats-session/types/pid';
 
 const defaultWidgetConfig: WidgetConfig = {
   isMaximized: false,
@@ -63,6 +64,12 @@ export const selectFilterActiveTab = (
   filterIdx: number,
 ): InitialTabType =>
   state.widgets.viewByFilter[filterIdx]?.activeTab ?? 'overview';
+
+export const selectFilterPidMetricMode = (
+  state: WidgetsRootState,
+  filterIdx: number,
+): PIDMetricMode =>
+  state.widgets.viewByFilter[filterIdx]?.pidMetricMode ?? 'bitrate';
 
 export const makeSelectWidgetConfig = () =>
   createSelector(

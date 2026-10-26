@@ -1,9 +1,11 @@
-import { memo, useEffect, useRef, useState } from 'react';
-import { useAppDispatch } from '@/shared/hooks/redux';
+import { memo, useCallback, useEffect, useRef } from 'react';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
 import {
   clearSelectedPidsByFilter,
   toggleSelectedPid,
 } from '@/shared/store/slices/monitoredFilterSlice';
+import { selectFilterPidMetricMode } from '@/shared/store/selectors/widgets/widgetsSelectors';
+import { setFilterViewState } from '@/shared/store/widgets/widgetsSlice';
 import type { PIDWithIndex } from '../../../types';
 import type { PIDMetricMode } from '../../../types/pid';
 import { PIDTable } from './shared';
@@ -27,7 +29,14 @@ const PIDInlineLayout = memo(
     variant = 'input',
   }: PIDInlineLayoutProps) => {
     const dispatch = useAppDispatch();
-    const [mode, setMode] = useState<PIDMetricMode>('bitrate');
+    const mode = useAppSelector((state) =>
+      selectFilterPidMetricMode(state, filterIdx),
+    );
+    const setMode = useCallback(
+      (pidMetricMode: PIDMetricMode) =>
+        dispatch(setFilterViewState({ filterIdx, patch: { pidMetricMode } })),
+      [dispatch, filterIdx],
+    );
     const hasDefaultedRef = useRef(false);
 
     useEffect(

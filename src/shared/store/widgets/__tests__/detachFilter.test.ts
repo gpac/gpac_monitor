@@ -8,7 +8,10 @@ import widgetsReducer, {
   closeFilter,
   setFilterViewState,
 } from '../widgetsSlice';
-import { selectFilterActiveTab } from '@/shared/store/selectors/widgets/widgetsSelectors';
+import {
+  selectFilterActiveTab,
+  selectFilterPidMetricMode,
+} from '@/shared/store/selectors/widgets/widgetsSelectors';
 
 const detachedWidget: Widget = {
   id: 'widget-detached',
@@ -63,6 +66,22 @@ describe('filter view active tab', () => {
     state = widgetsReducer(state, openFilterInline(3));
 
     expect(selectFilterActiveTab({ widgets: state }, 3)).toBe('overview');
+    expect(selectFilterPidMetricMode({ widgets: state }, 3)).toBe('bitrate');
+  });
+
+  it('keeps the PID metric mode when the filter is detached', () => {
+    let state = widgetsReducer(
+      openOnInputsTab(),
+      setFilterViewState({
+        filterIdx: 3,
+        patch: { pidMetricMode: 'processTime' },
+      }),
+    );
+    state = widgetsReducer(state, detachFilter({ idx: 3, name: 'mp4mx' }));
+
+    expect(selectFilterPidMetricMode({ widgets: state }, 3)).toBe(
+      'processTime',
+    );
   });
 
   it('ignores a patch for a filter that is not monitored', () => {
