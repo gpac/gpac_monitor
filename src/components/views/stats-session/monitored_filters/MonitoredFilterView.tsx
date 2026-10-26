@@ -67,7 +67,7 @@ const MonitoredFilterView = memo(
       initialTab,
     );
     const { openPreviews, toggleInputPreview, toggleOutputPreview } =
-      useOpenPreviews();
+      useOpenPreviews(overviewData.filterIdx);
     const isPidTabActive = activeTab === 'inputs' || activeTab === 'outputs';
 
     // Get log alerts for this filter

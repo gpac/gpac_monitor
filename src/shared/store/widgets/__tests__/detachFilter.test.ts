@@ -12,6 +12,7 @@ import widgetsReducer, {
 } from '../widgetsSlice';
 import {
   selectFilterActiveTab,
+  selectFilterOpenPreviews,
   selectFilterPidMetricMode,
 } from '@/shared/store/selectors/widgets/widgetsSelectors';
 
@@ -142,6 +143,39 @@ describe('filter view active tab', () => {
     expect(selectFilterPidMetricMode({ widgets: state }, 3)).toBe(
       'processTime',
     );
+  });
+
+  it('keeps open previews when the filter is detached then reattached', () => {
+    const openPreviews = { input: [0], output: [1] };
+    let state = widgetsReducer(
+      openOnInputsTab(),
+      setFilterViewState({ filterIdx: 3, patch: { openPreviews } }),
+    );
+    state = widgetsReducer(state, detachFilter({ idx: 3, name: 'mp4mx' }));
+    expect(selectFilterOpenPreviews({ widgets: state }, 3)).toEqual(
+      openPreviews,
+    );
+
+    state = widgetsReducer(state, attachFilter(3));
+    expect(selectFilterOpenPreviews({ widgets: state }, 3)).toEqual(
+      openPreviews,
+    );
+  });
+
+  it('drops open previews once the filter is closed', () => {
+    let state = widgetsReducer(
+      openOnInputsTab(),
+      setFilterViewState({
+        filterIdx: 3,
+        patch: { openPreviews: { input: [0], output: [] } },
+      }),
+    );
+    state = widgetsReducer(state, closeFilter(3));
+    state = widgetsReducer(state, openFilterInline(3));
+
+    const openPreviews = selectFilterOpenPreviews({ widgets: state }, 3);
+    expect(openPreviews).toEqual({ input: [], output: [] });
+    expect(selectFilterOpenPreviews({ widgets: state }, 4)).toBe(openPreviews);
   });
 
   it('ignores a patch for a filter that is not monitored', () => {

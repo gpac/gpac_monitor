@@ -15,11 +15,17 @@ export interface LayoutState {
 
 export type ViewMode = 'inline' | 'detached';
 
+export interface OpenPreviews {
+  input: number[];
+  output: number[];
+}
+
 export interface FilterView {
   mode: ViewMode;
   widgetId?: string;
   activeTab?: InitialTabType;
   pidMetricMode?: PIDMetricMode;
+  openPreviews?: OpenPreviews;
 }
 
 export interface WidgetsState {

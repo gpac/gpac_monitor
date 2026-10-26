@@ -106,7 +106,7 @@ export class FilterStatsHandler {
       (data) => {
         if (data) callback(data);
       },
-      { immediate: false },
+      { immediate: !isFirstSubscriber },
     );
 
     if (isFirstSubscriber) {

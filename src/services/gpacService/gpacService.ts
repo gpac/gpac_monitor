@@ -245,8 +245,8 @@ export class GpacService implements IGpacCommunication {
       .requestPreview(filterIdx, pidIdx, direction, filterName, source);
   }
 
-  public stopPidPreview(preview: PreviewEntry): void {
-    this.state.messageHandler.getPreviewHandler().stopPreview(preview);
+  public releasePidPreview(preview: PreviewEntry): void {
+    this.state.messageHandler.getPreviewHandler().releasePreview(preview);
   }
 
   // ============================================================================

@@ -146,6 +146,108 @@ describe('PreviewHandler', () => {
     expect(secondWorker.close).not.toHaveBeenCalled();
   });
 
+  it('hands a released preview back to a view remounted within the release delay', async () => {
+    const handler = new PreviewHandler(makeDependencies());
+    const worker = openFakeWorker();
+    const preview = handler.requestPreview(
+      8,
+      0,
+      'input',
+      'dasher',
+      H264_SOURCE,
+    );
+    await flushCodecResolution();
+    vi.useFakeTimers();
+
+    handler.releasePreview(preview);
+    const remountedPreview = handler.requestPreview(
+      8,
+      0,
+      'input',
+      'dasher',
+      H264_SOURCE,
+    );
+    await vi.advanceTimersByTimeAsync(200);
+    vi.useRealTimers();
+
+    expect(remountedPreview).toBe(preview);
+    expect(worker.close).not.toHaveBeenCalled();
+  });
+
+  it('stops a released preview once the release delay elapses', async () => {
+    const handler = new PreviewHandler(makeDependencies());
+    const worker = openFakeWorker();
+    const preview = handler.requestPreview(
+      8,
+      0,
+      'input',
+      'dasher',
+      H264_SOURCE,
+    );
+    await flushCodecResolution();
+    vi.useFakeTimers();
+
+    handler.releasePreview(preview);
+    await vi.advanceTimersByTimeAsync(200);
+    vi.useRealTimers();
+
+    expect(worker.close).toHaveBeenCalledTimes(1);
+  });
+
+  it('stops a released preview in error instead of handing it back', async () => {
+    const dependencies = makeDependencies();
+    const handler = new PreviewHandler(dependencies);
+    const worker = openFakeWorker();
+    openFakeWorker();
+    const preview = handler.requestPreview(
+      8,
+      0,
+      'input',
+      'dasher',
+      H264_SOURCE,
+    );
+    await flushCodecResolution();
+    preview.showError('WebCodecs decoding failed');
+
+    handler.releasePreview(preview);
+    const remountedPreview = handler.requestPreview(
+      8,
+      0,
+      'input',
+      'dasher',
+      H264_SOURCE,
+    );
+
+    expect(remountedPreview).not.toBe(preview);
+    expect(worker.close).toHaveBeenCalledTimes(1);
+    expect(dependencies.send).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'stop_pid_preview', idx: 8 }),
+    );
+  });
+
+  it('stops a released preview whose codec changed instead of handing it back', async () => {
+    const handler = new PreviewHandler(makeDependencies());
+    const worker = openFakeWorker();
+    openFakeWorker();
+    const preview = handler.requestPreview(
+      8,
+      0,
+      'input',
+      'dasher',
+      H264_SOURCE,
+    );
+    await flushCodecResolution();
+
+    handler.releasePreview(preview);
+    const remountedPreview = handler.requestPreview(8, 0, 'input', 'dasher', {
+      codec: 'hevc',
+      decoderConfig: null,
+    });
+
+    expect(remountedPreview).not.toBe(preview);
+    expect(worker.close).toHaveBeenCalledTimes(1);
+  });
+
   it('shows a preview_error only on the preview it targets', async () => {
     const handler = new PreviewHandler(makeDependencies());
     openFakeWorker();

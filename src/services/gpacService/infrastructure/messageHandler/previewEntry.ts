@@ -21,7 +21,8 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
 
   constructor(
     public readonly previewId: number,
-    private readonly target: PreviewTarget,
+    public readonly target: PreviewTarget,
+    public readonly source: PreviewSource,
     private readonly dependencies: MessageHandlerDependencies,
   ) {
     super({
@@ -33,10 +34,10 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
   }
 
   // Opens the decoder worker, then asks the server for the PID packets.
-  public async start(filterName: string, source: PreviewSource): Promise<void> {
+  public async start(filterName: string): Promise<void> {
     const webCodecsConfig = await resolveWebCodecsConfig(
-      source.codec,
-      source.decoderConfig,
+      this.source.codec,
+      this.source.decoderConfig,
     );
     if (this.closed) return;
     if (!webCodecsConfig) {

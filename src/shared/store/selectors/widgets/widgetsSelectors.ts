@@ -2,6 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { shallowEqual } from 'react-redux';
 import type { RootState } from '../../index';
 import type {
+  OpenPreviews,
   RootState as WidgetsRootState,
   ViewMode,
 } from '../../widgets/types';
@@ -70,6 +71,14 @@ export const selectFilterPidMetricMode = (
   filterIdx: number,
 ): PIDMetricMode =>
   state.widgets.viewByFilter[filterIdx]?.pidMetricMode ?? 'bitrate';
+
+const NO_OPEN_PREVIEWS: OpenPreviews = { input: [], output: [] };
+
+export const selectFilterOpenPreviews = (
+  state: WidgetsRootState,
+  filterIdx: number,
+): OpenPreviews =>
+  state.widgets.viewByFilter[filterIdx]?.openPreviews ?? NO_OPEN_PREVIEWS;
 
 export const makeSelectWidgetConfig = () =>
   createSelector(

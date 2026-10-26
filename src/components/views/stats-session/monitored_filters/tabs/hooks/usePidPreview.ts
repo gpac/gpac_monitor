@@ -64,7 +64,7 @@ export function usePidPreview(
     return () => {
       unsubscribe();
       resizeObserver.disconnect();
-      gpacService.stopPidPreview(preview);
+      gpacService.releasePidPreview(preview);
     };
   }, [filterIdx, pidIdx, variant, filterType, codec, decoderConfig, canvasRef]);
 
