@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import type { EnrichedFilterOverview } from '@/types/domain/gpac/model';
 import type { SessionFilterStats } from '@/shared/store/slices/sessionStatsSlice';
 import type { ActivityLevel } from '@/components/ui/activity-indicator';
+import { isSink, isSource } from '@/utils/graph/filterType';
 
 export interface StatsCounters {
   total: number;
@@ -20,7 +21,6 @@ export const useStatsCalculations = (
   enrichedFilters: EnrichedFilterOverview[],
   filtersWithLiveStats: SessionFilterStats[],
 ) => {
-  // Use computed sessionType from worker (no recalculation)
   const statsCounters = useMemo((): StatsCounters => {
     if (!enrichedFilters.length) {
       return { total: 0, active: 0, sources: 0, sinks: 0, processing: 0 };
@@ -28,11 +28,8 @@ export const useStatsCalculations = (
 
     return {
       total: enrichedFilters.length,
-      sources: enrichedFilters.filter(
-        (f) => f.computed?.sessionType === 'source',
-      ).length,
-      sinks: enrichedFilters.filter((f) => f.computed?.sessionType === 'sink')
-        .length,
+      sources: enrichedFilters.filter(isSource).length,
+      sinks: enrichedFilters.filter(isSink).length,
       active: filtersWithLiveStats.filter(
         (f) =>
           (f.bytes_done && f.bytes_done > 0) ||
