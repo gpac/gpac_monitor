@@ -90,6 +90,9 @@ export class PreviewDecoder {
     const data = this.prependPendingBytes(packetBytes);
     try {
       if (this.decoder.decodeQueueSize > MAX_DECODE_QUEUE_SIZE) {
+        console.warn(
+          `[Preview] decode queue overflow (${this.decoder.decodeQueueSize}), resetting until next keyframe`,
+        );
         this.decoder.reset();
         this.decoder.configure(this.config);
         this.waitingForKeyframe = true;

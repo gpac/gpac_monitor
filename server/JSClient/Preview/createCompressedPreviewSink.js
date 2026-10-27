@@ -1,3 +1,4 @@
+import { Sys as sys } from 'gpaccore';
 import { PREVIEW } from '../config.js';
 
 const PVWC_MAGIC = 'PVWC';
@@ -8,7 +9,29 @@ function isKeyframe(packet) {
     return packet.sap === 1 || packet.sap === 2 || packet.sap === 3;
 }
 
-function buildCompressedFrame(previewId, pidIdx, packet, timescale) {
+function createRateGate() {
+    return { lastDecodeTimeUs: null, mediaElapsedUs: 0, windowStartWallUs: 0, keyframesOnly: false, lastSpeed: 0 };
+}
+
+// Decode time (monotonic, unlike cts with B-frames) only counts forward steps, so a looping source keeps the window running.
+function shouldSendPacket(gate, decodeTimeUs, nowUs, isKey) {
+    if (gate.lastDecodeTimeUs === null) {
+        gate.windowStartWallUs = nowUs;
+    } else if (decodeTimeUs > gate.lastDecodeTimeUs) {
+        gate.mediaElapsedUs += decodeTimeUs - gate.lastDecodeTimeUs;
+    }
+    gate.lastDecodeTimeUs = decodeTimeUs;
+    const wallElapsedUs = nowUs - gate.windowStartWallUs;
+    if (wallElapsedUs >= PREVIEW.RATE_WINDOW_US) {
+        gate.lastSpeed = gate.mediaElapsedUs / wallElapsedUs;
+        gate.keyframesOnly = gate.mediaElapsedUs > PREVIEW.MAX_REALTIME_SPEED * wallElapsedUs;
+        gate.mediaElapsedUs = 0;
+        gate.windowStartWallUs = nowUs;
+    }
+    return isKey || !gate.keyframesOnly;
+}
+
+function buildCompressedFrame(previewId, pidIdx, packet, ctsUs) {
     const packetBytes = new Uint8Array(packet.data);
     const buffer = new ArrayBuffer(PVWC_HEADER_SIZE + packetBytes.byteLength);
     const header = new DataView(buffer);
@@ -18,7 +41,7 @@ function buildCompressedFrame(previewId, pidIdx, packet, timescale) {
     header.setUint32(4, previewId, true);
     header.setUint32(8, pidIdx, true);
     header.setUint32(12, isKeyframe(packet) ? PVWC_FLAG_KEYFRAME : 0, true);
-    header.setFloat64(16, Math.round(packet.cts * 1e6 / timescale), true);
+    header.setFloat64(16, ctsUs, true);
     new Uint8Array(buffer, PVWC_HEADER_SIZE).set(packetBytes);
     return buffer;
 }
@@ -27,6 +50,7 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
     const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
     const sink = session.new_filter(`${sinkName}${hideTag}`);
     let firstKeyframeSeen = false;
+    const rateGate = createRateGate();
     sink.require_source_id = true;
     sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
     sink.configure_pid = function (pid) {
@@ -63,7 +87,16 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
                 }
                 const socket = previewManager.client.client;
                 if (firstKeyframeSeen && socket) {
-                    socket.send(buildCompressedFrame(entry.previewId, entry.pidIdx, packet, entry.pid.timescale));
+                    const ctsUs = Math.round(packet.cts * 1e6 / entry.pid.timescale);
+                    const dtsUs = Math.round(packet.dts * 1e6 / entry.pid.timescale);
+                    const wasKeyframesOnly = rateGate.keyframesOnly;
+                    const send = shouldSendPacket(rateGate, dtsUs, sys.clock_us(), isKeyframe(packet));
+                    if (rateGate.keyframesOnly !== wasKeyframesOnly) {
+                        print(`[Preview] rate gate idx=${filterIdx} keyframesOnly=${rateGate.keyframesOnly} speed=${rateGate.lastSpeed.toFixed(2)} dtsUs=${dtsUs}`);
+                    }
+                    if (send) {
+                        socket.send(buildCompressedFrame(entry.previewId, entry.pidIdx, packet, ctsUs));
+                    }
                 }
                 entry.pid.drop_packet();
             }
@@ -74,4 +107,4 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
     return sink;
 }
 
-export { createCompressedPreviewSink };
+export { createCompressedPreviewSink, createRateGate, shouldSendPacket };
