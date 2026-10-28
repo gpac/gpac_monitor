@@ -10,7 +10,7 @@ function isKeyframe(packet) {
 }
 
 function createRateGate() {
-    return { lastDecodeTimeUs: null, mediaElapsedUs: 0, windowStartWallUs: 0, keyframesOnly: false, lastSpeed: 0 };
+    return { lastDecodeTimeUs: null, mediaElapsedUs: 0, windowStartWallUs: 0, keyframesOnly: false, lastSpeed: 0, lastKeyframeSentWallUs: null };
 }
 
 // Decode time (monotonic, unlike cts with B-frames) only counts forward steps, so a looping source keeps the window running.
@@ -28,7 +28,12 @@ function shouldSendPacket(gate, decodeTimeUs, nowUs, isKey) {
         gate.mediaElapsedUs = 0;
         gate.windowStartWallUs = nowUs;
     }
-    return isKey || !gate.keyframesOnly;
+    if (!gate.keyframesOnly) return true;
+    if (!isKey) return false;
+    const minKeyframeGapUs = 1000000 / PREVIEW.MAX_KEYFRAMES_PER_SEC;
+    if (gate.lastKeyframeSentWallUs !== null && nowUs - gate.lastKeyframeSentWallUs < minKeyframeGapUs) return false;
+    gate.lastKeyframeSentWallUs = nowUs;
+    return true;
 }
 
 function buildCompressedFrame(previewId, pidIdx, packet, ctsUs) {

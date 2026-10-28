@@ -26,6 +26,7 @@ const PREVIEW = {
     MAX_ACTIVE: 4,
     RATE_WINDOW_US: 1000000,
     MAX_REALTIME_SPEED: 1.5,
+    MAX_KEYFRAMES_PER_SEC: 10,
 };
 
 export { UPDATE_INTERVALS, LOG_RETENTION, WS_PROTOCOL_VERSION } from '../config/live.config.js';

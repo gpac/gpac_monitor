@@ -1,16 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import { createRateGate, shouldSendPacket } from './createCompressedPreviewSink.js';
+import { PREVIEW } from '../config.js';
 
 const FRAME_CTS_STEP_US = 40000;
 const KEYFRAME_INTERVAL = 25;
 
 // Feeds 25 fps packets whose wall-clock spacing is FRAME_CTS_STEP_US / speed.
-function feedPackets(gate, { speed, frameCount, startCtsUs = 0, startWallUs = 0 }) {
+function feedPackets(gate, { speed, frameCount, startCtsUs = 0, startWallUs = 0, keyframeInterval = KEYFRAME_INTERVAL }) {
     const results = [];
     for (let frameIndex = 0; frameIndex < frameCount; frameIndex++) {
         const ctsUs = startCtsUs + frameIndex * FRAME_CTS_STEP_US;
         const wallUs = startWallUs + Math.round((frameIndex * FRAME_CTS_STEP_US) / speed);
-        const isKey = frameIndex % KEYFRAME_INTERVAL === 0;
+        const isKey = frameIndex % keyframeInterval === 0;
         results.push({ wallUs, isKey, sent: shouldSendPacket(gate, ctsUs, wallUs, isKey) });
     }
     return results;
@@ -23,6 +24,17 @@ describe('shouldSendPacket', () => {
         const afterFirstWindow = results.filter((packet) => packet.wallUs > 1100000);
         expect(afterFirstWindow.filter((packet) => packet.sent && !packet.isKey)).toHaveLength(0);
         expect(afterFirstWindow.some((packet) => packet.sent && packet.isKey)).toBe(true);
+    });
+
+    it('caps keyframes per wall-clock second when media runs 286x faster than realtime', () => {
+        const gate = createRateGate();
+        const results = feedPackets(gate, { speed: 286, frameCount: 25 * 286 * 3, keyframeInterval: 117 });
+        for (let wallSecond = 1; wallSecond < 3; wallSecond++) {
+            const sentKeyframes = results.filter((packet) =>
+                packet.sent && packet.wallUs >= wallSecond * 1000000 && packet.wallUs < (wallSecond + 1) * 1000000);
+            expect(sentKeyframes.length).toBeGreaterThan(0);
+            expect(sentKeyframes.length).toBeLessThanOrEqual(PREVIEW.MAX_KEYFRAMES_PER_SEC);
+        }
     });
 
     it('sends every packet at realtime pace', () => {
