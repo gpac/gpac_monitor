@@ -37,6 +37,20 @@ describe('shouldSendPacket', () => {
         }
     });
 
+    it('bounds packets sent during the first window when media runs 286x faster than realtime', () => {
+        const gate = createRateGate();
+        const results = feedPackets(gate, { speed: 286, frameCount: 25 * 286 });
+        const sentInFirstWindow = results.filter((packet) => packet.sent && packet.wallUs < PREVIEW.RATE_WINDOW_US);
+        const maxPacketsBeforeSwitch = Math.ceil(PREVIEW.MAX_MEDIA_AHEAD_US / FRAME_CTS_STEP_US) + 1;
+        expect(sentInFirstWindow.length).toBeLessThanOrEqual(maxPacketsBeforeSwitch + PREVIEW.MAX_KEYFRAMES_PER_SEC);
+    });
+
+    it('never throttles a stream running below the realtime tolerance', () => {
+        const gate = createRateGate();
+        const results = feedPackets(gate, { speed: 1.4, frameCount: 105 });
+        expect(results.every((packet) => packet.sent)).toBe(true);
+    });
+
     it('sends every packet at realtime pace', () => {
         const gate = createRateGate();
         const results = feedPackets(gate, { speed: 1, frameCount: 100 });

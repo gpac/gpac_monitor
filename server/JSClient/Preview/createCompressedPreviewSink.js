@@ -27,6 +27,9 @@ function shouldSendPacket(gate, decodeTimeUs, nowUs, isKey) {
         gate.keyframesOnly = gate.mediaElapsedUs > PREVIEW.MAX_REALTIME_SPEED * wallElapsedUs;
         gate.mediaElapsedUs = 0;
         gate.windowStartWallUs = nowUs;
+    } else if (gate.mediaElapsedUs > PREVIEW.MAX_REALTIME_SPEED * wallElapsedUs + PREVIEW.MAX_MEDIA_AHEAD_US) {
+        // Mid-window: switch as soon as media is clearly ahead, so the first window cannot flood the browser.
+        gate.keyframesOnly = true;
     }
     if (!gate.keyframesOnly) return true;
     if (!isKey) return false;
@@ -68,7 +71,6 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
                     return false;
                 });
             }
-            print(`[Preview] compressed configured idx=${filterIdx} pid=${pid.name} codec=${pid.get_prop('CodecID')}`);
         } catch (error) {
             print(`[Preview] compressed configure_pid error: ${error}`);
             previewManager.send({ message: 'preview_error', previewId: entry.previewId, error: String(error) });
