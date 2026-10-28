@@ -3,6 +3,7 @@ import { Widget, WidgetConfig, WidgetType } from '@/types/ui/widget';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetsState } from './types';
 import { writeFilterViewMode } from './filterViewReducers';
+import { getLayoutPreset } from './layoutPresets';
 
 // Basic widget management
 export const addWidgetReducer = (
@@ -141,7 +142,7 @@ export const loadLayoutReducer = (
   action: PayloadAction<string>,
 ) => {
   const layoutName = action.payload;
-  const layout = state.savedLayouts[layoutName];
+  const layout = state.savedLayouts[layoutName] ?? getLayoutPreset(layoutName);
   if (!layout) return;
   state.activeWidgets = layout.widgets.map((w) => ({ ...w }));
   const newConfigs: Record<string, WidgetConfig> = {};
