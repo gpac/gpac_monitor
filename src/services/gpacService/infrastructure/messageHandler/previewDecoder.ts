@@ -1,5 +1,9 @@
 import { PVWC_HEADER_SIZE, PVWC_FLAG_KEYFRAME } from '@/services/ws/types';
-import { hasPictureSlice } from '@/utils/gpac/webcodecs-config';
+import {
+  annexBToAvcc,
+  hasPictureSlice,
+  isAnnexB,
+} from '@/utils/gpac/webcodecs-config';
 
 const MAX_DECODE_QUEUE_SIZE = 16;
 // Reopenings allowed without any decoded frame in between before giving up.
@@ -12,6 +16,7 @@ export class PreviewDecoder {
   private pendingIsKeyframe = false;
   private reopensWithoutFrame = 0;
   private stopped = false;
+  private isAnnexBStream: boolean | null = null;
 
   private constructor(
     private readonly config: VideoDecoderConfig,
@@ -40,7 +45,10 @@ export class PreviewDecoder {
   // WebCodecs decoders fail on unusual streams or lost GPU resources: replace and resume at the next keyframe.
   private reopen(error: unknown): void {
     if (this.stopped) return;
-    console.warn('[Preview] WebCodecs decoder error, reopening', error);
+    console.warn(
+      '[Preview] WebCodecs decoder error, reopening',
+      error instanceof Error ? `${error.name}: ${error.message}` : error,
+    );
     if (this.decoder.state !== 'closed') this.decoder.close();
     this.waitingForKeyframe = true;
     this.pendingBytes = null;
@@ -74,11 +82,16 @@ export class PreviewDecoder {
 
   public decodePacket(dataView: DataView): void {
     if (this.stopped || dataView.byteLength <= PVWC_HEADER_SIZE) return;
-    const packetBytes = new Uint8Array(
+    const receivedBytes = new Uint8Array(
       dataView.buffer,
       dataView.byteOffset + PVWC_HEADER_SIZE,
       dataView.byteLength - PVWC_HEADER_SIZE,
     );
+    // Decided once on the first packet; the decoder only reads AVCC.
+    this.isAnnexBStream ??= isAnnexB(receivedBytes);
+    const packetBytes = this.isAnnexBStream
+      ? annexBToAvcc(receivedBytes)
+      : receivedBytes;
     const packetIsKeyframe =
       (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAME) !== 0;
     if (!hasPictureSlice(packetBytes)) {

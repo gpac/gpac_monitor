@@ -36,6 +36,59 @@ export function hasPictureSlice(avccBytes: Uint8Array): boolean {
   return offset !== avccBytes.length;
 }
 
+// Annex B separates NAL units with start codes (00 00 01 or 00 00 00 01); AVCC prefixes their length.
+export function isAnnexB(bytes: Uint8Array): boolean {
+  return (
+    bytes[0] === 0 &&
+    bytes[1] === 0 &&
+    (bytes[2] === 1 || (bytes[2] === 0 && bytes[3] === 1))
+  );
+}
+
+// Index of the next 00 00 01 from `from`, or the end of the buffer.
+function nextStartCode(bytes: Uint8Array, from: number): number {
+  for (let index = from; index + 2 < bytes.length; index++) {
+    if (
+      bytes[index] === 0 &&
+      bytes[index + 1] === 0 &&
+      bytes[index + 2] === 1
+    ) {
+      return index;
+    }
+  }
+  return bytes.length;
+}
+
+// Splits on start codes, then writes each NAL as 4-byte length + bytes.
+export function annexBToAvcc(bytes: Uint8Array): Uint8Array {
+  const nalUnits: Uint8Array[] = [];
+  let nalStart = nextStartCode(bytes, 0) + 3;
+  while (nalStart < bytes.length) {
+    const nextStart = nextStartCode(bytes, nalStart);
+    // The leading 00 of a 4-byte start code is not part of the previous NAL.
+    const nalEnd =
+      nextStart < bytes.length && bytes[nextStart - 1] === 0
+        ? nextStart - 1
+        : nextStart;
+    nalUnits.push(bytes.subarray(nalStart, nalEnd));
+    nalStart = nextStart + 3;
+  }
+  const avccBytes = new Uint8Array(
+    nalUnits.reduce(
+      (sum, nalUnit) => sum + AVCC_LENGTH_SIZE + nalUnit.length,
+      0,
+    ),
+  );
+  const view = new DataView(avccBytes.buffer);
+  let offset = 0;
+  for (const nalUnit of nalUnits) {
+    view.setUint32(offset, nalUnit.length);
+    avccBytes.set(nalUnit, offset + AVCC_LENGTH_SIZE);
+    offset += AVCC_LENGTH_SIZE + nalUnit.length;
+  }
+  return avccBytes;
+}
+
 // Returns a browser-supported decoder config, or null when the preview must use PNG.
 export async function resolveWebCodecsConfig(
   codec: string,
