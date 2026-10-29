@@ -13,7 +13,7 @@ const defaultConfig: WidgetConfig = {
 
 function buildFactoryDefaultState(): WidgetsState {
   const activeWidgets = Object.values(widgetRegistry)
-    .filter((def) => def.enabled)
+    .filter((def) => def.enabled && def.inFactoryLayout !== false)
     .map((def) => createWidgetInstance(def.type))
     .filter(Boolean) as Widget[];
 

@@ -1,5 +1,6 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { shallowEqual } from 'react-redux';
+import { isEqual } from 'lodash';
 import type { RootState } from '../../index';
 import type {
   OpenPreviews,
@@ -125,6 +126,7 @@ export const selectPreviewSources = createSelector(
         ? [{ filterIdx: filter.idx, filterName: filter.name, pids }]
         : [];
     }),
+  { memoizeOptions: { resultEqualityCheck: isEqual } },
 );
 
 export const makeSelectWidgetConfig = () =>

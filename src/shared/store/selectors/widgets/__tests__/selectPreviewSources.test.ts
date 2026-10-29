@@ -53,6 +53,17 @@ describe('selectPreviewSources', () => {
     ]);
   });
 
+  it('keeps the same reference when a graph update changes no video PID', () => {
+    const store = createStore();
+    loadFixtureGraph(store);
+    const before = selectPreviewSources(store.getState());
+
+    loadFixtureGraph(store);
+    store.dispatch(openFilterInline(2));
+
+    expect(selectPreviewSources(store.getState())).toBe(before);
+  });
+
   it('marks a PID open only on the direction listed in openPreviews', () => {
     const store = createStore();
     loadFixtureGraph(store);
