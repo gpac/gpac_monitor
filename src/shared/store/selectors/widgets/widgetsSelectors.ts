@@ -9,6 +9,8 @@ import type {
 import { WidgetConfig } from '@/types/ui/widget';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import type { PIDMetricMode } from '@/components/views/stats-session/types/pid';
+import type { GraphInputPid, GraphOutputPid } from '@/types/domain/gpac/model';
+import { GpacStreamType } from '@/types/domain/gpac/stream-types';
 
 const defaultWidgetConfig: WidgetConfig = {
   isMaximized: false,
@@ -79,6 +81,51 @@ export const selectFilterOpenPreviews = (
   filterIdx: number,
 ): OpenPreviews =>
   state.widgets.viewByFilter[filterIdx]?.openPreviews ?? NO_OPEN_PREVIEWS;
+
+export interface PreviewSourcePid {
+  direction: keyof OpenPreviews;
+  pidIdx: number;
+  name: string;
+  isOpen: boolean;
+}
+
+export interface PreviewSourceGroup {
+  filterIdx: number;
+  filterName: string;
+  pids: PreviewSourcePid[];
+}
+
+const selectGraphFilters = (state: RootState) => state.graph.filters;
+
+const toVisualSourcePids = (
+  direction: keyof OpenPreviews,
+  graphPids: (GraphInputPid | GraphOutputPid)[],
+  openPreviews: OpenPreviews,
+): PreviewSourcePid[] =>
+  graphPids
+    .filter((pid) => pid.stream_type === GpacStreamType.Visual)
+    .map((pid) => ({
+      direction,
+      pidIdx: pid.pid_index,
+      name: pid.name,
+      isOpen: openPreviews[direction].includes(pid.pid_index),
+    }));
+
+export const selectPreviewSources = createSelector(
+  [selectGraphFilters, selectViewByFilter],
+  (filters, viewByFilter): PreviewSourceGroup[] =>
+    filters.flatMap((filter) => {
+      const openPreviews =
+        viewByFilter[filter.idx]?.openPreviews ?? NO_OPEN_PREVIEWS;
+      const pids = [
+        ...toVisualSourcePids('input', filter.ipid, openPreviews),
+        ...toVisualSourcePids('output', filter.opid, openPreviews),
+      ];
+      return pids.length > 0
+        ? [{ filterIdx: filter.idx, filterName: filter.name, pids }]
+        : [];
+    }),
+);
 
 export const makeSelectWidgetConfig = () =>
   createSelector(
