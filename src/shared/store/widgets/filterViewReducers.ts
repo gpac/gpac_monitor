@@ -1,5 +1,6 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { FilterView, ViewMode, WidgetsState } from './types';
+import { FilterView, OpenPreviews, ViewMode, WidgetsState } from './types';
+import { detachFilterView } from './widgetUtils';
 
 export type FilterViewStatePatch = Partial<
   Omit<FilterView, 'mode' | 'widgetId'>
@@ -28,4 +29,25 @@ export const setFilterViewStateReducer = (
   const current = state.viewByFilter[action.payload.filterIdx];
   if (!current) return;
   Object.assign(current, action.payload.patch);
+};
+
+export const openPidPreviewReducer = (
+  state: WidgetsState,
+  action: PayloadAction<{
+    filterIdx: number;
+    name: string;
+    pidIdx: number;
+    variant: keyof OpenPreviews;
+  }>,
+) => {
+  const { filterIdx, name, pidIdx, variant } = action.payload;
+  if (state.viewByFilter[filterIdx]?.mode !== 'detached') {
+    detachFilterView(state, filterIdx, name);
+  }
+  const current = state.viewByFilter[filterIdx];
+  if (!current) return;
+  current.activeTab = variant === 'input' ? 'inputs' : 'outputs';
+  current.openPreviews ??= { input: [], output: [] };
+  const openPidIdxs = current.openPreviews[variant];
+  if (!openPidIdxs.includes(pidIdx)) openPidIdxs.push(pidIdx);
 };

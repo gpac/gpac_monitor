@@ -5,7 +5,10 @@ import {
 } from '@reduxjs/toolkit';
 import { initialState } from './widgetsInitialState';
 import * as reducers from './widgetUtils';
-import { setFilterViewStateReducer } from './filterViewReducers';
+import {
+  openPidPreviewReducer,
+  setFilterViewStateReducer,
+} from './filterViewReducers';
 import { saveLayoutsToStorage, saveLastUsedLayout } from './layoutStorage';
 import { filtersUpdated } from '@/shared/store/actions/globalActions';
 
@@ -42,6 +45,7 @@ const widgetsSlice = createSlice({
     attachFilter: reducers.attachFilterReducer,
     closeFilter: reducers.closeFilterReducer,
     setFilterViewState: setFilterViewStateReducer,
+    openPidPreview: openPidPreviewReducer,
   },
   extraReducers: (builder) => {
     builder.addCase(filtersUpdated, (state, action) => {
@@ -79,6 +83,7 @@ export const {
   attachFilter,
   closeFilter,
   setFilterViewState,
+  openPidPreview,
 } = widgetsSlice.actions;
 
 export default widgetsSlice.reducer;
