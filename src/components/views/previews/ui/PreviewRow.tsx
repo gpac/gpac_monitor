@@ -22,10 +22,7 @@ export const PreviewRow = React.memo(
     if (isOpen) {
       return (
         <div className="group flex items-center gap-2 rounded bg-monitor-selection px-2 py-1 text-monitor-text-primary">
-          <span
-            className="h-2 w-2 rounded-full bg-monitor-active-filter"
-            aria-hidden
-          />
+          <span className="h-2 w-2 rounded-full bg-emerald-600" aria-hidden />
           <LuMonitor
             className="h-3.5 w-3.5 text-monitor-text-muted"
             aria-hidden
@@ -53,7 +50,7 @@ export const PreviewRow = React.memo(
         className="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-monitor-text-secondary hover:bg-white/5 disabled:cursor-not-allowed disabled:hover:bg-transparent"
       >
         <span
-          className="h-2 w-2 rounded-full border border-monitor-text-muted"
+          className="h-2 w-2 rounded-full bg-monitor-text-muted"
           aria-hidden
         />
         <LuMonitor

@@ -31,9 +31,7 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
     () => (
       <div className="flex items-center gap-1.5 text-[0.714rem]">
         <span className="text-monitor-text-muted">{activeCount} active</span>
-        <span className="rounded border border-emerald-700/50 bg-emerald-900/40 px-1.5 text-emerald-300">
-          LIVE only
-        </span>
+        <span className="rounded border border-emerald-700/50 bg-emerald-900/40 px-1.5 text-emerald-300"></span>
       </div>
     ),
     [activeCount],
@@ -41,7 +39,7 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
 
   return (
     <WidgetWrapper id={id} statusBadge={statusBadge}>
-      <div className="flex h-full flex-col gap-3 overflow-y-auto p-2 text-sm">
+      <div className="flex h-full flex-col gap-3 overflow-y-auto p-2 text-base">
         {isHistory && (
           <p className="px-2 text-xs text-monitor-text-muted">
             Preview is available in live mode only
@@ -64,6 +62,7 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
               title="Available"
               groups={availableGroups}
               disabled={isHistory}
+              collapsible
             />
           </div>
         )}
