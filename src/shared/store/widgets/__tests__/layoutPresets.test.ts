@@ -47,6 +47,16 @@ describe('default layout presets', () => {
         (widget) => widget.type === WidgetType.GRAPH,
       ),
     ).toBe(false);
+    expect(
+      getLayoutPreset('Preview')?.widgets.map((widget) => [
+        widget.type,
+        widget.y,
+      ]),
+    ).toEqual([
+      [WidgetType.PREVIEWS, 0],
+      [WidgetType.FILTERSESSION, 0],
+      [WidgetType.LOGS, 0],
+    ]);
     expect(getLayoutPreset('unknown')).toBeUndefined();
   });
 
@@ -64,10 +74,10 @@ describe('default layout presets', () => {
     expect(state.configs[state.activeWidgets[0].id].settings.custom).toBe(true);
     state.activeWidgets[0].h = 14;
     expect(state.savedLayouts.Preview.widgets[0].h).toBe(12);
-    expect(getLayoutPreset('Preview')?.widgets[0].h).toBe(8);
+    expect(getLayoutPreset('Preview')?.widgets[0].h).toBe(6);
     deleteLayoutReducer(state, { type: 'deleteLayout', payload: 'Preview' });
     loadLayoutReducer(state, { type: 'loadLayout', payload: 'Preview' });
-    expect(state.activeWidgets[0].h).toBe(8);
+    expect(state.activeWidgets[0].h).toBe(6);
     expect(state.savedLayouts['My layout']).toEqual(personalLayout);
   });
 

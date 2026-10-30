@@ -53,7 +53,7 @@ describe('LayoutManager presets', () => {
     const savedRow = screen.getByText('Preview').parentElement!;
     fireEvent.click(within(savedRow).getByRole('button', { name: 'Delete' }));
     fireEvent.click(within(presetRow).getByRole('button', { name: 'Load' }));
-    expect(store.getState().widgets.activeWidgets[0].h).toBe(8);
+    expect(store.getState().widgets.activeWidgets[0].h).toBe(6);
     expect(store.getState().widgets.savedLayouts.Personal.widgets[0].h).toBe(
       12,
     );

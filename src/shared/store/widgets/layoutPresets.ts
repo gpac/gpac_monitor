@@ -17,9 +17,9 @@ export const layoutPresets: Record<string, PresetWidget[]> = {
     { type: WidgetType.LOGS, x: 0, y: 8, w: 24, h: 4 },
   ],
   Preview: [
-    { type: WidgetType.FILTERSESSION, x: 0, y: 0, w: 24, h: 8 },
-    { type: WidgetType.METRICS, x: 0, y: 8, w: 6, h: 4 },
-    { type: WidgetType.LOGS, x: 6, y: 8, w: 18, h: 4 },
+    { type: WidgetType.PREVIEWS, x: 0, y: 0, w: 6, h: 6 },
+    { type: WidgetType.FILTERSESSION, x: 6, y: 0, w: 12, h: 6 },
+    { type: WidgetType.LOGS, x: 18, y: 0, w: 6, h: 6 },
   ],
   Transcoding: [
     { type: WidgetType.GRAPH, x: 0, y: 0, w: 14, h: 8 },
