@@ -1,6 +1,7 @@
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetType, type Widget } from '@/types/ui/widget';
 import type { LayoutState } from './types';
+import { isWidgetAvailable } from './widgetAvailability';
 
 type PresetWidget = Pick<Widget, 'type' | 'x' | 'y' | 'w' | 'h'>;
 
@@ -28,6 +29,13 @@ export const layoutPresets: Record<string, PresetWidget[]> = {
     { type: WidgetType.LOGS, x: 6, y: 8, w: 18, h: 4 },
   ],
 };
+
+export const getPresetNames = (isHistory: boolean): string[] =>
+  Object.keys(layoutPresets).filter((name) =>
+    layoutPresets[name].every((placement) =>
+      isWidgetAvailable(placement.type, isHistory),
+    ),
+  );
 
 export function getLayoutPreset(name: string): LayoutState | undefined {
   if (!Object.prototype.hasOwnProperty.call(layoutPresets, name)) return;

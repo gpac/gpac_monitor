@@ -7,6 +7,8 @@ import {
 } from '@/components/ui/popover';
 import { WidgetButton } from './WidgetButton';
 import { getAllWidgets } from './registry';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
+import { isWidgetAvailable } from '@/shared/store/widgets/widgetAvailability';
 
 interface WidgetSelectorProps {
   isOpen: boolean;
@@ -19,6 +21,11 @@ const WidgetSelector: React.FC<WidgetSelectorProps> = ({
   onToggle,
   onClose,
 }) => {
+  const { isHistory } = useDataMode();
+  const widgets = getAllWidgets().filter((widget) =>
+    isWidgetAvailable(widget.type, isHistory),
+  );
+
   return (
     <Popover
       open={isOpen}
@@ -53,7 +60,7 @@ const WidgetSelector: React.FC<WidgetSelectorProps> = ({
         sideOffset={5}
       >
         <div className="space-y-2">
-          {getAllWidgets().map((widget) => (
+          {widgets.map((widget) => (
             <WidgetButton
               key={widget.type}
               type={widget.type}

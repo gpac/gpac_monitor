@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import {
-  layoutPresets,
+  getPresetNames,
   getLayoutPreset,
 } from '@/shared/store/widgets/layoutPresets';
 import { useAppDispatch, useAppSelector } from '../redux';
+import { useDataMode } from '../data/useDataMode';
 import {
   saveLayout,
   loadLayout,
@@ -19,6 +20,7 @@ export const useLayoutManager = () => {
   const dispatch = useAppDispatch();
   const savedLayouts = useAppSelector(selectSavedLayouts);
   const currentLayout = useAppSelector(selectCurrentLayout);
+  const { isHistory } = useDataMode();
 
   const save = (layoutName: string) => {
     dispatch(saveLayout(layoutName));
@@ -47,7 +49,7 @@ export const useLayoutManager = () => {
 
   return {
     savedLayouts,
-    presetNames: Object.keys(layoutPresets),
+    presetNames: getPresetNames(isHistory),
     currentLayout,
     save,
     load,

@@ -13,7 +13,6 @@ interface PreviewRowContainerProps {
   direction: keyof OpenPreviews;
   pidIdx: number;
   isOpen: boolean;
-  disabled: boolean;
 }
 
 export const PreviewRowContainer = React.memo(
@@ -23,7 +22,6 @@ export const PreviewRowContainer = React.memo(
     direction,
     pidIdx,
     isOpen,
-    disabled,
   }: PreviewRowContainerProps) => {
     const dispatch = useAppDispatch();
     const { toggleInputPreview, toggleOutputPreview } =
@@ -55,7 +53,6 @@ export const PreviewRowContainer = React.memo(
         label={`${DIRECTION_LABEL[direction]} · PID #${pidIdx}`}
         filterName={filterName}
         isOpen={isOpen}
-        disabled={disabled}
         onOpen={handleOpen}
         onClose={handleClose}
       />

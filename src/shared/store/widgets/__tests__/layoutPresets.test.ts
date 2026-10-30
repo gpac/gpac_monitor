@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetType } from '@/types/ui/widget';
-import { getLayoutPreset, layoutPresets } from '../layoutPresets';
+import {
+  getLayoutPreset,
+  getPresetNames,
+  layoutPresets,
+} from '../layoutPresets';
+import { isWidgetAvailable } from '../widgetAvailability';
 import {
   loadLayoutReducer,
   saveLayoutReducer,
@@ -58,6 +63,18 @@ describe('default layout presets', () => {
       [WidgetType.LOGS, 0],
     ]);
     expect(getLayoutPreset('unknown')).toBeUndefined();
+  });
+
+  it('hides the live-only Previews widget and its preset in history', () => {
+    expect(isWidgetAvailable(WidgetType.PREVIEWS, true)).toBe(false);
+    expect(isWidgetAvailable(WidgetType.PREVIEWS, false)).toBe(true);
+    expect(isWidgetAvailable(WidgetType.LOGS, true)).toBe(true);
+    expect(getPresetNames(false)).toEqual(Object.keys(layoutPresets));
+    expect(getPresetNames(true)).toEqual([
+      'Playback',
+      'Dashboard',
+      'Transcoding',
+    ]);
   });
 
   it('keeps personal versions and restores the default after deletion', () => {

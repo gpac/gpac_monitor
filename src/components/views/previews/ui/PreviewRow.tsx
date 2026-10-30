@@ -5,20 +5,12 @@ interface PreviewRowProps {
   label: string;
   filterName: string;
   isOpen: boolean;
-  disabled: boolean;
   onOpen: () => void;
   onClose: () => void;
 }
 
 export const PreviewRow = React.memo(
-  ({
-    label,
-    filterName,
-    isOpen,
-    disabled,
-    onOpen,
-    onClose,
-  }: PreviewRowProps) => {
+  ({ label, filterName, isOpen, onOpen, onClose }: PreviewRowProps) => {
     if (isOpen) {
       return (
         <div className="group flex items-center gap-2 rounded bg-monitor-selection px-2 py-1 text-monitor-text-primary">
@@ -31,10 +23,9 @@ export const PreviewRow = React.memo(
           <button
             type="button"
             onClick={onClose}
-            disabled={disabled}
             title="Close preview"
             aria-label={`Close preview ${filterName} ${label}`}
-            className="text-monitor-text-muted opacity-0 hover:text-monitor-text-primary focus-visible:opacity-100 group-hover:opacity-100 disabled:hidden"
+            className="text-monitor-text-muted opacity-0 hover:text-monitor-text-primary focus-visible:opacity-100 group-hover:opacity-100"
           >
             <LuX className="h-3.5 w-3.5" />
           </button>
@@ -46,8 +37,7 @@ export const PreviewRow = React.memo(
       <button
         type="button"
         onClick={onOpen}
-        disabled={disabled}
-        className="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-monitor-text-secondary hover:bg-white/5 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+        className="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-monitor-text-secondary hover:bg-white/5"
       >
         <span
           className="h-2 w-2 rounded-full bg-monitor-text-muted"

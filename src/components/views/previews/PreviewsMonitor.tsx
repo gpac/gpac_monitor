@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import WidgetWrapper from '@/components/widget/WidgetWrapper';
 import { useAppSelector } from '@/shared/hooks';
-import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import {
   selectPreviewSources,
   type PreviewSourceGroup,
@@ -19,7 +18,6 @@ const keepPids = (
 
 const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
   const sources = useAppSelector(selectPreviewSources);
-  const { isHistory } = useDataMode();
   const activeGroups = useMemo(() => keepPids(sources, true), [sources]);
   const availableGroups = useMemo(() => keepPids(sources, false), [sources]);
   const activeCount = activeGroups.reduce(
@@ -40,28 +38,16 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
   return (
     <WidgetWrapper id={id} statusBadge={statusBadge}>
       <div className="flex h-full flex-col gap-3 overflow-y-auto p-2 text-base">
-        {isHistory && (
-          <p className="px-2 text-xs text-monitor-text-muted">
-            Preview is available in live mode only
-          </p>
-        )}
         {sources.length === 0 ? (
           <p className="m-auto text-monitor-text-muted">
             No video PID in this session
           </p>
         ) : (
-          <div
-            className={`flex flex-col gap-3 ${isHistory ? 'opacity-50' : ''}`}
-          >
-            <PreviewSection
-              title="Active"
-              groups={activeGroups}
-              disabled={isHistory}
-            />
+          <div className="flex flex-col gap-3">
+            <PreviewSection title="Active" groups={activeGroups} />
             <PreviewSection
               title="Available"
               groups={availableGroups}
-              disabled={isHistory}
               collapsible
             />
           </div>
