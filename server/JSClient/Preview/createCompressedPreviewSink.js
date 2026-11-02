@@ -65,6 +65,7 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
         try {
             if (entry.pid !== pid) {
                 entry.pid = pid;
+                pid.framing = true;
                 pid.send_event(new FilterEvent(GF_FEVT_PLAY));
                 session.post_task(() => {
                     if (entry.pid === pid) pid.discard = false;
