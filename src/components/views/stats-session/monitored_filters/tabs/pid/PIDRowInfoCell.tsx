@@ -13,6 +13,7 @@ import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
 import { selectPidColorIndexByKey } from '@/shared/store/selectors';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
+import { canPreview } from '@/utils/gpac/webcodecs-config';
 import { GraphRadio } from '@/components/common/charts';
 import type { PIDWithIndex } from '../../../types';
 
@@ -86,14 +87,16 @@ const PIDRowInfoCell = memo(
             <LuEye className="h-4 w-5" />
           </button>
         )}
-        {isLive && pid.type === GpacStreamType.Visual && (
-          <PIDPreviewButton
-            pid={pid}
-            onSelect={selectIfNeeded}
-            isPreviewOpen={isPreviewOpen}
-            onTogglePreview={onTogglePreview}
-          />
-        )}
+        {isLive &&
+          pid.type === GpacStreamType.Visual &&
+          canPreview(pid.codec) && (
+            <PIDPreviewButton
+              pid={pid}
+              onSelect={selectIfNeeded}
+              isPreviewOpen={isPreviewOpen}
+              onTogglePreview={onTogglePreview}
+            />
+          )}
         <Badge
           variant="outline"
           className={`px-1.5 py-0 h-5 font-mono font-bold text-[0.714rem] flex-shrink-0 ${isSelected ? '' : badgeConfig.className}`}

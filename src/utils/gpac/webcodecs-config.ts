@@ -1,6 +1,15 @@
 // GPAC CodecID name for AVC/H.264 (gf_codecid_file_ext, part before '|').
 const AVC_CODEC_ID = '264';
 
+export function isPreviewableCodec(codec: string): boolean {
+  return codec === AVC_CODEC_ID;
+}
+
+// A server that predates the graph `codec` field sends none: the PID stays offered.
+export function canPreview(codec: string | null | undefined): boolean {
+  return codec == null || isPreviewableCodec(codec);
+}
+
 function toHexByte(byte: number): string {
   return byte.toString(16).padStart(2, '0');
 }
@@ -95,7 +104,7 @@ export async function resolveWebCodecsConfig(
   decoderConfigBase64: string | null | undefined,
 ): Promise<VideoDecoderConfig | null> {
   if (typeof VideoDecoder === 'undefined' || !VideoDecoder) return null;
-  if (codec !== AVC_CODEC_ID || !decoderConfigBase64) return null;
+  if (!isPreviewableCodec(codec) || !decoderConfigBase64) return null;
   try {
     const description = decodeBase64(decoderConfigBase64);
     const codecString = buildAvcCodecString(description);

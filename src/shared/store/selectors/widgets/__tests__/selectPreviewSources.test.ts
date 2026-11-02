@@ -79,4 +79,20 @@ describe('selectPreviewSources', () => {
 
     expect(reframer.pids.map((pid) => pid.isOpen)).toEqual([true, false]);
   });
+
+  it('drops a video PID whose codec cannot be previewed', () => {
+    const store = createStore();
+    const filters = structuredClone(
+      filtersFixture.filters,
+    ) as GraphFilterData[];
+    filters[0].opid[1].codec = 'raw';
+    store.dispatch(filtersUpdated(filters));
+
+    const sources = selectPreviewSources(store.getState());
+
+    expect(sources.map((source) => source.filterName)).toEqual([
+      'reframer',
+      'inspect',
+    ]);
+  });
 });

@@ -12,6 +12,7 @@ import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import type { PIDMetricMode } from '@/components/views/stats-session/types/pid';
 import type { GraphInputPid, GraphOutputPid } from '@/types/domain/gpac/model';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
+import { canPreview } from '@/utils/gpac/webcodecs-config';
 
 const defaultWidgetConfig: WidgetConfig = {
   isMaximized: false,
@@ -104,7 +105,10 @@ const toVisualSourcePids = (
   openPreviews: OpenPreviews,
 ): PreviewSourcePid[] =>
   graphPids
-    .filter((pid) => pid.stream_type === GpacStreamType.Visual)
+    .filter(
+      (pid) =>
+        pid.stream_type === GpacStreamType.Visual && canPreview(pid.codec),
+    )
     .map((pid) => ({
       direction,
       pidIdx: pid.pid_index,

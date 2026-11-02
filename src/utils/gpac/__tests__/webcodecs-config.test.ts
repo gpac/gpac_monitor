@@ -2,6 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   annexBToAvcc,
   buildAvcCodecString,
+  canPreview,
   hasPictureSlice,
   isAnnexB,
   resolveWebCodecsConfig,
@@ -65,6 +66,18 @@ describe('annexBToAvcc', () => {
     const converted = annexBToAvcc(base64ToBytes(UFNALU_DELTA_BASE64));
     expect(converted).toEqual(base64ToBytes(UFNALU_DELTA_AVCC_BASE64));
     expect(hasPictureSlice(converted)).toBe(true);
+  });
+});
+
+describe('canPreview', () => {
+  it('accepts the AVC codec and refuses the others', () => {
+    expect(canPreview('264')).toBe(true);
+    expect(canPreview('raw')).toBe(false);
+  });
+
+  it('accepts the PID when the server sends no codec', () => {
+    expect(canPreview(undefined)).toBe(true);
+    expect(canPreview(null)).toBe(true);
   });
 });
 
