@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import WidgetWrapper from '@/components/widget/WidgetWrapper';
 import { useAppSelector } from '@/shared/hooks';
+import { selectIsPreviewSupported } from '@/shared/store/selectors';
 import {
   selectPreviewSources,
   type PreviewSourceGroup,
@@ -18,6 +19,7 @@ const keepPids = (
 
 const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
   const sources = useAppSelector(selectPreviewSources);
+  const isPreviewSupported = useAppSelector(selectIsPreviewSupported);
   const activeGroups = useMemo(() => keepPids(sources, true), [sources]);
   const availableGroups = useMemo(() => keepPids(sources, false), [sources]);
   const activeCount = activeGroups.reduce(
@@ -40,7 +42,9 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
       <div className="flex h-full flex-col gap-3 overflow-y-auto p-2 text-base">
         {sources.length === 0 ? (
           <p className="m-auto text-monitor-text-muted">
-            No video PID in this session
+            {isPreviewSupported
+              ? 'No video PID in this session'
+              : 'Preview requires a newer GPAC version'}
           </p>
         ) : (
           <div className="flex flex-col gap-3">

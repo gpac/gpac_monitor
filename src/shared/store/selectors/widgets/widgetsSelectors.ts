@@ -13,6 +13,7 @@ import type { PIDMetricMode } from '@/components/views/stats-session/types/pid';
 import type { GraphInputPid, GraphOutputPid } from '@/types/domain/gpac/model';
 import { GpacStreamType } from '@/types/domain/gpac/stream-types';
 import { canPreview } from '@/utils/gpac/webcodecs-config';
+import { selectIsPreviewSupported } from '../selectMonitorConfig';
 
 const defaultWidgetConfig: WidgetConfig = {
   isMaximized: false,
@@ -117,9 +118,10 @@ const toVisualSourcePids = (
     }));
 
 export const selectPreviewSources = createSelector(
-  [selectGraphFilters, selectViewByFilter],
-  (filters, viewByFilter): PreviewSourceGroup[] =>
-    filters.flatMap((filter) => {
+  [selectGraphFilters, selectViewByFilter, selectIsPreviewSupported],
+  (filters, viewByFilter, isPreviewSupported): PreviewSourceGroup[] => {
+    if (!isPreviewSupported) return [];
+    return filters.flatMap((filter) => {
       const openPreviews =
         viewByFilter[filter.idx]?.openPreviews ?? NO_OPEN_PREVIEWS;
       const pids = [
@@ -129,7 +131,8 @@ export const selectPreviewSources = createSelector(
       return pids.length > 0
         ? [{ filterIdx: filter.idx, filterName: filter.name, pids }]
         : [];
-    }),
+    });
+  },
   { memoizeOptions: { resultEqualityCheck: isEqual } },
 );
 

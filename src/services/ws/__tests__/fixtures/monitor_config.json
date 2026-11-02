@@ -15,6 +15,6 @@
       "debug": 0.05
     }
   },
-  "ws_protocol_version": 1,
+  "ws_protocol_version": 1.1,
   "gpac_version": "26.08-DEV-rev149-ga23ae2dc0-master"
 }

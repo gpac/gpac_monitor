@@ -185,6 +185,7 @@ export class BaseMessageHandler {
         break;
       case 'monitor_config': {
         this.callbacks.onSetMonitorConfig(data.intervals);
+        this.callbacks.onSetServerProtocolVersion(data.ws_protocol_version);
         const versionMismatch = checkProtocolVersionMismatch(
           data.ws_protocol_version,
           data.gpac_version,

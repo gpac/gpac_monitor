@@ -37,6 +37,7 @@ export interface MessageHandlerCallbacks {
   onFilterStatuses: (entries: FilterStatusInput[]) => void;
   onUpdateFilterStats: (payload: FilterStatsPayload) => void;
   onSetMonitorConfig: (intervals: MonitorIntervals) => void;
+  onSetServerProtocolVersion: (version: number | undefined) => void;
   onSessionEnd?: (data: SessionEndMessage) => void;
 }
 

@@ -6,7 +6,7 @@ const UPDATE_INTERVALS = {
 
 // Bump on any front<->server CONTRACT change (new message, new field the front relies on,
 // changed semantics)
-const WS_PROTOCOL_VERSION = 1;
+const WS_PROTOCOL_VERSION = 1.1;
 
 // Log retention strategy: preserve errors (100%), prioritize warnings (80%), sample info/debug (20%/5%)
 const LOG_RETENTION = {

@@ -9,7 +9,10 @@ import {
   updateSessionStats,
   setMetricDefinitions,
 } from '@/shared/store/slices/sessionStatsSlice';
-import { setMonitorConfig } from '@/shared/store/slices/monitorConfigSlice';
+import {
+  setMonitorConfig,
+  setServerProtocolVersion,
+} from '@/shared/store/slices/monitorConfigSlice';
 import {
   appendLogsForAllTools,
   setSubscriptionStatus,
@@ -147,6 +150,8 @@ export const createStoreCallbacks = (): MessageHandlerCallbacks => {
       store.dispatch(setMetricDefinitions(definitions)),
     onSetMonitorConfig: (intervals) =>
       store.dispatch(setMonitorConfig(intervals)),
+    onSetServerProtocolVersion: (version) =>
+      store.dispatch(setServerProtocolVersion(version)),
     onFilterStatuses: (entries) => {
       const state = store.getState();
       const changedEntries = entries.filter(

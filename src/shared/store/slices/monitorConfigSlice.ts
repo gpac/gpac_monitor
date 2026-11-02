@@ -8,12 +8,14 @@ export interface MonitorIntervals {
 
 interface MonitorConfigState {
   intervals: MonitorIntervals;
+  serverProtocolVersion: number | undefined;
 }
 
 // Fallback only, used until the server's monitor_config message arrives.
 // Source of truth: server/config/live.config.js UPDATE_INTERVALS.
 const initialState: MonitorConfigState = {
   intervals: { SESSION_STATS: 1000, FILTER_STATS: 1000, CPU_STATS: 500 },
+  serverProtocolVersion: undefined,
 };
 
 const monitorConfigSlice = createSlice({
@@ -23,8 +25,15 @@ const monitorConfigSlice = createSlice({
     setMonitorConfig: (state, action: PayloadAction<MonitorIntervals>) => {
       state.intervals = action.payload;
     },
+    setServerProtocolVersion: (
+      state,
+      action: PayloadAction<number | undefined>,
+    ) => {
+      state.serverProtocolVersion = action.payload;
+    },
   },
 });
 
-export const { setMonitorConfig } = monitorConfigSlice.actions;
+export const { setMonitorConfig, setServerProtocolVersion } =
+  monitorConfigSlice.actions;
 export default monitorConfigSlice.reducer;

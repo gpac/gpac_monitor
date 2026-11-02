@@ -11,7 +11,10 @@ import {
 } from '@/utils/filters/streamType';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
-import { selectPidColorIndexByKey } from '@/shared/store/selectors';
+import {
+  selectIsPreviewSupported,
+  selectPidColorIndexByKey,
+} from '@/shared/store/selectors';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
 import { canPreview } from '@/utils/gpac/webcodecs-config';
 import { GraphRadio } from '@/components/common/charts';
@@ -41,6 +44,7 @@ const PIDRowInfoCell = memo(
   }: PIDRowInfoCellProps) => {
     const dispatch = useAppDispatch();
     const { isLive } = useDataMode();
+    const isPreviewSupported = useAppSelector(selectIsPreviewSupported);
     const colorIndex = useAppSelector(
       (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
     );
@@ -88,6 +92,7 @@ const PIDRowInfoCell = memo(
           </button>
         )}
         {isLive &&
+          isPreviewSupported &&
           pid.type === GpacStreamType.Visual &&
           canPreview(pid.codec) && (
             <PIDPreviewButton

@@ -8,12 +8,23 @@ import widgetsReducer, {
 import { filtersUpdated } from '@/shared/store/actions/globalActions';
 import type { GraphFilterData } from '@/types/domain/gpac/model';
 import filtersFixture from '@/services/ws/__tests__/fixtures/filters.json';
+import monitorConfigReducer, {
+  setServerProtocolVersion,
+} from '@/shared/store/slices/monitorConfigSlice';
+import { PREVIEW_MIN_WS_PROTOCOL_VERSION } from '@/services/ws/protocolVersion';
 import { selectPreviewSources } from '../widgetsSelectors';
 
-const createStore = () =>
-  configureStore({
-    reducer: { graph: graphReducer, widgets: widgetsReducer },
+const createStore = () => {
+  const store = configureStore({
+    reducer: {
+      graph: graphReducer,
+      widgets: widgetsReducer,
+      monitorConfig: monitorConfigReducer,
+    },
   });
+  store.dispatch(setServerProtocolVersion(PREVIEW_MIN_WS_PROTOCOL_VERSION));
+  return store;
+};
 
 const loadFixtureGraph = (store: ReturnType<typeof createStore>) =>
   store.dispatch(filtersUpdated(filtersFixture.filters as GraphFilterData[]));
@@ -94,5 +105,35 @@ describe('selectPreviewSources', () => {
       'reframer',
       'inspect',
     ]);
+  });
+
+  it('offers an H.264 PID when the server announces version 1.1', () => {
+    const store = createStore();
+    const filters = structuredClone(
+      filtersFixture.filters,
+    ) as GraphFilterData[];
+    filters[0].opid[1].codec = '264';
+    store.dispatch(filtersUpdated(filters));
+    store.dispatch(setServerProtocolVersion(1.1));
+
+    const sources = selectPreviewSources(store.getState());
+
+    expect(sources[0].filterName).toBe('avgen');
+  });
+
+  it('returns an empty list when the server announces version 1', () => {
+    const store = createStore();
+    loadFixtureGraph(store);
+    store.dispatch(setServerProtocolVersion(1));
+
+    expect(selectPreviewSources(store.getState())).toEqual([]);
+  });
+
+  it('returns an empty list when the server announces no version', () => {
+    const store = createStore();
+    loadFixtureGraph(store);
+    store.dispatch(setServerProtocolVersion(undefined));
+
+    expect(selectPreviewSources(store.getState())).toEqual([]);
   });
 });
