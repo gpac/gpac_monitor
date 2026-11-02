@@ -75,6 +75,7 @@ function gpac_filter_to_minimal_object(f) {
             source_idx: f.ipid_source(i).idx,
             source_opid_idx: hasSourceOpidIdx ? f.ipid_source_opid_idx(i) : -1,
             stream_type: f.ipid_props(i, "StreamType"),
+            codec: f.ipid_props(i, "CodecID") ?? undefined,
             ID: f.ipid_props(i, "ID")
         });
     }
@@ -83,6 +84,7 @@ function gpac_filter_to_minimal_object(f) {
             pid_index: o,
             name: f.opid_props(o, "name"),
             stream_type: f.opid_props(o, "StreamType"),
+            codec: f.opid_props(o, "CodecID") ?? undefined,
             ID: f.opid_props(o, "ID")
         });
     }
