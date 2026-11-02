@@ -79,6 +79,7 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
     sink.remove_pid = function (pid) {
         if (entry.pid === pid) {
             entry.pid = null;
+            entry.sink = null;
             print(`[Preview] compressed pid removed idx=${filterIdx}`);
             previewManager.send({ message: 'preview_error', previewId: entry.previewId, error: 'Source removed' });
         }

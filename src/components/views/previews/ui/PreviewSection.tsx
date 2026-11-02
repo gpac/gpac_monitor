@@ -29,7 +29,7 @@ const PreviewGroupLabel = ({ group }: { group: PreviewSourceGroup }) => (
   <span className="flex min-w-0 items-center gap-1.5">
     <Badge
       variant="status"
-      className="min-w-0 rounded-[6px] border border-slate-600/40 bg-slate-800/60 px-2 text-[0.929rem] font-medium text-slate-200 shadow-none hover:bg-slate-800/60"
+      className="min-w-0 rounded-sm border border-slate-600/40 bg-slate-800/60 px-2 text-[0.929rem] font-medium text-slate-200 shadow-none hover:bg-slate-800/60"
     >
       <span className="truncate">{group.filterName}</span>
     </Badge>
