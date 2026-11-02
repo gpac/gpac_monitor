@@ -1,6 +1,6 @@
 import { WSMessageType } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
-import { resolveWebCodecsConfig } from '@/utils/gpac';
+import { isPreviewableCodec, resolveWebCodecsConfig } from '@/utils/gpac';
 import { PreviewWorker } from './previewWorker';
 import type {
   MessageHandlerDependencies,
@@ -41,7 +41,13 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
     );
     if (this.closed) return;
     if (!webCodecsConfig) {
-      this.showError('Codec not supported by this browser');
+      const isConfigMissing =
+        isPreviewableCodec(this.source.codec) && !this.source.decoderConfig;
+      this.showError(
+        isConfigMissing
+          ? 'No decoder configuration on this PID'
+          : 'Codec not supported by this browser',
+      );
       return;
     }
     this.decoder = PreviewWorker.open(

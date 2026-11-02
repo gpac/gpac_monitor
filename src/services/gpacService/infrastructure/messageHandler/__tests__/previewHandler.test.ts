@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { PreviewHandler } from '../previewHandler';
 import { PreviewWorker } from '../previewWorker';
+import { resolveWebCodecsConfig } from '@/utils/gpac';
 import type { MessageHandlerDependencies } from '../types';
 
 vi.mock('../previewWorker', () => ({
@@ -113,6 +114,38 @@ describe('PreviewHandler', () => {
       loading: false,
       error: 'Codec not supported by this browser',
     });
+  });
+
+  it('reports a missing decoder configuration for a decodable codec without config', async () => {
+    const dependencies = makeDependencies();
+    const handler = new PreviewHandler(dependencies);
+    vi.mocked(resolveWebCodecsConfig).mockResolvedValueOnce(null);
+
+    const preview = handler.requestPreview(5, 1, 'output', 'ffenc', {
+      codec: '264',
+      decoderConfig: null,
+    });
+    await flushCodecResolution();
+
+    expect(dependencies.send).not.toHaveBeenCalled();
+    expect(preview.getSnapshot().error).toBe(
+      'No decoder configuration on this PID',
+    );
+  });
+
+  it('blames the browser when a decodable codec with a config is refused', async () => {
+    const handler = new PreviewHandler(makeDependencies());
+    vi.mocked(resolveWebCodecsConfig).mockResolvedValueOnce(null);
+
+    const preview = handler.requestPreview(5, 1, 'output', 'reframer', {
+      codec: '264',
+      decoderConfig: 'AWQAKg==',
+    });
+    await flushCodecResolution();
+
+    expect(preview.getSnapshot().error).toBe(
+      'Codec not supported by this browser',
+    );
   });
 
   it('routes each frame to its own preview and keeps the other open when one closes', async () => {
