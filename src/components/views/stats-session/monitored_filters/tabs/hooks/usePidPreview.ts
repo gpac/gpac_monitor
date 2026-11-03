@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { RefObject } from 'react';
 import { gpacService } from '@/services/gpacService/gpacService';
-import type { PreviewHandlerState } from '@/services/gpacService/infrastructure/messageHandler/previewHandler';
+import type { PreviewHandlerState } from '@/services/gpacService/infrastructure/messageHandler/preview/previewHandler';
 
 export function usePidPreview(
   filterIdx: number,

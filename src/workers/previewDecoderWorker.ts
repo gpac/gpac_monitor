@@ -1,4 +1,4 @@
-import { PreviewDecoder } from '@/services/gpacService/infrastructure/messageHandler/previewDecoder';
+import { PreviewDecoder } from '@/services/gpacService/infrastructure/messageHandler/preview/previewDecoder';
 
 export type PreviewWorkerMessage =
   | { type: 'open'; config: VideoDecoderConfig }

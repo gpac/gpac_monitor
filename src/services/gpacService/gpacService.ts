@@ -13,7 +13,7 @@ import { BaseMessageHandler } from './infrastructure/messageHandler/baseMessageH
 import type {
   PreviewEntry,
   PreviewSource,
-} from './infrastructure/messageHandler/previewHandler';
+} from './infrastructure/messageHandler/preview/previewHandler';
 import { GpacCoreService } from './core/gpacCore';
 import { createStoreCallbacks } from './liveAdapter/storeIntegration';
 import {

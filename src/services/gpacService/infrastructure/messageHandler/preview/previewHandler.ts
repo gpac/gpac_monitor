@@ -4,9 +4,9 @@ import type {
 } from '@/services/ws/types';
 import { SubscriptionLifecycle } from '@/services/utils/SubscriptionLifecycle';
 import { PreviewEntry, type PreviewTarget } from './previewEntry';
-import type { MessageHandlerDependencies, PreviewSource } from './types';
+import type { MessageHandlerDependencies, PreviewSource } from '../types';
 
-export type { PreviewHandlerState, PreviewSource } from './types';
+export type { PreviewHandlerState, PreviewSource } from '../types';
 export type { PreviewEntry } from './previewEntry';
 
 const toPreviewKey = ({ filterIdx, direction, pidIdx }: PreviewTarget) =>

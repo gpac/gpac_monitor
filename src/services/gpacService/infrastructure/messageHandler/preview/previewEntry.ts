@@ -6,7 +6,7 @@ import type {
   MessageHandlerDependencies,
   PreviewHandlerState,
   PreviewSource,
-} from './types';
+} from '../types';
 
 export interface PreviewTarget {
   filterIdx: number;

@@ -14,7 +14,7 @@ import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
 import { PidPropsHandler } from './pidPropsHandler';
 import { CommandLineHandler } from './commandLineHandler';
-import { PreviewHandler } from './previewHandler';
+import { PreviewHandler } from './preview/previewHandler';
 import {
   LogBatchResponse,
   LogHistoryResponse,

@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { PreviewHandler } from '../previewHandler';
 import { PreviewWorker } from '../previewWorker';
 import { resolveWebCodecsConfig } from '@/utils/gpac';
-import type { MessageHandlerDependencies } from '../types';
+import type { MessageHandlerDependencies } from '../../types';
 
 vi.mock('../previewWorker', () => ({
   PreviewWorker: { open: vi.fn() },
