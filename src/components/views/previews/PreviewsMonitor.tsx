@@ -29,10 +29,9 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
 
   const statusBadge = useMemo(
     () => (
-      <div className="flex items-center gap-1.5 mt-4 text-[0.714rem]">
-        <span className="text-monitor-text-muted ">{activeCount} active</span>
-        <span className="rounded border border-emerald-700/50 bg-emerald-900/40 px-1.5 text-emerald-300"></span>
-      </div>
+      <span className="text-[0.786rem] tabular-nums text-monitor-text-muted">
+        {activeCount} active
+      </span>
     ),
     [activeCount],
   );
@@ -48,9 +47,16 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
           </p>
         ) : (
           <div className="flex flex-col gap-3">
-            <PreviewSection title="Active" groups={activeGroups} />
+            <PreviewSection
+              title="Active"
+              count={activeCount}
+              emptyLabel="No preview open"
+              groups={activeGroups}
+            />
             <PreviewSection
               title="Available"
+              count={availableGroups.length}
+              emptyLabel="No other previewable PID"
               groups={availableGroups}
               collapsible
             />
