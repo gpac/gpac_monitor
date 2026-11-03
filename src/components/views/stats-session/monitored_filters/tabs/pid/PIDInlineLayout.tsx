@@ -59,11 +59,12 @@ const PIDInlineLayout = memo(
       [dispatch, filterIdx, store],
     );
 
-    // Selection survives detach/reattach; default to the first PID
-    // only when the filter has none, so the graph shows by default.
+    // Selection survives detach/reattach; default to the previewed PID, else
+    // the first one, only when the filter has none, so the graph shows by default.
     useEffect(() => {
-      const firstPid = pids[0];
-      if (hasDefaultedRef.current || !firstPid) return;
+      const defaultPid =
+        pids.find((pid) => previewPidIdxs.includes(pid.pidIdx)) ?? pids[0];
+      if (hasDefaultedRef.current || !defaultPid) return;
       hasDefaultedRef.current = true;
       if (selectSelectedPidTargetsByFilter(store.getState(), filterIdx).length)
         return;
@@ -71,11 +72,11 @@ const PIDInlineLayout = memo(
         toggleSelectedPid({
           filterIdx,
           direction: variant,
-          pidIndex: firstPid.pidIdx,
-          label: buildPIDDisplayLabel(firstPid),
+          pidIndex: defaultPid.pidIdx,
+          label: buildPIDDisplayLabel(defaultPid),
         }),
       );
-    }, [dispatch, filterIdx, variant, pids, store]);
+    }, [dispatch, filterIdx, variant, pids, previewPidIdxs, store]);
 
     return (
       <div className="flex flex-col gap-2">
