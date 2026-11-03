@@ -20,7 +20,6 @@ export interface WidgetDefinition {
   description?: string;
   enabled: boolean;
   fixedPosition?: boolean;
-  inFactoryLayout?: boolean;
 }
 
 export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
@@ -83,7 +82,6 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     defaultZIndex: 1003,
     description: 'Open a video PID preview in one click.',
     enabled: true,
-    inFactoryLayout: false,
   },
 };
 
