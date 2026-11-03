@@ -1,5 +1,9 @@
 import React from 'react';
-import { LuMonitor, LuX } from 'react-icons/lu';
+import { LuEye, LuMonitor, LuX } from 'react-icons/lu';
+import { CustomTooltip } from '@/components/ui/tooltip';
+
+const ROW_BUTTON_CLASS =
+  'flex min-w-0 flex-1 items-center gap-2 rounded-sm px-2 py-1 text-left focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-monitor-active-filter';
 
 interface PreviewRowProps {
   label: string;
@@ -9,26 +13,46 @@ interface PreviewRowProps {
   onClose: () => void;
 }
 
+const PreviewRowContent = ({
+  label,
+  isOpen,
+}: Pick<PreviewRowProps, 'label' | 'isOpen'>) => (
+  <>
+    <span
+      className={`h-1.5 w-1.5 shrink-0 rounded-full ${isOpen ? 'bg-monitor-active-filter' : 'bg-monitor-text-muted/50'}`}
+      aria-hidden
+    />
+    <LuMonitor
+      className="h-3.5 w-3.5 shrink-0 text-monitor-text-muted"
+      aria-hidden
+    />
+    <span className="min-w-0 flex-1 truncate">{label}</span>
+  </>
+);
+
 export const PreviewRow = React.memo(
   ({ label, filterName, isOpen, onOpen, onClose }: PreviewRowProps) => {
     if (isOpen) {
       return (
-        <div className="group flex items-center gap-2 rounded bg-monitor-selection px-2 py-1 text-monitor-text-primary">
-          <span className="h-2 w-2 rounded-full bg-emerald-600" aria-hidden />
-          <LuMonitor
-            className="h-3.5 w-3.5 text-monitor-text-muted"
-            aria-hidden
-          />
-          <span className="flex-1 truncate">{label}</span>
+        <div className="group flex items-center rounded-sm bg-monitor-selection text-[0.929rem] text-monitor-text-primary">
           <button
             type="button"
-            onClick={onClose}
-            title="Close preview"
-            aria-label={`Close preview ${filterName} ${label}`}
-            className="text-monitor-text-muted opacity-0 hover:text-monitor-text-primary focus-visible:opacity-100 group-hover:opacity-100"
+            onClick={onOpen}
+            aria-label={`Show preview ${filterName} ${label}`}
+            className={ROW_BUTTON_CLASS}
           >
-            <LuX className="h-3.5 w-3.5" />
+            <PreviewRowContent label={label} isOpen />
           </button>
+          <CustomTooltip content="Close preview" side="right">
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={`Close preview ${filterName} ${label}`}
+              className="mr-1 shrink-0 rounded-sm p-0.5 text-monitor-text-muted opacity-0 hover:text-monitor-text-primary focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-monitor-active-filter group-hover:opacity-100"
+            >
+              <LuX className="h-3.5 w-3.5" />
+            </button>
+          </CustomTooltip>
         </div>
       );
     }
@@ -37,17 +61,14 @@ export const PreviewRow = React.memo(
       <button
         type="button"
         onClick={onOpen}
-        className="flex w-full items-center gap-2 rounded px-2 py-1 text-left text-monitor-text-secondary hover:bg-white/5"
+        aria-label={`Open preview ${filterName} ${label}`}
+        className={`group ${ROW_BUTTON_CLASS} w-full text-[0.929rem] text-monitor-text-secondary hover:bg-white/5 hover:text-monitor-text-primary`}
       >
-        <span
-          className="h-2 w-2 rounded-full bg-monitor-text-muted"
+        <PreviewRowContent label={label} isOpen={false} />
+        <LuEye
+          className="h-3.5 w-3.5 shrink-0 text-monitor-active-filter opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
           aria-hidden
         />
-        <LuMonitor
-          className="h-3.5 w-3.5 text-monitor-text-muted"
-          aria-hidden
-        />
-        <span className="truncate">{label}</span>
       </button>
     );
   },
