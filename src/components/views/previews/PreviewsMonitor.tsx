@@ -38,7 +38,7 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
 
   return (
     <WidgetWrapper id={id} statusBadge={statusBadge}>
-      <div className="flex h-full flex-col gap-3 overflow-y-auto p-2 text-base">
+      <div className="flex min-h-full flex-col gap-3 p-2 text-base">
         {sources.length === 0 ? (
           <p className="m-auto text-monitor-text-muted">
             {isPreviewSupported
