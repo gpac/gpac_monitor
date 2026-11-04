@@ -1,6 +1,6 @@
 import { WidgetsState } from './types';
 
-const GRID_COLUMNS = 24;
+export const GRID_COLUMNS = 24;
 const DETACHED_WIDTH = 8;
 const DETACHED_HEIGHT = 6;
 const DETACHED_PER_ROW = Math.floor(GRID_COLUMNS / DETACHED_WIDTH);

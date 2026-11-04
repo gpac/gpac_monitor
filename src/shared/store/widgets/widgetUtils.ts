@@ -7,6 +7,7 @@ import {
   getFreeDetachedPlacement,
   reflowDetachedWidgets,
 } from './detachedPlacement';
+import { placeAddedWidget } from './addedWidgetPlacement';
 
 // Basic widget management
 export const addWidgetReducer = (
@@ -27,6 +28,8 @@ export const addWidgetReducer = (
       instance.y = saved.y;
     }
   }
+
+  if (!instance.fixedPosition) placeAddedWidget(state, instance);
 
   state.activeWidgets.push(instance as Widget);
 };
