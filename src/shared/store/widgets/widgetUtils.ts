@@ -8,6 +8,7 @@ import {
   reflowDetachedWidgets,
 } from './detachedPlacement';
 import { placeAddedWidget } from './addedWidgetPlacement';
+import { slideWidgetsOnClose } from './closedWidgetPlacement';
 
 // Basic widget management
 export const addWidgetReducer = (
@@ -39,9 +40,11 @@ export const removeWidgetReducer = (
   action: PayloadAction<string>,
 ) => {
   const widgetId = action.payload;
-  const wasDetached = state.activeWidgets.some(
-    (widget) => widget.id === widgetId && widget.isDetached,
+  const closedWidget = state.activeWidgets.find(
+    (widget) => widget.id === widgetId,
   );
+  const wasDetached = Boolean(closedWidget?.isDetached);
+  if (closedWidget && !wasDetached) slideWidgetsOnClose(state, widgetId);
   state.activeWidgets = state.activeWidgets.filter((w) => w.id !== widgetId);
   if (wasDetached) reflowDetachedWidgets(state);
   if (state.configs[widgetId]) {

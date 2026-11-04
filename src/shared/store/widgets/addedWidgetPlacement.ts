@@ -4,7 +4,7 @@ import { findFirstFreeSlot } from '@/utils/layout/firstFreeSlot';
 import { GRID_COLUMNS } from './detachedPlacement';
 import { WidgetsState } from './types';
 
-const toLayoutItem = ({ id, x, y, w, h }: Widget): Layout => ({
+export const toLayoutItem = ({ id, x, y, w, h }: Widget): Layout => ({
   i: id,
   x,
   y,
