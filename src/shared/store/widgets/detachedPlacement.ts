@@ -1,3 +1,4 @@
+import { Layout } from 'react-grid-layout';
 import { WidgetsState } from './types';
 
 export const GRID_COLUMNS = 24;
@@ -19,6 +20,20 @@ const getSlotPlacement = (slot: number, gridBottom: number) => ({
   w: DETACHED_WIDTH,
   h: DETACHED_HEIGHT,
 });
+
+export const getStoredYBelowDetached = (
+  state: WidgetsState,
+  compactedLayout: Layout[],
+  displayedY: number,
+): number =>
+  getDetachedWidgets(state).reduce((storedY, detached) => {
+    const item = compactedLayout.find(
+      (candidate) => candidate.i === detached.id,
+    );
+    return item && item.y + item.h <= displayedY
+      ? Math.max(storedY, detached.y + 1)
+      : storedY;
+  }, displayedY);
 
 export const getFreeDetachedPlacement = (state: WidgetsState) => {
   const gridBottom = getGridBottom(state);

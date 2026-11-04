@@ -1,6 +1,9 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { compact } from 'react-grid-layout/build/utils';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetType, type Widget } from '@/types/ui/widget';
+import { toLayoutItem } from '../addedWidgetPlacement';
+import { GRID_COLUMNS } from '../detachedPlacement';
 import { addWidgetReducer, detachFilterReducer } from '../widgetUtils';
 import { WidgetsState } from '../types';
 
@@ -106,6 +109,73 @@ describe('addWidgetReducer placement', () => {
     expect(findByType(state, WidgetType.METRICS)).toMatchObject({
       x: 8,
       y: 14,
+    });
+  });
+
+  describe('below eight rows of detached filters', () => {
+    const LAST_ROW_DISPLAYED_Y = 42;
+
+    const detachFilters = (state: WidgetsState, count: number) =>
+      Array.from({ length: count }).forEach((_, idx) =>
+        detachFilterReducer(state, {
+          type: 'widgets/detachFilter',
+          payload: { idx, name: `filter-${idx}` },
+        }),
+      );
+
+    const displayedItem = (state: WidgetsState, widgetId: string) =>
+      compact(
+        state.activeWidgets.map(toLayoutItem),
+        'vertical',
+        GRID_COLUMNS,
+      ).find((item) => item.i === widgetId);
+
+    it('keeps the last row in place when a widget goes to the bottom', () => {
+      const state = createState([]);
+      detachFilters(state, 24);
+      const lastDetached = state.activeWidgets[23];
+
+      addWidget(state, WidgetType.LOGS);
+
+      const logsId = findByType(state, WidgetType.LOGS)!.id;
+      expect(displayedItem(state, lastDetached.id)?.y).toBe(
+        LAST_ROW_DISPLAYED_Y,
+      );
+      expect(displayedItem(state, logsId)).toMatchObject({ x: 0, y: 48 });
+    });
+
+    it('keeps the last row in place when a second widget fills a hole', () => {
+      const state = createState([]);
+      detachFilters(state, 24);
+      const lastDetached = state.activeWidgets[23];
+
+      addWidget(state, WidgetType.LOGS);
+      addWidget(state, WidgetType.METRICS);
+
+      const logsId = findByType(state, WidgetType.LOGS)!.id;
+      const metricsId = findByType(state, WidgetType.METRICS)!.id;
+      expect(displayedItem(state, lastDetached.id)?.y).toBe(
+        LAST_ROW_DISPLAYED_Y,
+      );
+      expect(displayedItem(state, logsId)).toMatchObject({ x: 0, y: 48 });
+      expect(displayedItem(state, metricsId)).toMatchObject({ x: 18, y: 48 });
+    });
+
+    it('opens a new detached filter below the added widget', () => {
+      const state = createState([]);
+      detachFilters(state, 24);
+
+      addWidget(state, WidgetType.LOGS);
+      detachFilterReducer(state, {
+        type: 'widgets/detachFilter',
+        payload: { idx: 24, name: 'filter-24' },
+      });
+
+      const newDetached = state.activeWidgets.at(-1)!;
+      expect(displayedItem(state, newDetached.id)).toMatchObject({
+        x: 0,
+        y: 52,
+      });
     });
   });
 

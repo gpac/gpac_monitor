@@ -1,6 +1,6 @@
 import { slideLeftOnClose } from '@/utils/layout/slideLeftOnClose';
 import { toLayoutItem } from './addedWidgetPlacement';
-import { GRID_COLUMNS } from './detachedPlacement';
+import { GRID_COLUMNS, getStoredYBelowDetached } from './detachedPlacement';
 import { WidgetsState } from './types';
 
 export const slideWidgetsOnClose = (
@@ -22,6 +22,6 @@ export const slideWidgetsOnClose = (
     const slidItem = slidLayout.find((item) => item.i === widget.id);
     if (!slidItem) return;
     widget.x = slidItem.x;
-    widget.y = slidItem.y;
+    widget.y = getStoredYBelowDetached(state, slidLayout, slidItem.y);
   });
 };

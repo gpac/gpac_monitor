@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
+import { compact } from 'react-grid-layout/build/utils';
 import { WidgetType, type Widget } from '@/types/ui/widget';
+import { toLayoutItem } from '../addedWidgetPlacement';
+import { GRID_COLUMNS } from '../detachedPlacement';
 import { removeWidgetReducer } from '../widgetUtils';
 import { WidgetsState } from '../types';
 
@@ -91,6 +94,41 @@ describe('removeWidgetReducer slide on close', () => {
     closeWidget(state, WidgetType.METRICS);
 
     expect(state.activeWidgets[1]).toMatchObject({ x: 8, y: 12 });
+  });
+
+  it('keeps the last detached row in place below eight rows', () => {
+    const detachedWidgets = Array.from(
+      { length: 24 },
+      (_, slot): Widget => ({
+        ...createBaseWidget(
+          WidgetType.FILTERSESSION,
+          (slot % 3) * 8,
+          Math.floor(slot / 3) * 7,
+          8,
+          6,
+        ),
+        id: `detached-${slot}`,
+        isDetached: true,
+        detachedFilterIdx: slot,
+      }),
+    );
+    const state = createState([
+      ...detachedWidgets,
+      createBaseWidget(WidgetType.LOGS, 0, 50, 18, 4),
+      createBaseWidget(WidgetType.METRICS, 18, 50, 6, 4),
+    ]);
+
+    closeWidget(state, WidgetType.LOGS);
+
+    const displayed = compact(
+      state.activeWidgets.map(toLayoutItem),
+      'vertical',
+      GRID_COLUMNS,
+    );
+    expect(displayed.find((item) => item.i === 'detached-23')?.y).toBe(42);
+    expect(
+      displayed.find((item) => item.i === `base-${WidgetType.METRICS}`),
+    ).toMatchObject({ x: 0, y: 48 });
   });
 
   it('moves nothing when the widget id is unknown', () => {
