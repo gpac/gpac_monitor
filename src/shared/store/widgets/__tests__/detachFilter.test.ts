@@ -8,7 +8,10 @@ import widgetsReducer, {
   closeFilter,
   setFilterViewState,
 } from '../widgetsSlice';
-import { detachFilterReducer, removeWidgetReducer } from '../widgetUtils';
+import {
+  detachFilterReducer,
+  updateWidgetPositionReducer,
+} from '../widgetUtils';
 import { WidgetsState } from '../types';
 import {
   selectFilterActiveTab,
@@ -128,16 +131,16 @@ describe('detachFilterReducer', () => {
     }));
   });
 
-  it('places a new detached widget in the slot freed by a removed one', () => {
+  it('places a new detached widget in the slot freed by a moved one', () => {
     const state = createEmptyState();
     detach(state, 0);
     detach(state, 1);
     detach(state, 2);
 
     const firstWidget = findDetachedWidget(state, 0);
-    removeWidgetReducer(state, {
-      type: 'widgets/removeWidget',
-      payload: firstWidget!.id,
+    updateWidgetPositionReducer(state, {
+      type: 'widgets/updateWidgetPosition',
+      payload: { id: firstWidget!.id, x: 0, y: 20, w: 8, h: 6 },
     });
     detach(state, 3);
 

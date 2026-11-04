@@ -3,6 +3,10 @@ import { Widget, WidgetConfig, WidgetType } from '@/types/ui/widget';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetsState } from './types';
 import { writeFilterViewMode } from './filterViewReducers';
+import {
+  getFreeDetachedPlacement,
+  reflowDetachedWidgets,
+} from './detachedPlacement';
 
 // Basic widget management
 export const addWidgetReducer = (
@@ -32,7 +36,11 @@ export const removeWidgetReducer = (
   action: PayloadAction<string>,
 ) => {
   const widgetId = action.payload;
+  const wasDetached = state.activeWidgets.some(
+    (widget) => widget.id === widgetId && widget.isDetached,
+  );
   state.activeWidgets = state.activeWidgets.filter((w) => w.id !== widgetId);
+  if (wasDetached) reflowDetachedWidgets(state);
   if (state.configs[widgetId]) {
     const { [widgetId]: _, ...remainingConfigs } = state.configs;
     state.configs = remainingConfigs;
@@ -176,6 +184,7 @@ export const openFilterInlineReducer = (
       (w) => w.id !== current.widgetId,
     );
     delete state.configs[current.widgetId];
+    reflowDetachedWidgets(state);
   }
 
   writeFilterViewMode(state, filterIdx, 'inline');
@@ -192,36 +201,7 @@ export const detachFilterReducer = (
   widget.isDetached = true;
   widget.detachedFilterIdx = idx;
   widget.title = name;
-
-  // Get all grid widgets (non-detached)
-  const gridWidgets = state.activeWidgets.filter((w) => !w.isDetached);
-
-  // Calculate max Y from existing grid widgets
-  const maxY = gridWidgets.reduce((max, w) => Math.max(max, w.y + w.h), 0);
-
-  const detachedWidgets = state.activeWidgets.filter((w) => w.isDetached);
-
-  // Position in grid at bottom, with smart layout
-  const cols = 24;
-  const widgetWidth = 8; // 1/3 of 24 cols
-  const widgetHeight = 6;
-  const maxWidgetsPerRow = Math.floor(cols / widgetWidth);
-
-  const slotX = (slot: number) => (slot % maxWidgetsPerRow) * widgetWidth;
-  const slotY = (slot: number) =>
-    maxY + Math.floor(slot / maxWidgetsPerRow) * (widgetHeight + 1);
-  const isSlotTaken = (slot: number) =>
-    detachedWidgets.some(
-      (detached) => detached.x === slotX(slot) && detached.y === slotY(slot),
-    );
-
-  let freeSlot = 0;
-  while (isSlotTaken(freeSlot)) freeSlot++;
-
-  widget.x = slotX(freeSlot);
-  widget.y = slotY(freeSlot);
-  widget.w = widgetWidth;
-  widget.h = widgetHeight;
+  Object.assign(widget, getFreeDetachedPlacement(state));
 
   state.activeWidgets.push(widget as Widget);
   state.configs[widget.id] = {
