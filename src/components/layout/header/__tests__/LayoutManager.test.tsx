@@ -36,21 +36,21 @@ describe('LayoutManager presets', () => {
         <LayoutManager />
       </Provider>,
     );
-    const presetRow = screen.getByText('Preview').parentElement!;
+    const presetRow = screen.getByText('Dashboard').parentElement!;
     fireEvent.click(within(presetRow).getByRole('button', { name: 'Load' }));
     const nameInput = screen.getByPlaceholderText('Layout name');
-    expect(nameInput).toHaveValue('Preview');
+    expect(nameInput).toHaveValue('Dashboard');
     const widget = store.getState().widgets.activeWidgets[0];
     store.dispatch(updateWidgetPosition({ id: widget.id, h: 12 }));
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-    expect(screen.getByText('Preview (customized)')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard (customized)')).toBeInTheDocument();
     expect(
-      JSON.parse(window.localStorage.getItem('gpac_monitor_layout_v1')!).Preview
-        .widgets[0].h,
+      JSON.parse(window.localStorage.getItem('gpac_monitor_layout_v1')!)
+        .Dashboard.widgets[0].h,
     ).toBe(12);
     fireEvent.change(nameInput, { target: { value: 'Personal' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-    const savedRow = screen.getByText('Preview').parentElement!;
+    const savedRow = screen.getByText('Dashboard').parentElement!;
     fireEvent.click(within(savedRow).getByRole('button', { name: 'Delete' }));
     fireEvent.click(within(presetRow).getByRole('button', { name: 'Load' }));
     expect(store.getState().widgets.activeWidgets[0].h).toBe(8);

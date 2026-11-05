@@ -1,29 +1,13 @@
-import { createWidgetInstance } from '@/components/widget/registry';
-import { widgetRegistry } from '@/components/widget/registry';
-import { WidgetConfig, Widget } from '@/types/ui/widget';
 import { WidgetsState } from './types';
 import { loadLayoutFromStorage, loadLastUsedLayout } from './layoutStorage';
-import { getLayoutPreset } from './layoutPresets';
-
-const defaultConfig: WidgetConfig = {
-  isMaximized: false,
-  isMinimized: false,
-  settings: {},
-};
+import { DEFAULT_LAYOUT, getLayoutPreset } from './layoutPresets';
 
 function buildFactoryDefaultState(): WidgetsState {
-  const activeWidgets = Object.values(widgetRegistry)
-    .filter((def) => def.enabled)
-    .map((def) => createWidgetInstance(def.type))
-    .filter(Boolean) as Widget[];
-
-  const configs = Object.fromEntries(
-    activeWidgets.map((w) => [w.id, { ...defaultConfig }]),
-  );
+  const defaultLayout = getLayoutPreset(DEFAULT_LAYOUT);
 
   return {
-    activeWidgets,
-    configs,
+    activeWidgets: defaultLayout?.widgets ?? [],
+    configs: defaultLayout?.configs ?? {},
     savedLayouts: {},
     viewByFilter: {},
     currentLayout: undefined,
