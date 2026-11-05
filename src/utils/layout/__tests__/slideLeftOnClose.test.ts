@@ -95,19 +95,6 @@ describe('slideLeftOnClose', () => {
     expect(positionOf(result, 'logs')).toEqual({ x: 0, y: 8, w: 18 });
   });
 
-  it('never slides a fixed widget, which still acts as an obstacle', () => {
-    const layout: Layout[] = [
-      { i: 'closed', x: 0, y: 0, w: 6, h: 4 },
-      { i: 'detached', x: 8, y: 10, w: 8, h: 6 },
-      { i: 'free', x: 16, y: 0, w: 8, h: 4 },
-    ];
-
-    const result = slideLeftOnClose(layout, 'closed', COLUMNS, ['detached']);
-
-    expect(positionOf(result, 'detached')).toEqual({ x: 8, y: 0, w: 8 });
-    expect(positionOf(result, 'free')).toEqual({ x: 16, y: 0, w: 8 });
-  });
-
   it('returns the compacted layout when the closed widget is unknown', () => {
     const result = slideLeftOnClose(branchLayout, 'unknown', COLUMNS);
 

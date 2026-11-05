@@ -7,6 +7,7 @@ import {
   removeWidgetReducer,
   updateWidgetPositionReducer,
 } from '../widgetUtils';
+import { getLayoutPreset } from '../layoutPresets';
 import { WidgetsState } from '../types';
 
 let createdCount = 0;
@@ -24,15 +25,11 @@ beforeEach(() => {
   }));
 });
 
-const baseWidget: Widget = {
-  id: 'base-widget',
-  type: WidgetType.LOGS,
-  title: 'Logs',
-  x: 0,
-  y: 0,
-  w: 24,
-  h: 8,
-};
+const detach = (state: WidgetsState, idx: number) =>
+  detachFilterReducer(state, {
+    type: 'widgets/detachFilter',
+    payload: { idx, name: `filter-${idx}` },
+  });
 
 const createStateWithDetachedFilters = (
   filterIndexes: number[],
@@ -44,14 +41,27 @@ const createStateWithDetachedFilters = (
     savedLayouts: {},
     viewByFilter: {},
   };
-  filterIndexes.forEach((idx) =>
-    detachFilterReducer(state, {
-      type: 'widgets/detachFilter',
-      payload: { idx, name: `filter-${idx}` },
-    }),
-  );
+  filterIndexes.forEach((idx) => detach(state, idx));
   return state;
 };
+
+const createPresetStateWithDetachedFilters = (
+  filterIndexes: number[],
+  presetName = 'Default',
+) =>
+  createStateWithDetachedFilters(
+    filterIndexes,
+    getLayoutPreset(presetName)!.widgets,
+  );
+
+const findByType = (state: WidgetsState, type: WidgetType) =>
+  state.activeWidgets.find((widget) => widget.type === type)!;
+
+const closeWidgetOfType = (state: WidgetsState, type: WidgetType) =>
+  removeWidgetReducer(state, {
+    type: 'widgets/removeWidget',
+    payload: findByType(state, type).id,
+  });
 
 const findDetached = (state: WidgetsState, idx: number) =>
   state.activeWidgets.find((widget) => widget.detachedFilterIdx === idx)!;
@@ -86,26 +96,46 @@ describe('detached widgets reflow', () => {
     expect(findDetached(state, 1)).toMatchObject({ x: 8, y: 0 });
   });
 
-  it('pulls the next row up when a slot of the first row is freed', () => {
-    const state = createStateWithDetachedFilters([0, 1, 2, 3]);
-    expect(findDetached(state, 3)).toMatchObject({ x: 0, y: 6 });
+  it('keeps the next row below when a slot of the first row is freed', () => {
+    const state = createPresetStateWithDetachedFilters([0, 1, 2, 3]);
 
     removeDetached(state, 0);
 
-    expect(findDetached(state, 3)).toMatchObject({ x: 16, y: 0 });
+    expect(findDetached(state, 1)).toMatchObject({ x: 0, y: 12 });
+    expect(findDetached(state, 2)).toMatchObject({ x: 8, y: 12 });
+    expect(findDetached(state, 3)).toMatchObject({ x: 0, y: 18 });
   });
 
-  it('moves a manually placed widget back to a slot, in visual order', () => {
-    const state = createStateWithDetachedFilters([0, 1, 2]);
+  it('gives the freed hole to the next detached filter', () => {
+    const state = createPresetStateWithDetachedFilters([0, 1, 2, 3]);
+
+    removeDetached(state, 0);
+    detach(state, 4);
+
+    expect(findDetached(state, 4)).toMatchObject({ x: 16, y: 12 });
+  });
+
+  it('moves up only the widget right under the hole', () => {
+    const state = createPresetStateWithDetachedFilters([0, 1, 2, 3, 4, 5]);
+
+    removeDetached(state, 0);
+
+    expect(findDetached(state, 5)).toMatchObject({ x: 16, y: 12 });
+    expect(findDetached(state, 3)).toMatchObject({ x: 0, y: 18 });
+    expect(findDetached(state, 4)).toMatchObject({ x: 8, y: 18 });
+  });
+
+  it('keeps the place and size of a manually placed widget', () => {
+    const state = createPresetStateWithDetachedFilters([0, 1, 2]);
     updateWidgetPositionReducer(state, {
       type: 'widgets/updateWidgetPosition',
-      payload: { id: findDetached(state, 1).id, x: 3, y: 20, w: 12, h: 9 },
+      payload: { id: findDetached(state, 2).id, x: 3, y: 18, w: 12, h: 9 },
     });
 
     removeDetached(state, 0);
 
-    expect(findDetached(state, 2)).toMatchObject({ x: 0, y: 0 });
-    expect(findDetached(state, 1)).toMatchObject({ x: 8, y: 0, w: 8, h: 6 });
+    expect(findDetached(state, 1)).toMatchObject({ x: 0, y: 12 });
+    expect(findDetached(state, 2)).toMatchObject({ x: 3, y: 18, w: 12, h: 9 });
   });
 
   it('reflows when a detached filter is reopened inline', () => {
@@ -131,15 +161,47 @@ describe('detached widgets reflow', () => {
     expect(findDetached(state, 3)).toMatchObject({ x: 16, y: 0 });
   });
 
-  it('does not reflow when a base widget is closed', () => {
-    const state = createStateWithDetachedFilters([0, 1], [baseWidget]);
+  it('slides a detached filter left when Graph is closed', () => {
+    const state = createPresetStateWithDetachedFilters([]);
+    closeWidgetOfType(state, WidgetType.LOGS);
+    detach(state, 0);
+    expect(findDetached(state, 0)).toMatchObject({ x: 16, y: 6 });
 
-    removeWidgetReducer(state, {
-      type: 'widgets/removeWidget',
-      payload: baseWidget.id,
+    closeWidgetOfType(state, WidgetType.GRAPH);
+
+    expect(findDetached(state, 0)).toMatchObject({ x: 0, y: 6 });
+  });
+
+  it('moves up a detached filter with nothing above it when Graph is closed', () => {
+    const state = createPresetStateWithDetachedFilters([0, 1]);
+
+    closeWidgetOfType(state, WidgetType.GRAPH);
+
+    expect(findByType(state, WidgetType.LOGS)).toMatchObject({ x: 0, y: 6 });
+    expect(findDetached(state, 1)).toMatchObject({ x: 8, y: 6 });
+    expect(findDetached(state, 0)).toMatchObject({ x: 0, y: 12 });
+  });
+
+  it('moves the widget under Logs into its place when Logs is closed', () => {
+    const state = createPresetStateWithDetachedFilters([0, 1, 2]);
+
+    closeWidgetOfType(state, WidgetType.LOGS);
+
+    expect(findDetached(state, 2)).toMatchObject({ x: 16, y: 6 });
+    expect(findDetached(state, 0)).toMatchObject({ x: 0, y: 12 });
+    expect(findDetached(state, 1)).toMatchObject({ x: 8, y: 12 });
+  });
+
+  it('keeps Metrics and Logs below when Graph is closed on Dashboard', () => {
+    const state = createPresetStateWithDetachedFilters([], 'Dashboard');
+
+    closeWidgetOfType(state, WidgetType.GRAPH);
+
+    expect(findByType(state, WidgetType.FILTERSESSION)).toMatchObject({
+      x: 0,
+      y: 0,
     });
-
-    expect(findDetached(state, 0)).toMatchObject({ x: 0, y: 8 });
-    expect(findDetached(state, 1)).toMatchObject({ x: 8, y: 8 });
+    expect(findByType(state, WidgetType.METRICS)).toMatchObject({ x: 0, y: 8 });
+    expect(findByType(state, WidgetType.LOGS)).toMatchObject({ x: 6, y: 8 });
   });
 });
