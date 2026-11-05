@@ -4,10 +4,7 @@ import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetsState } from './types';
 import { getLayoutPreset } from './layoutPresets';
 import { writeFilterViewMode } from './filterViewReducers';
-import {
-  getFreeDetachedPlacement,
-  reflowDetachedWidgets,
-} from './detachedPlacement';
+import { DETACHED_SIZE, reflowDetachedWidgets } from './detachedPlacement';
 import { placeAddedWidget } from './addedWidgetPlacement';
 import { slideWidgetsOnClose } from './closedWidgetPlacement';
 
@@ -210,7 +207,8 @@ export const detachFilterReducer = (
   widget.isDetached = true;
   widget.detachedFilterIdx = idx;
   widget.title = name;
-  Object.assign(widget, getFreeDetachedPlacement(state));
+  Object.assign(widget, DETACHED_SIZE);
+  placeAddedWidget(state, widget);
 
   state.activeWidgets.push(widget as Widget);
   state.configs[widget.id] = {

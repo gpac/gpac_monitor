@@ -5,6 +5,7 @@ export const GRID_COLUMNS = 24;
 const DETACHED_WIDTH = 8;
 const DETACHED_HEIGHT = 6;
 const DETACHED_PER_ROW = Math.floor(GRID_COLUMNS / DETACHED_WIDTH);
+export const DETACHED_SIZE = { w: DETACHED_WIDTH, h: DETACHED_HEIGHT };
 
 const getGridBottom = (state: WidgetsState) =>
   state.activeWidgets
@@ -34,22 +35,6 @@ export const getStoredYBelowDetached = (
       ? Math.max(storedY, detached.y + 1)
       : storedY;
   }, displayedY);
-
-export const getFreeDetachedPlacement = (state: WidgetsState) => {
-  const gridBottom = getGridBottom(state);
-  const detachedWidgets = getDetachedWidgets(state);
-  const isSlotTaken = (slot: number) => {
-    const placement = getSlotPlacement(slot, gridBottom);
-    return detachedWidgets.some(
-      (detached) => detached.x === placement.x && detached.y === placement.y,
-    );
-  };
-
-  let freeSlot = 0;
-  while (isSlotTaken(freeSlot)) freeSlot++;
-
-  return getSlotPlacement(freeSlot, gridBottom);
-};
 
 export const reflowDetachedWidgets = (state: WidgetsState) => {
   const gridBottom = getGridBottom(state);

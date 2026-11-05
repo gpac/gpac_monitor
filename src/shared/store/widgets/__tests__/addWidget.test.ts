@@ -90,7 +90,7 @@ describe('addWidgetReducer placement', () => {
     expect(findByType(state, WidgetType.METRICS)).toMatchObject({ x: 0, y: 8 });
   });
 
-  it('keeps the stored slots of detached filters', () => {
+  it('keeps the position of detached filters when a widget is added', () => {
     const state = createState([
       createBaseWidget(WidgetType.GRAPH, 0, 0, 24, 8),
     ]);
@@ -101,11 +101,11 @@ describe('addWidgetReducer placement', () => {
       }),
     );
     const lastDetached = state.activeWidgets[4];
-    expect(lastDetached).toMatchObject({ x: 0, y: 15 });
+    expect(lastDetached).toMatchObject({ x: 0, y: 14 });
 
     addWidget(state, WidgetType.METRICS);
 
-    expect(lastDetached).toMatchObject({ x: 0, y: 15 });
+    expect(lastDetached).toMatchObject({ x: 0, y: 14 });
     expect(findByType(state, WidgetType.METRICS)).toMatchObject({
       x: 8,
       y: 14,

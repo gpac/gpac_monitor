@@ -1,7 +1,7 @@
 import { Layout } from 'react-grid-layout';
 import { Widget } from '@/types/ui/widget';
 import { findFirstFreeSlot } from '@/utils/layout/firstFreeSlot';
-import { GRID_COLUMNS, getStoredYBelowDetached } from './detachedPlacement';
+import { GRID_COLUMNS } from './detachedPlacement';
 import { WidgetsState } from './types';
 
 export const toLayoutItem = ({ id, x, y, w, h }: Widget): Layout => ({
@@ -21,14 +21,9 @@ export const placeAddedWidget = (state: WidgetsState, widget: Widget) => {
   );
 
   state.activeWidgets.forEach((activeWidget, index) => {
-    if (activeWidget.isDetached) return;
-    activeWidget.y = getStoredYBelowDetached(
-      state,
-      compactedLayout,
-      compactedLayout[index].y,
-    );
+    activeWidget.y = compactedLayout[index].y;
   });
 
   widget.x = x;
-  widget.y = getStoredYBelowDetached(state, compactedLayout, y);
+  widget.y = y;
 };

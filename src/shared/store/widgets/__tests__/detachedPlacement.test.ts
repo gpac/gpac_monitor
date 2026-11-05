@@ -88,7 +88,7 @@ describe('detached widgets reflow', () => {
 
   it('pulls the next row up when a slot of the first row is freed', () => {
     const state = createStateWithDetachedFilters([0, 1, 2, 3]);
-    expect(findDetached(state, 3)).toMatchObject({ x: 0, y: 7 });
+    expect(findDetached(state, 3)).toMatchObject({ x: 0, y: 6 });
 
     removeDetached(state, 0);
 
