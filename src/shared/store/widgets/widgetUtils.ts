@@ -4,10 +4,7 @@ import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetsState } from './types';
 import { getLayoutPreset } from './layoutPresets';
 import { writeFilterViewMode } from './filterViewReducers';
-import {
-  getFreeDetachedPlacement,
-  reflowDetachedWidgets,
-} from './detachedPlacement';
+import { DETACHED_SIZE } from './gridPlacement';
 import { placeAddedWidget } from './addedWidgetPlacement';
 import { slideWidgetsOnClose } from './closedWidgetPlacement';
 
@@ -46,10 +43,8 @@ export const removeWidgetReducer = (
   const closedWidget = state.activeWidgets.find(
     (widget) => widget.id === widgetId,
   );
-  const wasDetached = Boolean(closedWidget?.isDetached);
-  if (closedWidget && !wasDetached) slideWidgetsOnClose(state, widgetId);
+  if (closedWidget) slideWidgetsOnClose(state, widgetId);
   state.activeWidgets = state.activeWidgets.filter((w) => w.id !== widgetId);
-  if (wasDetached) reflowDetachedWidgets(state);
   if (state.configs[widgetId]) {
     const { [widgetId]: _, ...remainingConfigs } = state.configs;
     state.configs = remainingConfigs;
@@ -189,11 +184,11 @@ export const openFilterInlineReducer = (
   const current = state.viewByFilter[filterIdx];
 
   if (current?.mode === 'detached' && current.widgetId) {
+    slideWidgetsOnClose(state, current.widgetId);
     state.activeWidgets = state.activeWidgets.filter(
       (w) => w.id !== current.widgetId,
     );
     delete state.configs[current.widgetId];
-    reflowDetachedWidgets(state);
   }
 
   writeFilterViewMode(state, filterIdx, 'inline');
@@ -210,7 +205,8 @@ export const detachFilterReducer = (
   widget.isDetached = true;
   widget.detachedFilterIdx = idx;
   widget.title = name;
-  Object.assign(widget, getFreeDetachedPlacement(state));
+  Object.assign(widget, DETACHED_SIZE);
+  placeAddedWidget(state, widget);
 
   state.activeWidgets.push(widget as Widget);
   state.configs[widget.id] = {

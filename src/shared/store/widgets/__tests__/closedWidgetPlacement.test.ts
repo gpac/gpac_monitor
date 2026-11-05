@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { compact } from 'react-grid-layout/build/utils';
 import { WidgetType, type Widget } from '@/types/ui/widget';
 import { toLayoutItem } from '../addedWidgetPlacement';
-import { GRID_COLUMNS } from '../detachedPlacement';
+import { GRID_COLUMNS } from '../gridPlacement';
 import { removeWidgetReducer } from '../widgetUtils';
 import { WidgetsState } from '../types';
 
@@ -78,7 +78,7 @@ describe('removeWidgetReducer slide on close', () => {
     expect(findByType(state, WidgetType.LOGS)).toMatchObject({ x: 0, y: 0 });
   });
 
-  it('leaves the stored slot of a detached filter untouched', () => {
+  it('slides a detached filter on the rows of the closed widget', () => {
     const detached: Widget = {
       ...createBaseWidget(WidgetType.FILTERSESSION, 8, 12, 8, 6),
       id: 'detached',
@@ -93,7 +93,7 @@ describe('removeWidgetReducer slide on close', () => {
 
     closeWidget(state, WidgetType.METRICS);
 
-    expect(state.activeWidgets[1]).toMatchObject({ x: 8, y: 12 });
+    expect(state.activeWidgets[1]).toMatchObject({ x: 0, y: 8 });
   });
 
   it('keeps the last detached row in place below eight rows', () => {

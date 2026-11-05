@@ -3,7 +3,7 @@ import { compact } from 'react-grid-layout/build/utils';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetType, type Widget } from '@/types/ui/widget';
 import { toLayoutItem } from '../addedWidgetPlacement';
-import { GRID_COLUMNS } from '../detachedPlacement';
+import { GRID_COLUMNS } from '../gridPlacement';
 import { addWidgetReducer, detachFilterReducer } from '../widgetUtils';
 import { WidgetsState } from '../types';
 
@@ -90,7 +90,7 @@ describe('addWidgetReducer placement', () => {
     expect(findByType(state, WidgetType.METRICS)).toMatchObject({ x: 0, y: 8 });
   });
 
-  it('keeps the stored slots of detached filters', () => {
+  it('keeps the position of detached filters when a widget is added', () => {
     const state = createState([
       createBaseWidget(WidgetType.GRAPH, 0, 0, 24, 8),
     ]);
@@ -101,11 +101,11 @@ describe('addWidgetReducer placement', () => {
       }),
     );
     const lastDetached = state.activeWidgets[4];
-    expect(lastDetached).toMatchObject({ x: 0, y: 15 });
+    expect(lastDetached).toMatchObject({ x: 0, y: 14 });
 
     addWidget(state, WidgetType.METRICS);
 
-    expect(lastDetached).toMatchObject({ x: 0, y: 15 });
+    expect(lastDetached).toMatchObject({ x: 0, y: 14 });
     expect(findByType(state, WidgetType.METRICS)).toMatchObject({
       x: 8,
       y: 14,
