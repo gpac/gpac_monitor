@@ -1,6 +1,6 @@
 import { slideLeftOnClose } from '@/utils/layout/slideLeftOnClose';
 import { toLayoutItem } from './addedWidgetPlacement';
-import { GRID_COLUMNS } from './detachedPlacement';
+import { GRID_COLUMNS } from './gridPlacement';
 import { WidgetsState } from './types';
 
 export const slideWidgetsOnClose = (

@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { compact } from 'react-grid-layout/build/utils';
 import { WidgetType, type Widget } from '@/types/ui/widget';
 import { toLayoutItem } from '../addedWidgetPlacement';
-import { GRID_COLUMNS } from '../detachedPlacement';
+import { GRID_COLUMNS } from '../gridPlacement';
 import { removeWidgetReducer } from '../widgetUtils';
 import { WidgetsState } from '../types';
 

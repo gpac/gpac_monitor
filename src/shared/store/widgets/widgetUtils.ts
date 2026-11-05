@@ -4,7 +4,7 @@ import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetsState } from './types';
 import { getLayoutPreset } from './layoutPresets';
 import { writeFilterViewMode } from './filterViewReducers';
-import { DETACHED_SIZE } from './detachedPlacement';
+import { DETACHED_SIZE } from './gridPlacement';
 import { placeAddedWidget } from './addedWidgetPlacement';
 import { slideWidgetsOnClose } from './closedWidgetPlacement';
 

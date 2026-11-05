@@ -1,7 +1,7 @@
 import { Layout } from 'react-grid-layout';
 import { Widget } from '@/types/ui/widget';
 import { findFirstFreeSlot } from '@/utils/layout/firstFreeSlot';
-import { GRID_COLUMNS } from './detachedPlacement';
+import { GRID_COLUMNS } from './gridPlacement';
 import { WidgetsState } from './types';
 
 export const toLayoutItem = ({ id, x, y, w, h }: Widget): Layout => ({

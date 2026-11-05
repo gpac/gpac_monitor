@@ -3,7 +3,7 @@ import { compact } from 'react-grid-layout/build/utils';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetType, type Widget } from '@/types/ui/widget';
 import { toLayoutItem } from '../addedWidgetPlacement';
-import { GRID_COLUMNS } from '../detachedPlacement';
+import { GRID_COLUMNS } from '../gridPlacement';
 import { addWidgetReducer, detachFilterReducer } from '../widgetUtils';
 import { WidgetsState } from '../types';
 
