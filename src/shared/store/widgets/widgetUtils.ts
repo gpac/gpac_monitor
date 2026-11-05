@@ -3,6 +3,13 @@ import { Widget, WidgetConfig, WidgetType } from '@/types/ui/widget';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetsState } from './types';
 import { getLayoutPreset } from './layoutPresets';
+import { writeFilterViewMode } from './filterViewReducers';
+import {
+  getFreeDetachedPlacement,
+  reflowDetachedWidgets,
+} from './detachedPlacement';
+import { placeAddedWidget } from './addedWidgetPlacement';
+import { slideWidgetsOnClose } from './closedWidgetPlacement';
 
 // Basic widget management
 export const addWidgetReducer = (
@@ -11,7 +18,9 @@ export const addWidgetReducer = (
 ) => {
   const instance = createWidgetInstance(action.payload);
   if (!instance) return;
-  const exists = state.activeWidgets.some((w) => w.type === instance.type);
+  const exists = state.activeWidgets.some(
+    (widget) => !widget.isDetached && widget.type === instance.type,
+  );
   if (exists) return;
 
   // Restore position from current layout if fixedPosition
@@ -24,6 +33,8 @@ export const addWidgetReducer = (
     }
   }
 
+  if (!instance.fixedPosition) placeAddedWidget(state, instance);
+
   state.activeWidgets.push(instance as Widget);
 };
 
@@ -32,7 +43,13 @@ export const removeWidgetReducer = (
   action: PayloadAction<string>,
 ) => {
   const widgetId = action.payload;
+  const closedWidget = state.activeWidgets.find(
+    (widget) => widget.id === widgetId,
+  );
+  const wasDetached = Boolean(closedWidget?.isDetached);
+  if (closedWidget && !wasDetached) slideWidgetsOnClose(state, widgetId);
   state.activeWidgets = state.activeWidgets.filter((w) => w.id !== widgetId);
+  if (wasDetached) reflowDetachedWidgets(state);
   if (state.configs[widgetId]) {
     const { [widgetId]: _, ...remainingConfigs } = state.configs;
     state.configs = remainingConfigs;
@@ -176,9 +193,10 @@ export const openFilterInlineReducer = (
       (w) => w.id !== current.widgetId,
     );
     delete state.configs[current.widgetId];
+    reflowDetachedWidgets(state);
   }
 
-  state.viewByFilter[filterIdx] = { mode: 'inline' };
+  writeFilterViewMode(state, filterIdx, 'inline');
 };
 
 export const detachFilterReducer = (
@@ -192,31 +210,7 @@ export const detachFilterReducer = (
   widget.isDetached = true;
   widget.detachedFilterIdx = idx;
   widget.title = name;
-
-  // Get all grid widgets (non-detached)
-  const gridWidgets = state.activeWidgets.filter((w) => !w.isDetached);
-
-  // Calculate max Y from existing grid widgets
-  const maxY = gridWidgets.reduce((max, w) => Math.max(max, w.y + w.h), 0);
-
-  // Count existing detached widgets
-  const detachedCount = Object.values(state.viewByFilter).filter(
-    (v) => v?.mode === 'detached',
-  ).length;
-
-  // Position in grid at bottom, with smart layout
-  const cols = 24;
-  const widgetWidth = 8; // 1/3 of 24 cols
-  const widgetHeight = 6;
-  const maxWidgetsPerRow = Math.floor(cols / widgetWidth);
-
-  const row = Math.floor(detachedCount / maxWidgetsPerRow);
-  const col = detachedCount % maxWidgetsPerRow;
-
-  widget.x = col * widgetWidth;
-  widget.y = maxY + row * (widgetHeight + 1);
-  widget.w = widgetWidth;
-  widget.h = widgetHeight;
+  Object.assign(widget, getFreeDetachedPlacement(state));
 
   state.activeWidgets.push(widget as Widget);
   state.configs[widget.id] = {
@@ -225,7 +219,7 @@ export const detachFilterReducer = (
     settings: {},
   };
 
-  state.viewByFilter[idx] = { mode: 'detached', widgetId: widget.id };
+  writeFilterViewMode(state, idx, 'detached', widget.id);
 };
 
 export const attachFilterReducer = (
@@ -240,7 +234,7 @@ export const attachFilterReducer = (
       (w) => w.id !== view.widgetId,
     );
     delete state.configs[view.widgetId];
-    state.viewByFilter[filterIdx] = { mode: 'inline' };
+    writeFilterViewMode(state, filterIdx, 'inline');
   }
 };
 

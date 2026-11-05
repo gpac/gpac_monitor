@@ -10,4 +10,5 @@ export {
   selectSavedLayouts,
   selectCurrentLayout,
   makeSelectWidgetConfig,
+  selectHasMonitoredFilter,
 } from './widgetsSelectors';

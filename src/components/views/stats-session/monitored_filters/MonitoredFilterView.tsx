@@ -1,9 +1,10 @@
-import { memo, useMemo, useState, useEffect } from 'react';
+import { memo, useMemo } from 'react';
 import { OverviewTabData, TabPIDData, NetworkTabData } from '@/types/ui';
 import { FilterStatsResponse } from '@/types/domain/gpac/filter-stats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import { useAppSelector, useOpenLogsWidget } from '@/shared/hooks';
+import { useFilterActiveTab } from '../hooks/filters/useFilterActiveTab';
 import { selectAllFilterAlerts } from '@/shared/store/selectors/header/headerSelectors';
 import { GpacLogLevel } from '@/types/domain/gpac/log-types';
 import FilterChangeBadges from '@/components/common/FilterChangeBadge';
@@ -59,8 +60,9 @@ const MonitoredFilterView = memo(
     isLoading = false,
     isDetached = false,
   }: MonitoredFilterViewProps) => {
-    const [activeTab, setActiveTab] = useState<string>(
-      initialTab || 'overview',
+    const { activeTab, handleTabChange } = useFilterActiveTab(
+      overviewData.filterIdx,
+      initialTab,
     );
 
     // Get log alerts for this filter
@@ -69,13 +71,6 @@ const MonitoredFilterView = memo(
         ? (selectAllFilterAlerts(state)[String(overviewData.filterIdx)] ?? null)
         : null,
     );
-
-    // Update active tab when initialTab changes
-    useEffect(() => {
-      if (initialTab) {
-        setActiveTab(initialTab);
-      }
-    }, [initialTab]);
 
     const counts = useMemo(
       () => ({
@@ -94,13 +89,13 @@ const MonitoredFilterView = memo(
         <div className="flex flex-col gap-2">
           <Tabs
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={handleTabChange}
             className="w-full"
           >
             <div
               className={`sticky ${isDetached ? 'top-0' : 'top-10'} z-10 bg-monitor-surface space-y-1 px-1 py-2`}
             >
-              <div className="flex justify-stretch items-center gap-4">
+              <div className="flex min-h-5 justify-stretch items-center gap-4">
                 <FilterChangeBadges filterIdx={overviewData.filterIdx} />
                 <StatusBadge
                   label={`${alerts?.errors} ERR`}

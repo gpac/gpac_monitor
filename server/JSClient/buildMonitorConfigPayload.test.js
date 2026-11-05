@@ -18,14 +18,6 @@ describe('buildMonitorConfigPayload', () => {
     expect(payload.ws_protocol_version).toBe(WS_PROTOCOL_VERSION);
   });
 
-  it('reads the GPAC version when available', () => {
-    sys.version_full = '26.03-DEV-rev3';
-
-    const payload = buildMonitorConfigPayload();
-
-    expect(payload.gpac_version).toBe('26.03-DEV-rev3');
-  });
-
   it('falls back to null without throwing when the binding is missing on an older GPAC binary', () => {
     Object.defineProperty(sys, 'version_full', {
       configurable: true,

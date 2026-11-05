@@ -10,6 +10,16 @@ import { filtersUpdated } from '@/shared/store/actions/globalActions';
 
 export type InitialTabType = 'overview' | 'network' | 'inputs' | 'outputs';
 
+const INITIAL_TABS: Record<InitialTabType, true> = {
+  overview: true,
+  network: true,
+  inputs: true,
+  outputs: true,
+};
+
+export const isInitialTabType = (value: string): value is InitialTabType =>
+  Object.keys(INITIAL_TABS).includes(value);
+
 export interface PendingFilterOpen {
   filterIdx: number;
   initialTab: InitialTabType;

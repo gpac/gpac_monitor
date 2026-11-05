@@ -5,7 +5,7 @@ export interface RowWidthShare {
   neighbors: Layout[];
 }
 
-const sharesRows = (item: Layout, other: Layout): boolean =>
+export const sharesRows = (item: Layout, other: Layout): boolean =>
   other.y < item.y + item.h && item.y < other.y + other.h;
 
 export const shareRowWidth = (
