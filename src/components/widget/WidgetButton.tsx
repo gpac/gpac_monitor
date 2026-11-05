@@ -22,7 +22,9 @@ export const WidgetButton: React.FC<WidgetButtonProps> = ({
   const activeWidgets = useAppSelector(selectActiveWidgets);
 
   // Vérifier si ce type de widget est déjà actif
-  const isActive = activeWidgets.some((widget) => widget.type === type);
+  const isActive = activeWidgets.some(
+    (widget) => !widget.isDetached && widget.type === type,
+  );
 
   const handleAddWidget = () => {
     dispatch(addWidget(type));

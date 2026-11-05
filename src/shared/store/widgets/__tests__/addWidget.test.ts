@@ -186,4 +186,45 @@ describe('addWidgetReducer placement', () => {
 
     expect(state.activeWidgets).toHaveLength(1);
   });
+
+  describe('Session Filters with a detached filter open', () => {
+    const detachFilter = (state: WidgetsState) =>
+      detachFilterReducer(state, {
+        type: 'widgets/detachFilter',
+        payload: { idx: 0, name: 'filter-0' },
+      });
+
+    const findSessionFilters = (state: WidgetsState) =>
+      state.activeWidgets.filter(
+        (widget) =>
+          widget.type === WidgetType.FILTERSESSION && !widget.isDetached,
+      );
+
+    it('reopens Session Filters and keeps the detached filter', () => {
+      const state = createState([
+        createBaseWidget(WidgetType.GRAPH, 0, 0, 24, 8),
+      ]);
+      detachFilter(state);
+      const detachedId = state.activeWidgets[1].id;
+
+      addWidget(state, WidgetType.FILTERSESSION);
+
+      expect(findSessionFilters(state)).toHaveLength(1);
+      expect(
+        state.activeWidgets.some((widget) => widget.id === detachedId),
+      ).toBe(true);
+    });
+
+    it('still refuses a second Session Filters', () => {
+      const state = createState([
+        createBaseWidget(WidgetType.FILTERSESSION, 0, 0, 24, 8),
+      ]);
+      detachFilter(state);
+
+      addWidget(state, WidgetType.FILTERSESSION);
+
+      expect(findSessionFilters(state)).toHaveLength(1);
+      expect(state.activeWidgets).toHaveLength(2);
+    });
+  });
 });

@@ -17,7 +17,9 @@ export const addWidgetReducer = (
 ) => {
   const instance = createWidgetInstance(action.payload);
   if (!instance) return;
-  const exists = state.activeWidgets.some((w) => w.type === instance.type);
+  const exists = state.activeWidgets.some(
+    (widget) => !widget.isDetached && widget.type === instance.type,
+  );
   if (exists) return;
 
   // Restore position from current layout if fixedPosition
