@@ -20,7 +20,7 @@ export const layoutPresets: Record<string, PresetWidget[]> = {
     { type: WidgetType.FILTERSESSION, x: 6, y: 0, w: 12, h: 6 },
     { type: WidgetType.LOGS, x: 18, y: 0, w: 6, h: 6 },
   ],
-  Transcoding: [
+  Dashboard: [
     { type: WidgetType.GRAPH, x: 0, y: 0, w: 14, h: 8 },
     { type: WidgetType.FILTERSESSION, x: 14, y: 0, w: 10, h: 8 },
     { type: WidgetType.METRICS, x: 0, y: 8, w: 6, h: 4 },

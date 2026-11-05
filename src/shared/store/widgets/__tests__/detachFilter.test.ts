@@ -1,8 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetType, type Widget } from '@/types/ui/widget';
-import { detachFilterReducer, removeWidgetReducer } from '../widgetUtils';
-import { WidgetsState } from '../types';
 import widgetsReducer, {
   openFilterInline,
   detachFilter,
@@ -11,68 +9,17 @@ import widgetsReducer, {
   setFilterViewState,
 } from '../widgetsSlice';
 import {
+  detachFilterReducer,
+  removeWidgetReducer,
+  updateWidgetPositionReducer,
+} from '../widgetUtils';
+import { getLayoutPreset } from '../layoutPresets';
+import { WidgetsState } from '../types';
+import {
   selectFilterActiveTab,
   selectFilterOpenPreviews,
   selectFilterPidMetricMode,
 } from '@/shared/store/selectors/widgets/widgetsSelectors';
-
-const createEmptyState = (): WidgetsState => ({
-  activeWidgets: [],
-  configs: {},
-  savedLayouts: {},
-  viewByFilter: {},
-});
-
-const detach = (state: WidgetsState, idx: number) =>
-  detachFilterReducer(state, {
-    type: 'widgets/detachFilter',
-    payload: { idx, name: `filter-${idx}` },
-  });
-
-const findDetachedWidget = (state: WidgetsState, idx: number) =>
-  state.activeWidgets.find((widget) => widget.detachedFilterIdx === idx);
-
-describe('detachFilterReducer', () => {
-  let createdCount = 0;
-
-  beforeEach(() => {
-    createdCount = 0;
-    vi.mocked(createWidgetInstance).mockImplementation((type: WidgetType) => ({
-      id: `widget-${createdCount++}`,
-      type,
-      title: '',
-      x: 0,
-      y: 0,
-      w: 11,
-      h: 8,
-    }));
-  });
-
-  it('places a new detached widget in the slot freed by a removed one', () => {
-    const state = createEmptyState();
-    detach(state, 0);
-    detach(state, 1);
-    detach(state, 2);
-
-    const firstWidget = findDetachedWidget(state, 0);
-    removeWidgetReducer(state, {
-      type: 'widgets/removeWidget',
-      payload: firstWidget!.id,
-    });
-    detach(state, 3);
-
-    const newWidget = findDetachedWidget(state, 3);
-    expect(newWidget).toMatchObject({ x: 0, y: 0 });
-  });
-
-  it('places widgets side by side when no slot was freed', () => {
-    const state = createEmptyState();
-    detach(state, 0);
-    detach(state, 1);
-
-    expect(findDetachedWidget(state, 1)).toMatchObject({ x: 8, y: 0 });
-  });
-});
 
 const detachedWidget: Widget = {
   id: 'widget-detached',
@@ -185,5 +132,138 @@ describe('filter view active tab', () => {
     );
 
     expect(state.viewByFilter[7]).toBeUndefined();
+  });
+});
+
+const createEmptyState = (): WidgetsState => ({
+  activeWidgets: [],
+  configs: {},
+  savedLayouts: {},
+  viewByFilter: {},
+});
+
+const detach = (state: WidgetsState, idx: number) =>
+  detachFilterReducer(state, {
+    type: 'widgets/detachFilter',
+    payload: { idx, name: `filter-${idx}` },
+  });
+
+const findDetachedWidget = (state: WidgetsState, idx: number) =>
+  state.activeWidgets.find((widget) => widget.detachedFilterIdx === idx);
+
+const createPresetState = (presetName: string): WidgetsState => ({
+  ...createEmptyState(),
+  activeWidgets: getLayoutPreset(presetName)!.widgets,
+});
+
+const closeWidgetOfType = (state: WidgetsState, type: WidgetType) =>
+  removeWidgetReducer(state, {
+    type: 'widgets/removeWidget',
+    payload: state.activeWidgets.find((widget) => widget.type === type)!.id,
+  });
+
+describe('detachFilterReducer', () => {
+  let createdCount = 0;
+
+  beforeEach(() => {
+    createdCount = 0;
+    vi.mocked(createWidgetInstance).mockImplementation((type: WidgetType) => ({
+      id: `widget-${createdCount++}`,
+      type,
+      title: '',
+      x: 0,
+      y: 0,
+      w: 11,
+      h: 8,
+    }));
+  });
+
+  it('does not treat a widget dropped lower as a freed slot', () => {
+    const state = createEmptyState();
+    detach(state, 0);
+    detach(state, 1);
+    detach(state, 2);
+
+    const firstWidget = findDetachedWidget(state, 0);
+    updateWidgetPositionReducer(state, {
+      type: 'widgets/updateWidgetPosition',
+      payload: { id: firstWidget!.id, x: 0, y: 20, w: 8, h: 6 },
+    });
+    detach(state, 3);
+
+    expect(firstWidget).toMatchObject({ x: 0, y: 0 });
+    expect(findDetachedWidget(state, 3)).toMatchObject({ x: 0, y: 6 });
+  });
+
+  it('places widgets side by side when no slot was freed', () => {
+    const state = createEmptyState();
+    detach(state, 0);
+    detach(state, 1);
+
+    expect(findDetachedWidget(state, 1)).toMatchObject({ x: 8, y: 0 });
+  });
+
+  it('takes the place of Logs once it is closed on Default', () => {
+    const state = createPresetState('Default');
+    closeWidgetOfType(state, WidgetType.LOGS);
+
+    detach(state, 0);
+
+    expect(findDetachedWidget(state, 0)).toMatchObject({
+      x: 16,
+      y: 6,
+      w: 8,
+      h: 6,
+    });
+  });
+
+  it('goes under Graph when the place of Logs is taken', () => {
+    const state = createPresetState('Default');
+    closeWidgetOfType(state, WidgetType.LOGS);
+
+    detach(state, 0);
+    detach(state, 1);
+
+    expect(findDetachedWidget(state, 1)).toMatchObject({ x: 0, y: 12 });
+  });
+
+  it('fills the rows under a complete Default layout', () => {
+    const state = createPresetState('Default');
+
+    [0, 1, 2, 3].forEach((idx) => detach(state, idx));
+
+    expect(findDetachedWidget(state, 0)).toMatchObject({ x: 0, y: 12 });
+    expect(findDetachedWidget(state, 1)).toMatchObject({ x: 8, y: 12 });
+    expect(findDetachedWidget(state, 2)).toMatchObject({ x: 16, y: 12 });
+    expect(findDetachedWidget(state, 3)).toMatchObject({ x: 0, y: 18 });
+  });
+
+  it('fills the hole left by Graph on Default', () => {
+    const state = createPresetState('Default');
+    closeWidgetOfType(state, WidgetType.GRAPH);
+
+    [0, 1, 2].forEach((idx) => detach(state, idx));
+
+    expect(findDetachedWidget(state, 0)).toMatchObject({ x: 8, y: 6 });
+    expect(findDetachedWidget(state, 1)).toMatchObject({ x: 16, y: 6 });
+    expect(findDetachedWidget(state, 2)).toMatchObject({ x: 0, y: 12 });
+  });
+
+  it('skips a hole too narrow for it when Metrics is closed on Default', () => {
+    const state = createPresetState('Default');
+    closeWidgetOfType(state, WidgetType.METRICS);
+
+    detach(state, 0);
+
+    expect(findDetachedWidget(state, 0)).toMatchObject({ x: 0, y: 12 });
+  });
+
+  it('takes the hole right of Session Filters on Dashboard', () => {
+    const state = createPresetState('Dashboard');
+    closeWidgetOfType(state, WidgetType.GRAPH);
+
+    detach(state, 0);
+
+    expect(findDetachedWidget(state, 0)).toMatchObject({ x: 10, y: 0 });
   });
 });
