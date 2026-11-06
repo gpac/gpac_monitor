@@ -20,6 +20,7 @@ interface WidgetWrapperProps {
   className?: string;
   customActions?: React.ReactNode;
   statusBadge?: React.ReactNode;
+  customTitle?: React.ReactNode;
 }
 
 // Memoized styles
@@ -39,6 +40,7 @@ const WidgetWrapper = ({
   className = '',
   customActions,
   statusBadge,
+  customTitle,
 }: WidgetWrapperProps) => {
   const dispatch = useAppDispatch();
   const [isResizing, setIsResizing] = useState(false);
@@ -116,7 +118,7 @@ const WidgetWrapper = ({
               className: 'w-4 h-4 text-secondary font-ui',
             })}
           <h3 className="text-base font-medium font-ui text-secondary">
-            {widget?.title}
+            {customTitle ?? widget?.title}
           </h3>
           {statusBadge && <div className="min-w-32 ">{statusBadge}</div>}
         </div>

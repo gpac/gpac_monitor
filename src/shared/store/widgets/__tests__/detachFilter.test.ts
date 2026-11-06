@@ -5,6 +5,7 @@ import widgetsReducer, {
   openFilterInline,
   detachFilter,
   attachFilter,
+  replaceDetachedFilter,
   closeFilter,
   setFilterViewState,
 } from '../widgetsSlice';
@@ -231,5 +232,109 @@ describe('detachFilterReducer', () => {
     detach(state, 0);
 
     expect(findDetachedWidget(state, 0)).toMatchObject({ x: 10, y: 0 });
+  });
+});
+
+describe('replaceDetachedFilter', () => {
+  const createDetachedState = () =>
+    widgetsReducer(openOnInputsTab(), detachFilter({ idx: 3, name: 'mp4mx' }));
+
+  const replaceWith = (filterIdx: number, widgetId = 'widget-detached') =>
+    replaceDetachedFilter({ widgetId, filterIdx, name: `filter-${filterIdx}` });
+
+  it('keeps the panel identity, geometry and maximized state while reattaching the previous filter', () => {
+    const detachedState = createDetachedState();
+    const state = {
+      ...detachedState,
+      configs: {
+        ...detachedState.configs,
+        'widget-detached': {
+          ...detachedState.configs['widget-detached'],
+          isMaximized: true,
+        },
+      },
+    };
+    const widgetBefore = state.activeWidgets.find(
+      (widget) => widget.id === 'widget-detached',
+    )!;
+    const next = widgetsReducer(state, replaceWith(0));
+
+    expect(next.activeWidgets).toHaveLength(state.activeWidgets.length);
+    expect(
+      next.activeWidgets.find((widget) => widget.id === widgetBefore.id),
+    ).toEqual({ ...widgetBefore, detachedFilterIdx: 0, title: 'filter-0' });
+    expect(next.configs).toEqual(state.configs);
+    expect(next.viewByFilter[3]).toEqual({
+      mode: 'inline',
+      activeTab: 'inputs',
+    });
+    expect(next.viewByFilter[0]).toEqual({
+      mode: 'detached',
+      widgetId: widgetBefore.id,
+    });
+  });
+
+  it('restores each filter own tab and metric mode through repeated replacements', () => {
+    let state = widgetsReducer(createDetachedState(), openFilterInline(7));
+    state = widgetsReducer(
+      state,
+      setFilterViewState({
+        filterIdx: 7,
+        patch: { activeTab: 'outputs', pidMetricMode: 'processTime' },
+      }),
+    );
+    state = widgetsReducer(state, replaceWith(7));
+    expect(state.viewByFilter[7]).toMatchObject({
+      mode: 'detached',
+      activeTab: 'outputs',
+      pidMetricMode: 'processTime',
+    });
+    state = widgetsReducer(state, replaceWith(3));
+    expect(state.viewByFilter[3]).toMatchObject({
+      mode: 'detached',
+      activeTab: 'inputs',
+    });
+    expect(state.viewByFilter[7]).toEqual({
+      mode: 'inline',
+      activeTab: 'outputs',
+      pidMetricMode: 'processTime',
+    });
+  });
+
+  it('rejects a filter already detached elsewhere even if dispatched directly', () => {
+    const initial = createDetachedState();
+    vi.mocked(createWidgetInstance).mockReturnValue({
+      ...detachedWidget,
+      id: 'other-panel',
+    });
+    const state = widgetsReducer(
+      initial,
+      detachFilter({ idx: 7, name: 'vdec' }),
+    );
+    expect(widgetsReducer(state, replaceWith(7))).toEqual(state);
+  });
+
+  it('ignores the current filter, a missing panel and a regular panel', () => {
+    const state = createDetachedState();
+    expect(widgetsReducer(state, replaceWith(3))).toEqual(state);
+    expect(widgetsReducer(state, replaceWith(7, 'missing'))).toEqual(state);
+    const regularState = {
+      ...state,
+      activeWidgets: [{ ...detachedWidget, isDetached: false }],
+    };
+    expect(widgetsReducer(regularState, replaceWith(7))).toEqual(regularState);
+  });
+
+  it('closes only the replacement when its panel is closed', () => {
+    const state = widgetsReducer(createDetachedState(), replaceWith(7));
+    const next = widgetsReducer(state, {
+      type: 'widgets/removeWidget',
+      payload: 'widget-detached',
+    });
+    expect(next.viewByFilter[7]).toBeUndefined();
+    expect(next.viewByFilter[3]).toEqual({
+      mode: 'inline',
+      activeTab: 'inputs',
+    });
   });
 });
