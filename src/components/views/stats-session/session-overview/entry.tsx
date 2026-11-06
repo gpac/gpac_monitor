@@ -17,6 +17,7 @@ import {
   setSelectedNode,
 } from '@/shared/store/slices/graphSlice';
 import WidgetWrapper from '@/components/widget/WidgetWrapper';
+import { DetachedFilterSelector } from '../monitored_filters/DetachedFilterSelector';
 import ConnectionErrorState from '@/components/common/ConnectionErrorState';
 import { WidgetProps } from '@/types/ui/widget';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -144,9 +145,15 @@ const MultiFilterMonitor: React.FC<WidgetProps> = React.memo(
       }
 
       return (
-        <WidgetWrapper id={id}>
+        <WidgetWrapper
+          id={id}
+          customTitle={
+            <DetachedFilterSelector widgetId={id} filterIdx={filter.idx} />
+          }
+        >
           <div ref={detachedContentRef} className="h-full">
             <MonitoredFilterContent
+              key={filter.idx}
               idx={filter.idx}
               filter={filter}
               isActive={true}

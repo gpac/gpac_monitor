@@ -40,6 +40,7 @@ const widgetsSlice = createSlice({
     openFilterInline: reducers.openFilterInlineReducer,
     detachFilter: reducers.detachFilterReducer,
     attachFilter: reducers.attachFilterReducer,
+    replaceDetachedFilter: reducers.replaceDetachedFilterReducer,
     closeFilter: reducers.closeFilterReducer,
     setFilterViewState: setFilterViewStateReducer,
   },
@@ -77,6 +78,7 @@ export const {
   openFilterInline,
   detachFilter,
   attachFilter,
+  replaceDetachedFilter,
   closeFilter,
   setFilterViewState,
 } = widgetsSlice.actions;
