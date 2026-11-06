@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { WsSessionFileReader } from './WsSessionFileReader';
 import type { SessionInfo } from './types';
+import {
+  classifySessionListFailure,
+  type SessionListFailure,
+} from '@/utils/history/sessionListFailure';
 
 interface UseSessionListResult {
   sessions: SessionInfo[];
   loading: boolean;
-  error: string | null;
+  failure: SessionListFailure | null;
   browser: WsSessionFileReader | null;
   retry: () => void;
 }
@@ -15,7 +19,7 @@ export function useSessionList(
 ): UseSessionListResult {
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [failure, setFailure] = useState<SessionListFailure | null>(null);
   const [browser, setBrowser] = useState<WsSessionFileReader | null>(null);
   const [tick, setTick] = useState(0);
 
@@ -25,13 +29,15 @@ export function useSessionList(
     const wsReader = new WsSessionFileReader(address);
     setBrowser(wsReader);
     setLoading(true);
-    setError(null);
+    setFailure(null);
     setSessions([]);
 
     wsReader
       .listSessions()
       .then(setSessions)
-      .catch((err: Error) => setError(err.message ?? 'Connection failed'))
+      .catch((reason: unknown) =>
+        setFailure(classifySessionListFailure(reason)),
+      )
       .finally(() => setLoading(false));
 
     return () => {
@@ -42,5 +48,5 @@ export function useSessionList(
 
   const retry = () => setTick((tick) => tick + 1);
 
-  return { sessions, loading, error, browser, retry };
+  return { sessions, loading, failure, browser, retry };
 }

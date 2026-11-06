@@ -16,11 +16,10 @@ const SessionPicker = () => {
   const { isHistory } = useDataMode();
   const { sessionLoaded, loadFromSource } = useDataSource();
   const activeConnection = useAppSelector(selectActiveConnection);
-  const { sessions, loading, error, browser, retry } = useSessionList(
+  const { sessions, loading, failure, browser, retry } = useSessionList(
     activeConnection?.address,
   );
   const local = useLocalSessionFolder();
-  const isLocal = local.hasFolder;
   const [loadingSession, setLoadingSession] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -87,18 +86,16 @@ const SessionPicker = () => {
         <div className="px-3 py-3 ">
           <>
             <p className="px-2 pb-2 text-xs font-medium text-gray-500">
-              Recorded by the connected GPAC
+              From GPAC
             </p>
-            {!isLocal && (
-              <RemoteSessionListStatus
-                loading={loading}
-                error={error}
-                isEmpty={sessions.length === 0}
-                onRetry={retry}
-              />
-            )}
+            <RemoteSessionListStatus
+              loading={loading}
+              failure={failure}
+              isEmpty={sessions.length === 0}
+              onRetry={retry}
+            />
             {!loading &&
-              !error &&
+              !failure &&
               sessions.map((session) => (
                 <SessionRow
                   key={session.sessionId}
