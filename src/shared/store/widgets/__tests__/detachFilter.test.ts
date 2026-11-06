@@ -270,6 +270,10 @@ describe('detachFilterReducer', () => {
 });
 
 describe('replaceDetachedFilter', () => {
+  beforeEach(() => {
+    vi.mocked(createWidgetInstance).mockReturnValue({ ...detachedWidget });
+  });
+
   const createDetachedState = () =>
     widgetsReducer(openOnInputsTab(), detachFilter({ idx: 3, name: 'mp4mx' }));
 
