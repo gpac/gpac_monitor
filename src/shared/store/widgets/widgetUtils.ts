@@ -244,6 +244,7 @@ export const replaceDetachedFilterReducer = (
     return;
 
   writeFilterViewMode(state, widget.detachedFilterIdx, 'inline');
+  delete state.viewByFilter[widget.detachedFilterIdx]?.openPreviews;
   writeFilterViewMode(state, filterIdx, 'detached', widgetId);
   widget.detachedFilterIdx = filterIdx;
   widget.title = name;

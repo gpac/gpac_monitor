@@ -335,6 +335,26 @@ describe('replaceDetachedFilter', () => {
     });
   });
 
+  it('closes the previews of the replaced filter and keeps its tab', () => {
+    let state = widgetsReducer(
+      createDetachedState(),
+      setFilterViewState({
+        filterIdx: 3,
+        patch: { openPreviews: { input: [0], output: [1] } },
+      }),
+    );
+    state = widgetsReducer(state, replaceWith(7));
+
+    expect(selectFilterOpenPreviews({ widgets: state }, 3)).toEqual({
+      input: [],
+      output: [],
+    });
+    expect(state.viewByFilter[3]).toEqual({
+      mode: 'inline',
+      activeTab: 'inputs',
+    });
+  });
+
   it('rejects a filter already detached elsewhere even if dispatched directly', () => {
     const initial = createDetachedState();
     vi.mocked(createWidgetInstance).mockReturnValue({
