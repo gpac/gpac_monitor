@@ -29,7 +29,7 @@ function formatSessionId(date) {
  * @param {string} [sessionId]
  */
 function HistoryWriter(historyDir, sessionId) {
-    const baseDir = historyDir || 'history';
+    const baseDir = historyDir;
     const id = sessionId || formatSessionId(new Date());
     const dir = `${baseDir}/${id}`;
     const chunksDir = `${dir}/chunks`;
