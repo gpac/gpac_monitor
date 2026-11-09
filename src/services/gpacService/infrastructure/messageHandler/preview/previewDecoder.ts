@@ -94,7 +94,7 @@ export class PreviewDecoder {
       : receivedBytes;
     const packetIsKeyframe =
       (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAME) !== 0;
-    if (!hasPictureSlice(packetBytes)) {
+    if (!hasPictureSlice(packetBytes, this.config.codec)) {
       this.pendingBytes = packetBytes;
       this.pendingIsKeyframe = packetIsKeyframe;
       return;

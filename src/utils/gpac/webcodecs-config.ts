@@ -1,17 +1,16 @@
+import { buildHevcCodecString, toHexByte } from './webcodecs-codec-strings';
+
 // GPAC CodecID name for AVC/H.264 (gf_codecid_file_ext, part before '|').
 const AVC_CODEC_ID = '264';
+const HEVC_CODEC_ID = 'hvc';
 
 export function isPreviewableCodec(codec: string): boolean {
-  return codec === AVC_CODEC_ID;
+  return codec === AVC_CODEC_ID || codec === HEVC_CODEC_ID;
 }
 
-// A server that predates the graph `codec` field sends none: the PID stays offered.
+// A PID without a `codec` value stays offered.
 export function canPreview(codec: string | null | undefined): boolean {
   return codec == null || isPreviewableCodec(codec);
-}
-
-function toHexByte(byte: number): string {
-  return byte.toString(16).padStart(2, '0');
 }
 
 function decodeBase64(base64: string): Uint8Array {
@@ -24,10 +23,26 @@ export function buildAvcCodecString(avcc: Uint8Array): string | null {
   return `avc1.${toHexByte(avcc[1])}${toHexByte(avcc[2])}${toHexByte(avcc[3])}`;
 }
 
+function isAvcPictureNal(nalHeader: number): boolean {
+  const nalType = nalHeader & 0x1f;
+  return nalType >= 1 && nalType <= 5;
+}
+
+function isHevcPictureNal(nalHeader: number): boolean {
+  const nalType = (nalHeader >> 1) & 0x3f;
+  return nalType <= 9 || (nalType >= 16 && nalType <= 21);
+}
+
 const AVCC_LENGTH_SIZE = 4;
 
-// True when an AVCC access unit holds a coded slice (NAL types 1-5); malformed data counts as one.
-export function hasPictureSlice(avccBytes: Uint8Array): boolean {
+// True when a length-prefixed access unit holds a coded picture NAL of its codec; malformed data counts as one.
+export function hasPictureSlice(
+  avccBytes: Uint8Array,
+  codecString = 'avc1',
+): boolean {
+  const isPictureNal = codecString.startsWith('hvc1')
+    ? isHevcPictureNal
+    : isAvcPictureNal;
   let offset = 0;
   while (offset + AVCC_LENGTH_SIZE < avccBytes.length) {
     const nalLength =
@@ -38,8 +53,7 @@ export function hasPictureSlice(avccBytes: Uint8Array): boolean {
       0;
     const nalStart = offset + AVCC_LENGTH_SIZE;
     if (nalLength === 0 || nalStart + nalLength > avccBytes.length) return true;
-    const nalType = avccBytes[nalStart] & 0x1f;
-    if (nalType >= 1 && nalType <= 5) return true;
+    if (isPictureNal(avccBytes[nalStart])) return true;
     offset = nalStart + nalLength;
   }
   return offset !== avccBytes.length;
@@ -98,16 +112,19 @@ export function annexBToAvcc(bytes: Uint8Array): Uint8Array {
   return avccBytes;
 }
 
-// Returns a browser-supported decoder config, or null when the preview must use PNG.
+// Returns a browser-supported decoder config, or null when the preview cannot be decoded.
 export async function resolveWebCodecsConfig(
   codec: string,
   decoderConfigBase64: string | null | undefined,
 ): Promise<VideoDecoderConfig | null> {
-  if (typeof VideoDecoder === 'undefined' || !VideoDecoder) return null;
+  if (typeof VideoDecoder === 'undefined') return null;
   if (!isPreviewableCodec(codec) || !decoderConfigBase64) return null;
   try {
     const description = decodeBase64(decoderConfigBase64);
-    const codecString = buildAvcCodecString(description);
+    const codecString =
+      codec === AVC_CODEC_ID
+        ? buildAvcCodecString(description)
+        : buildHevcCodecString(description);
     if (!codecString) return null;
     const config: VideoDecoderConfig = {
       codec: codecString,
@@ -116,7 +133,8 @@ export async function resolveWebCodecsConfig(
     };
     const support = await VideoDecoder.isConfigSupported(config);
     return support.supported ? config : null;
-  } catch {
+  } catch (error) {
+    console.warn('WebCodecs configuration failed:', error);
     return null;
   }
 }
