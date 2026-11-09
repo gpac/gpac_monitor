@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
-import { LuClapperboard, LuRefreshCw, LuLoaderCircle } from 'react-icons/lu';
-import { Button } from '@/components/ui/button';
+import { LuClapperboard } from 'react-icons/lu';
 import { Spinner } from '@/components/ui/spinner';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
 import { useDataMode } from '@/shared/hooks/data/useDataMode';
@@ -10,17 +9,17 @@ import { useAppSelector } from '@/shared/hooks/redux';
 import { selectActiveConnection } from '@/shared/store/selectors';
 import SessionRow from './SessionRow';
 import LocalFilePicker from './LocalFilePicker';
+import RemoteSessionListStatus from './RemoteSessionListStatus';
 import { useLocalSessionFolder } from './hooks/useLocalSessionFolder';
 
 const SessionPicker = () => {
   const { isHistory } = useDataMode();
   const { sessionLoaded, loadFromSource } = useDataSource();
   const activeConnection = useAppSelector(selectActiveConnection);
-  const { sessions, loading, error, browser, retry } = useSessionList(
+  const { sessions, loading, failure, browser, retry } = useSessionList(
     activeConnection?.address,
   );
   const local = useLocalSessionFolder();
-  const isLocal = local.hasFolder;
   const [loadingSession, setLoadingSession] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -86,31 +85,17 @@ const SessionPicker = () => {
 
         <div className="px-3 py-3 ">
           <>
-            {!isLocal && loading && (
-              <div className="flex items-center justify-center py-8 gap-2 text-gray-400">
-                <Spinner className="w-4 h-4" />
-                <span className="text-sm">Loading sessions…</span>
-              </div>
-            )}
-            {!isLocal && !loading && error && (
-              <div className="flex flex-col items-center gap-3 py-6 text-center">
-                <LuLoaderCircle className="w-6 h-6 text-red-400" />
-                <p className="text-sm text-gray-400">{error}</p>
-                <Button variant="outline" size="sm" onClick={retry}>
-                  <LuRefreshCw className="w-3 h-3 mr-1.5" /> Retry
-                </Button>
-              </div>
-            )}
-            {!isLocal && !loading && !error && sessions.length === 0 && (
-              <div className="flex flex-col items-center gap-3 py-6 text-center">
-                <p className="text-sm text-gray-400">No sessions found.</p>
-                <Button variant="outline" size="sm" onClick={retry}>
-                  <LuRefreshCw className="w-3 h-3 mr-1.5" /> Refresh
-                </Button>
-              </div>
-            )}
+            <p className="px-2 pb-2 text-xs font-medium text-gray-500">
+              From GPAC
+            </p>
+            <RemoteSessionListStatus
+              loading={loading}
+              failure={failure}
+              isEmpty={sessions.length === 0}
+              onRetry={retry}
+            />
             {!loading &&
-              !error &&
+              !failure &&
               sessions.map((session) => (
                 <SessionRow
                   key={session.sessionId}

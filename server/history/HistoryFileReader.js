@@ -15,11 +15,12 @@ const VALID_SEGMENT_FILE = /^segments\/\d{4}\/(chunks\/chunk_\d{4}\.jsonl|logs\/
  * all reads scoped to historyDir.
  */
 function HistoryFileReader(historyDir) {
-    const baseDir = historyDir || 'history';
+    const baseDir = historyDir;
 
     /** List available sessions with metadata */
     this.listSessions = function () {
         const sessions = [];
+        if (!baseDir) return sessions;
         const [entries, err] = os.readdir(baseDir);
         if (err) return sessions;
 
@@ -56,7 +57,7 @@ function HistoryFileReader(historyDir) {
 
     /** Read an allowed file from a session */
     this.readFile = function (sessionId, fileName) {
-        if (!VALID_SESSION_ID.test(sessionId)) {
+        if (!baseDir || !VALID_SESSION_ID.test(sessionId)) {
             return { ok: false, error: 'session_not_found', detail: `Invalid sessionId: ${sessionId}` };
         }
         const isAllowed = ALLOWED_EXACT_FILES.includes(fileName) || VALID_CHUNK_FILE.test(fileName) || VALID_LOG_CHUNK_FILE.test(fileName) || VALID_CHECKPOINT_FILE.test(fileName) || VALID_SEGMENT_FILE.test(fileName);

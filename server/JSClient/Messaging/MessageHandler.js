@@ -4,7 +4,7 @@ import { cacheManager } from '../Cache/CacheManager.js';
 import { HistoryFileReader } from '../../history/HistoryFileReader.js';
 
 // Read from the same directory HistoryCollector writes to (-rmt-log)
-const historyReader = new HistoryFileReader(sys.get_opt('core', 'rmt-log') || 'history');
+const historyReader = new HistoryFileReader(sys.get_opt('core', 'rmt-log'));
 
 function MessageHandler(client) {
     this.client = client;

@@ -38,7 +38,7 @@ function removeSegmentDir(sessionDir, segmentDir) {
  * @param {{ retentionMaxSegments?: number, buildSegmentSnapshot?: (rolloverTsUs: number) => object|undefined }} [options]
  */
 function HistorySessionWriter(historyDir, sessionId, options) {
-    const baseDir = historyDir || 'history';
+    const baseDir = historyDir;
     const id = sessionId || formatSessionId(new Date());
     const dir = `${baseDir}/${id}`;
     const segmentsDir = `${dir}/segments`;

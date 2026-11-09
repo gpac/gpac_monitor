@@ -17,7 +17,12 @@ const LocalFilePicker = memo(
 
     return (
       <div className="border-b border-monitor-line">
-        <div className="px-4 py-3">
+        <div className="px-3 pt-3">
+          <p className="px-2 pb-2 text-xs font-medium text-gray-500">
+            From your computer
+          </p>
+        </div>
+        <div className="px-4 pb-3">
           <div
             className={`flex flex-col items-center gap-1 rounded-lg border-2 px-4 py-6 text-center transition-colors ${
               isDraggingOver
@@ -36,11 +41,15 @@ const LocalFilePicker = memo(
             <p className="text-sm text-gray-400">
               {isDraggingOver ? 'Release to open' : 'Drop a history folder'}
             </p>
+            <p className="text-xs text-gray-500">No GPAC connection needed</p>
           </div>
         </div>
 
         {sessions.length > 0 && (
           <div className="px-3 pb-3">
+            <p className="px-2 pb-2 text-xs font-medium text-gray-500">
+              Sessions in this folder
+            </p>
             {sessions.map((session) => (
               <SessionRow
                 key={session.sessionId}

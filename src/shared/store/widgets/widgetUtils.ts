@@ -223,6 +223,32 @@ export const detachFilterView = (
   writeFilterViewMode(state, idx, 'detached', widget.id);
 };
 
+export const replaceDetachedFilterReducer = (
+  state: WidgetsState,
+  action: PayloadAction<{ widgetId: string; filterIdx: number; name: string }>,
+) => {
+  const { widgetId, filterIdx, name } = action.payload;
+  const widget = state.activeWidgets.find(
+    (candidate) => candidate.id === widgetId,
+  );
+  if (
+    !widget?.isDetached ||
+    widget.type !== WidgetType.FILTERSESSION ||
+    widget.detachedFilterIdx === undefined ||
+    widget.detachedFilterIdx === filterIdx ||
+    state.activeWidgets.some(
+      (candidate) =>
+        candidate.isDetached && candidate.detachedFilterIdx === filterIdx,
+    )
+  )
+    return;
+
+  writeFilterViewMode(state, widget.detachedFilterIdx, 'inline');
+  writeFilterViewMode(state, filterIdx, 'detached', widgetId);
+  widget.detachedFilterIdx = filterIdx;
+  widget.title = name;
+};
+
 export const attachFilterReducer = (
   state: WidgetsState,
   action: PayloadAction<number>,

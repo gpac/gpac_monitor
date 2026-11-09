@@ -75,7 +75,6 @@ export const useLocalSessionFolder = () => {
   );
 
   return {
-    hasFolder: browser !== null,
     sessions,
     loadingSession,
     loadError,
