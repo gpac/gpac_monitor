@@ -4,6 +4,7 @@ import { PREVIEW } from '../config.js';
 const PVWC_MAGIC = 'PVWC';
 const PVWC_HEADER_SIZE = 24;
 const PVWC_FLAG_KEYFRAME = 1;
+const PVWC_FLAG_KEYFRAMES_ONLY = 2;
 
 function isKeyframe(packet) {
     return packet.sap === 1 || packet.sap === 2 || packet.sap === 3;
@@ -39,7 +40,7 @@ function shouldSendPacket(gate, decodeTimeUs, nowUs, isKey) {
     return true;
 }
 
-function buildCompressedFrame(previewId, pidIdx, packet, ctsUs) {
+function buildCompressedFrame(previewId, pidIdx, packet, ctsUs, keyframesOnly) {
     const packetBytes = new Uint8Array(packet.data);
     const buffer = new ArrayBuffer(PVWC_HEADER_SIZE + packetBytes.byteLength);
     const header = new DataView(buffer);
@@ -48,7 +49,8 @@ function buildCompressedFrame(previewId, pidIdx, packet, ctsUs) {
     }
     header.setUint32(4, previewId, true);
     header.setUint32(8, pidIdx, true);
-    header.setUint32(12, isKeyframe(packet) ? PVWC_FLAG_KEYFRAME : 0, true);
+    const flags = (isKeyframe(packet) ? PVWC_FLAG_KEYFRAME : 0) | (keyframesOnly ? PVWC_FLAG_KEYFRAMES_ONLY : 0);
+    header.setUint32(12, flags, true);
     header.setFloat64(16, ctsUs, true);
     new Uint8Array(buffer, PVWC_HEADER_SIZE).set(packetBytes);
     return buffer;
@@ -105,7 +107,7 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
                         print(`[Preview] rate gate idx=${filterIdx} keyframesOnly=${rateGate.keyframesOnly} speed=${rateGate.lastSpeed.toFixed(2)} dtsUs=${dtsUs}`);
                     }
                     if (send) {
-                        socket.send(buildCompressedFrame(entry.previewId, entry.pidIdx, packet, ctsUs));
+                        socket.send(buildCompressedFrame(entry.previewId, entry.pidIdx, packet, ctsUs, rateGate.keyframesOnly));
                     }
                 }
                 entry.pid.drop_packet();
@@ -117,4 +119,4 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
     return sink;
 }
 
-export { createCompressedPreviewSink, createRateGate, shouldSendPacket };
+export { buildCompressedFrame, createCompressedPreviewSink, createRateGate, shouldSendPacket };

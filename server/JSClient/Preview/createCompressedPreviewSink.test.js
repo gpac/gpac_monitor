@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createRateGate, shouldSendPacket } from './createCompressedPreviewSink.js';
+import { buildCompressedFrame, createRateGate, shouldSendPacket } from './createCompressedPreviewSink.js';
 import { PREVIEW } from '../config.js';
 
 const FRAME_CTS_STEP_US = 40000;
@@ -65,5 +65,18 @@ describe('shouldSendPacket', () => {
         const lastSecond = looped.filter((packet) => packet.wallUs > floodEndWallUs + 2100000);
         expect(lastSecond.length).toBeGreaterThan(0);
         expect(lastSecond.every((packet) => packet.sent)).toBe(true);
+    });
+});
+
+describe('buildCompressedFrame', () => {
+    it.each([
+        { sap: 0, keyframesOnly: false, flags: 0 },
+        { sap: 1, keyframesOnly: false, flags: 1 },
+        { sap: 0, keyframesOnly: true, flags: 2 },
+        { sap: 1, keyframesOnly: true, flags: 3 },
+    ])('writes flags $flags for sap=$sap keyframesOnly=$keyframesOnly', ({ sap, keyframesOnly, flags }) => {
+        const packet = { sap, data: new Uint8Array([7, 8]).buffer };
+        const frame = new DataView(buildCompressedFrame(1, 0, packet, 0, keyframesOnly));
+        expect(frame.getUint32(12, true)).toBe(flags);
     });
 });
