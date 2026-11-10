@@ -87,14 +87,16 @@ export class PreviewDecoder {
       dataView.byteOffset + PVWC_HEADER_SIZE,
       dataView.byteLength - PVWC_HEADER_SIZE,
     );
+    // AV1 packets are OBU sequences, not NAL units: no Annex B conversion, no picture-slice check.
+    const isNalStream = !this.config.codec.startsWith('av01');
     // Decided once on the first packet; the decoder only reads AVCC.
-    this.isAnnexBStream ??= isAnnexB(receivedBytes);
+    this.isAnnexBStream ??= isNalStream && isAnnexB(receivedBytes);
     const packetBytes = this.isAnnexBStream
       ? annexBToAvcc(receivedBytes)
       : receivedBytes;
     const packetIsKeyframe =
       (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAME) !== 0;
-    if (!hasPictureSlice(packetBytes, this.config.codec)) {
+    if (isNalStream && !hasPictureSlice(packetBytes, this.config.codec)) {
       this.pendingBytes = packetBytes;
       this.pendingIsKeyframe = packetIsKeyframe;
       return;
