@@ -1,11 +1,21 @@
-import { buildHevcCodecString, toHexByte } from './webcodecs-codec-strings';
+import {
+  buildAv1CodecString,
+  buildHevcCodecString,
+  toHexByte,
+} from './webcodecs-codec-strings';
 
-// GPAC CodecID name for AVC/H.264 (gf_codecid_file_ext, part before '|').
-const AVC_CODEC_ID = '264';
-const HEVC_CODEC_ID = 'hvc';
+// Keys are GPAC CodecID names (gf_codecid_file_ext, part before '|').
+const CODEC_STRING_BUILDERS = new Map<
+  string,
+  (decoderConfig: Uint8Array) => string | null
+>([
+  ['264', buildAvcCodecString],
+  ['hvc', buildHevcCodecString],
+  ['av1', buildAv1CodecString],
+]);
 
 export function isPreviewableCodec(codec: string): boolean {
-  return codec === AVC_CODEC_ID || codec === HEVC_CODEC_ID;
+  return CODEC_STRING_BUILDERS.has(codec);
 }
 
 // A PID without a `codec` value stays offered.
@@ -118,13 +128,11 @@ export async function resolveWebCodecsConfig(
   decoderConfigBase64: string | null | undefined,
 ): Promise<VideoDecoderConfig | null> {
   if (typeof VideoDecoder === 'undefined') return null;
-  if (!isPreviewableCodec(codec) || !decoderConfigBase64) return null;
+  const buildCodecString = CODEC_STRING_BUILDERS.get(codec);
+  if (!buildCodecString || !decoderConfigBase64) return null;
   try {
     const description = decodeBase64(decoderConfigBase64);
-    const codecString =
-      codec === AVC_CODEC_ID
-        ? buildAvcCodecString(description)
-        : buildHevcCodecString(description);
+    const codecString = buildCodecString(description);
     if (!codecString) return null;
     const config: VideoDecoderConfig = {
       codec: codecString,
