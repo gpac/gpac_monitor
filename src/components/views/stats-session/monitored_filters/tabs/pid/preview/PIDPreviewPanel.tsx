@@ -1,7 +1,11 @@
 import { memo, useRef } from 'react';
-import { LuX } from 'react-icons/lu';
+import { LuTriangleAlert, LuX } from 'react-icons/lu';
 import { Spinner } from '@/components/ui/spinner';
+import { CustomTooltip } from '@/components/ui/tooltip';
 import { usePidPreview } from '../../hooks/usePidPreview';
+
+const KEYFRAMES_ONLY_HINT =
+  'GPAC is processing faster than real time. Only keyframes are sent, so the preview may appear frozen.';
 
 const FRAME_BOX_STYLE = {
   aspectRatio: '16 / 9',
@@ -34,7 +38,7 @@ const PIDPreviewPanel = memo(
     onClose,
   }: PIDPreviewPanelProps) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const { error, loading } = usePidPreview(
+    const { error, loading, keyframesOnly } = usePidPreview(
       filterIdx,
       pidIdx,
       variant,
@@ -90,6 +94,14 @@ const PIDPreviewPanel = memo(
                 <Spinner size="sm" />
                 Waiting for keyframe…
               </div>
+            )}
+            {keyframesOnly && !loading && (
+              <CustomTooltip content={KEYFRAMES_ONLY_HINT} side="left">
+                <span className="absolute right-2 top-2 flex items-center gap-1 border border-amber-400/70 bg-black/70 px-1.5 py-0.5 font-ui text-[10px] font-semibold uppercase tracking-wide text-amber-400">
+                  <LuTriangleAlert className="h-3 w-3" />
+                  Keyframes only
+                </span>
+              </CustomTooltip>
             )}
           </div>
         )}
