@@ -51,6 +51,7 @@ export interface PreviewHandlerState {
   pidIdx: number | null;
   loading: boolean;
   error: string | null;
+  keyframesOnly: boolean;
 }
 
 export interface MessageHandlerDependencies {

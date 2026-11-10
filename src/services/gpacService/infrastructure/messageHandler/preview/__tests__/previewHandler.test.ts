@@ -113,6 +113,7 @@ describe('PreviewHandler', () => {
       pidIdx: 1,
       loading: false,
       error: 'Codec not supported by this browser',
+      keyframesOnly: false,
     });
   });
 

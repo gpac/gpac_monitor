@@ -17,6 +17,7 @@ export function usePidPreview(
     pidIdx,
     loading: true,
     error: null,
+    keyframesOnly: false,
   }));
 
   useEffect(() => {

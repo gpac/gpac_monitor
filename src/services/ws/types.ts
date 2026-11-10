@@ -177,11 +177,13 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
   logLevel: GpacLogConfig;
 }
 
-// Binary webcodecs frame: 'PVWC' + previewId/pidIdx/flags u32 LE (bit 0 = key, SAP 1-3) + µs f64 LE,
+// Binary webcodecs frame: 'PVWC' + previewId/pidIdx/flags u32 LE + µs f64 LE,
 // then raw avcC packet bytes; first frame sent is a keyframe.
+// flags: bit 0 = key (SAP 1-3); bit 1 = server sends keyframes only (faster than real time).
 export const PVWC_MAGIC = 'PVWC';
 export const PVWC_HEADER_SIZE = 24;
 export const PVWC_FLAG_KEYFRAME = 1;
+export const PVWC_FLAG_KEYFRAMES_ONLY = 2;
 
 export interface PreviewErrorMessage {
   message: 'preview_error';

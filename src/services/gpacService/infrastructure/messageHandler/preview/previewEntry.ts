@@ -1,4 +1,8 @@
-import { WSMessageType } from '@/services/ws/types';
+import {
+  PVWC_FLAG_KEYFRAMES_ONLY,
+  PVWC_HEADER_SIZE,
+  WSMessageType,
+} from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
 import { isPreviewableCodec, resolveWebCodecsConfig } from '@/utils/gpac';
 import { PreviewWorker } from './previewWorker';
@@ -30,6 +34,7 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
       pidIdx: target.pidIdx,
       loading: true,
       error: null,
+      keyframesOnly: false,
     });
   }
 
@@ -94,6 +99,12 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
   }
 
   public decodePacket(dataView: DataView): void {
+    if (dataView.byteLength <= PVWC_HEADER_SIZE) return;
+    const keyframesOnly =
+      (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAMES_ONLY) !== 0;
+    if (keyframesOnly !== this.getSnapshot().keyframesOnly) {
+      this.updateDataAndNotify({ ...this.getSnapshot(), keyframesOnly });
+    }
     this.decoder?.decodePacket(dataView);
   }
 
