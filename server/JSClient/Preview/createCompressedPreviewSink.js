@@ -60,8 +60,7 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
     const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
     const sink = session.new_filter(`${sinkName}${hideTag}`);
     let firstKeyframeSeen = false;
-    const rateGate = createRateGate(entry.maxKeyframesPerSec);
-    sink.require_source_id = true;
+    const rateGate = createRateGate(entry.maxKeyframesPerSec);    sink.require_source_id = true;
     sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
     sink.configure_pid = function (pid) {
         try {
@@ -101,12 +100,10 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
                 if (firstKeyframeSeen && socket) {
                     const ctsUs = Math.round(packet.cts * 1e6 / entry.pid.timescale);
                     const dtsUs = Math.round(packet.dts * 1e6 / entry.pid.timescale);
-                    const wasKeyframesOnly = rateGate.keyframesOnly;
-                    const send = shouldSendPacket(rateGate, dtsUs, sys.clock_us(), isKeyframe(packet));
+                    const wasKeyframesOnly = rateGate.keyframesOnly;                    const send = shouldSendPacket(rateGate, dtsUs, sys.clock_us(), isKeyframe(packet));
                     if (rateGate.keyframesOnly !== wasKeyframesOnly) {
-                        print(`[Preview] rate gate idx=${filterIdx} keyframesOnly=${rateGate.keyframesOnly} speed=${rateGate.lastSpeed.toFixed(2)} dtsUs=${dtsUs}`);
-                    }
-                    if (send) {
+                        print(`[Preview] rate gate idx=${filterIdx} keyframesOnly=${rateGate.keyframesOnly} limit=${rateGate.maxKeyframesPerSec} speed=${rateGate.lastSpeed.toFixed(2)} dtsUs=${dtsUs}`);
+                    }                    if (send) {
                         socket.send(buildCompressedFrame(entry.previewId, entry.pidIdx, packet, ctsUs, rateGate.keyframesOnly));
                     }
                 }

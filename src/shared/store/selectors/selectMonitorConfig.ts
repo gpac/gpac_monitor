@@ -1,5 +1,10 @@
 import type { RootState } from '../index';
+import type { PreviewKeyframeRate } from '../slices/monitorConfigSlice';
 import { PREVIEW_MIN_WS_PROTOCOL_VERSION } from '@/services/ws/protocolVersion';
+
+export const selectPreviewMaxKeyframesPerSec = (
+  state: RootState,
+): PreviewKeyframeRate => state.monitorConfig.previewMaxKeyframesPerSec;
 
 export const selectCpuStatsInterval = (state: RootState): number =>
   state.monitorConfig.intervals.CPU_STATS;

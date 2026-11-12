@@ -4,6 +4,8 @@ import {
   WSMessageType,
 } from '@/services/ws/types';
 import { UpdatableSubscribable } from '@/services/utils/UpdatableSubcribable';
+import { store } from '@/shared/store';
+import { selectPreviewMaxKeyframesPerSec } from '@/shared/store/selectors/selectMonitorConfig';
 import { isPreviewableCodec, resolveWebCodecsConfig } from '@/utils/gpac';
 import { PreviewWorker } from './previewWorker';
 import type {
@@ -11,8 +13,6 @@ import type {
   PreviewHandlerState,
   PreviewSource,
 } from '../types';
-
-const DEFAULT_MAX_KEYFRAMES_PER_SEC = 10;
 
 export interface PreviewTarget {
   filterIdx: number;
@@ -73,7 +73,7 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
       pidIdx: this.target.pidIdx,
       direction: this.target.direction,
       name: filterName,
-      maxKeyframesPerSec: DEFAULT_MAX_KEYFRAMES_PER_SEC,
+      maxKeyframesPerSec: selectPreviewMaxKeyframesPerSec(store.getState()),
     });
   }
 

@@ -1,7 +1,12 @@
 import React, { useMemo } from 'react';
 import WidgetWrapper from '@/components/widget/WidgetWrapper';
-import { useAppSelector } from '@/shared/hooks';
-import { selectIsPreviewSupported } from '@/shared/store/selectors';
+import { useAppDispatch, useAppSelector } from '@/shared/hooks';
+import {
+  selectIsPreviewSupported,
+  selectPreviewMaxKeyframesPerSec,
+} from '@/shared/store/selectors';
+import { setPreviewMaxKeyframesPerSec } from '@/shared/store/slices/monitorConfigSlice';
+import { PreviewKeyframeRateToggle } from './ui/PreviewKeyframeRateToggle';
 import {
   selectPreviewSources,
   type PreviewSourceGroup,
@@ -20,6 +25,8 @@ const keepPids = (
 const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
   const sources = useAppSelector(selectPreviewSources);
   const isPreviewSupported = useAppSelector(selectIsPreviewSupported);
+  const maxKeyframesPerSec = useAppSelector(selectPreviewMaxKeyframesPerSec);
+  const dispatch = useAppDispatch();
   const activeGroups = useMemo(() => keepPids(sources, true), [sources]);
   const availableGroups = useMemo(() => keepPids(sources, false), [sources]);
   const activeCount = activeGroups.reduce(
@@ -37,7 +44,16 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
   );
 
   return (
-    <WidgetWrapper id={id} statusBadge={statusBadge}>
+    <WidgetWrapper
+      id={id}
+      statusBadge={statusBadge}
+      customActions={
+        <PreviewKeyframeRateToggle
+          value={maxKeyframesPerSec}
+          onChange={(rate) => dispatch(setPreviewMaxKeyframesPerSec(rate))}
+        />
+      }
+    >
       <div className="flex min-h-full flex-col gap-3 p-2 text-base">
         {sources.length === 0 ? (
           <p className="m-auto text-monitor-text-muted">
