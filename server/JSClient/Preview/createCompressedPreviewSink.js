@@ -10,8 +10,8 @@ function isKeyframe(packet) {
     return packet.sap === 1 || packet.sap === 2 || packet.sap === 3;
 }
 
-function createRateGate() {
-    return { lastDecodeTimeUs: null, mediaElapsedUs: 0, windowStartWallUs: 0, keyframesOnly: false, lastSpeed: 0, lastKeyframeSentWallUs: null };
+function createRateGate(maxKeyframesPerSec = PREVIEW.MAX_KEYFRAMES_PER_SEC) {
+    return { maxKeyframesPerSec, lastDecodeTimeUs: null, mediaElapsedUs: 0, windowStartWallUs: 0, keyframesOnly: false, lastSpeed: 0, lastKeyframeSentWallUs: null };
 }
 
 // Decode time (monotonic, unlike cts with B-frames) only counts forward steps, so a looping source keeps the window running.
@@ -34,7 +34,7 @@ function shouldSendPacket(gate, decodeTimeUs, nowUs, isKey) {
     }
     if (!gate.keyframesOnly) return true;
     if (!isKey) return false;
-    const minKeyframeGapUs = 1000000 / PREVIEW.MAX_KEYFRAMES_PER_SEC;
+    const minKeyframeGapUs = 1000000 / gate.maxKeyframesPerSec;
     if (gate.lastKeyframeSentWallUs !== null && nowUs - gate.lastKeyframeSentWallUs < minKeyframeGapUs) return false;
     gate.lastKeyframeSentWallUs = nowUs;
     return true;
@@ -60,7 +60,7 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
     const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
     const sink = session.new_filter(`${sinkName}${hideTag}`);
     let firstKeyframeSeen = false;
-    const rateGate = createRateGate();
+    const rateGate = createRateGate(entry.maxKeyframesPerSec);
     sink.require_source_id = true;
     sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
     sink.configure_pid = function (pid) {

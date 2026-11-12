@@ -12,6 +12,8 @@ import type {
   PreviewSource,
 } from '../types';
 
+const DEFAULT_MAX_KEYFRAMES_PER_SEC = 10;
+
 export interface PreviewTarget {
   filterIdx: number;
   pidIdx: number;
@@ -71,6 +73,7 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
       pidIdx: this.target.pidIdx,
       direction: this.target.direction,
       name: filterName,
+      maxKeyframesPerSec: DEFAULT_MAX_KEYFRAMES_PER_SEC,
     });
   }
 

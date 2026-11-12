@@ -47,12 +47,12 @@ function PreviewManager(client) {
         return null;
     };
 
-    this.startPreview = function (filterIdx, filterName, direction, pidIdx, previewId) {
-        print(`[Preview] startPreview requested previewId=${previewId} idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx}`);
-        this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx, previewId));
+    this.startPreview = function (filterIdx, filterName, direction, pidIdx, previewId, maxKeyframesPerSec) {
+        print(`[Preview] startPreview requested previewId=${previewId} idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx} maxKeyframesPerSec=${maxKeyframesPerSec}`);
+        this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx, previewId, maxKeyframesPerSec));
     };
 
-    this.doStartPreview = function (filterIdx, filterName, direction, pidIdx, previewId) {
+    this.doStartPreview = function (filterIdx, filterName, direction, pidIdx, previewId, maxKeyframesPerSec) {
         const key = this.previewKey(filterIdx, direction, pidIdx);
         if (this.activePreviews.has(key)) {
             print(`[Preview] already open key=${key}`);
@@ -83,6 +83,9 @@ function PreviewManager(client) {
             sink: null,
             pid: null,
             pidIdx: resolvedPidIdx,
+            maxKeyframesPerSec: PREVIEW.ALLOWED_KEYFRAMES_PER_SEC.includes(maxKeyframesPerSec)
+                ? maxKeyframesPerSec
+                : PREVIEW.MAX_KEYFRAMES_PER_SEC,
         };
         this.activePreviews.set(key, entry);
         try {

@@ -66,6 +66,16 @@ describe('shouldSendPacket', () => {
         expect(lastSecond.length).toBeGreaterThan(0);
         expect(lastSecond.every((packet) => packet.sent)).toBe(true);
     });
+
+    it.each([
+        { maxKeyframesPerSec: 30, sent: true },
+        { maxKeyframesPerSec: 10, sent: false },
+    ])('sends a keyframe 34 ms after the previous one: $sent at $maxKeyframesPerSec/s', ({ maxKeyframesPerSec, sent }) => {
+        const gate = createRateGate(maxKeyframesPerSec);
+        gate.keyframesOnly = true;
+        expect(shouldSendPacket(gate, 0, 0, true)).toBe(true);
+        expect(shouldSendPacket(gate, FRAME_CTS_STEP_US, 34000, true)).toBe(sent);
+    });
 });
 
 describe('buildCompressedFrame', () => {
