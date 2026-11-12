@@ -5,7 +5,7 @@ import { CustomTooltip } from '@/components/ui/tooltip';
 import { usePidPreview } from '../../hooks/usePidPreview';
 
 const KEYFRAMES_ONLY_HINT =
-  'GPAC is processing faster than real time. Only keyframes are sent, so the preview may appear frozen.';
+  'Only keyframes are displayed. This preview does not represent real-time playback.';
 
 const FRAME_BOX_STYLE = {
   aspectRatio: '16 / 9',
@@ -65,14 +65,24 @@ const PIDPreviewPanel = memo(
               {subtitle}
             </span>
           </div>
-          <button
-            onClick={() => onClose(pidIdx)}
-            className="shrink-0 rounded px-1 py-0.5 text-gray-300 hover:bg-gray-700/80"
-            title="Close preview"
-            aria-label="Close preview"
-          >
-            <LuX className="h-4 w-4" />
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            {keyframesOnly && !loading && (
+              <CustomTooltip content={KEYFRAMES_ONLY_HINT} side="bottom">
+                <span className="flex items-start gap-1 whitespace-nowrap border border-amber-500/70 bg-black/80 px-2 py-0.5 font-ui text-[9px] font-semibold uppercase text-amber-400">
+                  <LuTriangleAlert className="h-3 w-3" />
+                  Keyframes
+                </span>
+              </CustomTooltip>
+            )}
+            <button
+              onClick={() => onClose(pidIdx)}
+              className="rounded px-1 py-0.5 text-gray-300 hover:bg-gray-700/80"
+              title="Close preview"
+              aria-label="Close preview"
+            >
+              <LuX className="h-4 w-4" />
+            </button>
+          </div>
         </div>
         {error ? (
           <div
@@ -94,14 +104,6 @@ const PIDPreviewPanel = memo(
                 <Spinner size="sm" />
                 Waiting for keyframe…
               </div>
-            )}
-            {keyframesOnly && !loading && (
-              <CustomTooltip content={KEYFRAMES_ONLY_HINT} side="left">
-                <span className="absolute right-2 top-2 flex items-center gap-1 border border-amber-400/70 bg-black/70 px-1.5 py-0.5 font-ui text-[10px] font-semibold uppercase tracking-wide text-amber-400">
-                  <LuTriangleAlert className="h-3 w-3" />
-                  Keyframes only
-                </span>
-              </CustomTooltip>
             )}
           </div>
         )}
