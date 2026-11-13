@@ -64,8 +64,12 @@ function MessageHandler(client) {
                     
                     
 
-                    'get_png': () => {
-                        this.client.filterManager.addPngProbe(jtext['idx'], jtext['name']);
+                    'start_pid_preview': () => {
+                        this.client.previewManager.startPreview(jtext['idx'], jtext['name'], jtext['direction'], jtext['pidIdx'], jtext['previewId'], jtext['maxKeyframesPerSec']);
+                    },
+
+                    'stop_pid_preview': () => {
+                        this.client.previewManager.stopPreview(jtext['idx'], jtext['direction'], jtext['pidIdx']);
                     },
 
                     'subscribe_cpu_stats': () => {
@@ -89,7 +93,7 @@ function MessageHandler(client) {
                         this.client.logManager.unsubscribe();
                     },
 
-                    'update_log_level': () => {
+                    'update_log_level': () => {             
                         const logLevel = jtext['logLevel'] || "all@warning";
                         this.client.logManager.updateLogLevel(logLevel);
                     },

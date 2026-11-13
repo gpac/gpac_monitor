@@ -3,3 +3,4 @@
  */
 export * from './filter-arguments';
 export * from './pid-status';
+export * from './webcodecs-config';

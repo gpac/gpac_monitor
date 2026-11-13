@@ -1,6 +1,9 @@
 import { memo, useCallback } from 'react';
 import { LuEye } from 'react-icons/lu';
+import { GpacStreamType } from '@/types/domain/gpac/stream-types';
+import PIDPreviewButton from './preview/PIDPreviewButton';
 import { useAppDispatch, useAppSelector } from '@/shared/hooks/redux';
+import { useDataMode } from '@/shared/hooks/data/useDataMode';
 import { Badge } from '@/components/ui/badge';
 import {
   getStreamTypeBadgeConfig,
@@ -8,8 +11,12 @@ import {
 } from '@/utils/filters/streamType';
 import { PID_SELECTION_COLORS } from './utils/pidColors';
 import { toggleSelectedPid } from '@/shared/store/slices/monitoredFilterSlice';
-import { selectPidColorIndexByKey } from '@/shared/store/selectors';
+import {
+  selectIsPreviewSupported,
+  selectPidColorIndexByKey,
+} from '@/shared/store/selectors';
 import { buildPIDDisplayLabel } from './utils/pidLabel';
+import { canPreview } from '@/utils/gpac/webcodecs-config';
 import { GraphRadio } from '@/components/common/charts';
 import type { PIDWithIndex } from '../../../types';
 
@@ -20,6 +27,8 @@ interface PIDRowInfoCellProps {
   pidKey: string;
   infoLine: string;
   onOpenProps: () => void;
+  isPreviewOpen: boolean;
+  onTogglePreview: (pidIdx: number) => void;
 }
 
 const PIDRowInfoCell = memo(
@@ -30,8 +39,12 @@ const PIDRowInfoCell = memo(
     pidKey,
     infoLine,
     onOpenProps,
+    isPreviewOpen,
+    onTogglePreview,
   }: PIDRowInfoCellProps) => {
     const dispatch = useAppDispatch();
+    const { isLive } = useDataMode();
+    const isPreviewSupported = useAppSelector(selectIsPreviewSupported);
     const colorIndex = useAppSelector(
       (state) => selectPidColorIndexByKey(state)[pidKey] ?? -1,
     );
@@ -78,6 +91,17 @@ const PIDRowInfoCell = memo(
             <LuEye className="h-4 w-5" />
           </button>
         )}
+        {isLive &&
+          isPreviewSupported &&
+          pid.type === GpacStreamType.Visual &&
+          canPreview(pid.codec) && (
+            <PIDPreviewButton
+              pid={pid}
+              onSelect={selectIfNeeded}
+              isPreviewOpen={isPreviewOpen}
+              onTogglePreview={onTogglePreview}
+            />
+          )}
         <Badge
           variant="outline"
           className={`px-1.5 py-0 h-5 font-mono font-bold text-[0.714rem] flex-shrink-0 ${isSelected ? '' : badgeConfig.className}`}

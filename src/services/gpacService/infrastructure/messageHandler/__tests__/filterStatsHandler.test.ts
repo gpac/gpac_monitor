@@ -142,6 +142,30 @@ describe('FilterStatsHandler', () => {
     );
   });
 
+  it('replays the last snapshot to a view that resubscribes before the delayed unsubscribe', async () => {
+    vi.useFakeTimers();
+    const handler = new FilterStatsHandler(makeDependencies(), () => true);
+    const unsubscribe = handler.subscribeToFilterStatsUpdates(3, vi.fn());
+    handler.handleFilterStatsUpdate(makeFilterStats(3, { nb_ipid: 2 }));
+    await vi.advanceTimersByTimeAsync(200);
+    unsubscribe();
+
+    const remountedCallback = vi.fn();
+    handler.subscribeToFilterStatsUpdates(3, remountedCallback);
+
+    expect(remountedCallback).toHaveBeenCalledTimes(1);
+    expect(remountedCallback.mock.calls[0][0].nb_ipid).toBe(2);
+  });
+
+  it('does not replay the placeholder to the first subscriber', () => {
+    const handler = new FilterStatsHandler(makeDependencies(), () => true);
+    const callback = vi.fn();
+
+    handler.subscribeToFilterStatsUpdates(3, callback);
+
+    expect(callback).not.toHaveBeenCalled();
+  });
+
   describe('cleanup', () => {
     it('clears pending auto-unsubscribe timers', async () => {
       vi.useFakeTimers();

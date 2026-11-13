@@ -21,6 +21,16 @@ const FILTER_SUBSCRIPTION_FIELDS = [
     'status', 'bytes_done', 'bytes_sent', 'pck_done', 'pck_sent', 'time', 'nb_ipid', 'nb_opid', 'errors', 'current_errors','last_task_time'
 ];
 
+const PREVIEW = {
+    DEBUG_SHOW_FILTERS: false,
+    MAX_ACTIVE: 4,
+    RATE_WINDOW_US: 1000000,
+    MAX_REALTIME_SPEED: 1.5,
+    MAX_KEYFRAMES_PER_SEC: 10,
+    ALLOWED_KEYFRAMES_PER_SEC: [10, 30],
+    MAX_MEDIA_AHEAD_US: 300000,
+};
+
 export { UPDATE_INTERVALS, LOG_RETENTION, WS_PROTOCOL_VERSION } from '../config/live.config.js';
 
 export {
@@ -29,4 +39,5 @@ export {
     FILTER_ARGS_LITE,
     PID_PROPS_LITE,
     FILTER_SUBSCRIPTION_FIELDS,
+    PREVIEW,
 };

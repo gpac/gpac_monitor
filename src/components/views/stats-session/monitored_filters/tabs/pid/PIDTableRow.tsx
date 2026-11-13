@@ -27,6 +27,8 @@ interface PIDTableRowProps {
   hoveredPidKey?: string | null;
   activeMetric?: PIDMetricMode;
   onMetricClick?: (metric: PIDMetricMode) => void;
+  isPreviewOpen: boolean;
+  onTogglePreview: (pidIdx: number) => void;
 }
 
 const PIDTableRow = memo(
@@ -38,6 +40,8 @@ const PIDTableRow = memo(
     hoveredPidKey = null,
     activeMetric,
     onMetricClick,
+    isPreviewOpen,
+    onTogglePreview,
   }: PIDTableRowProps) => {
     const handleOpenProps = useCallback(
       () => onOpenProps(filterIdx, pid.pidIdx),
@@ -75,6 +79,8 @@ const PIDTableRow = memo(
             pidKey={pidKey}
             infoLine={infoStats.infoLine}
             onOpenProps={handleOpenProps}
+            isPreviewOpen={isPreviewOpen}
+            onTogglePreview={onTogglePreview}
           />
         </td>
 

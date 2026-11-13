@@ -18,6 +18,7 @@ import { getLayoutPreset } from '../layoutPresets';
 import { WidgetsState } from '../types';
 import {
   selectFilterActiveTab,
+  selectFilterOpenPreviews,
   selectFilterPidMetricMode,
 } from '@/shared/store/selectors/widgets/widgetsSelectors';
 
@@ -31,10 +32,6 @@ const detachedWidget: Widget = {
   h: 6,
 };
 
-beforeEach(() => {
-  vi.mocked(createWidgetInstance).mockReturnValue({ ...detachedWidget });
-});
-
 const openOnInputsTab = () => {
   let state = widgetsReducer(undefined, { type: 'test/init' });
   state = widgetsReducer(state, openFilterInline(3));
@@ -45,6 +42,10 @@ const openOnInputsTab = () => {
 };
 
 describe('filter view active tab', () => {
+  beforeEach(() => {
+    vi.mocked(createWidgetInstance).mockReturnValue({ ...detachedWidget });
+  });
+
   it('keeps the active tab when the filter is detached', () => {
     const state = widgetsReducer(
       openOnInputsTab(),
@@ -90,6 +91,39 @@ describe('filter view active tab', () => {
     expect(selectFilterPidMetricMode({ widgets: state }, 3)).toBe(
       'processTime',
     );
+  });
+
+  it('keeps open previews when the filter is detached then reattached', () => {
+    const openPreviews = { input: [0], output: [1] };
+    let state = widgetsReducer(
+      openOnInputsTab(),
+      setFilterViewState({ filterIdx: 3, patch: { openPreviews } }),
+    );
+    state = widgetsReducer(state, detachFilter({ idx: 3, name: 'mp4mx' }));
+    expect(selectFilterOpenPreviews({ widgets: state }, 3)).toEqual(
+      openPreviews,
+    );
+
+    state = widgetsReducer(state, attachFilter(3));
+    expect(selectFilterOpenPreviews({ widgets: state }, 3)).toEqual(
+      openPreviews,
+    );
+  });
+
+  it('drops open previews once the filter is closed', () => {
+    let state = widgetsReducer(
+      openOnInputsTab(),
+      setFilterViewState({
+        filterIdx: 3,
+        patch: { openPreviews: { input: [0], output: [] } },
+      }),
+    );
+    state = widgetsReducer(state, closeFilter(3));
+    state = widgetsReducer(state, openFilterInline(3));
+
+    const openPreviews = selectFilterOpenPreviews({ widgets: state }, 3);
+    expect(openPreviews).toEqual({ input: [], output: [] });
+    expect(selectFilterOpenPreviews({ widgets: state }, 4)).toBe(openPreviews);
   });
 
   it('ignores a patch for a filter that is not monitored', () => {
@@ -236,6 +270,10 @@ describe('detachFilterReducer', () => {
 });
 
 describe('replaceDetachedFilter', () => {
+  beforeEach(() => {
+    vi.mocked(createWidgetInstance).mockReturnValue({ ...detachedWidget });
+  });
+
   const createDetachedState = () =>
     widgetsReducer(openOnInputsTab(), detachFilter({ idx: 3, name: 'mp4mx' }));
 
@@ -298,6 +336,26 @@ describe('replaceDetachedFilter', () => {
       mode: 'inline',
       activeTab: 'outputs',
       pidMetricMode: 'processTime',
+    });
+  });
+
+  it('closes the previews of the replaced filter and keeps its tab', () => {
+    let state = widgetsReducer(
+      createDetachedState(),
+      setFilterViewState({
+        filterIdx: 3,
+        patch: { openPreviews: { input: [0], output: [1] } },
+      }),
+    );
+    state = widgetsReducer(state, replaceWith(7));
+
+    expect(selectFilterOpenPreviews({ widgets: state }, 3)).toEqual({
+      input: [],
+      output: [],
+    });
+    expect(state.viewByFilter[3]).toEqual({
+      mode: 'inline',
+      activeTab: 'inputs',
     });
   });
 

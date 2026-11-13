@@ -197,8 +197,13 @@ export const openFilterInlineReducer = (
 export const detachFilterReducer = (
   state: WidgetsState,
   action: PayloadAction<{ idx: number; name: string }>,
+) => detachFilterView(state, action.payload.idx, action.payload.name);
+
+export const detachFilterView = (
+  state: WidgetsState,
+  idx: number,
+  name: string,
 ) => {
-  const { idx, name } = action.payload;
   const widget = createWidgetInstance(WidgetType.FILTERSESSION);
   if (!widget) return;
 
@@ -239,6 +244,7 @@ export const replaceDetachedFilterReducer = (
     return;
 
   writeFilterViewMode(state, widget.detachedFilterIdx, 'inline');
+  delete state.viewByFilter[widget.detachedFilterIdx]?.openPreviews;
   writeFilterViewMode(state, filterIdx, 'detached', widgetId);
   widget.detachedFilterIdx = filterIdx;
   widget.title = name;

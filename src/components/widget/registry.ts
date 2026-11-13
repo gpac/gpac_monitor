@@ -4,6 +4,7 @@ import LogsMonitor from '../views/logs/LogsMonitor';
 import MetricsMonitor from '../views/cpu/MetricsMonitor';
 import GraphMonitor from '../views/graph/GraphMonitor';
 import MultiFilterMonitor from '../views/stats-session/session-overview/entry';
+import PreviewsMonitor from '../views/previews/PreviewsMonitor';
 import { generateID } from '@/utils/core';
 import { widgetIcons } from './widgetIcons';
 
@@ -68,6 +69,18 @@ export const widgetRegistry: Record<WidgetType, WidgetDefinition> = {
     defaultPosition: { x: 16, y: 6 },
     defaultZIndex: 1002,
     description: 'View and filter system logs.',
+    enabled: true,
+  },
+  [WidgetType.PREVIEWS]: {
+    type: WidgetType.PREVIEWS,
+    title: 'Previews',
+    icon: widgetIcons[WidgetType.PREVIEWS],
+    component: PreviewsMonitor,
+    defaultSize: { w: 6, h: 8 },
+    minWidth: 4,
+    defaultPosition: { x: 0, y: 0 },
+    defaultZIndex: 1003,
+    description: 'Open a video PID preview in one click.',
     enabled: true,
   },
 };

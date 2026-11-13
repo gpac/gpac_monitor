@@ -45,7 +45,13 @@
       ],
       "opid": [
         { "pid_index": 0, "name": "audio", "stream_type": "Audio", "ID": 1 },
-        { "pid_index": 1, "name": "video", "stream_type": "Visual", "ID": 2 }
+        {
+          "pid_index": 1,
+          "name": "video",
+          "stream_type": "Visual",
+          "codec": "264",
+          "ID": 2
+        }
       ]
     },
     {

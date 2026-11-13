@@ -4,10 +4,15 @@ import type { GPACTypes } from './gpac_args';
  * PID Property structure (same format as FilterArgument)
  * Represents a single property of a PID with its type and value
  */
+type BinaryGpacType = 'mem' | 'cmem';
+
+export type PidPropertyValue<T extends keyof GPACTypes> =
+  T extends BinaryGpacType ? string | null : GPACTypes[T];
+
 export interface PidProperty<T extends keyof GPACTypes = keyof GPACTypes> {
   name: string;
   type: T;
-  value: GPACTypes[T];
+  value: PidPropertyValue<T>;
 }
 
 /**

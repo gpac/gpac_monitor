@@ -5,6 +5,7 @@ import { FilterManager } from './Filters/FilterManager.js';
 import { CpuStatsManager } from './Sys/CpuStatsManager.js';
 import { LogManager } from './Sys/LogManager.js';
 import { CommandLineManager } from './CommandLineManager.js';
+import { PreviewManager } from './Preview/PreviewManager.js';
 import { buildMonitorConfigPayload } from './buildMonitorConfigPayload.js';
 
 function JSClient(id, client, all_clients, ensureMonitoringLoop, historyCollector) {
@@ -20,6 +21,7 @@ function JSClient(id, client, all_clients, ensureMonitoringLoop, historyCollecto
     this.cpuStatsManager = new CpuStatsManager(this);
     this.logManager = new LogManager(this);
     this.commandLineManager = new CommandLineManager(this);
+    this.previewManager = new PreviewManager(this);
 
     this.on_client_data = function(msg) {
         this.messageHandler.handleMessage(msg, all_clients);
@@ -35,8 +37,9 @@ function JSClient(id, client, all_clients, ensureMonitoringLoop, historyCollecto
             this.sessionStatsManager.cleanup();
             this.cpuStatsManager.cleanup();
             this.filterManager.cleanup();
+            this.previewManager.cleanup();
         } catch (error) {
-            console.error(`JSClient ${this.id}: Error during cleanup:`, error);
+            print(`JSClient ${this.id}: Error during cleanup: ${error}`);
         }
     };
 }

@@ -1,5 +1,5 @@
 import { WidgetType } from '../../types/ui/widget';
-import { LuFileText, LuGauge, LuShare2 } from 'react-icons/lu';
+import { LuFileText, LuGauge, LuMonitorPlay, LuShare2 } from 'react-icons/lu';
 import { TbFilterCog } from 'react-icons/tb';
 import { IconType } from 'react-icons';
 
@@ -8,4 +8,5 @@ export const widgetIcons: Record<WidgetType, IconType> = {
   [WidgetType.GRAPH]: LuShare2,
   [WidgetType.METRICS]: LuGauge,
   [WidgetType.LOGS]: LuFileText,
+  [WidgetType.PREVIEWS]: LuMonitorPlay,
 };

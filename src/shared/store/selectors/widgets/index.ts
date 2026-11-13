@@ -11,4 +11,6 @@ export {
   selectCurrentLayout,
   makeSelectWidgetConfig,
   selectHasMonitoredFilter,
+  selectPreviewSources,
 } from './widgetsSelectors';
+export type { PreviewSourceGroup, PreviewSourcePid } from './widgetsSelectors';

@@ -14,6 +14,7 @@ import { FilterArgsHandler } from './filterArgsHandler';
 import { LogHandler } from './logHandler';
 import { PidPropsHandler } from './pidPropsHandler';
 import { CommandLineHandler } from './commandLineHandler';
+import { PreviewHandler } from './preview/previewHandler';
 import {
   LogBatchResponse,
   LogHistoryResponse,
@@ -40,6 +41,7 @@ export class BaseMessageHandler {
   private logHandler: LogHandler;
   private pidPropsHandler: PidPropsHandler;
   private commandLineHandler: CommandLineHandler;
+  private previewHandler: PreviewHandler;
   private messageBatcher: WSMessageBatcher;
 
   constructor(
@@ -62,6 +64,7 @@ export class BaseMessageHandler {
     this.logHandler = new LogHandler(dependencies, () => true, callbacks);
     this.pidPropsHandler = new PidPropsHandler(dependencies);
     this.commandLineHandler = new CommandLineHandler(dependencies);
+    this.previewHandler = new PreviewHandler(dependencies);
 
     // Register log batch handler (only high-frequency message type)
     this.messageBatcher.registerLogHandler((logs) => {
@@ -94,6 +97,9 @@ export class BaseMessageHandler {
   }
   public getCommandLineHandler(): CommandLineHandler {
     return this.commandLineHandler;
+  }
+  public getPreviewHandler(): PreviewHandler {
+    return this.previewHandler;
   }
 
   public handleJsonMessage(_: GpacTransport, dataView: DataView): void {
@@ -160,6 +166,12 @@ export class BaseMessageHandler {
       case 'command_line_response':
         this.commandLineHandler.handleCommandLineResponse(data);
         break;
+      case 'preview_error':
+        this.previewHandler.handlePreviewError(data);
+        break;
+      case 'preview_stopped':
+        this.previewHandler.handlePreviewStopped(data);
+        break;
       case 'filter_pid_reconfigured':
         this.callbacks.onPidReconfigured(data.indexes);
         break;
@@ -173,6 +185,7 @@ export class BaseMessageHandler {
         break;
       case 'monitor_config': {
         this.callbacks.onSetMonitorConfig(data.intervals);
+        this.callbacks.onSetServerProtocolVersion(data.ws_protocol_version);
         const versionMismatch = checkProtocolVersionMismatch(
           data.ws_protocol_version,
           data.gpac_version,
@@ -347,5 +360,6 @@ export class BaseMessageHandler {
     this.filterStatsHandler.cleanup();
     this.logHandler.cleanup();
     this.pidPropsHandler.cleanup();
+    this.previewHandler.cleanup();
   }
 }

@@ -26,6 +26,7 @@ import SessionPicker from '@/components/history/SessionPicker';
 import HistoryControls from '@/components/history/timeline/HistoryControls';
 import { Widget } from '@/types/ui/widget';
 import { getWidgetDefinition } from '../../widget/registry';
+import { isWidgetAvailable } from '@/shared/store/widgets/widgetAvailability';
 import SidebarCloseButton from '../sidebar/SidebarCloseButton';
 import { toGridLayoutItem } from './gridLayoutItem';
 import DashboardScrollToggle from './DashboardScrollToggle';
@@ -72,6 +73,8 @@ const DashboardLayout = () => {
 
   const renderWidget = useCallback(
     (widget: Widget) => {
+      if (!isWidgetAvailable(widget.type, isHistory)) return null;
+
       const definition = getWidgetDefinition(widget.type);
 
       if (!definition) {
@@ -92,7 +95,7 @@ const DashboardLayout = () => {
         </div>
       );
     },
-    [configs],
+    [configs, isHistory],
   );
 
   return (

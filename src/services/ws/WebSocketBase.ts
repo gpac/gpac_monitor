@@ -96,6 +96,11 @@ export class WebSocketBase implements GpacTransport {
         };
 
         this.socket.onmessage = (event: MessageEvent) => {
+          if (event.data instanceof ArrayBuffer) {
+            this.parseMessageInline(event.data);
+            return;
+          }
+
           // Use Worker if available (offloads heavy parsing)
           if (this.parserWorker) {
             const id = ++this.messageId;
@@ -140,8 +145,13 @@ export class WebSocketBase implements GpacTransport {
       let data: string;
 
       if (eventData instanceof ArrayBuffer) {
-        const dataView = new DataView(eventData);
-        data = MessageFormatter.decodeDataView(dataView);
+        const head = new TextDecoder().decode(
+          new Uint8Array(eventData, 0, Math.min(5, eventData.byteLength)),
+        );
+        data =
+          head.startsWith('json:') || head.startsWith('{')
+            ? MessageFormatter.decodeDataView(new DataView(eventData))
+            : head;
       } else {
         data = eventData;
       }

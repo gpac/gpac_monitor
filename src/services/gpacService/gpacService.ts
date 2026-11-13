@@ -10,6 +10,10 @@ import type { IncomingWsMessage } from '../ws/types';
 import { GpacNotificationHandlers } from './types';
 import { ConnectionManager } from './infrastructure/connectionManager';
 import { BaseMessageHandler } from './infrastructure/messageHandler/baseMessageHandler';
+import type {
+  PreviewEntry,
+  PreviewSource,
+} from './infrastructure/messageHandler/preview/previewHandler';
 import { GpacCoreService } from './core/gpacCore';
 import { createStoreCallbacks } from './liveAdapter/storeIntegration';
 import {
@@ -228,6 +232,21 @@ export class GpacService implements IGpacCommunication {
 
   public async getCommandLine(): Promise<string | null> {
     return filterMethods.getCommandLine(this.state, () => this.isLoaded());
+  }
+  public requestPidPreview(
+    filterIdx: number,
+    pidIdx: number,
+    direction: 'input' | 'output',
+    filterName: string,
+    source: PreviewSource,
+  ): PreviewEntry {
+    return this.state.messageHandler
+      .getPreviewHandler()
+      .requestPreview(filterIdx, pidIdx, direction, filterName, source);
+  }
+
+  public releasePidPreview(preview: PreviewEntry): void {
+    this.state.messageHandler.getPreviewHandler().releasePreview(preview);
   }
 
   // ============================================================================

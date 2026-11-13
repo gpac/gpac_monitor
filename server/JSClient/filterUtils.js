@@ -1,4 +1,4 @@
-import { FILTER_PROPS_LITE, FILTER_ARGS_LITE, PID_PROPS_LITE } from './config.js';
+import { FILTER_PROPS_LITE, FILTER_ARGS_LITE, PID_PROPS_LITE, PREVIEW } from './config.js';
 
 function gpac_filter_to_object(f, full = false) {
     let jsf = {};
@@ -75,6 +75,7 @@ function gpac_filter_to_minimal_object(f) {
             source_idx: f.ipid_source(i).idx,
             source_opid_idx: hasSourceOpidIdx ? f.ipid_source_opid_idx(i) : -1,
             stream_type: f.ipid_props(i, "StreamType"),
+            codec: f.ipid_props(i, "CodecID") ?? undefined,
             ID: f.ipid_props(i, "ID")
         });
     }
@@ -83,6 +84,7 @@ function gpac_filter_to_minimal_object(f) {
             pid_index: o,
             name: f.opid_props(o, "name"),
             stream_type: f.opid_props(o, "StreamType"),
+            codec: f.opid_props(o, "CodecID") ?? undefined,
             ID: f.opid_props(o, "ID")
         });
     }
@@ -93,6 +95,12 @@ function gpac_filter_to_minimal_object(f) {
 
 
 
+function is_hidden_filter(f) {
+    if (PREVIEW.DEBUG_SHOW_FILTERS) return false;
+    if (f.itag === 'NODISPLAY') return true;
+    return typeof f.name === 'string' && f.name.startsWith('PreviewSink');
+}
+
 function on_all_connected(cb) {
     session.post_task(() => {
         let all_filters_instances = [];
@@ -100,7 +108,7 @@ function on_all_connected(cb) {
         session.lock_filters(true);
         for (let i = 0; i < session.nb_filters; i++) {
             const f = session.get_filter(i);
-            if (!f.is_destroyed()) all_filters_instances.push(f);
+            if (!f.is_destroyed() && !is_hidden_filter(f)) all_filters_instances.push(f);
         }
         session.lock_filters(false);
 
@@ -112,5 +120,6 @@ function on_all_connected(cb) {
 export {
     gpac_filter_to_object,
     gpac_filter_to_minimal_object,
+    is_hidden_filter,
     on_all_connected,
 };

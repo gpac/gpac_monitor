@@ -21,6 +21,28 @@ interface BaseWSResponse {
   error?: string;
 }
 
+// Types of messages we send to the server
+export enum WSMessageType {
+  GET_ALL_FILTERS = 'get_all_filters',
+  FILTER_ARGS_DETAILS = 'filter_args_details',
+  STOP_FILTER_ARGS = 'stop_filter_args',
+  UPDATE_ARG = 'update_arg',
+  SUBSCRIBE_SESSION = 'subscribe_session',
+  UNSUBSCRIBE_SESSION = 'unsubscribe_session',
+  SUBSCRIBE_FILTER_STATS = 'subscribe_filter',
+  UNSUBSCRIBE_FILTER_STATS = 'unsubscribe_filter',
+  SUBSCRIBE_CPU_STATS = 'subscribe_cpu_stats',
+  UNSUBSCRIBE_CPU_STATS = 'unsubscribe_cpu_stats',
+  SUBSCRIBE_LOGS = 'subscribe_logs',
+  UNSUBSCRIBE_LOGS = 'unsubscribe_logs',
+  UPDATE_LOG_LEVEL = 'update_log_level',
+  GET_LOG_STATUS = 'get_log_status',
+  GET_PNG = 'get_png',
+  GET_COMMAND_LINE = 'get_command_line',
+  START_PID_PREVIEW = 'start_pid_preview',
+  STOP_PID_PREVIEW = 'stop_pid_preview',
+}
+
 // Types of messages we receive from the server
 enum WSResponseType {
   ERROR = 'ERROR',
@@ -36,6 +58,8 @@ enum WSResponseType {
   LOG_CONFIG_CHANGED = 'log_config_changed',
   COMMAND_LINE_RESPONSE = 'command_line_response',
   SESSION_END = 'session_end',
+  PREVIEW_ERROR = 'preview_error',
+  PREVIEW_STOPPED = 'preview_stopped',
 }
 
 // --- Incoming message types ---
@@ -153,6 +177,25 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
   logLevel: GpacLogConfig;
 }
 
+// Binary webcodecs frame: 'PVWC' + previewId/pidIdx/flags u32 LE + µs f64 LE,
+// then raw avcC packet bytes; first frame sent is a keyframe.
+// flags: bit 0 = key (SAP 1-3); bit 1 = server sends keyframes only (faster than real time).
+export const PVWC_MAGIC = 'PVWC';
+export const PVWC_HEADER_SIZE = 24;
+export const PVWC_FLAG_KEYFRAME = 1;
+export const PVWC_FLAG_KEYFRAMES_ONLY = 2;
+
+export interface PreviewErrorMessage {
+  message: 'preview_error';
+  previewId: number;
+  error: string;
+}
+
+export interface PreviewStoppedMessage {
+  message: 'preview_stopped';
+  previewId: number;
+}
+
 export type IncomingWsMessage =
   | FiltersMessage
   | UpdateMessage
@@ -171,4 +214,6 @@ export type IncomingWsMessage =
   | NotificationMessage
   | FilterPidReconfiguredMessage
   | FilterArgUpdatedMessage
+  | PreviewErrorMessage
+  | PreviewStoppedMessage
   | MonitorConfigMessage;

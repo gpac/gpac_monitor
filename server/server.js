@@ -1,5 +1,6 @@
 import { Sys as sys } from 'gpaccore';
 import { JSClient } from './JSClient/index.js';
+import { is_hidden_filter } from './JSClient/filterUtils.js';
 import { HistoryCollector } from './history/HistoryCollector.js';
 import { GraphManager } from './GraphManager.js';
 import { buildSessionStatsPayload } from './JSClient/Session/buildSessionStatsPayload.js';
@@ -84,14 +85,14 @@ session.set_new_filter_fun((f) => {
     f.idx = filter_uid++;
     f.iname = '' + f.idx;
     all_filters.push(f);
-    if (f.itag == "NODISPLAY") return;
+    if (is_hidden_filter(f)) return;
     graphManager.onGraphEvent();
 });
 
 session.set_del_filter_fun((f) => {
     let idx = all_filters.indexOf(f);
     if (idx >= 0) all_filters.splice(idx, 1);
-    if (f.itag == "NODISPLAY") return;
+    if (is_hidden_filter(f)) return;
     graphManager.onGraphEvent();
 });
 

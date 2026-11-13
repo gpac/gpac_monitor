@@ -14,6 +14,8 @@ import OverviewTab from './tabs/OverviewTab';
 import NetworkTab from './tabs/NetworkTab';
 import InputsTab from './tabs/pid/InputsTab';
 import OutputsTab from './tabs/pid/OutputsTab';
+import PIDPreviewStrip from './tabs/pid/preview/PIDPreviewStrip';
+import { useOpenPreviews } from './tabs/hooks/useOpenPreviews';
 
 // Constant fallback
 const EMPTY_FILTER_DATA: FilterStatsResponse = {
@@ -64,6 +66,9 @@ const MonitoredFilterView = memo(
       overviewData.filterIdx,
       initialTab,
     );
+    const { openPreviews, toggleInputPreview, toggleOutputPreview } =
+      useOpenPreviews(overviewData.filterIdx);
+    const isPidTabActive = activeTab === 'inputs' || activeTab === 'outputs';
 
     // Get log alerts for this filter
     const alerts = useAppSelector((state) =>
@@ -157,6 +162,16 @@ const MonitoredFilterView = memo(
               </TabsList>
             </div>
 
+            {isPidTabActive && (
+              <PIDPreviewStrip
+                filterData={filterData}
+                filterType={overviewData.type}
+                inputPreviewPidIdxs={openPreviews.input}
+                outputPreviewPidIdxs={openPreviews.output}
+                onCloseInputPreview={toggleInputPreview}
+                onCloseOutputPreview={toggleOutputPreview}
+              />
+            )}
             <TabsContent value="overview">
               <MemoizedOverviewTab
                 filter={overviewData}
@@ -180,6 +195,8 @@ const MonitoredFilterView = memo(
                 filterData={filterData}
                 filterName={overviewData.name}
                 isLoading={isLoading}
+                previewPidIdxs={openPreviews.input}
+                onTogglePreview={toggleInputPreview}
               />
             </TabsContent>
             <TabsContent value="outputs">
@@ -187,6 +204,8 @@ const MonitoredFilterView = memo(
                 filterData={filterData}
                 filterName={overviewData.name}
                 isLoading={isLoading}
+                previewPidIdxs={openPreviews.output}
+                onTogglePreview={toggleOutputPreview}
               />
             </TabsContent>
           </Tabs>

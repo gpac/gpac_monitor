@@ -9,10 +9,18 @@ interface OutputsTabProps {
   filterData: FilterStatsResponse;
   filterName: string;
   isLoading?: boolean;
+  previewPidIdxs: number[];
+  onTogglePreview: (pidIdx: number) => void;
 }
 
 const OutputsTab = memo(
-  ({ filterData, filterName, isLoading = false }: OutputsTabProps) => {
+  ({
+    filterData,
+    filterName,
+    isLoading = false,
+    previewPidIdxs,
+    onTogglePreview,
+  }: OutputsTabProps) => {
     const { pidsWithIndices, globalStatus } = useOutputsTabData(filterData);
 
     return (
@@ -34,6 +42,8 @@ const OutputsTab = memo(
             onOpenProps={() => {}}
             hoveredPidKey={null}
             variant="output"
+            previewPidIdxs={previewPidIdxs}
+            onTogglePreview={onTogglePreview}
           />
         ) : isLoading ? (
           <div className="py-8 flex flex-col items-center justify-center">

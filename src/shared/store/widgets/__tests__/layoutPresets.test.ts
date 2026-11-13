@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetType } from '@/types/ui/widget';
-import { getLayoutPreset, layoutPresets } from '../layoutPresets';
+import {
+  getLayoutPreset,
+  getPresetNames,
+  layoutPresets,
+} from '../layoutPresets';
+import { isWidgetAvailable } from '../widgetAvailability';
 import {
   loadLayoutReducer,
   saveLayoutReducer,
@@ -28,8 +33,12 @@ beforeEach(() => {
 });
 
 describe('default layout presets', () => {
-  it('loads both without adding saved layouts', () => {
-    expect(Object.keys(layoutPresets)).toEqual(['Default', 'Dashboard']);
+  it('loads all three without adding saved layouts', () => {
+    expect(Object.keys(layoutPresets)).toEqual([
+      'Default',
+      'Preview',
+      'Dashboard',
+    ]);
     for (const name of Object.keys(layoutPresets)) {
       const state = emptyState();
       loadLayoutReducer(state, { type: 'loadLayout', payload: name });
@@ -37,7 +46,30 @@ describe('default layout presets', () => {
       expect(state.currentLayout).toBe(name);
       expect(state.savedLayouts).toEqual({});
     }
+    expect(
+      getLayoutPreset('Preview')?.widgets.some(
+        (widget) => widget.type === WidgetType.GRAPH,
+      ),
+    ).toBe(false);
+    expect(
+      getLayoutPreset('Preview')?.widgets.map((widget) => [
+        widget.type,
+        widget.y,
+      ]),
+    ).toEqual([
+      [WidgetType.PREVIEWS, 0],
+      [WidgetType.FILTERSESSION, 0],
+      [WidgetType.LOGS, 0],
+    ]);
     expect(getLayoutPreset('unknown')).toBeUndefined();
+  });
+
+  it('hides the live-only Previews widget and its preset in history', () => {
+    expect(isWidgetAvailable(WidgetType.PREVIEWS, true)).toBe(false);
+    expect(isWidgetAvailable(WidgetType.PREVIEWS, false)).toBe(true);
+    expect(isWidgetAvailable(WidgetType.LOGS, true)).toBe(true);
+    expect(getPresetNames(false)).toEqual(Object.keys(layoutPresets));
+    expect(getPresetNames(true)).toEqual(['Default', 'Dashboard']);
   });
 
   it('keeps personal versions and restores the default after deletion', () => {

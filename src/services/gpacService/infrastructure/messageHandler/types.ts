@@ -37,7 +37,21 @@ export interface MessageHandlerCallbacks {
   onFilterStatuses: (entries: FilterStatusInput[]) => void;
   onUpdateFilterStats: (payload: FilterStatsPayload) => void;
   onSetMonitorConfig: (intervals: MonitorIntervals) => void;
+  onSetServerProtocolVersion: (version: number | undefined) => void;
   onSessionEnd?: (data: SessionEndMessage) => void;
+}
+
+export interface PreviewSource {
+  codec: string;
+  decoderConfig: string | null | undefined;
+}
+
+export interface PreviewHandlerState {
+  filterIdx: number | null;
+  pidIdx: number | null;
+  loading: boolean;
+  error: string | null;
+  keyframesOnly: boolean;
 }
 
 export interface MessageHandlerDependencies {

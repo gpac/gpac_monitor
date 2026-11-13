@@ -62,6 +62,8 @@ export interface InputsTabProps {
   filterData: FilterStatsResponse;
   filterName: string;
   isLoading?: boolean;
+  previewPidIdxs: number[];
+  onTogglePreview: (pidIdx: number) => void;
 }
 
 /**

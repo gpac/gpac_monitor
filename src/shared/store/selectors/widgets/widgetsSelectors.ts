@@ -1,13 +1,19 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { shallowEqual } from 'react-redux';
+import { isEqual } from 'lodash';
 import type { RootState } from '../../index';
 import type {
+  OpenPreviews,
   RootState as WidgetsRootState,
   ViewMode,
 } from '../../widgets/types';
 import { WidgetConfig } from '@/types/ui/widget';
 import type { InitialTabType } from '@/shared/store/slices/graphSlice';
 import type { PIDMetricMode } from '@/components/views/stats-session/types/pid';
+import type { GraphInputPid, GraphOutputPid } from '@/types/domain/gpac/model';
+import { GpacStreamType } from '@/types/domain/gpac/stream-types';
+import { canPreview } from '@/utils/gpac/webcodecs-config';
+import { selectIsPreviewSupported } from '../selectMonitorConfig';
 
 const defaultWidgetConfig: WidgetConfig = {
   isMaximized: false,
@@ -70,6 +76,65 @@ export const selectFilterPidMetricMode = (
   filterIdx: number,
 ): PIDMetricMode =>
   state.widgets.viewByFilter[filterIdx]?.pidMetricMode ?? 'bitrate';
+
+const NO_OPEN_PREVIEWS: OpenPreviews = { input: [], output: [] };
+
+export const selectFilterOpenPreviews = (
+  state: WidgetsRootState,
+  filterIdx: number,
+): OpenPreviews =>
+  state.widgets.viewByFilter[filterIdx]?.openPreviews ?? NO_OPEN_PREVIEWS;
+
+export interface PreviewSourcePid {
+  direction: keyof OpenPreviews;
+  pidIdx: number;
+  name: string;
+  isOpen: boolean;
+}
+
+export interface PreviewSourceGroup {
+  filterIdx: number;
+  filterName: string;
+  pids: PreviewSourcePid[];
+}
+
+const selectGraphFilters = (state: RootState) => state.graph.filters;
+
+const toVisualSourcePids = (
+  direction: keyof OpenPreviews,
+  graphPids: (GraphInputPid | GraphOutputPid)[],
+  openPreviews: OpenPreviews,
+): PreviewSourcePid[] =>
+  graphPids
+    .filter(
+      (pid) =>
+        pid.stream_type === GpacStreamType.Visual && canPreview(pid.codec),
+    )
+    .map((pid) => ({
+      direction,
+      pidIdx: pid.pid_index,
+      name: pid.name,
+      isOpen: openPreviews[direction].includes(pid.pid_index),
+    }));
+
+export const selectPreviewSources = createSelector(
+  [selectGraphFilters, selectViewByFilter, selectIsPreviewSupported],
+  (filters, viewByFilter, isPreviewSupported): PreviewSourceGroup[] => {
+    if (!isPreviewSupported) return [];
+    return filters.flatMap((filter) => {
+      const openPreviews =
+        viewByFilter[filter.idx]?.openPreviews ?? NO_OPEN_PREVIEWS;
+      const pids = [
+        ...toVisualSourcePids('input', filter.ipid, openPreviews),
+        ...toVisualSourcePids('output', filter.opid, openPreviews),
+      ];
+      return pids.length > 0
+        ? [{ filterIdx: filter.idx, filterName: filter.name, pids }]
+        : [];
+    });
+  },
+  { memoizeOptions: { resultEqualityCheck: isEqual } },
+);
 
 export const makeSelectWidgetConfig = () =>
   createSelector(

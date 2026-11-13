@@ -1,7 +1,8 @@
 // Bump on any front<->server CONTRACT change (new message, new field the front relies on,
 // changed semantics)
 // Counterpart: server/config/live.config.js WS_PROTOCOL_VERSION.
-export const EXPECTED_WS_PROTOCOL_VERSION = 1;
+export const EXPECTED_WS_PROTOCOL_VERSION = 1.1;
+export const PREVIEW_MIN_WS_PROTOCOL_VERSION = 1.1;
 
 export type ProtocolVersionMismatchKind = 'server_too_old' | 'page_out_of_date';
 
