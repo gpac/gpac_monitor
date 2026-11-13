@@ -1,26 +1,10 @@
 import { PayloadAction } from '@reduxjs/toolkit';
-import { FilterView, OpenPreviews, ViewMode, WidgetsState } from './types';
+import { FilterView, OpenPreviews, WidgetsState } from './types';
 import { detachFilterView } from './widgetUtils';
 
 export type FilterViewStatePatch = Partial<
   Omit<FilterView, 'mode' | 'widgetId'>
 >;
-
-export const writeFilterViewMode = (
-  state: WidgetsState,
-  filterIdx: number,
-  mode: ViewMode,
-  widgetId?: string,
-) => {
-  const current = state.viewByFilter[filterIdx];
-  if (!current) {
-    state.viewByFilter[filterIdx] = widgetId ? { mode, widgetId } : { mode };
-    return;
-  }
-  current.mode = mode;
-  if (widgetId) current.widgetId = widgetId;
-  else delete current.widgetId;
-};
 
 export const setFilterViewStateReducer = (
   state: WidgetsState,

@@ -3,7 +3,7 @@ import { Widget, WidgetConfig, WidgetType } from '@/types/ui/widget';
 import { createWidgetInstance } from '@/components/widget/registry';
 import { WidgetsState } from './types';
 import { getLayoutPreset } from './layoutPresets';
-import { writeFilterViewMode } from './filterViewReducers';
+import { writeFilterViewMode } from './filterViewMode';
 import { DETACHED_SIZE } from './gridPlacement';
 import { placeAddedWidget } from './addedWidgetPlacement';
 import { slideWidgetsOnClose } from './closedWidgetPlacement';
