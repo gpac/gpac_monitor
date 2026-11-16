@@ -52,9 +52,11 @@ class WidgetErrorBoundary extends React.Component<
         <p className="text-sm font-medium text-gray-300">
           {this.props.widgetTitle ?? 'Widget'} failed to render
         </p>
-        <p className="text-xs text-gray-400 line-clamp-2">
-          {this.state.errorMessage}
-        </p>
+        {import.meta.env.DEV && (
+          <p className="text-xs text-gray-400 line-clamp-2">
+            {this.state.errorMessage}
+          </p>
+        )}
         <Button
           variant="outline"
           size="sm"
