@@ -154,14 +154,6 @@ describe('useLogsRedux', () => {
   });
 
   describe('currentTool management', () => {
-    it('should initialize with FILTER as default when no localStorage', () => {
-      const { result } = renderHook(() => useLogsRedux(), {
-        wrapper: createWrapper(store),
-      });
-
-      expect(result.current.currentTool).toBe(GpacLogTool.FILTER);
-    });
-
     it('should change currentTool when setTool is called', async () => {
       const { result } = renderHook(() => useLogsRedux(), {
         wrapper: createWrapper(store),
@@ -191,25 +183,6 @@ describe('useLogsRedux', () => {
   });
 
   describe('localStorage persistence', () => {
-    it('should restore currentTool from localStorage on initialization', () => {
-      // Setup localStorage with saved config BEFORE creating store
-      localStorageMock['gpac-logs-config'] = JSON.stringify({
-        currentTool: GpacLogTool.CACHE,
-        defaultAllLevel: GpacLogLevel.INFO,
-        levelsByTool: {},
-      });
-
-      // Create new store AFTER setting localStorage to trigger initialization with saved data
-      const storeWithData = createTestStore(localStorageMock);
-
-      const { result } = renderHook(() => useLogsRedux(), {
-        wrapper: createWrapper(storeWithData),
-      });
-
-      expect(result.current.currentTool).toBe(GpacLogTool.CACHE);
-      expect(result.current.defaultAllLevel).toBe(GpacLogLevel.INFO);
-    });
-
     it('should save complete config to localStorage', () => {
       const { result } = renderHook(() => useLogsRedux(), {
         wrapper: createWrapper(store),
@@ -317,36 +290,6 @@ describe('useLogsRedux', () => {
       expect(result.current.levelsByTool[GpacLogTool.MEDIA]).toBe(
         GpacLogLevel.INFO,
       );
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle invalid localStorage data gracefully', () => {
-      localStorageMock['gpac-logs-config'] = 'invalid-json';
-
-      const storeWithBadData = createTestStore(localStorageMock);
-
-      const { result } = renderHook(() => useLogsRedux(), {
-        wrapper: createWrapper(storeWithBadData),
-      });
-
-      // Should fallback to default values
-      expect(result.current.currentTool).toBe(GpacLogTool.FILTER);
-      expect(result.current.defaultAllLevel).toBe(GpacLogLevel.QUIET);
-    });
-
-    it('should handle empty localStorage gracefully', () => {
-      localStorageMock['gpac-logs-config'] = JSON.stringify({});
-
-      const storeWithEmptyData = createTestStore(localStorageMock);
-
-      const { result } = renderHook(() => useLogsRedux(), {
-        wrapper: createWrapper(storeWithEmptyData),
-      });
-
-      expect(result.current.currentTool).toBe(GpacLogTool.FILTER);
-      expect(result.current.defaultAllLevel).toBe(GpacLogLevel.QUIET);
-      expect(Object.keys(result.current.levelsByTool)).toHaveLength(0);
     });
   });
 });

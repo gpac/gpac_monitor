@@ -87,8 +87,10 @@ describe('annexBToAvcc', () => {
 });
 
 describe('canPreview', () => {
-  it('accepts the AVC codec and refuses the others', () => {
+  it('accepts AVC, HEVC and AV1 but refuses raw video', () => {
     expect(canPreview('264')).toBe(true);
+    expect(canPreview('hvc')).toBe(true);
+    expect(canPreview('av1')).toBe(true);
     expect(canPreview('raw')).toBe(false);
   });
 
@@ -119,7 +121,7 @@ describe('resolveWebCodecsConfig', () => {
     ).toBeNull();
   });
 
-  it('returns null for a non-AVC codec', async () => {
+  it('returns null for an unsupported codec', async () => {
     stubVideoDecoder(async () => ({ supported: true }));
     expect(
       await resolveWebCodecsConfig('raw', INPUT_MP4_AVCC_BASE64),

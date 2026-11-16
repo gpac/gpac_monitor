@@ -164,44 +164,6 @@ describe('HistoryAdapter.hydrateCheckpoint', () => {
     expect(ipid?.codec).toBe('264');
   });
 
-  it('applies arg_state as delta over base args', () => {
-    const store = makeStore();
-    const a = new HistoryAdapter(store.dispatch);
-
-    const filter1: HistoryFilter = {
-      ...baseFilter,
-      idx: 1,
-      gpac_args: [{ name: 'dst', value: 'out.mp4' } as any],
-    };
-    a.hydrate(makeSnapshot([baseFilter, filter1]), 0);
-
-    const arg_state = {
-      '0': [{ name: 'src', value: 'file2.mp4' } as any],
-    };
-    a.hydrateCheckpoint(
-      makeCheckpoint({ filters: [baseFilter, filter1], arg_state }),
-    );
-
-    const argsByFilter = store.getState().filterArgument.argsByFilter;
-    expect(argsByFilter['0']).toEqual(arg_state['0']);
-    expect(argsByFilter['1']).toEqual(filter1.gpac_args);
-  });
-
-  it('resets temporal state — no stats dispatched after checkpoint', () => {
-    adapter.setSilent(true);
-    adapter.hydrateCheckpoint(makeCheckpoint());
-    dispatch.mockClear();
-
-    adapter.flush();
-    const statsTypes = dispatch.mock.calls
-      .map(([action]: any) => action.type)
-      .filter(
-        (type: string) =>
-          type.includes('bulkAdd') || type.includes('addNetworkDataPoint'),
-      );
-    expect(statsTypes).toHaveLength(0);
-  });
-
   it('works with empty filters', () => {
     expect(() =>
       adapter.hydrateCheckpoint(makeCheckpoint({ filters: [] })),

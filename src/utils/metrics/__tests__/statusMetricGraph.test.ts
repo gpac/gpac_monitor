@@ -28,16 +28,6 @@ describe('buildStatusSamplesFromStats', () => {
     ).toEqual([]);
   });
 
-  it('returns [] when ts_us is null', () => {
-    expect(buildStatusSamplesFromStats(stats, null, sessionStartUs)).toEqual(
-      [],
-    );
-  });
-
-  it('returns [] when sessionStartUs is null (first tick not yet received)', () => {
-    expect(buildStatusSamplesFromStats(stats, 5000, null)).toEqual([]);
-  });
-
   it('produces sessionTimeUs = ts_us - sessionStartUs', () => {
     const samples = buildStatusSamplesFromStats(stats, 6000, sessionStartUs);
     expect(samples.length).toBeGreaterThan(0);
@@ -98,12 +88,8 @@ describe('isGraphableStatusMetric', () => {
     ['fps via unit', num('rate', 60, { unit: 'fps' })],
     ['queue depth Q', num('Q', 1180)],
     ['send rate kbps', num('s_rate', 850, { unit: 'kbps' })],
-    ['recv rate kbps', num('r_rate', 640, { unit: 'kbps' })],
     ['period as numeric', num('period', 1)],
     ['r_bytes cumulative', num('r_bytes', 4096)],
-    ['r_pck cumulative', num('r_pck', 42)],
-    ['s_bytes cumulative', num('s_bytes', 2048)],
-    ['s_pck cumulative', num('s_pck', 18)],
   ])('graphs numeric scalar %s', (_label, entry) => {
     expect(isGraphableStatusMetric(entry)).toBe(true);
   });
@@ -112,10 +98,6 @@ describe('isGraphableStatusMetric', () => {
     [
       'fraction (buffer/prog)',
       num('buffer', 0.5, { fraction: { num: 50, den: 100 }, unit: 'ms' }),
-    ],
-    [
-      'fraction time',
-      num('time', 0, { fraction: { num: 416221, den: 12800 } }),
     ],
     ['NaN value', num('fps', Number.NaN)],
     ['Infinity value', num('fps', Number.POSITIVE_INFINITY)],

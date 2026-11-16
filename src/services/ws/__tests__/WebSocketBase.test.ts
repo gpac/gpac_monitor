@@ -88,10 +88,6 @@ describe('WebSocketBase', () => {
     vi.restoreAllMocks();
   });
 
-  it('instantiates without error, falling back to inline parsing when the worker is unavailable', () => {
-    expect(() => new WebSocketBase()).not.toThrow();
-  });
-
   describe('connection lifecycle', () => {
     it('resolves connect() on open and triggers __OnConnect__ handlers', async () => {
       const wsBase = new WebSocketBase();
@@ -175,24 +171,6 @@ describe('WebSocketBase', () => {
       expect(handler).toHaveBeenCalledTimes(1);
       const dataView = handler.mock.calls[0][1] as DataView;
       expect(decode(dataView)).toEqual({ message: 'world' });
-    });
-
-    it('routes an ArrayBuffer starting with a registered 4-char id to its dedicated handler', async () => {
-      const { wsBase, socket } = await connectedWsBase();
-      const handler = vi.fn();
-      wsBase.addMessageHandler('TEST', handler);
-
-      // Built from same-realm Uint8Array/ArrayBuffer globals, not TextEncoder:
-      // vitest's jsdom environment polyfills TextEncoder from Node's outer
-      // realm, so its .buffer fails `instanceof ArrayBuffer` against jsdom's
-      // own ArrayBuffer — a test-env artifact, never true in a real browser.
-      const buffer = Uint8Array.from(
-        [...'TEST'].map((char) => char.charCodeAt(0)),
-      ).buffer;
-      socket.simulateMessage(buffer);
-
-      expect(handler).toHaveBeenCalledTimes(1);
-      expect(handler.mock.calls[0][0]).toBe(wsBase);
     });
 
     it('routes an unrecognized message to the __default__ handler', async () => {

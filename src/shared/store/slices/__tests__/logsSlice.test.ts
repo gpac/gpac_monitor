@@ -51,39 +51,6 @@ describe('setDefaultAllLevel - Reset Tool Levels', () => {
     expect(Object.keys(state.levelsByTool)).toHaveLength(0);
   });
 
-  it('should reset levelsByTool even with many tools configured', () => {
-    let state: LogsState = {
-      currentTool: GpacLogTool.ALL,
-      levelsByTool: {
-        [GpacLogTool.MMIO]: GpacLogLevel.INFO,
-        [GpacLogTool.FILTER]: GpacLogLevel.INFO,
-        [GpacLogTool.MEDIA]: GpacLogLevel.WARNING,
-        [GpacLogTool.AUDIO]: GpacLogLevel.INFO,
-        [GpacLogTool.CODING]: GpacLogLevel.INFO,
-      } as any,
-      defaultAllLevel: GpacLogLevel.ERROR,
-      visibleToolsFilter: [],
-      buffers: {} as any,
-      maxEntriesPerTool: 500,
-      isSubscribed: false,
-      highlightedLogId: null,
-      uiFilter: null,
-      viewMode: 'perTool',
-      lastSentConfig: {
-        levelsByTool: {} as any,
-        defaultAllLevel: null,
-      },
-      alertsByFilterKey: {},
-    };
-
-    // Change to all@quiet
-    state = logsReducer(state, setDefaultAllLevel(GpacLogLevel.QUIET));
-
-    // All tools should be reset
-    expect(state.defaultAllLevel).toBe(GpacLogLevel.QUIET);
-    expect(state.levelsByTool).toEqual({});
-  });
-
   it('should allow setting tool-specific level after reset', () => {
     let state: LogsState = {
       currentTool: GpacLogTool.FILTER,

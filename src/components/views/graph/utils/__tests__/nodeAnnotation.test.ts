@@ -20,6 +20,7 @@ describe('annotateNodesStable', () => {
     const first = annotateNodesStable(cache, nodes, subscribedSet);
     const second = annotateNodesStable(cache, nodes, subscribedSet);
 
+    expect(first.map((node) => node.data.isMonitored)).toEqual([true, false]);
     expect(second[0]).toBe(first[0]);
     expect(second[1]).toBe(first[1]);
   });
@@ -34,6 +35,34 @@ describe('annotateNodesStable', () => {
     expect(second[0]).toBe(first[0]);
     expect(second[1]).not.toBe(first[1]);
     expect(second[1].data.isMonitored).toBe(true);
+  });
+
+  it('does not mark a node without a filter index as monitored', () => {
+    const nodeWithoutIndex: Node = {
+      id: 'unindexed',
+      position: { x: 0, y: 0 },
+      data: { name: 'filter' },
+    };
+
+    const annotatedNodes = annotateNodesStable(
+      new Map(),
+      [nodeWithoutIndex],
+      new Set([0]),
+    );
+
+    expect(annotatedNodes[0].data.isMonitored).toBe(false);
+  });
+
+  it('clears monitoring when the last subscription is removed', () => {
+    const cache: NodeAnnotationCache = new Map();
+    const nodes = [graphNode('0', 0)];
+    const monitoredNodes = annotateNodesStable(cache, nodes, new Set([0]));
+
+    const unsubscribedNodes = annotateNodesStable(cache, nodes, new Set());
+
+    expect(monitoredNodes[0].data.isMonitored).toBe(true);
+    expect(unsubscribedNodes[0].data.isMonitored).toBe(false);
+    expect(unsubscribedNodes[0]).not.toBe(monitoredNodes[0]);
   });
 
   it('node removed from input → evicted from cache', () => {

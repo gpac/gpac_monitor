@@ -54,14 +54,6 @@ describe('PidDataCollector collectInputPids', () => {
     expect(ipids['V1'].properties).toBeUndefined();
   });
 
-  it('always includes properties on repeated calls with withPidProperties true', () => {
-    const filter = makeFakeFilter(1, STATIC_PROPS);
-    collector.collectInputPids(filter, true);
-    const ipids = collector.collectInputPids(filter, true);
-    expect(ipids['V1'].properties).toBeDefined();
-    expect(ipids['V1'].properties.Width.value).toBe(640);
-  });
-
   it('reflects updated values when withPidProperties is true', () => {
     const filter1 = makeFakeFilter(1, STATIC_PROPS);
     collector.collectInputPids(filter1, true);

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { PreviewEntry } from '../previewEntry';
 import type { MessageHandlerDependencies } from '../../types';
 
@@ -30,6 +30,10 @@ function makePvwcFrame(flags: number): DataView {
 }
 
 describe('PreviewEntry keyframesOnly', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it.each([
     { flags: 0, keyframesOnly: false },
     { flags: 1, keyframesOnly: false },
@@ -44,13 +48,24 @@ describe('PreviewEntry keyframesOnly', () => {
     },
   );
 
-  it('notifies only when the mode changes', () => {
+  it('notifies subscribers only when the mode changes', () => {
+    vi.useFakeTimers();
     const entry = makeEntry();
-    const notify = vi.spyOn(entry, 'updateDataAndNotify');
-    [3, 3, 2, 3, 1, 0, 1].forEach((flags) =>
-      entry.decodePacket(makePvwcFrame(flags)),
+    const notifiedModes: boolean[] = [];
+    const unsubscribe = entry.subscribe(
+      (snapshot) => notifiedModes.push(snapshot.keyframesOnly),
+      { immediate: false, debounce: 0 },
     );
-    expect(notify).toHaveBeenCalledTimes(2);
-    expect(entry.getSnapshot().keyframesOnly).toBe(false);
+
+    try {
+      for (const flags of [3, 3, 2, 3, 1, 0, 1]) {
+        entry.decodePacket(makePvwcFrame(flags));
+        vi.runOnlyPendingTimers();
+      }
+
+      expect(notifiedModes).toEqual([true, false]);
+    } finally {
+      unsubscribe();
+    }
   });
 });

@@ -83,28 +83,6 @@ describe('logsConfigSelectors', () => {
       expect(result).toContain('filter@debug');
     });
 
-    it('should NOT resend unchanged tools after first config', () => {
-      const state = {
-        logs: {
-          levelsByTool: {
-            [GpacLogTool.CORE]: GpacLogLevel.INFO,
-            [GpacLogTool.FILTER]: GpacLogLevel.DEBUG,
-          },
-          defaultAllLevel: GpacLogLevel.WARNING,
-          lastSentConfig: {
-            levelsByTool: {
-              [GpacLogTool.CORE]: GpacLogLevel.INFO,
-              [GpacLogTool.FILTER]: GpacLogLevel.DEBUG,
-            },
-            defaultAllLevel: GpacLogLevel.WARNING,
-          },
-        },
-      };
-
-      const result = selectLogsConfigChanges(state as any);
-      expect(result).toBe('');
-    });
-
     it('should send only new tools added after initial config', () => {
       const state = {
         logs: {

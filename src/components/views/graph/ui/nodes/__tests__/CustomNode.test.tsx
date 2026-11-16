@@ -49,10 +49,6 @@ function renderCustomNode(data: Record<string, unknown>) {
 }
 
 describe('CustomNode null-safety', () => {
-  it('renders normally when ipid/opid are populated arrays', () => {
-    expect(() => renderCustomNode(baseData)).not.toThrow();
-  });
-
   it('does not throw when ipid is null but nb_ipid is still > 0', () => {
     expect(() => renderCustomNode({ ...baseData, ipid: null })).not.toThrow();
   });

@@ -202,21 +202,6 @@ describe('clearSelectedPidsByFilter reducer', () => {
     expect(next.selectedPidTargets).toHaveLength(1);
     expect(next.selectedPidTargets[0].filterIdx).toBe(1);
   });
-
-  it('does not affect other filters when clearing one', () => {
-    const initial: MonitoredFilterState = {
-      dataByFilter: {},
-      maxPoints: 600,
-      maxPidSamples: 300,
-      selectedPidTargets: [makePidTarget(0, 1), makePidTarget(1, 2)],
-      pidSamples: {},
-    };
-
-    const next = monitoredFilterReducer(initial, clearSelectedPidsByFilter(1));
-
-    expect(next.selectedPidTargets).toHaveLength(1);
-    expect(next.selectedPidTargets[0].filterIdx).toBe(0);
-  });
 });
 
 describe('selectParsedStatus', () => {

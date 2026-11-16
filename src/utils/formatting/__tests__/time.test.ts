@@ -9,9 +9,6 @@ describe('formatCompactTime', () => {
   it('formats 0 µs as 00:00', () => {
     expect(formatCompactTime(0)).toBe('00:00');
   });
-  it('formats 8s as 00:08', () => {
-    expect(formatCompactTime(8_000_000)).toBe('00:08');
-  });
   it('formats 65s as 01:05', () => {
     expect(formatCompactTime(65_000_000)).toBe('01:05');
   });

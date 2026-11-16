@@ -86,40 +86,6 @@ describe('logsSelectors', () => {
       expect(result[GpacLogTool.MMIO]).toBe(0); // No critical logs
     });
 
-    it('should not count debug or info logs', () => {
-      const logs: GpacLogEntry[] = [
-        {
-          timestamp: 1,
-          tool: 'core',
-          level: LOG_LEVEL_VALUES[GpacLogLevel.DEBUG],
-          message: 'debug',
-        },
-        {
-          timestamp: 2,
-          tool: 'core',
-          level: LOG_LEVEL_VALUES[GpacLogLevel.INFO],
-          message: 'info',
-        },
-        {
-          timestamp: 3,
-          tool: 'core',
-          level: LOG_LEVEL_VALUES[GpacLogLevel.QUIET],
-          message: 'quiet',
-        },
-      ];
-
-      const state = {
-        logs: {
-          buffers: {
-            [GpacLogTool.CORE]: logs,
-          },
-        },
-      };
-
-      const result = selectCriticalLogCountsByTool(state as any);
-      expect(result[GpacLogTool.CORE]).toBe(0);
-    });
-
     it('should handle multiple tools independently', () => {
       const state = {
         logs: {

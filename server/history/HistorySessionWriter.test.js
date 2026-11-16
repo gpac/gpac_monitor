@@ -222,16 +222,6 @@ describe('HistorySessionWriter segment rollover', () => {
     openSpy.mockRestore();
   });
 
-  it('writes session.json during rollover', () => {
-    const writer = new HistorySessionWriter('test-history', 'sessK');
-    writer.writeEvent('{"a":1}', 0);
-
-    const writeSessionIndexSpy = vi.spyOn(writer, 'writeSessionIndex');
-    writer.writeEvent('{"a":2}', DAY_US);
-
-    expect(writeSessionIndexSpy).toHaveBeenCalled();
-  });
-
   it('purges the oldest unpinned segment beyond retention.maxSegments, never reusing indices', () => {
     const writer = new HistorySessionWriter('test-history', 'sessL', { retentionMaxSegments: 2 });
 

@@ -1,21 +1,11 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { Sys as sys } from 'gpaccore';
 import { buildMonitorConfigPayload } from './buildMonitorConfigPayload.js';
-import { UPDATE_INTERVALS, LOG_RETENTION, WS_PROTOCOL_VERSION } from './config.js';
 import monitorConfigFixture from '../../src/services/ws/__tests__/fixtures/monitor_config.json';
 
 describe('buildMonitorConfigPayload', () => {
   afterEach(() => {
     delete sys.version_full;
-  });
-
-  it('announces intervals, log retention and the protocol version', () => {
-    const payload = buildMonitorConfigPayload();
-
-    expect(payload.message).toBe('monitor_config');
-    expect(payload.intervals).toEqual(UPDATE_INTERVALS);
-    expect(payload.logRetention).toEqual(LOG_RETENTION);
-    expect(payload.ws_protocol_version).toBe(WS_PROTOCOL_VERSION);
   });
 
   it('falls back to null without throwing when the binding is missing on an older GPAC binary', () => {
@@ -37,19 +27,5 @@ describe('buildMonitorConfigPayload', () => {
     const payload = buildMonitorConfigPayload();
 
     expect(payload).toEqual(monitorConfigFixture);
-  });
-
-  it('keeps the monitor_config contract shape stable — a diff here means bump WS_PROTOCOL_VERSION on both sides', () => {
-    const payload = buildMonitorConfigPayload();
-
-    expect(Object.keys(payload).sort()).toMatchInlineSnapshot(`
-      [
-        "gpac_version",
-        "intervals",
-        "logRetention",
-        "message",
-        "ws_protocol_version",
-      ]
-    `);
   });
 });

@@ -38,11 +38,6 @@ describe('useSubscribedFilters', () => {
     expect(result.current).toEqual([1, 2, 3]);
   });
 
-  it('should call getSnapshot on service.filterSubscriptions', () => {
-    renderHook(() => useSubscribedFilters());
-    expect(mockFilterSubscriptionsStore.getSnapshot).toHaveBeenCalled();
-  });
-
   it('should setup subscription on mount', () => {
     const unsubscribe = vi.fn();
     mockFilterSubscriptionsStore.subscribe.mockReturnValue(unsubscribe);

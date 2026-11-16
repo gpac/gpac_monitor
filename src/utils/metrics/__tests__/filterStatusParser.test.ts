@@ -86,13 +86,6 @@ describe('parseFilterStatus', () => {
         { type: 'str', key: 'type', value: 'V', quoted: false },
       ]);
     });
-
-    it('parses LAT=B as bare-word string', () => {
-      const result = parseFilterStatus('PT=B');
-      expect(result.entries).toEqual([
-        { type: 'str', key: 'PT', value: 'B', quoted: false },
-      ]);
-    });
   });
 
   describe('unit annotation', () => {

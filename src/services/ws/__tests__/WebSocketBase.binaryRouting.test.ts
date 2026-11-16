@@ -82,6 +82,9 @@ describe('WebSocketBase — binary messages bypass the parser worker', () => {
 
     expect(postMessage).not.toHaveBeenCalled();
     expect(handler).toHaveBeenCalledTimes(1);
+    const [transport, receivedFrame] = handler.mock.calls[0];
+    expect(transport).toBe(wsBase);
+    expect(receivedFrame.buffer).toBe(buffer);
   });
 
   it('does not decode a whole binary frame to text before routing it', async () => {
@@ -113,6 +116,11 @@ describe('WebSocketBase — binary messages bypass the parser worker', () => {
     socket.simulateMessage(buffer);
 
     expect(handler).toHaveBeenCalledTimes(1);
+    const [transport, receivedFrame] = handler.mock.calls[0];
+    expect(transport).toBe(wsBase);
+    expect(JSON.parse(new TextDecoder().decode(receivedFrame))).toEqual({
+      message: 'hello',
+    });
   });
 
   it('still routes string messages through the worker when one is available', async () => {

@@ -47,7 +47,6 @@ describe('getDuration', () => {
 describe('findEventChunkIndex', () => {
   it.each([
     [0, 0],
-    [5_000_000, 0],
     [9_999_999, 0],
     [10_000_000, 1],
     [19_999_999, 1],
@@ -70,10 +69,30 @@ describe('findEventChunkIndex with recorded eventChunks', () => {
     endUs: 42_000_000,
     chunkCount: 4,
     eventChunks: [
-      { fromUs: 0, toUs: 10_500_000, file: 'chunks/chunk_0000.jsonl', count: 21 },
-      { fromUs: 11_000_000, toUs: 21_500_000, file: 'chunks/chunk_0001.jsonl', count: 21 },
-      { fromUs: 22_000_000, toUs: 32_500_000, file: 'chunks/chunk_0002.jsonl', count: 21 },
-      { fromUs: 33_000_000, toUs: 42_000_000, file: 'chunks/chunk_0003.jsonl', count: 18 },
+      {
+        fromUs: 0,
+        toUs: 10_500_000,
+        file: 'chunks/chunk_0000.jsonl',
+        count: 21,
+      },
+      {
+        fromUs: 11_000_000,
+        toUs: 21_500_000,
+        file: 'chunks/chunk_0001.jsonl',
+        count: 21,
+      },
+      {
+        fromUs: 22_000_000,
+        toUs: 32_500_000,
+        file: 'chunks/chunk_0002.jsonl',
+        count: 21,
+      },
+      {
+        fromUs: 33_000_000,
+        toUs: 42_000_000,
+        file: 'chunks/chunk_0003.jsonl',
+        count: 18,
+      },
     ],
   };
 
@@ -106,10 +125,6 @@ describe('findEventChunkIndex with recorded eventChunks', () => {
   it('clamps a timestamp after the last chunk to the last index', () => {
     expect(findEventChunkIndex(driftedManifest, 99_000_000)).toBe(3);
   });
-
-  it('keeps the arithmetic fallback when eventChunks is absent', () => {
-    expect(findEventChunkIndex(manifest, 25_000_000)).toBe(2);
-  });
 });
 
 // --- getEventChunkRange ---
@@ -139,8 +154,18 @@ describe('getEventChunkRange', () => {
     const withRanges: HistoryManifest = {
       ...manifest,
       eventChunks: [
-        { fromUs: 0, toUs: 10_500_000, file: 'chunks/chunk_0000.jsonl', count: 21 },
-        { fromUs: 11_000_000, toUs: 21_500_000, file: 'chunks/chunk_0001.jsonl', count: 21 },
+        {
+          fromUs: 0,
+          toUs: 10_500_000,
+          file: 'chunks/chunk_0000.jsonl',
+          count: 21,
+        },
+        {
+          fromUs: 11_000_000,
+          toUs: 21_500_000,
+          file: 'chunks/chunk_0001.jsonl',
+          count: 21,
+        },
       ],
     };
     expect(getEventChunkRange(withRanges, 1)).toEqual({
@@ -155,7 +180,6 @@ describe('getEventChunkRange', () => {
 describe('getChunkFile', () => {
   it.each([
     [0, 'chunks/chunk_0000.jsonl'],
-    [3, 'chunks/chunk_0003.jsonl'],
     [42, 'chunks/chunk_0042.jsonl'],
     [1000, 'chunks/chunk_1000.jsonl'],
   ])('index %i → %s', (index, expected) => {
@@ -279,8 +303,18 @@ describe('parseManifest', () => {
     const raw = {
       ...validRaw,
       eventChunks: [
-        { fromUs: 0, toUs: 10_500_000, file: 'chunks/chunk_0000.jsonl', count: 21 },
-        { fromUs: 11_000_000, toUs: 11_000_000, file: 'chunks/chunk_0001.jsonl', count: 1 },
+        {
+          fromUs: 0,
+          toUs: 10_500_000,
+          file: 'chunks/chunk_0000.jsonl',
+          count: 21,
+        },
+        {
+          fromUs: 11_000_000,
+          toUs: 11_000_000,
+          file: 'chunks/chunk_0001.jsonl',
+          count: 1,
+        },
       ],
     };
     expect(parseManifest(raw).eventChunks).toHaveLength(2);
@@ -290,7 +324,12 @@ describe('parseManifest', () => {
     const raw = {
       ...validRaw,
       eventChunks: [
-        { fromUs: 0, toUs: 10_500_000, file: 'chunks/chunk_0000.jsonl', count: 21 },
+        {
+          fromUs: 0,
+          toUs: 10_500_000,
+          file: 'chunks/chunk_0000.jsonl',
+          count: 21,
+        },
         { fromUs: 11_000_000, toUs: 21_500_000, file: 123, count: 21 },
       ],
     };

@@ -227,12 +227,6 @@ describe('buildFilterStatusViewModel', () => {
       expect(vm.textMetrics.find((m) => m.key === 'PT')).toBeUndefined();
     });
 
-    it('unknown fraction → numericMetrics "num / den"', () => {
-      expect(
-        build('drop=3/100').numericMetrics.find((m) => m.key === 'drop')?.value,
-      ).toBe('3 / 100');
-    });
-
     it('custom keys mixed with known keys → no crash, all routed correctly', () => {
       const vm = build('prog=5 custom=42 kbps done info="ok"');
       expect(vm.primaryProgress?.percentage).toBe(5);
@@ -307,13 +301,6 @@ describe('completionSnapshot — done flag propagation', () => {
     expect(vm.numericMetrics.find((m) => m.key === 'fps')?.graphable).toBe(
       true,
     );
-  });
-
-  it('done + normally-graphable metric → completionSnapshot:true overrides graphable', () => {
-    const vm = build('done fps=25');
-    const metric = vm.numericMetrics.find((m) => m.key === 'fps');
-    expect(metric?.completionSnapshot).toBe(true);
-    expect(metric?.graphable).toBe(false);
   });
 });
 

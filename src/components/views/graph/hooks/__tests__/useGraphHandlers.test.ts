@@ -35,17 +35,6 @@ describe('useGraphHandlers', () => {
     vi.clearAllMocks();
   });
 
-  it('should return handler functions', () => {
-    const { result } = renderHook(() => useGraphHandlers(defaultProps));
-
-    expect(result.current).toHaveProperty('handleNodesChange');
-    expect(result.current).toHaveProperty('handleEdgesChange');
-    expect(result.current).toHaveProperty('handleNodeClick');
-    expect(typeof result.current.handleNodesChange).toBe('function');
-    expect(typeof result.current.handleEdgesChange).toBe('function');
-    expect(typeof result.current.handleNodeClick).toBe('function');
-  });
-
   it('should handle node changes and update refs', () => {
     const mockChanges = [
       {

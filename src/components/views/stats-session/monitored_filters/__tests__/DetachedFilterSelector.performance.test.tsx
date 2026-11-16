@@ -11,7 +11,6 @@ describe('detached selector render isolation', () => {
       const store = renderSelector({ open: isOpen, onRender });
       if (isOpen) await screen.findByRole('menu');
       const initialCommits = onRender.mock.calls.length;
-      const startedAt = performance.now();
       for (let tickIndex = 0; tickIndex < 100; tickIndex += 1) {
         act(() => {
           store.dispatch(
@@ -34,16 +33,7 @@ describe('detached selector render isolation', () => {
           );
         });
       }
-      const elapsedMs = performance.now() - startedAt;
       const additionalCommits = onRender.mock.calls.length - initialCommits;
-      console.info(
-        JSON.stringify({
-          menuOpen: isOpen,
-          statisticsTicks: 100,
-          additionalCommits,
-          elapsedMs,
-        }),
-      );
       expect(additionalCommits).toBe(0);
       if (!isOpen) {
         expect(screen.queryByRole('menuitem')).not.toBeInTheDocument();

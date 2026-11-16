@@ -26,21 +26,4 @@ describe('logs.jsonl parsing', () => {
     const batch = events[1];
     expect(batch).toMatchSnapshot();
   });
-
-  it('log_batch contains expected log entries', () => {
-    const events = parseEventsJsonl(LOGS_JSONL);
-    const batch = events[1] as { logs: unknown[] };
-
-    expect(batch.logs).toHaveLength(2);
-    expect(batch.logs[0]).toMatchObject({
-      tool: 'core',
-      level: 1,
-      timestamp: expect.any(Number),
-    });
-    expect(batch.logs[1]).toMatchObject({
-      tool: 'core',
-      level: 2,
-      timestamp: expect.any(Number),
-    });
-  });
 });

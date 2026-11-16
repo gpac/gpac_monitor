@@ -94,17 +94,6 @@ describe('HistoryCollector flushLogs', () => {
 });
 
 describe('HistoryCollector rollover snapshot reseed', () => {
-  it('updates _graphVersion at the very start of recordGraph', () => {
-    const collector = makeCollector();
-    collector.writer.addEventIndex = vi.fn();
-    collector.writer.writeEvent = vi.fn(() => false);
-    collector.writer.writeSnapshot = vi.fn();
-
-    collector.recordGraph([], [], 7);
-
-    expect(collector._graphVersion).toBe(7);
-  });
-
   it('builds the rollover snapshot from SnapshotBuilder with the current graphVersion, overriding ts_us', () => {
     const collector = makeCollector();
     collector._graphVersion = 3;

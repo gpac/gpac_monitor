@@ -29,11 +29,6 @@ function collectVisibleKeys(viewModel: FilterStatusViewModel): string[] {
 }
 
 describe('dynamically loaded filter — definitions arrive after startup', () => {
-  it('initial session_metrics does not contain the dynamic filter keys', () => {
-    const initialDefinitions = parseMetricDefinitions(INITIAL_SESSION_METRICS);
-    expect(Object.keys(initialDefinitions).sort()).toEqual(['buffer', 'done']);
-  });
-
   it('status is fully displayed before definitions arrive (inference only)', () => {
     const initialDefinitions = parseMetricDefinitions(INITIAL_SESSION_METRICS);
     const viewModel = buildFilterStatusViewModel(

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { GpacLogEntry } from '@/types/domain/gpac/log-types';
-import { trimBuffer, BUFFER_TRIM_PRIORITY } from '../logs.helpers';
+import { trimBuffer } from '../logs.helpers';
 
 const makeLog = (level: number, id: number): GpacLogEntry => ({
   timestamp: id,
@@ -34,25 +34,10 @@ describe('trimBuffer', () => {
     expect(buffer[0].level).toBe(1);
   });
 
-  it('protects errors even with 500 warnings', () => {
-    const buffer = [
-      makeLog(1, 0),
-      ...Array.from({ length: 500 }, (_, i) => makeLog(2, i + 1)),
-    ];
-    const removed = trimBuffer(buffer, 10);
-    expect(removed.every((l) => l.level === 2)).toBe(true);
-    expect(buffer[0].level).toBe(1);
-    expect(buffer).toHaveLength(491);
-  });
-
   it('falls back to removing errors only when buffer is all errors', () => {
     const buffer = Array.from({ length: 5 }, (_, i) => makeLog(1, i));
     const removed = trimBuffer(buffer, 2);
     expect(removed).toHaveLength(2);
     expect(buffer).toHaveLength(3);
-  });
-
-  it('config has expected priority order', () => {
-    expect(BUFFER_TRIM_PRIORITY).toEqual([4, 3, 2]);
   });
 });

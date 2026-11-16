@@ -61,8 +61,11 @@ describe('selectLogCounts', () => {
       }),
     );
 
-    expect(selectLogCounts(state1)).toBe(selectLogCounts(state1));
-    expect(selectLogCounts(state1)).toEqual(selectLogCounts(state2));
+    const initialCounts = selectLogCounts(state1);
+    const updatedCounts = selectLogCounts(state2);
+
+    expect(initialCounts).toEqual({ error: 1, warning: 0, info: 0 });
+    expect(updatedCounts).toBe(initialCounts);
   });
 
   it('returns new value when counts actually change', () => {

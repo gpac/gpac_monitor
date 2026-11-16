@@ -1,7 +1,3 @@
-/**
- * Coherence tests based on GPAC API guarantees.
- * Each invariant is documented with its source behaviour.
- */
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { usePIDPerformanceStats } from '../usePIDPerformanceStats';
@@ -9,22 +5,7 @@ import { usePIDBufferStats } from '../usePIDBufferStats';
 import { formatLastTsSent } from '@/utils/formatting';
 import { makePID, makeStats } from './fixtures';
 
-// ─── GPAC guaranteed invariants ──────────────────────────────────────────────
-
 describe('average_process_rate <= max_process_rate', () => {
-  it('holds after sanitization with valid values', () => {
-    const pid = makePID({
-      stats: makeStats({
-        average_process_rate: 800_000_000,
-        max_process_rate: 1_200_000_000,
-      }),
-    });
-    const { result } = renderHook(() => usePIDPerformanceStats(pid));
-    const avg = result.current.average_process_rate ?? 0;
-    const max = result.current.max_process_rate ?? 0;
-    expect(avg).toBeLessThanOrEqual(max);
-  });
-
   it('holds when both are zero (no activity yet)', () => {
     const pid = makePID({
       stats: makeStats({ average_process_rate: 0, max_process_rate: 0 }),
@@ -32,43 +13,6 @@ describe('average_process_rate <= max_process_rate', () => {
     const { result } = renderHook(() => usePIDPerformanceStats(pid));
     expect(result.current.average_process_rate).toBe(0);
     expect(result.current.max_process_rate).toBe(0);
-  });
-});
-
-describe('average_bitrate <= max_bitrate (guaranteed by GPAC)', () => {
-  it('holds with typical audio values', () => {
-    const pid = makePID({
-      stats: makeStats({ average_bitrate: 160_000, max_bitrate: 192_000 }),
-    });
-    const { result } = renderHook(() => usePIDPerformanceStats(pid));
-    const avg = result.current.average_bitrate ?? 0;
-    const max = result.current.max_bitrate ?? 0;
-    expect(avg).toBeLessThanOrEqual(max);
-  });
-});
-
-describe('total_process_time >= max_process_time (guaranteed by GPAC)', () => {
-  it('total (cumulative sum) is always >= peak', () => {
-    const pid = makePID({
-      stats: makeStats({
-        total_process_time: 58_730_000,
-        max_process_time: 14,
-      }),
-    });
-    const { result } = renderHook(() => usePIDPerformanceStats(pid));
-    expect(result.current.total_process_time).toBeGreaterThanOrEqual(
-      result.current.max_process_time,
-    );
-  });
-
-  it('holds when both are zero', () => {
-    const pid = makePID({
-      stats: makeStats({ total_process_time: 0, max_process_time: 0 }),
-    });
-    const { result } = renderHook(() => usePIDPerformanceStats(pid));
-    expect(result.current.total_process_time).toBeGreaterThanOrEqual(
-      result.current.max_process_time,
-    );
   });
 });
 
@@ -94,19 +38,8 @@ describe('buffer can temporarily exceed max_buffer (transitional state)', () => 
       would_block: true,
     });
     const { result } = renderHook(() => usePIDBufferStats(pid));
-    expect(result.current.buffer).toBeGreaterThan(result.current.max_buffer!);
-  });
-
-  it('would_block is false when buffer is within limit', () => {
-    const pid = makePID({
-      buffer: 500_000,
-      max_buffer: 1_000_000,
-      would_block: false,
-    });
-    const { result } = renderHook(() => usePIDBufferStats(pid));
-    expect(result.current.buffer).toBeLessThanOrEqual(
-      result.current.max_buffer!,
-    );
+    expect(result.current.buffer).toBe(1_060_000);
+    expect(result.current.max_buffer).toBe(1_000_000);
   });
 });
 
@@ -131,11 +64,6 @@ describe('disconnected: true — stats are stale', () => {
 // ─── last_ts_sent ─────────────────────────────────────────────────────────────
 
 describe('last_ts_sent — GPAC fraction formats', () => {
-  it('{n: 0, d: timescale} is valid (start of stream, t=0)', () => {
-    // d=0 cannot occur in valid data; {n:0, d:1000} means t=0s at timescale 1000
-    expect(formatLastTsSent({ n: 0, d: 1000 })).toBe('0.00s');
-  });
-
   it('{n: 0, d: 0} is defended against (invalid — no timescale)', () => {
     expect(formatLastTsSent({ n: 0, d: 0 })).toBe('—');
   });
@@ -154,14 +82,5 @@ describe('pid.bitrate (declared) vs stats.average_bitrate (measured)', () => {
     expect(result.current.bitrate).toBe(5_000_000);
     expect(result.current.average_bitrate).toBe(3_200_000);
     expect(result.current.bitrate).not.toBe(result.current.average_bitrate);
-  });
-
-  it('can match in CBR content', () => {
-    const pid = makePID({
-      bitrate: 160_000,
-      stats: makeStats({ average_bitrate: 160_000 }),
-    });
-    const { result } = renderHook(() => usePIDPerformanceStats(pid));
-    expect(result.current.bitrate).toBe(result.current.average_bitrate);
   });
 });

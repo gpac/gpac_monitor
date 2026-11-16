@@ -49,13 +49,4 @@ describe('FilterSubscriptionsStore', () => {
     const snapshot = store.getSnapshot();
     expect(snapshot.subscribedFilterIdxs).toEqual([]);
   });
-
-  it('should maintain state across multiple operations', () => {
-    store.addFilter(1);
-    store.addFilter(2);
-    store.removeFilter(1);
-
-    const snapshot = store.getSnapshot();
-    expect(snapshot.subscribedFilterIdxs).toEqual([2]);
-  });
 });

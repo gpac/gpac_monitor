@@ -75,22 +75,6 @@ describe('BaseMessageHandler', () => {
     handler = createHandler(callbacks);
   });
 
-  it('should create message handler instance', () => {
-    expect(handler).toBeDefined();
-  });
-
-  it('should expose session stats handler', () => {
-    expect(handler.getSessionStatsHandler()).toBeDefined();
-  });
-
-  it('should expose filter stats handler', () => {
-    expect(handler.getFilterStatsHandler()).toBeDefined();
-  });
-
-  it('should expose CPU stats handler', () => {
-    expect(handler.getCPUStatsHandler()).toBeDefined();
-  });
-
   describe('filter_pid_reconfigured', () => {
     it('should call onPidReconfigured with indexes', () => {
       simulateMessage(handler, {
@@ -194,7 +178,7 @@ describe('BaseMessageHandler', () => {
   });
 
   describe('monitor_config → protocol version handshake', () => {
-    it('stores intervals and stays silent when versions match', () => {
+    it('stores intervals and protocol version without a mismatch notification', () => {
       const notificationHandlers = createNotificationHandlers();
       const handlerWithNotifications = createHandler(
         callbacks,
@@ -209,6 +193,9 @@ describe('BaseMessageHandler', () => {
 
       expect(callbacks.onSetMonitorConfig).toHaveBeenCalledWith(
         typedMonitorConfigFixture.intervals,
+      );
+      expect(callbacks.onSetServerProtocolVersion).toHaveBeenCalledWith(
+        typedMonitorConfigFixture.ws_protocol_version,
       );
       expect(
         notificationHandlers.onProtocolVersionMismatch,

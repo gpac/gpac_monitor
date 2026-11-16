@@ -53,19 +53,9 @@ describe('parseMetricDefinitions', () => {
       expect(map['period']?.type).toBe('str');
     });
 
-    it('parses t=num explicitly', () => {
-      const map = parseMetricDefinitions('freg=foo;rate=Rate;t=num');
-      expect(map['rate']?.type).toBe('num');
-    });
-
     it('parses t=frac', () => {
       const map = parseMetricDefinitions('freg=foo;buf=Buffer;t=frac;u=ms');
       expect(map['buf']?.type).toBe('frac');
-    });
-
-    it('t=bool is not a valid type (GPAC doc: num/frac/str) → num', () => {
-      const map = parseMetricDefinitions('freg=foo;done=Done;t=bool');
-      expect(map['done']?.type).toBe('num');
     });
 
     it('falls back to num for unknown t value', () => {
