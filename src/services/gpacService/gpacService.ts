@@ -44,7 +44,10 @@ export class GpacService implements IGpacCommunication {
   // STATE
   // ============================================================================
   private state: GpacServiceState;
-  private callbacks: GpacServiceCallbacks = {};
+  private callbacks: GpacServiceCallbacks = {
+    onConnectionStatusChange: (status) =>
+      this.onConnectionStatusChange?.(status),
+  };
 
   public onConnectionStatusChange?: (status: ConnectionStatus) => void;
 
