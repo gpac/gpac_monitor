@@ -189,6 +189,44 @@ describe('HistoryAdapter.hydrateCheckpoint', () => {
     expect(statsTypes).toHaveLength(0);
   });
 
+  it('drops bandwidth buffered before the checkpoint', () => {
+    adapter.setSilent(true);
+    for (const [ts_us, bytes] of [
+      [1_237_805, 727_528],
+      [2_237_805, 1_455_056],
+    ]) {
+      adapter.handleEvent({
+        message: 'session_stats',
+        ts_us,
+        all_packets_done: false,
+        stats: [
+          {
+            idx: 0,
+            status: '',
+            bytes_done: bytes,
+            bytes_sent: bytes,
+            pck_sent: 167,
+            pck_done: 167,
+            time: 4967,
+            nb_ipid: 2,
+            nb_opid: 2,
+            is_eos: false,
+            last_ts_sent: { n: 73, d: 30 },
+          },
+        ],
+      });
+    }
+
+    adapter.hydrateCheckpoint(makeCheckpoint());
+    dispatch.mockClear();
+    adapter.flush();
+
+    const bulkTypes = dispatch.mock.calls
+      .map(([action]: any) => action.type)
+      .filter((type: string) => type === 'monitoredFilter/bulkAddNetworkData');
+    expect(bulkTypes).toHaveLength(0);
+  });
+
   it('applies baseArgs + arg_state delta (unaffected filter preserved)', () => {
     const store = makeStore();
     const a = new HistoryAdapter(store.dispatch);
