@@ -60,6 +60,8 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
     const hideTag = PREVIEW.DEBUG_SHOW_FILTERS ? '' : ':ITAG=NODISPLAY:LT=all@quiet';
     const sink = session.new_filter(`${sinkName}${hideTag}`);
     let firstKeyframeSeen = false;
+    let firstPacketWallUs = null;
+    let noKeyframeReported = false;
     const rateGate = createRateGate(entry.maxKeyframesPerSec);    sink.require_source_id = true;
     sink.set_cap({ id: 'StreamType', value: 'Visual', in: true });
     sink.configure_pid = function (pid) {
@@ -96,8 +98,18 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
                     firstKeyframeSeen = true;
                     print(`[Preview] compressed first keyframe idx=${filterIdx} sap=${packet.sap} cts=${packet.cts} size=${packet.size}`);
                 }
+                if (!firstKeyframeSeen && !noKeyframeReported) {
+                    const nowUs = sys.clock_us();
+                    if (firstPacketWallUs === null) firstPacketWallUs = nowUs;
+                    if (nowUs - firstPacketWallUs >= PREVIEW.NO_KEYFRAME_TIMEOUT_US) {
+                        noKeyframeReported = true;
+                        const seconds = PREVIEW.NO_KEYFRAME_TIMEOUT_US / 1000000;
+                        print(`[Preview] no keyframe idx=${filterIdx} after ${seconds} s, preview stopped`);
+                        previewManager.send({ message: 'preview_error', previewId: entry.previewId, error: `No keyframe (SAP 1-3) received after ${seconds} s` });
+                    }
+                }
                 const socket = previewManager.client.client;
-                if (firstKeyframeSeen && socket) {
+                if (firstKeyframeSeen && !noKeyframeReported && socket) {
                     const ctsUs = Math.round(packet.cts * 1e6 / entry.pid.timescale);
                     const dtsUs = Math.round(packet.dts * 1e6 / entry.pid.timescale);
                     const wasKeyframesOnly = rateGate.keyframesOnly;                    const send = shouldSendPacket(rateGate, dtsUs, sys.clock_us(), isKeyframe(packet));
