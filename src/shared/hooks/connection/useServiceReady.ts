@@ -3,6 +3,7 @@ import { gpacService } from '@/services/gpacService';
 import { useAppSelector } from '../redux';
 import { selectActiveConnection } from '@/shared/store/selectors';
 import { useDataSource } from '@/services/dataSource/DataSourceContext';
+import { ConnectionStatus } from '@/types/communication/shared';
 
 type UseServiceReadyOptions = { enabled?: boolean; timeoutMs?: number };
 type UseServiceReadyResult = {
@@ -62,6 +63,11 @@ export function useServiceReady({
       cancelled = true;
     };
   }, [liveEnabled, timeoutMs, connectionId, connectionAddress]);
+
+  const connectionStatus = activeConnection?.status;
+  useEffect(() => {
+    if (connectionStatus === ConnectionStatus.DISCONNECTED) setIsReady(false);
+  }, [connectionStatus]);
 
   return { isReady, isLoading, error };
 }
