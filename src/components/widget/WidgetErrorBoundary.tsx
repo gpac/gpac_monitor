@@ -1,5 +1,6 @@
 import React from 'react';
-import { LuRotateCcw, LuTriangleAlert } from 'react-icons/lu';
+import { LuRefreshCw, LuTriangleAlert } from 'react-icons/lu';
+import { Button } from '@/components/ui/button';
 
 interface WidgetErrorBoundaryProps {
   widgetTitle?: string;
@@ -51,17 +52,20 @@ class WidgetErrorBoundary extends React.Component<
         <p className="text-sm font-medium text-gray-300">
           {this.props.widgetTitle ?? 'Widget'} failed to render
         </p>
-        <p className="text-xs text-gray-400 line-clamp-2">
-          {this.state.errorMessage}
-        </p>
-        <button
-          onClick={this.handleRetry}
+        {import.meta.env.DEV && (
+          <p className="text-xs text-gray-400 line-clamp-2">
+            {this.state.errorMessage}
+          </p>
+        )}
+        <Button
+          variant="outline"
+          size="sm"
           type="button"
-          className="flex items-center gap-1 px-2 py-1 mt-1 rounded text-xs text-gray-300 bg-gray-700 hover:bg-gray-600"
+          className="mt-1"
+          onClick={this.handleRetry}
         >
-          <LuRotateCcw className="w-3 h-3" />
-          Retry
-        </button>
+          <LuRefreshCw className="w-3 h-3 mr-1.5" /> Retry
+        </Button>
       </div>
     );
   }

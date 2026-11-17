@@ -28,6 +28,7 @@ import type {
 import { ChunkLoader } from './chunkLoader';
 import type { EventChunk } from './chunkLoader';
 import { findEventChunkIndex, findNearestCheckpoint } from './manifestParser';
+import { readOpenSessionEndUs } from './openSessionEnd';
 import {
   findNextSegmentDir,
   findPreviousSegmentDir,
@@ -262,16 +263,19 @@ export class HistoryController {
       throw new Error('[HistoryController] No manifest for session');
 
     this.manifest = manifest;
-    // Torn session: session.json has no end, the last segment's manifest has the real one.
     const lastSegment =
       sessionIndex?.segments[sessionIndex.segments.length - 1];
+    const lastSegmentDir = lastSegment && getSegmentDir(lastSegment);
     this.openSessionEndUs =
-      !lastSegment || sessionIndex?.endUs !== undefined
+      !lastSegmentDir || sessionIndex?.endUs !== undefined
         ? undefined
-        : getSegmentDir(lastSegment) === segmentDir
-          ? manifest.endUs
-          : (await source.getSegmentManifest(getSegmentDir(lastSegment)))
-              ?.endUs;
+        : await readOpenSessionEndUs(
+            source,
+            lastSegmentDir,
+            lastSegmentDir === segmentDir
+              ? manifest
+              : await source.getSegmentManifest(lastSegmentDir),
+          );
     const sessionStartUs = sessionIndex?.startUs ?? manifest.startUs;
     const eventsIndex = segmentDir
       ? ((await source.loadGlobalEventsIndex()) ?? [])
