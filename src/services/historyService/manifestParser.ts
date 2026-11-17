@@ -162,7 +162,15 @@ export function findEventChunkIndex(
   manifest: HistoryManifest,
   timestampUs: number,
 ): number {
-  if (manifest.eventChunks && manifest.eventChunks.length > 0) {
+  const eventChunks = manifest.eventChunks;
+  if (eventChunks && eventChunks.length > 0) {
+    const lastListedChunk = eventChunks[eventChunks.length - 1];
+    if (
+      manifest.chunkCount > eventChunks.length &&
+      timestampUs > lastListedChunk.toUs
+    ) {
+      return manifest.chunkCount - 1;
+    }
     return Math.min(
       findChunkIndexForTimestamp(manifest, timestampUs),
       manifest.chunkCount - 1,
