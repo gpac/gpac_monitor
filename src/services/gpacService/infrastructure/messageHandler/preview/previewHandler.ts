@@ -68,7 +68,7 @@ export class PreviewHandler {
   }
 
   public handleWebCodecsFrame(dataView: DataView): void {
-    this.previews.get(dataView.getUint32(4, true))?.decodePacket(dataView);
+    this.previews.get(dataView.getUint32(4, true))?.decodePacket(dataView); // PVWC @4 previewId
   }
 
   public handlePreviewError(data: PreviewErrorMessage): void {
