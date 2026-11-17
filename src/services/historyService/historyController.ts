@@ -213,7 +213,10 @@ export class HistoryController {
     }
   };
 
-  private async loadLogsForChunk(chunk: EventChunk): Promise<void> {
+  private async loadLogsForChunk(
+    chunk: EventChunk,
+    isStale: () => boolean = () => false,
+  ): Promise<void> {
     if (!this.loader)
       throw new Error('[HistoryController] Loader not initialized');
 
@@ -221,6 +224,7 @@ export class HistoryController {
       chunk.fromUs,
       chunk.toUs,
     );
+    if (isStale()) return;
 
     this.sessionLogs = flattenLogEvents(
       logChunks.flatMap((logChunk) => logChunk.logs),
@@ -388,7 +392,9 @@ export class HistoryController {
       if (this.snapshot) adapter.hydrate(this.snapshot, this.sessionStartUs);
     }
 
-    await this.loadLogsForChunk(currentChunk);
+    const isSeekStale = () => version !== preloader.getVersion();
+    await this.loadLogsForChunk(currentChunk, isSeekStale);
+    if (isSeekStale()) return;
     this.nextLogIndex = this.getNextLogIndexFromTimestamp(tsUs);
     adapter.hydrateLogsForSeek(this.sessionLogs, tsUs);
 
