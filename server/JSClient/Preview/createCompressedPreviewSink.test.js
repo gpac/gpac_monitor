@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { buildCompressedFrame, createRateGate, shouldSendPacket } from './createCompressedPreviewSink.js';
 import { PREVIEW } from '../config.js';
+import pvwcFrame from '../../../src/services/ws/__tests__/fixtures/pvwc_frame.json';
 
 const FRAME_CTS_STEP_US = 40000;
 const KEYFRAME_INTERVAL = 25;
@@ -88,5 +89,12 @@ describe('buildCompressedFrame', () => {
         const packet = { sap, data: new Uint8Array([7, 8]).buffer };
         const frame = new DataView(buildCompressedFrame(1, 0, packet, 0, keyframesOnly));
         expect(frame.getUint32(12, true)).toBe(flags);
+    });
+
+    it('writes the PVWC reference frame read by the client (src/services/ws/__tests__/fixtures/pvwc_frame.json)', () => {
+        const hexToBytes = (hex) => Uint8Array.from(hex.match(/../g), (byte) => parseInt(byte, 16));
+        const packet = { sap: pvwcFrame.sap, data: hexToBytes(pvwcFrame.payloadHex).buffer };
+        const frame = buildCompressedFrame(pvwcFrame.previewId, pvwcFrame.pidIdx, packet, pvwcFrame.ctsUs, pvwcFrame.keyframesOnly);
+        expect(Array.from(new Uint8Array(frame))).toEqual(Array.from(hexToBytes(pvwcFrame.frameHex)));
     });
 });
