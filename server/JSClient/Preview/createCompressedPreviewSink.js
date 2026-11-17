@@ -40,6 +40,7 @@ function shouldSendPacket(gate, decodeTimeUs, nowUs, isKey) {
     return true;
 }
 
+// PVWC layout: see the PVWC comment in src/services/ws/types.ts.
 function buildCompressedFrame(previewId, pidIdx, packet, ctsUs, keyframesOnly) {
     const packetBytes = new Uint8Array(packet.data);
     const buffer = new ArrayBuffer(PVWC_HEADER_SIZE + packetBytes.byteLength);

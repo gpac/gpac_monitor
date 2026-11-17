@@ -177,9 +177,11 @@ export interface LogConfigChangedResponse extends BaseWSResponse {
   logLevel: GpacLogConfig;
 }
 
-// Binary webcodecs frame: 'PVWC' + previewId/pidIdx/flags u32 LE + µs f64 LE,
-// then raw avcC packet bytes; first frame sent is a keyframe.
+// Binary preview frame, 24-byte little-endian header then the packet payload:
+// @0 'PVWC' | @4 previewId u32 | @8 pidIdx u32 | @12 flags u32 | @16 CTS µs f64 | @24 payload.
 // flags: bit 0 = key (SAP 1-3); bit 1 = server sends keyframes only (faster than real time).
+// Payload = packet bytes as GPAC outputs them (avcC, Annex B or AV1 OBUs); first frame is a key.
+// Written by server/JSClient/Preview/createCompressedPreviewSink.js; reference: fixtures/pvwc_frame.json.
 export const PVWC_MAGIC = 'PVWC';
 export const PVWC_HEADER_SIZE = 24;
 export const PVWC_FLAG_KEYFRAME = 1;
