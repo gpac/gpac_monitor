@@ -104,7 +104,7 @@ export class PreviewEntry extends UpdatableSubscribable<PreviewHandlerState> {
   public decodePacket(dataView: DataView): void {
     if (dataView.byteLength <= PVWC_HEADER_SIZE) return;
     const keyframesOnly =
-      (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAMES_ONLY) !== 0;
+      (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAMES_ONLY) !== 0; // PVWC @12 flags
     if (keyframesOnly !== this.getSnapshot().keyframesOnly) {
       this.updateDataAndNotify({ ...this.getSnapshot(), keyframesOnly });
     }

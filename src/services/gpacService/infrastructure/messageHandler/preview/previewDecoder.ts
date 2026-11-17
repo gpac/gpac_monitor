@@ -95,7 +95,7 @@ export class PreviewDecoder {
       ? annexBToAvcc(receivedBytes)
       : receivedBytes;
     const packetIsKeyframe =
-      (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAME) !== 0;
+      (dataView.getUint32(12, true) & PVWC_FLAG_KEYFRAME) !== 0; // PVWC @12 flags
     if (isNalStream && !hasPictureSlice(packetBytes, this.config.codec)) {
       this.pendingBytes = packetBytes;
       this.pendingIsKeyframe = packetIsKeyframe;
@@ -117,7 +117,7 @@ export class PreviewDecoder {
       this.decoder.decode(
         new EncodedVideoChunk({
           type: isKeyframe ? 'key' : 'delta',
-          timestamp: Math.round(dataView.getFloat64(16, true)),
+          timestamp: Math.round(dataView.getFloat64(16, true)), // PVWC @16 CTS µs
           data,
         }),
       );
