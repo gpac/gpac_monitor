@@ -67,6 +67,25 @@ jobs:
       - name: History recording
         run: timeout 45 node server/tests/integration/historyRecording.mjs
 
+      - name: Start GPAC with H.264 encoder
+        run: |
+          docker run -d --name gpac-preview --network host -v "$PWD/ci:/srv:ro" --entrypoint gpac gpac/ubuntu:latest \
+            -rmt -rmt-port=6392 -rmt-localhost -rmt-path=/srv/server.js -logs=rmtws@info -graph \
+            avgen:type=v:sizes=320x240 c=264 reframer:rt=on inspect:allp
+
+      - name: Check H.264 encoder
+        run: |
+          sleep 5
+          docker logs gpac-preview 2>&1 | tail -n 40
+          test "$(docker inspect -f '{{.State.Running}}' gpac-preview)" = "true"
+
+      - name: Stop GPAC with H.264 encoder
+        run: |
+          docker kill -s INT gpac-preview
+          timeout 10 docker wait gpac-preview || true
+          docker logs gpac-preview 2>&1 | tail -n 60
+          docker rm -f gpac-preview
+
       - name: GPAC diagnostics
         if: always()
         run: |
@@ -75,3 +94,5 @@ jobs:
           docker rm -f gpac || true
           docker logs gpac-history || true
           docker rm -f gpac-history || true
+          docker logs gpac-preview || true
+          docker rm -f gpac-preview || true
