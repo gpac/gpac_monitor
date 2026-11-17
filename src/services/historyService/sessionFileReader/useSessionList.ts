@@ -48,5 +48,11 @@ export function useSessionList(
 
   const retry = () => setTick((tick) => tick + 1);
 
-  return { sessions, loading, failure, browser, retry };
+  return {
+    sessions,
+    loading,
+    failure: address ? failure : 'no-gpac',
+    browser,
+    retry,
+  };
 }
