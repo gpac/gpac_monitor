@@ -16,7 +16,7 @@ export async function readOpenSessionEndUs(
       manifest.endUs,
     );
   } catch (error) {
-    console.warn('[HistoryController] Open chunk unreadable, keeping manifest end', error);
+    console.warn('[openSessionEnd] Open chunk unreadable, keeping manifest end', error);
     return manifest.endUs;
   }
 }
