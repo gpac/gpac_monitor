@@ -5,7 +5,7 @@ import type {
   HistorySessionIndex,
   ManifestEventEntry,
 } from '../source/types';
-import { parseEventsJsonl } from '../loader/eventLoader';
+import { parseEventsJsonl, parseLogEventsJsonl } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
 import { parseSnapshot } from '../snapshotParser';
 import { parseJournalIndex, parseJournalJsonl } from '../journalIndexParser';
@@ -161,10 +161,7 @@ export class LocalFileSessionFileReader {
     segmentDir?: string,
   ): Promise<LogEvent[]> {
     const name = `logs/logs_${padded(chunkIndex)}.jsonl`;
-    return (await this.readJsonl(
-      sessionId,
-      name,
-      segmentDir,
-    )) as unknown as LogEvent[];
+    const file = await this.file(sessionId, name, segmentDir);
+    return file ? parseLogEventsJsonl(await file.text()) : [];
   }
 }

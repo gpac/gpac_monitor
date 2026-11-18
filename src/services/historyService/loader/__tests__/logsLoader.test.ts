@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseEventsJsonl } from '../eventLoader';
+import { parseEventsJsonl, parseLogEventsJsonl } from '../eventLoader';
 
 /** Real logs.jsonl content from server/history/1775129444476/logs.jsonl */
 const LOGS_JSONL = [
@@ -25,5 +25,15 @@ describe('logs.jsonl parsing', () => {
     const events = parseEventsJsonl(LOGS_JSONL);
     const batch = events[1];
     expect(batch).toMatchSnapshot();
+  });
+
+  it('skips a log_batch line without logs and keeps the valid lines', () => {
+    const truncatedBatch = '{"message":"log_batch","ts_us":5}';
+    const events = parseLogEventsJsonl(`${LOGS_JSONL}\n${truncatedBatch}`);
+
+    expect(events.map((event) => event.message)).toEqual([
+      'log_config_changed',
+      'log_batch',
+    ]);
   });
 });

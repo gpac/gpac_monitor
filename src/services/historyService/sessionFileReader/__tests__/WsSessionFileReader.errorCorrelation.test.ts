@@ -124,3 +124,20 @@ describe('WsSessionFileReader read_file response without content', () => {
     reader.disconnect();
   });
 });
+
+describe('WsSessionFileReader list_sessions response', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('rejects a list whose entry has no sessionId', async () => {
+    stubServer(() => ({
+      command: 'list_sessions',
+      status: 'ok',
+      sessions: [{ sessionId }, { isComplete: true }],
+    }));
+    const reader = new WsSessionFileReader('ws://test');
+    await expect(reader.listSessions()).rejects.toThrow(
+      'list_sessions response without valid sessions',
+    );
+    reader.disconnect();
+  });
+});

@@ -1,14 +1,13 @@
-import type { HistoryEvent } from '../types';
+import type { HistoryEvent, LogEvent } from '../types';
 
-/** Parse JSONL text into HistoryEvent array. */
-export function parseEventsJsonl(text: string): HistoryEvent[] {
-  const events: HistoryEvent[] = [];
+function parseJsonlLines(text: string): unknown[] {
+  const values: unknown[] = [];
 
   for (const line of text.split('\n')) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     try {
-      events.push(JSON.parse(trimmed) as HistoryEvent);
+      values.push(JSON.parse(trimmed));
     } catch {
       console.warn(
         '[EventLoader] Skipping malformed line:',
@@ -17,6 +16,31 @@ export function parseEventsJsonl(text: string): HistoryEvent[] {
     }
   }
 
+  return values;
+}
+
+function isLogEvent(value: unknown): value is LogEvent {
+  if (typeof value !== 'object' || value === null) return false;
+  const event = value as Record<string, unknown>;
+  if (event.message === 'log_batch') return Array.isArray(event.logs);
+  if (event.message === 'log_config_changed')
+    return typeof event.logLevel === 'string';
+  return false;
+}
+
+/** Parse JSONL text into HistoryEvent array. */
+export function parseEventsJsonl(text: string): HistoryEvent[] {
+  return parseJsonlLines(text) as HistoryEvent[];
+}
+
+export function parseLogEventsJsonl(text: string): LogEvent[] {
+  const values = parseJsonlLines(text);
+  const events = values.filter(isLogEvent);
+  if (events.length < values.length) {
+    console.warn(
+      `[EventLoader] Skipping ${values.length - events.length} invalid log line(s)`,
+    );
+  }
   return events;
 }
 

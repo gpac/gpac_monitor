@@ -10,7 +10,7 @@ import type {
   ManifestEventEntry,
 } from '../source/types';
 import type { SessionInfo } from './types';
-import { parseEventsJsonl } from '../loader/eventLoader';
+import { parseEventsJsonl, parseLogEventsJsonl } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
 import { parseSnapshot } from '../snapshotParser';
 import { parseJournalIndex, parseJournalJsonl } from '../journalIndexParser';
@@ -25,6 +25,14 @@ function fileContent(response: Record<string, unknown>): string {
     throw new Error(`read_file response without content: ${response.file}`);
   }
   return response.content;
+}
+
+function isSessionInfo(value: unknown): value is SessionInfo {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as Record<string, unknown>).sessionId === 'string'
+  );
 }
 
 /**
@@ -72,7 +80,11 @@ export class WsSessionFileReader {
   async listSessions(): Promise<SessionInfo[]> {
     await this.ensureConnected();
     const response = await this.sendCommand({ message: 'list_sessions' });
-    return response.sessions as SessionInfo[];
+    const { sessions } = response;
+    if (!Array.isArray(sessions) || !sessions.every(isSessionInfo)) {
+      throw new Error('list_sessions response without valid sessions');
+    }
+    return sessions;
   }
 
   async readSnapshot(
@@ -223,7 +235,7 @@ export class WsSessionFileReader {
       sessionId,
       file,
     });
-    return parseEventsJsonl(fileContent(response)) as unknown as LogEvent[];
+    return parseLogEventsJsonl(fileContent(response));
   }
 
   private async ensureConnected(): Promise<void> {
