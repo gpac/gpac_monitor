@@ -100,6 +100,7 @@ const pidCollector = new PidDataCollector();
 
 let pidReconfigured = new Set();
 session.set_filter_pid_modified_fun((f) => {
+    if (is_hidden_filter(f)) return;
     pidReconfigured.add(f.idx);
     if (pidReconfigured.size > 1) return;
     session.post_task(() => {
