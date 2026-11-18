@@ -115,3 +115,31 @@ describe('useServiceReady — WS disconnect invalidates readiness', () => {
     expect(gpacService.ready).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('useServiceReady — a failed check is retried when the WS opens', () => {
+  beforeEach(() => {
+    vi.mocked(gpacService.ready).mockClear();
+    mockUseDataSource.mockReturnValue({ mode: 'live' });
+  });
+
+  it('becomes ready after a failed check once the connection opens', async () => {
+    vi.mocked(gpacService.ready).mockRejectedValueOnce(new Error('refused'));
+    const store = makeStore();
+    const { result } = renderHook(() => useServiceReady(), {
+      wrapper: makeWrapper(store),
+    });
+    await waitFor(() => expect(result.current.error).not.toBeNull());
+
+    act(() => {
+      store.dispatch(
+        updateConnectionStatus({
+          id: 'default',
+          status: ConnectionStatus.CONNECTED,
+        }),
+      );
+    });
+
+    await waitFor(() => expect(result.current.isReady).toBe(true));
+    expect(result.current.error).toBeNull();
+  });
+});

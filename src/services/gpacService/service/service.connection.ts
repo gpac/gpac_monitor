@@ -32,12 +32,18 @@ export const connectionMethods = {
    * Returns cached promise if already loading
    */
   async ready(
-    state: GpacServiceState,
+    state: Pick<GpacServiceState, 'readyPromise'>,
     address: string,
     loadFn: (address: string) => Promise<boolean>,
   ): Promise<void> {
     if (!state.readyPromise) {
-      state.readyPromise = loadFn(address).then(() => {});
+      state.readyPromise = loadFn(address).then(
+        () => {},
+        (error) => {
+          state.readyPromise = null;
+          throw error;
+        },
+      );
     }
     return state.readyPromise;
   },

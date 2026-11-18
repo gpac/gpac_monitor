@@ -55,7 +55,9 @@ export const initializationMethods = {
     }
 
     try {
-      callbacks.onConnectionStatusChange?.(ConnectionStatus.CONNECTING);
+      if (!isConnected()) {
+        callbacks.onConnectionStatusChange?.(ConnectionStatus.CONNECTING);
+      }
       await state.connectionManager.connect(address);
       await new Promise((resolve) => setTimeout(resolve, 100));
 

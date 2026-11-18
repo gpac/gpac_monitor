@@ -67,7 +67,24 @@ export function useServiceReady({
   const connectionStatus = activeConnection?.status;
   useEffect(() => {
     if (connectionStatus === ConnectionStatus.DISCONNECTED) setIsReady(false);
-  }, [connectionStatus]);
+    if (connectionStatus !== ConnectionStatus.CONNECTED) return;
+    if (!error || !liveEnabled || !connectionAddress) return;
+
+    let cancelled = false;
+    gpacService
+      .ready(connectionAddress)
+      .then(() => {
+        if (!cancelled) {
+          setIsReady(true);
+          setError(null);
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [connectionStatus, error, liveEnabled, connectionAddress]);
 
   return { isReady, isLoading, error };
 }
