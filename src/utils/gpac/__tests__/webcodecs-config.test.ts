@@ -3,6 +3,7 @@ import {
   annexBToAvcc,
   buildAvcCodecString,
   canPreview,
+  canPreviewWithConfig,
   hasPictureSlice,
   isAnnexB,
   resolveWebCodecsConfig,
@@ -97,6 +98,21 @@ describe('canPreview', () => {
   it('accepts the PID when the server sends no codec', () => {
     expect(canPreview(undefined)).toBe(true);
     expect(canPreview(null)).toBe(true);
+  });
+});
+
+describe('canPreviewWithConfig', () => {
+  it('refuses a decodable codec without decoder config (rfnalu output)', () => {
+    expect(canPreviewWithConfig('264', null)).toBe(false);
+    expect(canPreviewWithConfig('264', undefined)).toBe(false);
+  });
+
+  it('accepts a decodable codec with its decoder config', () => {
+    expect(canPreviewWithConfig('264', INPUT_MP4_AVCC_BASE64)).toBe(true);
+  });
+
+  it('still refuses raw video even with a decoder config', () => {
+    expect(canPreviewWithConfig('raw', INPUT_MP4_AVCC_BASE64)).toBe(false);
   });
 });
 

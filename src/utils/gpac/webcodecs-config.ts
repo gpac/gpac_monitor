@@ -23,6 +23,13 @@ export function canPreview(codec: string | null | undefined): boolean {
   return codec == null || isPreviewableCodec(codec);
 }
 
+export function canPreviewWithConfig(
+  codec: string | null | undefined,
+  decoderConfig: string | null | undefined,
+): boolean {
+  return canPreview(codec) && Boolean(decoderConfig);
+}
+
 function decodeBase64(base64: string): Uint8Array {
   return Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
 }
