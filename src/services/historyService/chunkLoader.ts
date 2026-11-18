@@ -22,6 +22,14 @@ export type LogChunk = {
 
 const MAX_LOG_CHUNKS = 10;
 
+function isHistoryCheckpoint(raw: unknown): raw is HistoryCheckpoint {
+  return (
+    typeof raw === 'object' &&
+    raw !== null &&
+    Array.isArray((raw as { filters?: unknown }).filters)
+  );
+}
+
 export class ChunkLoader {
   // Events: 2 slots (current + next). Purged on each load.
   private eventCache = new Map<number, EventChunk>();
@@ -69,8 +77,7 @@ export class ChunkLoader {
   async loadCheckpoint(cpFile: string): Promise<HistoryCheckpoint | null> {
     const chunkIndex = chunkIndexFromPath(cpFile);
     const raw = await this.reader.readCheckpoint(chunkIndex, this.segmentDir);
-    if (!raw || typeof raw !== 'object') return null;
-    return raw as HistoryCheckpoint;
+    return isHistoryCheckpoint(raw) ? raw : null;
   }
 
   async loadLogChunksInRange(

@@ -106,3 +106,21 @@ describe('WsSessionFileReader read_file error correlation', () => {
     );
   });
 });
+
+describe('WsSessionFileReader read_file response without content', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('rejects the chunk read with the file name instead of a parser TypeError', async () => {
+    stubServer((request) => ({
+      command: 'read_file',
+      status: 'ok',
+      sessionId: request.sessionId,
+      file: request.file,
+    }));
+    const reader = new WsSessionFileReader('ws://test');
+    await expect(reader.readChunk(sessionId, 3)).rejects.toThrow(
+      'read_file response without content: chunks/chunk_0003.jsonl',
+    );
+    reader.disconnect();
+  });
+});

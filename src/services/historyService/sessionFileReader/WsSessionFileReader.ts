@@ -12,11 +12,19 @@ import type {
 import type { SessionInfo } from './types';
 import { parseEventsJsonl } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
+import { parseSnapshot } from '../snapshotParser';
 import { parseJournalIndex, parseJournalJsonl } from '../journalIndexParser';
 import { parseSessionIndex, parseEventsIndex } from '../sessionIndexParser';
 
 function segmentFile(file: string, segmentDir?: string): string {
   return segmentDir ? `${segmentDir}/${file}` : file;
+}
+
+function fileContent(response: Record<string, unknown>): string {
+  if (typeof response.content !== 'string') {
+    throw new Error(`read_file response without content: ${response.file}`);
+  }
+  return response.content;
 }
 
 /**
@@ -77,7 +85,7 @@ export class WsSessionFileReader {
       sessionId,
       file: segmentFile('snapshot.json', segmentDir),
     });
-    return JSON.parse(response.content as string) as HistorySnapshot;
+    return parseSnapshot(JSON.parse(fileContent(response)));
   }
 
   async readManifest(
@@ -91,7 +99,7 @@ export class WsSessionFileReader {
         sessionId,
         file: segmentFile('manifest.json', segmentDir),
       });
-      return parseManifest(JSON.parse(response.content as string));
+      return parseManifest(JSON.parse(fileContent(response)));
     } catch {
       return null;
     }
@@ -108,7 +116,7 @@ export class WsSessionFileReader {
         sessionId,
         file: 'session.json',
       });
-      content = response.content as string;
+      content = fileContent(response);
     } catch {
       return null;
     }
@@ -125,7 +133,7 @@ export class WsSessionFileReader {
         sessionId,
         file: 'events_index.jsonl',
       });
-      return parseEventsIndex(parseEventsJsonl(response.content as string));
+      return parseEventsIndex(parseEventsJsonl(fileContent(response)));
     } catch {
       return null;
     }
@@ -139,7 +147,7 @@ export class WsSessionFileReader {
         sessionId,
         file: 'journal_index.jsonl',
       });
-      return parseJournalJsonl(response.content as string);
+      return parseJournalJsonl(fileContent(response));
     } catch {
       return this.readLegacyJournalIndex(sessionId);
     }
@@ -154,7 +162,7 @@ export class WsSessionFileReader {
         sessionId,
         file: 'journal_index.json',
       });
-      return parseJournalIndex(JSON.parse(response.content as string));
+      return parseJournalIndex(JSON.parse(fileContent(response)));
     } catch {
       return null;
     }
@@ -176,7 +184,7 @@ export class WsSessionFileReader {
         sessionId,
         file,
       });
-      return JSON.parse(response.content as string);
+      return JSON.parse(fileContent(response));
     } catch {
       return null;
     }
@@ -197,7 +205,7 @@ export class WsSessionFileReader {
       sessionId,
       file,
     });
-    return parseEventsJsonl(response.content as string);
+    return parseEventsJsonl(fileContent(response));
   }
 
   async readLogChunk(
@@ -215,9 +223,7 @@ export class WsSessionFileReader {
       sessionId,
       file,
     });
-    return parseEventsJsonl(
-      response.content as string,
-    ) as unknown as LogEvent[];
+    return parseEventsJsonl(fileContent(response)) as unknown as LogEvent[];
   }
 
   private async ensureConnected(): Promise<void> {

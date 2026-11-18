@@ -38,3 +38,18 @@ describe('ChunkLoader.loadEventChunk — failed read', () => {
     expect(reader.readChunk).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('ChunkLoader.loadCheckpoint — malformed file', () => {
+  it('returns null for a checkpoint without filters instead of passing it to seek', async () => {
+    const reader: IChunkReader = {
+      readChunk: vi.fn().mockResolvedValue([]),
+      readLogChunk: vi.fn().mockResolvedValue([]),
+      readCheckpoint: vi.fn().mockResolvedValue({ ts_us: 12_000_000 }),
+    };
+    const loader = new ChunkLoader(reader, manifest);
+
+    const checkpoint = await loader.loadCheckpoint('checkpoints/cp_0001.json');
+
+    expect(checkpoint).toBeNull();
+  });
+});

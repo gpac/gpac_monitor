@@ -1,4 +1,4 @@
-import type { HistorySnapshot, LogEvent, JournalIndex } from '../types';
+import type { LogEvent, JournalIndex } from '../types';
 import type { SessionInfo } from './types';
 import type {
   HistoryManifest,
@@ -7,6 +7,7 @@ import type {
 } from '../source/types';
 import { parseEventsJsonl } from '../loader/eventLoader';
 import { parseManifest } from '../manifestParser';
+import { parseSnapshot } from '../snapshotParser';
 import { parseJournalIndex, parseJournalJsonl } from '../journalIndexParser';
 import { parseSessionIndex, parseEventsIndex } from '../sessionIndexParser';
 import {
@@ -107,7 +108,7 @@ export class LocalFileSessionFileReader {
   async readSnapshot(sessionId: string, segmentDir?: string) {
     const file = await this.file(sessionId, 'snapshot.json', segmentDir);
     if (!file) throw new Error(`No snapshot for session ${sessionId}`);
-    return JSON.parse(await file.text()) as HistorySnapshot;
+    return parseSnapshot(JSON.parse(await file.text()));
   }
 
   async readManifest(

@@ -10,7 +10,8 @@ function makeMockFile(path: string, content: string): File {
   } as unknown as File;
 }
 
-const SNAPSHOT_CONTENT = '{}';
+const SNAPSHOT_CONTENT =
+  '{"ts_us":0,"command_line":null,"graph_v":1,"filters":[]}';
 
 describe('LocalFileSessionFileReader.listSessions', () => {
   it('populates startUs/endUs when manifest is present', async () => {
@@ -187,7 +188,7 @@ describe('LocalFileSessionFileReader — segmented sessions', () => {
 
     await expect(
       reader.readSnapshot(SESSION_ID, 'segments/0000'),
-    ).resolves.toEqual({});
+    ).resolves.toEqual(JSON.parse(SNAPSHOT_CONTENT));
     await expect(
       reader.readCheckpoint(SESSION_ID, 0, 'segments/0000'),
     ).resolves.toEqual({});
@@ -262,6 +263,8 @@ describe('LocalFileSessionFileReader — segmented sessions', () => {
     const events = await reader.readChunk('legacy-session', 2);
 
     expect(events[0].ts_us).toBe(7_000_000);
-    await expect(reader.readSnapshot('legacy-session')).resolves.toEqual({});
+    await expect(reader.readSnapshot('legacy-session')).resolves.toEqual(
+      JSON.parse(SNAPSHOT_CONTENT),
+    );
   });
 });
