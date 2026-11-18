@@ -39,6 +39,18 @@ describe('ConnectionManager', () => {
     expect(store.getState().graph.error).toBeNull();
   });
 
+  it('rejects every concurrent caller when the connection fails', async () => {
+    const manager = new ConnectionManager(
+      createTransport(Promise.reject(new Error('refused'))),
+    );
+
+    const firstAttempt = manager.connect('ws://localhost:6363');
+    const secondAttempt = manager.connect('ws://localhost:6363');
+
+    await expect(firstAttempt).rejects.toThrow('refused');
+    await expect(secondAttempt).rejects.toThrow('refused');
+  });
+
   it('reports a lost connection after it was established', async () => {
     const manager = new ConnectionManager(createTransport(Promise.resolve()));
 

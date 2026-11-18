@@ -99,7 +99,9 @@ export const useGraphConnection = ({
       } catch (error) {
         if (isMounted) {
           const errorMessage =
-            error instanceof Error ? error.message : 'Unknown connection error';
+            error instanceof Error
+              ? error.message
+              : `Start GPAC with -rmt to connect to ${connectionAddress}, then click Retry.`;
           setConnectionError(errorMessage);
         }
       }

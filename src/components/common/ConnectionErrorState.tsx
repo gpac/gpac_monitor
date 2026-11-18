@@ -1,3 +1,5 @@
+import { LuRefreshCw } from 'react-icons/lu';
+import { Button } from '@/components/ui/button';
 import WidgetWrapper from '../widget/WidgetWrapper';
 
 interface ConnectionErrorStateProps {
@@ -29,16 +31,20 @@ const ConnectionErrorState = ({
 
   return (
     <WidgetWrapper id={id}>
-      <div className="flex flex-col items-center justify-center h-full p-4">
-        <div className="text-red-500 mb-4">Connection error</div>
-        <div className="text-gray-400 text-center">{errorMessage}</div>
+      <div className="flex flex-col items-center justify-center h-full p-4 text-monitor-text-secondary">
+        <p className="text-monitor-text-primary">Waiting for GPAC</p>
+        <p className="text-sm mt-2 text-center text-monitor-text-muted">
+          {errorMessage}
+        </p>
         {onRetry && (
-          <button
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-4"
             onClick={onRetry}
-            className="mt-4 px-4 rounded-md py-2 bg-red-900 hover:bg-red-800 "
           >
-            Retry
-          </button>
+            <LuRefreshCw className="w-3 h-3 mr-1.5" /> Retry
+          </Button>
         )}
       </div>
     </WidgetWrapper>

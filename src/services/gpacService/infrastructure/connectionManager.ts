@@ -5,7 +5,7 @@ import { GpacNotificationHandlers } from '../types';
 
 export class ConnectionManager {
   private reconnectTimeout: NodeJS.Timeout | null = null;
-  private isConnecting: boolean = false;
+  private connectAttempt: Promise<void> | null = null;
   private notificationHandlers: GpacNotificationHandlers = {};
   private address: string | null = null;
   private endOfSession: boolean = false;
@@ -32,8 +32,8 @@ export class ConnectionManager {
       throw new Error('[ConnectionManager] No address provided');
     }
 
-    if (this.isConnecting) {
-      return;
+    if (this.connectAttempt) {
+      return this.connectAttempt;
     }
 
     if (this.ws.isConnected()) {
@@ -41,16 +41,16 @@ export class ConnectionManager {
     }
 
     this.address = targetAddress;
-    this.isConnecting = true;
     this.endOfSession = false; // Reset flag for new connection
     store.dispatch(setLoading(true));
+    this.connectAttempt = this.ws.connect(targetAddress);
 
     try {
-      await this.ws.connect(targetAddress);
+      await this.connectAttempt;
       this.notificationHandlers.onConnectionStatus?.(true);
       this.onConnectionSuccess();
     } catch (error) {
-      this.isConnecting = false;
+      this.connectAttempt = null;
       store.dispatch(setLoading(false));
       throw error;
     }
@@ -84,7 +84,7 @@ export class ConnectionManager {
   }
 
   private onConnectionSuccess(): void {
-    this.isConnecting = false;
+    this.connectAttempt = null;
     this.wasConnected = true;
     store.dispatch(setError(null));
   }
@@ -104,6 +104,6 @@ export class ConnectionManager {
       clearTimeout(this.reconnectTimeout);
       this.reconnectTimeout = null;
     }
-    this.isConnecting = false;
+    this.connectAttempt = null;
   }
 }
