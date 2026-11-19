@@ -58,7 +58,7 @@ const PreviewsMonitor = React.memo(({ id }: { id: string }) => {
         {sources.length === 0 ? (
           <p className="m-auto text-monitor-text-muted">
             {isPreviewSupported
-              ? 'No video PID in this session'
+              ? 'No video PID or no previewable PID in this session'
               : 'Preview requires a newer GPAC version'}
           </p>
         ) : (
