@@ -56,7 +56,7 @@ gpac -i input.mp4 vout -rmt
 
 **System Metrics** - Performance metrics
 
-- Real-time CPU usage (system and GPAC process)
+- Real-time CPU usage of the GPAC process
 - Memory consumption tracking
 - Time-series charts
 
@@ -69,7 +69,7 @@ gpac -i input.mp4 vout -rmt
 
 - Decoded in the browser with WebCodecs (H.264, HEVC, AV1, depending on browser support)
 - Open from the Preview button of a video PID, or from the Previews widget
-- Keyframes only when the source runs faster than real time
+- Keyframes only when the source runs faster than 1.5x real time
 - Live sessions only; requires a GPAC version that supports preview
 
 ### Session Replay
