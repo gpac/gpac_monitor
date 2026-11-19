@@ -11,7 +11,7 @@ function isKeyframe(packet) {
 }
 
 function createRateGate(maxKeyframesPerSec = PREVIEW.MAX_KEYFRAMES_PER_SEC) {
-    return { maxKeyframesPerSec, lastDecodeTimeUs: null, mediaElapsedUs: 0, windowStartWallUs: 0, keyframesOnly: false, lastSpeed: 0, lastKeyframeSentWallUs: null };
+    return { maxKeyframesPerSec, lastDecodeTimeUs: null, mediaElapsedUs: 0, windowStartWallUs: 0, keyframesOnly: false, lastKeyframeSentWallUs: null };
 }
 
 // Decode time (monotonic, unlike cts with B-frames) only counts forward steps, so a looping source keeps the window running.
@@ -24,7 +24,6 @@ function shouldSendPacket(gate, decodeTimeUs, nowUs, isKey) {
     gate.lastDecodeTimeUs = decodeTimeUs;
     const wallElapsedUs = nowUs - gate.windowStartWallUs;
     if (wallElapsedUs >= PREVIEW.RATE_WINDOW_US) {
-        gate.lastSpeed = gate.mediaElapsedUs / wallElapsedUs;
         gate.keyframesOnly = gate.mediaElapsedUs > PREVIEW.MAX_REALTIME_SPEED * wallElapsedUs;
         gate.mediaElapsedUs = 0;
         gate.windowStartWallUs = nowUs;
@@ -97,7 +96,6 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
                 if (!packet) return;
                 if (!firstKeyframeSeen && isKeyframe(packet)) {
                     firstKeyframeSeen = true;
-                    print(`[Preview] compressed first keyframe idx=${filterIdx} sap=${packet.sap} cts=${packet.cts} size=${packet.size}`);
                 }
                 if (!firstKeyframeSeen && !noKeyframeReported) {
                     const nowUs = sys.clock_us();
@@ -113,10 +111,8 @@ function createCompressedPreviewSink(previewManager, filterIdx, sinkName, entry)
                 if (firstKeyframeSeen && !noKeyframeReported && socket) {
                     const ctsUs = Math.round(packet.cts * 1e6 / entry.pid.timescale);
                     const dtsUs = Math.round(packet.dts * 1e6 / entry.pid.timescale);
-                    const wasKeyframesOnly = rateGate.keyframesOnly;                    const send = shouldSendPacket(rateGate, dtsUs, sys.clock_us(), isKeyframe(packet));
-                    if (rateGate.keyframesOnly !== wasKeyframesOnly) {
-                        print(`[Preview] rate gate idx=${filterIdx} keyframesOnly=${rateGate.keyframesOnly} limit=${rateGate.maxKeyframesPerSec} speed=${rateGate.lastSpeed.toFixed(2)} dtsUs=${dtsUs}`);
-                    }                    if (send) {
+                    const send = shouldSendPacket(rateGate, dtsUs, sys.clock_us(), isKeyframe(packet));
+                    if (send) {
                         socket.send(buildCompressedFrame(entry.previewId, entry.pidIdx, packet, ctsUs, rateGate.keyframesOnly));
                     }
                 }

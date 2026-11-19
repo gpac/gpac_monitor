@@ -48,16 +48,12 @@ function PreviewManager(client) {
     };
 
     this.startPreview = function (filterIdx, filterName, direction, pidIdx, previewId, maxKeyframesPerSec) {
-        print(`[Preview] startPreview requested previewId=${previewId} idx=${filterIdx} name=${filterName} direction=${direction} pidIdx=${pidIdx} maxKeyframesPerSec=${maxKeyframesPerSec}`);
         this.postTask(() => this.doStartPreview(filterIdx, filterName, direction, pidIdx, previewId, maxKeyframesPerSec));
     };
 
     this.doStartPreview = function (filterIdx, filterName, direction, pidIdx, previewId, maxKeyframesPerSec) {
         const key = this.previewKey(filterIdx, direction, pidIdx);
-        if (this.activePreviews.has(key)) {
-            print(`[Preview] already open key=${key}`);
-            return;
-        }
+        if (this.activePreviews.has(key)) return;
         if (this.activePreviews.size >= PREVIEW.MAX_ACTIVE) {
             print(`[Preview] too many previews key=${key} max=${PREVIEW.MAX_ACTIVE}`);
             this.send({ message: 'preview_error', previewId, error: `Too many previews (max ${PREVIEW.MAX_ACTIVE})` });
@@ -76,7 +72,6 @@ function PreviewManager(client) {
             return;
         }
         const { target, pidIdx: resolvedPidIdx } = resolved;
-        print(`[Preview] target resolved idx=${filterIdx} direction=${direction} requestedPidIdx=${pidIdx} resolvedPidIdx=${resolvedPidIdx} target=${target.name} type=${target.type}`);
 
         const entry = {
             previewId,
@@ -111,7 +106,6 @@ function PreviewManager(client) {
     };
 
     this.stopPreview = function (filterIdx, direction, pidIdx) {
-        print(`[Preview] stopPreview requested idx=${filterIdx} direction=${direction} pidIdx=${pidIdx}`);
         this.postTask(() => this.doStopPreview(filterIdx, direction, pidIdx));
     };
 
